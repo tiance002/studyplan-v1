@@ -9,13 +9,13 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Iterable
 from urllib.parse import urlparse
 
 from app.core.errors import ValidationAppError
-from app.core.ids import new_id, require_stable_key
+from app.core.ids import new_id
 from app.domain.enums import (
     PREFERENCE_SCOPE_RANK,
     MediaType,

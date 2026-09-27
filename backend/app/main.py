@@ -12,13 +12,13 @@
 
 from __future__ import annotations
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
 # ⚠️ 必须在 import 任何 langgraph 相关模块之前。不要调整导入顺序。
 from app import agent_workflows  # noqa: F401  (副作用：设置 LANGGRAPH_STRICT_MSGPACK)
 from app.agent_workflows import GRAPH_VERSION
 from app.core.config import get_settings
+from app.core.startup_guard import validate_startup_security
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 API_PREFIX = "/api/v1"
 
@@ -27,8 +27,20 @@ def create_app() -> FastAPI:
     """构建应用实例。
 
     拆成工厂函数以便测试用不同配置创建独立实例。
+
+    启动期**强制**安全校验：生产环境的非法配置（Fake LLM、默认密钥、
+    非法 DB、内存 Checkpointer、内存仓储后端、未实现的真实 Provider）
+    会在此**显式抛错**，绝不静默降级（Goal §8）。
+
+    Args:
+        (读取进程级 ``get_settings()``)
+
+    Raises:
+        StartupSecurityError: 生产配置中存在任一安全违规。
     """
     settings = get_settings()
+    # 组合根把"声明可用"与"实际可用"对齐：校验失败即拒绝启动。
+    validate_startup_security(settings)
     application = FastAPI(
         title="studyplan API",
         version="1.1.0",
@@ -65,4 +77,15 @@ def create_app() -> FastAPI:
     return application
 
 
-app = create_app()
+def __getattr__(name: str) -> FastAPI:
+    """惰性构造 `app`，使 `app.main:app`（uvicorn 入口）仍可用。
+
+    不在此处直接 `app = create_app()`：那会让 `import app.main` 本身
+    在非法生产配置下抛错，导致测试无法在**受控断言**内验证失败行为。
+    惰性访问保证：
+    - `from app.main import create_app` 永远可导入（用于测试与组合）；
+    - 一旦访问 `.app`（如 uvicorn 启动），非法配置**立即显式抛错**。
+    """
+    if name == "app":
+        return create_app()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

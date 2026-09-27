@@ -158,9 +158,9 @@ def _check_order_index(
         if raw is None:
             outcome.errors.append(f"{label}缺少 order_index")
             continue
-        try:
-            index = int(raw)  # type: ignore[arg-type]
-        except (TypeError, ValueError):
+        index = _strict_int(raw)
+        if index is None:
+            # 严格拒绝：不得把 3.7 / True / "3.0" 静默截断成整数（Goal §9.1）。
             outcome.errors.append(f"{label}的 order_index 不是整数：{raw!r}")
             continue
         if index < 0:
@@ -175,6 +175,20 @@ def _check_order_index(
             outcome.warnings.append(
                 f"{label}的 order_index 超出数量范围（{over[:3]}...），可能造成渲染空洞"
             )
+
+
+def _strict_int(raw: object) -> int | None:
+    """严格整数判定。
+
+    只有真正的整数（``int`` 且非 ``bool``）才接受。
+    ``bool`` 是 ``int`` 的子类但不是有效序号；``3.7`` / ``"3.0"`` / ``"3.7"``
+    一律拒绝——避免静默截断掩盖模型输出错误（Goal §9.1）。
+    """
+    if isinstance(raw, bool):
+        return None
+    if isinstance(raw, int):
+        return raw
+    return None
 
 
 def _check_acceptance(outcome: ValidationOutcome, *, tasks: list[dict[str, object]]) -> None:

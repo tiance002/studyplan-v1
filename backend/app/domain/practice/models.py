@@ -258,9 +258,9 @@ class PromptReview:
             review_id=new_id("prw"),
             revision_id=revision_id,
             task_id=task_id,
-            strengths=_clean(strengths or []),
-            gaps=_clean(gaps or []),
-            suggestions=_clean(suggestions or []),
+            strengths=tuple(_clean(strengths or [])),
+            gaps=tuple(_clean(gaps or [])),
+            suggestions=tuple(_clean(suggestions or [])),
             reviewer_kind=reviewer_kind,
             run_id=run_id,
             created_at=now or datetime.now(timezone.utc),
@@ -299,6 +299,51 @@ class PromptExport:
 
 
 @dataclass(frozen=True, slots=True)
+class VerificationRecord:
+    """**平台真实核验**记录。
+
+    设计 §8 硬约束：只有当平台**亲自执行**了核验（拉取仓库、运行 CI、
+    访问可复现产物）并把结果落库后，才能把证据升级为 ``verified``。
+
+    因此本记录**必须**由执行核验的基础设施填写；用户文本、粘贴日志、
+    未核验的 commit 哈希、仓库 URL 一律**不能**构造出本记录，也就不能
+    冒充 ``verified``。四个字段缺一不可：
+
+    - ``verification_method``: 核验方式（如 ``git_clone``/``ci_run``/``artifact_fetch``）
+    - ``verified_at``: 核验发生时间（服务端时钟）
+    - ``result``: 核验结果（如 ``ok``/``failed``/``mismatch``）
+    - ``evidence_ref``: 指向被核验对象的稳定引用（如 commit sha / 产物 URL）
+    """
+
+    verification_method: str
+    verified_at: datetime
+    result: str
+    evidence_ref: str
+
+    @staticmethod
+    def create(
+        *,
+        verification_method: str,
+        result: str,
+        evidence_ref: str,
+        now: datetime | None = None,
+    ) -> "VerificationRecord":
+        _require_text(verification_method, "核验方式", max_len=100)
+        _require_text(result, "核验结果", max_len=100)
+        _require_text(evidence_ref, "核验引用", max_len=1_000)
+        return VerificationRecord(
+            verification_method=verification_method.strip(),
+            verified_at=now or datetime.now(timezone.utc),
+            result=result.strip(),
+            evidence_ref=evidence_ref.strip(),
+        )
+
+    @property
+    def is_passing(self) -> bool:
+        return self.result.strip().lower() in {"ok", "pass", "passed", "success"}
+
+
+@dataclass(frozen=True, slots=True)
 class PracticeSubmission:
     """用户提交的成果证据。"""
 
@@ -309,6 +354,7 @@ class PracticeSubmission:
     note: str
     repo_url: str | None
     created_at: datetime
+    verification: VerificationRecord | None = None
 
     @staticmethod
     def create(
@@ -317,7 +363,7 @@ class PracticeSubmission:
         evidence: list[str] | None = None,
         note: str = "",
         repo_url: str | None = None,
-        evidence_grade: EvidenceGrade | None = None,
+        verification: VerificationRecord | None = None,
         now: datetime | None = None,
     ) -> "PracticeSubmission":
         items = _clean(evidence or [])
@@ -325,16 +371,18 @@ class PracticeSubmission:
             raise ValidationAppError(f"证据条目不得超过 {MAX_EVIDENCE_ITEMS} 条")
         if not items and not note.strip():
             raise ValidationAppError("提交必须包含证据或说明")
-        # 证据等级由**服务端**按证据形态判定，不接受客户端自报"我已 verified"。
-        grade = evidence_grade or _infer_evidence_grade(items, repo_url)
+        # 证据等级由**服务端**判定：**不接受客户端自报**，也不接受
+        # 用户文本 / 仓库 URL / 粘贴日志 / 未核验哈希冒充已核验。
+        grade = _infer_evidence_grade(items, repo_url, verification)
         return PracticeSubmission(
             submission_id=new_id("psb"),
             task_id=task_id,
             evidence_grade=grade,
-            evidence=items,
+            evidence=tuple(items),
             note=note.strip(),
             repo_url=repo_url.strip() if repo_url else None,
             created_at=now or datetime.now(timezone.utc),
+            verification=verification,
         )
 
 
@@ -379,20 +427,31 @@ class AcceptanceReview:
         )
 
 
-def _infer_evidence_grade(items: list[str], repo_url: str | None) -> EvidenceGrade:
-    """按证据形态推断等级。
+def _infer_evidence_grade(
+    items: list[str],
+    repo_url: str | None,
+    verification: VerificationRecord | None = None,
+) -> EvidenceGrade:
+    """按**证据来源**推断等级。刻意保守。
 
-    **规则刻意保守**：只有当证据是平台可访问、可复现的引用
-    （如提交哈希、可复现日志、可访问仓库）时才给 ``verified``；
-    纯文字自述一律 ``reported``；无任何证据 ``insufficient``。
+    设计 §8 硬约束（B1 评审指出旧实现严重错误）：
+
+    - 用户文字叙述、粘贴的日志、仓库 URL、未核验的 commit/sha —— 一律
+      ``reported``。**不得**因为字符串里出现 ``commit``/``ci``/
+      ``http(s)://`` 或提供了 ``repo_url`` 就升级为 ``verified``。
+    - 完全没有证据（既无条目也无 repo）—— ``insufficient``。
+    - 只有**平台亲自核验并落库**的 ``VerificationRecord`` 且核验通过，
+      才给 ``verified``。
+
+    判定**只依赖** ``verification`` 是否存在且通过，**绝不**依赖关键词、
+    URL 形态、文件名或 AI 自述。
     """
-    if not items and not repo_url:
-        return EvidenceGrade.INSUFFICIENT
-    verifiable_markers = ("commit", "sha", "ci", "run:", "log:", "http://", "https://")
-    joined = " ".join(items).lower() + " " + (repo_url or "").lower()
-    if repo_url or any(marker in joined for marker in verifiable_markers):
+    has_any_evidence = bool(items) or bool(repo_url)
+    if verification is not None and verification.is_passing:
         return EvidenceGrade.VERIFIED
-    return EvidenceGrade.REPORTED
+    if has_any_evidence:
+        return EvidenceGrade.REPORTED
+    return EvidenceGrade.INSUFFICIENT
 
 
 def _normalize_prompt(text: str) -> str:
@@ -441,4 +500,5 @@ __all__ = [
     "PromptReview",
     "PromptRevision",
     "TaskKnowledgeLink",
+    "VerificationRecord",
 ]

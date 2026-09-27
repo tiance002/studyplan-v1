@@ -37,12 +37,14 @@ class RubricSnapshot:
 
     @staticmethod
     def from_unit_snapshot(snapshot: dict[str, object]) -> "RubricSnapshot":
+        raw_objectives = snapshot.get("objectives", ())
+        raw_rubric = snapshot.get("rubric", {})
         return RubricSnapshot(
             unit_id=str(snapshot["unit_id"]),
             unit_stable_key=str(snapshot["stable_key"]),
-            rubric_version=int(snapshot["rubric_version"]),  # type: ignore[arg-type]
-            objectives=tuple(str(o) for o in snapshot.get("objectives", ())),  # type: ignore[arg-type]
-            rubric=dict(snapshot.get("rubric", {})),  # type: ignore[arg-type]
+            rubric_version=int(str(snapshot["rubric_version"])),
+            objectives=tuple(str(o) for o in _iterable(raw_objectives)),
+            rubric=dict(raw_rubric) if isinstance(raw_rubric, dict) else {},  # type: ignore[arg-type]
         )
 
 
@@ -199,6 +201,13 @@ def evaluate_review_completeness(review: SummaryReview) -> list[str]:
     if review.conclusion is SummaryReviewConclusion.NEEDS_REVISION and not (review.gaps or review.questions):
         problems.append("结论为 needs_revision 但未给出缺口或引导问题")
     return problems
+
+
+def _iterable(value: object) -> list[object]:
+    """把快照中的可选序列字段安全规整为列表（缺失/非法 → 空表）。"""
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return list(value)
+    return []
 
 
 def _normalize_summary(content: str) -> str:

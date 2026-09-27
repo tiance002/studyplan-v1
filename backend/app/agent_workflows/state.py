@@ -10,15 +10,36 @@
 可被其 reducer 机制处理的普通映射；Pydantic 模型会引入额外序列化层。
 业务校验收在 DTO 层（``api/v1``）与领域模型里，不在这里做。
 
-**单写入者原则**：每个字段只由一个节点写。需要多节点累加的字段
-（``validation_errors`` / ``repair_count``）显式使用 reducer，
-**不依赖平行写同一键碰运气**。
+## 错误字段的三种语义（B1 修复：不得互相覆盖）
+
+历史实现把所有错误塞进一个 ``validation_errors`` 且使用
+``operator.add`` reducer，导致两个真实缺陷：
+
+1. 修复节点返回空列表时 reducer 的"累加"语义**无法清除**旧错误，
+   于是"第一次修复成功"永远无法通过校验；
+2. ``normalize`` 写入的**输入错误**会在结构校验前被清空，
+   使空学习目标也能继续调用模型。
+
+本版把三类错误**分字段存放，全部为覆盖语义（普通字段）**：
+
+- ``input_errors``      —— 输入层错误（空目标等）。**非空即直接失败**，
+                           不进入生成阶段，不调用模型。
+- ``generation_errors`` —— 模型调用失败（``LLMFailure``）。**非空即失败**，
+                           不得被后续空结构校验覆盖成"看起来成功"。
+- ``structure_errors``  —— 本轮结构校验的结果。每次 ``validate`` **完整重写**，
+                           因此修复成功后旧错误自然消失。
+
+``validation_errors`` 保留为**对外聚合视图**（= 三类错误拼接），供路由与
+记录使用，仍然是覆盖语义。``validation_history`` 仅用于审计，**不参与**
+任何路由判断，避免历史错误影响最新校验结果。
+
+**单写入者原则**：每个字段只由一个节点写。需要跨节点保留的错误由对应
+节点各自写入自己的字段；**不依赖平行写同一键碰运气**。
 """
 
 from __future__ import annotations
 
-import operator
-from typing import Annotated, Any, TypedDict
+from typing import Any, TypedDict
 
 
 class PlanningState(TypedDict, total=False):
@@ -41,14 +62,27 @@ class PlanningState(TypedDict, total=False):
     units: list[dict[str, Any]]
     relations: list[dict[str, Any]]
     practice_proposal: dict[str, Any]
-    # ---- 校验与修复 ----
-    #: 多节点累加：用 reducer 显式表达"合并"语义，避免后写覆盖前写。
-    validation_errors: Annotated[list[str], operator.add]
+    # ---- 错误（三通道分离，全部覆盖语义）----
+    #: 输入层错误：非空即直接失败，**不调用模型**。
+    input_errors: list[str]
+    #: 模型调用失败：非空即失败，不得被后续空结构校验覆盖。
+    generation_errors: list[str]
+    #: 本轮结构校验结果：每次 validate 完整重写，修复成功后自动清空。
+    structure_errors: list[str]
+    #: 对外聚合视图（三类拼接），覆盖语义；供路由与记录使用。
+    validation_errors: list[str]
+    #: 仅审计用途，**不参与路由**；不因历史错误影响最新校验。
+    validation_history: list[str]
     repair_count: int
+    #: 上一次修复使用的 attempt_id，供付费调用账务与幂等判定。
+    last_repair_attempt_id: str
     # ---- 等待用户 ----
     draft_ref: str
     draft_hash: str
+    expected_version: int
     decision: str
+    decision_idempotency_key: str
+    edited_stages: list[dict[str, Any]]
     # ---- 结果 ----
     result_id: str
 
@@ -68,7 +102,8 @@ class ReviewState(TypedDict, total=False):
     rubric_snapshot: dict[str, Any]
     # ---- 评审输出 ----
     review: dict[str, Any]
-    validation_errors: Annotated[list[str], operator.add]
+    validation_errors: list[str]
+    validation_history: list[str]
     result_id: str
 
 

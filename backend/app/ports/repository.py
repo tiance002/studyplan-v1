@@ -8,6 +8,26 @@
   **契约测试必须同时覆盖两者**。
 - 关键约束（见 module-reuse-matrix.md §3 C6）：
   ``save_draft`` 必须**按状态过滤**，确保**已取消的草案不会被 worker 稍后发布**。
+
+## 两个端口的分工（Goal §9.2）
+
+本模块定义 **``RepositoryPort``：聚合读写端口**（面向应用层的粗粒度持久化）。
+
+它**不**承担跨表事务语义。计划发布涉及「草案状态 → 版本 → revision →
+关系表 → 当前引用 → 发布记录」的**单事务原子写**，由
+``app.domain.planning.models.PlanRepositoryPort`` 专门定义语义，
+由应用层在其上包裹事务边界。
+
+分工总结：
+
+===========================  ============================  ==============================
+端口                          职责                            事务语义
+===========================  ============================  ==============================
+``RepositoryPort``            聚合的 save/get（跨域）           单次调用单表写，无跨表事务
+``PlanRepositoryPort``        规划发布/草案状态                   ``publish_revision`` 单事务原子
+===========================  ============================  ==============================
+
+B2 可按域把 ``RepositoryPort`` 拆成更小的端口；当前保持单一端口以减少抽象层数。
 """
 
 from __future__ import annotations
@@ -24,7 +44,10 @@ from app.domain.workspace.models import AuthContext, LearningProject
 
 @runtime_checkable
 class RepositoryPort(Protocol):
-    """聚合仓储端口。
+    """聚合仓储端口（聚合读写）。
+
+    **不承担跨表事务**：需要单一事务的多表写入（如计划发布）应通过
+    ``PlanRepositoryPort.publish_revision`` 表达，由应用层包裹事务。
 
     V1 保持单一端口以减少抽象层数；B2 可按域拆分。
     每个方法都接收 ``scope``，实现须在 SQL 层（RLS）与应用层双重校验。

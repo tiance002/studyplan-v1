@@ -13,10 +13,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Iterable, Sequence
+from typing import Protocol, Sequence
 
 from app.core.errors import (
     ConflictError,
+    IdempotencyConflictError,
     NotFoundError,
     ValidationAppError,
     VersionConflictError,
@@ -132,6 +133,15 @@ class PlanRevision:
     def is_frozen(self) -> bool:
         return self.status in {PlanRevisionStatus.APPROVED, PlanRevisionStatus.SUPERSEDED}
 
+    @property
+    def version(self) -> int:
+        """当前引用的乐观并发版本号 = revision 序号。
+
+        未发布的草案不会成为 ``current``，因此这里直接复用 ``revision``，
+        与「不得取最大版本号」的规则一致（见模块 docstring §4）。
+        """
+        return self.revision
+
     def freeze(self, *, now: datetime | None = None) -> None:
         """发布：一旦冻结便不可再改结构。"""
         self.status = PlanRevisionStatus.APPROVED
@@ -157,12 +167,12 @@ class PlanRevision:
                     for s in self.stages
                 ],
                 "unit_links": [
-                    {"unit_id": l.unit_id, "order_index": l.order_index}
-                    for l in self.unit_links
+                    {"unit_id": link.unit_id, "order_index": link.order_index}
+                    for link in self.unit_links
                 ],
                 "task_links": [
-                    {"task_id": l.task_id, "order_index": l.order_index}
-                    for l in self.task_links
+                    {"task_id": link.task_id, "order_index": link.order_index}
+                    for link in self.task_links
                 ],
             }
         )
@@ -184,13 +194,16 @@ class PlanRevision:
             raise ValidationAppError("阶段稳定键不可重复")
 
         stage_ids = {s.stage_id for s in self.stages}
-        for link in (*self.unit_links, *self.task_links):
-            if link.stage_id not in stage_ids:
-                raise ValidationAppError("单元/任务链接指向不存在的阶段")
-        unit_pairs = [(l.stage_id, l.unit_id) for l in self.unit_links]
+        for unit_link in self.unit_links:
+            if unit_link.stage_id not in stage_ids:
+                raise ValidationAppError("单元链接指向不存在的阶段")
+        for task_link in self.task_links:
+            if task_link.stage_id not in stage_ids:
+                raise ValidationAppError("任务链接指向不存在的阶段")
+        unit_pairs = [(link.stage_id, link.unit_id) for link in self.unit_links]
         if len(set(unit_pairs)) != len(unit_pairs):
             raise ValidationAppError("同一阶段内单元重复链接")
-        if len({l.unit_id for l in self.unit_links}) != len(self.unit_links):
+        if len({link.unit_id for link in self.unit_links}) != len(self.unit_links):
             raise ValidationAppError("单元在计划内不可重复挂载")
 
 
@@ -274,11 +287,27 @@ class PublishResult:
     structure_fingerprint: str
 
 
+def _publish_body_fingerprint(draft: PlanDraft) -> str:
+    """发布请求的**语义体指纹**。
+
+    同键（idempotency_key）同体 → 复用；同键异体 → 409。
+    体 = 草案内容 + 目标项目，不含易变字段（时间、run_id）。
+    """
+    return content_hash_stable(
+        {"project_id": draft.project_id, "draft_hash": draft.content_hash}
+    )
+
+
 class PlanPublicationService:
     """计划的纯逻辑发布协调器。
 
     本类**不做 I/O**：仓储由 application 层注入实现。
     这样领域规则可以被完整单测，而不需要数据库。
+
+    发布必须**在单一数据库事务内**完成，由应用层包裹
+    ``PlanRepositoryPort.publish_revision`` 调用（见 Goal §6）：
+    草案状态检查 → 版本检查 → 新建 revision → 关系写入 →
+    切换当前引用 → 写发布记录。
     """
 
     def __init__(self, repository: "PlanRepositoryPort") -> None:  # noqa: F821
@@ -300,22 +329,43 @@ class PlanPublicationService:
         -> 新增 plan revision / links
         -> 设置当前引用（应用层在同一事务内完成）。
         """
-        # 1) 先查幂等键：重复点击/重复投递直接复用既有结果。
+        if not idempotency_key:
+            raise ValidationAppError("发布必须携带幂等键")
+
+        # 1) 先查幂等键：重复点击/重复投递。
+        #    同键同体 → 复用既有结果（重放返回原结果，即使草案已 APPROVED）；
+        #    同键异体 → 409。
+        body_fp = _publish_body_fingerprint(draft)
         existing = self._repo.find_publish_by_idempotency_key(
             project_id=draft.project_id, idempotency_key=idempotency_key
         )
         if existing is not None:
+            if existing.body_fingerprint != body_fp:
+                raise IdempotencyConflictError(
+                    "同一 Idempotency-Key 已用于不同的发布请求体"
+                )
             return PublishResult(
                 plan_id=existing.plan_id,
                 revision=existing.revision,
                 created=False,
-                structure_fingerprint=existing.structure_fingerprint(),
+                structure_fingerprint=existing.structure_fingerprint,
             )
 
-        # 2) 草案内容必须与用户看到的一致。
+        # 2) 草案必须处于「可发布」状态：已取消/已失效的草案绝不能发布。
+        if draft.status not in {
+            PlanDraftStatus.AWAITING_APPROVAL,
+            PlanDraftStatus.PENDING,
+        }:
+            raise ConflictError(
+                "当前草案状态不允许发布",
+                reason="draft_not_publishable",
+                status=str(draft.status),
+            )
+
+        # 3) 草案内容必须与用户看到的一致。
         draft.verify_hash(presented_hash)
 
-        # 3) 乐观并发：当前引用版本必须匹配。
+        # 4) 乐观并发：当前引用版本必须匹配。
         current = self._repo.get_current(project_id=draft.project_id)
         current_version = current.version if current else 0
         if expected_version != current_version:
@@ -334,8 +384,12 @@ class PlanPublicationService:
             stages=draft.stages,
             now=now,
         )
-        if current is not None and current.structure_fingerprint() == candidate.structure_fingerprint():
+        if (
+            current is not None
+            and current.structure_fingerprint() == candidate.structure_fingerprint()
+        ):
             draft.status = PlanDraftStatus.APPROVED
+            self._repo.save_draft(draft)
             return PublishResult(
                 plan_id=current.plan_id,
                 revision=current.revision,
@@ -343,13 +397,18 @@ class PlanPublicationService:
                 structure_fingerprint=current.structure_fingerprint(),
             )
 
-        # 5) 冻结新版本并在同一事务内切换当前引用（由应用层包裹）。
+        # 5) 冻结新版本，并在**单一事务内**写入 revision + 关系 + 切换当前引用 +
+        #    发布记录（由应用层包裹 publish_revision 调用）。
         candidate.freeze(now=now)
-        if current is not None:
-            current.mark_superseded()
-        self._repo.save_revision(candidate, idempotency_key=idempotency_key)
-        self._repo.set_current(project_id=draft.project_id, plan_id=candidate.plan_id)
+        self._repo.publish_revision(
+            draft=draft,
+            revision=candidate,
+            superseded=current,
+            idempotency_key=idempotency_key,
+            body_fingerprint=body_fp,
+        )
         draft.status = PlanDraftStatus.APPROVED
+        self._repo.save_draft(draft)
         return PublishResult(
             plan_id=candidate.plan_id,
             revision=candidate.revision,
@@ -368,7 +427,10 @@ class PlanPublicationService:
         edited_stages: Sequence[PlanStage] | None = None,
         now: datetime | None = None,
     ) -> PublishResult | None:
-        """处理等待用户时的三种决定：approve / edit / cancel。"""
+        """处理等待用户时的三种决定：approve / edit / cancel。
+
+        **非法/缺失决定一律失败，绝不默认 approve**（Goal §3）。
+        """
         if draft.status not in {PlanDraftStatus.AWAITING_APPROVAL, PlanDraftStatus.PENDING}:
             raise ConflictError("草案已处理，不能重复决定")
 
@@ -393,14 +455,37 @@ class PlanPublicationService:
             case DraftDecision.CANCEL:
                 draft.status = PlanDraftStatus.CANCELLED
                 self._repo.save_draft(draft)
-                # 取消后的草案绝不可被 worker 稍后发布：仓储需按状态过滤。
+                # 取消后的草案绝不可被 worker 稍后发布：保存须按状态过滤。
                 return None
             case _:  # pragma: no cover - 枚举已封闭
                 raise ValidationAppError(f"未知决定：{decision}")
 
 
-class PlanRepositoryPort:
-    """规划仓储端口。实现见 infrastructure；契约测试同时覆盖内存与 PG。"""
+@dataclass(frozen=True, slots=True)
+class PublishRecord:
+    """已落库的发布记录（幂等复用 + 体指纹比对）。"""
+
+    plan_id: str
+    revision: int
+    idempotency_key: str
+    body_fingerprint: str
+    structure_fingerprint: str
+
+
+class PlanRepositoryPort(Protocol):
+    """规划仓储端口。实现见 infrastructure；契约测试同时覆盖内存与 PG。
+
+    事务契约（Goal §6）：
+
+    - ``publish_revision`` 必须在**单一事务**内完成：
+      草案状态检查 → 版本检查 → 新建 PlanRevision → 写入 unit/task 关系 →
+      切换当前引用 → 更新被替代版本状态 → 写发布记录。
+      任何一步失败整体回滚，不得留下半发布状态。
+    - 幂等靠 **DB 唯一约束**（``(project_id, idempotency_key)``），
+      不得用「先查后写」伪造并发幂等。
+    - ``PlanRevision`` 一旦 APPROVED/SUPERSEDED **不可变**；
+      重规划**不得删除**历史 summary/outcome/learning_record。
+    """
 
     def get_current(self, *, project_id: str) -> PlanRevision | None: ...
 
@@ -408,17 +493,27 @@ class PlanRepositoryPort:
 
     def list_revisions(self, *, project_id: str) -> list[PlanRevision]: ...
 
-    def save_revision(self, revision: PlanRevision, *, idempotency_key: str) -> None: ...
+    def publish_revision(
+        self,
+        *,
+        draft: PlanDraft,
+        revision: PlanRevision,
+        superseded: PlanRevision | None,
+        idempotency_key: str,
+        body_fingerprint: str,
+    ) -> None: ...
 
     def set_current(self, *, project_id: str, plan_id: str) -> None: ...
 
     def get_draft(self, *, project_id: str, draft_id: str) -> PlanDraft | None: ...
 
-    def save_draft(self, draft: PlanDraft) -> None: ...
+    def save_draft(self, draft: PlanDraft) -> None:
+        """保存草案。实现**必须按状态过滤**：已 CANCELLED 的草案不得被覆盖为可发布。"""
+        ...
 
     def find_publish_by_idempotency_key(
         self, *, project_id: str, idempotency_key: str
-    ) -> PlanRevision | None: ...
+    ) -> PublishRecord | None: ...
 
 
 def diff_revisions(previous: PlanRevision, current: PlanRevision) -> dict[str, object]:
@@ -429,8 +524,8 @@ def diff_revisions(previous: PlanRevision, current: PlanRevision) -> dict[str, o
     """
     prev_keys = {s.stable_key for s in previous.stages}
     curr_keys = {s.stable_key for s in current.stages}
-    prev_units = {l.unit_id for l in previous.unit_links}
-    curr_units = {l.unit_id for l in current.unit_links}
+    prev_units = {link.unit_id for link in previous.unit_links}
+    curr_units = {link.unit_id for link in current.unit_links}
     return {
         "from_revision": previous.revision,
         "to_revision": current.revision,
@@ -477,6 +572,7 @@ __all__ = [
     "PlanStage",
     "PlanTaskLink",
     "PlanUnitLink",
+    "PublishRecord",
     "PublishResult",
     "diff_revisions",
     "validate_soft_limits",
