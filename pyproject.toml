@@ -1,0 +1,64 @@
+[project]
+name = "studyplan"
+version = "1.1.0"
+description = "学习规划助手 V1.1 — LangGraph 编排 + FastAPI 接入 + PostgreSQL 业务事实源"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "pydantic>=2.9",
+    "uvicorn>=0.32",
+    "argon2-cffi>=23.1",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "httpx>=0.27",
+    "ruff>=0.6",
+    "mypy>=1.11",
+]
+# PostgreSQL 持久化 + LangGraph Checkpointer。
+# ⚠️ psycopg 是 LGPL-3.0-only：作为依赖引入且不修改其源码；
+#    分发时须随附许可证文本。详见 docs/migration/module-reuse-matrix.md §2.2。
+postgres = [
+    "psycopg[binary]>=3.2",
+    "alembic>=1.13",
+    "SQLAlchemy>=2.0",
+]
+# LangGraph 编排层 + Postgres Checkpointer（ADR-0005）。
+# 独立于 postgres extra：逻辑层测试不需要任何框架即可运行。
+agent = [
+    "langgraph>=0.2",
+    "langgraph-checkpoint-postgres>=2.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+pythonpath = ["backend"]
+addopts = "-q --strict-markers"
+markers = [
+    "postgres: 需要本地 PostgreSQL 运行；不可达时整组跳过",
+    "langgraph: 需要安装 langgraph 才能运行（B1 骨架可用解释器替代）",
+]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+exclude = ["var", ".venv", "node_modules", "frontend"]
+
+[tool.ruff.lint]
+# 只启用能发现**真实缺陷**的规则集，不做纯风格约束（风格交给 formatter）。
+select = ["E", "F", "W", "I", "B"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/tests/*" = ["B011"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+include = ["app*"]

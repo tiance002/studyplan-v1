@@ -1,0 +1,52 @@
+# ---- env & secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- python ----
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+.mypy_cache/
+*.log
+
+# ---- node ----
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+*.tsbuildinfo
+
+# ---- local runtime data (never commit) ----
+var/
+*.sqlite
+*.sqlite3
+*.db
+
+# ---- editor / os ----
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+*.swp
+
+# ---- tooling caches ----
+.playwright-mcp/
+.serena/
+.trae/
+.codex/
+.agents/
+
+# ---- local legacy audit output ----
+docs/migration/legacy-raw/

@@ -1,0 +1,28 @@
+# 统一换行：仓库内一律 LF，检出时按平台。
+#
+# 为什么必须有这个文件：source-provenance.md 记录的 SHA-256 是基于**实际字节**的。
+# 若不同机器因 core.autocrlf 产生不同换行，哈希复核会失败，溯源就失去意义。
+# 这是 B1 识别的缺口（见 docs/migration/source-provenance.md §5 第 2 条）。
+* text=auto eol=lf
+
+# 二进制：不做换行转换，不做 diff。
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+
+# 以下必须是 LF，否则在 Windows 上会出问题：
+# - .ini 被 configparser 以 locale 编码读取（见 backend/alembic.ini 头部注释）
+# - .sh  在 Git Bash / WSL 下执行，CRLF 会导致 "bad interpreter"
+*.ini  text eol=lf
+*.sh   text eol=lf
+*.mako text eol=lf
+
+# 前端生成物：由工具产出，避免 diff 噪音
+frontend/src/api/generated/** linguist-generated=true
+contracts/openapi.json linguist-generated=true

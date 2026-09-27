@@ -1,0 +1,34 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "studyplan API",
+    "description": "学习规划助手 V1.1 —— LangGraph 编排 + FastAPI 接入 + PostgreSQL 业务事实源。\n\n**契约真相源是 Pydantic 模型**，本 OpenAPI 是其导出物（ADR-0004）。\n**AuthContext 永不出现在可写请求体**，由服务端会话派生。",
+    "version": "1.1.0"
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Healthz",
+        "description": "健康检查。**不暴露**图版本以外的内部信息。",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Healthz Healthz Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
