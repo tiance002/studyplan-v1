@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import pytest
 from app.agent_workflows.validators import (
     SOFT_LIMIT_NODES,
     SOFT_LIMIT_UNITS,
@@ -85,6 +86,37 @@ def test_negative_order_index_is_rejected() -> None:
         nodes=[], units=[{"stable_key": "u1", "order_index": -1}], relations=[], tasks=[]
     )
     assert not outcome.ok
+
+
+
+
+@pytest.mark.parametrize("bad", [3.7, 2.0, True, False, "3.0", "3.7", "abc", [3], {"v": 3}])
+def test_non_integer_order_index_is_rejected_not_coerced(bad: object) -> None:
+    """非整数 order_index 必须被拒绝，**不得静默截断**（Goal §9.1）。
+
+    ``int(3.7) == 3``、``int(True) == 1`` 这类隐式转换会掩盖模型输出错误，
+    必须显式报错。
+    """
+    outcome = validate_plan_structure(
+        nodes=[],
+        units=[{"stable_key": "u1", "order_index": bad}],
+        relations=[],
+        tasks=[],
+    )
+    assert not outcome.ok
+    assert any("order_index" in e for e in outcome.errors)
+
+
+def test_integer_valued_string_is_rejected() -> None:
+    """连 "0"（整数字符串）也拒绝——校验器只接受真正的 int。"""
+    outcome = validate_plan_structure(
+        nodes=[],
+        units=[{"stable_key": "u1", "order_index": "0"}],
+        relations=[],
+        tasks=[],
+    )
+    assert not outcome.ok
+
 
 
 def test_missing_acceptance_is_rejected() -> None:

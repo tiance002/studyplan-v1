@@ -19,8 +19,6 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-import pytest
-
 APP_DIR = Path(__file__).resolve().parents[2] / "app"
 
 #: domain 层**绝对禁止** import 的模块（含前缀匹配）。

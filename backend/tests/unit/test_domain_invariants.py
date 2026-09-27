@@ -9,8 +9,7 @@
 from __future__ import annotations
 
 import pytest
-
-from app.core.errors import ConflictError, ValidationAppError
+from app.core.errors import NotFoundError, ValidationAppError
 from app.domain.catalog.models import (
     KnowledgeNode,
     KnowledgeRelation,
@@ -21,20 +20,21 @@ from app.domain.catalog.models import (
 from app.domain.enums import (
     AiRunStatus,
     KnowledgeNodeType,
+    MediaType,
+    PreferenceScope,
     RelationType,
+    ResourceProvenance,
     UnitProgress,
     can_transition_progress,
 )
-from app.domain.planning.models import PlanRevision, PlanStage, validate_soft_limits
+from app.domain.planning.models import validate_soft_limits
 from app.domain.resources.models import (
+    ResourcePreference,
     ResourceRecord,
     require_safe_url,
     resolve_preference,
 )
-from app.domain.enums import MediaType, PreferenceMode, PreferenceScope, ResourceProvenance
-from app.domain.resources.models import DEFAULT_SYSTEM_PREFERENCE, ResourcePreference
 from app.domain.workspace.models import DEFAULT_CREDENTIAL_POLICY
-
 
 # ---------------------------------------------------------------------------
 # enums（契约的一部分，改值即破坏 API）
@@ -136,7 +136,7 @@ def test_validate_relations_rejects_cross_project() -> None:
 
 
 def test_validate_relations_rejects_unknown_node() -> None:
-    with pytest.raises(Exception):  # NotFoundError
+    with pytest.raises(NotFoundError):
         validate_relations(
             project_id="p1",
             relations=[

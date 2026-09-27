@@ -16,9 +16,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
-from app.core.errors import ErrorCode, STATUS_BY_CODE
+from app.core.errors import STATUS_BY_CODE, ErrorCode
 from app.domain.enums import (
     AiRunNextAction,
     AiRunStatus,
@@ -154,3 +152,34 @@ def test_design_required_status_codes_present() -> None:
     statuses = set(STATUS_BY_CODE.values())
     missing = [s for s in (400, 401, 403, 404, 409, 422, 429, 503) if s not in statuses]
     assert not missing, f"缺少设计要求的 HTTP 状态：{missing}"
+
+
+# ---------------------------------------------------------------------------
+# provider 名称一致性（Goal §8 / §13.2）
+# ---------------------------------------------------------------------------
+
+
+def test_supported_provider_sets_stay_in_sync() -> None:
+    """core 层与 infrastructure 层的 provider 闭集必须一致。
+
+    `core` 不得 import `infrastructure`（依赖方向），因此独立声明了
+    `SUPPORTED_PROVIDERS`；本测试机械保证两处不漂移——否则启动门禁
+    会与真实装配分叉，形成"配置说可用、实际拒绝"或反之的漏洞。
+    """
+    from app.core.startup_guard import SUPPORTED_PROVIDERS as CORE_SUPPORTED
+    from app.infrastructure.providers import SUPPORTED_PROVIDERS as INFRA_SUPPORTED
+
+    assert CORE_SUPPORTED == INFRA_SUPPORTED, (
+        f"provider 闭集不一致：core={sorted(CORE_SUPPORTED)} "
+        f"infra={sorted(INFRA_SUPPORTED)}"
+    )
+
+
+def test_declared_unimplemented_providers_are_not_supported() -> None:
+    """声明"未实现"的 provider 不得同时出现在 SUPPORTED 集合中。"""
+    from app.core.startup_guard import (
+        DECLARED_BUT_UNIMPLEMENTED,
+        SUPPORTED_PROVIDERS,
+    )
+
+    assert not (DECLARED_BUT_UNIMPLEMENTED & SUPPORTED_PROVIDERS)

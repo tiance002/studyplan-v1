@@ -10,21 +10,16 @@
 
 from __future__ import annotations
 
-import os
-
 import pytest
-
 from app.core.config import Settings, get_settings, reset_settings_cache
-from app.core.errors import ErrorCode, STATUS_BY_CODE
-from app.domain.workspace.models import AuthContext
+from app.core.errors import STATUS_BY_CODE, ErrorCode, ForbiddenError, ValidationAppError
 from app.domain.resources.models import require_safe_url
-from app.core.errors import ForbiddenError, ValidationAppError
+from app.domain.workspace.models import AuthContext
 from app.infrastructure.providers import (
     ProviderConfigurationError,
     assert_not_fake_in_production,
     build_llm,
 )
-
 
 # ---------------------------------------------------------------------------
 # AuthContext：越权必须拒绝

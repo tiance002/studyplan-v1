@@ -14,8 +14,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import pytest
-
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BACKEND_DIR = REPO_ROOT / "backend"
 
@@ -120,14 +118,23 @@ def test_no_legacy_env_prefix_in_code() -> None:
 
 
 def test_no_local_runtime_data_committed() -> None:
-    """本地运行数据（var/数据库/日志）不得出现在工作树中。"""
+    """本地运行数据（var/数据库/日志）不得出现在工作树中。
+
+    排除工具链缓存目录（`.mypy_cache` / `.pytest_cache` / `.ruff_cache`）——
+    它们由静态检查/测试工具生成，含 `.db` 缓存文件但与业务运行数据无关，
+    且均已被 `.gitignore` 忽略。
+    """
+    ignored_dirs = {
+        ".venv", "venv", "node_modules", "__pycache__",
+        ".mypy_cache", ".pytest_cache", ".ruff_cache",
+    }
     leaks: list[str] = []
     for path in REPO_ROOT.rglob("*"):
         rel = path.relative_to(REPO_ROOT).as_posix()
         if rel.startswith(".git/"):
             continue
         parts = path.relative_to(REPO_ROOT).parts
-        if any(part in {".venv", "venv", "node_modules", "__pycache__"} for part in parts):
+        if any(part in ignored_dirs for part in parts):
             continue
         if path.is_file() and path.suffix in {".sqlite", ".sqlite3", ".db"}:
             leaks.append(rel)

@@ -4,33 +4,35 @@ version = "1.1.0"
 description = "学习规划助手 V1.1 — LangGraph 编排 + FastAPI 接入 + PostgreSQL 业务事实源"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi>=0.115",
-    "pydantic>=2.9",
-    "uvicorn>=0.32",
-    "argon2-cffi>=23.1",
-    "PyYAML>=6.0",
+    "fastapi>=0.115,<1.0",
+    "pydantic>=2.9,<3.0",
+    "uvicorn>=0.32,<1.0",
+    "argon2-cffi>=23.1,<26.0",
+    "PyYAML>=6.0,<7.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.3",
-    "httpx>=0.27",
-    "ruff>=0.6",
-    "mypy>=1.11",
+    "pytest>=8.3,<10.0",
+    "httpx>=0.27,<1.0",
+    "ruff>=0.6,<1.0",
+    "mypy>=1.11,<2.0",
 ]
 # PostgreSQL 持久化 + LangGraph Checkpointer。
 # ⚠️ psycopg 是 LGPL-3.0-only：作为依赖引入且不修改其源码；
 #    分发时须随附许可证文本。详见 docs/migration/module-reuse-matrix.md §2.2。
+# 已在本机验证的版本（B1 验收）：psycopg 3.3.6 / alembic 1.20.0 / SQLAlchemy 2.1.1。
 postgres = [
-    "psycopg[binary]>=3.2",
-    "alembic>=1.13",
-    "SQLAlchemy>=2.0",
+    "psycopg[binary]>=3.2,<4.0",
+    "alembic>=1.13,<2.0",
+    "SQLAlchemy>=2.0,<3.0",
 ]
 # LangGraph 编排层 + Postgres Checkpointer（ADR-0005）。
 # 独立于 postgres extra：逻辑层测试不需要任何框架即可运行。
+# 已在本机验证的版本（B1 验收）：langgraph 1.2.12 / langgraph-checkpoint-postgres 3.1.2。
 agent = [
-    "langgraph>=0.2",
-    "langgraph-checkpoint-postgres>=2.0",
+    "langgraph>=1.0,<2.0",
+    "langgraph-checkpoint-postgres>=3.0,<4.0",
 ]
 
 [tool.pytest.ini_options]
@@ -54,6 +56,22 @@ ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "backend/tests/*" = ["B011"]
+
+[tool.mypy]
+# `app` 包位于 backend/ 下；显式声明搜索路径，使 `import app.*` 可解析。
+mypy_path = "backend"
+explicit_package_bases = true
+namespace_packages = true
+python_version = "3.11"
+# 骨架阶段：宽松起步，仅捕获真实类型缺陷，不做全量严格模式。
+# 严格化随 B2/B3 逐步推进（见 docs/acceptance/B1-report.md §6）。
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unused_ignores = false
+check_untyped_defs = false
+allow_redefinition = true
+disallow_untyped_defs = false
+exclude = ["^backend/tests/", "^frontend/", "^var/"]
 
 [build-system]
 requires = ["setuptools>=68"]
