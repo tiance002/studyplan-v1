@@ -16,7 +16,8 @@
     "node_view": "NodeView",
     "practice_task_view": "PracticeTaskView",
     "plan_view": "PlanView",
-    "plan_draft_view": "PlanDraftView"
+    "plan_draft_view": "PlanDraftView",
+    "plan_decision_response": "PlanDecisionResponse"
   },
   "plan_generate_request": {
     "goal": "我想学会用 Agent 做一个 PDF 知识助手",
@@ -245,5 +246,59 @@
     "draft_hash": "9f2c1a7b4e6d8035c1f2a3b4d5e6f708",
     "version": 2,
     "validation_warnings": []
+  },
+  "plan_decision_response": {
+    "run_id": "run_3f9c1a2b4d5e6f708192a3b4c5d6e7f8",
+    "draft": {
+      "draft_id": "drf_7c1d2e3f4a5b6c7d",
+      "project_id": "lpr_6f708192a3b4c5d6",
+      "revision": 3,
+      "goal_snapshot": "我想学会用 Agent 做一个 PDF 知识助手",
+      "stages": [
+        {
+          "stage_id": "stg_11c9aaaad2b440ed9e1a75fe3fc6a9ba",
+          "stable_key": "stage.foundation",
+          "title": "基础准备",
+          "section_kind": "foundation",
+          "order_index": 0,
+          "objective": "搭好 Python 环境"
+        }
+      ],
+      "unit_links": [],
+      "task_links": [],
+      "stage_resources": [],
+      "extensions": [],
+      "source_pack_key": "agent_app_dev",
+      "source_pack_version": 1,
+      "status": "approved",
+      "draft_hash": "9f2c1a7b4e6d8035c1f2a3b4d5e6f708",
+      "version": 3,
+      "validation_warnings": []
+    },
+    "plan": {
+      "plan_id": "pln_5e6f708192a3b4c5",
+      "project_id": "lpr_6f708192a3b4c5d6",
+      "revision": 3,
+      "goal_snapshot": "我想学会用 Agent 做一个 PDF 知识助手",
+      "stages": [
+        {
+          "stage_id": "stg_11c9aaaad2b440ed9e1a75fe3fc6a9ba",
+          "stable_key": "stage.foundation",
+          "title": "基础准备",
+          "section_kind": "foundation",
+          "order_index": 0,
+          "objective": "搭好 Python 环境"
+        }
+      ],
+      "unit_links": [],
+      "task_links": [],
+      "stage_resources": [],
+      "extensions": [],
+      "source_pack_key": "agent_app_dev",
+      "source_pack_version": 1,
+      "status": "approved",
+      "version": 3,
+      "approved_at": "2026-09-28T04:00:00+00:00"
+    }
   }
 }

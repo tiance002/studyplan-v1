@@ -54,6 +54,21 @@ exclude = ["var", ".venv", "node_modules", "frontend"]
 select = ["E", "F", "W", "I", "B"]
 ignore = ["E501"]
 
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI 的依赖注入**必须**在参数默认值里调用 `Depends()` / `Query()`，
+# 这是框架的既定用法而非可变默认值缺陷。把它们声明为「不可变调用」，
+# 使 B008 只对真正的可变默认值（list()/dict()/set()）报警。
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    "fastapi.Body",
+    "fastapi.Form",
+    "fastapi.File",
+]
+
 [tool.ruff.lint.per-file-ignores]
 "backend/tests/*" = ["B011"]
 

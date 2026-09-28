@@ -1,0 +1,125 @@
+"""``RunRepositoryPort`` 的 PostgreSQL 实现（对外运行状态投影 ``ai_runs``）。
+
+## 事务与并发
+
+每次调用一个连接、一个事务；``update_run`` 用 ``version = version + 1``
+做**乐观并发**并返回新记录。RLS 保证跨项目读写被数据库拒绝。
+
+## 为什么不是业务事实
+
+``ai_runs`` 只回答「跑到哪、下一步做什么、结果在哪」。任何「计划是否已发布」
+之类的判断都必须读 ``plan_revisions``，**不得**信任本表。
+"""
+
+from __future__ import annotations
+
+from collections.abc import Iterator
+from contextlib import contextmanager
+from typing import Any
+
+import psycopg
+from app.core.errors import NotFoundError
+from app.domain.enums import AiRunNextAction, AiRunStatus
+from app.domain.runs.models import RunRecord
+from app.infrastructure.db.plan_repository import to_psycopg_dsn
+from psycopg.rows import dict_row
+
+__all__ = ["PgRunRepository"]
+
+
+def _run_from(row: dict[str, Any]) -> RunRecord:
+    return RunRecord(
+        run_id=str(row["run_id"]),
+        actor_id=str(row["actor_id"]),
+        project_id=str(row["project_id"]),
+        kind=str(row["kind"]),
+        graph_name=str(row.get("graph_name") or ""),
+        graph_version=str(row.get("graph_version") or ""),
+        status=AiRunStatus(str(row["status"])),
+        next_action=AiRunNextAction(str(row.get("next_action") or "none")),
+        version=int(row.get("version") or 1),
+        thread_id=str(row.get("thread_id") or ""),
+        result_ref=(str(row["result_ref"]) if row.get("result_ref") else None),
+        error_class=(str(row["error_class"]) if row.get("error_class") else None),
+        created_at=row.get("created_at"),  # type: ignore[arg-type]
+        updated_at=row.get("updated_at"),  # type: ignore[arg-type]
+    )
+
+
+class PgRunRepository:
+    def __init__(self, dsn: str) -> None:
+        self._dsn = to_psycopg_dsn(dsn)
+
+    @contextmanager
+    def _tx(self, project_id: str) -> Iterator[psycopg.Connection[dict[str, Any]]]:
+        with psycopg.connect(
+            self._dsn, row_factory=dict_row
+        ) as conn:  # type: psycopg.Connection[dict[str, Any]]
+            conn.execute("SELECT set_config('app.project_id', %s, true)", (project_id,))
+            yield conn
+
+    def create_run(self, run: RunRecord) -> None:
+        with self._tx(run.project_id) as conn:
+            conn.execute(
+                """
+                INSERT INTO ai_runs
+                    (run_id, actor_id, project_id, kind, graph_name, graph_version,
+                     status, next_action, thread_id, result_ref, error_class, version)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    run.run_id,
+                    run.actor_id,
+                    run.project_id,
+                    run.kind,
+                    run.graph_name,
+                    run.graph_version,
+                    run.status.value,
+                    run.next_action.value,
+                    run.thread_id or None,
+                    run.result_ref,
+                    run.error_class,
+                    run.version,
+                ),
+            )
+
+    def get_run(self, *, project_id: str, run_id: str) -> RunRecord | None:
+        with self._tx(project_id) as conn:
+            row = conn.execute(
+                "SELECT * FROM ai_runs WHERE project_id = %s AND run_id = %s",
+                (project_id, run_id),
+            ).fetchone()
+        return _run_from(row) if row is not None else None
+
+    def update_run(
+        self,
+        *,
+        project_id: str,
+        run_id: str,
+        status: str,
+        next_action: str,
+        result_ref: str | None = None,
+        error_class: str | None = None,
+    ) -> RunRecord:
+        with self._tx(project_id) as conn:
+            cursor = conn.execute(
+                """
+                UPDATE ai_runs
+                SET status = %s,
+                    next_action = %s,
+                    result_ref = COALESCE(%s, result_ref),
+                    error_class = %s,
+                    version = version + 1,
+                    updated_at = now()
+                WHERE project_id = %s AND run_id = %s
+                """,
+                (status, next_action, result_ref, error_class, project_id, run_id),
+            )
+            if cursor.rowcount != 1:
+                raise NotFoundError("运行不存在")
+            row = conn.execute(
+                "SELECT * FROM ai_runs WHERE project_id = %s AND run_id = %s",
+                (project_id, run_id),
+            ).fetchone()
+        assert row is not None
+        return _run_from(row)

@@ -13,6 +13,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 from app.core.errors import (
     ConflictError,
@@ -26,6 +28,7 @@ from app.domain.enums import (
     PlanDraftStatus,
     PlanRevisionStatus,
     StageResourceRole,
+    TaskKnowledgeRole,
 )
 from app.domain.planning.models import (
     PlanDraft,
@@ -33,9 +36,11 @@ from app.domain.planning.models import (
     PlanRepositoryPort,
     PlanRevision,
     PlanStage,
+    PlanTaskKnowledgeLink,
     PlanTaskLink,
     PlanUnitLink,
     PublishRecord,
+    revision_from_draft,
 )
 from app.domain.resources.curation import (
     KnowledgeExtension,
@@ -46,7 +51,11 @@ from app.domain.resources.curation import (
 
 
 class FakePlanRepository(PlanRepositoryPort):
-    """内存实现。以单事务语义模拟 publish_revision（原子）。"""
+    """内存实现。以单事务语义模拟 ``publish_revision``（原子）。
+
+    B2-V §二：模拟真实 PG 的**事务内草案状态复核**——
+    发布前从 ``self.drafts`` 读**数据库里的**状态，而不是信任调用方对象。
+    """
 
     def __init__(self) -> None:
         self.current: PlanRevision | None = None
@@ -73,6 +82,7 @@ class FakePlanRepository(PlanRepositoryPort):
         superseded: PlanRevision | None,
         idempotency_key: str,
         body_fingerprint: str,
+        created: bool = True,
     ) -> None:
         """模拟**单一事务**：任何一步失败整体回滚，不留半发布状态。
 
@@ -80,6 +90,9 @@ class FakePlanRepository(PlanRepositoryPort):
         ``publish_record`` 失败时已经调用过 ``mark_superseded()``，回滚却只删
         新版本，导致既有 v1 被**错误地**留在 ``SUPERSEDED``。这正是真实
         PG 实现必须避免的陷阱（发布与草案状态更新同属一个事务）。
+
+        B2-V §二：事务内**复核数据库中的草案状态**（``self.drafts``）；
+        B2-V §四：``created=False``（复用当前版本）也必须落库幂等记录。
         """
         record_key = (draft.project_id, idempotency_key)
         # 事务开始前快照全部受影响状态。
@@ -87,17 +100,43 @@ class FakePlanRepository(PlanRepositoryPort):
         snap_current = self.current
         snap_record = self.publish_records.get(record_key)
         snap_superseded_status = superseded.status if superseded is not None else None
+        # 真实流程中草案在发布前必然已落库；fake 对未登记的草案做等价隐式落库
+        # （状态取「等待确认」，即服务发布前库里应有的状态），使单元测试聚焦领域
+        # 规则（真实的「草案不存在」路径由 PG 测试覆盖）。
+        seeded = False
+        if draft.draft_id not in self.drafts:
+            self.drafts[draft.draft_id] = replace(
+                draft, status=PlanDraftStatus.AWAITING_APPROVAL
+            )
+            seeded = True
+        stored = self.drafts[draft.draft_id]
+        snap_draft_status = stored.status
 
         log: list[str] = ["begin"]
         try:
-            if self.fail_on == "revision":
-                log.append("insert_revision(FAIL)")
-                raise RuntimeError("boom")
-            log.append("insert_revision")
-            self.revisions.append(revision)
-            if superseded is not None:
-                log.append("mark_superseded")
-                superseded.mark_superseded()
+            # 0) 事务内复核草案最新状态（不信任调用方持有的旧对象）。
+            if stored.status not in {
+                PlanDraftStatus.AWAITING_APPROVAL,
+                PlanDraftStatus.PENDING,
+            }:
+                log.append("check_draft(FAIL:not_publishable)")
+                raise ConflictError(
+                    "草案已被取消或已处理，不能再发布",
+                    reason="draft_not_publishable",
+                    status=str(stored.status),
+                )
+            log.append("check_draft")
+
+            if created:
+                if self.fail_on == "revision":
+                    log.append("insert_revision(FAIL)")
+                    raise RuntimeError("boom")
+                log.append("insert_revision")
+                self.revisions.append(revision)
+                if superseded is not None:
+                    log.append("mark_superseded")
+                    superseded.mark_superseded()
+
             if self.fail_on == "publish_record":
                 log.append("insert_record(FAIL)")
                 raise RuntimeError("boom")
@@ -114,11 +153,13 @@ class FakePlanRepository(PlanRepositoryPort):
                 log.append("update_draft_status(FAIL)")
                 raise RuntimeError("boom")
             log.append("update_draft_status")
+            stored.status = PlanDraftStatus.APPROVED
             if self.fail_on == "set_current":
                 log.append("set_current(FAIL)")
                 raise RuntimeError("boom")
             log.append("set_current")
-            self.current = revision
+            if created:
+                self.current = revision
         except Exception:
             # 回滚：恢复**全部**状态，包括被替代版本的状态与当前引用。
             self.revisions = snap_revisions
@@ -129,6 +170,9 @@ class FakePlanRepository(PlanRepositoryPort):
                 self.publish_records[record_key] = snap_record
             if superseded is not None and snap_superseded_status is not None:
                 superseded.status = snap_superseded_status
+            stored.status = snap_draft_status
+            if seeded:
+                self.drafts.pop(draft.draft_id, None)
             log.append("rollback")
             raise
         finally:
@@ -141,12 +185,29 @@ class FakePlanRepository(PlanRepositoryPort):
         return self.drafts.get(draft_id)
 
     def save_draft(self, draft: PlanDraft) -> None:
-        # 契约：已取消的草案不得被覆盖为可发布
+        # 契约：终态（cancelled / approved）草案不得被改写（B2-V §二.4）。
         existing = self.drafts.get(draft.draft_id)
-        if existing is not None and existing.status is PlanDraftStatus.CANCELLED:
-            if draft.status is not PlanDraftStatus.CANCELLED:
-                raise ConflictError("已取消的草案不可再发布", reason="draft_cancelled")
+        if existing is not None and existing.status in {
+            PlanDraftStatus.CANCELLED,
+            PlanDraftStatus.APPROVED,
+        }:
+            raise ConflictError(
+                "草案已终结（已取消或已发布），不能再修改",
+                reason="draft_terminal",
+            )
         self.drafts[draft.draft_id] = draft
+
+    def cancel_draft(self, *, project_id: str, draft_id: str) -> None:
+        stored = self.drafts.get(draft_id)
+        if stored is None or stored.status not in {
+            PlanDraftStatus.AWAITING_APPROVAL,
+            PlanDraftStatus.PENDING,
+        }:
+            raise ConflictError(
+                "草案已处理（已取消或已发布），不能再取消",
+                reason="draft_not_cancellable",
+            )
+        stored.status = PlanDraftStatus.CANCELLED
 
     def find_publish_by_idempotency_key(
         self, *, project_id: str, idempotency_key: str
@@ -314,14 +375,14 @@ def test_missing_idempotency_key_fails() -> None:
 
 
 def test_publish_is_single_transaction() -> None:
-    """发布副作用必须在一次原子调用内完成（含草案状态更新）。"""
+    """发布副作用必须在一次原子调用内完成（含草案状态复核与更新）。"""
     repo = FakePlanRepository()
     draft = _make_draft()
     _service(repo).publish(
         draft=draft, presented_hash=draft.content_hash, expected_version=0, idempotency_key="k1"
     )
     assert repo.call_log == [
-        "begin,insert_revision,insert_record,update_draft_status,set_current"
+        "begin,check_draft,insert_revision,insert_record,update_draft_status,set_current"
     ]
 
 
@@ -587,3 +648,330 @@ def test_draft_hash_covers_resources_and_extensions() -> None:
     d3 = _linked_draft(stages=d1.stages)
     d3.stage_resources = ()
     assert d1.content_hash != d3.content_hash, "草案哈希必须覆盖阶段资源主线"
+
+
+# ---------------------------------------------------------------------------
+# B2-V §二：发布原子性 —— 事务内复核草案状态、状态条件更新、复用也落幂等
+# ---------------------------------------------------------------------------
+
+
+def test_stale_object_publish_after_cancel_is_rejected() -> None:
+    """B2-V §二.2/.3：调用方持有的**旧对象**不得让已取消的草案被发布。
+
+    调用方对象仍是 AWAITING_APPROVAL，但数据库里已是 CANCELLED；
+    仓储必须在事务内复核数据库状态并拒绝，且**不产生任何版本**。
+    """
+    repo = FakePlanRepository()
+    draft = _make_draft()
+    # 模拟「另一个请求已取消该草案」：库里是 CANCELLED，调用方对象是陈旧的。
+    cancelled = _make_draft()
+    cancelled.status = PlanDraftStatus.CANCELLED
+    repo.drafts[draft.draft_id] = cancelled
+    assert draft.status is PlanDraftStatus.AWAITING_APPROVAL, "调用方对象必须仍是陈旧状态"
+
+    with pytest.raises(ConflictError) as exc:
+        _service(repo).publish(
+            draft=draft,
+            presented_hash=draft.content_hash,
+            expected_version=0,
+            idempotency_key="k-stale",
+        )
+    assert exc.value.details.get("reason") == "draft_not_publishable"
+    assert repo.revisions == [], "被取消的草案绝不可产生版本"
+    assert repo.publish_records == {}, "被拒绝的发布不得留下幂等记录"
+
+
+def test_publish_rechecks_draft_from_store_not_caller_object() -> None:
+    """事务内出现 check_draft 步骤（不信任调用方持有的旧对象）。"""
+    repo = FakePlanRepository()
+    draft = _make_draft()
+    _service(repo).publish(
+        draft=draft, presented_hash=draft.content_hash, expected_version=0, idempotency_key="k1"
+    )
+    assert "check_draft" in repo.call_log[0].split(",")
+    # 发布后库里的草案必须是 APPROVED（终态更新属于发布事务）。
+    stored = repo.drafts[draft.draft_id]
+    assert stored.status is PlanDraftStatus.APPROVED
+
+
+def test_reuse_path_persists_idempotency_record() -> None:
+    """B2-V §四：结构与当前路线一致而**复用**时，幂等结果仍须落库。"""
+    repo = FakePlanRepository()
+    svc = _service(repo)
+    d1 = _make_draft()
+    svc.publish(draft=d1, presented_hash=d1.content_hash, expected_version=0, idempotency_key="k1")
+
+    d2 = _make_draft()  # 结构完全相同
+    d2.draft_id = "drf_2"
+    r2 = svc.publish(
+        draft=d2, presented_hash=d2.content_hash, expected_version=1, idempotency_key="k2"
+    )
+    assert r2.created is False and r2.revision == 1
+    assert len(repo.revisions) == 1, "复用不得新建版本"
+    assert ("prj_1", "k2") in repo.publish_records, "复用也必须持久化幂等结果"
+    assert repo.publish_records[("prj_1", "k2")].revision == 1
+
+
+def test_reuse_then_replay_returns_original_without_republishing() -> None:
+    """复用落库后，同键重放必须直接命中记录（不再进入发布分支）。"""
+    repo = FakePlanRepository()
+    svc = _service(repo)
+    d1 = _make_draft()
+    r1 = svc.publish(
+        draft=d1, presented_hash=d1.content_hash, expected_version=0, idempotency_key="k1"
+    )
+    d2 = _make_draft()
+    d2.draft_id = "drf_2"
+    r2 = svc.publish(
+        draft=d2, presented_hash=d2.content_hash, expected_version=1, idempotency_key="k2"
+    )
+    calls_after_first = len(repo.call_log)
+    r3 = svc.publish(
+        draft=d2, presented_hash=d2.content_hash, expected_version=1, idempotency_key="k2"
+    )
+    assert (r3.plan_id, r3.revision, r3.created) == (r1.plan_id, r1.revision, False)
+    assert (r2.plan_id, r2.revision) == (r1.plan_id, r1.revision)
+    assert len(repo.call_log) == calls_after_first, "重放不得再次进入发布事务"
+
+
+def test_historical_idempotency_replayable_after_later_publish() -> None:
+    """B2-V §四：后续版本发布后，历史幂等结果仍可重放。"""
+    repo = FakePlanRepository()
+    svc = _service(repo)
+    d1 = _linked_draft()
+    r1 = svc.publish(
+        draft=d1, presented_hash=d1.content_hash, expected_version=0, idempotency_key="k1"
+    )
+    d2 = _linked_draft(stages=_make_stages(3))
+    d2.draft_id = "drf_2"
+    r2 = svc.publish(
+        draft=d2, presented_hash=d2.content_hash, expected_version=1, idempotency_key="k2"
+    )
+    assert r2.revision == 2
+
+    replay = svc.publish(
+        draft=d1, presented_hash=d1.content_hash, expected_version=1, idempotency_key="k1"
+    )
+    assert (replay.plan_id, replay.revision, replay.created) == (
+        r1.plan_id,
+        r1.revision,
+        False,
+    ), "历史幂等结果必须仍可重放"
+
+
+# ---------------------------------------------------------------------------
+# B2-V §三：唯一的版本构造入口 + 指纹摆脱数据库 ID
+# ---------------------------------------------------------------------------
+
+
+def test_same_route_with_different_stage_ids_has_same_fingerprint() -> None:
+    """同一路由、不同 stage_id → **同一**结构指纹（指纹不得依赖 DB ID）。"""
+    d1 = _linked_draft()
+    d2 = _linked_draft(stages=_make_stages(2))  # 全新 stage_id，语义相同
+    assert {s.stage_id for s in d1.stages}.isdisjoint({s.stage_id for s in d2.stages})
+    r1 = revision_from_draft(d1, revision=1)
+    r2 = revision_from_draft(d2, revision=2)
+    assert r1.structure_fingerprint() == r2.structure_fingerprint()
+    assert d1.content_hash == d2.content_hash, "草案哈希同样不得依赖 DB ID"
+
+
+def test_build_revision_snapshot_remaps_all_references() -> None:
+    """唯一的转换入口必须把链接/资源/扩展全部重映射到新 stage_id。"""
+    draft = _linked_draft()
+    rev = revision_from_draft(draft, revision=1)
+    old_ids = {s.stage_id for s in draft.stages}
+    new_ids = {s.stage_id for s in rev.stages}
+    assert old_ids.isdisjoint(new_ids), "新版本必须生成独立 stage_id"
+    assert {x.stage_id for x in rev.unit_links} <= new_ids
+    assert {x.stage_id for x in rev.task_links} <= new_ids
+    assert {a.stage_id for a in rev.stage_resources} <= new_ids
+    assert {e.stage_id for e in rev.extensions} <= new_ids
+    # 稳定语义原样保留
+    assert [x.unit_id for x in rev.unit_links] == [x.unit_id for x in draft.unit_links]
+    assert [x.task_id for x in rev.task_links] == [x.task_id for x in draft.task_links]
+
+
+def test_consecutive_versions_have_distinct_stage_ids() -> None:
+    """连续两版不得复用 stage_id（``plan_stages.stage_id`` 是全局主键）。"""
+    draft = _linked_draft()
+    v1 = revision_from_draft(draft, revision=1)
+    v2 = revision_from_draft(draft, revision=2)
+    assert {s.stage_id for s in v1.stages}.isdisjoint({s.stage_id for s in v2.stages})
+    assert v1.structure_fingerprint() == v2.structure_fingerprint(), (
+        "两版结构相同 → 指纹相同（stage_id 不参与指纹）"
+    )
+
+
+def test_production_publish_uses_single_conversion_entry() -> None:
+    """生产发布路径必须经由 ``revision_from_draft``：发布版本的 stage_id 全新。"""
+    repo = FakePlanRepository()
+    draft = _linked_draft()
+    _service(repo).publish(
+        draft=draft, presented_hash=draft.content_hash, expected_version=0, idempotency_key="k1"
+    )
+    published = repo.current
+    assert published is not None
+    assert {s.stage_id for s in published.stages}.isdisjoint({s.stage_id for s in draft.stages})
+
+
+def test_only_mainline_resource_change_creates_new_version() -> None:
+    """仅主线资源变化 → 必须新建版本（指纹覆盖资源主线）。"""
+    repo = FakePlanRepository()
+    svc = _service(repo)
+    d1 = _linked_draft()
+    r1 = svc.publish(
+        draft=d1, presented_hash=d1.content_hash, expected_version=0, idempotency_key="k1"
+    )
+    d2 = _linked_draft(stages=d1.stages)
+    d2.draft_id = "drf_r2"
+    d2.stage_resources = (
+        StageResourceAssignment.create(
+            project_id=d2.project_id,
+            stage_id=d1.stages[0].stage_id,
+            role=StageResourceRole.PRIMARY,
+            source_ref="src_other",
+            section_refs=("sec_9",),
+        ),
+    )
+    r2 = svc.publish(
+        draft=d2, presented_hash=d2.content_hash, expected_version=r1.revision, idempotency_key="k2"
+    )
+    assert r2.created is True and r2.revision == 2
+
+
+def test_only_extension_change_creates_new_version() -> None:
+    """仅扩展知识变化 → 必须新建版本（指纹覆盖扩展）。"""
+    repo = FakePlanRepository()
+    svc = _service(repo)
+    d1 = _linked_draft()
+    r1 = svc.publish(
+        draft=d1, presented_hash=d1.content_hash, expected_version=0, idempotency_key="k1"
+    )
+    d2 = _linked_draft(stages=d1.stages)
+    d2.draft_id = "drf_e2"
+    d2.extensions = (
+        KnowledgeExtension.create(
+            project_id=d2.project_id,
+            stage_id=d1.stages[1].stage_id,
+            topic="完全不同的扩展主题",
+            guidance="换一个方向",
+        ),
+    )
+    r2 = svc.publish(
+        draft=d2, presented_hash=d2.content_hash, expected_version=r1.revision, idempotency_key="k2"
+    )
+    assert r2.created is True and r2.revision == 2
+
+
+# ---------------------------------------------------------------------------
+# B2-V §四：哈希覆盖全部用户可见字段
+# ---------------------------------------------------------------------------
+
+
+def _base_kwargs(**overrides: object) -> dict[str, object]:
+    draft = _linked_draft()
+    return {
+        "draft_id": "drf_h",
+        "project_id": draft.project_id,
+        "run_id": "run_1",
+        "goal_snapshot": draft.goal_snapshot,
+        "revision_candidate": 1,
+        "stages": draft.stages,
+        "unit_links": draft.unit_links,
+        "task_links": draft.task_links,
+        "task_knowledge_links": draft.task_knowledge_links,
+        "stage_resources": draft.stage_resources,
+        "extensions": draft.extensions,
+        "source_pack_key": draft.source_pack_key,
+        "source_pack_version": draft.source_pack_version,
+        **overrides,
+    }
+
+
+def test_hash_covers_fallback_search_terms() -> None:
+    """无核验链接时的搜索建议也是用户可见内容，必须进哈希。"""
+    stage_id = _linked_draft().stages[0].stage_id
+    base = PlanDraft(**_base_kwargs())  # type: ignore[arg-type]
+    with_terms = PlanDraft(
+        **_base_kwargs(
+            stage_resources=(
+                StageResourceAssignment.create(
+                    project_id="prj_1",
+                    stage_id=stage_id,
+                    role=StageResourceRole.PRIMARY,
+                    fallback_search_terms=("关系型数据库 入门",),
+                ),
+            )
+        )  # type: ignore[arg-type]
+    )
+    assert base.content_hash != with_terms.content_hash
+
+
+def test_hash_covers_extension_required_and_unit_id() -> None:
+    stage_id = _linked_draft().stages[1].stage_id
+    plain = PlanDraft(**_base_kwargs())  # type: ignore[arg-type]
+    flagged = PlanDraft(
+        **_base_kwargs(
+            extensions=(
+                KnowledgeExtension.create(
+                    project_id="prj_1",
+                    stage_id=stage_id,
+                    topic="SQLite/PostgreSQL/MySQL 认识与对比",
+                    concepts=("基本特点", "典型适用场景"),
+                    guidance="了解基本特点及典型适用场景",
+                    required=True,
+                    unit_id="unt_rag",
+                ),
+            )
+        )  # type: ignore[arg-type]
+    )
+    assert plain.content_hash != flagged.content_hash
+
+
+def test_hash_covers_task_knowledge_links() -> None:
+    base = PlanDraft(**_base_kwargs())  # type: ignore[arg-type]
+    linked = PlanDraft(
+        **_base_kwargs(
+            task_knowledge_links=(
+                PlanTaskKnowledgeLink.create(
+                    task_id="ptk_pdf", node_id="n_rag", role=TaskKnowledgeRole.SUPPORTING
+                ),
+            )
+        )  # type: ignore[arg-type]
+    )
+    assert base.content_hash != linked.content_hash
+
+
+def test_hash_covers_mainline_section_order() -> None:
+    """主线章节**顺序**变化必须改变哈希（顺序是用户可见语义）。"""
+    stage_id = _linked_draft().stages[0].stage_id
+
+    def _res(refs: tuple[str, ...]) -> StageResourceAssignment:
+        return StageResourceAssignment.create(
+            project_id="prj_1",
+            stage_id=stage_id,
+            role=StageResourceRole.PRIMARY,
+            source_ref="src_1",
+            section_refs=refs,
+        )
+
+    a = PlanDraft(**_base_kwargs(stage_resources=(_res(("sec_1", "sec_2")),)))  # type: ignore[arg-type]
+    b = PlanDraft(**_base_kwargs(stage_resources=(_res(("sec_2", "sec_1")),)))  # type: ignore[arg-type]
+    assert a.content_hash != b.content_hash
+
+
+def test_structure_fingerprint_and_draft_hash_share_semantics() -> None:
+    """结构指纹与草案哈希必须覆盖同一组结构字段（不会一个有一个没有）。"""
+    draft = _linked_draft()
+    rev = revision_from_draft(draft, revision=1)
+
+    def _mutate(d: PlanDraft) -> PlanDraft:
+        d.extensions = ()
+        return d
+
+    assert _mutate(_linked_draft(stages=draft.stages)).content_hash != draft.content_hash
+    assert (
+        revision_from_draft(_mutate(_linked_draft(stages=draft.stages)), revision=1)
+        .structure_fingerprint()
+        != rev.structure_fingerprint()
+    )
