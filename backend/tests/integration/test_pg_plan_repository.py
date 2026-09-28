@@ -84,7 +84,7 @@ def repo(migrated_db: PgTestDatabase) -> PgPlanRepository:
 def _clean(db: PgTestDatabase) -> None:
     with psycopg.connect(db.migrator_dsn, autocommit=True) as conn:
         conn.execute(
-            "TRUNCATE plan_publications, plan_drafts, plan_revisions, "
+            "TRUNCATE summary_attempts, plan_publications, plan_drafts, plan_revisions, "
             "knowledge_extensions, stage_resource_assignments, plan_stages, "
             "plan_unit_links, plan_task_links CASCADE"
         )
@@ -465,6 +465,38 @@ def test_repository_cannot_read_other_project(migrated_db: PgTestDatabase, repo:
 
 
 # ----------------------------------------------------------- save_draft 状态过滤
+
+
+def test_republish_preserves_historical_completion_records(
+    migrated_db: PgTestDatabase, repo: PgPlanRepository
+) -> None:
+    """重规划/重新发布**不得删除**历史完成记录（Goal §1「历史完成记录不丢失」）。"""
+    _clean(migrated_db)
+    ids = _catalog_ids(PROJECT)
+    with psycopg.connect(migrated_db.migrator_dsn, autocommit=True) as conn:
+        conn.execute(
+            "INSERT INTO summary_attempts"
+            "(attempt_id,project_id,unit_id,content,attempt_no,rubric_version) "
+            "VALUES ('sat_hist','p1',%s,'历史总结原文',1,1)",
+            (ids["unit_basic"],),
+        )
+
+    draft = _build_draft()
+    repo.save_draft(draft)
+    rev1 = _build_revision(draft, revision_no=1)
+    repo.publish_revision(
+        draft=draft, revision=rev1, superseded=None, idempotency_key="k1", body_fingerprint="bf1"
+    )
+    rev2 = _build_revision(draft, revision_no=2)
+    repo.publish_revision(
+        draft=draft, revision=rev2, superseded=rev1, idempotency_key="k2", body_fingerprint="bf2"
+    )
+
+    with psycopg.connect(migrated_db.migrator_dsn) as conn:
+        rows = conn.execute(
+            "SELECT attempt_id, content FROM summary_attempts WHERE project_id='p1'"
+        ).fetchall()
+    assert rows == [("sat_hist", "历史总结原文")], "重新发布不得删除历史完成记录"
 
 
 def test_save_draft_does_not_resurrect_cancelled(migrated_db: PgTestDatabase, repo: PgPlanRepository) -> None:

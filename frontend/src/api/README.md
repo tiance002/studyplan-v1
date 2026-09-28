@@ -13,4 +13,11 @@
 
 ## 当前状态
 
-B1 骨架：待 B2 产生业务路由后，`contracts/openapi.json` 才会包含业务路径。
+B2-C：`contracts/openapi.json` 已包含 `/api/v1` **业务接口模型**（`PlanView` /
+`PlanDraftView` / `RunView` / `StageResourceAssignmentView` /
+`KnowledgeExtensionView` / `PracticeTaskView` 等），可生成 typed client。
+
+具体业务**路由**由 B2-V 实现；在此之前前端可依据 `contracts/examples/v1_examples.json`
+（由 DTO 机械校验）先写 Mock，UI 确认后不应重做后端状态模型。
+
+重新生成：`bash scripts/export_openapi.sh && npm run gen:api`。

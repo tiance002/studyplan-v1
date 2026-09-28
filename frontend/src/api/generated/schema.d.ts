@@ -27,7 +27,583 @@ export interface paths {
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        /**
+         * ErrorBody
+         * @description 统一错误视图：``code/message/request_id/details``，不回显敏感输入。
+         */
+        ErrorBody: {
+            /**
+             * Code
+             * @description 稳定错误码，见 core.errors.ErrorCode
+             */
+            code: string;
+            /**
+             * Message
+             * @description 面向用户的可读信息
+             */
+            message: string;
+            /** Request Id */
+            request_id: string;
+            /** Details */
+            details?: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * PreferenceMode
+         * @description 资源形态偏好。
+         * @enum {string}
+         */
+        PreferenceMode: "text_first" | "video_first" | "mixed" | "both";
+        /**
+         * PrefsSnapshot
+         * @description 资源偏好快照（请求内联，非独立资源）。
+         */
+        PrefsSnapshot: {
+            /** @default mixed */
+            mode: components["schemas"]["PreferenceMode"];
+            /**
+             * Language
+             * @default zh
+             */
+            language: string;
+            /**
+             * Official Priority
+             * @default true
+             */
+            official_priority: boolean;
+            /**
+             * Pace
+             * @default normal
+             * @enum {string}
+             */
+            pace: "slow" | "normal" | "fast";
+        };
+        /**
+         * AiRunNextAction
+         * @description 前端据此渲染下一步按钮。前端**永不**看到图内部节点名。
+         * @enum {string}
+         */
+        AiRunNextAction: "none" | "review_draft" | "retry" | "reconcile" | "wait";
+        /**
+         * AiRunStatus
+         * @description 对外可授权的运行状态。
+         *
+         *     图跑成功 **不自动等于**知识已学会、任务已验收。
+         * @enum {string}
+         */
+        AiRunStatus: "queued" | "running" | "waiting_user" | "succeeded" | "failed" | "cancelled" | "reconciliation_required";
+        /**
+         * RunView
+         * @description 对外运行状态投影（**唯一**可授权给前端的运行视图）。
+         *
+         *     ``status`` 成功 **不自动等于** 知识已学会/任务已验收。
+         *     ``result_ref`` 是不透明引用；前端不得解析其内部结构。
+         */
+        RunView: {
+            /** Run Id */
+            run_id: string;
+            status: components["schemas"]["AiRunStatus"];
+            next_action: components["schemas"]["AiRunNextAction"];
+            /**
+             * Version
+             * @description 乐观并发版本号
+             */
+            version: number;
+            /**
+             * Result Ref
+             * @default null
+             */
+            result_ref: string | null;
+            /** @default null */
+            error: components["schemas"]["ErrorBody"] | null;
+        };
+        /** PlanGenerateRequest */
+        PlanGenerateRequest: {
+            /** Goal */
+            goal: string;
+            prefs_snapshot?: components["schemas"]["PrefsSnapshot"];
+        };
+        /**
+         * PlanGenerateResponse
+         * @description 202 响应：只返回运行句柄，不返回草案内容。
+         */
+        PlanGenerateResponse: {
+            /** Run Id */
+            run_id: string;
+            /** Status Url */
+            status_url: string;
+        };
+        /**
+         * OutlineSectionKind
+         * @description 纲要分节类型。
+         * @enum {string}
+         */
+        OutlineSectionKind: "foundation" | "core" | "practice" | "advanced";
+        /**
+         * StageDetail
+         * @description 阶段详情（前端「阶段导航」直接消费）。
+         */
+        StageDetail: {
+            /** Stage Id */
+            stage_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            section_kind: components["schemas"]["OutlineSectionKind"];
+            /** Order Index */
+            order_index: number;
+            /**
+             * Objective
+             * @default
+             */
+            objective: string;
+        };
+        /**
+         * OrderedSection
+         * @description 主线资源的**有序章节**（保留作者原有章节顺序）。
+         */
+        OrderedSection: {
+            /** Section Id */
+            section_id: string;
+            /** Order Index */
+            order_index: number;
+            /** Title */
+            title: string;
+            /** Url */
+            url: string;
+            /**
+             * Anchor
+             * @default
+             */
+            anchor: string;
+        };
+        /**
+         * StageResourceRole
+         * @description 阶段与资源的关系角色（设计 §2.2）。
+         *
+         *     每阶段默认一条 ``PRIMARY`` 主线；``SUPPLEMENT`` 补充前置，
+         *     ``REFERENCE`` 为对照/延伸。**不计算章节重叠率或覆盖率。**
+         * @enum {string}
+         */
+        StageResourceRole: "primary" | "supplement" | "reference";
+        /**
+         * StageResourceAssignmentView
+         * @description 阶段 → 资源分配。``role=primary`` 表示该阶段主线。
+         *
+         *     ``ordered_sections`` 保持原始顺序；无核验链接时用
+         *     ``fallback_search_terms`` 给出搜索建议，**绝不编造 URL**。
+         */
+        StageResourceAssignmentView: {
+            /** Assignment Id */
+            assignment_id: string;
+            /** Stage Id */
+            stage_id: string;
+            role: components["schemas"]["StageResourceRole"];
+            /**
+             * Creator
+             * @description 主线作者/机构
+             * @default
+             */
+            creator: string;
+            /**
+             * Source Ref
+             * @description 公共资源来源 source_id
+             * @default
+             */
+            source_ref: string;
+            /**
+             * Source Version
+             * @default 0
+             */
+            source_version: number;
+            /** Ordered Sections */
+            ordered_sections?: components["schemas"]["OrderedSection"][];
+            /** Fallback Search Terms */
+            fallback_search_terms?: string[];
+        };
+        /**
+         * KnowledgeExtensionView
+         * @description 阶段预置扩展知识（默认 1–2 项，**可选**，不强制完成）。
+         */
+        KnowledgeExtensionView: {
+            /** Extension Id */
+            extension_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Topic */
+            topic: string;
+            /** Concepts */
+            concepts?: string[];
+            /**
+             * Guidance
+             * @default
+             */
+            guidance: string;
+            /**
+             * Links
+             * @description 已核验链接（可能为空）
+             */
+            links?: string[];
+            /**
+             * Search Hints
+             * @description 无核验链接时的搜索建议
+             */
+            search_hints?: string[];
+            /**
+             * Thinking Prompts
+             * @description 工程思考提示
+             */
+            thinking_prompts?: string[];
+            /**
+             * Required
+             * @description V1 恒为可选语义
+             * @default false
+             */
+            required: boolean;
+            /**
+             * Order Index
+             * @default 0
+             */
+            order_index: number;
+        };
+        /** UnitLinkView */
+        UnitLinkView: {
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Order Index */
+            order_index: number;
+        };
+        /** TaskLinkView */
+        TaskLinkView: {
+            /** Stage Id */
+            stage_id: string;
+            /** Task Id */
+            task_id: string;
+            /** Order Index */
+            order_index: number;
+        };
+        /**
+         * PlanSnapshot
+         * @description **完整版本快照**：阶段 + 单元/任务链接 + 主线资源 + 扩展知识。
+         *
+         *     草案视图（``PlanDraftView``）与已发布视图（``PlanView``）共用本结构，
+         *     保证「用户确认的结构」与「发布的结构」字段一致。
+         */
+        PlanSnapshot: {
+            /** Project Id */
+            project_id: string;
+            /** Revision */
+            revision: number;
+            /** Goal Snapshot */
+            goal_snapshot: string;
+            /** Stages */
+            stages?: components["schemas"]["StageDetail"][];
+            /** Unit Links */
+            unit_links?: components["schemas"]["UnitLinkView"][];
+            /** Task Links */
+            task_links?: components["schemas"]["TaskLinkView"][];
+            /** Stage Resources */
+            stage_resources?: components["schemas"]["StageResourceAssignmentView"][];
+            /** Extensions */
+            extensions?: components["schemas"]["KnowledgeExtensionView"][];
+            /**
+             * Source Pack Key
+             * @default
+             */
+            source_pack_key: string;
+            /**
+             * Source Pack Version
+             * @default 0
+             */
+            source_pack_version: number;
+        };
+        /**
+         * PlanDraftStatus
+         * @description 草案状态。草案永不可直接覆盖正式路线。
+         * @enum {string}
+         */
+        PlanDraftStatus: "pending" | "awaiting_approval" | "approved" | "rejected" | "cancelled" | "failed_validation";
+        /**
+         * PlanDraftView
+         * @description 草案视图。``draft_hash`` 必须原样回传用于确认校验。
+         */
+        PlanDraftView: {
+            /** Project Id */
+            project_id: string;
+            /** Revision */
+            revision: number;
+            /** Goal Snapshot */
+            goal_snapshot: string;
+            /** Stages */
+            stages?: components["schemas"]["StageDetail"][];
+            /** Unit Links */
+            unit_links?: components["schemas"]["UnitLinkView"][];
+            /** Task Links */
+            task_links?: components["schemas"]["TaskLinkView"][];
+            /** Stage Resources */
+            stage_resources?: components["schemas"]["StageResourceAssignmentView"][];
+            /** Extensions */
+            extensions?: components["schemas"]["KnowledgeExtensionView"][];
+            /**
+             * Source Pack Key
+             * @default
+             */
+            source_pack_key: string;
+            /**
+             * Source Pack Version
+             * @default 0
+             */
+            source_pack_version: number;
+            /** Draft Id */
+            draft_id: string;
+            status: components["schemas"]["PlanDraftStatus"];
+            /**
+             * Draft Hash
+             * @description 确认时原样回传，防确认期间被改写
+             */
+            draft_hash: string;
+            /** Version */
+            version: number;
+            /** Validation Warnings */
+            validation_warnings?: string[];
+        };
+        /**
+         * PlanRevisionStatus
+         * @description 计划版本状态。只有 APPROVED/CURRENT 的版本是正式路线。
+         * @enum {string}
+         */
+        PlanRevisionStatus: "draft" | "approved" | "superseded" | "cancelled";
+        /**
+         * PlanView
+         * @description 已确认路线视图（当前版本或历史版本）。
+         */
+        PlanView: {
+            /** Project Id */
+            project_id: string;
+            /** Revision */
+            revision: number;
+            /** Goal Snapshot */
+            goal_snapshot: string;
+            /** Stages */
+            stages?: components["schemas"]["StageDetail"][];
+            /** Unit Links */
+            unit_links?: components["schemas"]["UnitLinkView"][];
+            /** Task Links */
+            task_links?: components["schemas"]["TaskLinkView"][];
+            /** Stage Resources */
+            stage_resources?: components["schemas"]["StageResourceAssignmentView"][];
+            /** Extensions */
+            extensions?: components["schemas"]["KnowledgeExtensionView"][];
+            /**
+             * Source Pack Key
+             * @default
+             */
+            source_pack_key: string;
+            /**
+             * Source Pack Version
+             * @default 0
+             */
+            source_pack_version: number;
+            /** Plan Id */
+            plan_id: string;
+            status: components["schemas"]["PlanRevisionStatus"];
+            /** Version */
+            version: number;
+            /**
+             * Approved At
+             * @description UTC ISO8601
+             * @default null
+             */
+            approved_at: string | null;
+        };
+        /**
+         * DraftDecision
+         * @description 等待用户时的三种决定。
+         * @enum {string}
+         */
+        DraftDecision: "approve" | "edit" | "cancel";
+        /**
+         * DraftDecisionRequest
+         * @description approve / edit / cancel。**非法或缺失决定一律失败，绝不默认 approve。**
+         */
+        DraftDecisionRequest: {
+            decision: components["schemas"]["DraftDecision"];
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Draft Hash
+             * @default
+             */
+            draft_hash: string;
+            /**
+             * Idempotency Key
+             * @default
+             */
+            idempotency_key: string;
+            /**
+             * Edited Stages
+             * @description decision=edit 时必填（完整结构，不允许只回 draft_ref）
+             * @default null
+             */
+            edited_stages: components["schemas"]["StageDetail"][] | null;
+        };
+        /**
+         * KnowledgeNodeType
+         * @description 知识节点粒度。
+         * @enum {string}
+         */
+        KnowledgeNodeType: "concept" | "skill" | "tool" | "pattern" | "domain";
+        /**
+         * NodeView
+         * @description 知识卡片。``source_status`` 如实区分 AI 草稿与已验证来源。
+         */
+        NodeView: {
+            /** Node Id */
+            node_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            node_type: components["schemas"]["KnowledgeNodeType"];
+            /** Objectives */
+            objectives?: string[];
+            /** Source Status */
+            source_status: string;
+        };
+        /**
+         * UnitProgress
+         * @description 学习单元的进度状态。
+         *
+         *     注意：``SKIPPED`` ≠ ``COMPLETED``，二者都不代表掌握。
+         * @enum {string}
+         */
+        UnitProgress: "not_started" | "in_progress" | "completed" | "skipped";
+        /** UnitView */
+        UnitView: {
+            /** Unit Id */
+            unit_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Objectives */
+            objectives?: string[];
+            /** Rubric Version */
+            rubric_version: number;
+            /** @default not_started */
+            progress: components["schemas"]["UnitProgress"];
+        };
+        /** ProgressPatchRequest */
+        ProgressPatchRequest: {
+            status: components["schemas"]["UnitProgress"];
+            /** Expected Version */
+            expected_version: number;
+        };
+        /**
+         * PreferenceScope
+         * @description 偏好优先级：节点 > 单元 > 学习空间默认 > 系统默认。
+         * @enum {string}
+         */
+        PreferenceScope: "system" | "project" | "unit" | "node";
+        /** PreferenceView */
+        PreferenceView: {
+            scope: components["schemas"]["PreferenceScope"];
+            /** Scope Ref */
+            scope_ref: string;
+            mode: components["schemas"]["PreferenceMode"];
+            /** Language */
+            language: string;
+            /** Official Priority */
+            official_priority: boolean;
+            /** Pace */
+            pace: string;
+            /** Version */
+            version: number;
+        };
+        /** PreferenceUpdateRequest */
+        PreferenceUpdateRequest: {
+            scope: components["schemas"]["PreferenceScope"];
+            /** Scope Ref */
+            scope_ref: string;
+            mode: components["schemas"]["PreferenceMode"];
+            /**
+             * Language
+             * @default zh
+             */
+            language: string;
+            /**
+             * Official Priority
+             * @default true
+             */
+            official_priority: boolean;
+            /**
+             * Pace
+             * @default normal
+             * @enum {string}
+             */
+            pace: "slow" | "normal" | "fast";
+            /**
+             * Expected Version
+             * @default 0
+             */
+            expected_version: number;
+        };
+        /**
+         * PracticeTaskStatus
+         * @description 实践任务状态。
+         *
+         *     ``PROMPT_REVIEWED`` 只表示实现思路通过评审，
+         *     **不等于**真实功能已被验收。
+         * @enum {string}
+         */
+        PracticeTaskStatus: "pending" | "designing" | "prompt_reviewed" | "implementing" | "awaiting_evidence" | "accepted" | "skipped";
+        /**
+         * PracticeTaskView
+         * @description 实践任务。``thinking_prompts`` 在实践工作台重点展示。
+         *
+         *     ``acceptance`` 必填：没有「怎样算完成」的任务无法验收。
+         */
+        PracticeTaskView: {
+            /** Task Id */
+            task_id: string;
+            /** Practice Project Id */
+            practice_project_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Goal */
+            goal: string;
+            /** In Scope */
+            in_scope?: string[];
+            /** Out Scope */
+            out_scope?: string[];
+            /** Acceptance */
+            acceptance: string[];
+            status: components["schemas"]["PracticeTaskStatus"];
+            /** Thinking Prompts */
+            thinking_prompts?: string[];
+        };
+        /** SummaryCreateRequest */
+        SummaryCreateRequest: {
+            /** Content */
+            content: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** PromptRevisionCreateRequest */
+        PromptRevisionCreateRequest: {
+            /** User Draft */
+            user_draft: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;

@@ -30,5 +30,1229 @@
         }
       }
     }
+  },
+  "components": {
+    "schemas": {
+      "ErrorBody": {
+        "additionalProperties": false,
+        "description": "统一错误视图：``code/message/request_id/details``，不回显敏感输入。",
+        "properties": {
+          "code": {
+            "description": "稳定错误码，见 core.errors.ErrorCode",
+            "maxLength": 64,
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "description": "面向用户的可读信息",
+            "maxLength": 500,
+            "title": "Message",
+            "type": "string"
+          },
+          "request_id": {
+            "maxLength": 64,
+            "title": "Request Id",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "request_id"
+        ],
+        "title": "ErrorBody",
+        "type": "object"
+      },
+      "PreferenceMode": {
+        "description": "资源形态偏好。",
+        "enum": [
+          "text_first",
+          "video_first",
+          "mixed",
+          "both"
+        ],
+        "title": "PreferenceMode",
+        "type": "string"
+      },
+      "PrefsSnapshot": {
+        "additionalProperties": false,
+        "description": "资源偏好快照（请求内联，非独立资源）。",
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/PreferenceMode",
+            "default": "mixed"
+          },
+          "language": {
+            "default": "zh",
+            "maxLength": 16,
+            "title": "Language",
+            "type": "string"
+          },
+          "official_priority": {
+            "default": true,
+            "title": "Official Priority",
+            "type": "boolean"
+          },
+          "pace": {
+            "default": "normal",
+            "enum": [
+              "slow",
+              "normal",
+              "fast"
+            ],
+            "title": "Pace",
+            "type": "string"
+          }
+        },
+        "title": "PrefsSnapshot",
+        "type": "object"
+      },
+      "AiRunNextAction": {
+        "description": "前端据此渲染下一步按钮。前端**永不**看到图内部节点名。",
+        "enum": [
+          "none",
+          "review_draft",
+          "retry",
+          "reconcile",
+          "wait"
+        ],
+        "title": "AiRunNextAction",
+        "type": "string"
+      },
+      "AiRunStatus": {
+        "description": "对外可授权的运行状态。\n\n图跑成功 **不自动等于**知识已学会、任务已验收。",
+        "enum": [
+          "queued",
+          "running",
+          "waiting_user",
+          "succeeded",
+          "failed",
+          "cancelled",
+          "reconciliation_required"
+        ],
+        "title": "AiRunStatus",
+        "type": "string"
+      },
+      "RunView": {
+        "description": "对外运行状态投影（**唯一**可授权给前端的运行视图）。\n\n``status`` 成功 **不自动等于** 知识已学会/任务已验收。\n``result_ref`` 是不透明引用；前端不得解析其内部结构。",
+        "properties": {
+          "run_id": {
+            "maxLength": 64,
+            "title": "Run Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AiRunStatus"
+          },
+          "next_action": {
+            "$ref": "#/components/schemas/AiRunNextAction"
+          },
+          "version": {
+            "description": "乐观并发版本号",
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "result_ref": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Result Ref"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ErrorBody"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "required": [
+          "run_id",
+          "status",
+          "next_action",
+          "version"
+        ],
+        "title": "RunView",
+        "type": "object"
+      },
+      "PlanGenerateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "goal": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Goal",
+            "type": "string"
+          },
+          "prefs_snapshot": {
+            "$ref": "#/components/schemas/PrefsSnapshot"
+          }
+        },
+        "required": [
+          "goal"
+        ],
+        "title": "PlanGenerateRequest",
+        "type": "object"
+      },
+      "PlanGenerateResponse": {
+        "description": "202 响应：只返回运行句柄，不返回草案内容。",
+        "properties": {
+          "run_id": {
+            "maxLength": 64,
+            "title": "Run Id",
+            "type": "string"
+          },
+          "status_url": {
+            "maxLength": 200,
+            "title": "Status Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "status_url"
+        ],
+        "title": "PlanGenerateResponse",
+        "type": "object"
+      },
+      "OutlineSectionKind": {
+        "description": "纲要分节类型。",
+        "enum": [
+          "foundation",
+          "core",
+          "practice",
+          "advanced"
+        ],
+        "title": "OutlineSectionKind",
+        "type": "string"
+      },
+      "StageDetail": {
+        "description": "阶段详情（前端「阶段导航」直接消费）。",
+        "properties": {
+          "stage_id": {
+            "maxLength": 64,
+            "title": "Stage Id",
+            "type": "string"
+          },
+          "stable_key": {
+            "maxLength": 128,
+            "title": "Stable Key",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "title": "Title",
+            "type": "string"
+          },
+          "section_kind": {
+            "$ref": "#/components/schemas/OutlineSectionKind"
+          },
+          "order_index": {
+            "minimum": 0,
+            "title": "Order Index",
+            "type": "integer"
+          },
+          "objective": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Objective",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stage_id",
+          "stable_key",
+          "title",
+          "section_kind",
+          "order_index"
+        ],
+        "title": "StageDetail",
+        "type": "object"
+      },
+      "OrderedSection": {
+        "description": "主线资源的**有序章节**（保留作者原有章节顺序）。",
+        "properties": {
+          "section_id": {
+            "maxLength": 64,
+            "title": "Section Id",
+            "type": "string"
+          },
+          "order_index": {
+            "minimum": 0,
+            "title": "Order Index",
+            "type": "integer"
+          },
+          "title": {
+            "maxLength": 300,
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 2000,
+            "title": "Url",
+            "type": "string"
+          },
+          "anchor": {
+            "default": "",
+            "maxLength": 200,
+            "title": "Anchor",
+            "type": "string"
+          }
+        },
+        "required": [
+          "section_id",
+          "order_index",
+          "title",
+          "url"
+        ],
+        "title": "OrderedSection",
+        "type": "object"
+      },
+      "StageResourceRole": {
+        "description": "阶段与资源的关系角色（设计 §2.2）。\n\n每阶段默认一条 ``PRIMARY`` 主线；``SUPPLEMENT`` 补充前置，\n``REFERENCE`` 为对照/延伸。**不计算章节重叠率或覆盖率。**",
+        "enum": [
+          "primary",
+          "supplement",
+          "reference"
+        ],
+        "title": "StageResourceRole",
+        "type": "string"
+      },
+      "StageResourceAssignmentView": {
+        "description": "阶段 → 资源分配。``role=primary`` 表示该阶段主线。\n\n``ordered_sections`` 保持原始顺序；无核验链接时用\n``fallback_search_terms`` 给出搜索建议，**绝不编造 URL**。",
+        "properties": {
+          "assignment_id": {
+            "maxLength": 64,
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "stage_id": {
+            "maxLength": 64,
+            "title": "Stage Id",
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/StageResourceRole"
+          },
+          "creator": {
+            "default": "",
+            "description": "主线作者/机构",
+            "maxLength": 200,
+            "title": "Creator",
+            "type": "string"
+          },
+          "source_ref": {
+            "default": "",
+            "description": "公共资源来源 source_id",
+            "maxLength": 64,
+            "title": "Source Ref",
+            "type": "string"
+          },
+          "source_version": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Source Version",
+            "type": "integer"
+          },
+          "ordered_sections": {
+            "items": {
+              "$ref": "#/components/schemas/OrderedSection"
+            },
+            "title": "Ordered Sections",
+            "type": "array"
+          },
+          "fallback_search_terms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Fallback Search Terms",
+            "type": "array"
+          }
+        },
+        "required": [
+          "assignment_id",
+          "stage_id",
+          "role"
+        ],
+        "title": "StageResourceAssignmentView",
+        "type": "object"
+      },
+      "KnowledgeExtensionView": {
+        "description": "阶段预置扩展知识（默认 1–2 项，**可选**，不强制完成）。",
+        "properties": {
+          "extension_id": {
+            "maxLength": 64,
+            "title": "Extension Id",
+            "type": "string"
+          },
+          "stage_id": {
+            "maxLength": 64,
+            "title": "Stage Id",
+            "type": "string"
+          },
+          "topic": {
+            "maxLength": 200,
+            "title": "Topic",
+            "type": "string"
+          },
+          "concepts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Concepts",
+            "type": "array"
+          },
+          "guidance": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Guidance",
+            "type": "string"
+          },
+          "links": {
+            "description": "已核验链接（可能为空）",
+            "items": {
+              "type": "string"
+            },
+            "title": "Links",
+            "type": "array"
+          },
+          "search_hints": {
+            "description": "无核验链接时的搜索建议",
+            "items": {
+              "type": "string"
+            },
+            "title": "Search Hints",
+            "type": "array"
+          },
+          "thinking_prompts": {
+            "description": "工程思考提示",
+            "items": {
+              "type": "string"
+            },
+            "title": "Thinking Prompts",
+            "type": "array"
+          },
+          "required": {
+            "default": false,
+            "description": "V1 恒为可选语义",
+            "title": "Required",
+            "type": "boolean"
+          },
+          "order_index": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Order Index",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "extension_id",
+          "stage_id",
+          "topic"
+        ],
+        "title": "KnowledgeExtensionView",
+        "type": "object"
+      },
+      "UnitLinkView": {
+        "properties": {
+          "stage_id": {
+            "maxLength": 64,
+            "title": "Stage Id",
+            "type": "string"
+          },
+          "unit_id": {
+            "maxLength": 64,
+            "title": "Unit Id",
+            "type": "string"
+          },
+          "order_index": {
+            "minimum": 0,
+            "title": "Order Index",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "stage_id",
+          "unit_id",
+          "order_index"
+        ],
+        "title": "UnitLinkView",
+        "type": "object"
+      },
+      "TaskLinkView": {
+        "properties": {
+          "stage_id": {
+            "maxLength": 64,
+            "title": "Stage Id",
+            "type": "string"
+          },
+          "task_id": {
+            "maxLength": 64,
+            "title": "Task Id",
+            "type": "string"
+          },
+          "order_index": {
+            "minimum": 0,
+            "title": "Order Index",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "stage_id",
+          "task_id",
+          "order_index"
+        ],
+        "title": "TaskLinkView",
+        "type": "object"
+      },
+      "PlanSnapshot": {
+        "description": "**完整版本快照**：阶段 + 单元/任务链接 + 主线资源 + 扩展知识。\n\n草案视图（``PlanDraftView``）与已发布视图（``PlanView``）共用本结构，\n保证「用户确认的结构」与「发布的结构」字段一致。",
+        "properties": {
+          "project_id": {
+            "maxLength": 64,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "goal_snapshot": {
+            "maxLength": 2000,
+            "title": "Goal Snapshot",
+            "type": "string"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/StageDetail"
+            },
+            "title": "Stages",
+            "type": "array"
+          },
+          "unit_links": {
+            "items": {
+              "$ref": "#/components/schemas/UnitLinkView"
+            },
+            "title": "Unit Links",
+            "type": "array"
+          },
+          "task_links": {
+            "items": {
+              "$ref": "#/components/schemas/TaskLinkView"
+            },
+            "title": "Task Links",
+            "type": "array"
+          },
+          "stage_resources": {
+            "items": {
+              "$ref": "#/components/schemas/StageResourceAssignmentView"
+            },
+            "title": "Stage Resources",
+            "type": "array"
+          },
+          "extensions": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeExtensionView"
+            },
+            "title": "Extensions",
+            "type": "array"
+          },
+          "source_pack_key": {
+            "default": "",
+            "maxLength": 128,
+            "title": "Source Pack Key",
+            "type": "string"
+          },
+          "source_pack_version": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Source Pack Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "project_id",
+          "revision",
+          "goal_snapshot"
+        ],
+        "title": "PlanSnapshot",
+        "type": "object"
+      },
+      "PlanDraftStatus": {
+        "description": "草案状态。草案永不可直接覆盖正式路线。",
+        "enum": [
+          "pending",
+          "awaiting_approval",
+          "approved",
+          "rejected",
+          "cancelled",
+          "failed_validation"
+        ],
+        "title": "PlanDraftStatus",
+        "type": "string"
+      },
+      "PlanDraftView": {
+        "description": "草案视图。``draft_hash`` 必须原样回传用于确认校验。",
+        "properties": {
+          "project_id": {
+            "maxLength": 64,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "goal_snapshot": {
+            "maxLength": 2000,
+            "title": "Goal Snapshot",
+            "type": "string"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/StageDetail"
+            },
+            "title": "Stages",
+            "type": "array"
+          },
+          "unit_links": {
+            "items": {
+              "$ref": "#/components/schemas/UnitLinkView"
+            },
+            "title": "Unit Links",
+            "type": "array"
+          },
+          "task_links": {
+            "items": {
+              "$ref": "#/components/schemas/TaskLinkView"
+            },
+            "title": "Task Links",
+            "type": "array"
+          },
+          "stage_resources": {
+            "items": {
+              "$ref": "#/components/schemas/StageResourceAssignmentView"
+            },
+            "title": "Stage Resources",
+            "type": "array"
+          },
+          "extensions": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeExtensionView"
+            },
+            "title": "Extensions",
+            "type": "array"
+          },
+          "source_pack_key": {
+            "default": "",
+            "maxLength": 128,
+            "title": "Source Pack Key",
+            "type": "string"
+          },
+          "source_pack_version": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Source Pack Version",
+            "type": "integer"
+          },
+          "draft_id": {
+            "maxLength": 64,
+            "title": "Draft Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PlanDraftStatus"
+          },
+          "draft_hash": {
+            "description": "确认时原样回传，防确认期间被改写",
+            "maxLength": 128,
+            "title": "Draft Hash",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 0,
+            "title": "Version",
+            "type": "integer"
+          },
+          "validation_warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Validation Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "project_id",
+          "revision",
+          "goal_snapshot",
+          "draft_id",
+          "status",
+          "draft_hash",
+          "version"
+        ],
+        "title": "PlanDraftView",
+        "type": "object"
+      },
+      "PlanRevisionStatus": {
+        "description": "计划版本状态。只有 APPROVED/CURRENT 的版本是正式路线。",
+        "enum": [
+          "draft",
+          "approved",
+          "superseded",
+          "cancelled"
+        ],
+        "title": "PlanRevisionStatus",
+        "type": "string"
+      },
+      "PlanView": {
+        "description": "已确认路线视图（当前版本或历史版本）。",
+        "properties": {
+          "project_id": {
+            "maxLength": 64,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "revision": {
+            "minimum": 1,
+            "title": "Revision",
+            "type": "integer"
+          },
+          "goal_snapshot": {
+            "maxLength": 2000,
+            "title": "Goal Snapshot",
+            "type": "string"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/StageDetail"
+            },
+            "title": "Stages",
+            "type": "array"
+          },
+          "unit_links": {
+            "items": {
+              "$ref": "#/components/schemas/UnitLinkView"
+            },
+            "title": "Unit Links",
+            "type": "array"
+          },
+          "task_links": {
+            "items": {
+              "$ref": "#/components/schemas/TaskLinkView"
+            },
+            "title": "Task Links",
+            "type": "array"
+          },
+          "stage_resources": {
+            "items": {
+              "$ref": "#/components/schemas/StageResourceAssignmentView"
+            },
+            "title": "Stage Resources",
+            "type": "array"
+          },
+          "extensions": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeExtensionView"
+            },
+            "title": "Extensions",
+            "type": "array"
+          },
+          "source_pack_key": {
+            "default": "",
+            "maxLength": 128,
+            "title": "Source Pack Key",
+            "type": "string"
+          },
+          "source_pack_version": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Source Pack Version",
+            "type": "integer"
+          },
+          "plan_id": {
+            "maxLength": 64,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PlanRevisionStatus"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "UTC ISO8601",
+            "title": "Approved At"
+          }
+        },
+        "required": [
+          "project_id",
+          "revision",
+          "goal_snapshot",
+          "plan_id",
+          "status",
+          "version"
+        ],
+        "title": "PlanView",
+        "type": "object"
+      },
+      "DraftDecision": {
+        "description": "等待用户时的三种决定。",
+        "enum": [
+          "approve",
+          "edit",
+          "cancel"
+        ],
+        "title": "DraftDecision",
+        "type": "string"
+      },
+      "DraftDecisionRequest": {
+        "additionalProperties": false,
+        "description": "approve / edit / cancel。**非法或缺失决定一律失败，绝不默认 approve。**",
+        "properties": {
+          "decision": {
+            "$ref": "#/components/schemas/DraftDecision"
+          },
+          "expected_version": {
+            "minimum": 0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "draft_hash": {
+            "default": "",
+            "maxLength": 128,
+            "title": "Draft Hash",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "default": "",
+            "maxLength": 200,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "edited_stages": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/StageDetail"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "decision=edit 时必填（完整结构，不允许只回 draft_ref）",
+            "title": "Edited Stages"
+          }
+        },
+        "required": [
+          "decision",
+          "expected_version"
+        ],
+        "title": "DraftDecisionRequest",
+        "type": "object"
+      },
+      "KnowledgeNodeType": {
+        "description": "知识节点粒度。",
+        "enum": [
+          "concept",
+          "skill",
+          "tool",
+          "pattern",
+          "domain"
+        ],
+        "title": "KnowledgeNodeType",
+        "type": "string"
+      },
+      "NodeView": {
+        "description": "知识卡片。``source_status`` 如实区分 AI 草稿与已验证来源。",
+        "properties": {
+          "node_id": {
+            "maxLength": 64,
+            "title": "Node Id",
+            "type": "string"
+          },
+          "stable_key": {
+            "maxLength": 128,
+            "title": "Stable Key",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "title": "Title",
+            "type": "string"
+          },
+          "node_type": {
+            "$ref": "#/components/schemas/KnowledgeNodeType"
+          },
+          "objectives": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Objectives",
+            "type": "array"
+          },
+          "source_status": {
+            "maxLength": 32,
+            "title": "Source Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "node_id",
+          "stable_key",
+          "title",
+          "node_type",
+          "source_status"
+        ],
+        "title": "NodeView",
+        "type": "object"
+      },
+      "UnitProgress": {
+        "description": "学习单元的进度状态。\n\n注意：``SKIPPED`` ≠ ``COMPLETED``，二者都不代表掌握。",
+        "enum": [
+          "not_started",
+          "in_progress",
+          "completed",
+          "skipped"
+        ],
+        "title": "UnitProgress",
+        "type": "string"
+      },
+      "UnitView": {
+        "properties": {
+          "unit_id": {
+            "maxLength": 64,
+            "title": "Unit Id",
+            "type": "string"
+          },
+          "stable_key": {
+            "maxLength": 128,
+            "title": "Stable Key",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "title": "Title",
+            "type": "string"
+          },
+          "objectives": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Objectives",
+            "type": "array"
+          },
+          "rubric_version": {
+            "minimum": 1,
+            "title": "Rubric Version",
+            "type": "integer"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/UnitProgress",
+            "default": "not_started"
+          }
+        },
+        "required": [
+          "unit_id",
+          "stable_key",
+          "title",
+          "rubric_version"
+        ],
+        "title": "UnitView",
+        "type": "object"
+      },
+      "ProgressPatchRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/UnitProgress"
+          },
+          "expected_version": {
+            "minimum": 1,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "status",
+          "expected_version"
+        ],
+        "title": "ProgressPatchRequest",
+        "type": "object"
+      },
+      "PreferenceScope": {
+        "description": "偏好优先级：节点 > 单元 > 学习空间默认 > 系统默认。",
+        "enum": [
+          "system",
+          "project",
+          "unit",
+          "node"
+        ],
+        "title": "PreferenceScope",
+        "type": "string"
+      },
+      "PreferenceView": {
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/PreferenceScope"
+          },
+          "scope_ref": {
+            "maxLength": 64,
+            "title": "Scope Ref",
+            "type": "string"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/PreferenceMode"
+          },
+          "language": {
+            "maxLength": 16,
+            "title": "Language",
+            "type": "string"
+          },
+          "official_priority": {
+            "title": "Official Priority",
+            "type": "boolean"
+          },
+          "pace": {
+            "maxLength": 16,
+            "title": "Pace",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scope",
+          "scope_ref",
+          "mode",
+          "language",
+          "official_priority",
+          "pace",
+          "version"
+        ],
+        "title": "PreferenceView",
+        "type": "object"
+      },
+      "PreferenceUpdateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/PreferenceScope"
+          },
+          "scope_ref": {
+            "maxLength": 64,
+            "title": "Scope Ref",
+            "type": "string"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/PreferenceMode"
+          },
+          "language": {
+            "default": "zh",
+            "maxLength": 16,
+            "title": "Language",
+            "type": "string"
+          },
+          "official_priority": {
+            "default": true,
+            "title": "Official Priority",
+            "type": "boolean"
+          },
+          "pace": {
+            "default": "normal",
+            "enum": [
+              "slow",
+              "normal",
+              "fast"
+            ],
+            "title": "Pace",
+            "type": "string"
+          },
+          "expected_version": {
+            "default": 0,
+            "minimum": 0,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "scope",
+          "scope_ref",
+          "mode"
+        ],
+        "title": "PreferenceUpdateRequest",
+        "type": "object"
+      },
+      "PracticeTaskStatus": {
+        "description": "实践任务状态。\n\n``PROMPT_REVIEWED`` 只表示实现思路通过评审，\n**不等于**真实功能已被验收。",
+        "enum": [
+          "pending",
+          "designing",
+          "prompt_reviewed",
+          "implementing",
+          "awaiting_evidence",
+          "accepted",
+          "skipped"
+        ],
+        "title": "PracticeTaskStatus",
+        "type": "string"
+      },
+      "PracticeTaskView": {
+        "description": "实践任务。``thinking_prompts`` 在实践工作台重点展示。\n\n``acceptance`` 必填：没有「怎样算完成」的任务无法验收。",
+        "properties": {
+          "task_id": {
+            "maxLength": 64,
+            "title": "Task Id",
+            "type": "string"
+          },
+          "practice_project_id": {
+            "maxLength": 64,
+            "title": "Practice Project Id",
+            "type": "string"
+          },
+          "stable_key": {
+            "maxLength": 128,
+            "title": "Stable Key",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "title": "Title",
+            "type": "string"
+          },
+          "goal": {
+            "maxLength": 2000,
+            "title": "Goal",
+            "type": "string"
+          },
+          "in_scope": {
+            "items": {
+              "type": "string"
+            },
+            "title": "In Scope",
+            "type": "array"
+          },
+          "out_scope": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Out Scope",
+            "type": "array"
+          },
+          "acceptance": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Acceptance",
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PracticeTaskStatus"
+          },
+          "thinking_prompts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Thinking Prompts",
+            "type": "array"
+          }
+        },
+        "required": [
+          "task_id",
+          "practice_project_id",
+          "stable_key",
+          "title",
+          "goal",
+          "acceptance",
+          "status"
+        ],
+        "title": "PracticeTaskView",
+        "type": "object"
+      },
+      "SummaryCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "maxLength": 40000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "idempotency_key"
+        ],
+        "title": "SummaryCreateRequest",
+        "type": "object"
+      },
+      "PromptRevisionCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "user_draft": {
+            "maxLength": 40000,
+            "minLength": 50,
+            "title": "User Draft",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_draft",
+          "idempotency_key"
+        ],
+        "title": "PromptRevisionCreateRequest",
+        "type": "object"
+      }
+    }
   }
 }

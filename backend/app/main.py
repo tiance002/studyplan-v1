@@ -12,15 +12,46 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 # ⚠️ 必须在 import 任何 langgraph 相关模块之前。不要调整导入顺序。
 from app import agent_workflows  # noqa: F401  (副作用：设置 LANGGRAPH_STRICT_MSGPACK)
 from app.agent_workflows import GRAPH_VERSION
+from app.api.v1.schemas import V1_SCHEMAS
 from app.core.config import get_settings
 from app.core.startup_guard import validate_startup_security
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 API_PREFIX = "/api/v1"
+
+
+def _install_contract_schemas(application: FastAPI) -> None:
+    """把 ``/api/v1`` 业务 DTO 注册进 OpenAPI ``components.schemas``。
+
+    具体路由由 B2-V 实现（Goal §5），但**契约模型必须先可见**：
+    前端只能通过导出的 OpenAPI 生成 typed client（ADR-0004）。
+    否则模型存在却不进契约，等于前端拿不到类型。
+    """
+    base_openapi = application.openapi
+
+    def custom_openapi() -> dict[str, Any]:
+        if application.openapi_schema:
+            return application.openapi_schema
+        schema = base_openapi()
+        components = schema.setdefault("components", {}).setdefault("schemas", {})
+        for model in V1_SCHEMAS:
+            model_schema = model.model_json_schema(
+                ref_template="#/components/schemas/{model}"
+            )
+            # 嵌套模型（如 ErrorBody 被 RunView 引用）落在 $defs，平铺进 components。
+            for name, definition in (model_schema.pop("$defs", None) or {}).items():
+                components.setdefault(name, definition)
+            components.setdefault(model.__name__, model_schema)
+        application.openapi_schema = schema
+        return schema
+
+    application.openapi = custom_openapi  # type: ignore[method-assign]
 
 
 def create_app() -> FastAPI:
@@ -74,6 +105,8 @@ def create_app() -> FastAPI:
             "repository_backend": settings.repository_backend,
         }
 
+    # 契约模型注册必须在返回前完成（否则导出的 OpenAPI 缺业务 DTO）。
+    _install_contract_schemas(application)
     return application
 
 
