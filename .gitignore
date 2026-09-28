@@ -47,6 +47,7 @@ Thumbs.db
 .trae/
 .codex/
 .agents/
+.workbuddy-ai/
 
 # ---- local legacy audit output ----
 docs/migration/legacy-raw/

@@ -1,28 +1,54 @@
 # B1 验收报告：新骨架、领域契约与 Graph 最小演练
 
-> 日期：2026-09-27 · 批次：B1（含 **B1.1 缺陷修复轮**）· 依据：`docs/design-package/IMPLEMENTATION_PLAN.md` §5
+> 日期：2026-09-27 · 批次：B1（含 **B1.1 缺陷修复轮** 与 **B1.2 独立复审收口轮**）· 依据：`docs/design-package/IMPLEMENTATION_PLAN.md` §5
 > **Each item below carries source/test evidence. Unverified items are marked explicitly.**
 
-> **本文件已按 B1.1 修复轮更新**：B1 复审发现的 P1 正确性缺陷、真实 LangGraph 验收、
-> PostgreSQL/RLS 验收、启动安全门禁均已在本轮完成。见 §A（修复轮纪要）与各节更新。
+> **本文件已按 B1.1 / B1.2 两轮修复更新**：B1 复审发现的 P1 正确性缺陷、真实 LangGraph 验收、
+> PostgreSQL/RLS 验收、启动安全门禁已在 B1.1 完成；B1.2 进一步收口 **PG 测试工具角色安全**、
+> **真实编辑流程**、**发布原子性反例**与**文档口径**。见 §A（修复轮纪要）与各节更新。
 
 ---
 
 ## 0. 一句话结论
 
 B1 交付了**可独立运行、可机械验证的骨架**。B1.1 修复轮进一步：
-**211 个测试全绿**（B1 基线为 104）、Ruff 干净、mypy 干净（38 文件 0 错误）、
+**235 个测试全绿**（B1 基线为 104；B1.1 为 211，B1.2 新增 24 项反例）、Ruff 干净、mypy 干净（38 文件 0 错误）、
 **真实 LangGraph `StateGraph` + InMemorySaver/PostgresSaver 验收通过**、
-**PostgreSQL 迁移 + RLS 越权反例通过**、**跨进程 checkpoint 恢复通过**、
+**PostgreSQL 迁移 + RLS 越权反例通过**、**跨进程 checkpoint 恢复通过（正常退出与强制崩溃分别验证）**、
 **生产启动安全门禁接入组合根并通过真实应用工厂验证**。
 `domain` / `ports` / `core` 三层不依赖任何框架（由 AST 测试机械保证）。
 **未实现**业务路由、真实模型 —— 这些属 B2/B3。
 
 ---
 
-## A. B1.1 修复轮纪要（本轮新增）
+## A. 修复轮纪要
 
-### A.1 本轮发现并修复的缺陷
+### A.0 B1.2 独立复审收口轮（本轮新增）
+
+针对 B1.1 复审提出的两类**必修问题**（PG 测试工具角色安全、真实编辑流程）与发布原子性反例、
+文档口径，B1.2 逐条修复：
+
+| # | 严重度 | 问题 | 根因 | 修复 |
+|---|---|---|---|---|
+| B1.2-1 | P1 | **PG 测试工具会直接改写共享实例上的既有全局角色**（改密码 / CREATEDB / BYPASSRLS） | `pg_harness` 无条件 `ALTER ROLE` | 引入「实例专用性」判定：`STUDYPLAN_TEST_PG_DEDICATED=1` 显式声明实例专用；否则对**已存在**且属性匹配的角色**只读复用、绝不改密码**，对**缺失/不匹配**的角色在共享实例上**安全拒绝**（`UnsafeSharedInstanceError`）；仅 `drop_roles_created_by_harness()` 回收本工具自建角色 |
+| B1.2-2 | P1 | **编辑后仍校验旧结构、保存旧结构**：`edit` 未把新内容带回状态，`validate`/`save_draft_projection` 继续用旧节点/单元/关系 | 编辑增量未合并进 `PlanningState` | 新增 `edited_draft` 状态位；`apply_decision` 的 edit 分支把 `nodes/units/relations/practice_proposal/outline/draft_hash` 从编辑结果**合并进状态**；`route_after_validate` 在 `edited_draft=True` 且结构非法时**直接失败**（禁止模型静默覆盖用户编辑）；`save_draft_projection` 保存**本轮已校验内容** |
+| B1.2-3 | P1 | **发布原子性反例不足**：v1 已存在、v2 发布中途失败时，Fake 仓储会残留错误的 `SUPERSEDED` 状态 | 回滚快照未覆盖被 supersede 的旧版本状态 | `FakePlanRepository.publish_revision` 回滚时**完整还原** revisions/current/record/**被 supersede 版本的 status**；新增 4 阶段参数化反例与字段语义测试 |
+| B1.2-4 | P2 | **文档口径过度声称**：混用「正常退出」与「强制崩溃」恢复；`VerificationRecord` 测试被读成「已实现真实外部核验」 | 报告未区分证据类型 | 本文件 §3.1.1 把 J（正常退出）与 J2（强制崩溃）**分别记录**；§3.1.1/§3.2 明确 `VerificationRecord` 测试为**模拟核验**（构造领域对象验证判级逻辑，**未**接入任何真实平台核验）；PG 版发布仓储与业务 API 继续列为 **B2 工作** |
+
+**B1.2 新增/修改文件**：
+
+- 新增：`backend/tests/conftest.py`（顶层共享钩子：`postgres` 标记、按需跳过、会话末回收自建角色）、
+  `backend/tests/integration/test_pg_harness_safety.py`（10 例，角色安全反例）。
+- 修改：`backend/tests/pg_harness.py`（专用性判定 + 只读复用 + 安全拒绝 + 自建角色回收）、
+  `backend/tests/unit/conftest.py`（共享钩子上移后精简）、
+  `backend/app/agent_workflows/{state,nodes}.py`（`edited_draft` + 编辑合并 + 非法即失败）、
+  `backend/app/domain/planning/models.py`（发布端口事务契约与字段语义 docstring）、
+  `backend/tests/unit/test_graph_workflows.py`（编辑流程 3 例）、
+  `backend/tests/integration/test_real_langgraph.py`（编辑流程 E3–E6）、
+  `backend/tests/integration/test_graph_recovery_pg.py`（**新增强制崩溃恢复 J2**）、
+  `backend/tests/unit/test_plan_publication.py`（4 阶段回滚反例 + v1/v2 场景 + 字段语义）。
+
+### A.1 B1.1 修复轮发现并修复的缺陷
 
 | # | 严重度 | 缺陷 | 根因 | 修复 |
 |---|---|---|---|---|
@@ -31,13 +57,13 @@ B1 交付了**可独立运行、可机械验证的骨架**。B1.1 修复轮进�
 | A3 | P1 | **`await_approval → apply_decision` 未接入真实执行路径** | 真实 `StateGraph` 缺该边 | `build_planning_graph` 补齐 `await_approval → apply_decision → route_after_decision`，并支持结构化 `Command(resume={...})` |
 | A4 | P1 | **graph_version 不参与 checkpoint 命名空间**，跨版本恢复会串状态 | LangGraph checkpoint 仅按 `thread_id` 索引 | 新增 `graph_thread_id(run_id, graph_version)` 把版本编入 `thread_id`，并加 `assert_resumable` / `GraphVersionMismatchError` 显式守卫 |
 | A5 | P1 | **迁移 `downgrade()` 数据保护被 FORCE RLS 绕过**：有数据也能降级 | migrator 无上下文时 `SELECT count(*)` 被 RLS 过滤为 0 | 迁移角色授予 `BYPASSRLS`（其本就是 DDL owner），应用角色显式 `NOBYPASSRLS`；downgrade 遍历**全部**业务表并 `RAISE EXCEPTION` 拒绝 |
-| A6 | P1 | **`_infer_evidence_grade` 把 repo_url/commit/sha/ci 当已核验** | 用关键词与 URL 形态判级，可被自述伪装 | 只认平台真实核验记录 `VerificationRecord`（`verification_method`/`verified_at`/`result`/`evidence_ref`）；用户文本/URL/未核验哈希一律 `reported` |
+| A6 | P1 | **`_infer_evidence_grade` 把 repo_url/commit/sha/ci 当已核验** | 用关键词与 URL 形态判级，可被自述伪装 | 只认平台核验记录 `VerificationRecord`（`verification_method`/`verified_at`/`result`/`evidence_ref`）；用户文本/URL/未核验哈希一律 `reported`。**注**：当前测试仅以**构造的** `VerificationRecord` 验证判级逻辑，属**模拟核验**，未接入真实平台核验 |
 | A7 | P1 | **`PlanPublicationService` 幂等未比对请求体**，同键异体不报 409；发布非单事务；取消草案可发布 | 领域服务缺状态/体指纹校验 | 新增 `PublishRecord` + `body_fingerprint`；发布前查草案状态、`verify_hash`、版本校验；`publish_revision` 端口要求单事务；新增 `PlanRevision.version` 属性 |
 | A8 | P1 | **启动安全守卫未被真实启动路径调用** | `assert_not_fake_in_production` 无人调用 | 新增 `core/startup_guard.validate_startup_security` 并在 `create_app()` 组合根调用；生产拒绝 Fake/默认密钥/空 DB/内存 Checkpointer/内存仓储/未实现 provider |
 | A9 | P2 | **`order_index` 静默整数截断**：`3.7`→3、`True`→1 | `int(raw)` 强转 | 新增 `_strict_int`：仅接受真正 `int`（排除 `bool`），其余报错 |
 | A10 | P2 | `core` 误 import `infrastructure`（依赖方向泄漏） | startup_guard 引用 infra 常量 | 拆分为 core 侧独立常量 + 契约测试机械保证两处一致 |
 
-### A.2 本轮修改文件
+### A.2 B1.1 修复轮修改文件
 
 **修改**：
 `backend/app/agent_workflows/{state,nodes,graphs}.py`、
@@ -101,9 +127,11 @@ B1 交付了**可独立运行、可机械验证的骨架**。B1.1 修复轮进�
 | `backend/tests/unit/test_security_boundaries.py` | — | 越权 / 假身份 / fake 误用 |
 | `backend/tests/unit/test_import_direction.py` | — | 依赖方向（AST 机械保证） |
 | `backend/tests/unit/conftest.py`、`backend/tests/__init__.py` 等 | — | 测试基建 |
+| `backend/tests/conftest.py` | — | 顶层共享钩子（B1.2 新增：`postgres` 标记、按需跳过、会话末回收自建角色） |
 | `backend/tests/contract/test_isolation_contract.py` | — | 不依赖 E 盘的机械证明 |
 | `backend/tests/contract/test_contract_consistency.py` | — | 枚举 = 契约 |
 | `backend/tests/integration/test_app_boot.py` | — | 应用可独立启动 + OpenAPI |
+| `backend/tests/integration/test_pg_harness_safety.py` | — | PG 测试工具角色安全反例（B1.2 新增，10 例） |
 | `contracts/openapi.json` | — | 导出的契约（派生物） |
 | `contracts/examples/v1_examples.json` | — | 由 DTO 校验的示例 |
 | `frontend/{package.json,vite.config.ts,tsconfig.json,index.html}` | — | Vite/TS/React 骨架 |
@@ -141,29 +169,34 @@ B1 交付了**可独立运行、可机械验证的骨架**。B1.1 修复轮进�
 | 9 | `.venv/Scripts/python.exe -m ruff check backend` | 静态检查 |
 | 10 | `.venv/Scripts/python.exe -m mypy backend/app` | 类型检查（38 文件 0 错误） |
 | 11 | `.venv/Scripts/python.exe -m pytest backend/tests/integration/test_real_langgraph.py` | 真实 LangGraph（InMemorySaver） |
-| 12 | `.venv/Scripts/python.exe -m pytest backend/tests/integration/test_graph_recovery_pg.py` | 跨进程 Postgres Checkpointer 恢复 |
+| 12 | `.venv/Scripts/python.exe -m pytest backend/tests/integration/test_graph_recovery_pg.py` | 跨进程 Postgres Checkpointer 恢复（正常退出 J + 强制崩溃 J2） |
 | 13 | `.venv/Scripts/python.exe -m pytest backend/tests/integration/test_pg_migration_rls.py` | 真实 PG 迁移 + RLS 反例 |
-| 14 | `cd frontend && npm install` | 前端依赖（生成 lockfile + 平台二进制） |
-| 15 | `cd frontend && npx openapi-typescript ../contracts/openapi.json -o src/api/generated/schema.d.ts` | 生成 TS client |
-| 16 | `cd frontend && npm run build` | `tsc -b && vite build` 构建通过 |
-| 17 | `git diff --check` | 空白/EOF 检查（无问题） |
-| 18 | `git --no-optional-locks -C E:/codex_workspace/study-plan status --porcelain=v1` | 复核旧工程仍 clean |
+| 14 | `.venv/Scripts/python.exe -m pytest backend/tests/integration/test_pg_harness_safety.py` | PG 测试工具角色安全反例 |
+| 15 | `cd frontend && npm install` | 前端依赖（生成 lockfile + 平台二进制） |
+| 16 | `cd frontend && npx openapi-typescript ../contracts/openapi.json -o src/api/generated/schema.d.ts` | 生成 TS client |
+| 17 | `cd frontend && npm run build` | `tsc -b && vite build` 构建通过 |
+| 18 | `git diff --check` | 空白/EOF 检查（无问题） |
+| 19 | `git --no-optional-locks -C E:/codex_workspace/study-plan status --porcelain=v1` | 复核旧工程仍 clean |
 
 > ⚠️ 全部命令在 Windows Git Bash 下执行。**未在 E 盘运行任何安装、迁移、测试或启动脚本。**
-> PostgreSQL 验收**只**创建 `studyplan_test_*` 临时库；不触碰任何既有数据库。
+> PostgreSQL 验收**只**创建 `studyplan_test_*` 临时库；**不触碰任何既有数据库**。
+> B1.2 起，PG 测试工具对**已存在**的 `studyplan_*` 全局角色**只读复用、绝不修改**
+> （不改密码 / CREATEDB / BYPASSRLS）；仅在 `STUDYPLAN_TEST_PG_DEDICATED=1` 显式声明实例专用时才
+> 允许创建或调整角色，且会话末只回收**本工具自建**的角色。见 §3.1.2。
 
 ---
 
 ## 3. results
 
-### 3.1 测试结果（核心证据，B1.1 更新）
+### 3.1 测试结果（核心证据，B1.2 重跑）
 
 ```
 $ .venv/Scripts/python.exe -m pytest backend/tests -p no:cacheprovider
-........................................................................ [ 34%]
-........................................................................ [ 68%]
-...................................................................      [100%]
-211 passed in 55.14s
+........................................................................ [ 30%]
+........................................................................ [ 61%]
+........................................................................ [ 91%]
+...................                                                      [100%]
+235 passed in 81.91s (0:01:21)
 ```
 
 ```
@@ -174,24 +207,27 @@ $ .venv/Scripts/python.exe -m mypy backend/app
 Success: no issues found in 38 source files
 ```
 
-**测试分布（B1.1）**：
+**测试分布（B1.2 重跑实测）**：
 
 | 组 | 数量 | 覆盖 |
 |---|---|---|
-| `unit/test_domain_invariants.py` | ~25 | 进度语义、依赖无环、稳定键、SSRF、偏好优先级、产品约束 |
+| `unit/test_domain_invariants.py` | 29 | 进度语义、依赖无环、稳定键、SSRF、偏好优先级、产品约束 |
 | `unit/test_plan_validators.py` | 25 | 校验器每条规则"违反即失败"证明 + **非整数 order_index 严格拒绝** |
-| `unit/test_graph_workflows.py` | 26 | 三通道错误分离、修复上限=2、空纲要/空节点失败、历史不影响当前校验、非法决定 |
-| `unit/test_plan_publication.py` | **18** | 幂等同键同体复用/同键异体 409、取消不发布、hash/版本冲突、单事务全或无、历史保留 |
-| `unit/test_evidence_grade.py` | **20** | 反伪装：文本/URL/未核验哈希恒为 reported；仅真实核验为 verified；评审链独立 |
-| `unit/test_security_boundaries.py` | 14 | 越权 403、假身份 TypeError、错误码映射、fake 生产禁用 |
+| `unit/test_graph_workflows.py` | **29** | 三通道错误分离、修复上限=2、空纲要/空节点失败、历史不影响当前校验、非法决定、**编辑后校验新内容 / 非法编辑不入确认态 / 编辑缺内容失败** |
+| `unit/test_plan_publication.py` | **24** | 幂等同键同体复用/同键异体 409、取消不发布、hash/版本冲突、单事务全或无、**v1 已存在时 v2 失败回滚且 v1 不被置为 SUPERSEDED（4 阶段参数化）**、发布记录字段与修订一致、历史保留 |
+| `unit/test_evidence_grade.py` | 20 | 反伪装：文本/URL/未核验哈希恒为 reported；仅构造出的**模拟** `VerificationRecord` 判为 verified；评审链独立 |
+| `unit/test_security_boundaries.py` | 13 | 越权 403、假身份 TypeError、错误码映射、fake 生产禁用 |
 | `unit/test_import_direction.py` | 6 | domain/ports/core 零框架依赖、guard 首行、无绕过 |
 | `contract/test_isolation_contract.py` | 7 | 无旧路径/env 前缀/软链/本地数据泄漏 |
-| `contract/test_contract_consistency.py` | **14** | 枚举=契约、**provider 闭集 core/infra 一致** |
+| `contract/test_contract_consistency.py` | **15** | 枚举=契约、**provider 闭集 core/infra 一致** |
 | `integration/test_app_boot.py` | 6 | 应用可启动、operationId 唯一、OpenAPI 可导出 |
-| `integration/test_startup_guard.py` | **9** | **真实应用工厂**拒绝 Fake/默认密钥/空DB/内存Checkpointer/内存仓储/未实现 provider |
-| `integration/test_real_langgraph.py` | **21** | 真实 `StateGraph` + InMemorySaver 的 A–L 场景 |
-| `integration/test_graph_recovery_pg.py` | **4** | **跨进程** PostgresSaver 恢复（条款 J）、重复 resume、线程隔离 |
-| `integration/test_pg_migration_rls.py` | **12** | 迁移可执行、全表 FORCE RLS、越权读写拒绝、降级数据保护（真实 PG） |
+| `integration/test_startup_guard.py` | 9 | **真实应用工厂**拒绝 Fake/默认密钥/空DB/内存Checkpointer/内存仓储/未实现 provider |
+| `integration/test_real_langgraph.py` | **25** | 真实 `StateGraph` + InMemorySaver 的 A–L 场景 + **编辑流程 E3–E6** |
+| `integration/test_graph_recovery_pg.py` | **5** | **跨进程** PostgresSaver 恢复（条款 J 正常退出 + **条款 J2 强制崩溃**）、重复 resume、线程隔离 |
+| `integration/test_pg_migration_rls.py` | 12 | 迁移可执行、全表 FORCE RLS、越权读写拒绝、降级数据保护（真实 PG） |
+| `integration/test_pg_harness_safety.py` | **10** | **PG 测试工具角色安全**：匹配角色只读复用、共享实例拒绝改角色、专用实例才允许管理、会话末只回收自建角色 |
+
+合计 **235** 项（`unit` 146 · `contract` 22 · `integration` 67）。
 
 ### 3.1.1 真实 LangGraph 验收（Goal §4，逐条）
 
@@ -210,9 +246,14 @@ Success: no issues found in 38 source files
 | G | 非法决定 → 不会误发布 | ✅ 参数化 5 例 |
 | H | 同 thread_id 真实恢复 | ✅（InMemory + PG） |
 | I | 重复 resume → 无重复副作用 | ✅（含跨进程） |
-| J | **杀进程+重启仍恢复 `waiting_user`** | ✅ `test_J_cross_process_recovery_of_waiting_user`（子进程写 checkpoint 后退出，主进程 `Command(resume="approve")` 恢复） |
+| J | **正常退出后**跨进程恢复 `waiting_user` | ✅ `test_J_cross_process_recovery_of_waiting_user`：子进程写 checkpoint 后**正常退出**（`subprocess.run` 返回 0），主进程用同一 thread `Command(resume="approve")` 恢复 |
+| J2 | **强制崩溃**后跨进程恢复 `waiting_user` | ✅ `test_J2_forced_crash_recovery_of_waiting_user`：子进程写 checkpoint 后**阻塞**，父进程 `Popen.kill()` **强杀**（无优雅收尾、无 atexit、不关连接），新进程仍从 PG 恢复并完成发布 |
 | K | 不同 graph_version 按约定处理 | ✅ 版本编入 `thread_id` + `assert_resumable` 守卫 |
 | L | checkpoint 与业务草案不一致 → 不得声称可确认 | ✅ 过期草案 → 显式冲突 |
+
+> **J 与 J2 是两类证据，分别记录**：J 证明「正常退出后状态可跨进程恢复」；
+> J2 证明「进程被强杀、无任何清理动作后状态仍可恢复」。二者均只覆盖 **Fake provider** 的图，
+> **不**代表已接入真实模型或真实外部核验。
 
 **关键点**：resume 用真实 `Command(resume=...)` 驱动；解释器路径仅作快速单测工具，
 两套场景一致。`graph_version` 不放入 configurable 而编入 `thread_id`（否则不生效）。
@@ -233,6 +274,11 @@ Success: no issues found in 38 source files
 | 有业务数据时降级被拒绝 | ✅ |
 | 空库降级成功 | ✅ |
 
+**PG 测试工具角色安全（B1.2 新增，Goal §一）**：`pg_harness` 在**共享实例**上的行为已收口——
+既有角色属性匹配时**只读复用**（实测运行前后 `pg_roles` 计数与属性快照一致），
+缺失/不匹配时**安全拒绝**而非改角色；仅 `STUDYPLAN_TEST_PG_DEDICATED=1` 时才允许管理角色，
+且会话末只回收自建角色。反例见 `test_pg_harness_safety.py` 10 项。
+
 ### 3.2 关键实证（不是声称）
 
 | 断言 | 证据 |
@@ -245,10 +291,16 @@ Success: no issues found in 38 source files
 | 修复成功清空旧错误 | `test_repair_clears_old_structure_errors` / `test_C_repair_clears_old_errors` 通过 |
 | interrupt 前不提交 | `test_interrupt_precedes_side_effects` 断言 `committed == []` |
 | cancel 不产生结果 | `test_cancel_does_not_commit` 断言 `result_id == ""` |
-| 跨进程恢复 `waiting_user` | `test_J_cross_process_recovery_of_waiting_user`（PG Checkpointer，子进程退出后主进程 resume） |
+| 跨进程恢复 `waiting_user`（正常退出） | `test_J_cross_process_recovery_of_waiting_user`（PG Checkpointer，子进程**正常退出**后主进程 resume） |
+| 跨进程恢复 `waiting_user`（强制崩溃） | `test_J2_forced_crash_recovery_of_waiting_user`（PG Checkpointer，子进程被 `Popen.kill()` **强杀**后主进程 resume） |
 | 生产拒绝 Fake / 静默降级 | `test_create_app_rejects_fake_llm_in_production`（真实 `create_app()`）等 9 项 |
-| 证据不可伪装为已核验 | `test_user_text_is_always_reported`（10 例参数化）等 20 项 |
+| 证据不可伪装为已核验（**模拟核验**） | `test_user_text_is_always_reported`（10 例参数化）等 20 项：仅断言**判级逻辑**——构造出的 `VerificationRecord` 才能升级为 verified；**未**接入任何真实平台核验 |
 | 同键异体发布 → 409 | `test_repeated_publish_same_key_different_body_is_409` 通过 |
+| v2 发布中途失败不残留错误 SUPERSEDED | `test_publish_v2_failure_keeps_v1_current_and_not_superseded`（4 阶段参数化）通过 |
+| 编辑后校验/保存的是**新内容** | `test_edit_validates_and_saves_the_edited_content` / `test_E4_edit_to_valid_structure_shows_and_publishes_new_content` 通过 |
+| 编辑成非法结构不得进入可确认态 | `test_edit_to_invalid_structure_fails_and_never_reaches_confirmation` / `test_E3_...` 通过 |
+| 旧 draft_hash 不能确认新草案 | `test_E6_stale_draft_hash_cannot_approve_new_draft` / `test_L_stale_draft_cannot_be_confirmed` 通过 |
+| PG 测试工具不改共享实例既有角色 | `test_ensure_roles_is_noop_for_satisfied_existing_roles`（前后快照一致）等 10 项通过 |
 | AI 不能独立验收 | `test_prompt_review_pass_is_not_acceptance` / practice 域：`ReviewerKind.MODEL` → `ValidationAppError` |
 | 应用无 Postgres 也能启动 | `test_app_boots_without_database_or_network` 通过 |
 | operationId 唯一 | `test_openapi_has_no_duplicate_operation_ids` 通过 |
@@ -256,18 +308,19 @@ Success: no issues found in 38 source files
 | 前端可构建 + 生成 TS client | `npm run build` 成功；`openapi-typescript` 生成 `schema.d.ts` |
 | 产品约束 | 实测 `CredentialPolicy(min=6, max=12, invite=False)` |
 
-### 3.3 与验收条款的对应（B1.1 更新）
+### 3.3 与验收条款的对应（B1.2 更新）
 
 | B1 验收条款 | 状态 | 证据 |
 |---|---|---|
 | 目录不依赖 E 盘而启动 | ✅ | `test_isolation_contract.py` 7 项全通过；实测导入成功 |
-| 只用 Fake 的断点可跨进程恢复 | ✅ **已完成** | `test_graph_recovery_pg.py`：独立 PG Checkpointer，子进程中断→主进程 `Command(resume=...)` 恢复 |
+| 只用 Fake 的断点可跨进程恢复 | ✅ **已完成** | `test_graph_recovery_pg.py`：独立 PG Checkpointer，**正常退出**（J）与**强制崩溃**（J2）两路均→主进程 `Command(resume=...)` 恢复 |
 | run 越权拒绝 | ✅ | `test_auth_context_denies_foreign_project` 等 4 项 |
 | OpenAPI 无重复 operationId | ✅ | `test_openapi_has_no_duplicate_operation_ids` |
 | 前端可生成 TypeScript client | ✅ **已完成** | `npm install` + `npm run build` 成功；`openapi-typescript` 生成 `frontend/src/api/generated/schema.d.ts` |
 | 只引用 Fake provider | ✅ | `infrastructure/providers` 仅实现 fake；生产配置真实 provider 时**拒绝启动**（真实工厂验证） |
-| 真实 LangGraph 转移/暂停/恢复/幂等提交 | ✅ **已完成** | `test_real_langgraph.py` 21 项（InMemorySaver）+ `test_graph_recovery_pg.py` 4 项（PostgresSaver） |
+| 真实 LangGraph 转移/暂停/恢复/幂等提交 | ✅ **已完成** | `test_real_langgraph.py` 25 项（InMemorySaver，含编辑流程 E3–E6）+ `test_graph_recovery_pg.py` 5 项（PostgresSaver，含 J/J2） |
 | PostgreSQL 最小安全验收（RLS） | ✅ **已完成** | `test_pg_migration_rls.py` 12 项（真实 PG 16.4 临时库） |
+| **PG 测试工具不破坏共享实例角色** | ✅ **已完成** | `test_pg_harness_safety.py` 10 项（只读复用 / 安全拒绝 / 专用实例才管理） |
 
 
 ---
@@ -286,20 +339,22 @@ $ git --no-optional-locks -C E:/codex_workspace/study-plan status --porcelain=v1
 
 ---
 
-## 5. known risks（B1.1 更新）
+## 5. known risks（B1.2 更新）
 
 | # | 风险 | 等级 | 现状 / 缓解 |
 |---|---|---|---|
-| R1 | ~~跨进程 checkpoint 恢复未演练~~ | — | ✅ **已消除**：独立 PG Checkpointer 跨进程恢复通过（条款 J） |
-| R2 | ~~图逻辑未跑在真实 `StateGraph` 上~~ | — | ✅ **已消除**：真实 `StateGraph` + InMemorySaver/PostgresSaver 21+4 项通过；解释器与框架行为一致性由同场景双测保证 |
+| R1 | ~~跨进程 checkpoint 恢复未演练~~ | — | ✅ **已消除**：独立 PG Checkpointer 跨进程恢复通过（条款 J 正常退出 + 条款 J2 强制崩溃，**分别记录**） |
+| R2 | ~~图逻辑未跑在真实 `StateGraph` 上~~ | — | ✅ **已消除**：真实 `StateGraph` + InMemorySaver/PostgresSaver 25+5 项通过；解释器与框架行为一致性由同场景双测保证 |
 | R3 | ~~TS client 未实际生成~~ | — | ✅ **已消除**：`npm install` + `openapi-typescript` 生成 `schema.d.ts` 并入库 |
 | R4 | ~~新迁移基线未在真实 Postgres 上跑过~~ | — | ✅ **已消除**：`studyplan_test_*` 临时库执行 `alembic upgrade head` 通过 |
 | R5 | ~~`ai_run_events` / `ai_provider_attempts` 无归属策略~~ | — | ✅ **已消除**：迁移补齐全部私有表 FORCE RLS + 归属策略 |
 | R6 | ~~前端未构建验证~~ | — | ✅ **已消除**：`npm run build`（tsc + vite）通过 |
 | R7 | **真实模型 provider 存在性仍 unverified** | 中 | 沿用 B0 结论；生产配置真实 provider 时**明确拒绝启动**；B3 处理 |
 | R8 | 6–12 位密码上限低于常见建议 | 低 | 用户既定约束；已用 Argon2id 高成本参数 + 限流要求补偿（ADR-0006 记录取舍） |
-| R9 | 发布事务的单事务语义**尚无 PG 实现**，当前由领域端口契约 + 内存实现验证 | 中 | B2 实现 `PlanRepositoryPort` 的 PG 版本时，**必须**用 DB 唯一约束 `(project_id, idempotency_key)` 落幂等，不得 check-then-write |
+| R9 | 发布事务的单事务语义**尚无 PG 实现**，当前由领域端口契约 + 内存实现（含回滚反例）验证 | 中 | **属 B2 工作**：B2 实现 `PlanRepositoryPort` 的 PG 版本时，**必须**用 DB 唯一约束 `(project_id, idempotency_key)` 落幂等，不得 check-then-write；发布事务须一并覆盖草案状态更新 |
 | R10 | mypy 采用宽松起步配置（未开 `strict`） | 低 | 38 文件当前 0 错误；严格化随 B2/B3 逐步推进 |
+| R11 | **业务 API 路由尚未实现** | 中 | **属 B2 工作**：B2 实现业务 API 并覆盖 OpenAPI operationId 唯一性测试 |
+| R12 | `VerificationRecord` 判级仅为**模拟核验** | 低 | 现仅由构造的领域对象验证判级逻辑；**未**接入真实平台核验，B3+ 再评估 |
 
 ---
 
@@ -308,11 +363,12 @@ $ git --no-optional-locks -C E:/codex_workspace/study-plan status --porcelain=v1
 **B2 目标**：知识与计划业务域 —— 知识节点/关系/单元、路径草案与发布、版本、进度、
 实践任务与知识多对多、偏好/资源表、迁移与权限。
 
-**B2 必须先做（承自 B1/B1.1 的未完成项）**：
+**B2 必须先做（承自 B1/B1.1/B1.2 的未完成项）**：
 
-1. **实现 `PlanRepositoryPort` 的 PostgreSQL 版本**（R9）：单事务发布 +
-   `(project_id, idempotency_key)` 唯一约束；契约测试覆盖内存与 PG 两实现。
-2. **实现业务 API 路由**（B2 范围）：覆盖 OpenAPI operationId 唯一性测试。
+1. **实现 `PlanRepositoryPort` 的 PostgreSQL 版本**（R9）：单事务发布（**含草案状态更新**）+
+   `(project_id, idempotency_key)` 唯一约束；契约测试覆盖内存与 PG 两实现，并复用
+   `test_plan_publication.py` 的「v1 已存在、v2 失败回滚」反例。**未实现，属 B2。**
+2. **实现业务 API 路由**（R11，B2 范围）：覆盖 OpenAPI operationId 唯一性测试。**未实现，属 B2。**
 3. **`0002_business_domain.py` 业务表**：按设计 §3 补齐 `knowledge_nodes` /
    `knowledge_relations` / `learning_units` / `unit_node_links` / `plan_stages` /
    `plan_unit_links` / `plan_task_links` / `unit_progress` / `practice_*` /
@@ -329,9 +385,10 @@ $ git --no-optional-locks -C E:/codex_workspace/study-plan status --porcelain=v1
 ### B2 准入结论
 
 **准入通过。** B1 复审提出的 P1 缺陷（状态错误、确认流程、证据可信度、发布一致性、
-迁移与 RLS、启动门禁）已全部修复并有失败反例测试；真实 LangGraph、PostgreSQL/RLS、
-跨进程 checkpoint 恢复均已实测通过。剩余未完成项（PG 版发布仓储、业务 API、业务表）
-均属 B2 范畴且已在 §6 列明，不构成 B2 准入阻塞。
+迁移与 RLS、启动门禁）已在 B1.1 修复；B1.2 进一步收口 **PG 测试工具角色安全**、
+**真实编辑流程**、**发布原子性反例**与**文档口径**，均有失败反例测试；
+真实 LangGraph、PostgreSQL/RLS、跨进程 checkpoint 恢复（正常退出与强制崩溃两路）均已实测通过。
+剩余未完成项（PG 版发布仓储、业务 API、业务表）**均属 B2 范畴**且已在 §6 列明，不构成 B2 准入阻塞。
 
 ---
 
