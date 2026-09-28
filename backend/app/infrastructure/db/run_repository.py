@@ -3,7 +3,7 @@
 ## 事务与并发
 
 每次调用一个连接、一个事务；``update_run`` 用 ``version = version + 1``
-做**乐观并发**并返回新记录。RLS 保证跨项目读写被数据库拒绝。
+配合 WHERE version = expected_version 做**乐观并发**并返回新记录。RLS 保证跨项目读写被数据库拒绝。
 
 ## 为什么不是业务事实
 
@@ -18,7 +18,7 @@ from contextlib import contextmanager
 from typing import Any
 
 import psycopg
-from app.core.errors import NotFoundError
+from app.core.errors import ConflictError
 from app.domain.enums import AiRunNextAction, AiRunStatus
 from app.domain.runs.models import RunRecord
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -96,6 +96,7 @@ class PgRunRepository:
         *,
         project_id: str,
         run_id: str,
+        expected_version: int,
         status: str,
         next_action: str,
         result_ref: str | None = None,
@@ -111,12 +112,13 @@ class PgRunRepository:
                     error_class = %s,
                     version = version + 1,
                     updated_at = now()
-                WHERE project_id = %s AND run_id = %s
+                WHERE project_id = %s AND run_id = %s AND version = %s
+                  AND status NOT IN ('succeeded', 'failed', 'cancelled')
                 """,
-                (status, next_action, result_ref, error_class, project_id, run_id),
+                (status, next_action, result_ref, error_class, project_id, run_id, expected_version),
             )
             if cursor.rowcount != 1:
-                raise NotFoundError("运行不存在")
+                raise ConflictError("Run version changed or missing", reason="run_stale")
             row = conn.execute(
                 "SELECT * FROM ai_runs WHERE project_id = %s AND run_id = %s",
                 (project_id, run_id),

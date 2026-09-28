@@ -11,8 +11,8 @@
 
 ## 幂等（按 ``stable_key`` 复用）
 
-实体 ID 由 ``(project_id, stable_key)`` **确定性派生**，并用
-``ON CONFLICT ... DO UPDATE`` 复用既有行。因此「同一目标重新生成」不会
+实体 ID 由 ``(project_id, content_version, stable_key)`` **确定性派生**，并用
+``ON CONFLICT ... DO NOTHING`` 复用既有行。因此「同一目标重新生成」不会
 造出重复节点/单元/任务，也不会破坏历史计划的引用。
 
 ## 边界
@@ -23,7 +23,9 @@
 
 from __future__ import annotations
 
-import re
+import base64
+import hashlib
+import json
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from typing import Any
@@ -37,17 +39,11 @@ from psycopg.types.json import Jsonb
 
 __all__ = ["PgPlanningCatalog", "stable_entity_id"]
 
-_SLUG_RE = re.compile(r"[^0-9a-zA-Z_\-]+")
-
-
 def stable_entity_id(prefix: str, project_id: str, stable_key: str) -> str:
-    """由 ``(project_id, stable_key)`` 确定性派生实体 ID。
-
-    稳定键本身已经是受校验的 slug；这里只做防御性清洗与长度限制，
-    保证同一目标重复生成时命中同一行（幂等）。
-    """
-    cleaned = _SLUG_RE.sub("_", stable_key.strip())[:80] or "x"
-    return f"{prefix}_{project_id}_{cleaned}"
+    """Lossless encoding; dots, underscores, whitespace and long keys stay distinct."""
+    identity = json.dumps([project_id, stable_key], ensure_ascii=False, separators=(",", ":"))
+    encoded = base64.urlsafe_b64encode(identity.encode("utf-8")).decode("ascii").rstrip("=")
+    return f"{prefix}_{encoded}"
 
 
 def _as_dicts(raw: object) -> list[dict[str, object]]:
@@ -101,12 +97,17 @@ class PgPlanningCatalog:
         task_ids: dict[str, str] = {}
         practice_project_id = ""
 
+        # Immutable generation snapshot. Identical graph content reuses its entities;
+        # changed content gets new IDs, while legacy IDs/FKs remain untouched.
+        content = json.dumps([nodes, units, relations, practice], sort_keys=True,
+                             ensure_ascii=False, separators=(",", ":"))
+        namespace = project_id + ":" + hashlib.sha256(content.encode()).hexdigest()
         with self._tx(project_id) as conn:
             for node in nodes:
                 key = _text(node.get("stable_key"))
                 if not key:
                     continue
-                node_id = stable_entity_id("nod", project_id, key)
+                node_id = stable_entity_id("nod", namespace, key)
                 node_ids[key] = node_id
                 conn.execute(
                     """
@@ -114,11 +115,7 @@ class PgPlanningCatalog:
                         (node_id, project_id, stable_key, title, node_type,
                          objectives, source_status)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (node_id) DO UPDATE SET
-                        title = EXCLUDED.title,
-                        node_type = EXCLUDED.node_type,
-                        objectives = EXCLUDED.objectives,
-                        updated_at = now()
+                    ON CONFLICT (node_id) DO NOTHING
                     """,
                     (
                         node_id,
@@ -136,7 +133,7 @@ class PgPlanningCatalog:
                 key = _text(unit.get("stable_key"))
                 if not key:
                     continue
-                unit_id = stable_entity_id("unt", project_id, key)
+                unit_id = stable_entity_id("unt", namespace, key)
                 unit_ids[key] = unit_id
                 conn.execute(
                     """
@@ -144,10 +141,7 @@ class PgPlanningCatalog:
                         (unit_id, project_id, stable_key, title, objectives, rubric,
                          rubric_version)
                     VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (unit_id) DO UPDATE SET
-                        title = EXCLUDED.title,
-                        objectives = EXCLUDED.objectives,
-                        updated_at = now()
+                    ON CONFLICT (unit_id) DO NOTHING
                     """,
                     (
                         unit_id,
@@ -170,8 +164,7 @@ class PgPlanningCatalog:
                         INSERT INTO unit_node_links
                             (link_id, project_id, unit_id, node_id, order_index, role)
                         VALUES (%s, %s, %s, %s, %s, %s)
-                        ON CONFLICT (unit_id, node_id) DO UPDATE SET
-                            order_index = EXCLUDED.order_index
+                        ON CONFLICT (unit_id, node_id) DO NOTHING
                         """,
                         (new_id("unl"), project_id, unit_id, node_id, order, "core"),
                     )
@@ -202,7 +195,7 @@ class PgPlanningCatalog:
 
             if practice:
                 practice_project_id, task_ids = self._materialize_practice(
-                    conn, project_id=project_id, practice=practice, node_ids=node_ids
+                    conn, project_id=project_id, namespace=namespace, practice=practice, node_ids=node_ids
                 )
 
         return CatalogIds(
@@ -220,19 +213,17 @@ class PgPlanningCatalog:
         *,
         project_id: str,
         practice: dict[str, object],
+        namespace: str,
         node_ids: dict[str, str],
     ) -> tuple[str, dict[str, str]]:
         project_key = _text(practice.get("stable_key"), "practice")
-        practice_project_id = stable_entity_id("ppj", project_id, project_key)
+        practice_project_id = stable_entity_id("ppj", namespace, project_key)
         conn.execute(
             """
             INSERT INTO practice_projects
                 (practice_project_id, project_id, title, idea, status)
             VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (practice_project_id) DO UPDATE SET
-                title = EXCLUDED.title,
-                idea = EXCLUDED.idea,
-                updated_at = now()
+            ON CONFLICT (practice_project_id) DO NOTHING
             """,
             (
                 practice_project_id,
@@ -248,7 +239,7 @@ class PgPlanningCatalog:
             key = _text(task.get("stable_key"))
             if not key:
                 continue
-            task_id = stable_entity_id("ptk", project_id, key)
+            task_id = stable_entity_id("ptk", namespace, key)
             task_ids[key] = task_id
             acceptance = _str_list(task.get("acceptance"))
             conn.execute(
@@ -257,13 +248,7 @@ class PgPlanningCatalog:
                     (task_id, project_id, practice_project_id, stable_key, title,
                      goal, in_scope, out_scope, acceptance, status)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (task_id) DO UPDATE SET
-                    title = EXCLUDED.title,
-                    goal = EXCLUDED.goal,
-                    in_scope = EXCLUDED.in_scope,
-                    out_scope = EXCLUDED.out_scope,
-                    acceptance = EXCLUDED.acceptance,
-                    updated_at = now()
+                ON CONFLICT (task_id) DO NOTHING
                 """,
                 (
                     task_id,
@@ -286,7 +271,7 @@ class PgPlanningCatalog:
                     """
                     INSERT INTO task_knowledge_links (link_id, project_id, task_id, node_id, role)
                     VALUES (%s, %s, %s, %s, %s)
-                    ON CONFLICT (task_id, node_id) DO UPDATE SET role = EXCLUDED.role
+                    ON CONFLICT (task_id, node_id) DO NOTHING
                     """,
                     (
                         new_id("tkl"),

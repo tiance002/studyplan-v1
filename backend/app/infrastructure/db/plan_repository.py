@@ -298,7 +298,7 @@ class PgPlanRepository:
 
     # ------------------------------------------------------------- 草案
 
-    def save_draft(self, draft: PlanDraft) -> None:
+    def save_draft(self, draft: PlanDraft, *, expected_hash: str | None = None) -> None:
         """保存草案；**状态条件**更新 + **检查受影响行数**（B2-V §二.4）。
 
         - 已 ``cancelled`` / 已 ``approved`` 的草案不得被改写（行数为 0）；
@@ -319,6 +319,7 @@ class PgPlanRepository:
                     updated_at = now()
                 WHERE plan_drafts.project_id = EXCLUDED.project_id
                   AND plan_drafts.status <> ALL(%s)
+                  AND plan_drafts.content_hash = %s
                 """,
                 (
                     draft.draft_id,
@@ -329,12 +330,16 @@ class PgPlanRepository:
                     draft.revision_candidate,
                     Jsonb(_draft_payload(draft)),
                     list(TERMINAL_DRAFT_STATUSES),
+                    expected_hash if expected_hash is not None else draft.content_hash,
                 ),
             )
             if cursor.rowcount != 1:
+                row = conn.execute("SELECT status FROM plan_drafts WHERE project_id=%s AND draft_id=%s",
+                                   (draft.project_id, draft.draft_id)).fetchone()
+                terminal = row is not None and row["status"] in TERMINAL_DRAFT_STATUSES
                 raise ConflictError(
-                    "草案已终结（已取消或已发布），不能再修改",
-                    reason="draft_terminal",
+                    "Draft terminal or stale; reload before editing",
+                    reason="draft_terminal" if terminal else "draft_stale",
                     draft_id=draft.draft_id,
                 )
 

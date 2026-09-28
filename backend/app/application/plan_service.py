@@ -42,7 +42,7 @@ from app.application.plan_resources import (
     normalize_stage_resources,
     resolve_stage_resources,
 )
-from app.core.errors import NotFoundError, ValidationAppError
+from app.core.errors import ConflictError, NotFoundError, ValidationAppError
 from app.core.ids import new_id
 from app.domain.enums import (
     AiRunKind,
@@ -63,7 +63,7 @@ from app.domain.planning.models import (
 from app.domain.resources.curation import StageResourceAssignment
 from app.domain.runs.models import RunRecord
 from app.domain.workspace.models import AuthContext
-from app.ports.llm import LLMPort
+from app.ports.llm import LLMDispatchUnknownError, LLMPort
 from app.ports.public_resources import PublicResourceCatalogPort
 from app.ports.runs import PlanningCatalogPort, RunRepositoryPort
 
@@ -180,7 +180,6 @@ class PlanService:
             )
         )
 
-        nodes = self._build_nodes(project_id=project_id, run_id=run_id, goal=cleaned_goal)
         initial: PlanningState = {
             "run_id": run_id,
             "project_id": project_id,
@@ -188,7 +187,20 @@ class PlanService:
             "goal": cleaned_goal,
             "prefs_snapshot": dict(prefs_snapshot or {}),
         }
-        trace = run_planning_graph(nodes, initial)
+        try:
+            nodes = self._build_nodes(project_id=project_id, run_id=run_id, goal=cleaned_goal)
+            trace = run_planning_graph(nodes, initial)
+        except LLMDispatchUnknownError:
+            self._update_run(project_id=project_id, run_id=run_id,
+                             status=AiRunStatus.RECONCILIATION_REQUIRED,
+                             next_action=AiRunNextAction.RECONCILE,
+                             error_class="provider_dispatch_unknown")
+            raise
+        except Exception:
+            self._update_run(project_id=project_id, run_id=run_id,
+                             status=AiRunStatus.FAILED, next_action=AiRunNextAction.RETRY,
+                             error_class=ERROR_PLANNING_FAILED)
+            raise
 
         if trace.stopped_at == "await_approval":
             draft_id = str(trace.state.get("draft_ref") or "")
@@ -282,7 +294,9 @@ class PlanService:
         assert result is not None  # APPROVE 一定返回发布结果
         refreshed = self._repo.get_draft(project_id=project_id, draft_id=draft.draft_id)
         final_draft = refreshed or draft
-        plan = self._repo.get_current(project_id=project_id)
+        plan = self._repo.get_revision(project_id=project_id, revision=result.revision)
+        if plan is None or plan.plan_id != result.plan_id:
+            raise ConflictError("Published revision missing", reason="publication_inconsistent")
         plan_resources: tuple[StageResourceView, ...] = ()
         if plan is not None:
             plan_resources = self._resolve(plan.stage_resources, plan.stages)
@@ -306,6 +320,10 @@ class PlanService:
         self, *, draft: PlanDraft, project_id: str, command: DecisionCommand
     ) -> DecisionOutcome:
         """应用用户编辑 → **重新校验** → 保存新草案（不发布）。"""
+        if not command.draft_hash:
+            raise ValidationAppError("edit requires current draft_hash")
+        if command.draft_hash != draft.content_hash:
+            raise ConflictError("Draft changed", reason="draft_stale")
         if not command.edited_stages:
             raise ValidationAppError("edit 必须携带修改后的阶段列表")
 
@@ -336,7 +354,7 @@ class PlanService:
         # 用**唯一**的版本构造入口重新校验（结构非法即抛，不会发布坏结构）。
         revision_from_draft(draft, revision=draft.revision_candidate)
         draft.status = PlanDraftStatus.AWAITING_APPROVAL
-        self._repo.save_draft(draft)
+        self._repo.save_draft(draft, expected_hash=command.draft_hash)
         return DecisionOutcome(
             run_id=draft.run_id,
             draft=draft,
@@ -449,6 +467,7 @@ class PlanService:
         self._runs.update_run(
             project_id=project_id,
             run_id=run_id,
+            expected_version=current.version,
             status=status.value,
             next_action=next_action.value,
             result_ref=result_ref,

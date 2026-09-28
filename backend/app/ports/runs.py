@@ -29,6 +29,7 @@ class RunRepositoryPort(Protocol):
         *,
         project_id: str,
         run_id: str,
+        expected_version: int,
         status: str,
         next_action: str,
         result_ref: str | None = None,

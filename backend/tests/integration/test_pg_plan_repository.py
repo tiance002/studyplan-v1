@@ -578,7 +578,7 @@ def test_publish_rejects_stale_content_hash(
     # 库里换成另一份内容（同一个 draft_id）。
     changed = _build_draft()
     changed.goal_snapshot = "完全不同的目标陈述"
-    repo.save_draft(changed)
+    repo.save_draft(changed, expected_hash=draft.content_hash)
 
     revision = _build_revision(draft, revision_no=1)
     with pytest.raises(ConflictError) as exc:

@@ -812,8 +812,12 @@ class PlanPublicationService:
             case DraftDecision.EDIT:
                 if edited_stages is None:
                     raise ValidationAppError("edit 必须携带修改后的阶段列表")
+                if not presented_hash:
+                    raise ValidationAppError("edit requires current draft_hash")
+                if presented_hash != draft.content_hash:
+                    raise ConflictError("Draft changed", reason="draft_stale")
                 draft.apply_edit(stages=edited_stages)
-                self._repo.save_draft(draft)
+                self._repo.save_draft(draft, expected_hash=presented_hash)
                 # 编辑后必须重新校验：调用方（应用层）随后重新入队 validate。
                 return None
             case DraftDecision.CANCEL:
@@ -904,7 +908,7 @@ class PlanRepositoryPort(Protocol):
 
     def get_draft(self, *, project_id: str, draft_id: str) -> PlanDraft | None: ...
 
-    def save_draft(self, draft: PlanDraft) -> None:
+    def save_draft(self, draft: PlanDraft, *, expected_hash: str | None = None) -> None:
         """保存草案。实现**必须按状态条件**更新并**检查受影响行数**：
 
         - 已 ``cancelled`` 的草案不得被覆盖为可发布（设计 §3 C6）；

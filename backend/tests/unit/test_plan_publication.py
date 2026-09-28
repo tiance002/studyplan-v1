@@ -184,7 +184,7 @@ class FakePlanRepository(PlanRepositoryPort):
     def get_draft(self, *, project_id: str, draft_id: str) -> PlanDraft | None:
         return self.drafts.get(draft_id)
 
-    def save_draft(self, draft: PlanDraft) -> None:
+    def save_draft(self, draft: PlanDraft, *, expected_hash: str | None = None) -> None:
         # 契约：终态（cancelled / approved）草案不得被改写（B2-V §二.4）。
         existing = self.drafts.get(draft.draft_id)
         if existing is not None and existing.status in {
@@ -534,6 +534,7 @@ def test_decide_edit_applies_and_saves_without_publishing() -> None:
         draft=draft,
         decision=DraftDecision.EDIT,
         expected_version=0,
+        presented_hash=draft.content_hash,
         edited_stages=_make_stages(4),
     )
     assert result is None

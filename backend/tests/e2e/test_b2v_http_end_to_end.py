@@ -409,7 +409,7 @@ def test_full_chain_generate_edit_approve_readback(db: PgTestDatabase) -> None:
     resp = _decide(
         client,
         draft_id,
-        {"decision": "edit", "expected_version": 0, "edited_stages": edited},
+        {"decision": "edit", "expected_version": 0, "draft_hash": draft["draft_hash"], "edited_stages": edited},
     )
     assert resp.status_code == 200, resp.text
     edited_body = resp.json()
@@ -618,7 +618,7 @@ def test_stale_draft_hash_is_rejected(db: PgTestDatabase) -> None:
     edited[0]["title"] = "改过的标题"
     assert (
         _decide(
-            client, draft["draft_id"], {"decision": "edit", "expected_version": 0, "edited_stages": edited}
+            client, draft["draft_id"], {"decision": "edit", "expected_version": 0, "draft_hash": draft["draft_hash"], "edited_stages": edited}
         ).status_code
         == 200
     )
@@ -891,3 +891,142 @@ def test_unknown_draft_and_run_are_not_found(db: PgTestDatabase) -> None:
     client = _client(db)
     assert client.get(f"{V1}/plans/drafts/drf_nope", params={"project_id": PROJECT_P1}).status_code == 404
     assert client.get(f"{V1}/runs/run_nope", params={"project_id": PROJECT_P1}).status_code == 404
+
+# Targeted B2-V regressions: real HTTP + PostgreSQL.
+def _approve_body(draft, version, key):
+    return dict(decision="approve", expected_version=version,
+                draft_hash=draft["draft_hash"], idempotency_key=key)
+
+
+def test_regression_historical_replay(db):
+    client = _client(db)
+    _, first = _generate_to_draft(client)
+    body = _approve_body(first, 0, "history-v1")
+    v1 = _decide(client, first["draft_id"], body).json()["plan"]
+    _, second = _generate_to_draft(client, goal=GOAL_B)
+    v2 = _decide(client, second["draft_id"], _approve_body(second, 1, "history-v2"))
+    assert v2.status_code == 200, v2.text
+    assert v2.json()["plan"]["revision"] == 2
+    replay = _decide(client, first["draft_id"], body)
+    assert replay.status_code == 200, replay.text
+    assert replay.json()["plan"]["plan_id"] == v1["plan_id"]
+    assert replay.json()["plan"]["revision"] == 1
+
+
+def test_regression_two_windows_and_old_content(db):
+    client = _client(db)
+    _, draft = _generate_to_draft(client)
+    stages = [dict(s) for s in draft["stages"]]
+    stages[0]["title"] = "new window"
+    edit = dict(decision="edit", expected_version=0, draft_hash=draft["draft_hash"], edited_stages=stages)
+    assert _decide(client, draft["draft_id"], edit).status_code == 200
+    edit["edited_stages"] = draft["stages"]
+    stale = _decide(client, draft["draft_id"], edit)
+    assert stale.status_code == 409, stale.text
+    assert _get_draft(client, draft["draft_id"])["stages"][0]["title"] == "new window"
+
+
+def test_regression_concurrent_edit(db):
+    from concurrent.futures import ThreadPoolExecutor
+    _, draft = _generate_to_draft(_client(db))
+    barrier = threading.Barrier(2)
+    def edit(title):
+        client = _client(db)
+        stages = [dict(s) for s in draft["stages"]]
+        stages[0]["title"] = title
+        barrier.wait()
+        return _decide(client, draft["draft_id"], dict(decision="edit", expected_version=0,
+                       draft_hash=draft["draft_hash"], edited_stages=stages)).status_code
+    with ThreadPoolExecutor(2) as pool:
+        results = list(pool.map(edit, ["one", "two"]))
+    assert sorted(results) == [200, 409]
+
+
+def test_regression_catalog_history_and_keys(db):
+    from app.infrastructure.db.planning_catalog import stable_entity_id
+    keys = ["a.b", "a_b", "a" * 80 + "x", "a" * 80 + "y"]
+    assert len({stable_entity_id("nod", PROJECT_P1, k) for k in keys}) == 4
+    client = _client(db)
+    _, first = _generate_to_draft(client)
+    assert _decide(client, first["draft_id"], _approve_body(first, 0, "immutable-v1")).status_code == 200
+    def snapshot():
+        with psycopg.connect(db.migrator_dsn) as conn:
+            return {table: conn.execute(f"SELECT * FROM {table} ORDER BY 1").fetchall()
+                    for table in ["knowledge_nodes", "learning_units", "practice_tasks", "practice_projects"]}
+    before = snapshot()
+    def changed_structure(purpose, payload):
+        data = _structure_handler(purpose, payload)
+        for node in data["nodes"]:
+            node["title"] = "changed node"
+            node["objectives"] = ["changed objective"]
+        for unit in data["units"]:
+            unit["title"] = "changed unit"
+        return data
+    def changed_practice(purpose, payload):
+        data = _practice_handler(purpose, payload)
+        data["title"] = "changed practice"
+        data["tasks"][0]["goal"] = "changed task goal"
+        data["tasks"][0]["acceptance"] = ["changed acceptance"]
+        return data
+    changed = FakeLLM(handlers={"planning.outline": _outline_handler,
+                               "planning.structure": changed_structure,
+                               "planning.practice": changed_practice})
+    _, second = _generate_to_draft(_client(db, llm=changed), goal=GOAL_B)
+    assert _decide(client, second["draft_id"], dict(decision="cancel", expected_version=1)).status_code == 200
+    after = snapshot()
+    for table, rows in before.items():
+        by_id = {row[0]: row for row in after[table]}
+        assert all(by_id[row[0]] == row for row in rows), table
+    assert PgPlanRepository(db.app_dsn).get_revision(project_id=PROJECT_P1, revision=1) is not None
+
+
+def test_regression_generation_exception_and_run_cas(db):
+    from app.core.errors import ConflictError
+    service = _container(db).plan_service
+    def fail(**kwargs):
+        raise RuntimeError("catalog write failed")
+    service._catalog.materialize = fail
+    from datetime import datetime, timezone
+
+    from app.domain.workspace.models import AuthContext
+    scope = AuthContext(actor_id=ACTOR_A1, session_id=SESSION_A1, issued_at=datetime.now(timezone.utc), learning_project_scope=(PROJECT_P1,))
+    with pytest.raises(RuntimeError):
+        service.generate(scope=scope, project_id=PROJECT_P1, goal=GOAL_A)
+    with psycopg.connect(db.migrator_dsn) as conn:
+        run_id, status, version = conn.execute("SELECT run_id,status,version FROM ai_runs").fetchone()
+    assert status in {"failed", "reconciliation_required"}
+    repo = PgRunRepository(db.app_dsn)
+    with pytest.raises(ConflictError):
+        repo.update_run(project_id=PROJECT_P1, run_id=run_id, expected_version=version-1,
+                        status="running", next_action="wait")
+
+
+def test_regression_unknown_dispatch_stops_and_reconciles(db):
+    from datetime import datetime, timezone
+
+    from app.domain.workspace.models import AuthContext
+    from app.ports.llm import LLMDispatchUnknownError, LLMFailure
+    llm = _fake_llm()
+    def unknown(**kwargs):
+        llm.calls.append((kwargs["run_id"], kwargs["attempt_id"], kwargs["purpose"]))
+        return LLMFailure("timeout", "unknown", dispatch_unknown=True)
+    llm.generate_structured = unknown
+    service = _container(db, llm=llm).plan_service
+    scope = AuthContext(ACTOR_A1, SESSION_A1, datetime.now(timezone.utc), (PROJECT_P1,))
+    with pytest.raises(LLMDispatchUnknownError):
+        service.generate(scope=scope, project_id=PROJECT_P1, goal=GOAL_A)
+    with psycopg.connect(db.migrator_dsn) as conn:
+        assert conn.execute("SELECT status,next_action FROM ai_runs").fetchone() == ("reconciliation_required", "reconcile")
+    assert len(llm.calls) == 1
+
+
+def test_regression_long_keys_and_legacy_ids_real_pg(db):
+    keys = ["a.b", "a_b", "a" * 80 + "x", "a" * 80 + "y"]
+    with psycopg.connect(db.migrator_dsn) as conn:
+        conn.execute("INSERT INTO knowledge_nodes(node_id,project_id,stable_key,title,node_type,source_status) VALUES ('legacy_a_b',%s,'a.b','Confirmed legacy','concept','verified')", (PROJECT_P1,))
+    result = PgPlanningCatalog(db.app_dsn).materialize(project_id=PROJECT_P1,
+              nodes=[dict(stable_key=k, title=k) for k in keys], units=[], relations=[])
+    assert len(set(result.node_ids.values())) == 4
+    with psycopg.connect(db.migrator_dsn) as conn:
+        assert conn.execute("SELECT stable_key,title,source_status FROM knowledge_nodes WHERE node_id='legacy_a_b'").fetchone() == ('a.b', 'Confirmed legacy', 'verified')
+        assert conn.execute("SELECT count(*) FROM knowledge_nodes").fetchone()[0] == 5

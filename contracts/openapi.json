@@ -351,7 +351,7 @@
             "type": "string",
             "maxLength": 128,
             "title": "Draft Hash",
-            "description": "approve 时必填：原样回传加载到的草案哈希",
+            "description": "approve / edit 时必填：原样回传加载到的草案哈希",
             "default": ""
           },
           "idempotency_key": {
@@ -1076,7 +1076,6 @@
           },
           "task_id": {
             "type": "string",
-            "maxLength": 64,
             "title": "Task Id"
           },
           "order_index": {
@@ -1102,7 +1101,6 @@
           },
           "unit_id": {
             "type": "string",
-            "maxLength": 64,
             "title": "Unit Id"
           },
           "order_index": {
@@ -1249,7 +1247,6 @@
         "description": "知识卡片。``source_status`` 如实区分 AI 草稿与已验证来源。",
         "properties": {
           "node_id": {
-            "maxLength": 64,
             "title": "Node Id",
             "type": "string"
           },
@@ -1303,7 +1300,6 @@
       "UnitView": {
         "properties": {
           "unit_id": {
-            "maxLength": 64,
             "title": "Unit Id",
             "type": "string"
           },
@@ -1379,7 +1375,6 @@
             "$ref": "#/components/schemas/PreferenceScope"
           },
           "scope_ref": {
-            "maxLength": 64,
             "title": "Scope Ref",
             "type": "string"
           },
@@ -1425,7 +1420,6 @@
             "$ref": "#/components/schemas/PreferenceScope"
           },
           "scope_ref": {
-            "maxLength": 64,
             "title": "Scope Ref",
             "type": "string"
           },
@@ -1486,12 +1480,10 @@
         "description": "实践任务。``thinking_prompts`` 在实践工作台重点展示。\n\n``acceptance`` 必填：没有「怎样算完成」的任务无法验收。",
         "properties": {
           "task_id": {
-            "maxLength": 64,
             "title": "Task Id",
             "type": "string"
           },
           "practice_project_id": {
-            "maxLength": 64,
             "title": "Practice Project Id",
             "type": "string"
           },

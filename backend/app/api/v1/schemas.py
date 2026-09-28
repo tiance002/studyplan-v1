@@ -155,13 +155,13 @@ class KnowledgeExtensionView(BaseModel):
 
 class UnitLinkView(BaseModel):
     stage_id: str = Field(..., max_length=64)
-    unit_id: str = Field(..., max_length=64)
+    unit_id: str = Field(...)
     order_index: int = Field(..., ge=0)
 
 
 class TaskLinkView(BaseModel):
     stage_id: str = Field(..., max_length=64)
-    task_id: str = Field(..., max_length=64)
+    task_id: str = Field(...)
     order_index: int = Field(..., ge=0)
 
 
@@ -218,7 +218,7 @@ class DraftDecisionRequest(BaseModel):
         ),
     )
     draft_hash: str = Field(
-        default="", max_length=128, description="approve 时必填：原样回传加载到的草案哈希"
+        default="", max_length=128, description="approve / edit 时必填：原样回传加载到的草案哈希"
     )
     idempotency_key: str = Field(
         default="", max_length=200, description="approve 时必填：重复确认返回同一结果"
@@ -249,7 +249,7 @@ class PlanDecisionResponse(BaseModel):
 class NodeView(BaseModel):
     """知识卡片。``source_status`` 如实区分 AI 草稿与已验证来源。"""
 
-    node_id: str = Field(..., max_length=64)
+    node_id: str = Field(...)
     stable_key: str = Field(..., max_length=128)
     title: str = Field(..., max_length=200)
     node_type: KnowledgeNodeType
@@ -258,7 +258,7 @@ class NodeView(BaseModel):
 
 
 class UnitView(BaseModel):
-    unit_id: str = Field(..., max_length=64)
+    unit_id: str = Field(...)
     stable_key: str = Field(..., max_length=128)
     title: str = Field(..., max_length=200)
     objectives: list[str] = Field(default_factory=list)
@@ -275,7 +275,7 @@ class ProgressPatchRequest(BaseModel):
 
 class PreferenceView(BaseModel):
     scope: PreferenceScope
-    scope_ref: str = Field(..., max_length=64)
+    scope_ref: str = Field(...)
     mode: PreferenceMode
     language: str = Field(..., max_length=16)
     official_priority: bool
@@ -287,7 +287,7 @@ class PreferenceUpdateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     scope: PreferenceScope
-    scope_ref: str = Field(..., max_length=64)
+    scope_ref: str = Field(...)
     mode: PreferenceMode
     language: str = Field(default="zh", max_length=16)
     official_priority: bool = True
@@ -304,8 +304,8 @@ class PracticeTaskView(BaseModel):
     ``acceptance`` 必填：没有「怎样算完成」的任务无法验收。
     """
 
-    task_id: str = Field(..., max_length=64)
-    practice_project_id: str = Field(..., max_length=64)
+    task_id: str = Field(...)
+    practice_project_id: str = Field(...)
     stable_key: str = Field(..., max_length=128)
     title: str = Field(..., max_length=200)
     goal: str = Field(..., max_length=2000)

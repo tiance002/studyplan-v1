@@ -38,7 +38,7 @@ from typing import Any, Callable, Mapping
 
 from app.agent_workflows.state import PlanningState
 from app.agent_workflows.validators import MAX_REPAIR_ATTEMPTS, validate_plan_structure
-from app.ports.llm import LLMFailure, LLMPort
+from app.ports.llm import LLMDispatchUnknownError, LLMFailure, LLMPort
 
 #: 路由目标常量。
 ROUTE_COMMIT = "commit_plan_idempotently"
@@ -213,6 +213,8 @@ class PlanningNodes:
             attempt_id=f"{state.get('run_id', '')}:outline:1",
         )
         if isinstance(result, LLMFailure):
+            if result.dispatch_unknown:
+                raise LLMDispatchUnknownError(result.error_class)
             return _with_aggregate(
                 _extend_generation_errors(
                     state,
@@ -254,6 +256,8 @@ class PlanningNodes:
             attempt_id=f"{state.get('run_id', '')}:structure:1",
         )
         if isinstance(result, LLMFailure):
+            if result.dispatch_unknown:
+                raise LLMDispatchUnknownError(result.error_class)
             return _with_aggregate(
                 _extend_generation_errors(
                     state,
@@ -301,6 +305,8 @@ class PlanningNodes:
             attempt_id=f"{state.get('run_id', '')}:practice:1",
         )
         if isinstance(result, LLMFailure):
+            if result.dispatch_unknown:
+                raise LLMDispatchUnknownError(result.error_class)
             return _with_aggregate(
                 _extend_generation_errors(
                     state,
@@ -356,6 +362,8 @@ class PlanningNodes:
             attempt_id=attempt_id,
         )
         if isinstance(result, LLMFailure):
+            if result.dispatch_unknown:
+                raise LLMDispatchUnknownError(result.error_class)
             # 结果未知的付费调用不得自动重新派发：交给路由，不在此处重试。
             # 注意：repair 阶段是对已有 generation 错误的**重试通道**，
             # 这里用普通赋值（覆盖）会丢掉原始生成错误，因此改为追加。

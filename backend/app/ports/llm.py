@@ -51,6 +51,10 @@ class LLMFailure:
     details: dict[str, object] = field(default_factory=dict)
 
 
+class LLMDispatchUnknownError(RuntimeError):
+    """Paid dispatch outcome unknown; reconcile before another call."""
+
+
 class LLMUnavailableError(RuntimeError):
     """Provider 不可用。
 

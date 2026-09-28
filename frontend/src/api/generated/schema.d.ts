@@ -169,7 +169,7 @@ export interface components {
             expected_version: number;
             /**
              * Draft Hash
-             * @description approve 时必填：原样回传加载到的草案哈希
+             * @description approve / edit 时必填：原样回传加载到的草案哈希
              * @default
              */
             draft_hash: string;
