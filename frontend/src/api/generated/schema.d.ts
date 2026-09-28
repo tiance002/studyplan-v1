@@ -24,62 +24,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/plans/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 发起一次规划生成
+         * @description 发起规划。返回 ``run_id``；草案内容通过 ``GET /runs/{run_id}`` 与
+         *     ``GET /plans/drafts/{draft_id}`` 获取（本响应**不**回显草案）。
+         */
+        post: operations["generate_plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 读取运行状态投影
+         * @description 对外运行状态：``status`` / ``next_action`` / ``result_ref``（不透明）。
+         */
+        get: operations["get_run"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/drafts/{draft_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 读取草案（含已核验资源）
+         * @description 草案完整结构 + ``draft_hash``（确认时原样回传）。
+         *
+         *     资源引用会在此**实际输出前**校验：核验失败的条目只给搜索建议，
+         *     **绝不**编造已核验章节（B2-V §五）。
+         */
+        get: operations["get_plan_draft"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/drafts/{draft_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 确认 / 编辑 / 取消草案
+         * @description 处理用户在等待确认处的决定。
+         *
+         *     - ``approve``：单事务发布（幂等；重复确认返回**同一结果**，不产生第二份计划）；
+         *     - ``edit``：应用编辑并**重新校验**，保存新草案（不发布）；
+         *     - ``cancel``：状态条件取消（已发布的草案不会被取消）。
+         */
+        post: operations["decide_plan_draft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 读取当前正式路线
+         * @description 当前**已确认**的路线。没有正式路线时 404（而不是返回空计划）。
+         */
+        get: operations["get_current_plan"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /**
-         * ErrorBody
-         * @description 统一错误视图：``code/message/request_id/details``，不回显敏感输入。
-         */
-        ErrorBody: {
-            /**
-             * Code
-             * @description 稳定错误码，见 core.errors.ErrorCode
-             */
-            code: string;
-            /**
-             * Message
-             * @description 面向用户的可读信息
-             */
-            message: string;
-            /** Request Id */
-            request_id: string;
-            /** Details */
-            details?: {
-                [key: string]: unknown;
-            };
-        };
-        /**
-         * PreferenceMode
-         * @description 资源形态偏好。
-         * @enum {string}
-         */
-        PreferenceMode: "text_first" | "video_first" | "mixed" | "both";
-        /**
-         * PrefsSnapshot
-         * @description 资源偏好快照（请求内联，非独立资源）。
-         */
-        PrefsSnapshot: {
-            /** @default mixed */
-            mode: components["schemas"]["PreferenceMode"];
-            /**
-             * Language
-             * @default zh
-             */
-            language: string;
-            /**
-             * Official Priority
-             * @default true
-             */
-            official_priority: boolean;
-            /**
-             * Pace
-             * @default normal
-             * @enum {string}
-             */
-            pace: "slow" | "normal" | "fast";
-        };
         /**
          * AiRunNextAction
          * @description 前端据此渲染下一步按钮。前端**永不**看到图内部节点名。
@@ -95,134 +151,70 @@ export interface components {
          */
         AiRunStatus: "queued" | "running" | "waiting_user" | "succeeded" | "failed" | "cancelled" | "reconciliation_required";
         /**
-         * RunView
-         * @description 对外运行状态投影（**唯一**可授权给前端的运行视图）。
-         *
-         *     ``status`` 成功 **不自动等于** 知识已学会/任务已验收。
-         *     ``result_ref`` 是不透明引用；前端不得解析其内部结构。
-         */
-        RunView: {
-            /** Run Id */
-            run_id: string;
-            status: components["schemas"]["AiRunStatus"];
-            next_action: components["schemas"]["AiRunNextAction"];
-            /**
-             * Version
-             * @description 乐观并发版本号
-             */
-            version: number;
-            /**
-             * Result Ref
-             * @default null
-             */
-            result_ref: string | null;
-            /** @default null */
-            error: components["schemas"]["ErrorBody"] | null;
-        };
-        /** PlanGenerateRequest */
-        PlanGenerateRequest: {
-            /** Goal */
-            goal: string;
-            prefs_snapshot?: components["schemas"]["PrefsSnapshot"];
-        };
-        /**
-         * PlanGenerateResponse
-         * @description 202 响应：只返回运行句柄，不返回草案内容。
-         */
-        PlanGenerateResponse: {
-            /** Run Id */
-            run_id: string;
-            /** Status Url */
-            status_url: string;
-        };
-        /**
-         * OutlineSectionKind
-         * @description 纲要分节类型。
+         * DraftDecision
+         * @description 等待用户时的三种决定。
          * @enum {string}
          */
-        OutlineSectionKind: "foundation" | "core" | "practice" | "advanced";
+        DraftDecision: "approve" | "edit" | "cancel";
         /**
-         * StageDetail
-         * @description 阶段详情（前端「阶段导航」直接消费）。
+         * DraftDecisionRequest
+         * @description approve / edit / cancel。**非法或缺失决定一律失败，绝不默认 approve。**
          */
-        StageDetail: {
-            /** Stage Id */
-            stage_id: string;
-            /** Stable Key */
-            stable_key: string;
-            /** Title */
-            title: string;
-            section_kind: components["schemas"]["OutlineSectionKind"];
-            /** Order Index */
-            order_index: number;
+        DraftDecisionRequest: {
+            decision: components["schemas"]["DraftDecision"];
             /**
-             * Objective
+             * Expected Version
+             * @description **当前正式路线**的版本号（尚无正式路线时为 0）。用于乐观并发：期间若已有其它发布，本次确认返回 409。
+             */
+            expected_version: number;
+            /**
+             * Draft Hash
+             * @description approve 时必填：原样回传加载到的草案哈希
              * @default
              */
-            objective: string;
+            draft_hash: string;
+            /**
+             * Idempotency Key
+             * @description approve 时必填：重复确认返回同一结果
+             * @default
+             */
+            idempotency_key: string;
+            /**
+             * Edited Stages
+             * @description decision=edit 时必填（完整结构，不允许只回 draft_ref）
+             */
+            edited_stages?: components["schemas"]["StageDetail"][] | null;
         };
         /**
-         * OrderedSection
-         * @description 主线资源的**有序章节**（保留作者原有章节顺序）。
+         * ErrorBody
+         * @description 统一错误视图：``code/message/request_id/details``，不回显敏感输入。
+         *
+         *     ``code`` 是一个**稳定**标识：HTTP 响应里取 ``core.errors.ErrorCode``；
+         *     出现在 ``RunView.error`` 里时表示**运行失败类别**（同样是稳定闭集，
+         *     不含图内部节点名）。前端按 ``code`` 分支，**不解析** ``message``。
          */
-        OrderedSection: {
-            /** Section Id */
-            section_id: string;
-            /** Order Index */
-            order_index: number;
-            /** Title */
-            title: string;
-            /** Url */
-            url: string;
+        ErrorBody: {
             /**
-             * Anchor
-             * @default
+             * Code
+             * @description 稳定错误码（ErrorCode 或稳定 run error class）
              */
-            anchor: string;
+            code: string;
+            /**
+             * Message
+             * @description 面向用户的可读信息
+             */
+            message: string;
+            /** Request Id */
+            request_id: string;
+            /** Details */
+            details?: {
+                [key: string]: unknown;
+            };
         };
-        /**
-         * StageResourceRole
-         * @description 阶段与资源的关系角色（设计 §2.2）。
-         *
-         *     每阶段默认一条 ``PRIMARY`` 主线；``SUPPLEMENT`` 补充前置，
-         *     ``REFERENCE`` 为对照/延伸。**不计算章节重叠率或覆盖率。**
-         * @enum {string}
-         */
-        StageResourceRole: "primary" | "supplement" | "reference";
-        /**
-         * StageResourceAssignmentView
-         * @description 阶段 → 资源分配。``role=primary`` 表示该阶段主线。
-         *
-         *     ``ordered_sections`` 保持原始顺序；无核验链接时用
-         *     ``fallback_search_terms`` 给出搜索建议，**绝不编造 URL**。
-         */
-        StageResourceAssignmentView: {
-            /** Assignment Id */
-            assignment_id: string;
-            /** Stage Id */
-            stage_id: string;
-            role: components["schemas"]["StageResourceRole"];
-            /**
-             * Creator
-             * @description 主线作者/机构
-             * @default
-             */
-            creator: string;
-            /**
-             * Source Ref
-             * @description 公共资源来源 source_id
-             * @default
-             */
-            source_ref: string;
-            /**
-             * Source Version
-             * @default 0
-             */
-            source_version: number;
-            /** Ordered Sections */
-            ordered_sections?: components["schemas"]["OrderedSection"][];
-            /** Fallback Search Terms */
-            fallback_search_terms?: string[];
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
         };
         /**
          * KnowledgeExtensionView
@@ -269,58 +261,46 @@ export interface components {
              */
             order_index: number;
         };
-        /** UnitLinkView */
-        UnitLinkView: {
-            /** Stage Id */
-            stage_id: string;
-            /** Unit Id */
-            unit_id: string;
-            /** Order Index */
-            order_index: number;
-        };
-        /** TaskLinkView */
-        TaskLinkView: {
-            /** Stage Id */
-            stage_id: string;
-            /** Task Id */
-            task_id: string;
-            /** Order Index */
-            order_index: number;
-        };
         /**
-         * PlanSnapshot
-         * @description **完整版本快照**：阶段 + 单元/任务链接 + 主线资源 + 扩展知识。
-         *
-         *     草案视图（``PlanDraftView``）与已发布视图（``PlanView``）共用本结构，
-         *     保证「用户确认的结构」与「发布的结构」字段一致。
+         * OrderedSection
+         * @description 主线资源的**有序章节**（保留作者原有章节顺序）。
          */
-        PlanSnapshot: {
-            /** Project Id */
-            project_id: string;
-            /** Revision */
-            revision: number;
-            /** Goal Snapshot */
-            goal_snapshot: string;
-            /** Stages */
-            stages?: components["schemas"]["StageDetail"][];
-            /** Unit Links */
-            unit_links?: components["schemas"]["UnitLinkView"][];
-            /** Task Links */
-            task_links?: components["schemas"]["TaskLinkView"][];
-            /** Stage Resources */
-            stage_resources?: components["schemas"]["StageResourceAssignmentView"][];
-            /** Extensions */
-            extensions?: components["schemas"]["KnowledgeExtensionView"][];
+        OrderedSection: {
+            /** Section Id */
+            section_id: string;
+            /** Order Index */
+            order_index: number;
+            /** Title */
+            title: string;
+            /** Url */
+            url: string;
             /**
-             * Source Pack Key
+             * Anchor
              * @default
              */
-            source_pack_key: string;
-            /**
-             * Source Pack Version
-             * @default 0
-             */
-            source_pack_version: number;
+            anchor: string;
+        };
+        /**
+         * OutlineSectionKind
+         * @description 纲要分节类型。
+         * @enum {string}
+         */
+        OutlineSectionKind: "foundation" | "core" | "practice" | "advanced";
+        /**
+         * PlanDecisionResponse
+         * @description 一次决定的处理结果：更新后的草案 + （确认时）发布出的正式路线。
+         *
+         *     三种决定的形状一致，便于前端用同一段代码更新界面：
+         *
+         *     - ``approve``：``draft.status=approved``，``plan`` 为当前正式路线；
+         *     - ``edit``：``draft.status=awaiting_approval``（已重新校验），``plan`` 为 ``null``；
+         *     - ``cancel``：``draft.status=cancelled``，``plan`` 为 ``null``。
+         */
+        PlanDecisionResponse: {
+            /** Run Id */
+            run_id: string;
+            draft: components["schemas"]["PlanDraftView"];
+            plan?: components["schemas"]["PlanView"] | null;
         };
         /**
          * PlanDraftStatus
@@ -372,6 +352,22 @@ export interface components {
             /** Validation Warnings */
             validation_warnings?: string[];
         };
+        /** PlanGenerateRequest */
+        PlanGenerateRequest: {
+            /** Goal */
+            goal: string;
+            prefs_snapshot?: components["schemas"]["PrefsSnapshot"];
+        };
+        /**
+         * PlanGenerateResponse
+         * @description 202 响应：只返回运行句柄，不返回草案内容。
+         */
+        PlanGenerateResponse: {
+            /** Run Id */
+            run_id: string;
+            /** Status Url */
+            status_url: string;
+        };
         /**
          * PlanRevisionStatus
          * @description 计划版本状态。只有 APPROVED/CURRENT 的版本是正式路线。
@@ -417,40 +413,189 @@ export interface components {
             /**
              * Approved At
              * @description UTC ISO8601
-             * @default null
              */
-            approved_at: string | null;
+            approved_at?: string | null;
         };
         /**
-         * DraftDecision
-         * @description 等待用户时的三种决定。
+         * PreferenceMode
+         * @description 资源形态偏好。
          * @enum {string}
          */
-        DraftDecision: "approve" | "edit" | "cancel";
+        PreferenceMode: "text_first" | "video_first" | "mixed" | "both";
         /**
-         * DraftDecisionRequest
-         * @description approve / edit / cancel。**非法或缺失决定一律失败，绝不默认 approve。**
+         * PrefsSnapshot
+         * @description 资源偏好快照（请求内联，非独立资源）。
          */
-        DraftDecisionRequest: {
-            decision: components["schemas"]["DraftDecision"];
-            /** Expected Version */
-            expected_version: number;
+        PrefsSnapshot: {
+            /** @default mixed */
+            mode: components["schemas"]["PreferenceMode"];
             /**
-             * Draft Hash
+             * Language
+             * @default zh
+             */
+            language: string;
+            /**
+             * Official Priority
+             * @default true
+             */
+            official_priority: boolean;
+            /**
+             * Pace
+             * @default normal
+             * @enum {string}
+             */
+            pace: "slow" | "normal" | "fast";
+        };
+        /**
+         * RunView
+         * @description 对外运行状态投影（**唯一**可授权给前端的运行视图）。
+         *
+         *     ``status`` 成功 **不自动等于** 知识已学会/任务已验收。
+         *     ``result_ref`` 是不透明引用；前端不得解析其内部结构。
+         */
+        RunView: {
+            /** Run Id */
+            run_id: string;
+            status: components["schemas"]["AiRunStatus"];
+            next_action: components["schemas"]["AiRunNextAction"];
+            /**
+             * Version
+             * @description 乐观并发版本号
+             */
+            version: number;
+            /** Result Ref */
+            result_ref?: string | null;
+            error?: components["schemas"]["ErrorBody"] | null;
+        };
+        /**
+         * StageDetail
+         * @description 阶段详情（前端「阶段导航」直接消费）。
+         */
+        StageDetail: {
+            /** Stage Id */
+            stage_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            section_kind: components["schemas"]["OutlineSectionKind"];
+            /** Order Index */
+            order_index: number;
+            /**
+             * Objective
              * @default
              */
-            draft_hash: string;
+            objective: string;
+        };
+        /**
+         * StageResourceAssignmentView
+         * @description 阶段 → 资源分配。``role=primary`` 表示该阶段主线。
+         *
+         *     ``ordered_sections`` 保持原始顺序；无核验链接时用
+         *     ``fallback_search_terms`` 给出搜索建议，**绝不编造 URL**。
+         */
+        StageResourceAssignmentView: {
+            /** Assignment Id */
+            assignment_id: string;
+            /** Stage Id */
+            stage_id: string;
+            role: components["schemas"]["StageResourceRole"];
             /**
-             * Idempotency Key
+             * Creator
+             * @description 主线作者/机构
              * @default
              */
-            idempotency_key: string;
+            creator: string;
             /**
-             * Edited Stages
-             * @description decision=edit 时必填（完整结构，不允许只回 draft_ref）
-             * @default null
+             * Source Ref
+             * @description 公共资源来源 source_id
+             * @default
              */
-            edited_stages: components["schemas"]["StageDetail"][] | null;
+            source_ref: string;
+            /**
+             * Source Version
+             * @default 0
+             */
+            source_version: number;
+            /** Ordered Sections */
+            ordered_sections?: components["schemas"]["OrderedSection"][];
+            /** Fallback Search Terms */
+            fallback_search_terms?: string[];
+        };
+        /**
+         * StageResourceRole
+         * @description 阶段与资源的关系角色（设计 §2.2）。
+         *
+         *     每阶段默认一条 ``PRIMARY`` 主线；``SUPPLEMENT`` 补充前置，
+         *     ``REFERENCE`` 为对照/延伸。**不计算章节重叠率或覆盖率。**
+         * @enum {string}
+         */
+        StageResourceRole: "primary" | "supplement" | "reference";
+        /** TaskLinkView */
+        TaskLinkView: {
+            /** Stage Id */
+            stage_id: string;
+            /** Task Id */
+            task_id: string;
+            /** Order Index */
+            order_index: number;
+        };
+        /** UnitLinkView */
+        UnitLinkView: {
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Order Index */
+            order_index: number;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
+        };
+        /**
+         * PlanSnapshot
+         * @description **完整版本快照**：阶段 + 单元/任务链接 + 主线资源 + 扩展知识。
+         *
+         *     草案视图（``PlanDraftView``）与已发布视图（``PlanView``）共用本结构，
+         *     保证「用户确认的结构」与「发布的结构」字段一致。
+         */
+        PlanSnapshot: {
+            /** Project Id */
+            project_id: string;
+            /** Revision */
+            revision: number;
+            /** Goal Snapshot */
+            goal_snapshot: string;
+            /** Stages */
+            stages?: components["schemas"]["StageDetail"][];
+            /** Unit Links */
+            unit_links?: components["schemas"]["UnitLinkView"][];
+            /** Task Links */
+            task_links?: components["schemas"]["TaskLinkView"][];
+            /** Stage Resources */
+            stage_resources?: components["schemas"]["StageResourceAssignmentView"][];
+            /** Extensions */
+            extensions?: components["schemas"]["KnowledgeExtensionView"][];
+            /**
+             * Source Pack Key
+             * @default
+             */
+            source_pack_key: string;
+            /**
+             * Source Pack Version
+             * @default 0
+             */
+            source_pack_version: number;
         };
         /**
          * KnowledgeNodeType
@@ -630,6 +775,180 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+        };
+    };
+    generate_plan: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanGenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanGenerateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_run: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_plan_draft: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanDraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_plan_draft: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanDecisionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_current_plan: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

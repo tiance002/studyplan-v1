@@ -39,11 +39,16 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class ErrorBody(BaseModel):
-    """统一错误视图：``code/message/request_id/details``，不回显敏感输入。"""
+    """统一错误视图：``code/message/request_id/details``，不回显敏感输入。
+
+    ``code`` 是一个**稳定**标识：HTTP 响应里取 ``core.errors.ErrorCode``；
+    出现在 ``RunView.error`` 里时表示**运行失败类别**（同样是稳定闭集，
+    不含图内部节点名）。前端按 ``code`` 分支，**不解析** ``message``。
+    """
 
     model_config = ConfigDict(extra="forbid")
 
-    code: str = Field(..., max_length=64, description="稳定错误码，见 core.errors.ErrorCode")
+    code: str = Field(..., max_length=64, description="稳定错误码（ErrorCode 或稳定 run error class）")
     message: str = Field(..., max_length=500, description="面向用户的可读信息")
     request_id: str = Field(..., max_length=64)
     details: dict[str, Any] = Field(default_factory=dict)
@@ -204,12 +209,38 @@ class DraftDecisionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     decision: DraftDecision
-    expected_version: int = Field(..., ge=0)
-    draft_hash: str = Field(default="", max_length=128)
-    idempotency_key: str = Field(default="", max_length=200)
+    expected_version: int = Field(
+        ...,
+        ge=0,
+        description=(
+            "**当前正式路线**的版本号（尚无正式路线时为 0）。"
+            "用于乐观并发：期间若已有其它发布，本次确认返回 409。"
+        ),
+    )
+    draft_hash: str = Field(
+        default="", max_length=128, description="approve 时必填：原样回传加载到的草案哈希"
+    )
+    idempotency_key: str = Field(
+        default="", max_length=200, description="approve 时必填：重复确认返回同一结果"
+    )
     edited_stages: list[StageDetail] | None = Field(
         default=None, description="decision=edit 时必填（完整结构，不允许只回 draft_ref）"
     )
+
+
+class PlanDecisionResponse(BaseModel):
+    """一次决定的处理结果：更新后的草案 + （确认时）发布出的正式路线。
+
+    三种决定的形状一致，便于前端用同一段代码更新界面：
+
+    - ``approve``：``draft.status=approved``，``plan`` 为当前正式路线；
+    - ``edit``：``draft.status=awaiting_approval``（已重新校验），``plan`` 为 ``null``；
+    - ``cancel``：``draft.status=cancelled``，``plan`` 为 ``null``。
+    """
+
+    run_id: str = Field(..., max_length=64)
+    draft: PlanDraftView
+    plan: PlanView | None = None
 
 
 # ------------------------------------------------------------------ 知识与单元
@@ -317,6 +348,7 @@ V1_SCHEMAS: tuple[type[BaseModel], ...] = (
     PlanDraftView,
     PlanView,
     DraftDecisionRequest,
+    PlanDecisionResponse,
     NodeView,
     UnitView,
     ProgressPatchRequest,

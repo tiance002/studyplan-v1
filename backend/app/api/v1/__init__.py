@@ -1,3 +1,8 @@
-"""`/api/v1` 路由包。B2 实现业务端点。"""
+"""``/api/v1`` 路由包（B2-V §六）。
 
-__all__: list[str] = []
+对外导出 :data:`~app.api.v1.routes.router`：五条业务端点。
+"""
+
+from app.api.v1.routes import router
+
+__all__ = ["router"]

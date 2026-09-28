@@ -1,0 +1,155 @@
+"""阶段资源的**输出与落库前**校验（B2-V §五）。
+
+## 两个方向，一份规则
+
+公共资源的 ``source_ref`` / ``section_refs`` 必须**真实存在**且「章节属于
+对应来源」。这条规则在**两个时机**都要生效，且判定必须一致：
+
+1. **落库前**（保存草案 / 发布）：把无法核验的引用**降级**为「无来源 + 搜索
+   建议」，使 ``stage_resource_assignments.source_ref`` 的复合外键不会指向
+   不存在的来源（§五），同时**不编造**已核验章节。
+2. **输出前**（草案/正式路线视图）：把引用解析成可安全展示的章节，
+   核验失败时**显式**给出搜索建议与降级说明。
+
+两个方向都复用领域层的 :func:`~app.domain.resources.curation.resolve_assignment_output`，
+因此不可能出现「落库认为有效、输出认为无效」的分叉。
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Mapping, Sequence
+
+from app.domain.enums import StageResourceRole
+from app.domain.resources.curation import (
+    PublicResourceSection,
+    PublicResourceSource,
+    ResolvedSection,
+    StageResourceAssignment,
+    resolve_assignment_output,
+)
+from app.ports.public_resources import PublicResourceCatalogPort
+
+__all__ = [
+    "StageResourceView",
+    "normalize_stage_resources",
+    "resolve_stage_resources",
+]
+
+#: 降级且没有任何搜索建议时的兜底搜索词（**建议**，不是已核验来源）。
+_DEFAULT_FALLBACK = "该阶段 学习资源"
+
+
+@dataclass(frozen=True, slots=True)
+class StageResourceView:
+    """阶段资源分配的可展示视图（已核验章节 + 显式降级说明）。"""
+
+    assignment_id: str
+    stage_id: str
+    role: StageResourceRole
+    creator: str
+    source_ref: str
+    source_version: int
+    ordered_sections: tuple[ResolvedSection, ...]
+    fallback_search_terms: tuple[str, ...]
+    warnings: tuple[str, ...]
+
+    @property
+    def degraded(self) -> bool:
+        return bool(self.warnings)
+
+
+def _load_catalog(
+    assignments: Sequence[StageResourceAssignment],
+    *,
+    catalog: PublicResourceCatalogPort,
+) -> tuple[dict[str, PublicResourceSource], dict[str, PublicResourceSection]]:
+    """一次取回所有被引用的来源与章节（避免 N 次往返）。"""
+    source_ids = sorted({a.source_ref for a in assignments if a.source_ref})
+    section_ids = sorted({s for a in assignments for s in a.section_refs if s})
+    return catalog.load_sources(source_ids=source_ids), catalog.load_sections(
+        section_ids=section_ids
+    )
+
+
+def resolve_stage_resources(
+    assignments: Sequence[StageResourceAssignment],
+    *,
+    catalog: PublicResourceCatalogPort,
+    stage_titles: Mapping[str, str],
+) -> tuple[StageResourceView, ...]:
+    """把阶段资源分配解析为**可安全展示**的视图（B2-V §五）。
+
+    核验失败时不编造章节，只给出搜索建议与一条显式说明。
+    """
+    sources, sections = _load_catalog(assignments, catalog=catalog)
+    views: list[StageResourceView] = []
+    for assignment in assignments:
+        resolved = resolve_assignment_output(
+            assignment,
+            known_sources=sources,
+            known_sections=sections,
+            fallback_hint=stage_titles.get(assignment.stage_id, ""),
+        )
+        source = sources.get(resolved.source_ref) if resolved.source_ref else None
+        views.append(
+            StageResourceView(
+                assignment_id=resolved.assignment_id,
+                stage_id=resolved.stage_id,
+                role=resolved.role,
+                creator=source.creator if source is not None else "",
+                source_ref=resolved.source_ref,
+                source_version=resolved.source_version,
+                ordered_sections=resolved.sections,
+                fallback_search_terms=resolved.fallback_search_terms,
+                warnings=resolved.warnings,
+            )
+        )
+    return tuple(views)
+
+
+def normalize_stage_resources(
+    assignments: Sequence[StageResourceAssignment],
+    *,
+    catalog: PublicResourceCatalogPort,
+    stage_titles: Mapping[str, str],
+) -> tuple[StageResourceAssignment, ...]:
+    """**落库前**把无法核验的引用降级（B2-V §五）。
+
+    对每条分配执行与输出层**完全相同**的核验：
+
+    - 来源存在且章节归属正确 → 原样保留（保留 ``source_ref`` 与有序章节）；
+    - 否则 → 丢掉 ``source_ref``（存 NULL，不触发外键）与 ``section_refs``，
+      改用搜索建议，**绝不**写入未核验的章节引用。
+
+    这样 ``GET /drafts`` 展示的降级结果与数据库中的正式版本**完全一致**，
+    用户的确认哈希也覆盖了这份降级后的内容。
+    """
+    sources, sections = _load_catalog(assignments, catalog=catalog)
+    normalized: list[StageResourceAssignment] = []
+    for assignment in assignments:
+        resolved = resolve_assignment_output(
+            assignment,
+            known_sources=sources,
+            known_sections=sections,
+            fallback_hint=stage_titles.get(assignment.stage_id, ""),
+        )
+        if not resolved.degraded:
+            normalized.append(assignment)
+            continue
+        fallback = tuple(resolved.fallback_search_terms) or (_DEFAULT_FALLBACK,)
+        normalized.append(
+            StageResourceAssignment.create(
+                project_id=assignment.project_id,
+                stage_id=assignment.stage_id,
+                role=assignment.role,
+                plan_id=assignment.plan_id,
+                # 降级：不写未核验来源，只保留搜索建议。
+                source_ref="",
+                section_refs=(),
+                order_index=assignment.order_index,
+                source_version=0,
+                fallback_search_terms=fallback,
+            )
+        )
+    return tuple(normalized)

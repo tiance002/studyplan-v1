@@ -290,12 +290,37 @@ def test_0003_public_tables_read_only_for_app_role(migrated_db: PgTestDatabase) 
 
 
 def test_0003_private_tables_cross_project_isolation(migrated_db: PgTestDatabase) -> None:
-    """私人新表：缺上下文默认拒绝；跨项目读写拒绝。"""
+    """私人新表：缺上下文默认拒绝；跨项目读写拒绝。
+
+    0004 给 ``knowledge_extensions`` 加了归属 FK（必须属于某个已发布版本的
+    某个阶段），因此这里先植入最小父行（项目 → 版本 → 阶段）。
+    """
     with psycopg.connect(migrated_db.migrator_dsn, autocommit=True) as conn:
         conn.execute(
+            "INSERT INTO learning_projects(project_id,owner_actor_id,title,goal_statement,stable_key) "
+            "VALUES ('p1','a1','t1','g1','sk-p1'), ('p2','a2','t2','g2','sk-p2') "
+            "ON CONFLICT DO NOTHING"
+        )
+        for project, stage in (("p1", "stg1"), ("p2", "stg2")):
+            plan = f"pln_{project}"
+            conn.execute(
+                "INSERT INTO plan_revisions"
+                "(plan_id,project_id,revision,goal_snapshot,status,structure) "
+                "VALUES (%s,%s,1,'目标','approved','{}'::jsonb) ON CONFLICT DO NOTHING",
+                (plan, project),
+            )
+            conn.execute(
+                "INSERT INTO plan_stages"
+                "(stage_id,project_id,plan_id,stable_key,title,section_kind,objective,order_index) "
+                "VALUES (%s,%s,%s,%s,'阶段','core','',0) ON CONFLICT DO NOTHING",
+                (stage, project, plan, f"sk-{stage}"),
+            )
+        conn.execute(
             "INSERT INTO knowledge_extensions"
-            "(extension_id,project_id,stage_id,topic) "
-            "VALUES ('e1','p1','stg1','topic one'), ('e2','p2','stg2','topic two')"
+            "(extension_id,project_id,plan_id,stage_id,topic) "
+            "VALUES ('e1','p1','pln_p1','stg1','topic one'), "
+            "('e2','p2','pln_p2','stg2','topic two') "
+            "ON CONFLICT DO NOTHING"
         )
 
     with psycopg.connect(migrated_db.app_dsn) as conn:
@@ -309,8 +334,8 @@ def test_0003_private_tables_cross_project_isolation(migrated_db: PgTestDatabase
         with pytest.raises(Exception) as exc:  # noqa: B017 - 具体异常由 RLS 决定
             conn.execute(
                 "INSERT INTO knowledge_extensions"
-                "(extension_id,project_id,stage_id,topic) "
-                "VALUES ('ex','p2','stgX','topic x')"
+                "(extension_id,project_id,plan_id,stage_id,topic) "
+                "VALUES ('ex','p2','pln_p2','stg2','topic x')"
             )
         assert "row-level security" in str(exc.value).lower() or "权限" in str(exc.value)
 

@@ -33,6 +33,7 @@ from app.domain.resources.curation import (
     PublicResourceSection,
     PublicResourceSource,
     StageResourceAssignment,
+    resolve_assignment_output,
     validate_extension_soft_limit,
     validate_extensions,
     validate_mainline_continuity,
@@ -367,3 +368,145 @@ def test_curation_module_does_not_compute_duplicate_ratios() -> None:
     )
     hits = [token for token in forbidden if token in source]
     assert not hits, f"curation 模块不得包含重复度/覆盖率计算：{hits}"
+
+
+# --------------------------------------------------------------------- 输出前引用校验
+# B2-V §五：source_ref / section_refs 在**实际输出前**必须校验存在性与归属。
+
+
+def _source() -> PublicResourceSource:
+    return PublicResourceSource.create(
+        canonical_url="https://example.com/course", title="示例课程"
+    )
+
+
+def _catalog(source_id: str) -> dict[str, PublicResourceSection]:
+    """返回 {section_id: section}，键即领域生成的稳定 section_id。"""
+    sections = (
+        PublicResourceSection.create(
+            source_id=source_id, order_index=0, title="第一章", url="https://example.com/course#1"
+        ),
+        PublicResourceSection.create(
+            source_id=source_id, order_index=1, title="第二章", url="https://example.com/course#2"
+        ),
+        PublicResourceSection.create(
+            source_id="src_other", order_index=0, title="别家章节", url="https://other.example.com/x"
+        ),
+    )
+    return {sec.section_id: sec for sec in sections}
+
+
+def _ids(catalog: dict[str, PublicResourceSection], *titles: str) -> tuple[str, ...]:
+    by_title = {sec.title: sec.section_id for sec in catalog.values()}
+    return tuple(by_title[t] for t in titles)
+
+
+def test_resolve_assignment_keeps_verified_sections_in_order() -> None:
+    source = _source()
+    catalog = _catalog(source.source_id)
+    first, second = _ids(catalog, "第一章", "第二章")
+    assignment = StageResourceAssignment.create(
+        project_id="p1",
+        stage_id="stg_1",
+        role=StageResourceRole.PRIMARY,
+        source_ref=source.source_id,
+        section_refs=(second, first),
+    )
+    resolved = resolve_assignment_output(
+        assignment, known_sources={source.source_id: source}, known_sections=catalog
+    )
+    assert resolved.degraded is False
+    assert [s.title for s in resolved.sections] == ["第二章", "第一章"], "必须保留原顺序"
+
+
+def test_resolve_assignment_degrades_when_source_missing() -> None:
+    """来源不存在 → 不输出任何「已核验章节」，并显式给出降级说明与搜索建议。"""
+    catalog = _catalog("src_missing")
+    (first,) = _ids(catalog, "第一章")
+    assignment = StageResourceAssignment.create(
+        project_id="p1",
+        stage_id="stg_1",
+        role=StageResourceRole.PRIMARY,
+        source_ref="src_missing",
+        section_refs=(first,),
+    )
+    resolved = resolve_assignment_output(
+        assignment,
+        known_sources={},
+        known_sections=catalog,
+        fallback_hint="关系型数据库",
+    )
+    assert resolved.degraded is True
+    assert resolved.sections == (), "绝不把未核验章节当成已核验章节输出"
+    assert resolved.fallback_search_terms, "必须显式给出搜索建议"
+    assert any("不存在" in w for w in resolved.warnings)
+
+
+def test_resolve_assignment_drops_sections_belonging_to_another_source() -> None:
+    """章节存在但属于**别的来源** → 丢弃并说明（不得张冠李戴）。"""
+    source = _source()
+    catalog = _catalog(source.source_id)
+    first, foreign = _ids(catalog, "第一章", "别家章节")
+    assignment = StageResourceAssignment.create(
+        project_id="p1",
+        stage_id="stg_1",
+        role=StageResourceRole.PRIMARY,
+        source_ref=source.source_id,
+        section_refs=(first, foreign),
+    )
+    resolved = resolve_assignment_output(
+        assignment, known_sources={source.source_id: source}, known_sections=catalog
+    )
+    assert [s.title for s in resolved.sections] == ["第一章"]
+    assert any("不属于来源" in w for w in resolved.warnings)
+
+
+def test_resolve_assignment_drops_unknown_sections() -> None:
+    source = _source()
+    catalog = _catalog(source.source_id)
+    (first,) = _ids(catalog, "第一章")
+    assignment = StageResourceAssignment.create(
+        project_id="p1",
+        stage_id="stg_1",
+        role=StageResourceRole.PRIMARY,
+        source_ref=source.source_id,
+        section_refs=(first, "sec_ghost"),
+    )
+    resolved = resolve_assignment_output(
+        assignment, known_sources={source.source_id: source}, known_sections=catalog
+    )
+    assert [s.title for s in resolved.sections] == ["第一章"]
+    assert any("不存在" in w for w in resolved.warnings)
+
+
+def test_resolve_assignment_without_source_uses_fallback_terms() -> None:
+    """无 source_ref（仅搜索建议）→ 不输出章节，保留搜索建议并明确说明。"""
+    assignment = StageResourceAssignment.create(
+        project_id="p1",
+        stage_id="stg_1",
+        role=StageResourceRole.PRIMARY,
+        fallback_search_terms=("PostgreSQL 入门",),
+    )
+    resolved = resolve_assignment_output(assignment, known_sources={}, known_sections={})
+    assert resolved.sections == ()
+    assert resolved.fallback_search_terms == ("PostgreSQL 入门",)
+    assert resolved.degraded is True
+
+
+def test_resolve_assignment_never_fabricates_sections() -> None:
+    """护栏：无论怎么降级，输出章节数都不得多于「存在且归属正确」的数量。"""
+    source = _source()
+    catalog = _catalog(source.source_id)
+    first, foreign = _ids(catalog, "第一章", "别家章节")
+    assignment = StageResourceAssignment.create(
+        project_id="p1",
+        stage_id="stg_1",
+        role=StageResourceRole.PRIMARY,
+        source_ref=source.source_id,
+        section_refs=(first, "sec_ghost", foreign),
+    )
+    resolved = resolve_assignment_output(
+        assignment, known_sources={source.source_id: source}, known_sections=catalog
+    )
+    assert len(resolved.sections) == 1
+    assert resolved.sections[0].section_id == first

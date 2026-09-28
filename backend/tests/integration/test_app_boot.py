@@ -73,10 +73,39 @@ def test_healthz_is_outside_api_prefix_by_design(app) -> None:
     assert all(not p.startswith("/healthz/") for p in paths)
 
 
+def _route_paths(app) -> set[str]:
+    """收集应用**实际暴露**的路由路径。
+
+    FastAPI 0.141 起 ``include_router`` 会插入惰性 ``_IncludedRouter`` 对象
+    （它在运行期解析为真实路由），因此不能假定 ``app.routes`` 的每一项都有
+    ``path``。这里对两种形态都做遍历：直接取 ``path``，或递归其
+    ``original_router.routes``。这样断言与 FastAPI 内部实现解耦。
+    """
+    paths: set[str] = set()
+    stack = list(app.routes)
+    while stack:
+        route = stack.pop()
+        path = getattr(route, "path", None)
+        if isinstance(path, str) and path:
+            paths.add(path)
+        nested = getattr(route, "original_router", None)
+        if nested is not None:
+            stack.extend(getattr(nested, "routes", ()) or ())
+    return paths
+
+
 def test_no_legacy_unprefixed_business_routes(app) -> None:
     """不得暴露旧的无前缀业务路由（设计 §7：消除重复路径）。"""
-    paths = {r.path for r in app.routes}
+    paths = _route_paths(app)
     legacy_shapes = ("/plan/generate", "/projects", "/teaching", "/library", "/product")
     for path in paths:
         for shape in legacy_shapes:
             assert not path.startswith(shape), f"发现旧形态路由：{path}"
+
+
+def test_business_routes_live_under_api_prefix(app) -> None:
+    """业务端点必须统一挂在 ``/api/v1`` 命名空间下（运维/文档端点例外）。"""
+    infra = {"/healthz", "/docs", "/docs/oauth2-redirect", "/redoc"}
+    paths = _route_paths(app) - infra
+    offenders = sorted(p for p in paths if not p.startswith("/api/v1/"))
+    assert not offenders, f"发现未挂在 /api/v1 下的业务路由：{offenders}"

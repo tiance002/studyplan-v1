@@ -40,17 +40,20 @@ from datetime import datetime
 from typing import Any
 
 import psycopg
+from app.core.errors import ConflictError
 from app.core.ids import new_id
 from app.domain.enums import (
     OutlineSectionKind,
     PlanDraftStatus,
     PlanRevisionStatus,
     StageResourceRole,
+    TaskKnowledgeRole,
 )
 from app.domain.planning.models import (
     PlanDraft,
     PlanRevision,
     PlanStage,
+    PlanTaskKnowledgeLink,
     PlanTaskLink,
     PlanUnitLink,
     PublishRecord,
@@ -63,6 +66,18 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 __all__ = ["PgPlanRepository", "to_psycopg_dsn"]
+
+#: 可被发布的草案状态（其余一律拒绝：已取消 / 已处理 / 已失效）。
+PUBLISHABLE_DRAFT_STATUSES: tuple[str, ...] = (
+    PlanDraftStatus.PENDING.value,
+    PlanDraftStatus.AWAITING_APPROVAL.value,
+)
+
+#: 终态草案不可再被 ``save_draft`` 改写（B2-V §二.3/.4）。
+TERMINAL_DRAFT_STATUSES: tuple[str, ...] = (
+    PlanDraftStatus.CANCELLED.value,
+    PlanDraftStatus.APPROVED.value,
+)
 
 
 def to_psycopg_dsn(dsn: str) -> str:
@@ -100,6 +115,18 @@ def _task_link_payload(link: PlanTaskLink) -> dict[str, Any]:
     }
 
 
+def _task_knowledge_payload(link: PlanTaskKnowledgeLink) -> dict[str, Any]:
+    return {"task_id": link.task_id, "node_id": link.node_id, "role": str(link.role)}
+
+
+def _task_knowledge_from(row: dict[str, Any]) -> PlanTaskKnowledgeLink:
+    return PlanTaskKnowledgeLink(
+        task_id=str(row["task_id"]),
+        node_id=str(row["node_id"]),
+        role=TaskKnowledgeRole(str(row.get("role") or TaskKnowledgeRole.CORE)),
+    )
+
+
 def _assignment_payload(a: StageResourceAssignment) -> dict[str, Any]:
     return {
         "assignment_id": a.assignment_id,
@@ -135,6 +162,9 @@ def _structure_payload(revision: PlanRevision) -> dict[str, Any]:
         "stages": [_stage_payload(s) for s in revision.stages],
         "unit_links": [_unit_link_payload(x) for x in revision.unit_links],
         "task_links": [_task_link_payload(x) for x in revision.task_links],
+        "task_knowledge_links": [
+            _task_knowledge_payload(x) for x in revision.task_knowledge_links
+        ],
         "stage_resources": [_assignment_payload(x) for x in revision.stage_resources],
         "extensions": [_extension_payload(x) for x in revision.extensions],
         "approved_at": revision.approved_at.isoformat() if revision.approved_at else None,
@@ -151,6 +181,9 @@ def _draft_payload(draft: PlanDraft) -> dict[str, Any]:
         "node_stable_keys": list(draft.node_stable_keys),
         "unit_links": [_unit_link_payload(x) for x in draft.unit_links],
         "task_links": [_task_link_payload(x) for x in draft.task_links],
+        "task_knowledge_links": [
+            _task_knowledge_payload(x) for x in draft.task_knowledge_links
+        ],
         "stage_resources": [_assignment_payload(x) for x in draft.stage_resources],
         "extensions": [_extension_payload(x) for x in draft.extensions],
         "source_pack_key": draft.source_pack_key,
@@ -266,9 +299,13 @@ class PgPlanRepository:
     # ------------------------------------------------------------- 草案
 
     def save_draft(self, draft: PlanDraft) -> None:
-        """保存草案；**按状态过滤**——已 CANCELLED 的草案不得被覆盖为可发布。"""
+        """保存草案；**状态条件**更新 + **检查受影响行数**（B2-V §二.4）。
+
+        - 已 ``cancelled`` / 已 ``approved`` 的草案不得被改写（行数为 0）；
+        - 被条件挡下时**抛** :class:`ConflictError`，不静默忽略。
+        """
         with self._tx(draft.project_id) as conn:
-            conn.execute(
+            cursor = conn.execute(
                 """
                 INSERT INTO plan_drafts
                     (draft_id, project_id, run_id, status, content_hash,
@@ -280,7 +317,8 @@ class PgPlanRepository:
                     revision_candidate = EXCLUDED.revision_candidate,
                     payload = EXCLUDED.payload,
                     updated_at = now()
-                WHERE plan_drafts.status <> 'cancelled'
+                WHERE plan_drafts.project_id = EXCLUDED.project_id
+                  AND plan_drafts.status <> ALL(%s)
                 """,
                 (
                     draft.draft_id,
@@ -290,8 +328,40 @@ class PgPlanRepository:
                     draft.content_hash,
                     draft.revision_candidate,
                     Jsonb(_draft_payload(draft)),
+                    list(TERMINAL_DRAFT_STATUSES),
                 ),
             )
+            if cursor.rowcount != 1:
+                raise ConflictError(
+                    "草案已终结（已取消或已发布），不能再修改",
+                    reason="draft_terminal",
+                    draft_id=draft.draft_id,
+                )
+
+    def cancel_draft(self, *, project_id: str, draft_id: str) -> None:
+        """**状态条件**取消草案（B2-V §二.4）。
+
+        只有 ``awaiting_approval`` / ``pending`` 的草案可被取消；已被发布的
+        草案不会被取消（行数为 0 → 抛冲突），因此「发布与取消并发」中
+        失败的一方一定会**显式报错**，不会留下不一致状态。
+        """
+        with self._tx(project_id) as conn:
+            cursor = conn.execute(
+                "UPDATE plan_drafts SET status = %s, updated_at = now() "
+                "WHERE project_id = %s AND draft_id = %s AND status = ANY(%s)",
+                (
+                    PlanDraftStatus.CANCELLED.value,
+                    project_id,
+                    draft_id,
+                    list(PUBLISHABLE_DRAFT_STATUSES),
+                ),
+            )
+            if cursor.rowcount != 1:
+                raise ConflictError(
+                    "草案已处理（已取消或已发布），不能再取消",
+                    reason="draft_not_cancellable",
+                    draft_id=draft_id,
+                )
 
     def get_draft(self, *, project_id: str, draft_id: str) -> PlanDraft | None:
         with self._tx(project_id) as conn:
@@ -316,6 +386,9 @@ class PgPlanRepository:
             node_stable_keys=tuple(str(s) for s in _as_list(payload.get("node_stable_keys"))),
             unit_links=tuple(_unit_link_from(x) for x in _as_list(payload.get("unit_links"))),  # type: ignore[arg-type]
             task_links=tuple(_task_link_from(x) for x in _as_list(payload.get("task_links"))),  # type: ignore[arg-type]
+            task_knowledge_links=tuple(
+                _task_knowledge_from(x) for x in _as_list(payload.get("task_knowledge_links"))  # type: ignore[arg-type]
+            ),
             stage_resources=tuple(
                 _assignment_from(a, project_id=project_id, plan_id="")  # type: ignore[arg-type]
                 for a in _as_list(payload.get("stage_resources"))
@@ -399,6 +472,11 @@ class PgPlanRepository:
             "ORDER BY s.order_index, e.order_index",
             (project_id, plan_id),
         ).fetchall()
+        task_knowledge = conn.execute(
+            "SELECT * FROM plan_task_knowledge_links "
+            "WHERE project_id = %s AND plan_id = %s ORDER BY order_index",
+            (project_id, plan_id),
+        ).fetchall()
         structure = row.get("structure") or {}
         approved_at = _parse_dt(structure.get("approved_at")) if isinstance(structure, dict) else None
         return PlanRevision(
@@ -409,6 +487,14 @@ class PgPlanRepository:
             stages=tuple(_stage_from(s) for s in stages),  # type: ignore[arg-type]
             unit_links=tuple(_unit_link_from(x) for x in unit_links),  # type: ignore[arg-type]
             task_links=tuple(_task_link_from(x) for x in task_links),  # type: ignore[arg-type]
+            task_knowledge_links=tuple(
+                PlanTaskKnowledgeLink(
+                    task_id=str(x["task_id"]),
+                    node_id=str(x["node_id"]),
+                    role=TaskKnowledgeRole(str(x["role"])),
+                )
+                for x in task_knowledge
+            ),
             stage_resources=tuple(
                 _assignment_from(a, project_id=project_id, plan_id=plan_id)  # type: ignore[arg-type]
                 for a in assignments
@@ -455,144 +541,211 @@ class PgPlanRepository:
         superseded: PlanRevision | None,
         idempotency_key: str,
         body_fingerprint: str,
+        created: bool = True,
     ) -> None:
-        """**单事务**落定一次发布。任一步失败整体回滚。"""
+        """**单事务**落定一次发布。任一步失败整体回滚（B2-V §二）。
+
+        事务内**先复核草案最新状态**（``FOR UPDATE`` 行锁），再按状态条件更新
+        草案并检查受影响行数——因此调用方持有的**过期对象不会被信任**：
+        「已取消的草案被旧对象发布」「取消与发布并发」都会在数据库层被挡住，
+        且失败方**显式报错**而不是静默产生不一致。
+
+        ``created=False`` 为「结构与当前路线一致 → 复用当前版本」：
+        只更新草案状态 + 写发布记录（B2-V §四：复用也必须持久化幂等结果）。
+        """
         project_id = revision.project_id
         with self._tx(project_id) as conn:
-            # 1) 先把旧的当前版本置为 superseded，避免与
-            #    plan_revisions_current_unique(project_id WHERE approved) 冲突。
-            if superseded is not None:
-                conn.execute(
-                    "UPDATE plan_revisions SET status = %s "
-                    "WHERE project_id = %s AND plan_id = %s",
-                    (PlanRevisionStatus.SUPERSEDED.value, project_id, superseded.plan_id),
+            # 0) **事务内复核草案最新状态**（不信任调用方持有的旧对象）。
+            row = conn.execute(
+                "SELECT status, content_hash FROM plan_drafts "
+                "WHERE project_id = %s AND draft_id = %s FOR UPDATE",
+                (project_id, draft.draft_id),
+            ).fetchone()
+            if row is None:
+                raise ConflictError(
+                    "草案不存在，无法发布",
+                    reason="draft_not_found",
+                    draft_id=draft.draft_id,
+                )
+            db_status = str(row["status"])
+            if db_status not in PUBLISHABLE_DRAFT_STATUSES:
+                raise ConflictError(
+                    "草案已被取消或已处理，不能再发布",
+                    reason="draft_not_publishable",
+                    status=db_status,
+                )
+            # 草案内容也必须与调用方声称的一致：防止发布**过期内容**。
+            if str(row["content_hash"]) != draft.content_hash:
+                raise ConflictError(
+                    "草案内容已变化，请重新加载后再确认",
+                    reason="draft_hash_mismatch",
                 )
 
-            # 2) 新版本本体（structure 为等价快照，读回以子表为准）。
-            conn.execute(
-                """
-                INSERT INTO plan_revisions
-                    (plan_id, project_id, revision, goal_snapshot, status, structure,
-                     source_pack_key, source_pack_version)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """,
-                (
-                    revision.plan_id,
-                    project_id,
-                    revision.revision,
-                    revision.goal_snapshot,
-                    revision.status.value,
-                    Jsonb(_structure_payload(revision)),
-                    revision.source_pack_key,
-                    revision.source_pack_version,
-                ),
-            )
+            if created:
+                # 1) 先把旧的当前版本置为 superseded，避免与
+                #    plan_revisions_current_unique(project_id WHERE approved) 冲突。
+                if superseded is not None:
+                    conn.execute(
+                        "UPDATE plan_revisions SET status = %s "
+                        "WHERE project_id = %s AND plan_id = %s",
+                        (PlanRevisionStatus.SUPERSEDED.value, project_id, superseded.plan_id),
+                    )
 
-            # 3) 阶段与链接（规范化子表）。
-            for stage in revision.stages:
+                # 2) 新版本本体（structure 为等价快照，读回以子表为准）。
                 conn.execute(
                     """
-                    INSERT INTO plan_stages
-                        (stage_id, project_id, plan_id, stable_key, title,
-                         section_kind, objective, order_index)
+                    INSERT INTO plan_revisions
+                        (plan_id, project_id, revision, goal_snapshot, status, structure,
+                         source_pack_key, source_pack_version)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     (
-                        stage.stage_id,
-                        project_id,
                         revision.plan_id,
-                        stage.stable_key,
-                        stage.title,
-                        str(stage.section_kind),
-                        stage.objective,
-                        stage.order_index,
-                    ),
-                )
-            for link in revision.unit_links:
-                conn.execute(
-                    "INSERT INTO plan_unit_links"
-                    "(link_id, project_id, plan_id, stage_id, unit_id, order_index) "
-                    "VALUES (%s, %s, %s, %s, %s, %s)",
-                    (
-                        new_id("lnk"),
                         project_id,
-                        revision.plan_id,
-                        link.stage_id,
-                        link.unit_id,
-                        link.order_index,
-                    ),
-                )
-            for task_link in revision.task_links:
-                conn.execute(
-                    "INSERT INTO plan_task_links"
-                    "(link_id, project_id, plan_id, stage_id, task_id, order_index) "
-                    "VALUES (%s, %s, %s, %s, %s, %s)",
-                    (
-                        new_id("lnk"),
-                        project_id,
-                        revision.plan_id,
-                        task_link.stage_id,
-                        task_link.task_id,
-                        task_link.order_index,
+                        revision.revision,
+                        revision.goal_snapshot,
+                        revision.status.value,
+                        Jsonb(_structure_payload(revision)),
+                        revision.source_pack_key,
+                        revision.source_pack_version,
                     ),
                 )
 
-            # 4) V1.2：阶段资源主线与扩展知识快照。
-            for assignment in revision.stage_resources:
-                conn.execute(
-                    """
-                    INSERT INTO stage_resource_assignments
-                        (assignment_id, project_id, plan_id, stage_id, role, source_ref,
-                         section_refs, order_index, source_version, fallback_search_terms,
-                         snapshot_at)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """,
-                    (
-                        assignment.assignment_id,
-                        project_id,
-                        revision.plan_id,
-                        assignment.stage_id,
-                        str(assignment.role),
-                        assignment.source_ref,
-                        Jsonb(list(assignment.section_refs)),
-                        assignment.order_index,
-                        assignment.source_version,
-                        Jsonb(list(assignment.fallback_search_terms)),
-                        assignment.snapshot_at,
-                    ),
-                )
-            for extension in revision.extensions:
-                conn.execute(
-                    """
-                    INSERT INTO knowledge_extensions
-                        (extension_id, project_id, plan_id, stage_id, unit_id, topic,
-                         concepts, guidance, links, search_hints, thinking_prompts,
-                         required, order_index)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """,
-                    (
-                        extension.extension_id,
-                        project_id,
-                        revision.plan_id,
-                        extension.stage_id,
-                        extension.unit_id,
-                        extension.topic,
-                        Jsonb(list(extension.concepts)),
-                        extension.guidance,
-                        Jsonb(list(extension.links)),
-                        Jsonb(list(extension.search_hints)),
-                        Jsonb(list(extension.thinking_prompts)),
-                        extension.required,
-                        extension.order_index,
-                    ),
-                )
+                # 3) 阶段与链接（规范化子表）。
+                for stage in revision.stages:
+                    conn.execute(
+                        """
+                        INSERT INTO plan_stages
+                            (stage_id, project_id, plan_id, stable_key, title,
+                             section_kind, objective, order_index)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        """,
+                        (
+                            stage.stage_id,
+                            project_id,
+                            revision.plan_id,
+                            stage.stable_key,
+                            stage.title,
+                            str(stage.section_kind),
+                            stage.objective,
+                            stage.order_index,
+                        ),
+                    )
+                for link in revision.unit_links:
+                    conn.execute(
+                        "INSERT INTO plan_unit_links"
+                        "(link_id, project_id, plan_id, stage_id, unit_id, order_index) "
+                        "VALUES (%s, %s, %s, %s, %s, %s)",
+                        (
+                            new_id("lnk"),
+                            project_id,
+                            revision.plan_id,
+                            link.stage_id,
+                            link.unit_id,
+                            link.order_index,
+                        ),
+                    )
+                for task_link in revision.task_links:
+                    conn.execute(
+                        "INSERT INTO plan_task_links"
+                        "(link_id, project_id, plan_id, stage_id, task_id, order_index) "
+                        "VALUES (%s, %s, %s, %s, %s, %s)",
+                        (
+                            new_id("lnk"),
+                            project_id,
+                            revision.plan_id,
+                            task_link.stage_id,
+                            task_link.task_id,
+                            task_link.order_index,
+                        ),
+                    )
 
-            # 5) 草案状态（属于同一事务：不得留下「已发布但草案仍可发布」）。
-            conn.execute(
+                # 3b) 任务-知识链接（B2-V §四 §五：规范化表 + 复合 FK）。
+                for index, tk in enumerate(revision.task_knowledge_links):
+                    conn.execute(
+                        "INSERT INTO plan_task_knowledge_links"
+                        "(link_id, project_id, plan_id, task_id, node_id, role, order_index) "
+                        "VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                        (
+                            new_id("tkl"),
+                            project_id,
+                            revision.plan_id,
+                            tk.task_id,
+                            tk.node_id,
+                            str(tk.role),
+                            index,
+                        ),
+                    )
+
+                # 4) V1.2：阶段资源主线与扩展知识快照。
+                for assignment in revision.stage_resources:
+                    conn.execute(
+                        """
+                        INSERT INTO stage_resource_assignments
+                            (assignment_id, project_id, plan_id, stage_id, role, source_ref,
+                             section_refs, order_index, source_version, fallback_search_terms,
+                             snapshot_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """,
+                        (
+                            assignment.assignment_id,
+                            project_id,
+                            revision.plan_id,
+                            assignment.stage_id,
+                            str(assignment.role),
+                            # 无核验来源时存 NULL（不是空串）：FK 只约束真实来源。
+                            assignment.source_ref or None,
+                            Jsonb(list(assignment.section_refs)),
+                            assignment.order_index,
+                            assignment.source_version,
+                            Jsonb(list(assignment.fallback_search_terms)),
+                            assignment.snapshot_at,
+                        ),
+                    )
+                for extension in revision.extensions:
+                    conn.execute(
+                        """
+                        INSERT INTO knowledge_extensions
+                            (extension_id, project_id, plan_id, stage_id, unit_id, topic,
+                             concepts, guidance, links, search_hints, thinking_prompts,
+                             required, order_index)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """,
+                        (
+                            extension.extension_id,
+                            project_id,
+                            revision.plan_id,
+                            extension.stage_id,
+                            extension.unit_id,
+                            extension.topic,
+                            Jsonb(list(extension.concepts)),
+                            extension.guidance,
+                            Jsonb(list(extension.links)),
+                            Jsonb(list(extension.search_hints)),
+                            Jsonb(list(extension.thinking_prompts)),
+                            extension.required,
+                            extension.order_index,
+                        ),
+                    )
+
+            # 5) 草案状态：**状态条件**更新 + **检查受影响行数**（B2-V §二.4）。
+            #    终态恒为 approved（不再读取调用方对象的状态，避免陈旧值）。
+            cursor = conn.execute(
                 "UPDATE plan_drafts SET status = %s, updated_at = now() "
-                "WHERE project_id = %s AND draft_id = %s",
-                (draft.status.value, project_id, draft.draft_id),
+                "WHERE project_id = %s AND draft_id = %s AND status = ANY(%s)",
+                (
+                    PlanDraftStatus.APPROVED.value,
+                    project_id,
+                    draft.draft_id,
+                    list(PUBLISHABLE_DRAFT_STATUSES),
+                ),
             )
+            if cursor.rowcount != 1:
+                raise ConflictError(
+                    "草案状态已变化，发布已中止",
+                    reason="draft_not_publishable",
+                    draft_id=draft.draft_id,
+                )
 
             # 6) 发布记录：幂等唯一索引在此生效（并发下唯一胜出）。
             conn.execute(

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
+from typing import Mapping
 
 from app.core.errors import ValidationAppError
 from app.core.ids import new_id
@@ -360,13 +361,117 @@ def _require_text(value: str, field: str, *, max_len: int) -> None:
         raise ValidationAppError(f"{field}长度不得超过 {max_len} 字符")
 
 
+# --------------------------------------------------------------------------- 输出前校验
+# B2-V §五：公共资源的 ``source_ref`` / ``section_refs`` 在**实际输出前**必须
+# 校验「引用存在」且「章节属于对应来源」；没有可用来源时**显式**给出搜索建议，
+# **绝不**把未核验的章节当成已核验章节输出。
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedSection:
+    """已确认存在且归属正确的公共资源章节（按作者原有顺序输出）。"""
+
+    section_id: str
+    order_index: int
+    title: str
+    url: str
+    anchor: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedAssignment:
+    """阶段资源分配的**输出视图**（校验后的结果 + 显式降级说明）。"""
+
+    assignment_id: str
+    stage_id: str
+    role: StageResourceRole
+    source_ref: str
+    source_version: int
+    sections: tuple[ResolvedSection, ...]
+    fallback_search_terms: tuple[str, ...]
+    warnings: tuple[str, ...]
+
+    @property
+    def degraded(self) -> bool:
+        """``True`` 表示无法给出已核验章节，只提供搜索建议。"""
+        return bool(self.warnings)
+
+
+def resolve_assignment_output(
+    assignment: StageResourceAssignment,
+    *,
+    known_sources: Mapping[str, PublicResourceSource],
+    known_sections: Mapping[str, PublicResourceSection],
+    fallback_hint: str = "",
+) -> ResolvedAssignment:
+    """把一条阶段资源分配解析为**可安全输出**的视图（B2-V §五）。
+
+    规则（确定性、可单测）：
+
+    1. 无 ``source_ref`` → 不给章节，仅给搜索建议（并记一条显式说明）。
+    2. ``source_ref`` 不在公共来源里 → 同上，**不编造**章节。
+    3. 章节不存在 → 丢弃并记明；章节存在但属于**别的来源** → 丢弃并记明。
+    4. 仅当来源存在且章节归属正确时才输出 ``sections``，且保持原顺序。
+
+    ``fallback_hint``（通常是阶段标题）仅用于在**没有任何搜索建议**时生成
+    一条确定性的搜索词——这是「建议」，不是「已核验来源」。
+    """
+    warnings: list[str] = []
+    sections: list[ResolvedSection] = []
+    source_ref = assignment.source_ref
+    source = known_sources.get(source_ref) if source_ref else None
+
+    if not source_ref:
+        warnings.append("未指定已核验资源来源，仅提供搜索建议")
+    elif source is None:
+        warnings.append(f"引用的资源来源不存在：{source_ref}；已降级为搜索建议")
+    else:
+        for ref in assignment.section_refs:
+            section = known_sections.get(ref)
+            if section is None:
+                warnings.append(f"引用的章节不存在：{ref}")
+                continue
+            if section.source_id != source_ref:
+                warnings.append(f"章节 {ref} 不属于来源 {source_ref}")
+                continue
+            sections.append(
+                ResolvedSection(
+                    section_id=section.section_id,
+                    order_index=section.order_index,
+                    title=section.title,
+                    url=section.url,
+                    anchor=section.anchor,
+                )
+            )
+
+    fallback = list(assignment.fallback_search_terms)
+    if warnings and not fallback and fallback_hint.strip():
+        fallback = [f"{fallback_hint.strip()} 入门教程"]
+    if warnings and not fallback:
+        warnings.append("缺少可用搜索建议，请人工确认资源")
+
+    return ResolvedAssignment(
+        assignment_id=assignment.assignment_id,
+        stage_id=assignment.stage_id,
+        role=assignment.role,
+        source_ref=source_ref,
+        source_version=assignment.source_version,
+        sections=tuple(sections),
+        fallback_search_terms=tuple(fallback),
+        warnings=tuple(warnings),
+    )
+
+
 __all__ = [
     "EXTENSION_SOFT_LIMIT",
     "MAINLINE_PRIMARY_MAX",
     "KnowledgeExtension",
     "PublicResourceSection",
     "PublicResourceSource",
+    "ResolvedAssignment",
+    "ResolvedSection",
     "StageResourceAssignment",
+    "resolve_assignment_output",
     "validate_extension_soft_limit",
     "validate_extensions",
     "validate_mainline_continuity",
