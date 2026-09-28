@@ -62,40 +62,61 @@ class FakePlanRepository(PlanRepositoryPort):
         idempotency_key: str,
         body_fingerprint: str,
     ) -> None:
-        # 模拟单一事务：任何一步失败整体回滚（不产生副作用）。
+        """模拟**单一事务**：任何一步失败整体回滚，不留半发布状态。
+
+        B1.2 §三 修复：回滚必须**同时恢复被替代版本的状态**。旧实现在
+        ``publish_record`` 失败时已经调用过 ``mark_superseded()``，回滚却只删
+        新版本，导致既有 v1 被**错误地**留在 ``SUPERSEDED``。这正是真实
+        PG 实现必须避免的陷阱（发布与草案状态更新同属一个事务）。
+        """
+        record_key = (draft.project_id, idempotency_key)
+        # 事务开始前快照全部受影响状态。
+        snap_revisions = list(self.revisions)
+        snap_current = self.current
+        snap_record = self.publish_records.get(record_key)
+        snap_superseded_status = superseded.status if superseded is not None else None
+
         log: list[str] = ["begin"]
         try:
             if self.fail_on == "revision":
                 log.append("insert_revision(FAIL)")
                 raise RuntimeError("boom")
             log.append("insert_revision")
-            if superseded is not None:
-                log.append("mark_superseded")
             self.revisions.append(revision)
             if superseded is not None:
+                log.append("mark_superseded")
                 superseded.mark_superseded()
             if self.fail_on == "publish_record":
                 log.append("insert_record(FAIL)")
                 raise RuntimeError("boom")
             log.append("insert_record")
-            self.publish_records[(draft.project_id, idempotency_key)] = PublishRecord(
+            self.publish_records[record_key] = PublishRecord(
                 plan_id=revision.plan_id,
                 revision=revision.revision,
                 idempotency_key=idempotency_key,
                 body_fingerprint=body_fingerprint,
                 structure_fingerprint=revision.structure_fingerprint(),
             )
+            if self.fail_on == "draft_status":
+                # 草案状态更新也在发布事务内（B1.2 §三）。
+                log.append("update_draft_status(FAIL)")
+                raise RuntimeError("boom")
+            log.append("update_draft_status")
             if self.fail_on == "set_current":
                 log.append("set_current(FAIL)")
                 raise RuntimeError("boom")
             log.append("set_current")
             self.current = revision
         except Exception:
-            # 回滚
-            self.revisions = [
-                r for r in self.revisions if r.plan_id != revision.plan_id
-            ]
-            self.publish_records.pop((draft.project_id, idempotency_key), None)
+            # 回滚：恢复**全部**状态，包括被替代版本的状态与当前引用。
+            self.revisions = snap_revisions
+            self.current = snap_current
+            if snap_record is None:
+                self.publish_records.pop(record_key, None)
+            else:
+                self.publish_records[record_key] = snap_record
+            if superseded is not None and snap_superseded_status is not None:
+                superseded.status = snap_superseded_status
             log.append("rollback")
             raise
         finally:
@@ -281,17 +302,22 @@ def test_missing_idempotency_key_fails() -> None:
 
 
 def test_publish_is_single_transaction() -> None:
-    """发布副作用必须在一次原子调用内完成。"""
+    """发布副作用必须在一次原子调用内完成（含草案状态更新）。"""
     repo = FakePlanRepository()
     draft = _make_draft()
     _service(repo).publish(
         draft=draft, presented_hash=draft.content_hash, expected_version=0, idempotency_key="k1"
     )
-    assert repo.call_log == ["begin,insert_revision,insert_record,set_current"]
+    assert repo.call_log == [
+        "begin,insert_revision,insert_record,update_draft_status,set_current"
+    ]
 
 
-@pytest.mark.parametrize("stage", ["revision", "publish_record", "set_current"])
-def test_publish_failure_rolls_back( stage: str) -> None:
+@pytest.mark.parametrize(
+    "stage", ["revision", "publish_record", "draft_status", "set_current"]
+)
+def test_publish_failure_rolls_back(stage: str) -> None:
+    """首次发布（无 v1）中途失败 -> 全或无，不留半发布状态。"""
     repo = FakePlanRepository()
     repo.fail_on = stage
     draft = _make_draft()
@@ -304,6 +330,65 @@ def test_publish_failure_rolls_back( stage: str) -> None:
     assert repo.publish_records == {}
     assert repo.current is None
     assert repo.call_log[-1].endswith("rollback")
+
+
+@pytest.mark.parametrize(
+    "stage", ["revision", "publish_record", "draft_status", "set_current"]
+)
+def test_publish_v2_failure_keeps_v1_current_and_not_superseded(stage: str) -> None:
+    """B1.2 §三：**已有 v1、发布 v2 中途失败**必须整体回滚。
+
+    关键断言：v1 仍是**当前**版本且**不得被错误地标记为 SUPERSEDED**。
+    （旧实现在 ``publish_record`` 失败前已 ``mark_superseded``，回滚却只删新版本，
+    导致 v1 被留在错误的 SUPERSEDED 状态 —— 这是本测试要钉死的缺陷。）
+    """
+    repo = FakePlanRepository()
+    svc = _service(repo)
+    d1 = _make_draft()
+    r1 = svc.publish(
+        draft=d1, presented_hash=d1.content_hash, expected_version=0, idempotency_key="k1"
+    )
+    assert repo.current is not None and repo.current.revision == 1
+
+    # 发布 v2 时在指定阶段失败
+    repo.fail_on = stage
+    d2 = _make_draft(stages=_make_stages(3))
+    d2.draft_id = "drf_2"
+    with pytest.raises(RuntimeError):
+        svc.publish(
+            draft=d2,
+            presented_hash=d2.content_hash,
+            expected_version=r1.revision,
+            idempotency_key="k2",
+        )
+
+    # v2 未产生；v1 仍是当前，且状态未被错误改写
+    assert len(repo.revisions) == 1, "失败的 v2 不得留下任何版本"
+    v1 = repo.revisions[0]
+    assert v1.revision == 1
+    assert v1.status is PlanRevisionStatus.APPROVED, "v1 不得被错误标记为 SUPERSEDED"
+    assert repo.current is v1, "当前引用必须仍是 v1"
+    assert repo.publish_records.get(("prj_1", "k2")) is None, "失败的发布不得留下幂等记录"
+    # 失败后 v1 仍可被幂等复用
+    again = svc.publish(
+        draft=d1, presented_hash=d1.content_hash, expected_version=0, idempotency_key="k1"
+    )
+    assert again.created is False and again.revision == 1
+
+
+def test_publish_record_fields_are_consistent_with_revision() -> None:
+    """统一字段语义：幂等键 / 请求体指纹 / 发布记录必须与已发布版本一致。"""
+    repo = FakePlanRepository()
+    draft = _make_draft()
+    result = _service(repo).publish(
+        draft=draft, presented_hash=draft.content_hash, expected_version=0, idempotency_key="k-1"
+    )
+    record = repo.publish_records[("prj_1", "k-1")]
+    assert record.idempotency_key == "k-1"
+    assert record.plan_id == result.plan_id
+    assert record.revision == result.revision
+    assert record.structure_fingerprint == result.structure_fingerprint
+    assert record.body_fingerprint, "发布记录必须保存请求体指纹（同键异体判定依据）"
 
 
 def test_frozen_revision_is_immutable() -> None:

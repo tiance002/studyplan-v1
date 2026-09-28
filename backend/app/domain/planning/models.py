@@ -475,16 +475,27 @@ class PublishRecord:
 class PlanRepositoryPort(Protocol):
     """规划仓储端口。实现见 infrastructure；契约测试同时覆盖内存与 PG。
 
-    事务契约（Goal §6）：
+    事务契约（Goal §6 / B1.2 §三）：
 
-    - ``publish_revision`` 必须在**单一事务**内完成：
-      草案状态检查 → 版本检查 → 新建 PlanRevision → 写入 unit/task 关系 →
-      切换当前引用 → 更新被替代版本状态 → 写发布记录。
-      任何一步失败整体回滚，不得留下半发布状态。
+    - ``publish_revision`` 必须在**单一事务**内完成，且**草案状态更新也属于
+      该事务**：草案状态检查 → 版本检查 → 新建 PlanRevision → 写入 unit/task
+      关系 → 切换当前引用 → 更新被替代版本状态 → 更新草案状态 → 写发布记录。
+      任何一步失败整体回滚，**不得留下半发布状态**，尤其**不得把被替代版本
+      错误地留在 SUPERSEDED**（回滚必须恢复其原状态）。
     - 幂等靠 **DB 唯一约束**（``(project_id, idempotency_key)``），
       不得用「先查后写」伪造并发幂等。
     - ``PlanRevision`` 一旦 APPROVED/SUPERSEDED **不可变**；
       重规划**不得删除**历史 summary/outcome/learning_record。
+
+    字段语义（三处必须一致，不得各说各话）：
+
+    - **幂等键** ``idempotency_key``：调用方提供的操作键，与 ``project_id``
+      组成唯一约束；同一键的重复请求返回**同一结果**。
+    - **请求体指纹** ``body_fingerprint``：发布请求的语义指纹（草案内容）。
+      同键同体 → 复用；同键异体 → 409 ``idempotency_conflict``。
+    - **发布记录** :class:`PublishRecord`：落库的发布事实，含 ``plan_id`` /
+      ``revision`` / ``idempotency_key`` / ``body_fingerprint`` /
+      ``structure_fingerprint``。它是幂等复用与体比对的**唯一依据**。
     """
 
     def get_current(self, *, project_id: str) -> PlanRevision | None: ...
