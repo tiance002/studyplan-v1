@@ -122,14 +122,41 @@ class DraftStore:
         self.content: dict = {}
         self.published: list[dict] = []
 
-    def save(self, *, ref: str, nodes: list, units: list, relations: list) -> dict:
+    def save(
+        self,
+        *,
+        ref: str,
+        nodes: list,
+        units: list,
+        relations: list,
+        practice_proposal: dict | None = None,
+    ) -> dict:
         self.current_ref = ref
-        self.content = {"nodes": nodes, "units": units, "relations": relations}
+        self.content = {
+            "nodes": nodes,
+            "units": units,
+            "relations": relations,
+            "practice_proposal": practice_proposal or {},
+        }
         self.current_hash = _content_hash(self.content)
         return {"draft_ref": ref, "draft_hash": self.current_hash}
 
-    def apply_edit(self, *, ref: str, nodes: list, units: list, relations: list) -> dict:
-        result = self.save(ref=ref, nodes=nodes, units=units, relations=relations)
+    def apply_edit(
+        self,
+        *,
+        ref: str,
+        nodes: list,
+        units: list,
+        relations: list,
+        practice_proposal: dict | None = None,
+    ) -> dict:
+        result = self.save(
+            ref=ref,
+            nodes=nodes,
+            units=units,
+            relations=relations,
+            practice_proposal=practice_proposal,
+        )
         # 正式契约：把**编辑后的完整草案结构**一并返回，供图更新 state。
         return {**result, **self.content}
 
@@ -170,7 +197,13 @@ def _nodes(
             commit_plan=lambda s: (rec.committed.append(dict(s)), "plan:rev1")[1],
             apply_edit=lambda s: (
                 rec.edits.append(dict(s)),
-                {"draft_ref": f"draft:edited:{len(rec.edits)}"},
+                {
+                    "draft_ref": f"draft:edited:{len(rec.edits)}",
+                    "nodes": list(s.get("nodes") or []),
+                    "units": list(s.get("units") or []),
+                    "relations": list(s.get("relations") or []),
+                    "practice_proposal": s.get("practice_proposal") or {},
+                },
             )[1],
             cancel_draft=lambda s: rec.cancelled.append(dict(s)),
             on_failure=lambda s, e: rec.failures.append(list(e)),
@@ -183,6 +216,7 @@ def _nodes(
             nodes=list(s.get("nodes") or []),
             units=list(s.get("units") or []),
             relations=list(s.get("relations") or []),
+            practice_proposal=s.get("practice_proposal") or {},
         )
 
     def _apply_edit(s) -> dict:
@@ -193,12 +227,14 @@ def _nodes(
                 nodes=edit_structure["nodes"],
                 units=edit_structure["units"],
                 relations=edit_structure.get("relations", []),
+                practice_proposal=s.get("practice_proposal") or {},
             )
         return store.apply_edit(
             ref=f"draft:edited:{len(rec.edits)}",
             nodes=list(s.get("nodes") or []),
             units=list(s.get("units") or []),
             relations=list(s.get("relations") or []),
+            practice_proposal=s.get("practice_proposal") or {},
         )
 
     def _commit(s) -> str:

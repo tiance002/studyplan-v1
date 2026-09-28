@@ -29,6 +29,10 @@ from app.domain.enums import (
     PlanDraftStatus,
     PlanRevisionStatus,
 )
+from app.domain.resources.curation import (
+    KnowledgeExtension,
+    StageResourceAssignment,
+)
 
 #: 软上限：超过时给出警告但不阻断（避免为了「美观」而删掉必要内容）。
 SOFT_LIMIT_UNITS = 40
@@ -99,6 +103,13 @@ class PlanRevision:
     stages: tuple[PlanStage, ...] = ()
     unit_links: tuple[PlanUnitLink, ...] = ()
     task_links: tuple[PlanTaskLink, ...] = ()
+    #: 阶段主线/补充/对照资源快照（V1.2 §2.2）。
+    stage_resources: tuple[StageResourceAssignment, ...] = ()
+    #: 规划阶段预置的扩展知识与思考提示（V1.2 §2.1）。
+    extensions: tuple[KnowledgeExtension, ...] = ()
+    #: 来源领域包/模板版本（共享模板预留，V1 只记录）。
+    source_pack_key: str = ""
+    source_pack_version: int = 0
     status: PlanRevisionStatus = PlanRevisionStatus.DRAFT
     approved_at: datetime | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -112,6 +123,10 @@ class PlanRevision:
         stages: Sequence[PlanStage] = (),
         unit_links: Sequence[PlanUnitLink] = (),
         task_links: Sequence[PlanTaskLink] = (),
+        stage_resources: Sequence[StageResourceAssignment] = (),
+        extensions: Sequence[KnowledgeExtension] = (),
+        source_pack_key: str = "",
+        source_pack_version: int = 0,
         now: datetime | None = None,
     ) -> "PlanRevision":
         if revision < 1:
@@ -124,6 +139,10 @@ class PlanRevision:
             stages=tuple(stages),
             unit_links=tuple(unit_links),
             task_links=tuple(task_links),
+            stage_resources=tuple(stage_resources),
+            extensions=tuple(extensions),
+            source_pack_key=source_pack_key.strip(),
+            source_pack_version=source_pack_version,
             created_at=now or datetime.now(timezone.utc),
         )
         plan._validate_structure()
@@ -151,7 +170,12 @@ class PlanRevision:
         self.status = PlanRevisionStatus.SUPERSEDED
 
     def structure_fingerprint(self) -> str:
-        """结构指纹：用于判断「同一草案重复确认」与「重规划是否实质变化」。"""
+        """结构指纹：用于判断「同一草案重复确认」与「重规划是否实质变化」。
+
+        **必须覆盖全部发布结构**（B2-C §3.1）：阶段 + 单元/任务链接 +
+        阶段资源主线 + 扩展知识 + 领域包版本。否则「只改了单元/资源/扩展」
+        的草案会被误判为「结构相同」而不新建版本。
+        """
         return content_hash(
             {
                 "project_id": self.project_id,
@@ -167,13 +191,47 @@ class PlanRevision:
                     for s in self.stages
                 ],
                 "unit_links": [
-                    {"unit_id": link.unit_id, "order_index": link.order_index}
+                    {
+                        "stage_id": link.stage_id,
+                        "unit_id": link.unit_id,
+                        "order_index": link.order_index,
+                    }
                     for link in self.unit_links
                 ],
                 "task_links": [
-                    {"task_id": link.task_id, "order_index": link.order_index}
+                    {
+                        "stage_id": link.stage_id,
+                        "task_id": link.task_id,
+                        "order_index": link.order_index,
+                    }
                     for link in self.task_links
                 ],
+                "stage_resources": [
+                    {
+                        "stage_id": a.stage_id,
+                        "role": str(a.role),
+                        "source_ref": a.source_ref,
+                        "section_refs": list(a.section_refs),
+                        "order_index": a.order_index,
+                        "source_version": a.source_version,
+                    }
+                    for a in self.stage_resources
+                ],
+                "extensions": [
+                    {
+                        "stage_id": e.stage_id,
+                        "topic": e.topic,
+                        "concepts": list(e.concepts),
+                        "guidance": e.guidance,
+                        "links": list(e.links),
+                        "search_hints": list(e.search_hints),
+                        "thinking_prompts": list(e.thinking_prompts),
+                        "order_index": e.order_index,
+                    }
+                    for e in self.extensions
+                ],
+                "source_pack_key": self.source_pack_key,
+                "source_pack_version": self.source_pack_version,
             }
         )
 
@@ -200,11 +258,22 @@ class PlanRevision:
         for task_link in self.task_links:
             if task_link.stage_id not in stage_ids:
                 raise ValidationAppError("任务链接指向不存在的阶段")
+        for assignment in self.stage_resources:
+            if assignment.stage_id not in stage_ids:
+                raise ValidationAppError("阶段资源分配指向不存在的阶段")
+        for extension in self.extensions:
+            if extension.stage_id not in stage_ids:
+                raise ValidationAppError("扩展知识指向不存在的阶段")
         unit_pairs = [(link.stage_id, link.unit_id) for link in self.unit_links]
         if len(set(unit_pairs)) != len(unit_pairs):
             raise ValidationAppError("同一阶段内单元重复链接")
         if len({link.unit_id for link in self.unit_links}) != len(self.unit_links):
             raise ValidationAppError("单元在计划内不可重复挂载")
+        task_pairs = [(link.stage_id, link.task_id) for link in self.task_links]
+        if len(set(task_pairs)) != len(task_pairs):
+            raise ValidationAppError("同一阶段内任务重复链接")
+        if len({link.task_id for link in self.task_links}) != len(self.task_links):
+            raise ValidationAppError("任务在计划内不可重复挂载")
 
 
 @dataclass(slots=True)
@@ -224,6 +293,14 @@ class PlanDraft:
     unit_refs: tuple[str, ...] = ()          # 有序的 unit stable_key
     task_refs: tuple[str, ...] = ()          # 有序的 task stable_key
     node_stable_keys: tuple[str, ...] = ()
+    #: 完整发布结构（B2-C §3.1）：阶段→单元/任务链接、资源主线、扩展知识。
+    #: publish 必须把这些**全部**传入 PlanRevision，否则会丢失学习单元/实践关联。
+    unit_links: tuple[PlanUnitLink, ...] = ()
+    task_links: tuple[PlanTaskLink, ...] = ()
+    stage_resources: tuple[StageResourceAssignment, ...] = ()
+    extensions: tuple[KnowledgeExtension, ...] = ()
+    source_pack_key: str = ""
+    source_pack_version: int = 0
     practice_project_idea: str = ""
     status: PlanDraftStatus = PlanDraftStatus.AWAITING_APPROVAL
     validation_warnings: tuple[str, ...] = ()
@@ -231,7 +308,12 @@ class PlanDraft:
 
     @property
     def content_hash(self) -> str:
-        """内容指纹。忽略 run_id / 时间戳等易变字段。"""
+        """内容指纹。忽略 run_id / 时间戳等易变字段。
+
+        **覆盖全部发布结构**（B2-C §3.1）：阶段 + 单元/任务链接 +
+        阶段资源主线 + 扩展知识 + 领域包版本。用户确认的 hash 因此代表
+        「将要发布的完整路线」，而不是只有阶段标题。
+        """
         return content_hash_stable(
             {
                 "project_id": self.project_id,
@@ -250,6 +332,48 @@ class PlanDraft:
                 "unit_refs": list(self.unit_refs),
                 "task_refs": list(self.task_refs),
                 "node_stable_keys": list(self.node_stable_keys),
+                "unit_links": [
+                    {
+                        "stage_id": link.stage_id,
+                        "unit_id": link.unit_id,
+                        "order_index": link.order_index,
+                    }
+                    for link in self.unit_links
+                ],
+                "task_links": [
+                    {
+                        "stage_id": link.stage_id,
+                        "task_id": link.task_id,
+                        "order_index": link.order_index,
+                    }
+                    for link in self.task_links
+                ],
+                "stage_resources": [
+                    {
+                        "stage_id": a.stage_id,
+                        "role": str(a.role),
+                        "source_ref": a.source_ref,
+                        "section_refs": list(a.section_refs),
+                        "order_index": a.order_index,
+                        "source_version": a.source_version,
+                    }
+                    for a in self.stage_resources
+                ],
+                "extensions": [
+                    {
+                        "stage_id": e.stage_id,
+                        "topic": e.topic,
+                        "concepts": list(e.concepts),
+                        "guidance": e.guidance,
+                        "links": list(e.links),
+                        "search_hints": list(e.search_hints),
+                        "thinking_prompts": list(e.thinking_prompts),
+                        "order_index": e.order_index,
+                    }
+                    for e in self.extensions
+                ],
+                "source_pack_key": self.source_pack_key,
+                "source_pack_version": self.source_pack_version,
                 "practice_project_idea": self.practice_project_idea,
             }
         )
@@ -382,8 +506,25 @@ class PlanPublicationService:
             revision=next_revision,
             goal_snapshot=draft.goal_snapshot,
             stages=draft.stages,
+            # **关键**（B2-C P1-01）：发布必须携带完整结构，否则学习单元/任务/
+            # 资源/扩展会被静默丢弃，且结构指纹无法表达完整路线。
+            unit_links=draft.unit_links,
+            task_links=draft.task_links,
+            stage_resources=draft.stage_resources,
+            extensions=draft.extensions,
+            source_pack_key=draft.source_pack_key,
+            source_pack_version=draft.source_pack_version,
             now=now,
         )
+        # 草案期的资源/扩展 plan_id 为空，发布时绑定到新版本。
+        if candidate.stage_resources:
+            candidate.stage_resources = tuple(
+                a.bound_to_plan(candidate.plan_id) for a in candidate.stage_resources
+            )
+        if candidate.extensions:
+            candidate.extensions = tuple(
+                e.bound_to_plan(candidate.plan_id) for e in candidate.extensions
+            )
         if (
             current is not None
             and current.structure_fingerprint() == candidate.structure_fingerprint()

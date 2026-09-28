@@ -76,6 +76,20 @@ def _good_practice_handler(purpose: str, payload: dict) -> dict:
     return {"tasks": GOOD_TASKS, "task_knowledge_links": GOOD_LINKS}
 
 
+def _default_edit_result(edits: list) -> dict:
+    """正式编辑契约（B2-C P1-04）：返回**完整**草案结构。
+
+    只返回 ``draft_ref`` 的不完整兼容已废弃；缺任一关键结构即失败。
+    """
+    return {
+        "draft_ref": f"draft:edited:{len(edits)}",
+        "nodes": GOOD_NODES,
+        "units": GOOD_UNITS,
+        "relations": GOOD_RELATIONS,
+        "practice_proposal": {"tasks": GOOD_TASKS, "task_knowledge_links": GOOD_LINKS},
+    }
+
+
 def _build_nodes(
     *,
     structure_handler=_good_structure_handler,
@@ -102,12 +116,10 @@ def _build_nodes(
         llm=llm,
         save_draft=lambda state: (saved.append(state), f"draft:{len(saved)}")[1],
         commit_plan=lambda state: (committed.append(state), "plan:rev1")[1],
-        # 正式契约：返回编辑后的草案结构（mapping），至少含 draft_ref。
+        # 正式契约：返回编辑后的**完整**草案结构（mapping），缺关键结构即失败。
         apply_edit=lambda state: (
             edits.append(state),
-            edit_result
-            if edit_result is not None
-            else {"draft_ref": f"draft:edited:{len(edits)}"},
+            edit_result if edit_result is not None else _default_edit_result(edits),
         )[1],
         cancel_draft=lambda state: cancelled.append(state),
         on_failure=lambda state, errors: failures.append(list(errors)),
@@ -526,6 +538,7 @@ def test_edit_validates_and_saves_the_edited_content() -> None:
         "nodes": NEW_NODES,
         "units": NEW_UNITS,
         "relations": [],
+        "practice_proposal": {},
     }
     trace = run_planning_graph(
         _build_nodes(saved=saved, edit_result=edit_result),
@@ -560,6 +573,7 @@ def test_edit_to_invalid_structure_fails_and_never_reaches_confirmation() -> Non
         "nodes": NEW_NODES,
         "units": bad_units,
         "relations": [],
+        "practice_proposal": {},
     }
     trace = run_planning_graph(
         _build_nodes(committed=committed, failures=failures, edit_result=edit_result),
@@ -590,6 +604,64 @@ def test_edit_missing_content_fails() -> None:
     assert trace.state.get("input_errors")
     assert committed == []
     assert trace.stopped_at == "failed_validation"
+
+
+# ---------------------------------------------------------------------------
+# P1-04：只返回 draft_ref 的不完整编辑必须失败（废弃旧兼容）
+# ---------------------------------------------------------------------------
+
+
+def test_edit_returning_only_draft_ref_is_rejected() -> None:
+    """B2-C P1-04：只返回 draft_ref（缺关键结构）必须失败，不得校验/发布旧结构。"""
+    committed: list = []
+    trace = run_planning_graph(
+        _build_nodes(committed=committed, edit_result={"draft_ref": "draft:edited:1"}),
+        {
+            "run_id": "r1",
+            "project_id": "p1",
+            "goal": "g",
+            "edited_stages": [
+                {"stable_key": "s1", "title": "x", "section_kind": "core", "order_index": 0}
+            ],
+        },
+        resume_decision="edit",
+    )
+    assert trace.stopped_at == "failed_validation"
+    assert committed == []
+    assert any(
+        "缺少完整草案结构" in e for e in (trace.state.get("input_errors") or [])
+    ), "不完整编辑必须被显式拒绝"
+
+
+def test_edit_returning_plain_string_ref_is_rejected() -> None:
+    """返回裸字符串（旧契约）也必须失败，不得回退为「结构保持原样」。"""
+    llm = FakeLLM(
+        {
+            "planning.outline": _good_outline_handler,
+            "planning.structure": _good_structure_handler,
+            "planning.practice": _good_practice_handler,
+        }
+    )
+    nodes = PlanningNodes(
+        llm=llm,
+        save_draft=lambda s: "draft:1",
+        apply_edit=lambda s: "draft:edited:1",
+        on_failure=lambda s, e: None,
+    )
+    trace = run_planning_graph(
+        nodes,
+        {
+            "run_id": "r1",
+            "project_id": "p1",
+            "goal": "g",
+            "edited_stages": [
+                {"stable_key": "s1", "title": "x", "section_kind": "core", "order_index": 0}
+            ],
+        },
+        resume_decision="edit",
+    )
+    assert trace.stopped_at == "failed_validation"
+    assert trace.state.get("input_errors")
 
 
 def test_illegal_decision_fails_and_never_publishes() -> None:

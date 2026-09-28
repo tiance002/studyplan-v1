@@ -274,6 +274,38 @@ class ResourceProvenance(StrEnum):
     GITHUB_CANDIDATE = "github_candidate"
 
 
+class DomainPackStatus(StrEnum):
+    """领域内容包状态。发布版只读；V1 从仓库内审核过的文件加载。
+
+    不是服务、不是第二套业务规则 —— 只是**策划配置输入**。
+    """
+
+    DRAFT = "draft"
+    PUBLISHED = "published"
+
+
+class StageResourceRole(StrEnum):
+    """阶段与资源的关系角色（设计 §2.2）。
+
+    每阶段默认一条 ``PRIMARY`` 主线；``SUPPLEMENT`` 补充前置，
+    ``REFERENCE`` 为对照/延伸。**不计算章节重叠率或覆盖率。**
+    """
+
+    PRIMARY = "primary"
+    SUPPLEMENT = "supplement"
+    REFERENCE = "reference"
+
+
+class ResourceSourceVisibility(StrEnum):
+    """公共资源来源可见性。V1 只支持平台维护/审核的 ``CURATED``。
+
+    公共源可跨用户读，但**只有**管理员/受审核流程可写；
+    个人私有资源记录另设，不与公共源混表。
+    """
+
+    CURATED = "curated"
+
+
 __all__ = [
     "AI_RUN_TERMINAL_STATES",
     "PREFERENCE_SCOPE_RANK",
@@ -282,6 +314,7 @@ __all__ = [
     "AiRunKind",
     "AiRunNextAction",
     "AiRunStatus",
+    "DomainPackStatus",
     "DraftDecision",
     "EvidenceGrade",
     "GraphName",
@@ -296,8 +329,10 @@ __all__ = [
     "PreferenceScope",
     "RelationType",
     "ResourceProvenance",
+    "ResourceSourceVisibility",
     "ResourceVerificationStatus",
     "ReviewerKind",
+    "StageResourceRole",
     "SummaryReviewConclusion",
     "TaskKnowledgeRole",
     "UnitProgress",

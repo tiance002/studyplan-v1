@@ -48,6 +48,11 @@ ROUTE_DRAFT = "save_draft_projection"
 ROUTE_CANCEL = "cancel_draft"
 ROUTE_VALIDATE = "validate"
 
+#: 编辑结果**必须**提供的完整结构键（B2-C P1-04）。
+#: 只返回 ``draft_ref`` 的不完整兼容已废弃：缺任一关键结构即失败，
+#: 否则会「校验旧结构、发布旧结构」，让用户编辑形同虚设。
+REQUIRED_EDIT_KEYS: tuple[str, ...] = ("nodes", "units", "relations", "practice_proposal")
+
 
 def aggregate_errors(state: Mapping[str, Any]) -> list[str]:
     """把三类错误按固定顺序拼成对外视图。
@@ -81,16 +86,19 @@ def _as_list(value: Any) -> list[Any]:
 def _coerce_edit_delta(edited: Any) -> dict[str, Any]:
     """规整 ``apply_edit`` 的返回值。
 
-    正式契约：返回**编辑后的完整草案结构**（mapping），至少含 ``draft_ref``，
-    并可含 ``draft_hash`` 与新的 ``nodes``/``units``/``relations``/
-    ``practice_proposal``/``outline``。这样随后的 ``validate`` 才能校验
-    **新内容**，``save_draft_projection`` 才会保存新内容（B1.2 §二）。
+    正式契约（B2-C P1-04）：返回**编辑后的完整草案结构**（mapping），
+    必须含 ``draft_ref`` 与 ``nodes``/``units``/``relations``/``practice_proposal``。
+    这样随后的 ``validate`` 才能校验**新内容**，``save_draft_projection``
+    才会保存新内容。
 
-    兼容：若返回字符串，则仅视为草案引用（旧契约），结构保持原样。
+    **已废弃**：只返回字符串或只含 ``draft_ref`` 的不完整结果。
+    这类结果会被 ``apply_decision`` 显式拒绝（缺关键结构即失败），
+    不再回退为「结构保持原样」——那等于校验并发布旧结构。
     """
     if isinstance(edited, AbcMapping):
         return dict(edited)
     if isinstance(edited, str):
+        # 旧契约残留：仅草案引用，不含结构。调用方必须拒绝。
         return {"draft_ref": edited}
     return {}
 
@@ -436,6 +444,20 @@ class PlanningNodes:
                 return _with_aggregate(
                     {"input_errors": ["编辑保存失败：未获得新的草案引用"]}, state
                 )
+            # B2-C P1-04：拒绝不完整编辑 —— 缺任一关键结构即失败，
+            # 绝不回退为「结构保持原样」（那会校验并发布旧结构）。
+            missing = [key for key in REQUIRED_EDIT_KEYS if key not in edit_delta]
+            if missing:
+                return _with_aggregate(
+                    {
+                        "input_errors": [
+                            "编辑结果缺少完整草案结构："
+                            f"{missing}（不允许只返回 draft_ref，"
+                            "请回读完整草案或返回完整规范化结构）"
+                        ]
+                    },
+                    state,
+                )
             merged: dict[str, Any] = {
                 "draft_ref": new_ref,
                 "repair_count": 0,
@@ -543,6 +565,7 @@ def route_after_decision(state: PlanningState) -> str:
 
 
 __all__ = [
+    "REQUIRED_EDIT_KEYS",
     "ROUTE_CANCEL",
     "ROUTE_COMMIT",
     "ROUTE_DRAFT",

@@ -20,14 +20,26 @@ from app.core.errors import (
     ValidationAppError,
     VersionConflictError,
 )
-from app.domain.enums import DraftDecision, OutlineSectionKind, PlanDraftStatus, PlanRevisionStatus
+from app.domain.enums import (
+    DraftDecision,
+    OutlineSectionKind,
+    PlanDraftStatus,
+    PlanRevisionStatus,
+    StageResourceRole,
+)
 from app.domain.planning.models import (
     PlanDraft,
     PlanPublicationService,
     PlanRepositoryPort,
     PlanRevision,
     PlanStage,
+    PlanTaskLink,
+    PlanUnitLink,
     PublishRecord,
+)
+from app.domain.resources.curation import (
+    KnowledgeExtension,
+    StageResourceAssignment,
 )
 
 # --------------------------------------------------------------------------- fake repo
@@ -467,3 +479,111 @@ def test_decide_edit_applies_and_saves_without_publishing() -> None:
     assert len(draft.stages) == 4
     assert draft.status is PlanDraftStatus.PENDING
     assert repo.revisions == []
+
+
+# ---------------------------------------------------------------------------
+# B2-C P1-01：发布必须携带**完整结构**（单元/任务/资源/扩展）
+# ---------------------------------------------------------------------------
+
+
+def _linked_draft(
+    *, project_id: str = "prj_1", stages: tuple[PlanStage, ...] | None = None
+) -> PlanDraft:
+    """构造带完整发布结构的草案（单元/任务链接 + 阶段资源主线 + 扩展知识）。"""
+    stgs = stages if stages is not None else _make_stages(2)
+    s0, s1 = stgs[0], stgs[1]
+    return PlanDraft(
+        draft_id="drf_linked",
+        project_id=project_id,
+        run_id="run_1",
+        goal_snapshot="学会 Python 并做出一个小工具",
+        revision_candidate=1,
+        stages=stgs,
+        unit_refs=("u_basic", "u_rag"),
+        task_refs=("t_pdf",),
+        node_stable_keys=("n_python", "n_rag"),
+        unit_links=(
+            PlanUnitLink(stage_id=s0.stage_id, unit_id="unt_basic", order_index=0),
+            PlanUnitLink(stage_id=s1.stage_id, unit_id="unt_rag", order_index=0),
+        ),
+        task_links=(PlanTaskLink(stage_id=s1.stage_id, task_id="ptk_pdf", order_index=0),),
+        stage_resources=(
+            StageResourceAssignment.create(
+                project_id=project_id,
+                plan_id="",
+                stage_id=s0.stage_id,
+                role=StageResourceRole.PRIMARY,
+                source_ref="src_1",
+                section_refs=("sec_1", "sec_2"),
+            ),
+        ),
+        extensions=(
+            KnowledgeExtension.create(
+                project_id=project_id,
+                plan_id="",
+                stage_id=s1.stage_id,
+                topic="SQLite/PostgreSQL/MySQL 认识与对比",
+                concepts=("基本特点", "典型适用场景"),
+                guidance="了解基本特点及典型适用场景",
+                search_hints=("关系型数据库对比 入门",),
+                thinking_prompts=("多人同时写入？", "是否需要独立服务？"),
+            ),
+        ),
+        source_pack_key="agent_app_dev",
+        source_pack_version=1,
+    )
+
+
+def test_publish_carries_unit_and_task_links_and_snapshot() -> None:
+    """P1-01 RED：发布的 PlanRevision 必须包含单元/任务链接、资源与扩展快照。"""
+    repo = FakePlanRepository()
+    draft = _linked_draft()
+    _service(repo).publish(
+        draft=draft,
+        presented_hash=draft.content_hash,
+        expected_version=0,
+        idempotency_key="k1",
+    )
+    rev = repo.current
+    assert rev is not None
+    assert len(rev.unit_links) == 2, "发布丢失了学习单元链接"
+    assert len(rev.task_links) == 1, "发布丢失了实践任务链接"
+    assert len(rev.stage_resources) == 1, "发布丢失了阶段资源主线快照"
+    assert len(rev.extensions) == 1, "发布丢失了扩展知识快照"
+    assert rev.source_pack_key == "agent_app_dev"
+
+
+def test_structure_fingerprint_covers_full_route() -> None:
+    """P1-01 RED：结构指纹必须覆盖完整路线（仅改单元链接也应判为不同结构）。"""
+    repo = FakePlanRepository()
+    svc = _service(repo)
+    d1 = _linked_draft()
+    r1 = svc.publish(
+        draft=d1, presented_hash=d1.content_hash, expected_version=0, idempotency_key="k1"
+    )
+    # 复用同一批阶段（同一 stage_id），仅改动单元链接目标。
+    d2 = _linked_draft(stages=d1.stages)
+    d2.draft_id = "drf_linked2"
+    d2.unit_links = (
+        PlanUnitLink(stage_id=d1.stages[0].stage_id, unit_id="unt_other", order_index=0),
+        d1.unit_links[1],
+    )
+    r2 = svc.publish(
+        draft=d2,
+        presented_hash=d2.content_hash,
+        expected_version=r1.revision,
+        idempotency_key="k2",
+    )
+    assert r2.created is True, "仅单元链接变化也必须新建版本（指纹必须覆盖完整路线）"
+    assert r2.revision == 2
+
+
+def test_draft_hash_covers_resources_and_extensions() -> None:
+    """P1-01 RED：草案哈希必须覆盖资源主线与扩展知识。"""
+    d1 = _linked_draft()
+    d2 = _linked_draft(stages=d1.stages)
+    d2.extensions = ()
+    assert d1.content_hash != d2.content_hash, "草案哈希必须覆盖扩展知识"
+    d3 = _linked_draft(stages=d1.stages)
+    d3.stage_resources = ()
+    assert d1.content_hash != d3.content_hash, "草案哈希必须覆盖阶段资源主线"

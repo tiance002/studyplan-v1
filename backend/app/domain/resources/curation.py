@@ -1,0 +1,373 @@
+"""resources 领域（V1.2）：公共资源目录、章节、阶段主线分配与扩展知识。
+
+设计定位（V1.2 §2.2 §二.4）：
+
+- ``PublicResourceSource`` / ``PublicResourceSection`` 是**公共受审核、只读**的
+  资源来源与章节，可被多用户读；**用户不可直接写**。
+- ``StageResourceAssignment`` / ``KnowledgeExtension`` 属于**私人已发布计划快照**，
+  公共资源更新**不**静默修改个人已确认路线。
+- 同 URL 可有多个章节：``PublicResourceSection`` 有独立 ``anchor`` / ``order_index``，
+  因此**不能**用 ``UNIQUE(url)`` 登记章节。
+
+硬约束（V1.2 §2.2 §3）：
+
+- ``checked_at`` 只表示「链接/章节索引曾确认」，**不代表教学质量**。
+- 无核验链接时保存**搜索词**而非编造 URL（``require_safe_url`` 拒绝私网/非法 scheme）。
+- **不做**章节重叠率 / 覆盖率 / 作者选型分析 —— 本模块不提供任何此类计算。
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field, replace
+from datetime import datetime, timezone
+
+from app.core.errors import ValidationAppError
+from app.core.ids import new_id
+from app.domain.enums import (
+    ResourceSourceVisibility,
+    StageResourceRole,
+)
+from app.domain.resources.models import require_safe_url
+
+#: 每阶段主线条数上限：一阶段一条主线（设计 §2.1）。
+MAINLINE_PRIMARY_MAX = 1
+
+#: 每阶段扩展主题**软上限**：默认 1–2 项，超出只警告、不阻断（设计 §2.1 §3）。
+EXTENSION_SOFT_LIMIT = 2
+
+
+# --------------------------------------------------------------------------- 公共资源
+
+
+@dataclass(frozen=True, slots=True)
+class PublicResourceSource:
+    """公共受审核资源来源（一门课 / 一条连续项目教程 / 一份资料）。
+
+    ``source_version`` 与 ``checked_at`` 记录来源版本与索引确认时间，
+    供私人计划在实例化时快照，避免公共更新静默改动个人路线。
+    """
+
+    source_id: str
+    canonical_url: str
+    title: str
+    creator: str
+    media_type: str
+    language: str
+    source_version: int = 1
+    visibility: ResourceSourceVisibility = ResourceSourceVisibility.CURATED
+    provenance: str = ""
+    checked_at: datetime | None = None
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @staticmethod
+    def create(
+        *,
+        canonical_url: str,
+        title: str,
+        creator: str = "",
+        media_type: str = "course",
+        language: str = "zh",
+        source_version: int = 1,
+        provenance: str = "",
+        now: datetime | None = None,
+    ) -> "PublicResourceSource":
+        require_safe_url(canonical_url)
+        _require_text(title, "资源来源标题", max_len=300)
+        if source_version < 1:
+            raise ValidationAppError("资源来源版本必须从 1 开始")
+        return PublicResourceSource(
+            source_id=new_id("src"),
+            canonical_url=canonical_url.strip(),
+            title=title.strip(),
+            creator=creator.strip(),
+            media_type=media_type.strip() or "course",
+            language=language.strip() or "zh",
+            source_version=source_version,
+            provenance=provenance.strip(),
+            checked_at=now or datetime.now(timezone.utc),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class PublicResourceSection:
+    """公共资源来源下的一个章节（有序）。
+
+    同一 ``url`` 可被多个章节复用（不同 anchor），因此**无** ``UNIQUE(url)``。
+    """
+
+    section_id: str
+    source_id: str
+    order_index: int
+    title: str
+    url: str
+    anchor: str = ""
+    checked_at: datetime | None = None
+
+    @staticmethod
+    def create(
+        *,
+        source_id: str,
+        order_index: int,
+        title: str,
+        url: str,
+        anchor: str = "",
+        now: datetime | None = None,
+    ) -> "PublicResourceSection":
+        if not source_id:
+            raise ValidationAppError("章节必须归属一个资源来源")
+        if order_index < 0:
+            raise ValidationAppError("章节顺序索引不能为负")
+        _require_text(title, "章节标题", max_len=300)
+        require_safe_url(url)
+        return PublicResourceSection(
+            section_id=new_id("sec"),
+            source_id=source_id,
+            order_index=order_index,
+            title=title.strip(),
+            url=url.strip(),
+            anchor=anchor.strip(),
+            checked_at=now or datetime.now(timezone.utc),
+        )
+
+
+# --------------------------------------------------------------------------- 私人计划快照
+
+
+@dataclass(frozen=True, slots=True)
+class StageResourceAssignment:
+    """阶段 → 资源分配（私人已发布计划快照的一部分）。
+
+    ``role=PRIMARY`` 表示阶段主线；一个阶段**至多一条** ``PRIMARY``。
+    主线章节 ``section_refs`` 必须按原始顺序排列（顺序校验见 ``validate_mainline``）。
+    无核验链接时用 ``fallback_search_terms`` 表达搜索建议，**不编造 URL**。
+
+    ``plan_id`` 在**草案阶段为空**（plan 尚未生成），发布时用
+    :meth:`bound_to_plan` 绑定到新版本。因此 ``create`` 不要求 plan_id 非空。
+    """
+
+    assignment_id: str
+    project_id: str
+    plan_id: str
+    stage_id: str
+    role: StageResourceRole
+    source_ref: str = ""
+    section_refs: tuple[str, ...] = ()
+    order_index: int = 0
+    source_version: int = 0
+    fallback_search_terms: tuple[str, ...] = ()
+    snapshot_at: datetime | None = None
+
+    @staticmethod
+    def create(
+        *,
+        project_id: str,
+        stage_id: str,
+        role: StageResourceRole,
+        plan_id: str = "",
+        source_ref: str = "",
+        section_refs: tuple[str, ...] = (),
+        order_index: int = 0,
+        source_version: int = 0,
+        fallback_search_terms: tuple[str, ...] = (),
+        now: datetime | None = None,
+    ) -> "StageResourceAssignment":
+        for name, value in (("project_id", project_id), ("stage_id", stage_id)):
+            if not value:
+                raise ValidationAppError(f"阶段资源分配缺少 {name}")
+        if order_index < 0:
+            raise ValidationAppError("阶段资源分配顺序索引不能为负")
+        sections = tuple(s for s in section_refs if s)
+        fallback = tuple(t.strip() for t in fallback_search_terms if t and t.strip())
+        if role is StageResourceRole.PRIMARY and not sections and not fallback:
+            # 主线必须至少给出有序章节，或（索引不可用时）明确的搜索建议。
+            raise ValidationAppError("阶段主线必须至少给出有序章节或明确的搜索建议")
+        return StageResourceAssignment(
+            assignment_id=new_id("asg"),
+            project_id=project_id,
+            plan_id=plan_id.strip(),
+            stage_id=stage_id,
+            role=role,
+            source_ref=source_ref.strip(),
+            section_refs=sections,
+            order_index=order_index,
+            source_version=source_version,
+            fallback_search_terms=fallback,
+            snapshot_at=now or datetime.now(timezone.utc),
+        )
+
+    def bound_to_plan(self, plan_id: str) -> "StageResourceAssignment":
+        """发布时把草案期的分配绑定到具体 plan 版本。"""
+        return replace(self, plan_id=plan_id)
+
+
+@dataclass(frozen=True, slots=True)
+class KnowledgeExtension:
+    """阶段预置扩展知识（规划时生成，只作扩展；用户按需外学）。
+
+    设计 §2.1：通用选型视野在**规划时**直接提供 1–2 个扩展主题，
+    含学习范围（``concepts``/``guidance``）、已核验链接（``links``）或
+    搜索建议（``search_hints``）与工程思考提示（``thinking_prompts``）。
+
+    **不做**覆盖率 / 重复度 / 作者选型分析；``required`` 恒为可选语义。
+    """
+
+    extension_id: str
+    project_id: str
+    plan_id: str
+    stage_id: str
+    topic: str
+    concepts: tuple[str, ...] = ()
+    guidance: str = ""
+    links: tuple[str, ...] = ()
+    search_hints: tuple[str, ...] = ()
+    thinking_prompts: tuple[str, ...] = ()
+    required: bool = False
+    order_index: int = 0
+    unit_id: str | None = None
+
+    @staticmethod
+    def create(
+        *,
+        project_id: str,
+        stage_id: str,
+        topic: str,
+        plan_id: str = "",
+        concepts: tuple[str, ...] = (),
+        guidance: str = "",
+        links: tuple[str, ...] = (),
+        search_hints: tuple[str, ...] = (),
+        thinking_prompts: tuple[str, ...] = (),
+        required: bool = False,
+        order_index: int = 0,
+        unit_id: str | None = None,
+    ) -> "KnowledgeExtension":
+        for name, value in (("project_id", project_id), ("stage_id", stage_id)):
+            if not value:
+                raise ValidationAppError(f"扩展知识缺少 {name}")
+        _require_text(topic, "扩展主题", max_len=200)
+        if order_index < 0:
+            raise ValidationAppError("扩展主题顺序索引不能为负")
+        # 已核验链接必须通过 URL 安全校验（防 SSRF / 假链接）。
+        for link in links:
+            require_safe_url(link)
+        return KnowledgeExtension(
+            extension_id=new_id("ext"),
+            project_id=project_id,
+            plan_id=plan_id.strip(),
+            stage_id=stage_id,
+            topic=topic.strip(),
+            concepts=tuple(c.strip() for c in concepts if c and c.strip()),
+            guidance=guidance.strip(),
+            links=tuple(link.strip() for link in links if link and link.strip()),
+            search_hints=tuple(h.strip() for h in search_hints if h and h.strip()),
+            thinking_prompts=tuple(
+                p.strip() for p in thinking_prompts if p and p.strip()
+            ),
+            required=bool(required),
+            order_index=order_index,
+            unit_id=unit_id,
+        )
+
+    def bound_to_plan(self, plan_id: str) -> "KnowledgeExtension":
+        """发布时把草案期的扩展绑定到具体 plan 版本。"""
+        return replace(self, plan_id=plan_id)
+
+
+# --------------------------------------------------------------------------- 确定性校验
+
+
+def validate_mainline_continuity(
+    assignments: "list[StageResourceAssignment] | tuple[StageResourceAssignment, ...]",
+) -> list[str]:
+    """校验**连续章节顺序**（确定性，不做重复度计算）。
+
+    规则：
+
+    1. 一个阶段**至多一条** ``PRIMARY`` 主线（``MAINLINE_PRIMARY_MAX``）。
+    2. 主线 ``section_refs`` 不得为空引用、不得重复。
+    3. 同一阶段的补充/对照分配 ``order_index`` 不得重复。
+
+    返回错误列表（空列表表示通过）。
+    """
+    errors: list[str] = []
+    by_stage: dict[str, list[StageResourceAssignment]] = {}
+    for assignment in assignments:
+        by_stage.setdefault(assignment.stage_id, []).append(assignment)
+
+    for stage_id, items in by_stage.items():
+        primaries = [a for a in items if a.role is StageResourceRole.PRIMARY]
+        if len(primaries) > MAINLINE_PRIMARY_MAX:
+            errors.append(
+                f"阶段 {stage_id} 存在 {len(primaries)} 条主线，"
+                f"每阶段至多 {MAINLINE_PRIMARY_MAX} 条"
+            )
+        for primary in primaries:
+            refs = list(primary.section_refs)
+            if any(not ref for ref in refs):
+                errors.append(f"阶段 {stage_id} 的主线存在空的章节引用")
+            if len(set(refs)) != len(refs):
+                errors.append(f"阶段 {stage_id} 的主线章节存在重复引用")
+        orders = [a.order_index for a in items]
+        if len(set(orders)) != len(orders):
+            errors.append(f"阶段 {stage_id} 的资源分配顺序索引重复")
+    return errors
+
+
+def validate_extension_soft_limit(
+    extensions: "list[KnowledgeExtension] | tuple[KnowledgeExtension, ...]",
+) -> list[str]:
+    """每阶段扩展条数**软上限**：超出只警告、不阻断（设计 §2.1）。"""
+    warnings: list[str] = []
+    by_stage: dict[str, int] = {}
+    for extension in extensions:
+        by_stage[extension.stage_id] = by_stage.get(extension.stage_id, 0) + 1
+    for stage_id, count in by_stage.items():
+        if count > EXTENSION_SOFT_LIMIT:
+            warnings.append(
+                f"阶段 {stage_id} 扩展主题 {count} 项超过建议上限 "
+                f"{EXTENSION_SOFT_LIMIT}，建议精简（不阻断发布）"
+            )
+    return warnings
+
+
+def validate_extensions(extensions: "list[KnowledgeExtension] | tuple[KnowledgeExtension, ...]") -> list[str]:
+    """扩展结构合法性：主题非空、顺序非负、已核验链接安全。"""
+    errors: list[str] = []
+    seen_orders: dict[str, set[int]] = {}
+    for extension in extensions:
+        if not extension.topic.strip():
+            errors.append("扩展主题不能为空")
+        if extension.order_index < 0:
+            errors.append(f"扩展 {extension.topic} 的顺序索引不能为负")
+        orders = seen_orders.setdefault(extension.stage_id, set())
+        if extension.order_index in orders:
+            errors.append(
+                f"阶段 {extension.stage_id} 的扩展顺序索引重复：{extension.order_index}"
+            )
+        orders.add(extension.order_index)
+        for link in extension.links:
+            try:
+                require_safe_url(link)
+            except ValidationAppError as exc:
+                errors.append(f"扩展 {extension.topic} 的链接不安全：{exc.message}")
+    return errors
+
+
+def _require_text(value: str, field: str, *, max_len: int) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise ValidationAppError(f"{field}不能为空")
+    if len(value) > max_len:
+        raise ValidationAppError(f"{field}长度不得超过 {max_len} 字符")
+
+
+__all__ = [
+    "EXTENSION_SOFT_LIMIT",
+    "MAINLINE_PRIMARY_MAX",
+    "KnowledgeExtension",
+    "PublicResourceSection",
+    "PublicResourceSource",
+    "StageResourceAssignment",
+    "validate_extension_soft_limit",
+    "validate_extensions",
+    "validate_mainline_continuity",
+]
