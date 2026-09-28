@@ -32,6 +32,9 @@ from app.domain.enums import (
 from app.domain.resources.curation import (
     KnowledgeExtension,
     StageResourceAssignment,
+    validate_extension_soft_limit,
+    validate_extensions,
+    validate_mainline_continuity,
 )
 
 #: 软上限：超过时给出警告但不阻断（避免为了「美观」而删掉必要内容）。
@@ -169,6 +172,14 @@ class PlanRevision:
     def mark_superseded(self) -> None:
         self.status = PlanRevisionStatus.SUPERSEDED
 
+    def validation_warnings(self) -> list[str]:
+        """**软上限**警告（不阻断发布）：每阶段扩展主题条数（设计 §2.1）。
+
+        与 :meth:`_validate_structure` 的硬错误分开：软上限只提示，
+        不得因为「想好看」而删掉必要内容。
+        """
+        return validate_extension_soft_limit(self.extensions)
+
     def structure_fingerprint(self) -> str:
         """结构指纹：用于判断「同一草案重复确认」与「重规划是否实质变化」。
 
@@ -274,6 +285,15 @@ class PlanRevision:
             raise ValidationAppError("同一阶段内任务重复链接")
         if len({link.task_id for link in self.task_links}) != len(self.task_links):
             raise ValidationAppError("任务在计划内不可重复挂载")
+
+        # V1.2 §2.1 确定性校验（硬错误，阻断发布）：
+        # 主线数量 / 连续章节顺序 / 扩展结构安全。**不做**任何重复率计算。
+        mainline_errors = validate_mainline_continuity(self.stage_resources)
+        if mainline_errors:
+            raise ValidationAppError("；".join(mainline_errors))
+        extension_errors = validate_extensions(self.extensions)
+        if extension_errors:
+            raise ValidationAppError("；".join(extension_errors))
 
 
 @dataclass(slots=True)
