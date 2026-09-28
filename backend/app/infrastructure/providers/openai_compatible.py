@@ -11,7 +11,7 @@ from app.ports.llm import LLMFailure, LLMResult
 # Explicit shapes used by the existing deterministic validators/projection.
 SHAPES: dict[str, dict[str, Any]] = {
  "planning.outline": {"outline_ref":"outline:1", "sections":[{"stable_key":"stage.foundation","title":"","section_kind":"foundation","objective":"","resources":[],"extensions":[]}]},
- "planning.structure": {"nodes":[{"stable_key":"node.python","title":"","node_type":"concept","objectives":[]}],"units":[{"stable_key":"unit.python","title":"","section_key":"stage.foundation","order_index":0,"node_keys":["node.python"],"objectives":[],"rubric":{}}],"relations":[]},
+ "planning.structure": {"nodes":[{"stable_key":"node.python","title":"","node_type":"concept","objectives":[]}],"units":[{"stable_key":"unit.python","title":"","section_key":"stage.foundation","order_index":0,"node_keys":["node.python"],"objectives":[],"rubric":{}}],"relations":[{"from_stable_key":"node.python","to_stable_key":"node.cli","relation_type":"prerequisite"}]},
  "planning.practice": {"stable_key":"practice.python","title":"","idea":"","tasks":[{"stable_key":"task.cli","title":"","goal":"","section_key":"stage.foundation","order_index":0,"in_scope":[],"out_scope":[],"acceptance":["concrete check"],"knowledge_links":[{"node_stable_key":"node.python","role":"core"}]}],"task_knowledge_links":[{"task_stable_key":"task.cli","node_stable_key":"node.python","role":"core"}]},
 }
 SHAPES["planning.repair"] = {
@@ -25,6 +25,7 @@ class OpenAICompatibleLLM:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
+        self.prompt_version = "b3-v2"
         self.timeout = timeout
         self.max_tokens = max_tokens
         self.client = client

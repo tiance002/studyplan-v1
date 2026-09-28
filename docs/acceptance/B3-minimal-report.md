@@ -1,6 +1,6 @@
 # B3 最小闭环进度与验收（2026-09-28）
 
-B2-V 修复提交 `94ad097` 后推进 B3。已接入可运行的 OpenAI 兼容 Provider、审核内容包、实际 StateGraph / 独立 PG Checkpointer、最小路线前端。**真实外部模型闭环待用户填写凭据后验收**；不把 Fake、MockTransport 或浏览器测试宣称为真实 LLM。
+B2-V 修复提交 `94ad097` 后推进 B3，基础实现提交 `cf467bf`。已接入 OpenAI 兼容 Provider、审核内容包、实际 StateGraph / 独立 PG Checkpointer、最小路线前端。用户填写 DeepSeek 配置后，真实外部模型生成、确认、回读、重放及 checkpoint 验收通过；Fake / MockTransport 测试仍单独标明。
 
 ## 实现与边界
 
@@ -47,4 +47,47 @@ PASS: real browser session -> generate -> edit/hash CAS -> approve -> reload; of
 
 本机 `.env` 已设置 `LLM_PROVIDER=openai_compatible`、默认 `LLM_BASE_URL=https://api.openai.com/v1`。填写 `LLM_MODEL_ID` / `LLM_API_KEY`；其他服务商再改兼容 base URL。不要在聊天或提交中发送密钥。
 
-`scripts/b3-verify-live.ps1` 使用真实配置，创建独立验证项目，经监听 socket 生成、批准、回读及发布重放，并检查 final checkpoint、run 和 provider attempt usage。没有凭据前停在预检，不发起付费调用。真实调用成功前 B3 不能宣称完成。
+`scripts/b3-verify-live.ps1` 使用真实配置，创建独立验证项目，经监听 socket 生成、批准、回读及发布重放，并检查 final checkpoint、run 和 provider attempt usage。没有凭据时停在预检，不发起付费调用。
+
+## DeepSeek 真实验收
+
+用户配置 `LLM_BASE_URL=https://api.deepseek.com`，模型 `deepseek-flash`；密钥仅保留本机 `.env`。第一次真实运行 `run_99f6dcb405df4001969cad23a3738e4e` 经两次有界修复后失败，5 个 paid attempt 均有已知成功响应，Run 明确 failed。
+
+定位为提示词关系字段未定义：模型返回 `from_node_stable_key` / `to_node_stable_key`，契约校验要求 `from_stable_key` / `to_stable_key`。补全结构/修复提示词中的关系例子，先新增协议反例失败，再修复为通过。提示词版本升级 `b3-v2`，账本 fingerprint 随之更新；不放宽校验，不重写旧结果。
+
+```powershell
+.venv/Scripts/python -m pytest backend/tests/unit/test_b3_provider.py -k relation_contract -o addopts= -q
+# 修复前 1 failed, 1 deselected in 0.59s
+.venv/Scripts/python -m pytest backend/tests/unit/test_b3_provider.py -o addopts= -q
+# 修复后 2 passed in 0.36s
+./scripts/b3-verify-live.ps1
+# verified: real_provider_HTTP_PG_StateGraph_checkpoint_publish_replay
+# project_id: prj_6ed0e5199f024ff4b0704bd2b6098e25
+# run_id: run_8802895fe92c467ca113002c7c93b812
+# plan_id: pln_f79901a42180469993cae7b86e5907a5, revision: 1
+# OutlineV1: succeeded, input 1013 / output 403
+# KnowledgeStructureV1: succeeded, input 1298 / output 4660
+# PracticeProposalV1: succeeded, input 1419 / output 3428
+# KnowledgeStructureV1 repair: succeeded, input 2995 / output 7022
+```
+
+独立回查 PG：Run `succeeded / none` 指向上述 plan；4 个 attempt 均为 `b3-v2 / succeeded`，输入 6725 / 输出 15513 tokens。已发布 2 个阶段、3 个单元链接、2 个任务链接、7 个任务知识关联、2 个资料分配。checkpoint 为 `approve` 且 result_id 等于 plan_id，structure_errors / generation_errors 为空，repair_count=1。原始证据位于 `var/b3-deepseek-live-v2.txt`、`var/b3-deepseek-audit.txt`；首次失败记录保留在 `var/b3-deepseek-live.txt` 和业务 PG。
+
+```powershell
+.venv/Scripts/python -m pytest -o addopts= -q
+# 396 passed in 180.42s；输出 var/b3-deepseek-full.txt
+.venv/Scripts/python -m ruff check backend
+# All checks passed!
+.venv/Scripts/python -m mypy backend/app
+# Success: no issues found in 70 source files
+```
+
+同一前端通过真实配置的服务端会话回读该 DeepSeek 正式计划（测试服务仅将会话学习空间指向验收项目，不替换 Provider）：
+
+```text
+PASS: actual DeepSeek-published plan read by frontend; 2 stages, 4 official links; desktop/mobile; no page errors; no new LLM dispatch
+```
+
+截图 `var/b3-real-model-desktop.png` / `var/b3-real-model-mobile.png` 已目视核验；测试 API 已停止。
+
+用户另提出云端个人模型设置，限定 OpenAI 兼容 API。方案见 `docs/design-package/B3-user-model-settings-design.md`，尚未实现；它不是现有环境变量配置或完整云端发布的能力。

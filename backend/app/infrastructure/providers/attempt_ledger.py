@@ -24,13 +24,13 @@ class PgAttemptLLM:
 
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
         project_id = str(payload.get("_project_id") or "")
-        fingerprint = hashlib.sha256(json.dumps([purpose,payload,schema_name,self.provider.model,"b3-v1",self.provider.domain_pack], sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        fingerprint = hashlib.sha256(json.dumps([purpose,payload,schema_name,self.provider.model,self.provider.prompt_version,self.provider.domain_pack], sort_keys=True, ensure_ascii=False).encode()).hexdigest()
         with self._connect(project_id) as conn:
             inserted = conn.execute("""INSERT INTO ai_provider_attempts
                 (attempt_id,run_id,provider,model_id,prompt_version,status,request_fingerprint,schema_name)
-                VALUES (%s,%s,'openai_compatible',%s,'b3-v1','dispatched',%s,%s)
+                VALUES (%s,%s,'openai_compatible',%s,%s,'dispatched',%s,%s)
                 ON CONFLICT (attempt_id) DO NOTHING RETURNING attempt_id""",
-                (attempt_id,run_id,self.provider.model,fingerprint,schema_name)).fetchone()
+                (attempt_id,run_id,self.provider.model,self.provider.prompt_version,fingerprint,schema_name)).fetchone()
             if not inserted:
                 row = conn.execute("SELECT * FROM ai_provider_attempts WHERE attempt_id=%s", (attempt_id,)).fetchone()
                 if row is None or row["request_fingerprint"] != fingerprint or row["run_id"] != run_id:
