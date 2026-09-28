@@ -238,9 +238,26 @@ def test_unavailable_resource_keeps_record() -> None:
         title="某教程",
         media_type=MediaType.TEXT,
         provenance=ResourceProvenance.CURATED_POOL,
+        project_id="p1",
     )
     record.mark_unavailable()
     assert record.verification_status.value == "unavailable"
+
+
+def test_resource_record_requires_project_id() -> None:
+    """P1-07：``resource_records`` 是**项目私有**记录，``project_id`` 必填。
+
+    公共受审核资源另设 ``PublicResourceSource``（只读、跨用户可读），
+    两者不混成一张表；缺 project_id 的私有资源记录必须被拒绝。
+    """
+    with pytest.raises(ValidationAppError):
+        ResourceRecord.create(
+            url="https://example.com/x",
+            title="某教程",
+            media_type=MediaType.TEXT,
+            provenance=ResourceProvenance.CURATED_POOL,
+            project_id="",
+        )
 
 
 # ---------------------------------------------------------------------------

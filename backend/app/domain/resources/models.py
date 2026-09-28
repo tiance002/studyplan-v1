@@ -42,7 +42,12 @@ _PRIVATE_HOST_PREFIXES: tuple[str, ...] = (
 
 @dataclass(slots=True)
 class ResourceRecord:
-    """一条资源记录。``section_anchor`` 可为章节编号或视频时间点。"""
+    """一条**项目私有**资源记录。``section_anchor`` 可为章节编号或视频时间点。
+
+    V1.2 §2.2/§二.4：``resource_records`` 仅表示**项目私有**增补资源记录，
+    因此 ``project_id`` **必填**；公共受审核资源另设 ``PublicResourceSource`` /
+    ``PublicResourceSection``（只读、跨用户可读），两者**不混成一张表**。
+    """
 
     resource_id: str
     url: str
@@ -51,10 +56,10 @@ class ResourceRecord:
     language: str
     provenance: ResourceProvenance
     verification_status: ResourceVerificationStatus
+    project_id: str
     section_anchor: str | None = None
     checked_at: datetime | None = None
     source_note: str = ""
-    project_id: str | None = None
 
     @staticmethod
     def create(
@@ -62,15 +67,17 @@ class ResourceRecord:
         url: str,
         title: str,
         media_type: MediaType,
+        project_id: str,
         language: str = "zh",
         provenance: ResourceProvenance = ResourceProvenance.CURATED_POOL,
         verification_status: ResourceVerificationStatus = ResourceVerificationStatus.UNVERIFIED,
         section_anchor: str | None = None,
-        project_id: str | None = None,
         now: datetime | None = None,
     ) -> "ResourceRecord":
         require_safe_url(url)
         _require_text(title, "资源标题", max_len=300)
+        if not project_id:
+            raise ValidationAppError("项目私有资源记录必须归属一个 project_id")
         return ResourceRecord(
             resource_id=new_id("res"),
             url=url.strip(),
