@@ -64,6 +64,25 @@ GOOD_LINKS = [
 ]
 
 
+def test_repair_replaces_invalid_practice_proposal() -> None:
+    def repair(purpose: str, payload: dict) -> dict:
+        assert payload["practice_proposal"]["tasks"][0]["acceptance"] == []
+        return {"nodes": GOOD_NODES, "units": GOOD_UNITS,
+                "relations": GOOD_RELATIONS,
+                "practice_proposal": {"tasks": GOOD_TASKS, "task_knowledge_links": GOOD_LINKS}}
+
+    llm = FakeLLM({"planning.outline": _good_outline_handler,
+                   "planning.structure": _good_structure_handler,
+                   "planning.practice": lambda p, s: {"tasks": [{**GOOD_TASKS[0], "acceptance": []}], "task_knowledge_links": []},
+                   "planning.repair": repair})
+    trace = run_planning_graph(PlanningNodes(llm=llm, save_draft=lambda s: "draft:1"),
+                               {"run_id": "repair-practice", "project_id": "p1", "goal": "g"})
+    assert trace.stopped_at == "await_approval"
+    assert trace.state["repair_count"] == 1
+    assert trace.state["practice_proposal"]["tasks"] == GOOD_TASKS
+    assert trace.state["practice_proposal"]["task_knowledge_links"] == GOOD_LINKS
+
+
 def _good_structure_handler(purpose: str, payload: dict) -> dict:
     return {"nodes": GOOD_NODES, "units": GOOD_UNITS, "relations": GOOD_RELATIONS}
 

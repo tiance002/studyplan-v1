@@ -20,7 +20,8 @@ B2 仍使用同步解释器；HTTP 202 在同步生成完成后返回。这不�
 .venv/Scripts/python -m pytest backend/tests/e2e/test_b2v_http_end_to_end.py -k regression -o addopts= -q
 # 修复后：7 passed, 17 deselected in 14.85s
 .venv/Scripts/python -m pytest -o addopts= -q
-# 384 passed in 124.10s (0:02:04)
+# 最终完整重跑：385 passed in 124.42s (0:02:04)
+# 含领域 EDIT 入口 CAS 与旧 ID/长键反例；输出 var/b2v-commit-full.txt
 # 全量收集后新增的旧 ID/长键反例单独执行：1 passed, 23 deselected in 5.41s
 .venv/Scripts/python -m ruff check backend
 # All checks passed!
@@ -33,4 +34,11 @@ npm --prefix frontend run build
 # tsc -b && vite build；27 modules transformed；built in 1.21s
 ```
 
-真实 HTTP 通过 FastAPI TestClient/ASGI 与真实 PG 仓储执行；不是监听 socket 的网络测试。PG 反例只使用随机 `studyplan_test_*` 临时库及已有独立迁移/应用角色，测试后删除临时库。无 PG 跳过。原始输出本机保存在 `var/b2v-final.txt` 与 `var/b2v-counterexamples-final.txt`。
+另补监听 localhost 的 Uvicorn + httpx + 真实 PG 反例：
+
+```powershell
+.venv/Scripts/python -m pytest backend/tests/e2e/test_b2v_socket_counterexamples.py -o addopts= -q
+# 4 passed in 16.26s：历史重放、双窗口/旧内容、并发编辑、生成后取消保留历史。
+```
+
+其他 HTTP 反例通过 FastAPI TestClient/ASGI 与真实 PG 仓储执行。PG 反例只使用随机 `studyplan_test_*` 临时库及已有独立迁移/应用角色，测试后删除临时库。无 PG 跳过。原始输出本机保存在 `var/b2v-commit-full.txt`、`var/b2v-counterexamples-final.txt`、`var/b2v-socket.txt`。

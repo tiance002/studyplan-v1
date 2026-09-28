@@ -356,6 +356,10 @@ class PlanningNodes:
                 # 回灌**本轮**校验错误，而不是历史错误。
                 "errors": list(state.get("structure_errors") or state.get("validation_errors") or []),
                 "outline": state.get("outline") or {},
+                "nodes": state.get("nodes") or [],
+                "units": state.get("units") or [],
+                "relations": state.get("relations") or [],
+                "practice_proposal": state.get("practice_proposal") or {},
             },
             schema_name="KnowledgeStructureV1",
             run_id=state.get("run_id", ""),
@@ -397,6 +401,11 @@ class PlanningNodes:
                 "generation_errors": gen_errors,
                 "repair_count": attempt,
                 "last_repair_attempt_id": attempt_id,
+                "practice_proposal": (
+                    payload["practice_proposal"]
+                    if isinstance(payload.get("practice_proposal"), dict)
+                    else state.get("practice_proposal") or {}
+                ),
             },
             state,
         )

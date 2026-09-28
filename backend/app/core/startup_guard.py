@@ -28,7 +28,7 @@ INSECURE_SESSION_SECRETS = frozenset(
 #: 当前**实际实现**的 provider 名称闭集。core 层不得 import infrastructure，
 #: 因此这里独立声明（infrastructure.providers.SUPPORTED_PROVIDERS 必须与本集合一致，
 #: 由契约测试机械校验，避免两处漂移）。
-SUPPORTED_PROVIDERS = frozenset({"fake"})
+SUPPORTED_PROVIDERS = frozenset({"fake", "openai_compatible"})
 
 #: 声明"已支持"但**实际未实现**的真实 provider（B3 范围）。
 DECLARED_BUT_UNIMPLEMENTED = frozenset(

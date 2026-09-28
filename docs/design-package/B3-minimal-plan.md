@@ -1,0 +1,13 @@
+# B3 最小真实模型闭环：设计与执行计划
+
+用户已要求在 B2-V 修复提交后直接推进；执行遵循现有 SOFTWARE_DESIGN / IMPLEMENTATION_PLAN §B3，不新增框架。
+
+1. OpenAI 兼容 chat/completions Provider：JSON 输出、显式字段契约、请求超时、无自动重试。业务 PG 记录 attempt/run/model/prompt/schema/usage；已派发但未知的同 attempt 不再次调用。响应留存以支持精确重放。
+2. 只读 Python 工程入门包 v1：官方 Python 教程按原章节顺序引用。标注教程要求基础编程认知，不宣称全面教学质量。迁移角色播种公共目录，应用角色只读。
+3. 复用现有 StateGraph，用独立数据库 PostgresSaver 持久化 thread。同步 invoke 是最小路径，不宣称异步队列/生产 worker。批准/取消先完成既有业务事务，再关闭图等待点；图不再次发布业务计划。图关闭失败应进入待对账，不回滚既成发布。
+4. 前端消费生成的 API 类型：本地会话接入、目标、RunView、资源、阶段编辑（携带 hash）、确认/取消、正式路线回读；冲突刷新草案。界面不暴露 thread 或 checkpoint。
+5. 本地单用户会话由服务端配置映射，客户端提交不透明令牌，不自报 actor/project 授权。B3 最小演示不扩展完整注册登录（B6）。
+6. 验证：Provider 的真实 HTTP 协议/错误分支测试、真实 PG attempt 幂等与未知状态、真实 Graph/独立 PG checkpoint + HTTP 决策闭环、前端 build/浏览器核验。最后凭真实 LLM_KEY 跑一条真实外部调用。未提供凭据前该项明确待验证。
+
+## 前端方向
+学习路线编辑工作台：左侧目标和操作，右侧沿阶段顺序展示草案与官方资源。白色背景 #ffffff、深蓝文本 #152b42、主色 #245ca6、浅蓝底 #eef4fc、错误红 #a52435；中文系统无衬线正文和较粗标题，避免外链字体依赖。宽屏双列、窄屏单列；按钮状态与错误有明确文本。

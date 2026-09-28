@@ -1,0 +1,1 @@
+HEAD d299e87; clean tree. Historical replay uses get_current. Draft save only checks terminal status. Catalog upserts mutate history and slug IDs collide. Run update lacks version predicate; uncaught generation failures remain running.

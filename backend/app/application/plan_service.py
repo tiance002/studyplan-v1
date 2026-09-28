@@ -63,6 +63,7 @@ from app.domain.planning.models import (
 from app.domain.resources.curation import StageResourceAssignment
 from app.domain.runs.models import RunRecord
 from app.domain.workspace.models import AuthContext
+from app.ports.graph_runner import PlanningExecutorPort
 from app.ports.llm import LLMDispatchUnknownError, LLMPort
 from app.ports.public_resources import PublicResourceCatalogPort
 from app.ports.runs import PlanningCatalogPort, RunRepositoryPort
@@ -132,12 +133,14 @@ class PlanService:
         graph_version: str,
         source_pack_key: str = "",
         source_pack_version: int = 0,
+        planning_executor: PlanningExecutorPort | None = None,
     ) -> None:
         self._repo = repository
         self._runs = runs
         self._catalog = catalog
         self._resources = resources
         self._llm = llm
+        self._executor = planning_executor
         self._graph_version = graph_version
         self._source_pack_key = source_pack_key
         self._source_pack_version = source_pack_version
@@ -189,17 +192,22 @@ class PlanService:
         }
         try:
             nodes = self._build_nodes(project_id=project_id, run_id=run_id, goal=cleaned_goal)
-            trace = run_planning_graph(nodes, initial)
+            trace = (self._executor.execute(nodes, initial, thread_id)
+                     if self._executor is not None else run_planning_graph(nodes, initial))
         except LLMDispatchUnknownError:
             self._update_run(project_id=project_id, run_id=run_id,
                              status=AiRunStatus.RECONCILIATION_REQUIRED,
                              next_action=AiRunNextAction.RECONCILE,
                              error_class="provider_dispatch_unknown")
+            if self._executor is not None:
+                return run_id
             raise
         except Exception:
             self._update_run(project_id=project_id, run_id=run_id,
                              status=AiRunStatus.FAILED, next_action=AiRunNextAction.RETRY,
                              error_class=ERROR_PLANNING_FAILED)
+            if self._executor is not None:
+                return run_id
             raise
 
         if trace.stopped_at == "await_approval":
@@ -300,13 +308,7 @@ class PlanService:
         plan_resources: tuple[StageResourceView, ...] = ()
         if plan is not None:
             plan_resources = self._resolve(plan.stage_resources, plan.stages)
-        self._update_run(
-            project_id=project_id,
-            run_id=final_draft.run_id,
-            status=AiRunStatus.SUCCEEDED,
-            next_action=AiRunNextAction.NONE,
-            result_ref=result.plan_id,
-        )
+        self._finalize_run(draft=final_draft, decision="approve", result_ref=result.plan_id)
         return DecisionOutcome(
             run_id=final_draft.run_id,
             draft=final_draft,
@@ -372,12 +374,7 @@ class PlanService:
         )
         refreshed = self._repo.get_draft(project_id=project_id, draft_id=draft.draft_id)
         final_draft = refreshed or draft
-        self._update_run(
-            project_id=project_id,
-            run_id=final_draft.run_id,
-            status=AiRunStatus.CANCELLED,
-            next_action=AiRunNextAction.NONE,
-        )
+        self._finalize_run(draft=final_draft, decision="cancel")
         return DecisionOutcome(
             run_id=final_draft.run_id,
             draft=final_draft,
@@ -393,7 +390,7 @@ class PlanService:
             )
 
         return PlanningNodes(
-            llm=self._llm,
+            llm=_ScopedLLM(self._llm, project_id),
             save_draft=save_draft,
             # 生成路径在 await_approval 处停下，以下回调不会被执行；
             # 决策路径由本服务的 decide() 负责，**不**重复实现第二套规则。
@@ -446,6 +443,26 @@ class PlanService:
             stage_titles={s.stage_id: s.title for s in stages},
         )
 
+    def _finalize_run(self, *, draft: PlanDraft, decision: str, result_ref: str = "") -> None:
+        status = AiRunStatus.SUCCEEDED if decision == "approve" else AiRunStatus.CANCELLED
+        action = AiRunNextAction.NONE
+        error_class = None
+        if self._executor is not None:
+            run = self._runs.get_run(project_id=draft.project_id, run_id=draft.run_id)
+            try:
+                if run is None:
+                    raise NotFoundError("Run missing")
+                self._executor.finish(thread_id=run.thread_id, graph_version=run.graph_version,
+                                      decision=decision, result_id=result_ref, draft_hash=draft.content_hash)
+            except Exception:
+                # A committed publication is never rolled back because checkpoint
+                # acknowledgment failed. Retrying this decision uses the same result.
+                status = AiRunStatus.RECONCILIATION_REQUIRED
+                action = AiRunNextAction.RECONCILE
+                error_class = "checkpoint_finalize_failed"
+        self._update_run(project_id=draft.project_id,run_id=draft.run_id,status=status,
+                         next_action=action,result_ref=result_ref or None,error_class=error_class)
+
     def _update_run(
         self,
         *,
@@ -473,3 +490,15 @@ class PlanService:
             result_ref=result_ref,
             error_class=error_class,
         )
+
+
+class _ScopedLLM:
+    """The server adds project context for the durable attempt ledger."""
+    def __init__(self, llm: LLMPort, project_id: str):
+        self.llm = llm
+        self.project_id = project_id
+
+    def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
+        return self.llm.generate_structured(purpose=purpose,
+            payload={**payload,"_project_id":self.project_id},schema_name=schema_name,
+            run_id=run_id,attempt_id=attempt_id)

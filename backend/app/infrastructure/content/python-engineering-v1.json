@@ -1,0 +1,19 @@
+{
+ "pack_key":"python.engineering", "version":1,"status":"published",
+ "title":"Python 工程入门：从脚本到可验收工具",
+ "supported_scope":"已有基础编程认知，学习 Python 脚本与命令行工具；其他领域先补 Python 前置",
+ "provenance":"Codex repository review 2026-09-28; Python official tutorial source and chapter order checked; not a zero-programming course or comprehensive teaching quality rating",
+ "stage_blueprints":[
+  {"stable_key":"stage.foundation","title":"脚本基础","section_kind":"foundation","objective":"使用控制流与函数处理文本","resources":[{"role":"primary","source_ref":"src_python_tutorial_v1","section_refs":["sec_python_interpreter_v1","sec_python_control_v1"],"order_index":0,"source_version":1}]},
+  {"stable_key":"stage.core","title":"可验收的小工具","section_kind":"core","objective":"文件读写、异常处理与运行说明","resources":[{"role":"primary","source_ref":"src_python_tutorial_v1","section_refs":["sec_python_io_v1","sec_python_errors_v1"],"order_index":0,"source_version":1}]}
+ ],
+ "resource_refs":["src_python_tutorial_v1"],
+ "practice_blueprints":[{"stable_key":"practice.report","title":"文本统计命令行工具","goal":"读入本地文本并输出统计报告","acceptance":["示例文本统计结果与手算一致","文件不存在时输出明确错误","README 给出可复现运行命令"]}],
+ "resources":[{"source_id":"src_python_tutorial_v1","canonical_url":"https://docs.python.org/3.14/tutorial/","title":"The Python Tutorial","creator":"Python Software Foundation","media_type":"course","language":"en","source_version":1,
+  "sections":[
+   {"section_id":"sec_python_interpreter_v1","order_index":0,"title":"2. Using the Python Interpreter","url":"https://docs.python.org/3.14/tutorial/interpreter.html"},
+   {"section_id":"sec_python_control_v1","order_index":1,"title":"4. More Control Flow Tools","url":"https://docs.python.org/3.14/tutorial/controlflow.html"},
+   {"section_id":"sec_python_io_v1","order_index":2,"title":"7. Input and Output","url":"https://docs.python.org/3.14/tutorial/inputoutput.html"},
+   {"section_id":"sec_python_errors_v1","order_index":3,"title":"8. Errors and Exceptions","url":"https://docs.python.org/3.14/tutorial/errors.html"}
+  ]}]
+}

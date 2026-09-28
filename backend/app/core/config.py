@@ -74,6 +74,9 @@ class Settings:
     # 骨架运行开关：允许在无 Postgres / 无云模型时启动
     repository_backend: str
     cors_allow_credentials: bool = True
+    local_session_token: str = ""
+    local_actor_id: str = "local_actor"
+    local_project_id: str = "local_project"
 
     @property
     def is_development(self) -> bool:
@@ -122,6 +125,9 @@ def get_settings() -> Settings:
         graph_max_repair_attempts=_env_int("GRAPH_MAX_REPAIR_ATTEMPTS", 2),
         graph_version=_env("GRAPH_VERSION", "1"),
         repository_backend=_env("STUDYPLAN_REPOSITORY_BACKEND", "memory"),
+        local_session_token=_env("STUDYPLAN_LOCAL_SESSION_TOKEN", ""),
+        local_actor_id=_env("STUDYPLAN_LOCAL_ACTOR_ID", "local_actor"),
+        local_project_id=_env("STUDYPLAN_LOCAL_PROJECT_ID", "local_project"),
     )
 
 

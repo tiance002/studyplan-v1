@@ -105,6 +105,26 @@ prompt_review_graph      START -> load_task_from_revision -> review_once -> vali
 > 这一顺序是刻意的 —— 图的**转移逻辑**（修复上限、interrupt 位置、取消语义）
 > 才是风险所在，把它写成可独立测试的纯函数风险最低。
 
+## B3 本地最小闭环
+
+当前支持 OpenAI 兼容 `/chat/completions`、实际 StateGraph 与独立 PG Checkpointer、Python 工程入门领域包和路线前端。同步生成完成后返回 HTTP 202；尚不是异步 worker。
+
+在 `.env` 填写 `LLM_MODEL_ID`、`LLM_API_KEY`；`LLM_BASE_URL` 默认 `https://api.openai.com/v1`，可替换为服务商的兼容地址。密钥只放本机 `.env`。本机数据库已准备时不要重复运行安装脚本。
+
+```powershell
+# 两个终端分别运行
+./scripts/b3-dev.ps1
+./scripts/b3-dev.ps1 -Frontend
+# 使用真实模型生成并确认一条验证路线（会产生模型费用，独立验证项目）
+./scripts/b3-verify-live.ps1
+```
+
+打开 `http://127.0.0.1:5173`，使用 `.env` 的 `STUDYPLAN_LOCAL_SESSION_TOKEN` 进入本地学习空间。填写目标、生成、编辑并保存、确认或取消。模型结果未知时进入待对账，不自动重发。当前单用户会话不替代后续注册登录。
+
+新环境先安装依赖 `pip install -e ".[dev,agent,postgres]"`，准备本机 PG 的迁移/应用角色，复制 `.env.example` 并清空其中 `DATABASE_URL`，再运行 `.venv/Scripts/python scripts/b3-setup-local.py`。脚本只创建随机新库与 checkpoint 角色，已有配置会拒绝重复建库；生产安装应使用独立管理凭据执行迁移和播种。
+
+验收范围及真实模型待验项见 `docs/acceptance/B3-minimal-report.md`。
+
 ## 5. 仓库结构
 
 ```

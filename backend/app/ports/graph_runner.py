@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from app.domain.enums import GraphName
 
@@ -59,3 +59,10 @@ class GraphRunnerPort(Protocol):
 
 
 __all__ = ["GraphRecoveryError", "GraphRunnerPort", "ResumeRequest", "StartRequest"]
+
+
+class PlanningExecutorPort(Protocol):
+    """Generation and acknowledgment of already committed business decisions."""
+    def execute(self, nodes: Any, initial: Any, thread_id: str) -> Any: ...
+    def finish(self, *, thread_id: str, graph_version: str, decision: str,
+               result_id: str, draft_hash: str) -> None: ...

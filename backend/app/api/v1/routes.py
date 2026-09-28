@@ -75,7 +75,7 @@ def generate_plan(
         scope=scope,
         project_id=project_id,
         goal=payload.goal,
-        prefs_snapshot=payload.prefs_snapshot.model_dump(),
+        prefs_snapshot=payload.prefs_snapshot.model_dump(mode="json"),
     )
     return PlanGenerateResponse(
         run_id=run_id, status_url=f"{API_PREFIX}/runs/{run_id}"

@@ -22,7 +22,7 @@ from __future__ import annotations
 from app.agent_workflows import GRAPH_VERSION
 from app.application.container import AppContainer
 from app.application.plan_service import PlanService
-from app.application.sessions import InMemorySessionStore
+from app.application.sessions import InMemorySessionStore, SessionRecord
 from app.core.config import Settings
 from app.infrastructure.db import (
     PgPlanningCatalog,
@@ -42,11 +42,31 @@ def build_container(settings: Settings) -> AppContainer:
     内存实现只用于测试，不作为生产降级路径。
     """
     sessions = InMemorySessionStore()
+    if settings.is_development and settings.local_session_token:
+        sessions.add(SessionRecord(token=settings.local_session_token,
+                     actor_id=settings.local_actor_id,session_id="local-session",
+                     learning_project_scope=(settings.local_project_id,)))
     dsn = settings.database_url.strip()
     if not dsn:
         return AppContainer(settings=settings, sessions=sessions, plan_service=None)
 
     llm = build_llm(settings)
+    executor = None
+    pack_key, pack_version = "", 0
+    if not settings.use_fake_llm:
+        from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor
+        from app.infrastructure.db.plan_repository import to_psycopg_dsn
+        from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
+        if not settings.checkpoint_database_url:
+            raise RuntimeError("Real provider requires CHECKPOINT_DATABASE_URL")
+        from urllib.parse import urlsplit
+        app_url = urlsplit(to_psycopg_dsn(dsn))
+        cp_url = urlsplit(to_psycopg_dsn(settings.checkpoint_database_url))
+        if (app_url.hostname, app_url.port or 5432, app_url.path) == (cp_url.hostname, cp_url.port or 5432, cp_url.path):
+            raise RuntimeError("Business and checkpoint databases must be separate")
+        llm = PgAttemptLLM(dsn,llm)
+        executor = PgPlanningExecutor(to_psycopg_dsn(settings.checkpoint_database_url),llm=llm)
+        pack_key, pack_version = "python.engineering", 1
     plan_service = PlanService(
         repository=PgPlanRepository(dsn),
         runs=PgRunRepository(dsn),
@@ -54,5 +74,6 @@ def build_container(settings: Settings) -> AppContainer:
         resources=PgPublicResourceCatalog(dsn),
         llm=llm,
         graph_version=settings.graph_version or GRAPH_VERSION,
+        planning_executor=executor,source_pack_key=pack_key,source_pack_version=pack_version,
     )
     return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service)

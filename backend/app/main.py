@@ -20,6 +20,7 @@ from app.agent_workflows import GRAPH_VERSION
 from app.api.v1.deps import CONTAINER_STATE_KEY
 from app.api.v1.routes import router as v1_router
 from app.api.v1.schemas import V1_SCHEMAS
+from app.api.v1.session_routes import router as session_router
 from app.application.container import AppContainer
 from app.composition import build_container
 from app.core.config import get_settings
@@ -151,6 +152,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
         }
 
     application.include_router(v1_router)
+    application.include_router(session_router)
     # 契约模型注册必须在返回前完成（否则导出的 OpenAPI 缺业务 DTO）。
     _install_contract_schemas(application)
     return application
