@@ -5,6 +5,10 @@
 - **执行前 HEAD**：`b9e9cb0716a01084efdcbeb68fc00f7387790c5c`（与基线**一致**），工作树干净
 - **本次提交**：`7da6ce1`（代码 + 契约生成物）；本验收报告为紧随其后的 docs 提交
   （`docs/acceptance/B2-V-report.md`）
+- **远端落地**：`origin/master` = `668f3bf`（docs）← `932c434`（代码），
+  parent = `b9e9cb0`。因本机 `git push` 被代理拦截，改用 GitHub Git Data API 重建提交，
+  故远端 SHA 与本地不同，但**内容逐字节等价**（远端 commit 的 `tree` == 本地
+  `git rev-parse HEAD^{tree}` == `8491a62a1cf0b83a5acc2f1843c635dd20f1cc16`）。
 - **结论**：Goal §一–§八全部完成；**378 测试通过**（0 失败 / 0 跳过）；
   `ruff` / `mypy` / 前端 `tsc -b` 全部干净；真实 PostgreSQL + Fake LLM 跑通
   第一条业务 HTTP 链路。
