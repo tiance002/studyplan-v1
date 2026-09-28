@@ -84,6 +84,7 @@ def _build_nodes(
     failures: list | None = None,
     edits: list | None = None,
     cancelled: list | None = None,
+    edit_result: dict | None = None,
 ) -> PlanningNodes:
     llm = FakeLLM(
         {
@@ -101,7 +102,13 @@ def _build_nodes(
         llm=llm,
         save_draft=lambda state: (saved.append(state), f"draft:{len(saved)}")[1],
         commit_plan=lambda state: (committed.append(state), "plan:rev1")[1],
-        apply_edit=lambda state: (edits.append(state), f"draft:edited:{len(edits)}")[1],
+        # 正式契约：返回编辑后的草案结构（mapping），至少含 draft_ref。
+        apply_edit=lambda state: (
+            edits.append(state),
+            edit_result
+            if edit_result is not None
+            else {"draft_ref": f"draft:edited:{len(edits)}"},
+        )[1],
         cancel_draft=lambda state: cancelled.append(state),
         on_failure=lambda state, errors: failures.append(list(errors)),
     )
@@ -501,6 +508,88 @@ def test_edit_applies_edits_and_revalidates_without_publishing() -> None:
     # 编辑通过后重新等待确认，不得自动发布
     assert trace.stopped_at == "await_approval"
     assert committed == []
+
+
+# ---------------------------------------------------------------------------
+# 真实编辑流程（B1.2 §二）：validate 校验新内容、save 保存新内容
+# ---------------------------------------------------------------------------
+
+NEW_NODES = [{"stable_key": "n_new", "title": "编辑后新节点"}]
+NEW_UNITS = [{"stable_key": "u_new", "title": "编辑后新单元", "order_index": 0}]
+
+
+def test_edit_validates_and_saves_the_edited_content() -> None:
+    """编辑后的**新结构**必须被校验，且保存的就是新内容（不是旧结构）。"""
+    saved: list = []
+    edit_result = {
+        "draft_ref": "draft:edited:1",
+        "nodes": NEW_NODES,
+        "units": NEW_UNITS,
+        "relations": [],
+    }
+    trace = run_planning_graph(
+        _build_nodes(saved=saved, edit_result=edit_result),
+        {
+            "run_id": "r1",
+            "project_id": "p1",
+            "goal": "g",
+            "edited_stages": [
+                {"stable_key": "s1", "title": "新阶段", "section_kind": "core", "order_index": 0}
+            ],
+        },
+        resume_decision="edit",
+    )
+    assert trace.stopped_at == "await_approval"
+    # 重新校验后保存的草案内容必须是编辑后的新结构
+    assert saved, "编辑后必须重新保存草案"
+    assert saved[-1].get("units") == NEW_UNITS, "保存的必须是编辑后的新单元"
+    assert saved[-1].get("nodes") == NEW_NODES
+
+
+def test_edit_to_invalid_structure_fails_and_never_reaches_confirmation() -> None:
+    """把结构改成非法时：不得进入可确认状态，且**不得**用模型静默修复覆盖编辑。"""
+    committed: list = []
+    failures: list = []
+    # 非法：单元 order_index 重复。
+    bad_units = [
+        {"stable_key": "u_a", "title": "A", "order_index": 0},
+        {"stable_key": "u_b", "title": "B", "order_index": 0},
+    ]
+    edit_result = {
+        "draft_ref": "draft:edited:1",
+        "nodes": NEW_NODES,
+        "units": bad_units,
+        "relations": [],
+    }
+    trace = run_planning_graph(
+        _build_nodes(committed=committed, failures=failures, edit_result=edit_result),
+        {
+            "run_id": "r1",
+            "project_id": "p1",
+            "goal": "g",
+            "edited_stages": [
+                {"stable_key": "s1", "title": "新阶段", "section_kind": "core", "order_index": 0}
+            ],
+        },
+        resume_decision="edit",
+    )
+    assert trace.stopped_at == "failed_validation", "非法编辑不得停在确认点"
+    assert "repair_content" not in trace.visited, "编辑后的非法结构不得被模型静默修复"
+    assert committed == []
+    assert failures, "失败必须被记录（保留错误）"
+
+
+def test_edit_missing_content_fails() -> None:
+    """edit 缺少实际编辑内容 -> 失败（不默认放行）。"""
+    committed: list = []
+    trace = run_planning_graph(
+        _build_nodes(committed=committed),
+        {"run_id": "r1", "project_id": "p1", "goal": "g"},
+        resume_decision="edit",
+    )
+    assert trace.state.get("input_errors")
+    assert committed == []
+    assert trace.stopped_at == "failed_validation"
 
 
 def test_illegal_decision_fails_and_never_publishes() -> None:

@@ -101,11 +101,54 @@ class Recorder:
         self.failures: list = []
 
 
+def _content_hash(content: dict) -> str:
+    import hashlib
+    import json
+
+    blob = json.dumps(content, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(blob).hexdigest()
+
+
+class DraftStore:
+    """模拟**应用层**草案存储（B1.2 §二）。
+
+    负责：保存草案内容并计算内容指纹、应用用户编辑、以及在提交时校验
+    "呈递的 draft_hash 必须等于当前草案的 hash"（旧 hash 不能批准新草案）。
+    """
+
+    def __init__(self) -> None:
+        self.current_ref = ""
+        self.current_hash = ""
+        self.content: dict = {}
+        self.published: list[dict] = []
+
+    def save(self, *, ref: str, nodes: list, units: list, relations: list) -> dict:
+        self.current_ref = ref
+        self.content = {"nodes": nodes, "units": units, "relations": relations}
+        self.current_hash = _content_hash(self.content)
+        return {"draft_ref": ref, "draft_hash": self.current_hash}
+
+    def apply_edit(self, *, ref: str, nodes: list, units: list, relations: list) -> dict:
+        result = self.save(ref=ref, nodes=nodes, units=units, relations=relations)
+        # 正式契约：把**编辑后的完整草案结构**一并返回，供图更新 state。
+        return {**result, **self.content}
+
+    def commit(self, presented_hash: str) -> str:
+        if presented_hash != self.current_hash:
+            raise RuntimeError(
+                "draft_hash_mismatch: 呈递的草案哈希与当前草案不一致，拒绝发布"
+            )
+        self.published.append(dict(self.content))
+        return "plan:rev1"
+
+
 def _nodes(
     recorder: Recorder | None = None,
     *,
     structure=_good_structure,
     repair=None,
+    store: DraftStore | None = None,
+    edit_structure: dict | None = None,
 ) -> PlanningNodes:
     rec = recorder or Recorder()
     handlers = {
@@ -118,11 +161,55 @@ def _nodes(
     else:
         handlers["planning.repair"] = _good_structure
     llm = FakeLLM(handlers)
+
+    if store is None:
+        # 未提供 DraftStore 时退化为简单记录（多数场景不需要 hash 语义）。
+        return PlanningNodes(
+            llm=llm,
+            save_draft=lambda s: (rec.saved.append(dict(s)), f"draft:{len(rec.saved)}")[1],
+            commit_plan=lambda s: (rec.committed.append(dict(s)), "plan:rev1")[1],
+            apply_edit=lambda s: (
+                rec.edits.append(dict(s)),
+                {"draft_ref": f"draft:edited:{len(rec.edits)}"},
+            )[1],
+            cancel_draft=lambda s: rec.cancelled.append(dict(s)),
+            on_failure=lambda s, e: rec.failures.append(list(e)),
+        )
+
+    def _save(s) -> dict:
+        rec.saved.append(dict(s))
+        return store.save(
+            ref=f"draft:{len(rec.saved)}",
+            nodes=list(s.get("nodes") or []),
+            units=list(s.get("units") or []),
+            relations=list(s.get("relations") or []),
+        )
+
+    def _apply_edit(s) -> dict:
+        rec.edits.append(dict(s))
+        if edit_structure is not None:
+            return store.apply_edit(
+                ref=f"draft:edited:{len(rec.edits)}",
+                nodes=edit_structure["nodes"],
+                units=edit_structure["units"],
+                relations=edit_structure.get("relations", []),
+            )
+        return store.apply_edit(
+            ref=f"draft:edited:{len(rec.edits)}",
+            nodes=list(s.get("nodes") or []),
+            units=list(s.get("units") or []),
+            relations=list(s.get("relations") or []),
+        )
+
+    def _commit(s) -> str:
+        rec.committed.append(dict(s))
+        return store.commit(str(s.get("draft_hash", "")))
+
     return PlanningNodes(
         llm=llm,
-        save_draft=lambda s: (rec.saved.append(dict(s)), f"draft:{len(rec.saved)}")[1],
-        commit_plan=lambda s: (rec.committed.append(dict(s)), "plan:rev1")[1],
-        apply_edit=lambda s: (rec.edits.append(dict(s)), f"draft:edited:{len(rec.edits)}")[1],
+        save_draft=_save,
+        commit_plan=_commit,
+        apply_edit=_apply_edit,
         cancel_draft=lambda s: rec.cancelled.append(dict(s)),
         on_failure=lambda s, e: rec.failures.append(list(e)),
     )
@@ -271,6 +358,125 @@ def test_E2_edit_without_content_fails() -> None:
     result = graph.invoke(Command(resume={"decision": "edit"}), cfg)
     assert rec.committed == []
     assert result.get("input_errors"), "缺少编辑内容必须失败"
+
+
+# ---------------------------------------------------------------------------
+# E3–E6. 真实编辑流程（B1.2 §二）：校验新内容、保存新内容、不发布、旧 hash 失效
+# ---------------------------------------------------------------------------
+
+EDITED_NODES = [
+    {"stable_key": "n_python", "title": "Python 基础（编辑后）"},
+    {"stable_key": "n_rag", "title": "RAG 检索（编辑后）"},
+]
+EDITED_UNITS = [
+    {"stable_key": "u_basic", "title": "基础（编辑后）", "order_index": 0},
+    {"stable_key": "u_rag", "title": "RAG（编辑后）", "order_index": 1},
+]
+#: 非法编辑：单元 order_index 重复（其余保持与任务关联一致，隔离出单一错误）。
+BAD_EDITED_UNITS = [
+    {"stable_key": "u_basic", "title": "基础", "order_index": 0},
+    {"stable_key": "u_rag", "title": "RAG", "order_index": 0},
+]
+
+
+def test_E3_edit_to_invalid_structure_cannot_reach_confirmation() -> None:
+    """1) 修改为非法结构，不能进入可确认状态。"""
+    store = DraftStore()
+    rec = Recorder()
+    graph = build_planning_graph(
+        _nodes(rec, store=store, edit_structure={"nodes": EDITED_NODES, "units": BAD_EDITED_UNITS}),
+        checkpointer=InMemorySaver(),
+    )
+    cfg = _config("t-E3")
+    graph.invoke(_initial(), cfg)
+    result = graph.invoke(
+        Command(resume={"decision": "edit", "edited_stages": [{"stable_key": "s1", "title": "x"}]}),
+        cfg,
+    )
+    assert "__interrupt__" not in result, "非法编辑不得停在确认点"
+    assert result.get("structure_errors"), "必须保留结构校验错误"
+    assert rec.committed == []
+    assert store.published == []
+
+
+def test_E4_edit_to_valid_structure_shows_and_publishes_new_content() -> None:
+    """2) 修改为合法结构，再次确认时**展示与发布的都是新内容**。"""
+    store = DraftStore()
+    rec = Recorder()
+    graph = build_planning_graph(
+        _nodes(rec, store=store, edit_structure={"nodes": EDITED_NODES, "units": EDITED_UNITS}),
+        checkpointer=InMemorySaver(),
+    )
+    cfg = _config("t-E4")
+    graph.invoke(_initial(), cfg)
+    hash_before = store.current_hash
+
+    result = graph.invoke(
+        Command(resume={"decision": "edit", "edited_stages": [{"stable_key": "s1", "title": "x"}]}),
+        cfg,
+    )
+    # 重新等待确认，且草案内容已是编辑后的新内容
+    assert "__interrupt__" in result
+    assert store.content["units"] == EDITED_UNITS, "保存的必须是编辑后的新内容"
+    assert store.current_hash != hash_before, "编辑后草案指纹必须变化"
+    # 确认点展示的 hash 就是新草案的 hash
+    payload = result["__interrupt__"][0].value
+    assert payload["draft_hash"] == store.current_hash
+
+    # 用新 hash 批准 -> 发布的必须是新内容
+    graph.invoke(
+        Command(resume={"decision": "approve", "draft_hash": store.current_hash,
+                        "idempotency_key": "k-e4"}),
+        cfg,
+    )
+    assert len(store.published) == 1
+    assert store.published[0]["units"] == EDITED_UNITS, "发布的必须是编辑后的新内容"
+
+
+def test_E5_edit_does_not_publish() -> None:
+    """3) edit 不直接发布。"""
+    store = DraftStore()
+    rec = Recorder()
+    graph = build_planning_graph(
+        _nodes(rec, store=store, edit_structure={"nodes": EDITED_NODES, "units": EDITED_UNITS}),
+        checkpointer=InMemorySaver(),
+    )
+    cfg = _config("t-E5")
+    graph.invoke(_initial(), cfg)
+    graph.invoke(
+        Command(resume={"decision": "edit", "edited_stages": [{"stable_key": "s1", "title": "x"}]}),
+        cfg,
+    )
+    assert rec.committed == [], "edit 不得触发提交"
+    assert store.published == [], "edit 不得发布任何计划"
+
+
+def test_E6_stale_draft_hash_cannot_approve_new_draft() -> None:
+    """4) 旧 draft_hash 不能批准新草案。"""
+    store = DraftStore()
+    rec = Recorder()
+    graph = build_planning_graph(
+        _nodes(rec, store=store, edit_structure={"nodes": EDITED_NODES, "units": EDITED_UNITS}),
+        checkpointer=InMemorySaver(),
+    )
+    cfg = _config("t-E6")
+    graph.invoke(_initial(), cfg)
+    stale_hash = store.current_hash  # 编辑前的 hash
+
+    graph.invoke(
+        Command(resume={"decision": "edit", "edited_stages": [{"stable_key": "s1", "title": "x"}]}),
+        cfg,
+    )
+    assert store.current_hash != stale_hash
+
+    # 用**旧** hash 批准新草案 -> 必须被拒绝
+    with pytest.raises(RuntimeError, match="draft_hash_mismatch"):
+        graph.invoke(
+            Command(resume={"decision": "approve", "draft_hash": stale_hash,
+                            "idempotency_key": "k-e6"}),
+            cfg,
+        )
+    assert store.published == [], "旧 hash 不得发布任何内容"
 
 
 # ---------------------------------------------------------------------------

@@ -32,6 +32,7 @@ Ports（``LLMPort`` 等）。B1 用 Fake LLM 跑通；真实模型在 B3 接入�
 
 from __future__ import annotations
 
+from collections.abc import Mapping as AbcMapping
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping
 
@@ -77,6 +78,38 @@ def _as_list(value: Any) -> list[Any]:
     return []
 
 
+def _coerce_edit_delta(edited: Any) -> dict[str, Any]:
+    """规整 ``apply_edit`` 的返回值。
+
+    正式契约：返回**编辑后的完整草案结构**（mapping），至少含 ``draft_ref``，
+    并可含 ``draft_hash`` 与新的 ``nodes``/``units``/``relations``/
+    ``practice_proposal``/``outline``。这样随后的 ``validate`` 才能校验
+    **新内容**，``save_draft_projection`` 才会保存新内容（B1.2 §二）。
+
+    兼容：若返回字符串，则仅视为草案引用（旧契约），结构保持原样。
+    """
+    if isinstance(edited, AbcMapping):
+        return dict(edited)
+    if isinstance(edited, str):
+        return {"draft_ref": edited}
+    return {}
+
+
+def _coerce_draft_result(result: Any) -> dict[str, str]:
+    """规整 ``save_draft`` 的返回值。
+
+    支持两种形态：
+    - mapping：``{"draft_ref": ..., "draft_hash": ...}``（正式契约）；
+    - 字符串：仅草案引用（旧契约）。
+    """
+    if isinstance(result, AbcMapping):
+        return {
+            "draft_ref": str(result.get("draft_ref", "") or ""),
+            "draft_hash": str(result.get("draft_hash", "") or ""),
+        }
+    return {"draft_ref": str(result or ""), "draft_hash": ""}
+
+
 def _extend_generation_errors(state: Mapping[str, Any], delta: dict[str, Any]) -> dict[str, Any]:
     """在生成阶段**累加** generation 错误，而不是覆盖。
 
@@ -117,11 +150,15 @@ class PlanningNodes:
 
     llm: LLMPort
     #: 保存草案投影（写业务草案表）—— 由应用层注入，图不自行 SQL。
-    save_draft: Callable[[PlanningState], str] = field(default=lambda s: "")
+    #: 返回草案引用字符串，或 ``{"draft_ref", "draft_hash"}`` mapping。
+    save_draft: Callable[[PlanningState], Any] = field(default=lambda s: "")
     #: 幂等提交 —— 必须实现 run_id + operation_key 唯一。
     commit_plan: Callable[[PlanningState], str] = field(default=lambda s: "")
     #: 应用用户编辑并保存**新的草案版本**（不发布）。
-    apply_edit: Callable[[PlanningState], str] = field(default=lambda s: "")
+    #: **必须返回编辑后的完整草案结构**（mapping）：至少含 ``draft_ref``，
+    #: 并含新的 ``nodes``/``units``/``relations``/``practice_proposal``
+    #: 与 ``draft_hash``，使随后的 validate 校验新内容、save_draft 保存新内容。
+    apply_edit: Callable[[PlanningState], Any] = field(default=lambda s: {})
     #: 持久化草案取消状态（供 worker 按状态过滤，杜绝取消后发布）。
     cancel_draft: Callable[[PlanningState], None] = field(default=lambda s: None)
     #: 记录失败（保留错误，供人工核对）。
@@ -147,6 +184,7 @@ class PlanningNodes:
                 "structure_errors": [],
                 "validation_history": [],
                 "repair_count": 0,
+                "edited_draft": False,
             },
             state,
         )
@@ -351,9 +389,17 @@ class PlanningNodes:
         """把草案投影到**受授权业务草案表**。
 
         checkpoint 只保存 ``draft_ref`` 引用，不保存草案正文（ADR-0002）。
+
+        **保存的是当前 state 里的内容** —— 生成路径下是模型产物；编辑路径下
+        已被 ``apply_decision`` 覆盖为**用户编辑后的新结构**，因此不会把旧结构
+        重新写回新草案（B1.2 §二）。若 ``save_draft`` 同时返回 ``draft_hash``，
+        则一并更新，使后续 approve 必须使用**新**草案的 hash。
         """
-        draft_ref = self.save_draft(state)
-        return {"draft_ref": draft_ref}
+        coerced = _coerce_draft_result(self.save_draft(state))
+        delta: dict[str, Any] = {"draft_ref": coerced["draft_ref"]}
+        if coerced["draft_hash"]:
+            delta["draft_hash"] = coerced["draft_hash"]
+        return delta
 
     def apply_decision(self, state: PlanningState) -> dict[str, Any]:
         """处理用户在 ``await_approval`` 处的决定。
@@ -383,20 +429,35 @@ class PlanningNodes:
                     {"input_errors": ["edit 决定必须携带实际的编辑内容"]}, state
                 )
             # 应用编辑并保存新的草案版本（应用层实现），**不发布**。
-            new_ref = self.apply_edit(state)
+            edited = self.apply_edit(state)
+            edit_delta = _coerce_edit_delta(edited)
+            new_ref = str(edit_delta.get("draft_ref", "") or "")
             if not new_ref:
                 return _with_aggregate(
                     {"input_errors": ["编辑保存失败：未获得新的草案引用"]}, state
                 )
-            return _with_aggregate(
-                {
-                    "draft_ref": new_ref,
-                    "repair_count": 0,
-                    "generation_errors": [],
-                    "structure_errors": [],
-                },
-                state,
-            )
+            merged: dict[str, Any] = {
+                "draft_ref": new_ref,
+                "repair_count": 0,
+                "generation_errors": [],
+                "structure_errors": [],
+                # 标记为「用户编辑后的重新校验」：结构非法时直接失败，
+                # 不用模型静默修复覆盖用户的实际编辑。
+                "edited_draft": True,
+            }
+            # **关键**：用编辑后的实际内容覆盖旧结构，确保 validate 校验新内容、
+            # save_draft_projection 保存新内容（而不是把旧结构写回新草案）。
+            for key in (
+                "nodes",
+                "units",
+                "relations",
+                "practice_proposal",
+                "outline",
+                "draft_hash",
+            ):
+                if key in edit_delta:
+                    merged[key] = edit_delta[key]
+            return _with_aggregate(merged, state)
         if decision == "approve":
             return {}
         # 非法/空 decision：不默认 approve。
@@ -447,7 +508,9 @@ def route_after_validate(state: PlanningState) -> str:
     1. ``generation_errors`` 非空 -> 失败。**模型失败不得被空结构校验覆盖**，
        因此这一条必须先于"结构是否为空"的判定。
     2. ``structure_errors`` 为空 -> 通过，保存草案。
-    3. 否则看修复配额：用尽即失败，否则修复（设计 §4 上限 2）。
+    3. **用户编辑后的重新校验**（``edited_draft``）：结构非法即**直接失败**，
+       **不**用模型静默修复覆盖用户的实际编辑（B1.2 §二）。
+    4. 否则看修复配额：用尽即失败，否则修复（设计 §4 上限 2）。
     """
     if state.get("generation_errors"):
         return ROUTE_FAIL
@@ -455,6 +518,8 @@ def route_after_validate(state: PlanningState) -> str:
         return ROUTE_FAIL
     if not (state.get("structure_errors") or []):
         return ROUTE_DRAFT
+    if state.get("edited_draft"):
+        return ROUTE_FAIL
     if int(state.get("repair_count", 0)) >= MAX_REPAIR_ATTEMPTS:
         return ROUTE_FAIL
     return ROUTE_REPAIR

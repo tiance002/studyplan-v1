@@ -83,6 +83,9 @@ class PlanningState(TypedDict, total=False):
     decision: str
     decision_idempotency_key: str
     edited_stages: list[dict[str, Any]]
+    #: 本轮是否为「用户编辑后的重新校验」。为 True 时结构非法**直接失败**，
+    #: 不用模型静默修复覆盖用户的实际编辑（B1.2 §二）。
+    edited_draft: bool
     # ---- 结果 ----
     result_id: str
 
