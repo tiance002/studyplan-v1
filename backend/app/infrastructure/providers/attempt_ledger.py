@@ -7,7 +7,7 @@ from dataclasses import asdict
 
 import psycopg
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
-from app.ports.llm import LLMDispatchUnknownError, LLMFailure, LLMResult
+from app.ports.llm import LLMDispatchUnknownError, LLMFailure, LLMNotDispatchedError, LLMResult
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
@@ -24,7 +24,9 @@ class PgAttemptLLM:
 
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
         project_id = str(payload.get("_project_id") or "")
-        fingerprint = hashlib.sha256(json.dumps([purpose,payload,schema_name,self.provider.model,self.provider.prompt_version,self.provider.domain_pack], sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        identity = [purpose,payload,schema_name,self.provider.model,self.provider.prompt_version,self.provider.domain_pack]
+        fingerprint = hashlib.sha256(json.dumps([*identity,self.provider.base_url,self.provider.configuration_ref], sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+        legacy_fingerprint = hashlib.sha256(json.dumps(identity, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
         with self._connect(project_id) as conn:
             inserted = conn.execute("""INSERT INTO ai_provider_attempts
                 (attempt_id,run_id,provider,model_id,prompt_version,status,request_fingerprint,schema_name)
@@ -33,7 +35,11 @@ class PgAttemptLLM:
                 (attempt_id,run_id,self.provider.model,self.provider.prompt_version,fingerprint,schema_name)).fetchone()
             if not inserted:
                 row = conn.execute("SELECT * FROM ai_provider_attempts WHERE attempt_id=%s", (attempt_id,)).fetchone()
-                if row is None or row["request_fingerprint"] != fingerprint or row["run_id"] != run_id:
+                compatible = (row is not None and row["run_id"] == run_id and (
+                    row["request_fingerprint"] == fingerprint or
+                    (self.provider.configuration_ref == "deployment" and row["request_fingerprint"] == legacy_fingerprint)
+                ))
+                if not compatible:
                     return LLMFailure("attempt_conflict", "Attempt identity mismatch")
                 if row["status"] == "succeeded":
                     return LLMResult(**row["response_payload"])
@@ -43,6 +49,9 @@ class PgAttemptLLM:
         # Connection commits 'dispatched' BEFORE the external network request.
         try:
             result = self.provider.generate_structured(purpose=purpose,payload=payload,schema_name=schema_name,run_id=run_id,attempt_id=attempt_id)
+        except LLMNotDispatchedError:
+            result = LLMFailure("endpoint_preflight_rejected","No provider request was sent")
+            cause = None
         except Exception as exc:
             # Never retry an exception after durable dispatch.
             result = LLMFailure("provider_exception_unknown", "Provider outcome unknown", dispatch_unknown=True)

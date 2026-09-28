@@ -6,7 +6,8 @@ import time
 from typing import Any
 
 import httpx
-from app.ports.llm import LLMFailure, LLMResult
+from app.core.errors import AppError
+from app.ports.llm import LLMFailure, LLMNotDispatchedError, LLMResult
 
 # Explicit shapes used by the existing deterministic validators/projection.
 SHAPES: dict[str, dict[str, Any]] = {
@@ -21,7 +22,7 @@ SHAPES["planning.repair"] = {
 
 
 class OpenAICompatibleLLM:
-    def __init__(self, *, base_url, api_key, model, timeout=120, max_tokens=8000, client=None, domain_pack=None):
+    def __init__(self, *, base_url, api_key, model, timeout=120, max_tokens=8000, client=None, domain_pack=None, endpoint_guard=None):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
@@ -30,6 +31,8 @@ class OpenAICompatibleLLM:
         self.max_tokens = max_tokens
         self.client = client
         self.domain_pack = domain_pack or {}
+        self.endpoint_guard = endpoint_guard
+        self.configuration_ref = "deployment"
 
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
         if purpose not in SHAPES:
@@ -49,9 +52,16 @@ class OpenAICompatibleLLM:
                      "field_shape":SHAPES[purpose],"domain_pack":self.domain_pack,"context":context},ensure_ascii=False)}],
                     response_format={"type":"json_object"}, max_tokens=self.max_tokens)
         started = time.monotonic()
+        # Validate approved origin/public DNS before sending Authorization. This is
+        # outside the dispatch exception handling: a rejection made no HTTP call.
+        if self.endpoint_guard:
+            try:
+                self.endpoint_guard(self.base_url)
+            except AppError:
+                raise LLMNotDispatchedError("Model endpoint preflight rejected") from None
         try:
             if self.client is None:
-                with httpx.Client(timeout=self.timeout, follow_redirects=False) as client:
+                with httpx.Client(timeout=self.timeout, follow_redirects=False, trust_env=False) as client:
                     response = client.post(self.base_url + "/chat/completions", headers={"Authorization": "Bearer " + self.api_key}, json=body)
             else:
                 response = self.client.post(self.base_url + "/chat/completions", headers={"Authorization": "Bearer " + self.api_key}, json=body, timeout=self.timeout)

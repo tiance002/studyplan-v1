@@ -9,3 +9,5 @@ User subsequently supplied DeepSeek config. First real run failed validation wit
 User requests personal model settings, only OpenAI-compatible, no subagents. Read-only architecture design written; user review requested by brainstorming skill. No settings feature implemented yet.
 
 Final full suite 396 passed in 180.42s. Actual DeepSeek plan read by browser desktop/mobile with four official links, no new dispatch; screenshots verified. Test API stopped. Original B2-V/B3 goal acceptance satisfied; personal settings remain a separate unimplemented follow-up design.
+
+User approved personal settings design and confirmed OpenAI-compatible only. Implemented 0007 encrypted actor settings, CAS/redaction/endpoint policy, per-run fixed runtime, frontend, OpenAPI, and ignored local encryption key. Real personal DeepSeek closure run_92afe02... / plan pln_045fd4... succeeded; verification actor credential revoked after run. Final full suite 406 passed in 146.02s; browser settings save/reload/clear PASS; dev API/frontend stopped after QA.

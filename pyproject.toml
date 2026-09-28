@@ -10,6 +10,7 @@ dependencies = [
     "argon2-cffi>=23.1,<26.0",
     "PyYAML>=6.0,<7.0",
     "httpx>=0.27,<1.0",
+    "cryptography>=44,<47",
 ]
 
 [project.optional-dependencies]

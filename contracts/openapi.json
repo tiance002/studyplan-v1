@@ -350,6 +350,96 @@
           }
         }
       }
+    },
+    "/api/v1/model-settings": {
+      "get": {
+        "summary": "Get Model Settings",
+        "operationId": "get_model_settings",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelSettingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Save Model Settings",
+        "operationId": "save_model_settings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelSettingsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Clear Model Settings",
+        "operationId": "clear_model_settings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelSettingsClear"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelSettingsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -563,6 +653,121 @@
         ],
         "title": "KnowledgeExtensionView",
         "description": "阶段预置扩展知识（默认 1–2 项，**可选**，不强制完成）。"
+      },
+      "ModelSettingsClear": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version"
+        ],
+        "title": "ModelSettingsClear"
+      },
+      "ModelSettingsRequest": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version"
+          },
+          "base_url": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Base Url"
+          },
+          "model_id": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Model Id"
+          },
+          "protocol": {
+            "type": "string",
+            "title": "Protocol",
+            "default": "openai"
+          },
+          "api_key": {
+            "type": "string",
+            "format": "password",
+            "title": "Api Key",
+            "default": "",
+            "writeOnly": true
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "base_url",
+          "model_id"
+        ],
+        "title": "ModelSettingsRequest"
+      },
+      "ModelSettingsResponse": {
+        "properties": {
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "model_id": {
+            "type": "string",
+            "title": "Model Id"
+          },
+          "protocol": {
+            "type": "string",
+            "title": "Protocol"
+          },
+          "has_api_key": {
+            "type": "boolean",
+            "title": "Has Api Key"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "encryption_available": {
+            "type": "boolean",
+            "title": "Encryption Available"
+          },
+          "allowed_hosts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Hosts"
+          },
+          "supported_protocols": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Supported Protocols"
+          }
+        },
+        "type": "object",
+        "required": [
+          "version",
+          "base_url",
+          "model_id",
+          "protocol",
+          "has_api_key",
+          "source",
+          "encryption_available",
+          "allowed_hosts",
+          "supported_protocols"
+        ],
+        "title": "ModelSettingsResponse"
       },
       "OrderedSection": {
         "properties": {

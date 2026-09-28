@@ -55,6 +55,10 @@ class LLMDispatchUnknownError(RuntimeError):
     """Paid dispatch outcome unknown; reconcile before another call."""
 
 
+class LLMNotDispatchedError(RuntimeError):
+    """An explicit preflight rejected the call before any provider request."""
+
+
 class LLMUnavailableError(RuntimeError):
     """Provider 不可用。
 

@@ -48,3 +48,7 @@ a { color: #245ca6; text-underline-offset: 3px; }
 .confirmed > ol > li { padding: 20px 0; }
 @media (max-width: 880px) { main { padding: 0 20px 36px; } .workspace { grid-template-columns: 1fr; gap: 30px; padding-top: 28px; } aside { max-width: 640px; } header { gap: 14px; } header span { font-size: 12px; } .stage-top { flex-wrap: wrap; } .stage-top input { flex: 1; } .order-actions { margin-left: auto; } .empty { padding: 40px 24px; } }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+.model-block { margin: 1.5rem 0; padding: 1rem 0; border-top: 1px solid #d3deec; border-bottom: 1px solid #d3deec; }
+.model-block summary { cursor: pointer; color: #245ca6; font-weight: 700; padding: .5rem 0; }
+.model-source { font-size: .85rem; margin: 0 0 .35rem; }
+.model-actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .75rem; }

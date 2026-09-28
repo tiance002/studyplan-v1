@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { api, ApiError } from "./api/client";
 import type { components } from "./api/generated/schema";
 import "./style.css";
+import { ModelSettings } from "./ModelSettings";
 
 type DTO = components["schemas"];
 type Draft = DTO["PlanDraftView"];
@@ -32,6 +33,7 @@ function App() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
+  const [modelSettings, setModelSettings] = useState<DTO["ModelSettingsResponse"] | null>(null);
   const remember = (list: string[]) => { setProjects(list); setProject(list[0] ?? ""); };
   useEffect(() => { api.session().then(s => remember(s.project_ids)).catch(() => {}).finally(() => setCheckingSession(false)); }, []);
   async function loadDraft(id: string) {
@@ -102,13 +104,14 @@ function App() {
           <label htmlFor="token">本地访问口令</label><input id="token" type="password" autoComplete="off" value={token} onChange={e => setToken(e.target.value)} required />
           <button disabled={busy}>进入学习空间</button>
         </form> : <>
+          <ModelSettings onChange={setModelSettings} />
           {projects.length > 1 && <label>学习空间<select value={project} onChange={e => setProject(e.target.value)}>{projects.map(p => <option key={p}>{p}</option>)}</select></label>}
           <form onSubmit={e => { e.preventDefault(); act(async () => {
             const result = await api.generate(project, goal); localStorage.setItem(`studyplan-run:${project}`, result.run_id);
             await loadRun(result.run_id);
           }); }}>
             <label htmlFor="goal">学习目标</label><textarea id="goal" rows={5} maxLength={2000} value={goal} onChange={e => setGoal(e.target.value)} required />
-            <button disabled={busy || !goal.trim() || run?.status === "reconciliation_required"}>{busy ? "正在处理…" : "生成学习草案"}</button>
+            <button disabled={busy || !goal.trim() || !modelSettings || modelSettings.source === "unconfigured" || run?.status === "reconciliation_required"}>{busy ? "正在处理…" : "生成学习草案"}</button>
           </form>
           <p className="scope-note">当前内容包：Python 工程入门。主线引用官方教程，适合已有基础编程认知的学习者。</p>
         </>}

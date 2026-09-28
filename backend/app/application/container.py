@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from app.application.model_settings import ModelSettingsService
 from app.application.plan_service import PlanService
 from app.core.config import Settings
 from app.ports.sessions import SessionResolverPort
@@ -36,3 +37,4 @@ class AppContainer:
     settings: Settings
     sessions: SessionResolverPort
     plan_service: PlanService | None = None
+    model_settings_service: ModelSettingsService | None = None

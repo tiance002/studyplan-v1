@@ -31,7 +31,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 from app.agent_workflows.graphs import graph_thread_id, run_planning_graph
 from app.agent_workflows.nodes import PlanningNodes
@@ -63,7 +63,7 @@ from app.domain.planning.models import (
 from app.domain.resources.curation import StageResourceAssignment
 from app.domain.runs.models import RunRecord
 from app.domain.workspace.models import AuthContext
-from app.ports.graph_runner import PlanningExecutorPort
+from app.ports.graph_runner import PlanningExecutorPort, PlanningRuntime
 from app.ports.llm import LLMDispatchUnknownError, LLMPort
 from app.ports.public_resources import PublicResourceCatalogPort
 from app.ports.runs import PlanningCatalogPort, RunRepositoryPort
@@ -134,6 +134,7 @@ class PlanService:
         source_pack_key: str = "",
         source_pack_version: int = 0,
         planning_executor: PlanningExecutorPort | None = None,
+        runtime_factory: Callable[[AuthContext,str,str],PlanningRuntime] | None = None,
     ) -> None:
         self._repo = repository
         self._runs = runs
@@ -141,6 +142,7 @@ class PlanService:
         self._resources = resources
         self._llm = llm
         self._executor = planning_executor
+        self._runtime_factory = runtime_factory
         self._graph_version = graph_version
         self._source_pack_key = source_pack_key
         self._source_pack_version = source_pack_version
@@ -191,9 +193,12 @@ class PlanService:
             "prefs_snapshot": dict(prefs_snapshot or {}),
         }
         try:
-            nodes = self._build_nodes(project_id=project_id, run_id=run_id, goal=cleaned_goal)
-            trace = (self._executor.execute(nodes, initial, thread_id)
-                     if self._executor is not None else run_planning_graph(nodes, initial))
+            runtime = self._runtime_factory(scope,project_id,run_id) if self._runtime_factory else None
+            executor = runtime.executor if runtime else self._executor
+            nodes = self._build_nodes(project_id=project_id, run_id=run_id, goal=cleaned_goal,
+                                      llm=runtime.llm if runtime else None)
+            trace = (executor.execute(nodes, initial, thread_id)
+                     if executor is not None else run_planning_graph(nodes, initial))
         except LLMDispatchUnknownError:
             self._update_run(project_id=project_id, run_id=run_id,
                              status=AiRunStatus.RECONCILIATION_REQUIRED,
@@ -381,7 +386,7 @@ class PlanService:
             resources=self._resolve(final_draft.stage_resources, final_draft.stages),
         )
 
-    def _build_nodes(self, *, project_id: str, run_id: str, goal: str) -> PlanningNodes:
+    def _build_nodes(self, *, project_id: str, run_id: str, goal: str, llm: LLMPort | None = None) -> PlanningNodes:
         """装配图节点，并把「保存草案」接回应用层的投影 + 物化 + 仓储。"""
 
         def save_draft(state: PlanningState) -> dict[str, str]:
@@ -390,7 +395,7 @@ class PlanService:
             )
 
         return PlanningNodes(
-            llm=_ScopedLLM(self._llm, project_id),
+            llm=_ScopedLLM(llm if llm is not None else self._llm, project_id),
             save_draft=save_draft,
             # 生成路径在 await_approval 处停下，以下回调不会被执行；
             # 决策路径由本服务的 decide() 负责，**不**重复实现第二套规则。

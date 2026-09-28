@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
 from app.domain.enums import GraphName
+from app.ports.llm import LLMPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -58,7 +59,7 @@ class GraphRunnerPort(Protocol):
     def resume(self, request: ResumeRequest) -> None: ...
 
 
-__all__ = ["GraphRecoveryError", "GraphRunnerPort", "ResumeRequest", "StartRequest"]
+__all__ = ["GraphRecoveryError", "GraphRunnerPort", "PlanningRuntime", "ResumeRequest", "StartRequest"]
 
 
 class PlanningExecutorPort(Protocol):
@@ -66,3 +67,7 @@ class PlanningExecutorPort(Protocol):
     def execute(self, nodes: Any, initial: Any, thread_id: str) -> Any: ...
     def finish(self, *, thread_id: str, graph_version: str, decision: str,
                result_id: str, draft_hash: str) -> None: ...
+@dataclass(frozen=True)
+class PlanningRuntime:
+    llm: LLMPort
+    executor: PlanningExecutorPort

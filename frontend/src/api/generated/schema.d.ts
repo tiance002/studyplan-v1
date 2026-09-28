@@ -150,6 +150,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/model-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Model Settings */
+        get: operations["get_model_settings"];
+        /** Save Model Settings */
+        put: operations["save_model_settings"];
+        post?: never;
+        /** Clear Model Settings */
+        delete: operations["clear_model_settings"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -278,6 +297,52 @@ export interface components {
              * @default 0
              */
             order_index: number;
+        };
+        /** ModelSettingsClear */
+        ModelSettingsClear: {
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** ModelSettingsRequest */
+        ModelSettingsRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Base Url */
+            base_url: string;
+            /** Model Id */
+            model_id: string;
+            /**
+             * Protocol
+             * @default openai
+             */
+            protocol: string;
+            /**
+             * Api Key
+             * Format: password
+             * @default
+             */
+            api_key: string;
+        };
+        /** ModelSettingsResponse */
+        ModelSettingsResponse: {
+            /** Version */
+            version: number;
+            /** Base Url */
+            base_url: string;
+            /** Model Id */
+            model_id: string;
+            /** Protocol */
+            protocol: string;
+            /** Has Api Key */
+            has_api_key: boolean;
+            /** Source */
+            source: string;
+            /** Encryption Available */
+            encryption_available: boolean;
+            /** Allowed Hosts */
+            allowed_hosts: string[];
+            /** Supported Protocols */
+            supported_protocols: string[];
         };
         /**
          * OrderedSection
@@ -1021,6 +1086,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SessionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_model_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelSettingsResponse"];
+                };
+            };
+        };
+    };
+    save_model_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModelSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelSettingsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_model_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModelSettingsClear"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelSettingsResponse"];
                 };
             };
             /** @description Validation Error */

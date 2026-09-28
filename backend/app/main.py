@@ -18,6 +18,7 @@ from typing import Any
 from app import agent_workflows  # noqa: F401  (副作用：设置 LANGGRAPH_STRICT_MSGPACK)
 from app.agent_workflows import GRAPH_VERSION
 from app.api.v1.deps import CONTAINER_STATE_KEY
+from app.api.v1.model_settings_routes import router as model_settings_router
 from app.api.v1.routes import router as v1_router
 from app.api.v1.schemas import V1_SCHEMAS
 from app.api.v1.session_routes import router as session_router
@@ -28,6 +29,8 @@ from app.core.errors import AppError
 from app.core.request_context import new_request_id, set_request_id
 from app.core.startup_guard import validate_startup_security
 from fastapi import FastAPI, Request
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -63,6 +66,16 @@ def _install_contract_schemas(application: FastAPI) -> None:
 
 def _install_error_handling(application: FastAPI) -> None:
     """统一错误视图：``code/message/request_id/details``（不回显敏感输入）。"""
+
+    @application.exception_handler(RequestValidationError)
+    async def _validation_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+        if request.url.path == "/api/v1/model-settings":
+            # FastAPI's default validation response includes raw input, including
+            # malformed API Key objects. Never echo input/ctx on this secret route.
+            return JSONResponse(status_code=422,content={"detail":[
+                {"loc":error["loc"],"type":error["type"],"msg":"Invalid model setting value"}
+                for error in exc.errors()]})
+        return await request_validation_exception_handler(request,exc)
 
     @application.exception_handler(AppError)
     async def _app_error_handler(request: Request, exc: AppError) -> JSONResponse:
@@ -153,6 +166,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
 
     application.include_router(v1_router)
     application.include_router(session_router)
+    application.include_router(model_settings_router)
     # 契约模型注册必须在返回前完成（否则导出的 OpenAPI 缺业务 DTO）。
     _install_contract_schemas(application)
     return application

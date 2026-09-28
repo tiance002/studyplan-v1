@@ -3,6 +3,7 @@
 Uses the configured cloud provider without Fake or automatic redispatch. Retains
 run/attempt/plan/checkpoint evidence in the dedicated local B3 databases.
 """
+import argparse
 import json
 import secrets
 import socket
@@ -22,12 +23,16 @@ from app.main import create_app
 
 def main():
     import os
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--personal", action="store_true", help="Save a personal OpenAI-compatible setting before generation")
+    args = parser.parse_args()
     settings = get_settings()
     if settings.llm_provider != "openai_compatible" or not settings.llm_api_key or not settings.llm_model_id:
         raise SystemExit("B3 live verification pending: fill LLM_BASE_URL, LLM_MODEL_ID, LLM_API_KEY in D:\\studyplan\\.env")
     project_id = new_id("prj")
     token = secrets.token_urlsafe(32)
-    settings = replace(settings,local_project_id=project_id,local_session_token=token)
+    actor_id = new_id("act") if args.personal else settings.local_actor_id
+    settings = replace(settings,local_project_id=project_id,local_session_token=token,local_actor_id=actor_id)
     container = build_container(settings)
     with psycopg.connect(to_psycopg_dsn(os.environ["STUDYPLAN_MIGRATION_DSN"])) as conn:
         conn.execute("INSERT INTO learning_projects(project_id,owner_actor_id,title,goal_statement,stable_key) VALUES (%s,%s,'B3 live verification','Python text CLI',%s)",
@@ -51,6 +56,13 @@ def main():
         with httpx.Client(base_url=f"http://127.0.0.1:{port}",timeout=settings.llm_timeout_seconds*6+30) as client:
             response = client.post("/api/v1/session",json={"token":token})
             response.raise_for_status()
+            if args.personal:
+                response = client.put("/api/v1/model-settings",json={"expected_version":0,
+                    "base_url":settings.llm_base_url,"model_id":settings.llm_model_id,
+                    "protocol":"openai","api_key":settings.llm_api_key})
+                response.raise_for_status()
+                assert response.json()["source"] == "personal"
+                assert settings.llm_api_key not in response.text
             params={"project_id":project_id}
             response=client.post("/api/v1/plans/generate",params=params,json={"goal":"学会使用 Python 编写一个读入文本并输出统计报告的命令行工具，具备文件异常处理和可复现运行说明"})
             response.raise_for_status()
@@ -81,10 +93,20 @@ def main():
             assert saved and saved.checkpoint["channel_values"]["result_id"] == plan["plan_id"]
         with psycopg.connect(to_psycopg_dsn(os.environ["STUDYPLAN_MIGRATION_DSN"])) as conn:
             rows=conn.execute("SELECT model_id,status,input_tokens,output_tokens,schema_name FROM ai_provider_attempts WHERE run_id=%s ORDER BY created_at",(run_id,)).fetchall()
+            bindings=conn.execute("SELECT actor_id,settings_version FROM ai_run_model_settings WHERE run_id=%s",(run_id,)).fetchall()
         assert rows and all(row[1] == "succeeded" for row in rows),rows
+        assert (len(bindings)==1 and bindings[0][0]==actor_id) if args.personal else not bindings
+        if args.personal:
+            from app.infrastructure.db.model_settings import PgModelSettings
+            repository = PgModelSettings(settings.database_url,settings.model_settings_encryption_key)
+            current = repository.get(actor_id)
+            assert current and current.version == bindings[0][1]
+            repository.clear(actor_id,expected_version=current.version)
         print(json.dumps({"verified":"real_provider_HTTP_PG_StateGraph_checkpoint_publish_replay",
                           "project_id":project_id,"run_id":run_id,"plan_id":plan["plan_id"],
-                          "revision":plan["revision"],"attempts":rows},ensure_ascii=False))
+                          "revision":plan["revision"],"model_source":"personal" if args.personal else "deployment",
+                          "settings_version":bindings[0][1] if bindings else None,
+                          "verification_credential_revoked":args.personal,"attempts":rows},ensure_ascii=False))
     finally:
         server.should_exit=True
         thread.join(timeout=15)

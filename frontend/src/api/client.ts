@@ -4,18 +4,21 @@ type DTO = components["schemas"];
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
-async function request<T>(url: string, body?: unknown): Promise<T> {
+async function request<T>(url: string, body?: unknown, method?: string): Promise<T> {
   const response = await fetch(`/api/v1${url}`, {
-    method: body === undefined ? "GET" : "POST", credentials: "include",
+    method: method ?? (body === undefined ? "GET" : "POST"), credentials: "include",
     headers: body === undefined ? {} : { "Content-Type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = await response.json();
-  if (!response.ok) throw new ApiError(response.status, data.message ?? data.detail ?? `请求失败（${response.status}）`);
+  if (!response.ok) throw new ApiError(response.status, data.message ?? (typeof data.detail === "string" ? data.detail : `请求失败（${response.status}），请检查输入或重新加载。`));
   return data as T;
 }
 const scope = (project: string) => `?project_id=${encodeURIComponent(project)}`;
 export const api = {
+  modelSettings: () => request<DTO["ModelSettingsResponse"]>("/model-settings"),
+  saveModelSettings: (body: DTO["ModelSettingsRequest"]) => request<DTO["ModelSettingsResponse"]>("/model-settings", body, "PUT"),
+  clearModelSettings: (expected_version: number) => request<DTO["ModelSettingsResponse"]>("/model-settings", { expected_version } satisfies DTO["ModelSettingsClear"], "DELETE"),
   session: () => request<DTO["SessionView"]>("/session"),
   enter: (token: string) => request<DTO["SessionView"]>("/session", { token } satisfies DTO["SessionEntry"]),
   generate: (project: string, goal: string) => request<DTO["PlanGenerateResponse"]>(`/plans/generate${scope(project)}`, { goal } satisfies DTO["PlanGenerateRequest"]),

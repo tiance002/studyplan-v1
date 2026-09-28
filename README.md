@@ -121,6 +121,8 @@ prompt_review_graph      START -> load_task_from_revision -> review_once -> vali
 
 打开 `http://127.0.0.1:5173`，使用 `.env` 的 `STUDYPLAN_LOCAL_SESSION_TOKEN` 进入本地学习空间。填写目标、生成、编辑并保存、确认或取消。模型结果未知时进入待对账，不自动重发。当前单用户会话不替代后续注册登录。
 
+“模型设置”允许当前会话用户保存自己的 OpenAI 兼容 Base URL、模型名称和 API Key；密钥在服务端加密，不会在 GET 响应或页面刷新后回显。生成时固定个人配置修订，未配置个人模型时明确使用部署默认模型。部署时须通过 secret 提供稳定的 `MODEL_SETTINGS_ENCRYPTION_KEY`（Fernet 密钥），并用 `LLM_ALLOWED_HOSTS` 管理允许访问的兼容服务商主机；当前初始名单是 `api.openai.com,api.deepseek.com`。云端还需正式用户认证和阻断私网/metadata 的出口策略；仓库的本地单用户会话不能直接用于公开多用户部署。当前不支持 Anthropic `/messages` 协议。
+
 新环境先安装依赖 `pip install -e ".[dev,agent,postgres]"`，准备本机 PG 的迁移/应用角色，复制 `.env.example` 并清空其中 `DATABASE_URL`，再运行 `.venv/Scripts/python scripts/b3-setup-local.py`。脚本只创建随机新库与 checkpoint 角色，已有配置会拒绝重复建库；生产安装应使用独立管理凭据执行迁移和播种。
 
 验收范围及真实模型待验项见 `docs/acceptance/B3-minimal-report.md`。

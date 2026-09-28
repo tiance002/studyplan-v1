@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from app.agent_workflows import GRAPH_VERSION
 from app.application.container import AppContainer
+from app.application.model_settings import ModelSettingsService
 from app.application.plan_service import PlanService
 from app.application.sessions import InMemorySessionStore, SessionRecord
 from app.core.config import Settings
@@ -30,7 +31,7 @@ from app.infrastructure.db import (
     PgPublicResourceCatalog,
     PgRunRepository,
 )
-from app.infrastructure.providers import build_llm
+from app.infrastructure.providers import SUPPORTED_PROVIDERS, build_llm
 
 __all__ = ["build_container"]
 
@@ -49,14 +50,25 @@ def build_container(settings: Settings) -> AppContainer:
     dsn = settings.database_url.strip()
     if not dsn:
         return AppContainer(settings=settings, sessions=sessions, plan_service=None)
+    if settings.llm_provider.strip().lower() not in SUPPORTED_PROVIDERS:
+        build_llm(settings)
 
-    llm = build_llm(settings)
+    from app.infrastructure.db.model_settings import PgModelSettings
+    from app.infrastructure.providers.endpoint_policy import ModelEndpointPolicy
+    model_repository = PgModelSettings(dsn,settings.model_settings_encryption_key)
+    model_service = ModelSettingsService(model_repository,ModelEndpointPolicy(settings.llm_allowed_hosts).validate)
+    if settings.use_fake_llm:
+        llm = build_llm(settings)
+    else:
+        from app.infrastructure.providers.runtime_factory import UnconfiguredLLM
+        llm = UnconfiguredLLM()
     executor = None
+    runtime_factory = None
     pack_key, pack_version = "", 0
     if not settings.use_fake_llm:
         from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor
         from app.infrastructure.db.plan_repository import to_psycopg_dsn
-        from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
+        from app.infrastructure.providers.runtime_factory import PersonalPlanningRuntimeFactory
         if not settings.checkpoint_database_url:
             raise RuntimeError("Real provider requires CHECKPOINT_DATABASE_URL")
         from urllib.parse import urlsplit
@@ -64,8 +76,8 @@ def build_container(settings: Settings) -> AppContainer:
         cp_url = urlsplit(to_psycopg_dsn(settings.checkpoint_database_url))
         if (app_url.hostname, app_url.port or 5432, app_url.path) == (cp_url.hostname, cp_url.port or 5432, cp_url.path):
             raise RuntimeError("Business and checkpoint databases must be separate")
-        llm = PgAttemptLLM(dsn,llm)
         executor = PgPlanningExecutor(to_psycopg_dsn(settings.checkpoint_database_url),llm=llm)
+        runtime_factory = PersonalPlanningRuntimeFactory(settings,model_repository)
         pack_key, pack_version = "python.engineering", 1
     plan_service = PlanService(
         repository=PgPlanRepository(dsn),
@@ -75,5 +87,6 @@ def build_container(settings: Settings) -> AppContainer:
         llm=llm,
         graph_version=settings.graph_version or GRAPH_VERSION,
         planning_executor=executor,source_pack_key=pack_key,source_pack_version=pack_version,
+        runtime_factory=runtime_factory,
     )
-    return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service)
+    return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service,model_settings_service=model_service)
