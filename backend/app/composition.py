@@ -50,6 +50,11 @@ def build_container(settings: Settings) -> AppContainer:
     dsn = settings.database_url.strip()
     if not dsn:
         return AppContainer(settings=settings, sessions=sessions, plan_service=None)
+    from app.infrastructure.db.browser_auth import PgBrowserAuth
+    browser_auth = PgBrowserAuth(dsn, settings.session_ttl_seconds)
+    from app.infrastructure.db.workspace import PgWorkspaceReader
+    workspace_reader = PgWorkspaceReader(dsn)
+    sessions = browser_auth
     if settings.llm_provider.strip().lower() not in SUPPORTED_PROVIDERS:
         build_llm(settings)
 
@@ -58,7 +63,8 @@ def build_container(settings: Settings) -> AppContainer:
     model_repository = PgModelSettings(dsn,settings.model_settings_encryption_key)
     model_service = ModelSettingsService(model_repository,ModelEndpointPolicy(settings.llm_allowed_hosts).validate)
     if settings.use_fake_llm:
-        llm = build_llm(settings)
+        from app.infrastructure.providers.planning_demo import build_planning_demo
+        llm = build_planning_demo()
     else:
         from app.infrastructure.providers.runtime_factory import UnconfiguredLLM
         llm = UnconfiguredLLM()
@@ -88,5 +94,6 @@ def build_container(settings: Settings) -> AppContainer:
         graph_version=settings.graph_version or GRAPH_VERSION,
         planning_executor=executor,source_pack_key=pack_key,source_pack_version=pack_version,
         runtime_factory=runtime_factory,
+        run_timeout_seconds=max(1800, 3 * (settings.graph_max_repair_attempts + 1) * settings.llm_timeout_seconds + 300),
     )
-    return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service,model_settings_service=model_service)
+    return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service,model_settings_service=model_service, browser_auth=browser_auth, workspace_reader=workspace_reader)

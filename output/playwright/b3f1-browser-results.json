@@ -1,0 +1,38 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "nav": 158.390625,
+      "plan": 244.796875,
+      "canvas": 1036.8125,
+      "overflow": false,
+      "assistantBefore": 430,
+      "assistantAfter": 520
+    },
+    {
+      "width": 1920,
+      "nav": 211.1875,
+      "plan": 326.390625,
+      "canvas": 1382.421875,
+      "overflow": false,
+      "assistantBefore": 430,
+      "assistantAfter": 520
+    },
+    {
+      "width": 1366,
+      "nav": 150.25,
+      "plan": 232.21875,
+      "canvas": 983.53125,
+      "overflow": false,
+      "assistantBefore": 430,
+      "assistantAfter": 520
+    }
+  ],
+  "errors": [],
+  "refresh": true,
+  "registration": true,
+  "edit": true,
+  "publication": true,
+  "mobile": true,
+  "conflictPreservesEdit": true
+}

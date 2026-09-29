@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Study Plan — 学习工作室 · 百分比侧栏 V6.3</title>
+<style>
+:root{
+  --paper:#f8f7f4;--canvas:#fdfcf9;--surface:#fff;--stone:#f1efe9;--stone2:#e8e5dd;
+  --line:#e7e4dc;--line2:#d8d5cb;--ink:#252a2e;--muted:#727979;--quiet:#a1a6a5;
+  --accent:#466e85;--accent-dark:#305569;--accent-soft:#edf3f6;--clay:#ba725c;--clay-soft:#fbf0e9;
+  --sage:#557b68;--sage-soft:#ebf3ed;--violet:#79729a;--violet-soft:#f1eff6;
+  --shadow:0 14px 35px rgba(35,43,47,.045);--chat-w:376px;
+  --sans:Inter,"SF Pro Display","PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box} html,body{height:100%;margin:0} body{font-family:var(--sans);color:var(--ink);background:var(--paper);font-size:14px;-webkit-font-smoothing:antialiased} button,input,textarea{font:inherit} button{cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}button:disabled{opacity:.5;cursor:not-allowed} a{color:inherit}svg.ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}svg.ico.sm{width:15px;height:15px}svg.ico.lg{width:21px;height:21px} .muted{color:var(--muted)}.quiet{color:var(--quiet)}.small{font-size:12px}.eyebrow{font-size:11px;font-weight:720;letter-spacing:.12em;color:var(--muted)}.mono{font-variant-numeric:tabular-nums}.btn{border:1px solid var(--line2);background:var(--surface);border-radius:10px;padding:9px 13px;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:630;color:var(--ink);white-space:nowrap;transition:background .15s,border-color .15s,transform .15s}.btn:hover{background:var(--stone);border-color:#c9ccc9}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.primary:hover{background:var(--accent-dark)}.btn.subtle{border-color:transparent;background:transparent;color:var(--muted)}.btn.subtle:hover{background:var(--stone)}.btn.sm{font-size:12px;padding:7px 10px;border-radius:8px}.text-btn{color:var(--accent);border:0;background:transparent;padding:4px 0;font-weight:680}.text-btn:hover{text-decoration:underline}.pill{display:inline-flex;align-items:center;gap:5px;border:1px solid transparent;border-radius:20px;padding:4px 9px;font-size:11px;white-space:nowrap;font-weight:680}.pill.blue{background:var(--accent-soft);border-color:#dae7ee;color:var(--accent-dark)}.pill.green{background:var(--sage-soft);border-color:#d9e7dc;color:#406c54}.pill.clay{background:var(--clay-soft);border-color:#f0dbcf;color:#a55d45}.pill.gray{background:var(--stone);border-color:var(--line);color:var(--muted)}.pill.violet{background:var(--violet-soft);border-color:#e4dfee;color:#625a83}.dot{height:7px;width:7px;border-radius:50%;background:currentColor;display:inline-block}
+.app{height:100dvh;display:grid;grid-template-columns:76px minmax(0,1fr);overflow:hidden}.rail{background:#f4f2ed;border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:18px 8px 12px;gap:5px;z-index:8}.brandmark{display:grid;place-items:center;width:39px;height:39px;border-radius:13px;background:#ede7dd;border:1px solid #dfd8cd;color:#485b63;margin-bottom:24px;font-weight:850;font-size:19px;letter-spacing:-.08em}.rail-btn{width:60px;min-height:54px;background:transparent;border:0;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#777c7a;position:relative;transition:all .15s}.rail-btn .ico{width:19px;height:19px}.rail-btn span{font-size:10.5px;white-space:nowrap;font-weight:610}.rail-btn:hover{background:#ebe8e1;color:var(--ink)}.rail-btn.active{background:#e5edf0;color:var(--accent-dark)}.rail-btn.active::before{content:"";position:absolute;left:-8px;top:16px;height:22px;width:3px;background:var(--accent);border-radius:0 3px 3px 0}.rail-spacer{flex:1}.rail-avatar{width:32px;height:32px;border-radius:11px;background:#e4d7c9;color:#76584a;display:grid;place-items:center;font-weight:750;font-size:12px;margin:10px 0 3px}
+.shell{min-width:0;display:flex;position:relative;height:100%;overflow:hidden}.course-nav{width:236px;flex-shrink:0;border-right:1px solid var(--line);background:#fbfaf7;display:flex;flex-direction:column;overflow:hidden;transition:width .23s ease}.app.hide-course .course-nav{width:0;border-right:0}.course-top{padding:24px 18px 20px;border-bottom:1px solid var(--line)}.course-top .group{display:flex;align-items:center;justify-content:space-between;gap:6px}.course-title{font-size:17px;letter-spacing:-.04em;font-weight:760;line-height:1.36;margin:7px 0 12px}.course-sub{font-size:11px;color:var(--muted)}.mini-track{height:4px;border-radius:10px;overflow:hidden;background:#e6e4dc;margin-top:11px}.mini-track span{display:block;background:var(--accent);height:100%;width:42%;border-radius:10px}.course-list{padding:13px 10px 25px;overflow:auto;flex:1}.course-label{color:var(--quiet);font-size:10.5px;font-weight:760;letter-spacing:.1em;padding:15px 9px 8px;display:flex;align-items:center;justify-content:space-between}.side-item{display:flex;align-items:flex-start;gap:10px;padding:10px 9px;border-radius:10px;cursor:pointer;color:var(--muted);min-width:0}.side-item:hover{background:#f2f0ea}.side-item.active{background:#eaf0f2;color:var(--accent-dark)}.side-item .step-ind{width:20px;height:20px;border-radius:7px;border:1px solid var(--line2);display:grid;place-items:center;font-size:10px;flex:none;font-weight:770}.side-item.done .step-ind{background:#e5efe8;border-color:#d4e5d8;color:#557761}.side-item.active .step-ind{border-color:#b8ccd6;background:#dce9ef}.side-item .side-txt{min-width:0;flex:1;font-size:12.5px;font-weight:680;line-height:1.35}.side-item .side-meta{font-size:10.5px;font-weight:400;color:var(--quiet);margin-top:4px}.side-item.active .side-meta{color:#658497}.side-item .side-aux{font-size:10px;flex:none;color:var(--quiet);margin-top:2px}.side-item.slim{padding:7px 10px;gap:8px;align-items:center}.side-item.slim .side-txt{font-size:12px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.side-item.slim.active{background:#f0f2ef;color:var(--ink)}.side-item.slim .ico{color:var(--quiet)}.course-list button.side-item{background:transparent}.course-list button.side-item.active{background:#f0f2ef}.course-archive{margin-top:10px;border-top:1px solid var(--line);padding-top:4px}.side-foot{padding:13px 17px;border-top:1px solid var(--line);font-size:11px;color:var(--quiet);display:flex;justify-content:space-between;align-items:center}
+.center{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;background:var(--canvas)}.topbar{height:62px;flex-shrink:0;padding:0 27px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;background:rgba(253,252,249,.97);z-index:2}.breadcrumbs{font-size:12px;color:var(--muted);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.breadcrumbs strong{color:var(--ink);font-weight:740}.topbar .right{margin-left:auto;display:flex;gap:7px;align-items:center}.status-mark{font-size:11px;color:var(--muted);border-left:1px solid var(--line);padding-left:13px;margin-left:5px}.scroll-main{flex:1;min-height:0;overflow-y:auto;scroll-behavior:smooth}.scroll-main::-webkit-scrollbar,.chat-scroll::-webkit-scrollbar,.course-list::-webkit-scrollbar{width:7px}.scroll-main::-webkit-scrollbar-thumb,.chat-scroll::-webkit-scrollbar-thumb,.course-list::-webkit-scrollbar-thumb{background:#dfded8;border-radius:6px}.content{max-width:914px;margin:0 auto;padding:30px clamp(24px,3.8vw,57px) 76px}.content h1{font-size:clamp(29px,2.55vw,39px);line-height:1.2;letter-spacing:-.055em;font-weight:770;margin:10px 0 10px}.content h2{font-size:17px;letter-spacing:-.025em;margin:0;font-weight:760}.content h3{font-size:14px;margin:0;font-weight:740}.content p{line-height:1.72}.kicker{display:flex;align-items:center;gap:10px;color:var(--accent);font-size:11.5px;font-weight:740;letter-spacing:.055em}.lede{font-size:14px;color:var(--muted);line-height:1.85;margin:0;max-width:650px}.content-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:23px}.content-head .inline-actions{display:flex;gap:8px;flex-shrink:0}.goal-banner{display:grid;grid-template-columns:41px minmax(0,1fr);gap:13px;padding:19px 21px;border-radius:13px;border:1px solid #dfe8ec;background:#f1f6f7;position:relative;margin:22px 0 28px}.goal-banner .number{font-size:21px;font-weight:720;color:var(--accent);font-variant-numeric:tabular-nums;letter-spacing:-.04em}.goal-banner h3{color:var(--accent-dark);margin:0 0 6px}.goal-banner p{margin:0;font-size:13px;line-height:1.7;color:#465963}.goal-banner button{margin-top:9px}.section-head{display:flex;align-items:baseline;gap:10px;margin:29px 0 13px}.section-head .hint{margin-left:auto;color:var(--quiet);font-size:11px}.lesson-path{border-top:1px solid var(--line)}.lesson-item{position:relative;display:flex;align-items:flex-start;gap:16px;padding:17px 2px 17px 0;border-bottom:1px solid var(--line);cursor:pointer}.lesson-item:hover .lesson-name{color:var(--accent)}.lesson-mark{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#f1f2ee;color:var(--quiet);font-size:11px;font-weight:800;flex:none}.lesson-item.done .lesson-mark{background:var(--sage-soft);color:var(--sage)}.lesson-item.current .lesson-mark{background:var(--accent);color:#fff}.lesson-main{flex:1;min-width:0}.lesson-name{font-size:14px;font-weight:710}.lesson-desc{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.65}.lesson-right{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-top:5px}.lesson-item.current{background:linear-gradient(90deg,rgba(237,243,246,.8),transparent 65%)}.note-callout{background:#f9f4ed;border:1px solid #efe4d4;border-radius:12px;padding:16px 18px;display:flex;gap:11px;color:#8b664b}.note-callout h3{color:#6b4f3e}.note-callout p{font-size:12px;margin:5px 0 0;color:#8b7766}.twocol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.plain-panel{border:1px solid var(--line);background:#fff;border-radius:12px;padding:17px 18px}.plain-panel .panel-top{display:flex;align-items:center;gap:9px;margin-bottom:12px}.plain-panel .panel-top .ico{color:var(--accent)}.plain-panel p{font-size:12px;color:var(--muted);margin:0 0 11px}.micro-list{display:flex;flex-direction:column;gap:12px}.micro-row{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.55}.micro-row .ico{width:15px;height:15px;color:var(--sage);margin-top:2px}.micro-row .rightnote{margin-left:auto;font-size:10.5px;color:var(--quiet);white-space:nowrap}.resource-row{display:flex;align-items:flex-start;gap:11px;padding:13px 0;border-bottom:1px solid var(--line);cursor:pointer}.resource-row:last-child{border-bottom:0}.resource-icon{height:34px;width:34px;border-radius:9px;display:grid;place-items:center;color:var(--accent);background:var(--accent-soft);flex:none}.resource-row .r-title{font-size:12.5px;font-weight:700}.resource-row .r-sub{font-size:11px;color:var(--muted);margin-top:5px}.resource-row .pill{margin-left:auto}.practice-card{border:1px solid var(--line);background:#fff;border-radius:13px;padding:19px;display:flex;align-items:center;gap:16px}.practice-icon{width:45px;height:45px;border-radius:11px;display:grid;place-items:center;background:var(--clay-soft);color:var(--clay);flex:none}.practice-card .practice-text{flex:1;min-width:0}.practice-card p{font-size:12px;color:var(--muted);margin:6px 0 0}.practice-card .btn{flex:none}.context-highlight{animation:highlight 2s ease}@keyframes highlight{0%,25%{outline:3px solid #9cc2d8;outline-offset:4px;background:#f5fafc}100%{outline:3px solid transparent;outline-offset:4px}}
+/* Right assistant is a real, independent pane, not an overlay in desktop layouts. */
+.chat-panel{width:var(--chat-w);flex:0 0 var(--chat-w);border-left:1px solid var(--line);background:#faf9f6;display:flex;flex-direction:column;min-width:0;position:relative;transition:flex-basis .22s ease,width .22s ease}.chat-panel:before{content:"";position:absolute;left:-4px;top:0;bottom:0;width:8px;cursor:col-resize;z-index:5}.chat-top{padding:17px 18px 13px;border-bottom:1px solid var(--line);flex:none;background:#faf9f6}.chat-header{display:flex;align-items:center;gap:10px}.tutor-mark{display:grid;place-items:center;width:33px;height:33px;border-radius:11px;background:#e8edf0;color:var(--accent);font-weight:800;flex:none}.chat-head-title{font-size:13px;font-weight:770}.chat-head-sub{font-size:11px;color:var(--muted);margin-top:3px}.chat-menu{margin-left:auto;display:flex;gap:3px}.iconbtn{border:0;background:transparent;color:var(--muted);height:30px;width:30px;border-radius:8px;display:grid;place-items:center}.iconbtn:hover{background:#eeeae3;color:var(--ink)}.session-select{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);padding:8px 10px;border-radius:9px;font-size:12px;margin-top:15px;width:100%;color:var(--ink);text-align:left}.session-select span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1}.session-popover{position:absolute;top:112px;left:17px;right:17px;background:#fff;box-shadow:0 12px 35px #25334023;border:1px solid var(--line);border-radius:11px;padding:6px;z-index:8;display:none}.session-popover.open{display:block}.session-popover button{width:100%;border:0;background:transparent;padding:10px;text-align:left;border-radius:7px;color:var(--ink);font-size:12px}.session-popover button:hover{background:var(--stone)}.session-popover .sep{border-top:1px solid var(--line);margin:4px 0}.chat-context{padding:11px 18px;border-bottom:1px solid var(--line);display:flex;gap:7px;flex-wrap:wrap;align-items:center}.context-pin{background:#eaf1f4;color:var(--accent-dark);border:1px solid #dbe6ea;font-size:11px;border-radius:7px;padding:6px 8px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chat-scroll{flex:1;min-height:0;overflow-y:auto;padding:20px 18px 20px}.chat-date{text-align:center;font-size:10.5px;color:var(--quiet);margin:0 0 23px}.chat-msg{margin:0 0 22px}.chat-msg .who{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;margin-bottom:9px}.chat-msg .who .mini-ai{background:var(--accent-soft);border-radius:7px;width:22px;height:22px;color:var(--accent);display:grid;place-items:center}.chat-msg p{font-size:12.5px;line-height:1.8;margin:0 0 8px}.chat-msg.user{display:flex;justify-content:flex-end}.chat-msg.user .bubble{background:#efede7;padding:10px 13px;max-width:94%;border-radius:12px 12px 3px 12px;font-size:12.5px;line-height:1.7}.chat-reference{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;background:#fff;padding:9px 10px;font-size:11px;margin:9px 0 0;cursor:pointer;text-align:left;width:100%}.chat-reference:hover{border-color:#a8c2cf;background:#f8fcfd}.chat-reference .ico{color:var(--accent)}.chat-reference span{flex:1}.chat-reference .ref-meta{color:var(--muted);font-size:10px;flex:none}.chat-compose{border-top:1px solid var(--line);padding:12px 14px 16px;flex:none;background:#faf9f6}.chat-quick{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px}.chat-quick button{border:1px solid var(--line2);background:#fff;border-radius:7px;padding:6px 9px;white-space:nowrap;font-size:11px;color:var(--muted)}.chat-quick button:hover{color:var(--accent);border-color:#c1d2da}.draft-context{display:none;gap:6px;align-items:center;background:var(--accent-soft);border-radius:7px;padding:8px 9px;margin-bottom:7px;color:var(--accent-dark);font-size:11px}.draft-context.show{display:flex}.draft-context span{flex:1}.draft-context button{border:0;background:transparent;color:inherit}.compose-field{display:flex;align-items:flex-end;background:#fff;border:1px solid #d7d9d4;border-radius:11px;padding:10px;gap:7px}.compose-field:focus-within{border-color:#94afbd;box-shadow:0 0 0 3px #e6eff2}.compose-field textarea{border:0;outline:0;background:transparent;resize:none;flex:1;min-height:40px;max-height:130px;font-size:12.5px;color:var(--ink);line-height:1.6}.send{border:0;width:29px;height:29px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none}.compose-note{font-size:10px;color:var(--quiet);padding:8px 3px 0}.collapsed-tab{display:none}.app.reading-focus .chat-panel{width:0;flex-basis:0;border-left:0}.app.reading-focus .chat-panel>*{visibility:hidden}.app.reading-focus .collapsed-tab{display:flex;position:absolute;right:0;top:105px;transform:none;z-index:11;background:var(--accent);color:white;border:0;border-radius:0 9px 9px 0;padding:11px 8px;writing-mode:vertical-rl;gap:9px;align-items:center;font-size:11px}.app.reading-focus .center{margin-right:24px}.app.chat-focus .course-nav,.app.chat-focus .center{display:none}.app.chat-focus .chat-panel{flex:1;width:auto;max-width:none;border-left:0}.app.chat-focus .chat-scroll,.app.chat-focus .chat-compose,.app.chat-focus .chat-top,.app.chat-focus .chat-context{width:min(800px,100%);margin-left:auto;margin-right:auto}.app.chat-focus .chat-panel:before{display:none}.app.route-dashboard .course-nav,.app.route-dashboard .chat-panel{display:none}.app.route-dashboard .center{background:var(--paper)}
+/* Homepage: editorial/product hierarchy, no dark hero or generic KPI wall */
+.dash-inner{max-width:1190px;margin:0 auto;padding:35px 36px 60px}.dash-intro{display:flex;align-items:flex-end;gap:20px;justify-content:space-between;padding:3px 0 25px}.dash-intro h1{font-size:32px;line-height:1.2;letter-spacing:-.055em;margin:8px 0 7px}.dash-intro p{margin:0;color:var(--muted);font-size:13px}.dash-feature{background:#fff;border:1px solid var(--line);border-radius:17px;padding:26px 28px 23px;display:grid;grid-template-columns:1.4fr 1fr;gap:28px;box-shadow:var(--shadow)}.feature-title{font-size:25px;font-weight:760;letter-spacing:-.045em;margin:9px 0}.dash-feature p{color:var(--muted);font-size:12.5px;line-height:1.8;margin:0}.feature-bottom{display:flex;align-items:center;gap:16px;margin-top:24px}.feature-num{font-size:27px;font-weight:750;letter-spacing:-.04em}.feature-progress{height:6px;flex:1;background:var(--stone);border-radius:10px;overflow:hidden;max-width:260px}.feature-progress span{width:42%;height:100%;display:block;background:var(--accent)}.feature-side{border-left:1px solid var(--line);padding-left:25px;display:flex;flex-direction:column;justify-content:space-between}.next-module{font-size:20px;font-weight:740;letter-spacing:-.035em;margin:11px 0 5px}.feature-side .btn{align-self:flex-start;margin-top:18px}.dash-grid{display:grid;grid-template-columns:1.35fr .92fr;gap:18px;margin-top:18px}.dash-panel{border:1px solid var(--line);background:#fff;border-radius:14px;padding:21px 23px}.dash-panel h2{font-size:15px;margin:0;font-weight:760;letter-spacing:-.02em}.dash-panel .panel-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.dash-task{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line);font-size:12.5px;cursor:pointer}.dash-task:last-child{border-bottom:0}.task-circle{width:18px;height:18px;border:1px solid #cacdc9;border-radius:6px;display:grid;place-items:center;color:#fff;flex:none}.dash-task.done .task-circle{background:var(--sage);border-color:var(--sage)}.dash-task.done .task-name{color:var(--quiet);text-decoration:line-through}.dash-task .task-name{flex:1}.dash-task .task-state{font-size:11px;color:var(--muted)}.dash-task.now .task-state{color:var(--accent)}.path-line{display:flex;gap:0;align-items:flex-start;justify-content:space-between;position:relative;margin:25px 0 12px}.path-line:before{content:"";position:absolute;height:2px;left:7%;right:7%;top:15px;background:var(--line2)}.path-unit{position:relative;display:flex;align-items:center;flex-direction:column;min-width:0;flex:1;text-align:center;gap:8px}.path-unit .badge{width:30px;height:30px;border:2px solid var(--line2);background:#fff;border-radius:50%;display:grid;place-items:center;color:var(--quiet);font-size:10px;font-weight:750}.path-unit.done .badge{background:var(--sage);border-color:var(--sage);color:#fff}.path-unit.current .badge{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}.path-unit .path-name{font-size:10px;color:var(--muted);white-space:nowrap}.path-unit.current .path-name{color:var(--accent);font-weight:730}.advice{display:flex;align-items:flex-start;gap:13px}.advice .glyph{background:#edf1f0;border-radius:10px;height:33px;width:33px;display:grid;place-items:center;color:var(--accent);flex:none}.advice p{font-size:12.5px;margin:3px 0 0;line-height:1.8}.list-session{display:flex;gap:10px;align-items:center;border-top:1px solid var(--line);padding:12px 0;cursor:pointer;font-size:12.5px}.list-session:first-of-type{border-top:0}.list-session .ico{color:var(--quiet)}.list-session b{font-weight:650}.list-session time{color:var(--quiet);font-size:10.5px;margin-left:auto}
+/* Supporting detail pages */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:18px 0 22px}.tab{border:0;background:transparent;padding:10px 14px;color:var(--muted);font-size:12px;font-weight:650;border-bottom:2px solid transparent}.tab.active{border-bottom-color:var(--accent);color:var(--accent-dark)}.summary-body{font-size:13px;line-height:2;color:#343a3c}.summary-body h3{font-size:14px;margin:24px 0 6px}.summary-body p{margin:0 0 13px}.feedback{border:1px solid var(--line);background:#fff;border-radius:12px;padding:19px;margin:23px 0}.feedback-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:17px 0}.feedback-grid strong{font-size:24px}.feedback-grid p{margin:4px 0 0;color:var(--muted);font-size:11px}.feedback ul{margin:0;padding-left:18px;font-size:12.5px;line-height:1.8}.steps{display:flex;gap:0;margin:25px 0}.steps .phase{flex:1;border-top:3px solid var(--line2);padding-top:12px;font-size:11.5px;color:var(--quiet)}.steps .phase.done{border-color:var(--sage);color:var(--sage)}.steps .phase.now{border-color:var(--accent);color:var(--accent);font-weight:740}.kvline{padding:14px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:92px 1fr;gap:17px;font-size:12.5px;line-height:1.7}.kvline .key{color:var(--muted)}.field{width:100%;border:1px solid var(--line2);border-radius:9px;padding:11px 12px;font-size:12px;background:white;resize:vertical}.form-note{font-size:11px;color:var(--muted);line-height:1.7}.conv-group{padding:15px 0}.conv-group h3{font-size:12px;color:var(--muted);font-weight:700;margin:0 0 8px}.conv-entry{padding:13px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;cursor:pointer;border-radius:7px}.conv-entry:hover{background:var(--stone)}.conv-entry .conv-name{font-size:13px;font-weight:700;flex:1}.conv-entry small{font-size:10px;color:var(--quiet)}.search{background:#fff;border:1px solid var(--line2);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:9px}.search input{border:0;outline:0;flex:1;background:transparent;font-size:12px;min-width:0}.empty{padding:20px;color:var(--muted);font-size:12px}.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,25px);opacity:0;background:#27333a;color:white;border-radius:10px;padding:11px 17px;z-index:40;pointer-events:none;transition:all .2s;font-size:12px}.toast.show{transform:translate(-50%,0);opacity:1}.hidden{display:none!important}
+
+
+
+
+
+
+/* ===== V5: 轻量编辑式工作台 + 可伸缩全局导航 ===== */
+:root{--nav-w:196px;--chat-w:352px}
+.app{grid-template-columns:var(--nav-w) minmax(0,1fr)}
+.app.nav-mini{--nav-w:62px}
+.rail{background:#faf9f6;padding:13px 9px 12px;align-items:stretch;gap:2px;overflow:hidden}
+.brand-wide{display:flex;align-items:center;text-align:left;width:100%;gap:10px;border:0;background:none;padding:5px 8px 13px;min-height:53px;color:var(--ink)}
+.brand-square{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#e9eff1;border:1px solid #d8e2e7;color:var(--accent-dark);font-size:16px;font-weight:800;flex:none;letter-spacing:-.08em}
+.brand-dot{color:var(--clay)}
+.brand-copy{display:flex;flex-direction:column;gap:2px;white-space:nowrap}
+.brand-copy strong{font-size:14px;font-weight:760;letter-spacing:-.03em}
+.brand-copy small{font-size:10px;color:var(--quiet)}
+.nav-divider{height:1px;background:var(--line);margin:1px 3px 8px}
+.nav-heading{padding:10px 11px 6px;font-size:10px;letter-spacing:.045em;color:var(--quiet);font-weight:700;white-space:nowrap}
+.rail-btn{width:100%;height:37px;min-height:37px;border-radius:8px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;padding:0 10px;color:#636e73;text-align:left;white-space:nowrap}
+.rail-btn .ico{width:16px;height:16px;flex:none}
+.rail-btn span.rail-label{font-size:12.7px;font-weight:560}
+.rail-btn.active{background:#eaf0f3;color:#305b70;font-weight:680}
+.rail-btn.active:before{display:none}
+.rail-btn:hover{background:#eeefed}
+.nav-count{font-size:10px;margin-left:auto;color:#788187;background:white;border:1px solid var(--line);padding:1px 6px;border-radius:9px}
+.rail-spacer{min-height:12px;flex:1}
+.profile-button{width:100%;display:flex;gap:9px;align-items:center;border:0;background:none;padding:8px 6px;color:var(--ink);text-align:left}
+.profile-avatar{display:grid;place-items:center;width:28px;height:28px;flex:none;border-radius:50%;background:#e9e2d9;color:#7b6652;font-size:12px}
+.profile-copy{display:flex;flex-direction:column;gap:3px;white-space:nowrap}
+.profile-copy strong{font-size:11.5px}.profile-copy small{font-size:10px;color:var(--quiet)}
+.nav-toggle{margin-top:4px}.app.nav-mini .brand-wide{justify-content:center;padding:5px 0 13px}.app.nav-mini .brand-copy,.app.nav-mini .nav-heading,.app.nav-mini .rail-label,.app.nav-mini .nav-count,.app.nav-mini .profile-copy{display:none}.app.nav-mini .rail-btn{justify-content:center;padding:0;width:44px;margin:0 auto}.app.nav-mini .profile-button{justify-content:center;padding:8px 0}.app.nav-mini .rail{padding-left:7px;padding-right:7px}
+/* balanced stage navigation: slim top, separate rhythm for nodes, conversations and artifacts */
+.course-nav{width:225px;background:#fcfbf8}
+.course-top{padding:14px 14px 13px}
+.course-overline{display:flex;align-items:center;justify-content:space-between;color:var(--quiet);font-size:10px;font-weight:680;letter-spacing:.02em}
+.course-title{font-size:15px;margin:6px 0 4px;line-height:1.32}
+.course-sub{font-size:11px;line-height:1.5}
+.course-progress{display:flex;align-items:center;gap:10px;margin-top:10px;color:var(--accent);font-size:11px}
+.course-progress .mini-track{margin:0;flex:1;height:4px}
+.course-list{padding:9px 10px 18px}
+.course-label{padding:15px 8px 7px;font-size:11px;letter-spacing:.025em}
+.side-item{padding:9px 9px;gap:9px;border-radius:8px;align-items:center}
+.side-item .side-txt{font-size:12.8px;line-height:1.4}
+.side-item .side-meta{font-size:10.5px;margin-top:3px;line-height:1.32}
+.side-item.slim{padding:8px 9px;min-height:35px}
+.side-item.slim .side-txt{font-weight:530;font-size:12.2px}
+.course-archive{margin-top:5px;padding-top:7px;border-top:1px solid var(--line)}
+.course-archive .side-item{gap:8px}
+.course-archive .side-item .side-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side-foot{padding:10px 13px;font-size:10px}
+/* content / chat split; the objective stays visible while content scrolls */
+.ws-main,.center{background:#fff}
+.topbar{height:55px;padding:0 22px;background:#fff}
+.learning-pin{display:flex;align-items:center;gap:9px;flex-shrink:0;min-height:49px;padding:7px 20px;border-bottom:1px solid var(--line);background:#fbfcfc;color:var(--ink)}
+.learning-pin .pin-text{flex:1;min-width:0;display:flex;gap:9px;align-items:center}
+.pin-label{flex:none;font-size:10px;font-weight:760;color:var(--accent-dark);border-radius:5px;padding:4px 6px;background:#e9f0f4}
+#pinGoal{font-size:11.5px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#53616b}
+.learning-pin button{font-size:10.5px;color:var(--muted);border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 7px;flex:none}
+.learning-pin button:hover{color:var(--accent);border-color:#bacbd5}
+.app:not(.route-workspace) .learning-pin{display:none}
+.content{max-width:860px;padding:22px 28px 62px}
+.content h1{font-size:clamp(25px,2.3vw,32px);margin:6px 0 7px}
+.content-head{margin-bottom:16px}.lede{font-size:12.5px;line-height:1.65}
+.goal-banner{padding:18px 18px;margin-bottom:22px}
+.section-head{margin-top:25px}.lesson-item{min-height:65px}
+.chat-panel{background:#fbfaf8}
+.chat-top{padding:12px 15px 10px}.chat-header{gap:8px}.chat-context{padding:9px 15px}.chat-scroll{padding:13px 15px;gap:11px}
+.chat-compose{padding:10px 14px 13px}.chat-quick{gap:5px}.chat-quick button{font-size:10.5px;padding:5px 7px}
+.chat-msg{line-height:1.56}.chat-panel:before{width:7px;left:-4px}
+/* dashboard: reduce intro/hero, promote resources to the first row */
+.dash .dash-inner{max-width:1200px;padding:21px 27px 50px}
+.dash-intro{align-items:center;padding:0 0 14px}.dash-intro h1{font-size:23px;line-height:1.2;margin:2px 0 3px}.dash-intro p{font-size:11.5px}.dash-intro .eyebrow{font-size:10px}
+.dash-feature{padding:18px 22px;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);align-items:center;gap:21px;border-radius:14px}
+.feature-title{font-size:21px;margin:4px 0 2px}.dash-feature p{font-size:11.7px;line-height:1.5}
+.feature-bottom{margin-top:12px;gap:12px}.feature-num{font-size:24px}.feature-side{padding-left:22px;gap:8px}.next-module{font-size:18px;margin:3px 0 2px}.feature-side p{font-size:11.5px;line-height:1.5}
+.feature-side .btn{margin-top:6px}.dash-grid{gap:14px;margin-top:14px;grid-template-columns:1.2fr 1fr}.dash-panel{padding:18px 20px}.dash-panel h2{font-size:14px}
+.dash-panel .panel-header{margin-bottom:9px}.dash-task{padding:10px 0}.dash-resource{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--line);cursor:pointer}.dash-resource:last-child{border-bottom:0}.dash-resource b{flex:1;font-size:12.5px;font-weight:650}.dash-resource small{font-size:10.5px;color:var(--muted)}
+.dash-resource .resource-icon{height:30px;width:30px;flex:none}.dash-resource:hover b{color:var(--accent-dark)}
+.dash-first{grid-template-columns:1.2fr 1fr}.dash-first .dash-panel{min-height:213px}.dash-second .dash-panel{min-height:206px}
+.path-stop{position:relative;z-index:1;flex:1;min-width:0;display:flex;align-items:center;flex-direction:column;gap:8px;padding:0 2px;border:0;background:transparent;color:var(--muted);font-size:10.5px;text-align:center;line-height:1.35}
+.path-stop .path-dot{width:29px;height:29px;border-radius:50%;background:#fff;border:2px solid var(--line2);display:grid;place-items:center;color:var(--quiet);font-weight:730;font-size:11px}
+.path-stop.done .path-dot{background:#567b6a;border-color:#567b6a;color:white}.path-stop.current .path-dot{border-color:var(--accent);color:var(--accent-dark);box-shadow:0 0 0 4px #edf3f6}
+.path-stop.done,.path-stop.current{color:var(--ink);font-weight:640}
+.path-line{margin:21px 0 10px}.path-line:before{top:14px;left:6%;right:6%}
+.path-stop:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:5px}
+/* responsive: retain 4 panels on normal 1440-wide desktop; overlays only below 1140 */
+
+
+
+
+
+
+/* ====================== V6: panel state + shared typography ====================== */
+:root{--nav-w:196px;--plan-w:324px;--chat-w:430px}
+.app{grid-template-columns:var(--nav-w) minmax(0,1fr)}
+.app.nav-mini{--nav-w:62px}
+.rail{background:#faf9f6}
+.course-nav{width:var(--plan-w);flex:0 0 var(--plan-w);background:#fcfbf8;transition:width .2s,flex-basis .2s;min-width:0}
+.app.hide-course .course-nav{width:0;flex-basis:0;border-right:0;overflow:hidden}
+.course-top{padding:17px 19px 16px}.course-title{font-size:18px}
+.course-list{padding:11px 13px 20px}
+.course-label{padding:17px 8px 9px;font-size:11px;letter-spacing:.04em}
+/* Same font for knowledge nodes, conversation titles and artifact titles. */
+.course-nav .side-item{min-height:59px;padding:11px 10px;gap:11px;border-radius:9px}
+.course-nav .side-item .side-txt,.course-nav .side-item.slim .side-txt{font-size:15px;font-weight:600;line-height:1.38;letter-spacing:-.01em}
+.course-nav .side-item.slim{min-height:52px;padding:12px 10px;align-items:center}
+.course-nav .side-item .side-meta{font-size:11px;font-weight:450;margin-top:5px;line-height:1.35}
+.course-nav .side-item .side-aux{font-size:10.5px}
+.course-nav .side-item .ico{width:16px;height:16px}
+.course-nav .course-archive{margin-top:12px;padding-top:8px}
+.course-nav .course-archive .side-item .side-txt{white-space:normal;overflow:visible;text-overflow:clip}
+.course-nav .course-archive .pill{font-size:10px;padding:3px 7px;margin-left:auto;flex:none}
+.course-nav .step-ind{width:23px;height:23px;font-size:11px}
+.chat-panel{width:var(--chat-w);flex:0 0 var(--chat-w);background:#faf9f6;transition:none;position:relative}
+.chat-head-title{font-size:15px}.session-select{font-size:14px;font-weight:650}
+.chat-msg p,.chat-msg.user .bubble{font-size:13.3px;line-height:1.75}
+.chat-reference{font-size:12px}
+.chat-top{padding:15px 19px 13px}.chat-context{padding:11px 19px}.chat-scroll{padding:21px 20px}.chat-compose{padding:12px 18px 16px}.compose-field textarea{font-size:13px}
+.chat-panel:before{pointer-events:none;display:none}
+.resize-grip{position:absolute;left:-5px;top:0;bottom:0;width:11px;z-index:13;cursor:col-resize;touch-action:none;outline-offset:-3px}
+.resize-grip:after{content:"";position:absolute;left:5px;top:0;bottom:0;width:1px;background:var(--line);transition:background .15s,width .15s}
+.resize-grip:hover:after,.resize-grip:focus-visible:after,.is-resizing .resize-grip:after{left:4px;width:3px;background:#7395a8}
+body.is-resizing{cursor:col-resize!important;user-select:none!important}
+.app.assistant-hidden .chat-panel{width:0!important;flex-basis:0!important;min-width:0;border:0;overflow:hidden;pointer-events:none}
+.app.assistant-hidden .chat-panel>*{visibility:hidden}
+.app.assistant-hidden .chat-panel .resize-grip{display:none}
+.app:not(.assistant-hidden) .chat-panel>*{visibility:visible}
+.app.reading-only .center{margin:0}
+.topbar{padding:0 22px}.topbar .right{gap:7px}
+.assistant-toggle{min-width:120px}
+.assistant-toggle.is-open{background:#ecf2f5;color:#315b70;border-color:#d5e3e9}
+.more-wrapper{position:relative}
+.modes-menu{position:absolute;right:0;top:35px;width:235px;background:#fff;border:1px solid var(--line2);border-radius:10px;box-shadow:0 16px 40px #252a2e1a;padding:6px;z-index:25}
+.modes-menu[hidden]{display:none}
+.modes-menu button{width:100%;display:block;text-align:left;background:transparent;border:0;border-radius:6px;padding:10px 12px;font-size:12px;color:var(--ink)}
+.modes-menu button:hover{background:var(--stone)}
+.app:not(.route-dashboard) .center{min-width:0}
+/* Normal reading remains split; explicit chat focus alone fills the central area. */
+.app.chat-focus:not(.route-dashboard) .center{display:none}
+.app.chat-focus:not(.route-dashboard) .chat-panel{flex:1!important;width:auto!important;max-width:none}
+.app.chat-focus .resize-grip{display:none}
+.app.chat-focus .chat-scroll,.app.chat-focus .chat-compose,.app.chat-focus .chat-top,.app.chat-focus .chat-context{width:min(820px,100%);margin-left:auto;margin-right:auto}
+/* small desktop and tablet: preserve main content, assistant becomes on-demand overlay */
+@media(max-width:1000px){
+ .app:not(.route-dashboard) .course-nav{display:none}
+ .app:not(.route-dashboard) .chat-panel{position:absolute;right:0;top:0;bottom:0;z-index:15;max-width:min(520px,calc(100vw - 68px));box-shadow:-10px 0 30px #252a2e17}
+ .app:not(.route-dashboard).assistant-hidden .chat-panel{display:none}
+ .app:not(.route-dashboard) .center{display:flex}
+ .app.chat-focus:not(.route-dashboard) .center{display:none}
+ .resize-grip{display:none}
+}
+@media(max-width:760px){.app{--nav-w:62px!important}.app .rail{padding:12px 6px}.app .brand-copy,.app .nav-heading,.app .rail-label,.app .nav-count,.app .profile-copy{display:none}.app .rail-btn{justify-content:center;padding:0;width:44px;margin:0 auto}.app .brand-wide,.app .profile-button{justify-content:center}.dash .dash-inner{padding:17px 14px 40px}.dash-grid,.dash-feature{grid-template-columns:1fr}.feature-side{padding:0;border-left:0;border-top:1px solid var(--line);padding-top:13px}.content{padding:22px 18px 48px}.topbar .breadcrumbs{font-size:11px}.topbar{padding:0 12px}.learning-pin{padding:8px 10px}.learning-pin button{display:none}}
+
+/* V6.1: Codex-like compact plan directory; long status is a two-line right column. */
+.course-nav .side-item{min-height:48px;padding:8px 10px;gap:9px;align-items:center}
+.course-nav .side-item[data-node]{min-height:49px}
+.course-nav .side-item .side-txt,
+.course-nav .side-item.slim .side-txt{font-size:14px;font-weight:600;line-height:1.42;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.course-nav .side-item .side-hint{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:2px;max-width:106px;flex:0 0 auto;text-align:right;font-size:10.5px;font-weight:450;line-height:1.35;color:var(--quiet);white-space:nowrap}
+.course-nav .side-item .side-hint .hint-primary{color:var(--muted);font-weight:550}
+.course-nav .side-item.done .side-hint .hint-primary{color:#527661}
+.course-nav .side-item.active .side-hint .hint-primary{color:var(--accent-dark)}
+.course-nav .side-item .side-hint .hint-secondary{color:var(--quiet)}
+.course-nav .side-item.active .side-hint .hint-secondary{color:#658497}
+.course-nav .side-item .step-ind{width:22px;height:22px;flex:none;font-size:10px}
+.course-nav #sideSessions .side-item.slim{min-height:46px;padding:9px 10px}
+.course-nav .course-archive .side-item.slim{min-height:46px;padding:9px 10px}
+.course-nav .course-archive .side-item .side-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.course-nav .course-archive .pill{margin-left:auto;flex:none}
+
+
+/* ========== V6.2 · reference-proportioned navigation and compact hover hints ========== */
+:root{--nav-w:11vw;--plan-w:17vw}
+.app.nav-mini{--nav-w:62px}
+.rail{padding-left:10px;padding-right:10px}
+.course-top{padding:16px 19px 15px}
+.course-list{padding:8px 11px 18px}
+.course-label{padding:13px 8px 6px;font-size:10.5px}
+/* Knowledge, conversation and artifacts use one title specification. */
+.course-nav .side-item,
+.course-nav .side-item[data-node],
+.course-nav #sideSessions .side-item.slim,
+.course-nav .course-archive .side-item.slim{min-height:42px;padding:7px 9px;gap:9px;align-items:center;border-radius:8px}
+.course-nav .side-item .side-txt,
+.course-nav .side-item.slim .side-txt,
+.course-nav .course-archive .side-item .side-txt{font-size:13px;font-weight:600;line-height:1.35;letter-spacing:0;min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.course-nav .step-ind{width:20px;height:20px;font-size:9.5px}
+.course-nav .side-item .ico{width:15px;height:15px;flex:none}
+.course-nav .side-item .side-hint{max-width:75px;min-width:0;flex:0 0 auto;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;font-size:10px;line-height:1.35}
+.course-nav .side-item .hint-primary{font-size:10px;font-weight:530}
+.course-nav .side-item .hint-secondary{display:none}
+.course-nav #sideSessions .side-item.slim,.course-nav .course-archive .side-item.slim{min-height:41px}
+.course-nav .course-archive{margin-top:9px;padding-top:5px}
+.course-nav .course-archive .pill{margin-left:auto;font-size:9.5px;padding:3px 6px;flex:none}
+.course-nav .course-label .text-btn{font-size:10.5px!important}
+.course-nav .side-item .side-aux{flex:none;font-size:10px}
+/* V6.3: 11vw + 17vw = 28vw; main learning content gets 72vw when A is closed. */
+/* Tooltip lives outside the scroll container: no clipped, duplicated second line. */
+.plan-tooltip{position:fixed;z-index:80;pointer-events:none;display:none;max-width:320px;padding:9px 12px;border:1px solid #d8dce0;border-radius:9px;background:#fff;box-shadow:0 12px 30px rgba(32,44,52,.13);font-size:11.5px;font-weight:470;line-height:1.6;color:#35444b;white-space:normal;overflow-wrap:anywhere}
+.plan-tooltip.is-visible{display:block}
+
+</style>
+</head>
+<body>
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
+<symbol id="i-home" viewbox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"></path><path d="M9 21v-8h6v8"></path></symbol>
+<symbol id="i-path" viewbox="0 0 24 24"><circle cx="5" cy="5" r="2"></circle><circle cx="19" cy="7" r="2"></circle><circle cx="9" cy="19" r="2"></circle><path d="M7 5h8a4 4 0 0 1 4 4v4a6 6 0 0 1-6 6h-2"></path></symbol>
+<symbol id="i-talk" viewbox="0 0 24 24"><path d="M20 15a3 3 0 0 1-3 3H8l-5 3V6a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3z"></path><path d="M7 9h9M7 13h6"></path></symbol>
+<symbol id="i-book" viewbox="0 0 24 24"><path d="M4 4a2 2 0 0 1 2-2h14v19H6a2 2 0 0 1-2-2z"></path><path d="M4 19a2 2 0 0 1 2-2h14M8 7h8"></path></symbol>
+<symbol id="i-code" viewbox="0 0 24 24"><path d="m8 5-6 7 6 7M16 5l6 7-6 7M14 4l-4 16"></path></symbol>
+<symbol id="i-spark" viewbox="0 0 24 24"><path d="m12 2 2.6 7.4L22 12l-7.4 2.6L12 22l-2.6-7.4L2 12l7.4-2.6z"></path></symbol>
+<symbol id="i-check" viewbox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></symbol>
+<symbol id="i-arrow" viewbox="0 0 24 24"><path d="M5 12h14m-7-7 7 7-7 7"></path></symbol>
+<symbol id="i-chevron" viewbox="0 0 24 24"><path d="m9 6 6 6-6 6"></path></symbol>
+<symbol id="i-close" viewbox="0 0 24 24"><path d="M5 5 19 19M19 5 5 19"></path></symbol>
+<symbol id="i-panel" viewbox="0 0 24 24"><rect height="18" rx="2" width="18" x="3" y="3"></rect><path d="M15 3v18"></path></symbol>
+<symbol id="i-menu" viewbox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></symbol>
+<symbol id="i-link" viewbox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 .5l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7-.5l-3 3a5 5 0 0 0 7 7l2-2"></path></symbol>
+<symbol id="i-play" viewbox="0 0 24 24"><path d="m7 4 13 8-13 8z"></path></symbol>
+<symbol id="i-file" viewbox="0 0 24 24"><path d="M6 2h8l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM14 2v6h5"></path><path d="M8 13h8M8 17h6"></path></symbol>
+<symbol id="i-clock" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></symbol>
+<symbol id="i-target" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle><circle cx="12" cy="12" r="1"></circle></symbol>
+<symbol id="i-plus" viewbox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></symbol>
+<symbol id="i-send" viewbox="0 0 24 24"><path d="M12 19V5m-7 7 7-7 7 7"></path></symbol>
+<symbol id="i-search" viewbox="0 0 24 24"><circle cx="10.5" cy="10.5" r="7.5"></circle><path d="m16 16 5 5"></path></symbol>
+<symbol id="i-expand" viewbox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5"></path></symbol>
+<symbol id="i-external" viewbox="0 0 24 24"><path d="M13 5h6v6M19 5l-9 9"></path><path d="M19 14v5H5V5h5"></path></symbol>
+</svg>
+<div class="app route-dashboard" id="app">
+<nav aria-label="全局导航" class="rail"><button class="brand-wide" data-route="dashboard" title="学习工作台"><span class="brand-square">S<span class="brand-dot">.</span></span><span class="brand-copy"><strong>Study Plan</strong><small>学习规划助手</small></span></button><div class="nav-divider"></div><div class="nav-heading">主要功能</div><button class="rail-btn active" data-route="dashboard" title="学习工作台"><svg class="ico"><use href="#i-home"></use></svg><span class="rail-label">学习工作台</span></button><button class="rail-btn" data-route="workspace" title="我的学习路径"><svg class="ico"><use href="#i-path"></use></svg><span class="rail-label">我的学习路径</span></button><button class="rail-btn" data-route="plans" title="学习计划"><svg class="ico"><use href="#i-target"></use></svg><span class="rail-label">学习计划</span></button><button class="rail-btn" data-route="conversations" title="我的会话"><svg class="ico"><use href="#i-talk"></use></svg><span class="rail-label">我的会话</span><span class="nav-count">4</span></button><div class="nav-heading">学习成果</div><button class="rail-btn" data-route="summary" title="知识总结"><svg class="ico"><use href="#i-book"></use></svg><span class="rail-label">知识总结</span></button><button class="rail-btn" data-route="practice" title="项目实践"><svg class="ico"><use href="#i-code"></use></svg><span class="rail-label">项目实践</span></button><button class="rail-btn" data-route="resources" title="学习资源"><svg class="ico"><use href="#i-file"></use></svg><span class="rail-label">学习资源</span></button><button class="rail-btn" data-route="report" title="学习报告"><svg class="ico"><use href="#i-target"></use></svg><span class="rail-label">学习报告</span></button><div class="rail-spacer"></div><div class="nav-divider"></div><button class="profile-button" id="profileButton" title="学习者 123"><span class="profile-avatar">学</span><span class="profile-copy"><strong>学习者 123</strong><small>Agent 应用开发 · 42%</small></span></button><button class="rail-btn nav-toggle" id="navToggle" title="折叠/展开全局导航"><svg class="ico"><use href="#i-panel"></use></svg><span class="rail-label">折叠导航</span></button></nav>
+<div class="shell">
+<aside class="course-nav" id="courseNav">
+<div class="course-top"><div class="course-overline"><span>当前学习计划</span><button class="iconbtn" id="closeCourse" title="收起阶段导航"><svg class="ico sm"><use href="#i-panel"></use></svg></button></div><div class="course-title">Agent 应用开发</div><div class="course-sub">RAG 检索与知识库 <span class="mono">· 03 / 07</span></div><div class="course-progress"><span class="mini-track"><span></span></span><b>计划 42%</b></div></div>
+<div class="course-list">
+<div class="course-label">本阶段知识 <span>01—04</span></div>
+<div class="side-item done" data-node="vector" data-tooltip="向量检索基础 · 已完成 · 总结已通过" tabindex="0" role="button"><span class="step-ind"><svg class="ico sm"><use href="#i-check"></use></svg></span><span class="side-txt">向量检索基础</span><span class="side-hint"><span class="hint-primary">已完成</span></span></div>
+<div class="side-item active" data-node="hybrid" data-tooltip="混合检索 · 学习中 · 2 个子知识待学" tabindex="0" role="button"><span class="step-ind">02</span><span class="side-txt">混合检索</span><span class="side-hint"><span class="hint-primary">学习中</span></span></div>
+<div class="side-item" data-node="vectordb" data-tooltip="向量数据库选型 · 未开始" tabindex="0" role="button"><span class="step-ind">03</span><span class="side-txt">向量数据库选型</span><span class="side-hint"><span class="hint-primary">未开始</span></span></div>
+<div class="side-item" data-node="rrf" data-tooltip="RRF 融合排序 · 建议今日学习" tabindex="0" role="button"><span class="step-ind">04</span><span class="side-txt">RRF 融合排序</span><span class="side-hint"><span class="hint-primary">今日建议</span></span></div>
+<div class="course-label">关联会话 <button class="text-btn" id="newChatSide" style="font-size:11px">＋ 新建</button></div>
+<div id="sideSessions"></div>
+<div class="course-archive"><div class="course-label">阶段成果</div><div class="side-item slim" data-route="summary" data-tooltip="阶段学习总结 · 当前 v3 评价通过，另有两项非阻塞补充建议" tabindex="0" role="button"><svg class="ico sm"><use href="#i-book"></use></svg><div class="side-txt">阶段学习总结</div><span class="pill clay">建议补充</span></div><div class="side-item slim" data-route="practice" data-tooltip="混合检索实践 · 方案已评审，当前等待提交运行证据" tabindex="0" role="button"><svg class="ico sm"><use href="#i-code"></use></svg><div class="side-txt">混合检索实践</div><span class="pill blue">进行中</span></div></div>
+</div>
+<div class="side-foot"><span>知识节点 1 / 4 已完成</span><span>阶段概览 ↗</span></div>
+</aside>
+<main class="center">
+<header class="topbar" id="topbar">
+ <button class="iconbtn" id="openCourse" title="展开或收起学习计划栏" aria-label="切换学习计划栏"><svg class="ico"><use href="#i-menu"></use></svg></button>
+ <span class="breadcrumbs" id="crumb">Agent 应用开发　/　RAG 检索与知识库　/　<strong>混合检索</strong></span>
+ <div class="right">
+   <div class="more-wrapper"><button class="iconbtn" id="moreModes" title="更多阅读模式" aria-label="更多阅读模式" aria-expanded="false">•••</button><div class="modes-menu" id="modesMenu" hidden><button id="focusRead">专注阅读（收起所有辅助栏）</button><button id="resetLayout">恢复默认学习布局</button><button id="focusChatMode">专注聊天</button></div></div>
+   <button class="btn sm assistant-toggle" id="toggleAssistant" aria-expanded="true"><svg class="ico sm"><use href="#i-talk"></use></svg><span id="assistantToggleText">收起学习助手</span></button>
+ </div>
+</header><div class="learning-pin" id="learningPin"><div class="pin-text"><span class="pin-label">本节目标</span><span id="pinGoal">理解向量召回与关键词召回的互补性，判断何时引入混合检索。</span></div><button data-jump="goal" title="查看完整目标">目标</button><button data-jump="prior" title="查看前置知识">前置</button><button data-jump="resources" title="查看学习资料">资料</button></div>
+<div class="scroll-main" id="mainScroll"><div class="content" id="mainContent"></div></div>
+</main>
+<aside aria-label="AI 学习助教" class="chat-panel" id="chatPanel"><div class="resize-grip" id="resizeGrip" role="separator" aria-orientation="vertical" aria-label="拖动调整学习助手宽度" tabindex="0" title="按住鼠标左键拖动，双击重置宽度"></div>
+<div class="chat-top"><div class="chat-header"><div class="tutor-mark"><svg class="ico"><use href="#i-spark"></use></svg></div><div><div class="chat-head-title">学习助教 <span class="pill blue" style="padding:2px 6px;margin-left:4px">伴学</span></div><div class="chat-head-sub" id="chatSub">跟随当前知识节点</div></div><div class="chat-menu"><button class="iconbtn" id="chatFocus" title="展开专注聊天"><svg class="ico"><use href="#i-expand"></use></svg></button><button class="iconbtn" id="chatClose" title="收起助教"><svg class="ico"><use href="#i-panel"></use></svg></button></div></div>
+<button class="session-select" id="sessionTrigger"><svg class="ico sm"><use href="#i-talk"></use></svg><span id="currentSessionTitle">混合检索与 RRF</span><svg class="ico sm" style="transform:rotate(90deg)"><use href="#i-chevron"></use></svg></button>
+<div class="session-popover" id="sessionPopover"></div>
+</div>
+<div class="chat-context"><svg class="ico sm muted"><use href="#i-target"></use></svg><button class="context-pin" id="contextPin">当前节点 · 混合检索</button><span class="small quiet">上下文已关联</span></div>
+<div class="chat-scroll" id="chatScroll"></div>
+<div class="chat-compose"><div class="chat-quick"><button data-quick="解释这个概念">解释概念</button><button data-quick="根据当前知识节点出一道理解题">出一道自测</button><button data-quick="帮我把这部分关联到实践任务">关联实践</button></div><div class="draft-context" id="draftContext"><svg class="ico sm"><use href="#i-link"></use></svg><span id="draftContextTitle"></span><button id="clearDraft" title="取消引用"><svg class="ico sm"><use href="#i-close"></use></svg></button></div><div class="compose-field"><textarea id="chatInput" placeholder="针对当前学习内容提问…" rows="2"></textarea><button class="send" id="sendBtn" title="发送模拟消息"><svg class="ico sm"><use href="#i-send"></use></svg></button></div><div class="compose-note">原型交互演示 · 无真实模型调用 · Enter 发送，Shift+Enter 换行</div></div>
+</aside>
+
+</div>
+</div>
+<div class="plan-tooltip" id="planTooltip" role="tooltip"></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const icon=(name,cls='sm')=>`<svg class="ico ${cls}"><use href="#i-${name}"/></svg>`;
+const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nodes={
+ vector:{name:'向量检索基础',label:'已完成',no:'01',summary:'文本如何变成可以检索的向量。',goal:'理解嵌入模型、相似度度量与向量索引之间的关系。',topics:[['Embedding 与语义空间','文本如何映射到高维向量','done'],['相似度与距离','余弦相似度、内积和归一化','done'],['向量索引','HNSW 如何加速近邻检索','done'],['局限与边界','精确关键词漏召回问题','done']]},
+ hybrid:{name:'混合检索',label:'学习中',no:'02',summary:'让语义召回与关键词召回互相补充。',goal:'理解向量召回与关键词召回的互补性，能够判断何时引入混合检索，并解释融合排序的基本思路。',topics:[['两路召回的互补性','理解 BM25 与向量检索各自擅长什么','done'],['融合策略','从两路候选到一个统一结果集','current'],['检索效果对比','召回、精确率与失败案例的记录','todo'],['实践中的参数','Top-k、RRF k 与排序截断','todo']]},
+ vectordb:{name:'向量数据库选型',label:'未开始',no:'03',summary:'从需求和数据量出发选择存储方案。',goal:'理解向量数据库的基本职责，并根据数据规模、过滤需求和部署成本做技术选型。',topics:[['索引与存储','向量索引与业务元数据','todo'],['选型维度','性能、部署、过滤与维护','todo'],['本地方案','pgvector 与 Qdrant 的比较','todo']]},
+ rrf:{name:'RRF 融合排序',label:'建议今日学习',no:'04',summary:'让不同检索器的排序结果合并。',goal:'理解 RRF 的排名融合公式与适用边界，能够手算一组小样本的融合得分。',topics:[['排名融合直觉','为什么不直接相加原始分数','todo'],['公式与常数 k','1/(k+rank) 的含义','todo'],['案例演算','把双路检索结果融合排序','todo']]}
+};
+let sessions={
+ hybrid:{title:'混合检索与 RRF',node:'hybrid',kind:'学习讨论',messages:[{role:'ai',text:'上一单元的向量检索总结已经通过评审。今天我们继续混合检索，先看双路召回为什么互补。',ref:{label:'向量检索基础总结',target:'prior'}},{role:'user',text:'BM25 和向量检索为什么要融合？只用向量检索不行吗？'},{role:'ai',text:'向量检索更容易匹配语义相近的表述；BM25 对错误码、专有名词等精确词项更敏感。混合检索把两路候选汇总，再用统一的排序策略选择证据。',ref:{label:'两路召回的互补性',target:'topic-0'}},{role:'user',text:'那我怎么判断该用哪一种？'},{role:'ai',text:'先看问题和语料：如果既有口语化提问，也有型号、缩写和术语，适合先建立两路基线。你可以打开下方的实践任务，比较 10 条查询的结果，再决定是否保留混合检索。',ref:{label:'混合检索实践任务',target:'practice-link'}}]},
+ bm25:{title:'BM25 原理讨论',node:'hybrid',kind:'学习讨论',messages:[{role:'user',text:'BM25 里的 k1 和 b 参数分别影响什么？'},{role:'ai',text:'k1 影响词频饱和程度；b 控制文档长度归一化的强度。可以先用常见默认值建立基线，再观察不同长度文档的得分变化。',ref:{label:'检索参数实践',target:'topic-3'}}]},
+ summary:{title:'向量检索 · 总结修改',node:'vector',kind:'总结讨论',messages:[{role:'ai',text:'当前总结 v3 已通过评审，但建议补充余弦相似度与归一化后内积之间的推导。',ref:{label:'查看总结与评价',target:'summary'}}]},
+ practice:{title:'混合检索 · 实践讨论',node:'hybrid',kind:'实践讨论',messages:[{role:'user',text:'十条测试查询应该怎么设计？'},{role:'ai',text:'覆盖精确关键词、语义改写和普通事实问题；固定查询集合，并保存 BM25、向量和融合后的三路排序，便于对照结果。',ref:{label:'查看实践要求',target:'practice'}}]}
+};
+let route='dashboard',activeNode='hybrid',activeSession='hybrid',pendingRef=null,summaryVer=3,practiceStatus='pending';
+try{const saved=JSON.parse(localStorage.getItem('studyplan-demo-sessions-v5')||'null');if(saved&&typeof saved==='object')for(const [k,v] of Object.entries(saved))if(v&&Array.isArray(v.messages)&&typeof v.title==='string')sessions[k]=v;}catch(e){}
+function persist(){try{localStorage.setItem('studyplan-demo-sessions-v5',JSON.stringify(sessions));}catch(e){}}
+function toast(s){const el=$('#toast');el.textContent=s;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2600)}
+function showRoute(r){
+ const prev=route; route=r;
+ const app=$('#app');
+ app.classList.toggle('route-dashboard',r==='dashboard');
+ app.classList.toggle('route-workspace',r==='workspace');
+ app.classList.remove('reading-focus','chat-focus','mobile-chat');
+ if(r==='dashboard') layout={nav:navPreference,plan:false,assistant:false};
+ else if(r==='conversations' || r==='plans' || r==='resources' || r==='report') layout={nav:true,plan:false,assistant:false};
+ else if(prev==='dashboard'||prev==='conversations'||prev==='plans'||prev==='resources'||prev==='report') { layout={nav:false,plan:true,assistant:true};lastNoAssistant={nav:true,plan:true}; }
+ $$('.rail-btn[data-route]').forEach(b=>b.classList.toggle('active',b.dataset.route===r));
+ applyLayout('route'); render();
+}
+function setNode(n){if(!nodes[n])return;activeNode=n;$$('.side-item[data-node]').forEach(e=>e.classList.toggle('active',e.dataset.node===n));showRoute('workspace');}
+function renderSide(){const wrap=$('#sideSessions');wrap.innerHTML='';Object.entries(sessions).forEach(([id,s])=>{const btn=document.createElement('button');btn.className='side-item slim'+(id===activeSession?' active':'');btn.style.cssText='width:100%;border:0;text-align:left';btn.innerHTML=`${icon('talk')}<span class="side-txt">${escapeHtml(s.title)}</span>${id===activeSession?'<span class="side-aux">●</span>':''}`;btn.title=s.title+' · '+s.kind;btn.onclick=()=>setSession(id);wrap.append(btn)})}
+function setSession(id){if(!sessions[id])return;activeSession=id;activeNode=sessions[id].node||activeNode;$$('.side-item[data-node]').forEach(e=>e.classList.toggle('active',e.dataset.node===activeNode));renderSide();$('#currentSessionTitle').textContent=sessions[id].title;$('#sessionPopover').classList.remove('open');renderChat();$('#chatSub').textContent=`${nodes[activeNode]?.name||'学习计划'} · ${sessions[id].kind}`;$('#contextPin').textContent='当前节点 · '+(nodes[activeNode]?.name||'计划讨论');if(route==='workspace')render();}
+function renderSessionMenu(){const pop=$('#sessionPopover');pop.innerHTML='';Object.entries(sessions).forEach(([id,s])=>{const b=document.createElement('button');b.innerHTML=`<strong>${escapeHtml(s.title)}</strong><span style="float:right;color:var(--quiet);font-size:10px">${escapeHtml(s.kind)}</span>`;b.onclick=()=>setSession(id);pop.append(b)});const hr=document.createElement('div');hr.className='sep';pop.append(hr);const b=document.createElement('button');b.textContent='＋ 新建当前阶段会话';b.onclick=newSession;pop.append(b)}
+function newSession(){const title=prompt('会话标题（仅供原型体验）','新的学习讨论');if(title===null)return;const id='custom-'+Date.now();sessions[id]={title:title.trim()||'新的学习讨论',node:activeNode,kind:'学习讨论',messages:[{role:'ai',text:'这是新的学习会话。你可以围绕当前知识节点提出问题。'}]};persist();activeSession=id;showRoute('workspace');setSession(id);$('#chatInput').focus();toast('已创建模拟会话，记录保存在当前浏览器')}
+function renderChat(){const s=sessions[activeSession],body=$('#chatScroll');$('#currentSessionTitle').textContent=s.title;body.innerHTML='<div class="chat-date">今天 · 学习讨论</div>';s.messages.forEach(m=>{const box=document.createElement('div');box.className='chat-msg '+(m.role==='user'?'user':'ai');if(m.role==='user'){const bubble=document.createElement('div');bubble.className='bubble';bubble.textContent=m.text;box.append(bubble)}else{const who=document.createElement('div');who.className='who';who.innerHTML=`<span class="mini-ai">${icon('spark','sm')}</span>学习助教`;const p=document.createElement('p');p.textContent=m.text;box.append(who,p);if(m.ref){const b=document.createElement('button');b.className='chat-reference';b.innerHTML=`${icon('link')}<span>${escapeHtml(m.ref.label)}</span><span class="ref-meta">定位内容 →</span>`;b.onclick=()=>jumpTo(m.ref.target);box.append(b)}}body.append(box)});body.scrollTop=body.scrollHeight;renderSessionMenu()}
+function send(){const field=$('#chatInput'),text=field.value.trim();if(!text)return;sessions[activeSession].messages.push({role:'user',text});field.value='';const ref=pendingRef;pendingRef=null;$('#draftContext').classList.remove('show');const reply=ref?`已收到你针对「${ref.label}」的问题。这是交互原型，正式版本将在此使用该知识片段作为上下文回答。`:'这是交互原型，因此暂不调用真实 AI。正式产品会结合当前知识节点、已确认成果和引用内容回答。';sessions[activeSession].messages.push({role:'ai',text:reply,ref:ref?{label:ref.label,target:ref.target}:null});persist();renderChat()}
+function askAbout(label,target){
+ pendingRef={label,target};$('#draftContextTitle').textContent='已引用 · '+label;
+ $('#draftContext').classList.add('show');
+ if(!layout.assistant) openAssistant();
+ $('#chatInput').value='请结合当前学习计划解释「'+label+'」：';$('#chatInput').focus();
+}
+function jumpTo(target){if(target==='summary'||target==='practice'){showRoute(target);return;}if(target==='prior'){activeNode='vector';showRoute('summary');return;}showRoute('workspace');requestAnimationFrame(()=>{const el=document.getElementById(target);if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.classList.remove('context-highlight');void el.offsetWidth;el.classList.add('context-highlight')}})}
+function dashboard(){return `<div class="dash-inner">
+  <div class="dash-intro"><div><div class="eyebrow">YOUR LEARNING STUDIO / 09.29</div><h1>学习工作台</h1><p>今天的目标、学习资料与正在推进的事情。</p></div><span class="pill blue">当前学习 · RAG 检索</span></div>
+  <section class="dash-feature"><div><div class="eyebrow">当前学习计划　 /　03 OF 07</div><div class="feature-title">Agent 应用开发</div><p>RAG 检索与知识库 · 当前知识节点：混合检索</p><div class="feature-bottom"><span class="feature-num mono">42<small style="font-size:12px">%</small></span><div class="feature-progress"><span></span></div><span class="small muted">计划进度</span></div></div><div class="feature-side"><div><div class="eyebrow">接着学习</div><div class="next-module">混合检索 · 双路召回</div><p>预计 25 分钟 · 继续上一次「混合检索与 RRF」讨论。</p></div><button class="btn primary" data-action="continue">继续学习 ${icon('arrow')}</button></div></section>
+  <div class="dash-grid dash-first"><section class="dash-panel"><div class="panel-header"><h2>先从学习资料开始</h2><button class="text-btn" data-action="continue">进入知识节点 ${icon('arrow')}</button></div>
+    <div class="dash-resource" data-action="continue"><span class="resource-icon">${icon('file')}</span><b>混合检索官方文档</b><small>文档 · 双路召回基础</small><span class="pill green">已核验</span></div>
+    <div class="dash-resource" data-action="continue"><span class="resource-icon">${icon('play')}</span><b>RRF 排名融合图解</b><small>视频 · 8 分钟</small><span class="pill clay">待核验</span></div>
+    <div class="dash-resource" data-action="continue"><span class="resource-icon">${icon('file')}</span><b>BM25 参数笔记</b><small>笔记 · k1 / b 调参</small><span class="pill green">已核验</span></div>
+  </section><section class="dash-panel"><div class="panel-header"><h2>学习路径</h2><span class="small muted">7 个单元 · 当前第 3 单元</span></div><div class="path-line">${[['开发环境','done'],['Prompt','done'],['RAG','current'],['LangGraph',''],['工具',''],['记忆',''],['综合','']].map(([name,state],i)=>`<button class="path-stop ${state}" data-action="path" data-step="${i}"><span class="path-dot">${state==='done'?icon('check'):i+1}</span><span>${name}</span></button>`).join('')}</div><p class="small muted" style="margin:14px 0 0;line-height:1.65">你正在学习混合检索。完成本阶段后再继续 LangGraph。</p></section></div>
+  <div class="dash-grid dash-second"><section class="dash-panel"><div class="panel-header"><h2>今天的三件事</h2><span class="small muted">1 / 3 已完成</span></div><div class="dash-task done" data-action="summary"><span class="task-circle">${icon('check')}</span><span class="task-name">复盘向量检索基础</span><span class="task-state">已通过</span></div><div class="dash-task now" data-action="continue"><span class="task-circle"></span><span class="task-name">学习混合检索 · 双路召回</span><span class="task-state">进行中 →</span></div><div class="dash-task" data-action="quiz"><span class="task-circle"></span><span class="task-name">完成五道理解自测</span><span class="task-state">待开始</span></div></section><section class="dash-panel"><div class="panel-header"><h2>正在推进的实践</h2><span class="pill clay">待提交证据</span></div><div style="font-size:16px;font-weight:740;margin:14px 0 5px">实现一个混合检索模块</div><p class="small muted" style="line-height:1.65">向量 + BM25 双路召回，使用 RRF 融合，并对比检索效果。</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin:13px 0"><span class="pill green">方案已评审</span><span class="pill blue">运行证据</span><span class="pill gray">最终验收</span></div><button class="text-btn" data-action="practice">继续实践 ${icon('arrow')}</button></section></div>
+  <div class="dash-grid"><section class="dash-panel"><div class="panel-header"><h2>接着上次的讨论</h2><button class="text-btn" data-action="conversations">全部会话 ${icon('arrow')}</button></div>${[['混合检索与 RRF','hybrid','今天 08:15'],['BM25 原理讨论','bm25','昨天 21:14'],['向量检索 · 总结修改','summary','昨天 18:02']].map(([title,id,t])=>`<div class="list-session" data-session="${id}">${icon('talk')}<b>${title}</b><time>${t}</time>${icon('chevron')}</div>`).join('')}</section><section class="dash-panel"><div class="panel-header"><h2>学习助教的建议</h2><span class="pill gray">基于当前进度</span></div><div class="advice"><div class="glyph">${icon('spark')}</div><div><p>你已完成向量检索基础。今天先巩固 <strong>RRF 融合排序</strong>，再继续实践任务。</p><button class="text-btn" data-action="advice">查看关联知识 ${icon('arrow')}</button></div></div></section></div>
+</div>`}
+function workspace(){const n=nodes[activeNode];return `<div class="content"><div class="content-head"><div><div class="kicker"><span class="mono">LESSON ${n.no}</span><span style="width:24px;height:1px;background:var(--line2)"></span>RAG 检索与知识库</div><h1>${n.name}<span class="pill ${activeNode==='vector'?'green':'blue'}" style="vertical-align:middle;margin-left:10px;letter-spacing:0">${n.label}</span></h1><p class="lede">${n.summary} 这不是一份必须从头翻完的文档；你可以打开知识片段，同时在右侧与助教讨论。</p></div><div class="inline-actions"><button class="btn sm" data-action="summary">${icon('book')}<span>学习总结</span></button></div></div>
+<div class="goal-banner" id="goal"><div class="number">↗</div><div><h3>这一节，你需要真正弄懂什么？</h3><p>${n.goal}</p><button class="text-btn" data-ask="学习目标" data-target="goal">围绕目标提问 ${icon('arrow')}</button></div></div>
+<div class="section-head"><h2>学习路线</h2><span class="hint">把知识拆成可理解、可验证的小步</span></div><div class="lesson-path">${n.topics.map(([title,desc,state],i)=>`<div class="lesson-item ${state==='done'?'done':state==='current'?'current':''}" id="topic-${i}" data-ask="${escapeHtml(title)}" data-target="topic-${i}"><div class="lesson-mark">${state==='done'?icon('check'):String(i+1).padStart(2,'0')}</div><div class="lesson-main"><div class="lesson-name">${escapeHtml(title)}</div><div class="lesson-desc">${escapeHtml(desc)}</div></div><div class="lesson-right"><span class="pill ${state==='done'?'green':state==='current'?'blue':'gray'}">${state==='done'?'已理解':state==='current'?'当前学习':'待开始'}</span>${icon('chevron')}</div></div>`).join('')}</div>
+<div class="section-head"><h2>学习前，你已经知道这些</h2><span class="hint">关联已确认的学习成果</span></div><div class="twocol" id="prior"><div class="plain-panel"><div class="panel-top">${icon('check')}<h3>向量检索基础</h3><span class="pill green" style="margin-left:auto">已完成</span></div><p>Embedding、相似度和 HNSW 已在上一单元总结中覆盖。</p><button class="text-btn" data-action="summary">查看你的总结 ${icon('arrow')}</button></div><div class="plain-panel"><div class="panel-top">${icon('target')}<h3>BM25 打分原理</h3></div><p>回顾词频、文档长度及 k1、b 参数对分数的影响。</p><button class="text-btn" data-session="bm25">继续原有讨论 ${icon('arrow')}</button></div></div>
+<div class="section-head"><h2>为这一节挑选的资料</h2><span class="hint">资料保留来源与核验状态</span></div><div class="plain-panel" id="resources"><div class="resource-row" data-ask="混合检索官方文档" data-target="resources"><div class="resource-icon">${icon('file')}</div><div style="flex:1"><div class="r-title">混合检索官方文档</div><div class="r-sub">从两路召回开始 · 文档 · 核验过的学习索引</div></div><span class="pill green">已核验</span></div><div class="resource-row" data-ask="RRF 排名融合图解" data-target="resources"><div class="resource-icon">${icon('play')}</div><div style="flex:1"><div class="r-title">RRF 排名融合图解</div><div class="r-sub">8 分钟 · 视频 · 作为补充材料</div></div><span class="pill clay">未核验</span></div></div>
+<div class="section-head"><h2>把知识用起来</h2><span class="hint">关联你的阶段实践任务</span></div><div class="practice-card" id="practice-link"><div class="practice-icon">${icon('code','lg')}</div><div class="practice-text"><h3>实现一个混合检索模块</h3><p>提交双路与融合结果对比，以及可复现的运行证据。</p></div><button class="btn sm" data-action="practice">查看任务 ${icon('arrow')}</button></div><div class="note-callout" style="margin-top:18px">${icon('spark')}<div><h3>学习建议不是完成证明</h3><p>助教可以推荐学习顺序，但只有你的总结、自测或实践记录才能更新正式学习状态。</p></div></div></div>`}
+function summary(){return `<div class="content"><div class="kicker">LEARNING NOTES　/　01</div><div class="content-head"><div><h1>向量检索基础 · 学习总结</h1><p class="lede">你的学习成果独立保存，讨论会话仅用于修改与补充。</p></div><span class="pill green">评价通过 · 可补充</span></div><div class="tabs">${[1,2,3].map(v=>`<button class="tab ${summaryVer===v?'active':''}" data-version="${v}">版本 v${v}${v===3?' · 当前':''}</button>`).join('')}</div><div class="summary-body"><p>向量检索的核心思想是将文本映射为高维向量，再用向量之间的相似程度衡量语义相关性。相比纯关键词匹配，它能处理用词不同但意思接近的查询。</p><h3>01 / 嵌入与索引</h3><p>文本经过 Embedding 模型转换为向量，写入索引。HNSW 使用分层图结构加快近邻搜索，以一定近似误差换取检索效率。</p><h3>02 / 相似度度量</h3><p>余弦相似度关注向量方向；当向量经过单位归一化，分母为 1，余弦相似度等于点积。</p><h3>03 / 应用边界</h3><p>对于错误码、型号等精确词项，单纯语义检索可能漏召回。这也是学习混合检索的直接动机。</p></div><section class="feedback"><div class="section-head" style="margin:0 0 11px"><h2>AI 评价 · v${summaryVer}</h2><span class="pill green">已评价</span></div><div class="feedback-grid"><div><strong style="color:var(--sage)">5</strong><p>满足知识目标</p></div><div><strong style="color:var(--clay)">2</strong><p>非阻塞补充建议</p></div><div><strong>0</strong><p>关键理解偏差</p></div></div><div class="eyebrow" style="margin-bottom:8px">NEXT REVISION</div><ul><li>补充一个精确关键词漏召回的具体案例。</li><li>用一组简单向量展示归一化后的计算过程。</li></ul></section><div style="display:flex;gap:9px;flex-wrap:wrap"><button class="btn primary" data-action="edit-summary">继续修改 · v4 ${icon('arrow')}</button><button class="btn" data-session="summary">与助教讨论修改</button><button class="btn subtle" data-action="continue">返回知识节点</button></div></div>`}
+function practice(){return `<div class="content"><div class="kicker">PROJECT PRACTICE　/　STAGE 03</div><div class="content-head"><div><h1>实现一个混合检索模块</h1><p class="lede">把知识变成可以运行、可以复核的项目成果。</p></div><span class="pill blue">${practiceStatus==='pending'?'待提交运行证据':'证据已暂存'}</span></div><div class="steps"><div class="phase done">01　方案设计</div><div class="phase done">02　Prompt 评审</div><div class="phase now">03　运行证据</div><div class="phase">04　最终验收</div></div><div class="kvline"><div class="key">任务目标</div><div>在本地知识库 Demo 中实现向量检索与 BM25 双路召回，采用 RRF 融合，比较不同查询的检索结果。</div></div><div class="kvline"><div class="key">关联知识</div><div><span class="pill blue">向量检索</span> <span class="pill blue">BM25</span> <span class="pill blue">RRF 融合排序</span></div></div><div class="kvline"><div class="key">交付内容</div><div>GitHub 仓库、运行日志、10 个查询的三路结果对比，以及一份简短的分析结论。</div></div><div class="kvline"><div class="key">验收标准</div><div>代码可运行、结果可复现；日志展示各路检索与融合结果；结论与证据一致。</div></div><div class="section-head"><h2>运行证据</h2><span class="pill clay">原型模拟</span></div><div class="plain-panel"><label class="small muted" for="githubUrl">代码仓库</label><input id="githubUrl" class="field" type="url" placeholder="https://github.com/..." style="margin:8px 0 15px"><label class="small muted" for="evidenceText">运行日志 / 测试记录</label><textarea class="field" id="evidenceText" rows="5" placeholder="粘贴三路检索结果和测试记录……" style="margin:8px 0 11px"></textarea><div class="form-note">仅演示交付交互。不会上传文件，也不会宣称已验证运行真实性。</div><div style="display:flex;gap:8px;margin-top:16px"><button class="btn primary" data-action="evidence">保存模拟证据</button><button class="btn" data-session="practice">进入实践讨论</button></div></div><div class="section-head"><h2>最终验收</h2></div><div class="note-callout">${icon('target')}<div><h3>待核查</h3><p>正式版本会对照可核验的运行证据作出结论；模型的文字描述不能替代实际运行结果。</p></div></div></div>`}
+function conversations(){const term=($('#convSearch')?.value||'').trim();return `<div class="content"><div class="kicker">CONVERSATION LIBRARY</div><div class="content-head"><div><h1>对话，也是一部分学习过程。</h1><p class="lede">按照学习计划与阶段组织，不让总结和实践淹没在历史消息里。</p></div><button class="btn primary" data-action="new-session">${icon('plus')} 新建会话</button></div><label class="search">${icon('search')}<input id="convSearch" value="${escapeHtml(term)}" placeholder="搜索会话标题…"></label><div class="conv-group"><h3>Agent 应用开发　/　RAG 检索与知识库</h3><div id="convResults">${conversationRows(term)}</div></div></div>`}
+function conversationRows(term=''){let rows=Object.entries(sessions).filter(([id,s])=>s.title.toLowerCase().includes(term.toLowerCase()));return rows.length?rows.map(([id,s])=>`<div class="conv-entry" data-session="${id}"><span class="resource-icon" style="height:31px;width:31px">${icon('talk')}</span><div style="flex:1;min-width:0"><div class="conv-name">${escapeHtml(s.title)}</div><small>${escapeHtml(s.kind)} · 关联：${escapeHtml(nodes[s.node]?.name||'学习计划')}</small></div><span class="small quiet">${s.messages.length} 条消息</span>${icon('chevron')}</div>`).join(''):'<div class="empty">没有匹配的会话</div>'}
+function extraPage(r){const names={plans:'学习计划',resources:'学习资源',report:'学习报告'};return `<div class="content"><div class="kicker">STUDY PLAN / PROTOTYPE</div><div class="content-head"><div><h1>${names[r]||'页面'}</h1><p class="lede">本轮聚焦学习工作台、知识节点与右侧伴学。此处为导航占位，暂未连接实际业务。</p></div></div><button class="btn primary" data-action="continue">进入当前学习节点 ${icon('arrow')}</button></div>`}function render(){const isDash=route==='dashboard';$('#topbar').classList.toggle('hidden',isDash);const main=$('#mainContent');if(isDash){main.className='';main.innerHTML=dashboard()}else{main.className='content-wrapper';main.innerHTML=route==='workspace'?workspace():route==='summary'?summary():route==='practice'?practice():route==='conversations'?conversations():extraPage(route)}$('#crumb').innerHTML=route==='workspace'?`Agent 应用开发　/　RAG 检索与知识库　/　<strong>${nodes[activeNode].name}</strong>`:`Agent 应用开发　/　<strong>${({summary:'知识总结',practice:'项目实践',conversations:'我的会话',plans:'学习计划',resources:'学习资源',report:'学习报告'})[route]||'学习空间'}</strong>`;$('#mainScroll').scrollTop=0;renderSide();renderChat();$('#pinGoal').textContent=nodes[activeNode]?.goal||'查看当前学习目标';$('#chatSub').textContent=route==='summary'?'学习总结 · 关联讨论':route==='practice'?'阶段实践 · 关联讨论':`${nodes[activeNode]?.name||'学习计划'} · ${sessions[activeSession].kind}`;$('#contextPin').textContent=route==='summary'?'当前成果 · 向量检索基础总结':route==='practice'?'当前任务 · 混合检索实践':route==='conversations'?'会话库 · 当前讨论':'当前节点 · '+nodes[activeNode].name;}
+// V6 layout manager: N (global navigation), P (plan), C (canvas), A (assistant).
+// C always remains in ordinary modes. At most two of N/P/A may be fully expanded.
+const MIN_CANVAS=600, NAV_MINI=62, MIN_PLAN_WIDTH=190;
+// Normal desktop widths follow the confirmed N=11% / P=17% / C=72% of the app viewport.
+function fullNavWidth(){return usableWidth()*0.11}
+function standardPlanWidth(){return usableWidth()*0.17}
+let chatWidth=430, layout={nav:true,plan:false,assistant:false}, lastNoAssistant={nav:true,plan:true};
+let navPreference=true, dragState=null, focusMode=null;
+try {navPreference=localStorage.getItem('studyplan-demo-nav-v6')!=='mini';
+ const savedW=Number(localStorage.getItem('studyplan-demo-chat-width-v6'));
+ if(savedW>=380&&savedW<=620)chatWidth=savedW;
+ layout.nav=navPreference;
+}catch(e){}
+function usableWidth(){return $('#app').getBoundingClientRect().width||innerWidth}
+function effectivePlanWidth(){
+ if(!layout.plan)return 0;
+ if(!layout.assistant)return standardPlanWidth();
+ // Preserve the chosen 17% plan width until the actual reading canvas needs protection.
+ return Math.max(0,Math.min(standardPlanWidth(),usableWidth()-(layout.nav?fullNavWidth():NAV_MINI)-chatWidth-MIN_CANVAS));
+}
+function availableCanvas(){return usableWidth()-(layout.nav?fullNavWidth():NAV_MINI)-effectivePlanWidth()-(layout.assistant?chatWidth:0)}
+function updateButtons(){
+ const navBtn=$('#navToggle'); navBtn.title=layout.nav?'折叠全局导航':'展开全局导航';
+ navBtn.querySelector('.rail-label').textContent=layout.nav?'折叠导航':'展开导航';
+ $('#assistantToggleText').textContent=layout.assistant?'收起学习助手':'打开学习助手';
+ $('#toggleAssistant').setAttribute('aria-expanded',String(layout.assistant));
+ $('#toggleAssistant').classList.toggle('is-open',layout.assistant);
+ $('#openCourse').title=layout.plan?'收起学习计划栏':'展开学习计划栏';
+ $('#chatFocus').title=focusMode==='chat'?'恢复学习分栏':'专注聊天';
+}
+function applyLayout(reason='user'){
+ const app=$('#app');
+ if(route==='dashboard'){layout.plan=false;layout.assistant=false;}
+ if(layout.nav&&layout.plan&&layout.assistant){
+   if(reason==='open-nav'){layout.plan=false;lastNoAssistant={nav:true,plan:false};}
+   else if(reason==='open-plan'){layout.assistant=false;lastNoAssistant={nav:true,plan:true};}
+   else layout.nav=false;
+ }
+ if(usableWidth()<=1000){layout.plan=false;if(layout.assistant)layout.nav=false;}
+ // On 1440 desktops, retain the plan + assistant combination by letting the plan adapt within a safe range.
+ // Dragging wider than that range releases the plan instead of shrinking the learning canvas.
+ if(layout.assistant&&layout.plan&&effectivePlanWidth()<MIN_PLAN_WIDTH)layout.plan=false;
+ if(layout.assistant&&availableCanvas()<MIN_CANVAS){
+   // An oversized assistant first releases the most expendable left pane.
+   if(layout.plan)layout.plan=false;
+   if(availableCanvas()<MIN_CANVAS&&layout.nav)layout.nav=false;
+   if(availableCanvas()<MIN_CANVAS)chatWidth=Math.max(380,Math.min(chatWidth,usableWidth()-NAV_MINI-MIN_CANVAS));
+ }
+ // Without the assistant, preserve a usable reading canvas too.
+ if(!layout.assistant&&layout.plan&&availableCanvas()<MIN_CANVAS)layout.plan=false;
+ app.classList.toggle('nav-mini',!layout.nav);
+ app.classList.toggle('hide-course',!layout.plan);
+ app.classList.toggle('assistant-hidden',!layout.assistant);
+ app.classList.toggle('reading-only',focusMode==='reading');
+ app.classList.toggle('chat-focus',focusMode==='chat');
+ app.style.setProperty('--chat-w',Math.round(chatWidth)+'px');
+ app.style.setProperty('--plan-w',layout.plan?effectivePlanWidth()+'px':standardPlanWidth()+'px');
+ updateButtons();
+}
+function openAssistant(){
+ if(route==='dashboard')showRoute('workspace');
+ if(!layout.assistant){lastNoAssistant={nav:layout.nav,plan:layout.plan};layout.assistant=true;}
+ focusMode=null;applyLayout('open-assistant');
+}
+function closeAssistant(){
+ if(layout.assistant){layout.assistant=false;layout.nav=lastNoAssistant.nav;layout.plan=lastNoAssistant.plan;}
+ focusMode=null;applyLayout('close-assistant');
+}
+function toggleChat(){if(layout.assistant)closeAssistant();else openAssistant()}
+function toggleNavigation(){
+ layout.nav=!layout.nav;
+ if(layout.nav&&layout.assistant&&layout.plan)layout.plan=false;
+ if(layout.assistant)lastNoAssistant={nav:layout.nav,plan:false};
+ else lastNoAssistant={nav:layout.nav,plan:layout.plan};
+ try{localStorage.setItem('studyplan-demo-nav-v6',layout.nav?'full':'mini')}catch(e){}
+ focusMode=null;applyLayout('open-nav');
+}
+function togglePlan(){
+ layout.plan=!layout.plan;
+ if(layout.plan&&layout.assistant&&layout.nav){layout.assistant=false;}
+ lastNoAssistant={nav:layout.nav,plan:layout.plan};
+ focusMode=null;applyLayout('open-plan');
+}
+function focusReading(){
+ if(focusMode==='reading'){focusMode=null;layout={nav:false,plan:true,assistant:true};}
+ else {focusMode='reading';layout={nav:false,plan:false,assistant:false};}
+ applyLayout('focus');toast(focusMode==='reading'?'专注阅读：主体内容最大化':'已恢复阶段学习布局');
+}
+function focusChat(){
+ if(focusMode==='chat'){focusMode=null;layout={nav:false,plan:true,assistant:true};}
+ else {focusMode='chat';layout={nav:false,plan:false,assistant:true};}
+ applyLayout('focus');
+}
+function resetLayout(){focusMode=null;layout={nav:false,plan:true,assistant:true};chatWidth=430;lastNoAssistant={nav:true,plan:true};applyLayout('reset');toast('已恢复默认学习布局')}
+$('#sessionTrigger').onclick=()=>$('#sessionPopover').classList.toggle('open');
+$('#newChatSide').onclick=newSession;
+$('#sendBtn').onclick=send;
+$('#chatInput').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};
+$('#clearDraft').onclick=()=>{pendingRef=null;$('#draftContext').classList.remove('show')};
+$('#contextPin').onclick=()=>jumpTo(route==='summary'?'summary':route==='practice'?'practice':'goal');
+$('#closeCourse').onclick=togglePlan;
+$('#openCourse').onclick=togglePlan;
+$('#toggleAssistant').onclick=toggleChat;
+$('#chatClose').onclick=closeAssistant;
+$('#chatFocus').onclick=focusChat;
+$('#navToggle').onclick=toggleNavigation;
+$('#themeNote')?.addEventListener('click',()=>toast('V6.3 · 导航 11% / 计划 17% / 正文 72%'));
+$('#profileButton').onclick=()=>toast('原型演示 · 学习者 123');
+const menu=$('#modesMenu');
+$('#moreModes').onclick=()=>{menu.hidden=!menu.hidden;$('#moreModes').setAttribute('aria-expanded',String(!menu.hidden))};
+function hideMenu(){menu.hidden=true;$('#moreModes').setAttribute('aria-expanded','false')}
+$('#focusRead').onclick=()=>{hideMenu();focusReading()};
+$('#focusChatMode').onclick=()=>{hideMenu();focusChat()};
+$('#resetLayout').onclick=()=>{hideMenu();resetLayout()};
+document.addEventListener('pointerdown',e=>{if(!e.target.closest('.more-wrapper'))hideMenu()});
+$('#learningPin').addEventListener('click',e=>{const b=e.target.closest('[data-jump]');if(b)jumpTo(b.dataset.jump)});
+$$('.rail-btn[data-route],.brandmark').forEach(b=>b.onclick=()=>showRoute(b.dataset.route));
+$('#chatInput').oninput=e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,130)+'px'};
+$('#mainContent').addEventListener('click',e=>{
+ const el=e.target.closest('[data-action],[data-session],[data-ask],[data-route],[data-version]');if(!el)return;
+ const a=el.dataset.action;
+ if(el.dataset.version){summaryVer=Number(el.dataset.version);render();return}
+ if(el.dataset.route){showRoute(el.dataset.route);return}
+ if(el.dataset.session){setSession(el.dataset.session);showRoute('workspace');openAssistant();return}
+ if(el.dataset.ask){askAbout(el.dataset.ask,el.dataset.target);return}
+ if(a==='continue'||a==='path'||a==='advice'){if(a==='path'&&Number(el.dataset.step)>2)toast('此阶段未开始，演示返回当前学习节点');setNode(a==='advice'?'rrf':'hybrid');return}
+ if(a==='quiz'){askAbout('混合检索理解自测','goal');return}
+ if(a==='summary'||a==='practice'||a==='conversations'){showRoute(a);return}
+ if(a==='new-session'){newSession();return}
+ if(a==='edit-summary'){toast('原型演示：正式版本将在此创建总结草稿 v4');return}
+ if(a==='evidence'){const url=$('#githubUrl')?.value.trim(),log=$('#evidenceText')?.value.trim();if(!url||!log){toast('请填写仓库地址与模拟运行记录');return}practiceStatus='saved';toast('模拟证据已暂存，未执行真实验收');render();return}
+});
+$('#mainContent').addEventListener('input',e=>{if(e.target.id==='convSearch')$('#convResults').innerHTML=conversationRows(e.target.value)});
+$('#courseNav').addEventListener('click',e=>{const item=e.target.closest('[data-node],[data-route]');if(!item)return;if(item.dataset.node)setNode(item.dataset.node);else showRoute(item.dataset.route)});
+$('#chatPanel').addEventListener('click',e=>{const b=e.target.closest('[data-quick]');if(b){$('#chatInput').value=b.dataset.quick;$('#chatInput').focus()}});
+// A genuine pointer drag: mouse movement alone must never resize the assistant.
+const grip=$('#resizeGrip');
+grip.addEventListener('pointerdown',e=>{
+ if(e.button!==0||!layout.assistant||route==='dashboard'||focusMode==='chat')return;
+ e.preventDefault();dragState={pointerId:e.pointerId};grip.setPointerCapture(e.pointerId);
+ document.body.classList.add('is-resizing');
+});
+grip.addEventListener('pointermove',e=>{
+ if(!dragState||dragState.pointerId!==e.pointerId)return;
+ let desired=Math.min(620,Math.max(380,usableWidth()-e.clientX));
+ chatWidth=desired;applyLayout('resize');
+});
+function finishResize(){if(!dragState)return;dragState=null;document.body.classList.remove('is-resizing');try{localStorage.setItem('studyplan-demo-chat-width-v6',chatWidth)}catch(e){}}
+grip.addEventListener('pointerup',finishResize);grip.addEventListener('pointercancel',finishResize);
+grip.addEventListener('lostpointercapture',finishResize);
+grip.addEventListener('dblclick',()=>{chatWidth=430;applyLayout('resize');toast('助手宽度已恢复默认')});
+grip.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();chatWidth=Math.max(380,Math.min(620,chatWidth+(e.key==='ArrowLeft'?20:-20)));applyLayout('resize');try{localStorage.setItem('studyplan-demo-chat-width-v6',chatWidth)}catch(err){}}});
+
+// V6.2: hover/focus full status without expanding rows; tooltip is outside the scrollable plan.
+const planTip=$('#planTooltip'),courseList=$('#courseNav');
+function showPlanTip(el){
+ const msg=el?.dataset?.tooltip;if(!msg)return;
+ planTip.textContent=msg;planTip.classList.add('is-visible');
+ const r=el.getBoundingClientRect(),tw=planTip.offsetWidth,th=planTip.offsetHeight;
+ const left=Math.min(innerWidth-tw-12,Math.max(12,r.right+10));
+ const top=Math.max(10,Math.min(innerHeight-th-10,r.top+(r.height-th)/2));
+ planTip.style.left=left+'px';planTip.style.top=top+'px';
+}
+function hidePlanTip(){planTip.classList.remove('is-visible')}
+courseList.addEventListener('pointerover',e=>{const row=e.target.closest('.side-item[data-tooltip]');if(row)showPlanTip(row)});
+courseList.addEventListener('pointerout',e=>{const row=e.target.closest('.side-item[data-tooltip]');if(row&&!row.contains(e.relatedTarget))hidePlanTip()});
+courseList.addEventListener('focusin',e=>{const row=e.target.closest('.side-item[data-tooltip]');if(row)showPlanTip(row)});
+courseList.addEventListener('focusout',hidePlanTip);
+courseList.addEventListener('scroll',hidePlanTip,{passive:true});
+courseList.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.side-item[data-node],.course-archive .side-item[data-route]')){e.preventDefault();e.target.click()}});
+
+addEventListener('resize',()=>{hidePlanTip();applyLayout('viewport')});
+applyLayout('initial');
+render();
+</script>
+</body>
+</html>

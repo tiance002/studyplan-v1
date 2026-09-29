@@ -315,8 +315,8 @@
         }
       },
       "post": {
-        "summary": "Enter Session",
-        "operationId": "enter_session",
+        "summary": "Enter Development Session",
+        "operationId": "enter_development_session",
         "requestBody": {
           "content": {
             "application/json": {
@@ -334,6 +334,141 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SessionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "summary": "Register",
+        "operationId": "register_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "summary": "Login",
+        "operationId": "login_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CredentialsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "summary": "Logout",
+        "operationId": "logout_user",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workspace": {
+      "get": {
+        "summary": "Workspace",
+        "operationId": "get_learning_workspace",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningWorkspaceView"
                 }
               }
             }
@@ -469,6 +604,29 @@
         ],
         "title": "AiRunStatus",
         "description": "对外可授权的运行状态。\n\n图跑成功 **不自动等于**知识已学会、任务已验收。"
+      },
+      "CredentialsRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 2,
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 12,
+            "minLength": 6,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "CredentialsRequest"
       },
       "DraftDecision": {
         "type": "string",
@@ -653,6 +811,48 @@
         ],
         "title": "KnowledgeExtensionView",
         "description": "阶段预置扩展知识（默认 1–2 项，**可选**，不强制完成）。"
+      },
+      "KnowledgeNodeType": {
+        "type": "string",
+        "enum": [
+          "concept",
+          "skill",
+          "tool",
+          "pattern",
+          "domain"
+        ],
+        "title": "KnowledgeNodeType",
+        "description": "知识节点粒度。"
+      },
+      "LearningWorkspaceView": {
+        "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/PlanView"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/StageWorkspaceView"
+            },
+            "type": "array",
+            "title": "Stages"
+          },
+          "completed_units": {
+            "type": "integer",
+            "title": "Completed Units"
+          },
+          "total_units": {
+            "type": "integer",
+            "title": "Total Units"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plan",
+          "stages",
+          "completed_units",
+          "total_units"
+        ],
+        "title": "LearningWorkspaceView"
       },
       "ModelSettingsClear": {
         "properties": {
@@ -1118,6 +1318,91 @@
         "title": "PlanView",
         "description": "已确认路线视图（当前版本或历史版本）。"
       },
+      "PracticeTaskStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "designing",
+          "prompt_reviewed",
+          "implementing",
+          "awaiting_evidence",
+          "accepted",
+          "skipped"
+        ],
+        "title": "PracticeTaskStatus",
+        "description": "实践任务状态。\n\n``PROMPT_REVIEWED`` 只表示实现思路通过评审，\n**不等于**真实功能已被验收。"
+      },
+      "PracticeTaskView": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "practice_project_id": {
+            "type": "string",
+            "title": "Practice Project Id"
+          },
+          "stable_key": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Stable Key"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Title"
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Goal"
+          },
+          "in_scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "In Scope"
+          },
+          "out_scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Out Scope"
+          },
+          "acceptance": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Acceptance"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PracticeTaskStatus"
+          },
+          "thinking_prompts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Thinking Prompts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "practice_project_id",
+          "stable_key",
+          "title",
+          "goal",
+          "acceptance",
+          "status"
+        ],
+        "title": "PracticeTaskView",
+        "description": "实践任务。``thinking_prompts`` 在实践工作台重点展示。\n\n``acceptance`` 必填：没有「怎样算完成」的任务无法验收。"
+      },
       "PreferenceMode": {
         "type": "string",
         "enum": [
@@ -1238,6 +1523,16 @@
             },
             "type": "array",
             "title": "Project Ids"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "default": ""
+          },
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token",
+            "default": ""
           }
         },
         "type": "object",
@@ -1358,6 +1653,50 @@
         "title": "StageResourceRole",
         "description": "阶段与资源的关系角色（设计 §2.2）。\n\n每阶段默认一条 ``PRIMARY`` 主线；``SUPPLEMENT`` 补充前置，\n``REFERENCE`` 为对照/延伸。**不计算章节重叠率或覆盖率。**"
       },
+      "StageWorkspaceView": {
+        "properties": {
+          "stage": {
+            "$ref": "#/components/schemas/StageDetail"
+          },
+          "units": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceUnitView"
+            },
+            "type": "array",
+            "title": "Units"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/WorkspaceNodeView"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "resources": {
+            "items": {
+              "$ref": "#/components/schemas/StageResourceAssignmentView"
+            },
+            "type": "array",
+            "title": "Resources"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeTaskView"
+            },
+            "type": "array",
+            "title": "Tasks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stage",
+          "units",
+          "nodes",
+          "resources",
+          "tasks"
+        ],
+        "title": "StageWorkspaceView"
+      },
       "TaskLinkView": {
         "properties": {
           "stage_id": {
@@ -1408,6 +1747,17 @@
         ],
         "title": "UnitLinkView"
       },
+      "UnitProgress": {
+        "type": "string",
+        "enum": [
+          "not_started",
+          "in_progress",
+          "completed",
+          "skipped"
+        ],
+        "title": "UnitProgress",
+        "description": "学习单元的进度状态。\n\n注意：``SKIPPED`` ≠ ``COMPLETED``，二者都不代表掌握。"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -1447,6 +1797,104 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WorkspaceNodeView": {
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "stable_key": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Stable Key"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Title"
+          },
+          "node_type": {
+            "$ref": "#/components/schemas/KnowledgeNodeType"
+          },
+          "objectives": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Objectives"
+          },
+          "source_status": {
+            "type": "string",
+            "maxLength": 32,
+            "title": "Source Status"
+          },
+          "prerequisite_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Prerequisite Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node_id",
+          "stable_key",
+          "title",
+          "node_type",
+          "source_status"
+        ],
+        "title": "WorkspaceNodeView"
+      },
+      "WorkspaceUnitView": {
+        "properties": {
+          "unit_id": {
+            "type": "string",
+            "title": "Unit Id"
+          },
+          "stable_key": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Stable Key"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Title"
+          },
+          "objectives": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Objectives"
+          },
+          "rubric_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Rubric Version"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/UnitProgress",
+            "default": "not_started"
+          },
+          "node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Node Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "unit_id",
+          "stable_key",
+          "title",
+          "rubric_version"
+        ],
+        "title": "WorkspaceUnitView"
       },
       "PlanSnapshot": {
         "description": "**完整版本快照**：阶段 + 单元/任务链接 + 主线资源 + 扩展知识。\n\n草案视图（``PlanDraftView``）与已发布视图（``PlanView``）共用本结构，\n保证「用户确认的结构」与「发布的结构」字段一致。",
@@ -1522,18 +1970,6 @@
         "title": "PlanSnapshot",
         "type": "object"
       },
-      "KnowledgeNodeType": {
-        "description": "知识节点粒度。",
-        "enum": [
-          "concept",
-          "skill",
-          "tool",
-          "pattern",
-          "domain"
-        ],
-        "title": "KnowledgeNodeType",
-        "type": "string"
-      },
       "NodeView": {
         "description": "知识卡片。``source_status`` 如实区分 AI 草稿与已验证来源。",
         "properties": {
@@ -1576,17 +2012,6 @@
         ],
         "title": "NodeView",
         "type": "object"
-      },
-      "UnitProgress": {
-        "description": "学习单元的进度状态。\n\n注意：``SKIPPED`` ≠ ``COMPLETED``，二者都不代表掌握。",
-        "enum": [
-          "not_started",
-          "in_progress",
-          "completed",
-          "skipped"
-        ],
-        "title": "UnitProgress",
-        "type": "string"
       },
       "UnitView": {
         "properties": {
@@ -1751,91 +2176,6 @@
           "mode"
         ],
         "title": "PreferenceUpdateRequest",
-        "type": "object"
-      },
-      "PracticeTaskStatus": {
-        "description": "实践任务状态。\n\n``PROMPT_REVIEWED`` 只表示实现思路通过评审，\n**不等于**真实功能已被验收。",
-        "enum": [
-          "pending",
-          "designing",
-          "prompt_reviewed",
-          "implementing",
-          "awaiting_evidence",
-          "accepted",
-          "skipped"
-        ],
-        "title": "PracticeTaskStatus",
-        "type": "string"
-      },
-      "PracticeTaskView": {
-        "description": "实践任务。``thinking_prompts`` 在实践工作台重点展示。\n\n``acceptance`` 必填：没有「怎样算完成」的任务无法验收。",
-        "properties": {
-          "task_id": {
-            "title": "Task Id",
-            "type": "string"
-          },
-          "practice_project_id": {
-            "title": "Practice Project Id",
-            "type": "string"
-          },
-          "stable_key": {
-            "maxLength": 128,
-            "title": "Stable Key",
-            "type": "string"
-          },
-          "title": {
-            "maxLength": 200,
-            "title": "Title",
-            "type": "string"
-          },
-          "goal": {
-            "maxLength": 2000,
-            "title": "Goal",
-            "type": "string"
-          },
-          "in_scope": {
-            "items": {
-              "type": "string"
-            },
-            "title": "In Scope",
-            "type": "array"
-          },
-          "out_scope": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Out Scope",
-            "type": "array"
-          },
-          "acceptance": {
-            "items": {
-              "type": "string"
-            },
-            "minItems": 1,
-            "title": "Acceptance",
-            "type": "array"
-          },
-          "status": {
-            "$ref": "#/components/schemas/PracticeTaskStatus"
-          },
-          "thinking_prompts": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Thinking Prompts",
-            "type": "array"
-          }
-        },
-        "required": [
-          "task_id",
-          "practice_project_id",
-          "stable_key",
-          "title",
-          "goal",
-          "acceptance",
-          "status"
-        ],
-        "title": "PracticeTaskView",
         "type": "object"
       },
       "SummaryCreateRequest": {

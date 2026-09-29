@@ -31,6 +31,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Callable, Mapping, Sequence
 
 from app.agent_workflows.graphs import graph_thread_id, run_planning_graph
@@ -135,6 +136,7 @@ class PlanService:
         source_pack_version: int = 0,
         planning_executor: PlanningExecutorPort | None = None,
         runtime_factory: Callable[[AuthContext,str,str],PlanningRuntime] | None = None,
+        run_timeout_seconds: int = 1800,
     ) -> None:
         self._repo = repository
         self._runs = runs
@@ -147,6 +149,7 @@ class PlanService:
         self._source_pack_key = source_pack_key
         self._source_pack_version = source_pack_version
         self._publication = PlanPublicationService(repository)
+        self._run_timeout_seconds = run_timeout_seconds
 
     # ------------------------------------------------------------------ 生成
 
@@ -241,6 +244,21 @@ class PlanService:
         run = self._runs.get_run(project_id=project_id, run_id=run_id)
         if run is None:
             raise NotFoundError("运行不存在")
+        # Sync generation is bounded. A process interruption cannot leave its
+        # projection running forever. Unknown paid dispatch is never retried.
+        if (run.status in {AiRunStatus.RUNNING, AiRunStatus.QUEUED} and run.updated_at
+                and (datetime.now(timezone.utc) - run.updated_at).total_seconds() > self._run_timeout_seconds):
+            try:
+                return self._runs.update_run(project_id=project_id, run_id=run_id,
+                    expected_version=run.version, status=AiRunStatus.RECONCILIATION_REQUIRED.value,
+                    next_action=AiRunNextAction.RECONCILE.value, result_ref=run.result_ref,
+                    error_class="run_interrupted")
+            except ConflictError:
+                # Generation may have completed concurrently with this read.
+                latest = self._runs.get_run(project_id=project_id, run_id=run_id)
+                if latest is None:
+                    raise NotFoundError("运行不存在") from None
+                return latest
         return run
 
     def get_draft(self, *, scope: AuthContext, project_id: str, draft_id: str) -> DraftBundle:

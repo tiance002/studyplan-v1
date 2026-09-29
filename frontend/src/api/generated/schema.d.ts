@@ -142,8 +142,76 @@ export interface paths {
         /** Get Session */
         get: operations["get_session"];
         put?: never;
-        /** Enter Session */
-        post: operations["enter_session"];
+        /** Enter Development Session */
+        post: operations["enter_development_session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register */
+        post: operations["register_user"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login */
+        post: operations["login_user"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout */
+        post: operations["logout_user"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Workspace */
+        get: operations["get_learning_workspace"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -187,6 +255,13 @@ export interface components {
          * @enum {string}
          */
         AiRunStatus: "queued" | "running" | "waiting_user" | "succeeded" | "failed" | "cancelled" | "reconciliation_required";
+        /** CredentialsRequest */
+        CredentialsRequest: {
+            /** Username */
+            username: string;
+            /** Password */
+            password: string;
+        };
         /**
          * DraftDecision
          * @description 等待用户时的三种决定。
@@ -297,6 +372,22 @@ export interface components {
              * @default 0
              */
             order_index: number;
+        };
+        /**
+         * KnowledgeNodeType
+         * @description 知识节点粒度。
+         * @enum {string}
+         */
+        KnowledgeNodeType: "concept" | "skill" | "tool" | "pattern" | "domain";
+        /** LearningWorkspaceView */
+        LearningWorkspaceView: {
+            plan: components["schemas"]["PlanView"];
+            /** Stages */
+            stages: components["schemas"]["StageWorkspaceView"][];
+            /** Completed Units */
+            completed_units: number;
+            /** Total Units */
+            total_units: number;
         };
         /** ModelSettingsClear */
         ModelSettingsClear: {
@@ -500,6 +591,42 @@ export interface components {
             approved_at?: string | null;
         };
         /**
+         * PracticeTaskStatus
+         * @description 实践任务状态。
+         *
+         *     ``PROMPT_REVIEWED`` 只表示实现思路通过评审，
+         *     **不等于**真实功能已被验收。
+         * @enum {string}
+         */
+        PracticeTaskStatus: "pending" | "designing" | "prompt_reviewed" | "implementing" | "awaiting_evidence" | "accepted" | "skipped";
+        /**
+         * PracticeTaskView
+         * @description 实践任务。``thinking_prompts`` 在实践工作台重点展示。
+         *
+         *     ``acceptance`` 必填：没有「怎样算完成」的任务无法验收。
+         */
+        PracticeTaskView: {
+            /** Task Id */
+            task_id: string;
+            /** Practice Project Id */
+            practice_project_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Goal */
+            goal: string;
+            /** In Scope */
+            in_scope?: string[];
+            /** Out Scope */
+            out_scope?: string[];
+            /** Acceptance */
+            acceptance: string[];
+            status: components["schemas"]["PracticeTaskStatus"];
+            /** Thinking Prompts */
+            thinking_prompts?: string[];
+        };
+        /**
          * PreferenceMode
          * @description 资源形态偏好。
          * @enum {string}
@@ -559,6 +686,16 @@ export interface components {
         SessionView: {
             /** Project Ids */
             project_ids: string[];
+            /**
+             * Username
+             * @default
+             */
+            username: string;
+            /**
+             * Csrf Token
+             * @default
+             */
+            csrf_token: string;
         };
         /**
          * StageDetail
@@ -624,6 +761,18 @@ export interface components {
          * @enum {string}
          */
         StageResourceRole: "primary" | "supplement" | "reference";
+        /** StageWorkspaceView */
+        StageWorkspaceView: {
+            stage: components["schemas"]["StageDetail"];
+            /** Units */
+            units: components["schemas"]["WorkspaceUnitView"][];
+            /** Nodes */
+            nodes: components["schemas"]["WorkspaceNodeView"][];
+            /** Resources */
+            resources: components["schemas"]["StageResourceAssignmentView"][];
+            /** Tasks */
+            tasks: components["schemas"]["PracticeTaskView"][];
+        };
         /** TaskLinkView */
         TaskLinkView: {
             /** Stage Id */
@@ -642,6 +791,14 @@ export interface components {
             /** Order Index */
             order_index: number;
         };
+        /**
+         * UnitProgress
+         * @description 学习单元的进度状态。
+         *
+         *     注意：``SKIPPED`` ≠ ``COMPLETED``，二者都不代表掌握。
+         * @enum {string}
+         */
+        UnitProgress: "not_started" | "in_progress" | "completed" | "skipped";
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -654,6 +811,39 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** WorkspaceNodeView */
+        WorkspaceNodeView: {
+            /** Node Id */
+            node_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            node_type: components["schemas"]["KnowledgeNodeType"];
+            /** Objectives */
+            objectives?: string[];
+            /** Source Status */
+            source_status: string;
+            /** Prerequisite Ids */
+            prerequisite_ids?: string[];
+        };
+        /** WorkspaceUnitView */
+        WorkspaceUnitView: {
+            /** Unit Id */
+            unit_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Objectives */
+            objectives?: string[];
+            /** Rubric Version */
+            rubric_version: number;
+            /** @default not_started */
+            progress: components["schemas"]["UnitProgress"];
+            /** Node Ids */
+            node_ids?: string[];
         };
         /**
          * PlanSnapshot
@@ -691,12 +881,6 @@ export interface components {
             source_pack_version: number;
         };
         /**
-         * KnowledgeNodeType
-         * @description 知识节点粒度。
-         * @enum {string}
-         */
-        KnowledgeNodeType: "concept" | "skill" | "tool" | "pattern" | "domain";
-        /**
          * NodeView
          * @description 知识卡片。``source_status`` 如实区分 AI 草稿与已验证来源。
          */
@@ -713,14 +897,6 @@ export interface components {
             /** Source Status */
             source_status: string;
         };
-        /**
-         * UnitProgress
-         * @description 学习单元的进度状态。
-         *
-         *     注意：``SKIPPED`` ≠ ``COMPLETED``，二者都不代表掌握。
-         * @enum {string}
-         */
-        UnitProgress: "not_started" | "in_progress" | "completed" | "skipped";
         /** UnitView */
         UnitView: {
             /** Unit Id */
@@ -790,42 +966,6 @@ export interface components {
              * @default 0
              */
             expected_version: number;
-        };
-        /**
-         * PracticeTaskStatus
-         * @description 实践任务状态。
-         *
-         *     ``PROMPT_REVIEWED`` 只表示实现思路通过评审，
-         *     **不等于**真实功能已被验收。
-         * @enum {string}
-         */
-        PracticeTaskStatus: "pending" | "designing" | "prompt_reviewed" | "implementing" | "awaiting_evidence" | "accepted" | "skipped";
-        /**
-         * PracticeTaskView
-         * @description 实践任务。``thinking_prompts`` 在实践工作台重点展示。
-         *
-         *     ``acceptance`` 必填：没有「怎样算完成」的任务无法验收。
-         */
-        PracticeTaskView: {
-            /** Task Id */
-            task_id: string;
-            /** Practice Project Id */
-            practice_project_id: string;
-            /** Stable Key */
-            stable_key: string;
-            /** Title */
-            title: string;
-            /** Goal */
-            goal: string;
-            /** In Scope */
-            in_scope?: string[];
-            /** Out Scope */
-            out_scope?: string[];
-            /** Acceptance */
-            acceptance: string[];
-            status: components["schemas"]["PracticeTaskStatus"];
-            /** Thinking Prompts */
-            thinking_prompts?: string[];
         };
         /** SummaryCreateRequest */
         SummaryCreateRequest: {
@@ -1066,7 +1206,7 @@ export interface operations {
             };
         };
     };
-    enter_session: {
+    enter_development_session: {
         parameters: {
             query?: never;
             header?: never;
@@ -1086,6 +1226,124 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SessionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_user: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CredentialsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    login_user: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CredentialsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    logout_user: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    get_learning_workspace: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearningWorkspaceView"];
                 };
             };
             /** @description Validation Error */

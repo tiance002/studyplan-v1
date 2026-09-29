@@ -22,6 +22,7 @@ from app.api.v1.model_settings_routes import router as model_settings_router
 from app.api.v1.routes import router as v1_router
 from app.api.v1.schemas import V1_SCHEMAS
 from app.api.v1.session_routes import router as session_router
+from app.api.v1.workspace_routes import router as workspace_router
 from app.application.container import AppContainer
 from app.composition import build_container
 from app.core.config import get_settings
@@ -69,7 +70,7 @@ def _install_error_handling(application: FastAPI) -> None:
 
     @application.exception_handler(RequestValidationError)
     async def _validation_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-        if request.url.path == "/api/v1/model-settings":
+        if request.url.path == "/api/v1/model-settings" or request.url.path.startswith("/api/v1/auth/"):
             # FastAPI's default validation response includes raw input, including
             # malformed API Key objects. Never echo input/ctx on this secret route.
             return JSONResponse(status_code=422,content={"detail":[
@@ -142,7 +143,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
         allow_origins=list(settings.allow_origins),
         allow_credentials=settings.cors_allow_credentials,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type", "Idempotency-Key", "X-Request-Id"],
+        allow_headers=["Content-Type", "Idempotency-Key", "X-Request-Id", "X-CSRF-Token"],
     )
 
     # 容器：测试可注入；否则按配置装配（缺 DATABASE_URL 时业务端点返回 503）。
@@ -166,6 +167,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
 
     application.include_router(v1_router)
     application.include_router(session_router)
+    application.include_router(workspace_router)
     application.include_router(model_settings_router)
     # 契约模型注册必须在返回前完成（否则导出的 OpenAPI 缺业务 DTO）。
     _install_contract_schemas(application)

@@ -49,6 +49,8 @@ def get_auth_context(
     context = container.sessions.resolve(token) if token else None
     if context is None:
         raise UnauthenticatedError()
+    from app.api.v1.session_routes import check_csrf
+    check_csrf(request, container)
     return context
 
 

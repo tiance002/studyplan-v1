@@ -39,6 +39,7 @@ __all__ = [
 #: 运行失败类别 → 面向用户的稳定说明（不回显模型原文，不泄露图内部节点名）。
 _RUN_ERROR_MESSAGES: dict[str, str] = {
     "planning_failed": "计划生成未通过校验，可重新发起",
+    "run_interrupted": "生成运行已中断或超时，需要核对结果；不会自动再次调用模型",
 }
 
 

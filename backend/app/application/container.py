@@ -21,7 +21,9 @@ from dataclasses import dataclass
 from app.application.model_settings import ModelSettingsService
 from app.application.plan_service import PlanService
 from app.core.config import Settings
+from app.ports.browser_auth import BrowserAuthPort
 from app.ports.sessions import SessionResolverPort
+from app.ports.workspace import WorkspaceReaderPort
 
 __all__ = ["AppContainer"]
 
@@ -38,3 +40,5 @@ class AppContainer:
     sessions: SessionResolverPort
     plan_service: PlanService | None = None
     model_settings_service: ModelSettingsService | None = None
+    browser_auth: BrowserAuthPort | None = None
+    workspace_reader: WorkspaceReaderPort | None = None

@@ -273,6 +273,14 @@ class ProgressPatchRequest(BaseModel):
     expected_version: int = Field(..., ge=1)
 
 
+class WorkspaceNodeView(NodeView):
+    prerequisite_ids: list[str] = Field(default_factory=list)
+
+
+class WorkspaceUnitView(UnitView):
+    node_ids: list[str] = Field(default_factory=list)
+
+
 class PreferenceView(BaseModel):
     scope: PreferenceScope
     scope_ref: str = Field(...)
@@ -314,6 +322,21 @@ class PracticeTaskView(BaseModel):
     acceptance: list[str] = Field(..., min_length=1)
     status: PracticeTaskStatus
     thinking_prompts: list[str] = Field(default_factory=list)
+
+
+class StageWorkspaceView(BaseModel):
+    stage: StageDetail
+    units: list[WorkspaceUnitView]
+    nodes: list[WorkspaceNodeView]
+    resources: list[StageResourceAssignmentView]
+    tasks: list[PracticeTaskView]
+
+
+class LearningWorkspaceView(BaseModel):
+    plan: PlanView
+    stages: list[StageWorkspaceView]
+    completed_units: int
+    total_units: int
 
 
 class SummaryCreateRequest(BaseModel):

@@ -4,14 +4,15 @@
 > 从零生成完整知识体系 → 路径草案 → 用户确认 → 单元资料 → 自主总结 → AI 引导反馈 →
 > 阶段实践任务 → 用户写实现思路 → AI 评审 → 导出 Prompt → 外部实现 → 证据验收 → 进入下一阶段。
 
-**当前状态：B0 完成 + B1 骨架就绪。**
-本仓库交付的是**可运行的架构骨架 + 冻结的领域契约 + 三张 LangGraph 小图的可测试逻辑**，
-不是一套已打通真实云模型、真实资源池的完整产品。完成度以 `docs/` 下的里程碑文档为准。
+**当前状态：B2-V 发布闭环、B3 模型设置及 B3-F1 正式前端已实现。**
+可操作链路：注册 / 登录 → 学习目标 → 生成草案 → 编辑 / 确认 → 正式学习路径 → 阶段工作区。认证、计划、知识目录及进度读取使用真实 PostgreSQL；React 前端以 V6.3 为视觉基线。
 
-- **B0（已完成）**：本机新旧工程审计、复用清单、来源溯源、架构决策记录 →
-  `docs/migration/`、`docs/adr/`
-- **B1（骨架已就绪）**：领域契约、三张小图逻辑、队列/迁移基线、`/api/v1` 骨架、可独立测试
-- **B2–B6**：见 `docs/design-package/IMPLEMENTATION_PLAN.md` §5
+本轮验收使用明确标识的 Fake LLM 预设 Agent 场景，不代表任意领域规划质量，也没有新增云模型验收。已有 OpenAI 兼容模型与加密个人配置仍可使用。会话、总结写入、评审及实践提交尚未开放。
+
+- 基线与保全记录：`docs/reviews/B3-F1-baseline.md`
+- 启动配置：`docs/development/B3-F1-startup.md`
+- 验收证据及延期项：`docs/acceptance/B3-F1-report.md`
+- 开发版本边界：`docs/development/B3-F1-scope.md`
 
 ---
 
@@ -41,48 +42,33 @@
 
 ## 3. 快速开始
 
-### 3.1 跑测试（不需要 Postgres / 网络 / langgraph）
+已有本地数据库与 `.env` 时，先安装依赖并运行增量迁移，再分别启动后端和前端：
 
-```bash
-bash scripts/test.sh
-# 或手动：
-python -m venv .venv
-.venv/Scripts/python -m pip install pytest fastapi httpx
-.venv/Scripts/python -m pytest
+```powershell
+.venv/Scripts/python -m pip install -e ".[dev,agent,postgres]"
+npm --prefix frontend ci
+./scripts/b3f1-dev.ps1 -Migrate
+# 两个终端分别执行
+./scripts/b3f1-dev.ps1 -Demo
+./scripts/b3f1-dev.ps1 -Frontend
 ```
 
-预期：**104 passed**（unit + contract + integration；Postgres 组自动跳过）。
+打开 `http://127.0.0.1:5173`，点击开放注册。用户名支持中文，密码 6–12 个 Unicode 码点，无邀请码。注册自动创建服务端归属学习空间；无需输入 actor、project 或访问令牌。
 
-### 3.2 启动 API（骨架模式，内存仓储 + Fake 模型）
+Demo 仅对启动进程设置 Fake LLM，不修改 `.env` 云模型凭据。使用已有真实模型配置时启动 `./scripts/b3f1-dev.ps1`，前端模型设置仍有效；模型调用可能产生服务商费用。
 
-```bash
-bash scripts/dev.sh
-# 或手动：
-cd backend
-LLM_PROVIDER=fake STUDYPLAN_REPOSITORY_BACKEND=memory ../.venv/Scripts/python -m uvicorn app.main:app --port 8000
+新环境的 PostgreSQL 角色、独立业务/Checkpoint 数据库与环境变量配置见 `docs/development/B3-F1-startup.md`。应用角色无 DDL；迁移角色与应用角色必须分离。未配置 PG 时仅能访问健康检查和接口文档，不能伪造成功业务结果。
+
+```powershell
+.venv/Scripts/python -m pytest -o addopts= -q -rs
+.venv/Scripts/python -m ruff check backend
+.venv/Scripts/python -m mypy backend/app
+npm --prefix frontend test
+npm --prefix frontend run build
+node scripts/b3f1-browser.cjs
 ```
 
-打开 http://127.0.0.1:8000/docs 查看 OpenAPI（骨架阶段仅有 `/healthz`，
-业务路由属 B2）。
-
-### 3.3 切换到真实 PostgreSQL（B2 起可用）
-
-```bash
-cp .env.example .env      # 填写三个 DSN（业务库 / checkpoint 库 / 迁移 DSN）
-cd backend
-../.venv/Scripts/python -m pip install -e ".[postgres]"
-STUDYPLAN_MIGRATION_DSN=... ../.venv/Scripts/python -m alembic upgrade head
-```
-
-⚠️ 迁移角色与应用角色**必须不同**（`studyplan_app` 无 DDL），见 `docs/adr/ADR-0003`。
-
-### 3.4 前端
-
-```bash
-cd frontend
-npm install
-npm run dev        # http://localhost:5173，/api 代理到 127.0.0.1:8000
-```
+浏览器脚本需要运行中的两端服务和本机 Chrome；自动注册独立验收用户，截图写入 `output/playwright/`。后端 PG 测试只使用 `studyplan_test_*` 临时库，无可用安全 PG 时显式 SKIP。最终结果见验收报告。
 
 ## 4. 三张图
 
@@ -105,27 +91,11 @@ prompt_review_graph      START -> load_task_from_revision -> review_once -> vali
 > 这一顺序是刻意的 —— 图的**转移逻辑**（修复上限、interrupt 位置、取消语义）
 > 才是风险所在，把它写成可独立测试的纯函数风险最低。
 
-## B3 本地最小闭环
+## B3 模型能力
 
-当前支持 OpenAI 兼容 `/chat/completions`、实际 StateGraph 与独立 PG Checkpointer、Python 工程入门领域包和路线前端。同步生成完成后返回 HTTP 202；尚不是异步 worker。
+已有 OpenAI 兼容 `/chat/completions`、实际 StateGraph、独立 PG Checkpointer 与 Python 工程入门领域包。同步生成完成后返回 HTTP 202，尚无异步 worker。运行异常进入 failed；超过配置预算仍未完成的运行在下一次读取时进入待核对，不自动再次调用模型。
 
-在 `.env` 填写 `LLM_MODEL_ID`、`LLM_API_KEY`；`LLM_BASE_URL` 默认 `https://api.openai.com/v1`，可替换为服务商的兼容地址。密钥只放本机 `.env`。本机数据库已准备时不要重复运行安装脚本。
-
-```powershell
-# 两个终端分别运行
-./scripts/b3-dev.ps1
-./scripts/b3-dev.ps1 -Frontend
-# 使用真实模型生成并确认一条验证路线（会产生模型费用，独立验证项目）
-./scripts/b3-verify-live.ps1
-```
-
-打开 `http://127.0.0.1:5173`，使用 `.env` 的 `STUDYPLAN_LOCAL_SESSION_TOKEN` 进入本地学习空间。填写目标、生成、编辑并保存、确认或取消。模型结果未知时进入待对账，不自动重发。当前单用户会话不替代后续注册登录。
-
-“模型设置”允许当前会话用户保存自己的 OpenAI 兼容 Base URL、模型名称和 API Key；密钥在服务端加密，不会在 GET 响应或页面刷新后回显。生成时固定个人配置修订，未配置个人模型时明确使用部署默认模型。部署时须通过 secret 提供稳定的 `MODEL_SETTINGS_ENCRYPTION_KEY`（Fernet 密钥），并用 `LLM_ALLOWED_HOSTS` 管理允许访问的兼容服务商主机；当前初始名单是 `api.openai.com,api.deepseek.com`。云端还需正式用户认证和阻断私网/metadata 的出口策略；仓库的本地单用户会话不能直接用于公开多用户部署。当前不支持 Anthropic `/messages` 协议。
-
-新环境先安装依赖 `pip install -e ".[dev,agent,postgres]"`，准备本机 PG 的迁移/应用角色，复制 `.env.example` 并清空其中 `DATABASE_URL`，再运行 `.venv/Scripts/python scripts/b3-setup-local.py`。脚本只创建随机新库与 checkpoint 角色，已有配置会拒绝重复建库；生产安装应使用独立管理凭据执行迁移和播种。
-
-验收范围及真实模型待验项见 `docs/acceptance/B3-minimal-report.md`。
+个人 Base URL、模型名称和 API Key 由服务端按当前用户隔离保存；密钥加密且 GET 不回显。须通过部署 secret 提供稳定的 Fernet `MODEL_SETTINGS_ENCRYPTION_KEY`，并用 `LLM_ALLOWED_HOSTS` 管理允许的服务商。当前不支持 Anthropic `/messages` 协议。真实模型历史证据见 `docs/acceptance/B3-minimal-report.md`；本轮未运行付费云模型验证。
 
 ## 5. 仓库结构
 
