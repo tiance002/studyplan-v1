@@ -79,12 +79,34 @@ def test_truncated_provider_output_is_not_success():
     from app.ports.llm import LLMFailure
 
     with httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200, json={
+        "usage": {"prompt_tokens": 123, "completion_tokens": 8000},
         "choices": [{"finish_reason": "length", "message": {"content": '{"outline_ref":"o","sections":[]}'}}]
     }))) as client:
         provider = OpenAICompatibleLLM(base_url="https://provider.example", api_key="test", model="test", client=client)
         result = provider.generate_structured(purpose="planning.outline", payload={}, schema_name="OutlineV1", run_id="r", attempt_id="a")
     assert isinstance(result, LLMFailure)
     assert result.error_class == "provider_output_truncated"
+    assert result.input_tokens == 123 and result.output_tokens == 8000
+
+
+@pytest.mark.parametrize("base_url,model,disabled", [
+    ("https://api.deepseek.com/v1", "deepseek-flash", True),
+    ("https://api.deepseek.com", "deepseek-flash", True),
+    ("https://provider.example/v1", "deepseek-flash", False),
+    ("https://api.deepseek.com", "custom-model", False),
+])
+def test_official_deepseek_flash_json_planning_does_not_default_to_high_thinking(base_url, model, disabled):
+    requests = []
+    def reply(request):
+        requests.append(json.loads(request.content))
+        return httpx.Response(200, json={"choices": [{"message": {"content": '{"outline_ref":"o","sections":[]}'}}]})
+    with httpx.Client(transport=httpx.MockTransport(reply)) as client:
+        OpenAICompatibleLLM(base_url=base_url, api_key="test", model=model, client=client).generate_structured(
+            purpose="planning.outline", payload={}, schema_name="OutlineV1", run_id="test", attempt_id="test")
+    if disabled:
+        assert requests[0]["thinking"] == {"type": "disabled"}
+    else:
+        assert "thinking" not in requests[0]
 
 
 def test_outside_selected_pack_reference_becomes_search_only():

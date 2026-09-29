@@ -155,3 +155,37 @@ def test_mock_http_provider_full_pg_graph_and_ledger(migrated_db, checkpoint_db)
             with psycopg.connect(migrated_db.migrator_dsn) as conn:
                 attempts = conn.execute("SELECT status,input_tokens,output_tokens FROM ai_provider_attempts WHERE run_id IN (SELECT run_id FROM ai_runs WHERE project_id=%s)", (session["project_ids"][0],)).fetchall()
                 assert attempts == [("succeeded", 100, 200)] * 3
+
+
+def test_failed_provider_usage_is_retained_and_replayed_without_dispatch(migrated_db):
+    import json
+
+    import httpx
+    from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
+    from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
+
+    settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
+    container = build_container(settings)
+    client = TestClient(create_app(container))
+    session = client.post("/api/v1/auth/register", json={"username": "失败用量留存", "password": "123456"}).json()
+    draft, _, _, _ = route(client, session, "Agent开发")
+    with psycopg.connect(migrated_db.migrator_dsn) as conn:
+        run_id = conn.execute("SELECT run_id FROM plan_drafts WHERE draft_id=%s", (draft["draft_id"],)).fetchone()[0]
+    calls = []
+    def reply(request):
+        calls.append(request)
+        return httpx.Response(200, json={"usage": {"prompt_tokens": 111, "completion_tokens": 8000},
+                                        "choices": [{"finish_reason": "length", "message": {"content": ""}}]})
+    with httpx.Client(transport=httpx.MockTransport(reply)) as transport:
+        ledger = PgAttemptLLM(migrated_db.app_dsn, OpenAICompatibleLLM(base_url="https://mock.example/v1", api_key="test", model="mock", client=transport))
+        args = dict(purpose="planning.outline", payload={"_project_id": session["project_ids"][0]}, schema_name="OutlineV1", run_id=run_id, attempt_id=run_id + ":usage-check")
+        first = ledger.generate_structured(**args)
+        replay = ledger.generate_structured(**args)
+        assert first.error_class == replay.error_class == "provider_output_truncated"
+        assert first.input_tokens == replay.input_tokens == 111
+        assert first.output_tokens == replay.output_tokens == 8000
+        assert len(calls) == 1
+        with psycopg.connect(migrated_db.migrator_dsn) as conn:
+            row = conn.execute("SELECT status,input_tokens,output_tokens,response_payload FROM ai_provider_attempts WHERE attempt_id=%s", (args["attempt_id"],)).fetchone()
+            assert row[:3] == ("failed", 111, 8000)
+            assert "reasoning_content" not in json.dumps(row[3])

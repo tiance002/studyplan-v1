@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import time
 from typing import Any
+from urllib.parse import urlsplit
 
 import httpx
 from app.core.errors import AppError
@@ -26,7 +27,7 @@ class OpenAICompatibleLLM:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
-        self.prompt_version = "b3f2-v1"
+        self.prompt_version = "b3f2-v2"
         self.timeout = timeout
         self.max_tokens = max_tokens
         self.client = client
@@ -58,6 +59,11 @@ class OpenAICompatibleLLM:
                     {"role":"user","content":json.dumps({"purpose":purpose,"schema":schema_name,
                      "field_shape":SHAPES[purpose],"domain_pack":payload.get("domain_pack",self.domain_pack),"context":context},ensure_ascii=False)}],
                     response_format={"type":"json_object"}, max_tokens=self.max_tokens)
+        # Official DeepSeek Flash defaults to high thinking, sharing the output
+        # budget with the JSON. Planning uses the explicit non-thinking mode;
+        # do not send provider-specific options to other compatible endpoints.
+        if urlsplit(self.base_url).hostname == "api.deepseek.com" and self.model == "deepseek-flash":
+            body["thinking"] = {"type": "disabled"}
         started = time.monotonic()
         # Validate approved origin/public DNS before sending Authorization. This is
         # outside the dispatch exception handling: a rejection made no HTTP call.
@@ -78,19 +84,27 @@ class OpenAICompatibleLLM:
             return LLMFailure("provider_server_unknown", "Provider outcome unknown", dispatch_unknown=True)
         if response.status_code != 200:
             return LLMFailure("provider_http_rejected", "Provider rejected the request", details={"status":response.status_code})
+        failed_usage: dict[str, Any] = {"latency_ms": int((time.monotonic()-started)*1000)}
         try:
             data = response.json()
+            usage = data.get("usage") or {}
+            for field, key in (("input_tokens", "prompt_tokens"), ("output_tokens", "completion_tokens")):
+                value = usage.get(key) if isinstance(usage, dict) else None
+                failed_usage[field] = value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else None
             choice = data["choices"][0]
             if choice.get("finish_reason") == "length":
-                return LLMFailure("provider_output_truncated", "The complete route exceeded the model output limit")
+                message = choice.get("message") or {}
+                return LLMFailure("provider_output_truncated", "The complete route exceeded the model output limit",
+                                  details={"finish_reason": "length", "model_id": str(data.get("model") or self.model),
+                                           "content_chars": len(message.get("content") or ""),
+                                           "reasoning_chars": len(message.get("reasoning_content") or "")}, **failed_usage)
             content = json.loads(choice["message"]["content"])
             if not isinstance(content, dict) or not set(SHAPES[purpose]).issubset(content):
                 raise ValueError("Invalid structured response")
-            usage = data.get("usage") or {}
             return LLMResult(payload=content, model_id=str(data.get("model") or self.model),
-                             provider="openai_compatible", input_tokens=int(usage.get("prompt_tokens") or 0),
-                             output_tokens=int(usage.get("completion_tokens") or 0),
+                             provider="openai_compatible", input_tokens=failed_usage["input_tokens"] or 0,
+                             output_tokens=failed_usage["output_tokens"] or 0,
                              latency_ms=int((time.monotonic()-started)*1000),
                              finish_reason=choice.get("finish_reason") or "stop")
         except (ValueError, KeyError, IndexError, TypeError):
-            return LLMFailure("provider_invalid_json", "Provider returned invalid structured JSON")
+            return LLMFailure("provider_invalid_json", "Provider returned invalid structured JSON", **failed_usage)

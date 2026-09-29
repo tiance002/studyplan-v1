@@ -4,9 +4,11 @@
 
 The active branch is `codex/b3-f1`. The master history was integrated in `6a187fc`; implementation through `ce81eaa` is already on GitHub. See [M0-integration.md](M0-integration.md) for exact parents, merge-base, migration hashes and eighteen conflict resolutions. No force push, migration rewrite or published-history deletion was used.
 
-Local development migration 0010 and immutable Agent/Python resource seeding succeeded on 2026-09-29. The frontend remains at http://127.0.0.1:5173 and the backend at http://127.0.0.1:8000 in explicitly labelled **Fake mode**. No cloud request was made by this acceptance run.
+Local development migration 0010 and immutable Agent/Python resource seeding succeeded on 2026-09-29. The frontend remains at http://127.0.0.1:5173 and the backend at http://127.0.0.1:8000. Initial browser acceptance used explicitly labelled Fake mode. After explicit authorization the backend switched to the configured real provider for one cloud run; see the separate report below.
 
 Final backend regression: **428 passed in 235.59s, exit 0**, no skips or warnings reported. Frontend build, four layout tests, auth browser regression and workspace browser regression all exited 0. Ruff passed and mypy checked 83 source files successfully. Exact commands and raw logs are linked in [M5-commands.md](M5-commands.md).
+
+After the authorized cloud run exposed truncation, the v2 provider/usage repair passed **433 backend tests in 174.40s, exit 0**. This later raw log and investigation are under `live/`; cloud success remains unproven.
 
 ## Requirement evidence
 
@@ -32,9 +34,9 @@ The full reviewed chapter metadata and support list are in [Resource-index.md](R
 
 ## Cloud verification
 
-- Status: **NOT RUN — awaiting explicit authorization**.
+- Status: **RUN — FAILED**. The user authorized one bounded run; three requests returned truncated responses, no draft was published. See [live/Cloud-verification.md](live/Cloud-verification.md).
 - Configured deployment model: `deepseek-flash`; maximum output tokens per response: 8000.
-- Requests/tokens charged by this acceptance run: 0/0; provider invoice cost: not available, no cloud calls made.
+- Cloud requests: 3. Actual token counts and invoice cost are unavailable in the old failure records, not zero. The initial Fake browser acceptance made no cloud calls. The repaired adapter retains failure usage for future attempts.
 - A full normal route uses outline, structure and practice requests. Existing repair policy permits up to two additional content-repair requests. Approval/replay must not call the model again. Any authorized cloud run must report actual ledger counts and tokens; it cannot be described using the Fake/MockTransport example.
 
 ## P2/P3 deferrals

@@ -49,6 +49,11 @@ class LLMFailure:
     retryable: bool = False
     dispatch_unknown: bool = False
     details: dict[str, object] = field(default_factory=dict)
+    # Rejected/truncated responses can still be billed. None means unavailable,
+    # never zero inferred from a missing usage object.
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    latency_ms: int | None = None
 
 
 class LLMDispatchUnknownError(RuntimeError):

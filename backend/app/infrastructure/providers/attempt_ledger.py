@@ -45,6 +45,8 @@ class PgAttemptLLM:
                     return LLMResult(**row["response_payload"])
                 if row["status"] in {"dispatched","reconciliation_required"}:
                     return LLMFailure("attempt_dispatch_unknown", "Reconcile before another dispatch", dispatch_unknown=True)
+                if row["response_payload"]:
+                    return LLMFailure(**row["response_payload"])
                 return LLMFailure(row["error_class"] or "attempt_failed", "Retained failed attempt")
         # Connection commits 'dispatched' BEFORE the external network request.
         try:
@@ -59,7 +61,7 @@ class PgAttemptLLM:
         else:
             cause = None
         status = "succeeded" if isinstance(result, LLMResult) else ("reconciliation_required" if result.dispatch_unknown else "failed")
-        data = asdict(result) if isinstance(result, LLMResult) else None
+        data = asdict(result)
         try:
             with self._connect(project_id) as conn:
                 cursor = conn.execute("""UPDATE ai_provider_attempts SET status=%s,response_payload=%s,

@@ -1,0 +1,13 @@
+{
+  "run_id": "run_54bd4bd11b6047709c581a3e530d43b6",
+  "status": "failed",
+  "next_action": "retry",
+  "version": 2,
+  "result_ref": null,
+  "error": {
+    "code": "planning_failed",
+    "message": "计划生成未通过校验，可重新发起",
+    "request_id": "req_cf55d59f63ed46538070",
+    "details": {}
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "configured_model": "deepseek-flash",
+  "source": "deployment",
+  "max_output_tokens_per_request": 8000,
+  "run": {
+    "run_id": "run_54bd4bd11b6047709c581a3e530d43b6",
+    "status": "failed",
+    "next_action": "retry",
+    "error_class": "planning_failed",
+    "result_ref": null,
+    "thread_id": "run_54bd4bd11b6047709c581a3e530d43b6::1"
+  },
+  "request_count": 3,
+  "attempts": [
+    {
+      "attempt_id": "run_54bd4bd11b6047709c581a3e530d43b6:outline:1",
+      "model_id": "deepseek-flash",
+      "prompt_version": "b3f2-v1",
+      "status": "failed",
+      "input_tokens": null,
+      "output_tokens": null,
+      "latency_ms": null,
+      "error_class": "provider_output_truncated"
+    },
+    {
+      "attempt_id": "run_54bd4bd11b6047709c581a3e530d43b6:structure:1",
+      "model_id": "deepseek-flash",
+      "prompt_version": "b3f2-v1",
+      "status": "failed",
+      "input_tokens": null,
+      "output_tokens": null,
+      "latency_ms": null,
+      "error_class": "provider_output_truncated"
+    },
+    {
+      "attempt_id": "run_54bd4bd11b6047709c581a3e530d43b6:practice:1",
+      "model_id": "deepseek-flash",
+      "prompt_version": "b3f2-v1",
+      "status": "failed",
+      "input_tokens": null,
+      "output_tokens": null,
+      "latency_ms": null,
+      "error_class": "provider_output_truncated"
+    }
+  ],
+  "input_tokens": null,
+  "output_tokens": null,
+  "invoice_cost": null,
+  "cost_note": "Provider invoice/pricing not supplied by completion response; no cost estimate claimed."
+}
