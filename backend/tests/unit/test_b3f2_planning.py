@@ -97,3 +97,11 @@ def test_outside_selected_pack_reference_becomes_search_only():
     resource = result["outline"]["sections"][0]["resources"][0]
     assert resource["source_ref"] == "" and resource["section_refs"] == []
     assert resource["fallback_search_terms"]
+
+
+def test_provider_shape_examples_are_domain_neutral_and_describe_resource_links():
+    from app.infrastructure.providers.openai_compatible import SHAPES
+
+    assert "python" not in json.dumps(SHAPES)
+    resource = SHAPES["planning.outline"]["sections"][0]["resources"][0]
+    assert {"node_keys", "source_ref", "section_refs", "source_version", "fallback_search_terms"} <= resource.keys()

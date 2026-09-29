@@ -11,9 +11,9 @@ from app.ports.llm import LLMFailure, LLMNotDispatchedError, LLMResult
 
 # Explicit shapes used by the existing deterministic validators/projection.
 SHAPES: dict[str, dict[str, Any]] = {
- "planning.outline": {"outline_ref":"outline:1", "sections":[{"stable_key":"stage.foundation","title":"","section_kind":"foundation","objective":"","resources":[],"extensions":[]}]},
- "planning.structure": {"nodes":[{"stable_key":"node.python","title":"","node_type":"concept","objectives":[]}],"units":[{"stable_key":"unit.python","title":"","section_key":"stage.foundation","order_index":0,"node_keys":["node.python"],"objectives":[],"rubric":{}}],"relations":[{"from_stable_key":"node.python","to_stable_key":"node.cli","relation_type":"prerequisite"}]},
- "planning.practice": {"stable_key":"practice.python","title":"","idea":"","tasks":[{"stable_key":"task.cli","title":"","goal":"","section_key":"stage.foundation","order_index":0,"in_scope":[],"out_scope":[],"acceptance":["concrete check"],"knowledge_links":[{"node_stable_key":"node.python","role":"core"}]}],"task_knowledge_links":[{"task_stable_key":"task.cli","node_stable_key":"node.python","role":"core"}]},
+ "planning.outline": {"outline_ref":"outline:1", "sections":[{"stable_key":"stage.foundation","title":"","section_kind":"foundation","objective":"","resources":[{"role":"primary","source_ref":"","section_refs":[],"source_version":0,"order_index":0,"node_keys":["node.topic"],"fallback_search_terms":[]}],"extensions":[]}]},
+ "planning.structure": {"nodes":[{"stable_key":"node.topic","title":"","node_type":"concept","objectives":[]}],"units":[{"stable_key":"unit.topic","title":"","section_key":"stage.foundation","order_index":0,"node_keys":["node.topic"],"objectives":[],"rubric":{}}],"relations":[{"from_stable_key":"node.topic","to_stable_key":"node.topic.child","relation_type":"prerequisite"}]},
+ "planning.practice": {"stable_key":"practice.route","title":"","idea":"","tasks":[{"stable_key":"task.topic","title":"","goal":"","section_key":"stage.foundation","order_index":0,"in_scope":[],"out_scope":[],"acceptance":["concrete check"],"knowledge_links":[{"node_stable_key":"node.topic","role":"core"}]}],"task_knowledge_links":[{"task_stable_key":"task.topic","node_stable_key":"node.topic","role":"core"}]},
 }
 SHAPES["planning.repair"] = {
     **SHAPES["planning.structure"],

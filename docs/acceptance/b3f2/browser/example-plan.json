@@ -1,0 +1,2661 @@
+{
+  "provider": "fake",
+  "cloudVerification": "NOT RUN",
+  "run": {
+    "run_id": "run_1fbaea7b59524b928c5dadebc2363f09",
+    "status": "waiting_user",
+    "next_action": "review_draft",
+    "version": 2,
+    "result_ref": "drf_1bc9b265500747c89750518b3ffda1e7",
+    "error": null
+  },
+  "draft": {
+    "project_id": "lpr_c0e966589cc94262ab41cd2e4ad44d99",
+    "revision": 1,
+    "goal_snapshot": "学习 Agent 开发，完成一个可验收的知识助手",
+    "stages": [
+      {
+        "stage_id": "stg_912cba6e473f4afe8d752d26d3383e28",
+        "stable_key": "stage.environment",
+        "title": "开发环境与必要语言基础",
+        "section_kind": "foundation",
+        "order_index": 0,
+        "objective": "建立可复现环境，编写可测试的工具函数"
+      },
+      {
+        "stage_id": "stg_976589b2e1b34eb1855d3ba7b9fbea83",
+        "stable_key": "stage.model_api",
+        "title": "LLM API 与 Prompt",
+        "section_kind": "core",
+        "order_index": 1,
+        "objective": "调用模型并明确输入、输出、token 与错误边界"
+      },
+      {
+        "stage_id": "stg_fa406cca963c4fada0a3e1c35023ef3d",
+        "stable_key": "stage.tools",
+        "title": "工具调用与结构化输出",
+        "section_kind": "core",
+        "order_index": 2,
+        "objective": "把模型决策转为受校验的工具请求"
+      },
+      {
+        "stage_id": "stg_8be245c5413d45718c17fd57bcce783d",
+        "stable_key": "stage.langgraph",
+        "title": "LangGraph 编排基础",
+        "section_kind": "core",
+        "order_index": 3,
+        "objective": "用状态、节点与路由组织可恢复的 Agent 流程"
+      },
+      {
+        "stage_id": "stg_8c08a9e1f0c349e18f5230b1e01b2163",
+        "stable_key": "stage.rag",
+        "title": "RAG 检索与知识库",
+        "section_kind": "core",
+        "order_index": 4,
+        "objective": "构建有来源依据的检索生成链路"
+      },
+      {
+        "stage_id": "stg_f5b58c179160490fbf08e784f8f5b10c",
+        "stable_key": "stage.mcp",
+        "title": "MCP 协议与工具接入",
+        "section_kind": "core",
+        "order_index": 5,
+        "objective": "理解客户端、服务端及工具上下文边界"
+      },
+      {
+        "stage_id": "stg_e4ac887382d64f50be8f7b8ac692b0ef",
+        "stable_key": "stage.context",
+        "title": "记忆与上下文管理基础",
+        "section_kind": "core",
+        "order_index": 6,
+        "objective": "保持有限会话状态并控制上下文长度"
+      },
+      {
+        "stage_id": "stg_0be0a70d44b54fb1b0d369fc9c0c4883",
+        "stable_key": "stage.reliability",
+        "title": "Agent 评价与可靠性",
+        "section_kind": "core",
+        "order_index": 7,
+        "objective": "用固定评价集检验正确性、失败处理和成本边界"
+      },
+      {
+        "stage_id": "stg_648088f065ea4188923576662a89af3a",
+        "stable_key": "stage.capstone",
+        "title": "综合实践：可验收的知识助手",
+        "section_kind": "practice",
+        "order_index": 8,
+        "objective": "集成工具、检索、编排与评价，交付可复现应用"
+      }
+    ],
+    "unit_links": [
+      {
+        "stage_id": "stg_912cba6e473f4afe8d752d26d3383e28",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuZW52aXJvbm1lbnQiXQ",
+        "order_index": 0
+      },
+      {
+        "stage_id": "stg_976589b2e1b34eb1855d3ba7b9fbea83",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubW9kZWxfYXBpIl0",
+        "order_index": 1
+      },
+      {
+        "stage_id": "stg_fa406cca963c4fada0a3e1c35023ef3d",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UudG9vbHMiXQ",
+        "order_index": 2
+      },
+      {
+        "stage_id": "stg_8be245c5413d45718c17fd57bcce783d",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubGFuZ2dyYXBoIl0",
+        "order_index": 3
+      },
+      {
+        "stage_id": "stg_8c08a9e1f0c349e18f5230b1e01b2163",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UucmFnIl0",
+        "order_index": 4
+      },
+      {
+        "stage_id": "stg_f5b58c179160490fbf08e784f8f5b10c",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubWNwIl0",
+        "order_index": 5
+      },
+      {
+        "stage_id": "stg_e4ac887382d64f50be8f7b8ac692b0ef",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuY29udGV4dCJd",
+        "order_index": 6
+      },
+      {
+        "stage_id": "stg_0be0a70d44b54fb1b0d369fc9c0c4883",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UucmVsaWFiaWxpdHkiXQ",
+        "order_index": 7
+      },
+      {
+        "stage_id": "stg_648088f065ea4188923576662a89af3a",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuY2Fwc3RvbmUiXQ",
+        "order_index": 8
+      }
+    ],
+    "task_links": [
+      {
+        "stage_id": "stg_912cba6e473f4afe8d752d26d3383e28",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suZW52aXJvbm1lbnQiXQ",
+        "order_index": 0
+      },
+      {
+        "stage_id": "stg_976589b2e1b34eb1855d3ba7b9fbea83",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subW9kZWxfYXBpIl0",
+        "order_index": 1
+      },
+      {
+        "stage_id": "stg_fa406cca963c4fada0a3e1c35023ef3d",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sudG9vbHMiXQ",
+        "order_index": 2
+      },
+      {
+        "stage_id": "stg_8be245c5413d45718c17fd57bcce783d",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subGFuZ2dyYXBoIl0",
+        "order_index": 3
+      },
+      {
+        "stage_id": "stg_8c08a9e1f0c349e18f5230b1e01b2163",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sucmFnIl0",
+        "order_index": 4
+      },
+      {
+        "stage_id": "stg_f5b58c179160490fbf08e784f8f5b10c",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subWNwIl0",
+        "order_index": 5
+      },
+      {
+        "stage_id": "stg_e4ac887382d64f50be8f7b8ac692b0ef",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suY29udGV4dCJd",
+        "order_index": 6
+      },
+      {
+        "stage_id": "stg_0be0a70d44b54fb1b0d369fc9c0c4883",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sucmVsaWFiaWxpdHkiXQ",
+        "order_index": 7
+      },
+      {
+        "stage_id": "stg_648088f065ea4188923576662a89af3a",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suY2Fwc3RvbmUiXQ",
+        "order_index": 8
+      }
+    ],
+    "stage_resources": [
+      {
+        "assignment_id": "asg_577a3e9e763e427c8f447515be3171cb",
+        "stage_id": "stg_912cba6e473f4afe8d752d26d3383e28",
+        "role": "primary",
+        "creator": "Python Software Foundation",
+        "source_ref": "src_agent_python_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_venv_v1",
+            "order_index": 0,
+            "title": "12. Virtual Environments and Packages",
+            "url": "https://docs.python.org/3.14/tutorial/venv.html",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_functions_v1",
+            "order_index": 1,
+            "title": "4. More Control Flow Tools",
+            "url": "https://docs.python.org/3.14/tutorial/controlflow.html",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMSJd",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMiJd"
+        ],
+        "title": "The Python Tutorial",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "Python 3.14",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_d7c48d8a5846488cb05ffd07e2ac2693",
+        "stage_id": "stg_976589b2e1b34eb1855d3ba7b9fbea83",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_models_v1",
+            "order_index": 0,
+            "title": "Models",
+            "url": "https://docs.langchain.com/oss/python/langchain/models",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_messages_v1",
+            "order_index": 1,
+            "title": "Messages",
+            "url": "https://docs.langchain.com/oss/python/langchain/messages",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpIl0",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjEiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjIiXQ"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_432bb2e0c5b542228b409b3d4d58bb96",
+        "stage_id": "stg_fa406cca963c4fada0a3e1c35023ef3d",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_tools_v1",
+            "order_index": 2,
+            "title": "Tools",
+            "url": "https://docs.langchain.com/oss/python/langchain/tools",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_structured_v1",
+            "order_index": 3,
+            "title": "Structured output",
+            "url": "https://docs.langchain.com/oss/python/langchain/structured-output",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMSJd",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMiJd"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_4f2319df00c14e8a8417f00c15605dbe",
+        "stage_id": "stg_8be245c5413d45718c17fd57bcce783d",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_graph_v1",
+            "order_index": 4,
+            "title": "Graph API overview",
+            "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_persistence_v1",
+            "order_index": 5,
+            "title": "Persistence",
+            "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoIl0",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjEiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjIiXQ"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_2b99f9e977484f5db2403ca1eea8c770",
+        "stage_id": "stg_8c08a9e1f0c349e18f5230b1e01b2163",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_retrieval_v1",
+            "order_index": 6,
+            "title": "Retrieval",
+            "url": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnIl0",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjEiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjIiXQ"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_cc2b56b0185b4a96b8f6b38332993857",
+        "stage_id": "stg_f5b58c179160490fbf08e784f8f5b10c",
+        "role": "primary",
+        "creator": "Model Context Protocol maintainers",
+        "source_ref": "src_agent_mcp_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_mcp_v1",
+            "order_index": 0,
+            "title": "Architecture overview",
+            "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwIl0",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjEiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjIiXQ"
+        ],
+        "title": "Model Context Protocol documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "Protocol 2026-07-28",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_4f32407628b44b4db85210f738aae587",
+        "stage_id": "stg_e4ac887382d64f50be8f7b8ac692b0ef",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_persistence_v1",
+            "order_index": 5,
+            "title": "Persistence",
+            "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_memory_v1",
+            "order_index": 7,
+            "title": "Short-term memory",
+            "url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dCJd",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4xIl0",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4yIl0"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_01e8ec0729764d83855d847566ab11ec",
+        "stage_id": "stg_0be0a70d44b54fb1b0d369fc9c0c4883",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_evaluation_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_evaluation_v1",
+            "order_index": 0,
+            "title": "LangSmith Evaluation",
+            "url": "https://docs.langchain.com/langsmith/evaluation",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMSJd",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMiJd"
+        ],
+        "title": "LangSmith Evaluation documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_9071151816f6445c9e0923769974c70c",
+        "stage_id": "stg_648088f065ea4188923576662a89af3a",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_agents_v1",
+            "order_index": 9,
+            "title": "Agents",
+            "url": "https://docs.langchain.com/oss/python/langchain/agents",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_testing_v1",
+            "order_index": 8,
+            "title": "Test",
+            "url": "https://docs.langchain.com/oss/python/langchain/test",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMSJd",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMiJd"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      }
+    ],
+    "extensions": [],
+    "source_pack_key": "agent.application",
+    "source_pack_version": 1,
+    "draft_id": "drf_1bc9b265500747c89750518b3ffda1e7",
+    "status": "awaiting_approval",
+    "draft_hash": "a3ac2f2abc74e70a9fd97e4b3291e6005bc93e1dc548c9cd276ebb9baa3e4b5f",
+    "version": 1,
+    "validation_warnings": []
+  },
+  "plan": {
+    "project_id": "lpr_c0e966589cc94262ab41cd2e4ad44d99",
+    "revision": 1,
+    "goal_snapshot": "学习 Agent 开发，完成一个可验收的知识助手",
+    "stages": [
+      {
+        "stage_id": "stg_819675c83c0a460ca47c5ab4fa334a20",
+        "stable_key": "stage.environment",
+        "title": "开发环境与必要语言基础",
+        "section_kind": "foundation",
+        "order_index": 0,
+        "objective": "建立可复现环境，编写可测试的工具函数"
+      },
+      {
+        "stage_id": "stg_f787d6454e924c45ac759b47049404d1",
+        "stable_key": "stage.model_api",
+        "title": "LLM API 与 Prompt",
+        "section_kind": "core",
+        "order_index": 1,
+        "objective": "调用模型并明确输入、输出、token 与错误边界"
+      },
+      {
+        "stage_id": "stg_a51be70a9fff41bea93cfbd40600e411",
+        "stable_key": "stage.tools",
+        "title": "工具调用与结构化输出",
+        "section_kind": "core",
+        "order_index": 2,
+        "objective": "把模型决策转为受校验的工具请求"
+      },
+      {
+        "stage_id": "stg_27ab7f6a1ede4cf09094576eb4e419bf",
+        "stable_key": "stage.langgraph",
+        "title": "LangGraph 编排基础",
+        "section_kind": "core",
+        "order_index": 3,
+        "objective": "用状态、节点与路由组织可恢复的 Agent 流程"
+      },
+      {
+        "stage_id": "stg_170c532fb143409cb014066e7024a518",
+        "stable_key": "stage.rag",
+        "title": "RAG 检索与知识库",
+        "section_kind": "core",
+        "order_index": 4,
+        "objective": "构建有来源依据的检索生成链路"
+      },
+      {
+        "stage_id": "stg_c1ee7e6cdf494f4689f218771585e41f",
+        "stable_key": "stage.mcp",
+        "title": "MCP 协议与工具接入",
+        "section_kind": "core",
+        "order_index": 5,
+        "objective": "理解客户端、服务端及工具上下文边界"
+      },
+      {
+        "stage_id": "stg_34895f80fad74896a7fadf0883bc1685",
+        "stable_key": "stage.context",
+        "title": "记忆与上下文管理基础",
+        "section_kind": "core",
+        "order_index": 6,
+        "objective": "保持有限会话状态并控制上下文长度"
+      },
+      {
+        "stage_id": "stg_c014577aaa0243dc894a1eab9ee0b7d3",
+        "stable_key": "stage.reliability",
+        "title": "Agent 评价与可靠性",
+        "section_kind": "core",
+        "order_index": 7,
+        "objective": "用固定评价集检验正确性、失败处理和成本边界"
+      },
+      {
+        "stage_id": "stg_b49ea03bcd4349c59321b8c2c97895a2",
+        "stable_key": "stage.capstone",
+        "title": "综合实践：可验收的知识助手",
+        "section_kind": "practice",
+        "order_index": 8,
+        "objective": "集成工具、检索、编排与评价，交付可复现应用"
+      }
+    ],
+    "unit_links": [
+      {
+        "stage_id": "stg_819675c83c0a460ca47c5ab4fa334a20",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuZW52aXJvbm1lbnQiXQ",
+        "order_index": 0
+      },
+      {
+        "stage_id": "stg_f787d6454e924c45ac759b47049404d1",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubW9kZWxfYXBpIl0",
+        "order_index": 1
+      },
+      {
+        "stage_id": "stg_a51be70a9fff41bea93cfbd40600e411",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UudG9vbHMiXQ",
+        "order_index": 2
+      },
+      {
+        "stage_id": "stg_27ab7f6a1ede4cf09094576eb4e419bf",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubGFuZ2dyYXBoIl0",
+        "order_index": 3
+      },
+      {
+        "stage_id": "stg_170c532fb143409cb014066e7024a518",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UucmFnIl0",
+        "order_index": 4
+      },
+      {
+        "stage_id": "stg_c1ee7e6cdf494f4689f218771585e41f",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubWNwIl0",
+        "order_index": 5
+      },
+      {
+        "stage_id": "stg_34895f80fad74896a7fadf0883bc1685",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuY29udGV4dCJd",
+        "order_index": 6
+      },
+      {
+        "stage_id": "stg_c014577aaa0243dc894a1eab9ee0b7d3",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UucmVsaWFiaWxpdHkiXQ",
+        "order_index": 7
+      },
+      {
+        "stage_id": "stg_b49ea03bcd4349c59321b8c2c97895a2",
+        "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuY2Fwc3RvbmUiXQ",
+        "order_index": 8
+      }
+    ],
+    "task_links": [
+      {
+        "stage_id": "stg_819675c83c0a460ca47c5ab4fa334a20",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suZW52aXJvbm1lbnQiXQ",
+        "order_index": 0
+      },
+      {
+        "stage_id": "stg_f787d6454e924c45ac759b47049404d1",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subW9kZWxfYXBpIl0",
+        "order_index": 1
+      },
+      {
+        "stage_id": "stg_a51be70a9fff41bea93cfbd40600e411",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sudG9vbHMiXQ",
+        "order_index": 2
+      },
+      {
+        "stage_id": "stg_27ab7f6a1ede4cf09094576eb4e419bf",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subGFuZ2dyYXBoIl0",
+        "order_index": 3
+      },
+      {
+        "stage_id": "stg_170c532fb143409cb014066e7024a518",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sucmFnIl0",
+        "order_index": 4
+      },
+      {
+        "stage_id": "stg_c1ee7e6cdf494f4689f218771585e41f",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subWNwIl0",
+        "order_index": 5
+      },
+      {
+        "stage_id": "stg_34895f80fad74896a7fadf0883bc1685",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suY29udGV4dCJd",
+        "order_index": 6
+      },
+      {
+        "stage_id": "stg_c014577aaa0243dc894a1eab9ee0b7d3",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sucmVsaWFiaWxpdHkiXQ",
+        "order_index": 7
+      },
+      {
+        "stage_id": "stg_b49ea03bcd4349c59321b8c2c97895a2",
+        "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suY2Fwc3RvbmUiXQ",
+        "order_index": 8
+      }
+    ],
+    "stage_resources": [
+      {
+        "assignment_id": "asg_a5e1e2e191df4699ac71b2d8a028fab5",
+        "stage_id": "stg_819675c83c0a460ca47c5ab4fa334a20",
+        "role": "primary",
+        "creator": "Python Software Foundation",
+        "source_ref": "src_agent_python_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_venv_v1",
+            "order_index": 0,
+            "title": "12. Virtual Environments and Packages",
+            "url": "https://docs.python.org/3.14/tutorial/venv.html",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_functions_v1",
+            "order_index": 1,
+            "title": "4. More Control Flow Tools",
+            "url": "https://docs.python.org/3.14/tutorial/controlflow.html",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMSJd",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMiJd"
+        ],
+        "title": "The Python Tutorial",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "Python 3.14",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_26ae071771b042dd8455dc043191aed8",
+        "stage_id": "stg_f787d6454e924c45ac759b47049404d1",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_models_v1",
+            "order_index": 0,
+            "title": "Models",
+            "url": "https://docs.langchain.com/oss/python/langchain/models",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_messages_v1",
+            "order_index": 1,
+            "title": "Messages",
+            "url": "https://docs.langchain.com/oss/python/langchain/messages",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpIl0",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjEiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjIiXQ"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_f970bc527378424d9b095f176fd94cd7",
+        "stage_id": "stg_a51be70a9fff41bea93cfbd40600e411",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_tools_v1",
+            "order_index": 2,
+            "title": "Tools",
+            "url": "https://docs.langchain.com/oss/python/langchain/tools",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_structured_v1",
+            "order_index": 3,
+            "title": "Structured output",
+            "url": "https://docs.langchain.com/oss/python/langchain/structured-output",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMSJd",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMiJd"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_206f56e885a647b0892935636f808c89",
+        "stage_id": "stg_27ab7f6a1ede4cf09094576eb4e419bf",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_graph_v1",
+            "order_index": 4,
+            "title": "Graph API overview",
+            "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_persistence_v1",
+            "order_index": 5,
+            "title": "Persistence",
+            "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoIl0",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjEiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjIiXQ"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_601e80f7cd0040e794a9949519e3f486",
+        "stage_id": "stg_170c532fb143409cb014066e7024a518",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_retrieval_v1",
+            "order_index": 6,
+            "title": "Retrieval",
+            "url": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnIl0",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjEiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjIiXQ"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_146bc91560bc4d45b66c0cde08a67f09",
+        "stage_id": "stg_c1ee7e6cdf494f4689f218771585e41f",
+        "role": "primary",
+        "creator": "Model Context Protocol maintainers",
+        "source_ref": "src_agent_mcp_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_mcp_v1",
+            "order_index": 0,
+            "title": "Architecture overview",
+            "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwIl0",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjEiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjIiXQ"
+        ],
+        "title": "Model Context Protocol documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "Protocol 2026-07-28",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_805bb6c455934fe08f0e8f58bdc0abf9",
+        "stage_id": "stg_34895f80fad74896a7fadf0883bc1685",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_persistence_v1",
+            "order_index": 5,
+            "title": "Persistence",
+            "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_memory_v1",
+            "order_index": 7,
+            "title": "Short-term memory",
+            "url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dCJd",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4xIl0",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4yIl0"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_3065f28ce05f427fa6838e3c7e6b7c43",
+        "stage_id": "stg_c014577aaa0243dc894a1eab9ee0b7d3",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_evaluation_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_evaluation_v1",
+            "order_index": 0,
+            "title": "LangSmith Evaluation",
+            "url": "https://docs.langchain.com/langsmith/evaluation",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMSJd",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMiJd"
+        ],
+        "title": "LangSmith Evaluation documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      },
+      {
+        "assignment_id": "asg_62d7db403a814070a9b59ea9255d9776",
+        "stage_id": "stg_b49ea03bcd4349c59321b8c2c97895a2",
+        "role": "primary",
+        "creator": "LangChain",
+        "source_ref": "src_agent_langchain_v1",
+        "source_version": 1,
+        "ordered_sections": [
+          {
+            "section_id": "sec_agent_agents_v1",
+            "order_index": 9,
+            "title": "Agents",
+            "url": "https://docs.langchain.com/oss/python/langchain/agents",
+            "anchor": ""
+          },
+          {
+            "section_id": "sec_agent_testing_v1",
+            "order_index": 8,
+            "title": "Test",
+            "url": "https://docs.langchain.com/oss/python/langchain/test",
+            "anchor": ""
+          }
+        ],
+        "fallback_search_terms": [],
+        "node_ids": [
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUiXQ",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMSJd",
+          "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMiJd"
+        ],
+        "title": "LangChain / LangGraph Python documentation",
+        "media_type": "documentation",
+        "language": "en",
+        "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+        "verification_status": "reviewed",
+        "warnings": []
+      }
+    ],
+    "extensions": [],
+    "source_pack_key": "agent.application",
+    "source_pack_version": 1,
+    "plan_id": "pln_eb5c7461cacc4800927d3645c047bfe0",
+    "status": "approved",
+    "version": 1,
+    "approved_at": "2026-09-29T11:09:48.443241+00:00"
+  },
+  "workspace": {
+    "plan": {
+      "project_id": "lpr_c0e966589cc94262ab41cd2e4ad44d99",
+      "revision": 1,
+      "goal_snapshot": "学习 Agent 开发，完成一个可验收的知识助手",
+      "stages": [
+        {
+          "stage_id": "stg_819675c83c0a460ca47c5ab4fa334a20",
+          "stable_key": "stage.environment",
+          "title": "开发环境与必要语言基础",
+          "section_kind": "foundation",
+          "order_index": 0,
+          "objective": "建立可复现环境，编写可测试的工具函数"
+        },
+        {
+          "stage_id": "stg_f787d6454e924c45ac759b47049404d1",
+          "stable_key": "stage.model_api",
+          "title": "LLM API 与 Prompt",
+          "section_kind": "core",
+          "order_index": 1,
+          "objective": "调用模型并明确输入、输出、token 与错误边界"
+        },
+        {
+          "stage_id": "stg_a51be70a9fff41bea93cfbd40600e411",
+          "stable_key": "stage.tools",
+          "title": "工具调用与结构化输出",
+          "section_kind": "core",
+          "order_index": 2,
+          "objective": "把模型决策转为受校验的工具请求"
+        },
+        {
+          "stage_id": "stg_27ab7f6a1ede4cf09094576eb4e419bf",
+          "stable_key": "stage.langgraph",
+          "title": "LangGraph 编排基础",
+          "section_kind": "core",
+          "order_index": 3,
+          "objective": "用状态、节点与路由组织可恢复的 Agent 流程"
+        },
+        {
+          "stage_id": "stg_170c532fb143409cb014066e7024a518",
+          "stable_key": "stage.rag",
+          "title": "RAG 检索与知识库",
+          "section_kind": "core",
+          "order_index": 4,
+          "objective": "构建有来源依据的检索生成链路"
+        },
+        {
+          "stage_id": "stg_c1ee7e6cdf494f4689f218771585e41f",
+          "stable_key": "stage.mcp",
+          "title": "MCP 协议与工具接入",
+          "section_kind": "core",
+          "order_index": 5,
+          "objective": "理解客户端、服务端及工具上下文边界"
+        },
+        {
+          "stage_id": "stg_34895f80fad74896a7fadf0883bc1685",
+          "stable_key": "stage.context",
+          "title": "记忆与上下文管理基础",
+          "section_kind": "core",
+          "order_index": 6,
+          "objective": "保持有限会话状态并控制上下文长度"
+        },
+        {
+          "stage_id": "stg_c014577aaa0243dc894a1eab9ee0b7d3",
+          "stable_key": "stage.reliability",
+          "title": "Agent 评价与可靠性",
+          "section_kind": "core",
+          "order_index": 7,
+          "objective": "用固定评价集检验正确性、失败处理和成本边界"
+        },
+        {
+          "stage_id": "stg_b49ea03bcd4349c59321b8c2c97895a2",
+          "stable_key": "stage.capstone",
+          "title": "综合实践：可验收的知识助手",
+          "section_kind": "practice",
+          "order_index": 8,
+          "objective": "集成工具、检索、编排与评价，交付可复现应用"
+        }
+      ],
+      "unit_links": [
+        {
+          "stage_id": "stg_819675c83c0a460ca47c5ab4fa334a20",
+          "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuZW52aXJvbm1lbnQiXQ",
+          "order_index": 0
+        },
+        {
+          "stage_id": "stg_f787d6454e924c45ac759b47049404d1",
+          "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubW9kZWxfYXBpIl0",
+          "order_index": 1
+        },
+        {
+          "stage_id": "stg_a51be70a9fff41bea93cfbd40600e411",
+          "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UudG9vbHMiXQ",
+          "order_index": 2
+        },
+        {
+          "stage_id": "stg_27ab7f6a1ede4cf09094576eb4e419bf",
+          "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubGFuZ2dyYXBoIl0",
+          "order_index": 3
+        },
+        {
+          "stage_id": "stg_170c532fb143409cb014066e7024a518",
+          "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UucmFnIl0",
+          "order_index": 4
+        },
+        {
+          "stage_id": "stg_c1ee7e6cdf494f4689f218771585e41f",
+          "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubWNwIl0",
+          "order_index": 5
+        },
+        {
+          "stage_id": "stg_34895f80fad74896a7fadf0883bc1685",
+          "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuY29udGV4dCJd",
+          "order_index": 6
+        },
+        {
+          "stage_id": "stg_c014577aaa0243dc894a1eab9ee0b7d3",
+          "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UucmVsaWFiaWxpdHkiXQ",
+          "order_index": 7
+        },
+        {
+          "stage_id": "stg_b49ea03bcd4349c59321b8c2c97895a2",
+          "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuY2Fwc3RvbmUiXQ",
+          "order_index": 8
+        }
+      ],
+      "task_links": [
+        {
+          "stage_id": "stg_819675c83c0a460ca47c5ab4fa334a20",
+          "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suZW52aXJvbm1lbnQiXQ",
+          "order_index": 0
+        },
+        {
+          "stage_id": "stg_f787d6454e924c45ac759b47049404d1",
+          "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subW9kZWxfYXBpIl0",
+          "order_index": 1
+        },
+        {
+          "stage_id": "stg_a51be70a9fff41bea93cfbd40600e411",
+          "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sudG9vbHMiXQ",
+          "order_index": 2
+        },
+        {
+          "stage_id": "stg_27ab7f6a1ede4cf09094576eb4e419bf",
+          "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subGFuZ2dyYXBoIl0",
+          "order_index": 3
+        },
+        {
+          "stage_id": "stg_170c532fb143409cb014066e7024a518",
+          "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sucmFnIl0",
+          "order_index": 4
+        },
+        {
+          "stage_id": "stg_c1ee7e6cdf494f4689f218771585e41f",
+          "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subWNwIl0",
+          "order_index": 5
+        },
+        {
+          "stage_id": "stg_34895f80fad74896a7fadf0883bc1685",
+          "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suY29udGV4dCJd",
+          "order_index": 6
+        },
+        {
+          "stage_id": "stg_c014577aaa0243dc894a1eab9ee0b7d3",
+          "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sucmVsaWFiaWxpdHkiXQ",
+          "order_index": 7
+        },
+        {
+          "stage_id": "stg_b49ea03bcd4349c59321b8c2c97895a2",
+          "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suY2Fwc3RvbmUiXQ",
+          "order_index": 8
+        }
+      ],
+      "stage_resources": [
+        {
+          "assignment_id": "asg_a5e1e2e191df4699ac71b2d8a028fab5",
+          "stage_id": "stg_819675c83c0a460ca47c5ab4fa334a20",
+          "role": "primary",
+          "creator": "Python Software Foundation",
+          "source_ref": "src_agent_python_v1",
+          "source_version": 1,
+          "ordered_sections": [
+            {
+              "section_id": "sec_agent_venv_v1",
+              "order_index": 0,
+              "title": "12. Virtual Environments and Packages",
+              "url": "https://docs.python.org/3.14/tutorial/venv.html",
+              "anchor": ""
+            },
+            {
+              "section_id": "sec_agent_functions_v1",
+              "order_index": 1,
+              "title": "4. More Control Flow Tools",
+              "url": "https://docs.python.org/3.14/tutorial/controlflow.html",
+              "anchor": ""
+            }
+          ],
+          "fallback_search_terms": [],
+          "node_ids": [
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQiXQ",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMSJd",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMiJd"
+          ],
+          "title": "The Python Tutorial",
+          "media_type": "documentation",
+          "language": "en",
+          "documentation_version": "Python 3.14",
+          "verification_status": "reviewed",
+          "warnings": []
+        },
+        {
+          "assignment_id": "asg_26ae071771b042dd8455dc043191aed8",
+          "stage_id": "stg_f787d6454e924c45ac759b47049404d1",
+          "role": "primary",
+          "creator": "LangChain",
+          "source_ref": "src_agent_langchain_v1",
+          "source_version": 1,
+          "ordered_sections": [
+            {
+              "section_id": "sec_agent_models_v1",
+              "order_index": 0,
+              "title": "Models",
+              "url": "https://docs.langchain.com/oss/python/langchain/models",
+              "anchor": ""
+            },
+            {
+              "section_id": "sec_agent_messages_v1",
+              "order_index": 1,
+              "title": "Messages",
+              "url": "https://docs.langchain.com/oss/python/langchain/messages",
+              "anchor": ""
+            }
+          ],
+          "fallback_search_terms": [],
+          "node_ids": [
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpIl0",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjEiXQ",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjIiXQ"
+          ],
+          "title": "LangChain / LangGraph Python documentation",
+          "media_type": "documentation",
+          "language": "en",
+          "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+          "verification_status": "reviewed",
+          "warnings": []
+        },
+        {
+          "assignment_id": "asg_f970bc527378424d9b095f176fd94cd7",
+          "stage_id": "stg_a51be70a9fff41bea93cfbd40600e411",
+          "role": "primary",
+          "creator": "LangChain",
+          "source_ref": "src_agent_langchain_v1",
+          "source_version": 1,
+          "ordered_sections": [
+            {
+              "section_id": "sec_agent_tools_v1",
+              "order_index": 2,
+              "title": "Tools",
+              "url": "https://docs.langchain.com/oss/python/langchain/tools",
+              "anchor": ""
+            },
+            {
+              "section_id": "sec_agent_structured_v1",
+              "order_index": 3,
+              "title": "Structured output",
+              "url": "https://docs.langchain.com/oss/python/langchain/structured-output",
+              "anchor": ""
+            }
+          ],
+          "fallback_search_terms": [],
+          "node_ids": [
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMiXQ",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMSJd",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMiJd"
+          ],
+          "title": "LangChain / LangGraph Python documentation",
+          "media_type": "documentation",
+          "language": "en",
+          "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+          "verification_status": "reviewed",
+          "warnings": []
+        },
+        {
+          "assignment_id": "asg_206f56e885a647b0892935636f808c89",
+          "stage_id": "stg_27ab7f6a1ede4cf09094576eb4e419bf",
+          "role": "primary",
+          "creator": "LangChain",
+          "source_ref": "src_agent_langchain_v1",
+          "source_version": 1,
+          "ordered_sections": [
+            {
+              "section_id": "sec_agent_graph_v1",
+              "order_index": 4,
+              "title": "Graph API overview",
+              "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+              "anchor": ""
+            },
+            {
+              "section_id": "sec_agent_persistence_v1",
+              "order_index": 5,
+              "title": "Persistence",
+              "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+              "anchor": ""
+            }
+          ],
+          "fallback_search_terms": [],
+          "node_ids": [
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoIl0",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjEiXQ",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjIiXQ"
+          ],
+          "title": "LangChain / LangGraph Python documentation",
+          "media_type": "documentation",
+          "language": "en",
+          "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+          "verification_status": "reviewed",
+          "warnings": []
+        },
+        {
+          "assignment_id": "asg_601e80f7cd0040e794a9949519e3f486",
+          "stage_id": "stg_170c532fb143409cb014066e7024a518",
+          "role": "primary",
+          "creator": "LangChain",
+          "source_ref": "src_agent_langchain_v1",
+          "source_version": 1,
+          "ordered_sections": [
+            {
+              "section_id": "sec_agent_retrieval_v1",
+              "order_index": 6,
+              "title": "Retrieval",
+              "url": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+              "anchor": ""
+            }
+          ],
+          "fallback_search_terms": [],
+          "node_ids": [
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnIl0",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjEiXQ",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjIiXQ"
+          ],
+          "title": "LangChain / LangGraph Python documentation",
+          "media_type": "documentation",
+          "language": "en",
+          "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+          "verification_status": "reviewed",
+          "warnings": []
+        },
+        {
+          "assignment_id": "asg_146bc91560bc4d45b66c0cde08a67f09",
+          "stage_id": "stg_c1ee7e6cdf494f4689f218771585e41f",
+          "role": "primary",
+          "creator": "Model Context Protocol maintainers",
+          "source_ref": "src_agent_mcp_v1",
+          "source_version": 1,
+          "ordered_sections": [
+            {
+              "section_id": "sec_agent_mcp_v1",
+              "order_index": 0,
+              "title": "Architecture overview",
+              "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+              "anchor": ""
+            }
+          ],
+          "fallback_search_terms": [],
+          "node_ids": [
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwIl0",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjEiXQ",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjIiXQ"
+          ],
+          "title": "Model Context Protocol documentation",
+          "media_type": "documentation",
+          "language": "en",
+          "documentation_version": "Protocol 2026-07-28",
+          "verification_status": "reviewed",
+          "warnings": []
+        },
+        {
+          "assignment_id": "asg_805bb6c455934fe08f0e8f58bdc0abf9",
+          "stage_id": "stg_34895f80fad74896a7fadf0883bc1685",
+          "role": "primary",
+          "creator": "LangChain",
+          "source_ref": "src_agent_langchain_v1",
+          "source_version": 1,
+          "ordered_sections": [
+            {
+              "section_id": "sec_agent_persistence_v1",
+              "order_index": 5,
+              "title": "Persistence",
+              "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+              "anchor": ""
+            },
+            {
+              "section_id": "sec_agent_memory_v1",
+              "order_index": 7,
+              "title": "Short-term memory",
+              "url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+              "anchor": ""
+            }
+          ],
+          "fallback_search_terms": [],
+          "node_ids": [
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dCJd",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4xIl0",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4yIl0"
+          ],
+          "title": "LangChain / LangGraph Python documentation",
+          "media_type": "documentation",
+          "language": "en",
+          "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+          "verification_status": "reviewed",
+          "warnings": []
+        },
+        {
+          "assignment_id": "asg_3065f28ce05f427fa6838e3c7e6b7c43",
+          "stage_id": "stg_c014577aaa0243dc894a1eab9ee0b7d3",
+          "role": "primary",
+          "creator": "LangChain",
+          "source_ref": "src_agent_evaluation_v1",
+          "source_version": 1,
+          "ordered_sections": [
+            {
+              "section_id": "sec_agent_evaluation_v1",
+              "order_index": 0,
+              "title": "LangSmith Evaluation",
+              "url": "https://docs.langchain.com/langsmith/evaluation",
+              "anchor": ""
+            }
+          ],
+          "fallback_search_terms": [],
+          "node_ids": [
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkiXQ",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMSJd",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMiJd"
+          ],
+          "title": "LangSmith Evaluation documentation",
+          "media_type": "documentation",
+          "language": "en",
+          "documentation_version": "living documentation; reviewed 2026-09-29",
+          "verification_status": "reviewed",
+          "warnings": []
+        },
+        {
+          "assignment_id": "asg_62d7db403a814070a9b59ea9255d9776",
+          "stage_id": "stg_b49ea03bcd4349c59321b8c2c97895a2",
+          "role": "primary",
+          "creator": "LangChain",
+          "source_ref": "src_agent_langchain_v1",
+          "source_version": 1,
+          "ordered_sections": [
+            {
+              "section_id": "sec_agent_agents_v1",
+              "order_index": 9,
+              "title": "Agents",
+              "url": "https://docs.langchain.com/oss/python/langchain/agents",
+              "anchor": ""
+            },
+            {
+              "section_id": "sec_agent_testing_v1",
+              "order_index": 8,
+              "title": "Test",
+              "url": "https://docs.langchain.com/oss/python/langchain/test",
+              "anchor": ""
+            }
+          ],
+          "fallback_search_terms": [],
+          "node_ids": [
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUiXQ",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMSJd",
+            "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMiJd"
+          ],
+          "title": "LangChain / LangGraph Python documentation",
+          "media_type": "documentation",
+          "language": "en",
+          "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+          "verification_status": "reviewed",
+          "warnings": []
+        }
+      ],
+      "extensions": [],
+      "source_pack_key": "agent.application",
+      "source_pack_version": 1,
+      "plan_id": "pln_eb5c7461cacc4800927d3645c047bfe0",
+      "status": "approved",
+      "version": 1,
+      "approved_at": "2026-09-29T11:09:48.443241+00:00"
+    },
+    "stages": [
+      {
+        "stage": {
+          "stage_id": "stg_819675c83c0a460ca47c5ab4fa334a20",
+          "stable_key": "stage.environment",
+          "title": "开发环境与必要语言基础",
+          "section_kind": "foundation",
+          "order_index": 0,
+          "objective": "建立可复现环境，编写可测试的工具函数"
+        },
+        "units": [
+          {
+            "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuZW52aXJvbm1lbnQiXQ",
+            "stable_key": "unit.stage.environment",
+            "title": "开发环境与必要语言基础",
+            "objectives": [
+              "建立可复现环境，编写可测试的工具函数"
+            ],
+            "rubric_version": 1,
+            "progress": "not_started",
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMiJd"
+            ],
+            "progress_recorded": false
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQiXQ",
+            "stable_key": "node.environment",
+            "title": "开发环境与必要语言基础",
+            "node_type": "skill",
+            "objectives": [
+              "建立可复现环境，编写可测试的工具函数"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMiJd"
+            ],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMSJd",
+            "stable_key": "node.environment.1",
+            "title": "虚拟环境与依赖",
+            "node_type": "concept",
+            "objectives": [
+              "在独立环境安装并记录依赖"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMiJd",
+            "stable_key": "node.environment.2",
+            "title": "函数、类型与输入校验",
+            "node_type": "concept",
+            "objectives": [
+              "用函数处理合法与非法输入"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          }
+        ],
+        "resources": [
+          {
+            "assignment_id": "asg_a5e1e2e191df4699ac71b2d8a028fab5",
+            "stage_id": "stg_819675c83c0a460ca47c5ab4fa334a20",
+            "role": "primary",
+            "creator": "Python Software Foundation",
+            "source_ref": "src_agent_python_v1",
+            "source_version": 1,
+            "ordered_sections": [
+              {
+                "section_id": "sec_agent_venv_v1",
+                "order_index": 0,
+                "title": "12. Virtual Environments and Packages",
+                "url": "https://docs.python.org/3.14/tutorial/venv.html",
+                "anchor": ""
+              },
+              {
+                "section_id": "sec_agent_functions_v1",
+                "order_index": 1,
+                "title": "4. More Control Flow Tools",
+                "url": "https://docs.python.org/3.14/tutorial/controlflow.html",
+                "anchor": ""
+              }
+            ],
+            "fallback_search_terms": [],
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQuMiJd"
+            ],
+            "title": "The Python Tutorial",
+            "media_type": "documentation",
+            "language": "en",
+            "documentation_version": "Python 3.14",
+            "verification_status": "reviewed",
+            "warnings": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suZW52aXJvbm1lbnQiXQ",
+            "practice_project_id": "ppj_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInByYWN0aWNlLnJvdXRlIl0",
+            "stable_key": "task.environment",
+            "title": "搭建并验证独立实验环境",
+            "goal": "建立可复现环境，编写可测试的工具函数",
+            "in_scope": [
+              "虚拟环境与依赖",
+              "函数、类型与输入校验"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "从干净环境复现依赖安装并运行输入校验测试"
+            ],
+            "status": "pending",
+            "thinking_prompts": []
+          }
+        ]
+      },
+      {
+        "stage": {
+          "stage_id": "stg_f787d6454e924c45ac759b47049404d1",
+          "stable_key": "stage.model_api",
+          "title": "LLM API 与 Prompt",
+          "section_kind": "core",
+          "order_index": 1,
+          "objective": "调用模型并明确输入、输出、token 与错误边界"
+        },
+        "units": [
+          {
+            "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubW9kZWxfYXBpIl0",
+            "stable_key": "unit.stage.model_api",
+            "title": "LLM API 与 Prompt",
+            "objectives": [
+              "调用模型并明确输入、输出、token 与错误边界"
+            ],
+            "rubric_version": 1,
+            "progress": "not_started",
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjIiXQ"
+            ],
+            "progress_recorded": false
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpIl0",
+            "stable_key": "node.model_api",
+            "title": "LLM API 与 Prompt",
+            "node_type": "skill",
+            "objectives": [
+              "调用模型并明确输入、输出、token 与错误边界"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuZW52aXJvbm1lbnQiXQ"
+            ],
+            "child_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjIiXQ"
+            ],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjEiXQ",
+            "stable_key": "node.model_api.1",
+            "title": "模型请求与响应",
+            "node_type": "concept",
+            "objectives": [
+              "记录一次请求的模型、token 与失败状态"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjIiXQ",
+            "stable_key": "node.model_api.2",
+            "title": "消息角色与提示词边界",
+            "node_type": "concept",
+            "objectives": [
+              "区分系统规则和不可信用户资料"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          }
+        ],
+        "resources": [
+          {
+            "assignment_id": "asg_26ae071771b042dd8455dc043191aed8",
+            "stage_id": "stg_f787d6454e924c45ac759b47049404d1",
+            "role": "primary",
+            "creator": "LangChain",
+            "source_ref": "src_agent_langchain_v1",
+            "source_version": 1,
+            "ordered_sections": [
+              {
+                "section_id": "sec_agent_models_v1",
+                "order_index": 0,
+                "title": "Models",
+                "url": "https://docs.langchain.com/oss/python/langchain/models",
+                "anchor": ""
+              },
+              {
+                "section_id": "sec_agent_messages_v1",
+                "order_index": 1,
+                "title": "Messages",
+                "url": "https://docs.langchain.com/oss/python/langchain/messages",
+                "anchor": ""
+              }
+            ],
+            "fallback_search_terms": [],
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpLjIiXQ"
+            ],
+            "title": "LangChain / LangGraph Python documentation",
+            "media_type": "documentation",
+            "language": "en",
+            "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+            "verification_status": "reviewed",
+            "warnings": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subW9kZWxfYXBpIl0",
+            "practice_project_id": "ppj_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInByYWN0aWNlLnJvdXRlIl0",
+            "stable_key": "task.model_api",
+            "title": "实现可观测的模型调用",
+            "goal": "调用模型并明确输入、输出、token 与错误边界",
+            "in_scope": [
+              "模型请求与响应",
+              "消息角色与提示词边界"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "验证成功、超时及错误输入，输出 schema 与用量记录"
+            ],
+            "status": "pending",
+            "thinking_prompts": []
+          }
+        ]
+      },
+      {
+        "stage": {
+          "stage_id": "stg_a51be70a9fff41bea93cfbd40600e411",
+          "stable_key": "stage.tools",
+          "title": "工具调用与结构化输出",
+          "section_kind": "core",
+          "order_index": 2,
+          "objective": "把模型决策转为受校验的工具请求"
+        },
+        "units": [
+          {
+            "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UudG9vbHMiXQ",
+            "stable_key": "unit.stage.tools",
+            "title": "工具调用与结构化输出",
+            "objectives": [
+              "把模型决策转为受校验的工具请求"
+            ],
+            "rubric_version": 1,
+            "progress": "not_started",
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMiJd"
+            ],
+            "progress_recorded": false
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMiXQ",
+            "stable_key": "node.tools",
+            "title": "工具调用与结构化输出",
+            "node_type": "skill",
+            "objectives": [
+              "把模型决策转为受校验的工具请求"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpIl0"
+            ],
+            "child_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMiJd"
+            ],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMSJd",
+            "stable_key": "node.tools.1",
+            "title": "工具 schema 与权限边界",
+            "node_type": "concept",
+            "objectives": [
+              "拒绝非法参数并限制工具能力"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMiJd",
+            "stable_key": "node.tools.2",
+            "title": "结构化结果与错误处理",
+            "node_type": "concept",
+            "objectives": [
+              "用 schema 校验结果且不把失败当成功"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          }
+        ],
+        "resources": [
+          {
+            "assignment_id": "asg_f970bc527378424d9b095f176fd94cd7",
+            "stage_id": "stg_a51be70a9fff41bea93cfbd40600e411",
+            "role": "primary",
+            "creator": "LangChain",
+            "source_ref": "src_agent_langchain_v1",
+            "source_version": 1,
+            "ordered_sections": [
+              {
+                "section_id": "sec_agent_tools_v1",
+                "order_index": 2,
+                "title": "Tools",
+                "url": "https://docs.langchain.com/oss/python/langchain/tools",
+                "anchor": ""
+              },
+              {
+                "section_id": "sec_agent_structured_v1",
+                "order_index": 3,
+                "title": "Structured output",
+                "url": "https://docs.langchain.com/oss/python/langchain/structured-output",
+                "anchor": ""
+              }
+            ],
+            "fallback_search_terms": [],
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMuMiJd"
+            ],
+            "title": "LangChain / LangGraph Python documentation",
+            "media_type": "documentation",
+            "language": "en",
+            "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+            "verification_status": "reviewed",
+            "warnings": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sudG9vbHMiXQ",
+            "practice_project_id": "ppj_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInByYWN0aWNlLnJvdXRlIl0",
+            "stable_key": "task.tools",
+            "title": "实现受控工具调用",
+            "goal": "把模型决策转为受校验的工具请求",
+            "in_scope": [
+              "工具 schema 与权限边界",
+              "结构化结果与错误处理"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "合法请求返回结构化结果，非法请求被明确拒绝"
+            ],
+            "status": "pending",
+            "thinking_prompts": []
+          }
+        ]
+      },
+      {
+        "stage": {
+          "stage_id": "stg_27ab7f6a1ede4cf09094576eb4e419bf",
+          "stable_key": "stage.langgraph",
+          "title": "LangGraph 编排基础",
+          "section_kind": "core",
+          "order_index": 3,
+          "objective": "用状态、节点与路由组织可恢复的 Agent 流程"
+        },
+        "units": [
+          {
+            "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubGFuZ2dyYXBoIl0",
+            "stable_key": "unit.stage.langgraph",
+            "title": "LangGraph 编排基础",
+            "objectives": [
+              "用状态、节点与路由组织可恢复的 Agent 流程"
+            ],
+            "rubric_version": 1,
+            "progress": "not_started",
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjIiXQ"
+            ],
+            "progress_recorded": false
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoIl0",
+            "stable_key": "node.langgraph",
+            "title": "LangGraph 编排基础",
+            "node_type": "skill",
+            "objectives": [
+              "用状态、节点与路由组织可恢复的 Agent 流程"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMiXQ"
+            ],
+            "child_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjIiXQ"
+            ],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjEiXQ",
+            "stable_key": "node.langgraph.1",
+            "title": "StateGraph、状态与条件路由",
+            "node_type": "concept",
+            "objectives": [
+              "实现明确的状态更新与分支"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjIiXQ",
+            "stable_key": "node.langgraph.2",
+            "title": "检查点与运行标识",
+            "node_type": "concept",
+            "objectives": [
+              "用 thread_id 恢复运行并说明重复执行边界"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          }
+        ],
+        "resources": [
+          {
+            "assignment_id": "asg_206f56e885a647b0892935636f808c89",
+            "stage_id": "stg_27ab7f6a1ede4cf09094576eb4e419bf",
+            "role": "primary",
+            "creator": "LangChain",
+            "source_ref": "src_agent_langchain_v1",
+            "source_version": 1,
+            "ordered_sections": [
+              {
+                "section_id": "sec_agent_graph_v1",
+                "order_index": 4,
+                "title": "Graph API overview",
+                "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+                "anchor": ""
+              },
+              {
+                "section_id": "sec_agent_persistence_v1",
+                "order_index": 5,
+                "title": "Persistence",
+                "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+                "anchor": ""
+              }
+            ],
+            "fallback_search_terms": [],
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoLjIiXQ"
+            ],
+            "title": "LangChain / LangGraph Python documentation",
+            "media_type": "documentation",
+            "language": "en",
+            "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+            "verification_status": "reviewed",
+            "warnings": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subGFuZ2dyYXBoIl0",
+            "practice_project_id": "ppj_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInByYWN0aWNlLnJvdXRlIl0",
+            "stable_key": "task.langgraph",
+            "title": "构建有失败分支的工作流",
+            "goal": "用状态、节点与路由组织可恢复的 Agent 流程",
+            "in_scope": [
+              "StateGraph、状态与条件路由",
+              "检查点与运行标识"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "演示条件路由、恢复和重复执行保护"
+            ],
+            "status": "pending",
+            "thinking_prompts": []
+          }
+        ]
+      },
+      {
+        "stage": {
+          "stage_id": "stg_170c532fb143409cb014066e7024a518",
+          "stable_key": "stage.rag",
+          "title": "RAG 检索与知识库",
+          "section_kind": "core",
+          "order_index": 4,
+          "objective": "构建有来源依据的检索生成链路"
+        },
+        "units": [
+          {
+            "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UucmFnIl0",
+            "stable_key": "unit.stage.rag",
+            "title": "RAG 检索与知识库",
+            "objectives": [
+              "构建有来源依据的检索生成链路"
+            ],
+            "rubric_version": 1,
+            "progress": "not_started",
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjIiXQ"
+            ],
+            "progress_recorded": false
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnIl0",
+            "stable_key": "node.rag",
+            "title": "RAG 检索与知识库",
+            "node_type": "skill",
+            "objectives": [
+              "构建有来源依据的检索生成链路"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubW9kZWxfYXBpIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMiXQ"
+            ],
+            "child_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjIiXQ"
+            ],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjEiXQ",
+            "stable_key": "node.rag.1",
+            "title": "文档切分、嵌入与检索",
+            "node_type": "concept",
+            "objectives": [
+              "把小型文档集转换为可检索片段"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjIiXQ",
+            "stable_key": "node.rag.2",
+            "title": "上下文引用与无结果处理",
+            "node_type": "concept",
+            "objectives": [
+              "为回答绑定来源并处理检索为空"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          }
+        ],
+        "resources": [
+          {
+            "assignment_id": "asg_601e80f7cd0040e794a9949519e3f486",
+            "stage_id": "stg_170c532fb143409cb014066e7024a518",
+            "role": "primary",
+            "creator": "LangChain",
+            "source_ref": "src_agent_langchain_v1",
+            "source_version": 1,
+            "ordered_sections": [
+              {
+                "section_id": "sec_agent_retrieval_v1",
+                "order_index": 6,
+                "title": "Retrieval",
+                "url": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+                "anchor": ""
+              }
+            ],
+            "fallback_search_terms": [],
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnLjIiXQ"
+            ],
+            "title": "LangChain / LangGraph Python documentation",
+            "media_type": "documentation",
+            "language": "en",
+            "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+            "verification_status": "reviewed",
+            "warnings": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sucmFnIl0",
+            "practice_project_id": "ppj_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInByYWN0aWNlLnJvdXRlIl0",
+            "stable_key": "task.rag",
+            "title": "完成小型资料检索实验",
+            "goal": "构建有来源依据的检索生成链路",
+            "in_scope": [
+              "文档切分、嵌入与检索",
+              "上下文引用与无结果处理"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "固定问题命中正确片段；无依据时明确说明"
+            ],
+            "status": "pending",
+            "thinking_prompts": []
+          }
+        ]
+      },
+      {
+        "stage": {
+          "stage_id": "stg_c1ee7e6cdf494f4689f218771585e41f",
+          "stable_key": "stage.mcp",
+          "title": "MCP 协议与工具接入",
+          "section_kind": "core",
+          "order_index": 5,
+          "objective": "理解客户端、服务端及工具上下文边界"
+        },
+        "units": [
+          {
+            "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UubWNwIl0",
+            "stable_key": "unit.stage.mcp",
+            "title": "MCP 协议与工具接入",
+            "objectives": [
+              "理解客户端、服务端及工具上下文边界"
+            ],
+            "rubric_version": 1,
+            "progress": "not_started",
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjIiXQ"
+            ],
+            "progress_recorded": false
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwIl0",
+            "stable_key": "node.mcp",
+            "title": "MCP 协议与工具接入",
+            "node_type": "skill",
+            "objectives": [
+              "理解客户端、服务端及工具上下文边界"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUudG9vbHMiXQ"
+            ],
+            "child_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjIiXQ"
+            ],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjEiXQ",
+            "stable_key": "node.mcp.1",
+            "title": "MCP 角色、协议与传输",
+            "node_type": "concept",
+            "objectives": [
+              "解释 host/client/server 与两类传输"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjIiXQ",
+            "stable_key": "node.mcp.2",
+            "title": "工具发现与安全边界",
+            "node_type": "concept",
+            "objectives": [
+              "检查能力声明并拒绝越权工具请求"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          }
+        ],
+        "resources": [
+          {
+            "assignment_id": "asg_146bc91560bc4d45b66c0cde08a67f09",
+            "stage_id": "stg_c1ee7e6cdf494f4689f218771585e41f",
+            "role": "primary",
+            "creator": "Model Context Protocol maintainers",
+            "source_ref": "src_agent_mcp_v1",
+            "source_version": 1,
+            "ordered_sections": [
+              {
+                "section_id": "sec_agent_mcp_v1",
+                "order_index": 0,
+                "title": "Architecture overview",
+                "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+                "anchor": ""
+              }
+            ],
+            "fallback_search_terms": [],
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjEiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwLjIiXQ"
+            ],
+            "title": "Model Context Protocol documentation",
+            "media_type": "documentation",
+            "language": "en",
+            "documentation_version": "Protocol 2026-07-28",
+            "verification_status": "reviewed",
+            "warnings": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2subWNwIl0",
+            "practice_project_id": "ppj_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInByYWN0aWNlLnJvdXRlIl0",
+            "stable_key": "task.mcp",
+            "title": "演示 MCP 工具边界",
+            "goal": "理解客户端、服务端及工具上下文边界",
+            "in_scope": [
+              "MCP 角色、协议与传输",
+              "工具发现与安全边界"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "记录工具发现/调用流程及拒绝非法请求的结果"
+            ],
+            "status": "pending",
+            "thinking_prompts": []
+          }
+        ]
+      },
+      {
+        "stage": {
+          "stage_id": "stg_34895f80fad74896a7fadf0883bc1685",
+          "stable_key": "stage.context",
+          "title": "记忆与上下文管理基础",
+          "section_kind": "core",
+          "order_index": 6,
+          "objective": "保持有限会话状态并控制上下文长度"
+        },
+        "units": [
+          {
+            "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuY29udGV4dCJd",
+            "stable_key": "unit.stage.context",
+            "title": "记忆与上下文管理基础",
+            "objectives": [
+              "保持有限会话状态并控制上下文长度"
+            ],
+            "rubric_version": 1,
+            "progress": "not_started",
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dCJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4xIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4yIl0"
+            ],
+            "progress_recorded": false
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dCJd",
+            "stable_key": "node.context",
+            "title": "记忆与上下文管理基础",
+            "node_type": "skill",
+            "objectives": [
+              "保持有限会话状态并控制上下文长度"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoIl0"
+            ],
+            "child_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4xIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4yIl0"
+            ],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4xIl0",
+            "stable_key": "node.context.1",
+            "title": "会话状态与检查点",
+            "node_type": "concept",
+            "objectives": [
+              "区分会话状态和跨会话长期存储"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4yIl0",
+            "stable_key": "node.context.2",
+            "title": "裁剪、摘要及上下文预算",
+            "node_type": "concept",
+            "objectives": [
+              "比较裁剪与摘要，保留任务必要信息"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          }
+        ],
+        "resources": [
+          {
+            "assignment_id": "asg_805bb6c455934fe08f0e8f58bdc0abf9",
+            "stage_id": "stg_34895f80fad74896a7fadf0883bc1685",
+            "role": "primary",
+            "creator": "LangChain",
+            "source_ref": "src_agent_langchain_v1",
+            "source_version": 1,
+            "ordered_sections": [
+              {
+                "section_id": "sec_agent_persistence_v1",
+                "order_index": 5,
+                "title": "Persistence",
+                "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+                "anchor": ""
+              },
+              {
+                "section_id": "sec_agent_memory_v1",
+                "order_index": 7,
+                "title": "Short-term memory",
+                "url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+                "anchor": ""
+              }
+            ],
+            "fallback_search_terms": [],
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dCJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4xIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dC4yIl0"
+            ],
+            "title": "LangChain / LangGraph Python documentation",
+            "media_type": "documentation",
+            "language": "en",
+            "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+            "verification_status": "reviewed",
+            "warnings": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suY29udGV4dCJd",
+            "practice_project_id": "ppj_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInByYWN0aWNlLnJvdXRlIl0",
+            "stable_key": "task.context",
+            "title": "验证上下文管理策略",
+            "goal": "保持有限会话状态并控制上下文长度",
+            "in_scope": [
+              "会话状态与检查点",
+              "裁剪、摘要及上下文预算"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "长输入仍保留必要约束，两个会话状态不串用"
+            ],
+            "status": "pending",
+            "thinking_prompts": []
+          }
+        ]
+      },
+      {
+        "stage": {
+          "stage_id": "stg_c014577aaa0243dc894a1eab9ee0b7d3",
+          "stable_key": "stage.reliability",
+          "title": "Agent 评价与可靠性",
+          "section_kind": "core",
+          "order_index": 7,
+          "objective": "用固定评价集检验正确性、失败处理和成本边界"
+        },
+        "units": [
+          {
+            "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UucmVsaWFiaWxpdHkiXQ",
+            "stable_key": "unit.stage.reliability",
+            "title": "Agent 评价与可靠性",
+            "objectives": [
+              "用固定评价集检验正确性、失败处理和成本边界"
+            ],
+            "rubric_version": 1,
+            "progress": "not_started",
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMiJd"
+            ],
+            "progress_recorded": false
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkiXQ",
+            "stable_key": "node.reliability",
+            "title": "Agent 评价与可靠性",
+            "node_type": "skill",
+            "objectives": [
+              "用固定评价集检验正确性、失败处理和成本边界"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubGFuZ2dyYXBoIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmFnIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUubWNwIl0",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY29udGV4dCJd"
+            ],
+            "child_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMiJd"
+            ],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMSJd",
+            "stable_key": "node.reliability.1",
+            "title": "离线测试集与评价标准",
+            "node_type": "concept",
+            "objectives": [
+              "建立正常、边界和失败问题集"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMiJd",
+            "stable_key": "node.reliability.2",
+            "title": "失败分支、重复执行与可观测性",
+            "node_type": "concept",
+            "objectives": [
+              "追踪失败并确认未知结果不会重复付费"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          }
+        ],
+        "resources": [
+          {
+            "assignment_id": "asg_3065f28ce05f427fa6838e3c7e6b7c43",
+            "stage_id": "stg_c014577aaa0243dc894a1eab9ee0b7d3",
+            "role": "primary",
+            "creator": "LangChain",
+            "source_ref": "src_agent_evaluation_v1",
+            "source_version": 1,
+            "ordered_sections": [
+              {
+                "section_id": "sec_agent_evaluation_v1",
+                "order_index": 0,
+                "title": "LangSmith Evaluation",
+                "url": "https://docs.langchain.com/langsmith/evaluation",
+                "anchor": ""
+              }
+            ],
+            "fallback_search_terms": [],
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkuMiJd"
+            ],
+            "title": "LangSmith Evaluation documentation",
+            "media_type": "documentation",
+            "language": "en",
+            "documentation_version": "living documentation; reviewed 2026-09-29",
+            "verification_status": "reviewed",
+            "warnings": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2sucmVsaWFiaWxpdHkiXQ",
+            "practice_project_id": "ppj_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInByYWN0aWNlLnJvdXRlIl0",
+            "stable_key": "task.reliability",
+            "title": "建立可复现的 Agent 评价集",
+            "goal": "用固定评价集检验正确性、失败处理和成本边界",
+            "in_scope": [
+              "离线测试集与评价标准",
+              "失败分支、重复执行与可观测性"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "记录每个案例结果、引用、错误路径和成本指标"
+            ],
+            "status": "pending",
+            "thinking_prompts": []
+          }
+        ]
+      },
+      {
+        "stage": {
+          "stage_id": "stg_b49ea03bcd4349c59321b8c2c97895a2",
+          "stable_key": "stage.capstone",
+          "title": "综合实践：可验收的知识助手",
+          "section_kind": "practice",
+          "order_index": 8,
+          "objective": "集成工具、检索、编排与评价，交付可复现应用"
+        },
+        "units": [
+          {
+            "unit_id": "unt_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInVuaXQuc3RhZ2UuY2Fwc3RvbmUiXQ",
+            "stable_key": "unit.stage.capstone",
+            "title": "综合实践：可验收的知识助手",
+            "objectives": [
+              "集成工具、检索、编排与评价，交付可复现应用"
+            ],
+            "rubric_version": 1,
+            "progress": "not_started",
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMiJd"
+            ],
+            "progress_recorded": false
+          }
+        ],
+        "nodes": [
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUiXQ",
+            "stable_key": "node.capstone",
+            "title": "综合实践：可验收的知识助手",
+            "node_type": "skill",
+            "objectives": [
+              "集成工具、检索、编排与评价，交付可复现应用"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUucmVsaWFiaWxpdHkiXQ"
+            ],
+            "child_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMiJd"
+            ],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMSJd",
+            "stable_key": "node.capstone.1",
+            "title": "集成流程与资料来源",
+            "node_type": "concept",
+            "objectives": [
+              "让回答、工具结果和检索片段具有可追踪来源"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          },
+          {
+            "node_id": "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMiJd",
+            "stable_key": "node.capstone.2",
+            "title": "验收、运行说明与已知限制",
+            "node_type": "concept",
+            "objectives": [
+              "用评价集证明成功与失败边界并编写运行说明"
+            ],
+            "source_status": "ai_draft",
+            "prerequisite_ids": [],
+            "child_ids": [],
+            "progress": null
+          }
+        ],
+        "resources": [
+          {
+            "assignment_id": "asg_62d7db403a814070a9b59ea9255d9776",
+            "stage_id": "stg_b49ea03bcd4349c59321b8c2c97895a2",
+            "role": "primary",
+            "creator": "LangChain",
+            "source_ref": "src_agent_langchain_v1",
+            "source_version": 1,
+            "ordered_sections": [
+              {
+                "section_id": "sec_agent_agents_v1",
+                "order_index": 9,
+                "title": "Agents",
+                "url": "https://docs.langchain.com/oss/python/langchain/agents",
+                "anchor": ""
+              },
+              {
+                "section_id": "sec_agent_testing_v1",
+                "order_index": 8,
+                "title": "Test",
+                "url": "https://docs.langchain.com/oss/python/langchain/test",
+                "anchor": ""
+              }
+            ],
+            "fallback_search_terms": [],
+            "node_ids": [
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUiXQ",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMSJd",
+              "nod_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsIm5vZGUuY2Fwc3RvbmUuMiJd"
+            ],
+            "title": "LangChain / LangGraph Python documentation",
+            "media_type": "documentation",
+            "language": "en",
+            "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+            "verification_status": "reviewed",
+            "warnings": []
+          }
+        ],
+        "tasks": [
+          {
+            "task_id": "ptk_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInRhc2suY2Fwc3RvbmUiXQ",
+            "practice_project_id": "ppj_WyJscHJfYzBlOTY2NTg5Y2M5NDI2MmFiNDFjZDJlNGFkNDRkOTk6ZjY2YmI1YzNkMzI0YzRmNWU3ZmQ0YTIzZjRhYjY5NmI3MjFmYThlMjgxZmFkNjY0MTk5MmQ2MWU4ZTU3N2ZiMiIsInByYWN0aWNlLnJvdXRlIl0",
+            "stable_key": "task.capstone",
+            "title": "交付并验收知识助手",
+            "goal": "集成工具、检索、编排与评价，交付可复现应用",
+            "in_scope": [
+              "集成流程与资料来源",
+              "验收、运行说明与已知限制"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "至少覆盖成功回答、无依据、工具失败、状态隔离和可复现启动"
+            ],
+            "status": "pending",
+            "thinking_prompts": []
+          }
+        ]
+      }
+    ],
+    "completed_units": 0,
+    "total_units": 9
+  }
+}

@@ -1,0 +1,43 @@
+
+> studyplan-frontend@1.1.0 build
+> tsc -b && vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.41 kB │ gzip:  0.30 kB
+dist/assets/index-HgkNGFF3.css   14.74 kB │ gzip:  3.85 kB
+dist/assets/index-CVYzbMgI.js   266.05 kB │ gzip: 82.32 kB
+✓ built in 683ms
+BUILD_EXIT_CODE=0
+
+> studyplan-frontend@1.1.0 test
+> node --test tests/*.test.mjs
+
+✔ N+P opens A and closing restores prior layout (0.5967ms)
+✔ P+A opening N collapses P; N+A opening P closes A (0.1105ms)
+✔ wide assistant preserves readable canvas at target widths (0.1819ms)
+✔ manual reopening wins after assistant caused automatic collapse (0.1011ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 133.2342
+TEST_EXIT_CODE=0
+
+> studyplan-frontend@1.1.0 test:auth
+> node tests/auth.browser.cjs
+
+PASS: auth mode, stale errors, duplicate username, validation, throttle, unavailable service and network failure
+AUTH_EXIT_CODE=0
+
+> studyplan-frontend@1.1.0 test:workspace
+> node tests/workspace.browser.cjs
+
+PASS: selected-node goal, neutral labels, exact chapter URL, refresh position and subknowledge
+WORKSPACE_EXIT_CODE=0

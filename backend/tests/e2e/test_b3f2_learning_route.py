@@ -9,6 +9,7 @@ from app.main import create_app
 from fastapi.testclient import TestClient
 
 from tests.e2e.test_b2v_http_end_to_end import migrated_db as fixture_db
+from tests.e2e.test_b3_closed_loop import checkpoint_db as checkpoint_db
 
 pytestmark = pytest.mark.postgres
 
@@ -109,3 +110,48 @@ def test_unsupported_direction_never_binds_known_python_resources(migrated_db):
     draft, _, _, _ = route(client, session, "水彩构图入门")
     assert draft["source_pack_key"] == "" and draft["source_pack_version"] == 0
     assert all(not r["source_ref"] and not r["ordered_sections"] and r["fallback_search_terms"] for r in draft["stage_resources"])
+
+
+def test_mock_http_provider_full_pg_graph_and_ledger(migrated_db, checkpoint_db):
+    import json
+
+    import httpx
+    from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor
+    from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
+    from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
+    from app.infrastructure.providers.planning_demo import selected_output
+    from app.tools.seed_b3 import seed_reviewed_pack
+
+    with psycopg.connect(migrated_db.migrator_dsn) as conn:
+        seed_reviewed_pack(conn, load_pack("agent-application-v1.json"))
+    calls = []
+    def reply(request):
+        body = json.loads(request.content)
+        prompt = json.loads(body["messages"][1]["content"])
+        calls.append(prompt)
+        payload = {**prompt["context"], "domain_pack": prompt["domain_pack"]}
+        response = selected_output(prompt["purpose"], payload)
+        return httpx.Response(200, json={"model": "mock-route-model", "usage": {"prompt_tokens": 100, "completion_tokens": 200},
+                                       "choices": [{"finish_reason": "stop", "message": {"content": json.dumps(response)}}]})
+    settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
+    container = build_container(settings)
+    with httpx.Client(transport=httpx.MockTransport(reply)) as transport:
+        provider = OpenAICompatibleLLM(base_url="https://mock.example/v1", api_key="test", model="mock-route-model", client=transport)
+        ledger = PgAttemptLLM(migrated_db.app_dsn, provider)
+        container.plan_service._llm = ledger
+        container.plan_service._executor = PgPlanningExecutor(checkpoint_db.migrator_dsn, llm=ledger)
+        with TestClient(create_app(container)) as client:
+            session = client.post("/api/v1/auth/register", json={"username": "适配器完整路线", "password": "123456"}).json()
+            draft, url, suffix, headers = route(client, session, "Agent应用开发与知识助手")
+            assert len(draft["stages"]) == 9 and draft["source_pack_key"] == "agent.application"
+            assert [c["purpose"] for c in calls] == ["planning.outline", "planning.structure", "planning.practice"]
+            assert all(c["domain_pack"]["pack_key"] == "agent.application" for c in calls)
+            body = {"decision": "approve", "expected_version": 0, "draft_hash": draft["draft_hash"], "idempotency_key": "mock-full-route"}
+            approved = client.post(url + "/decision" + suffix, json=body, headers=headers)
+            assert approved.status_code == 200, approved.text
+            assert client.post(url + "/decision" + suffix, json=body, headers=headers).json()["plan"] == approved.json()["plan"]
+            assert len(calls) == 3
+            assert client.get("/api/v1/plans/current" + suffix).json() == approved.json()["plan"]
+            with psycopg.connect(migrated_db.migrator_dsn) as conn:
+                attempts = conn.execute("SELECT status,input_tokens,output_tokens FROM ai_provider_attempts WHERE run_id IN (SELECT run_id FROM ai_runs WHERE project_id=%s)", (session["project_ids"][0],)).fetchall()
+                assert attempts == [("succeeded", 100, 200)] * 3

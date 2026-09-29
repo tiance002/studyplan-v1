@@ -1,0 +1,230 @@
+{
+  "registration": true,
+  "publication": true,
+  "refresh": true,
+  "results": [
+    {
+      "width": 1366,
+      "nav": 150.25,
+      "plan": 232.21875,
+      "canvas": 983.53125,
+      "overflow": false,
+      "headings": [
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        }
+      ],
+      "chapterLinks": [
+        "https://docs.python.org/3.14/tutorial/venv.html",
+        "https://docs.python.org/3.14/tutorial/controlflow.html"
+      ],
+      "assistantDrag": true
+    },
+    {
+      "width": 1440,
+      "nav": 158.390625,
+      "plan": 244.796875,
+      "canvas": 1036.8125,
+      "overflow": false,
+      "headings": [
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        }
+      ],
+      "chapterLinks": [
+        "https://docs.python.org/3.14/tutorial/venv.html",
+        "https://docs.python.org/3.14/tutorial/controlflow.html"
+      ],
+      "assistantDrag": true
+    },
+    {
+      "width": 1920,
+      "nav": 211.1875,
+      "plan": 326.390625,
+      "canvas": 1382.421875,
+      "overflow": false,
+      "headings": [
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        },
+        {
+          "size": "13px",
+          "weight": "600"
+        }
+      ],
+      "chapterLinks": [
+        "https://docs.python.org/3.14/tutorial/venv.html",
+        "https://docs.python.org/3.14/tutorial/controlflow.html"
+      ],
+      "assistantDrag": true
+    }
+  ],
+  "errors": []
+}
