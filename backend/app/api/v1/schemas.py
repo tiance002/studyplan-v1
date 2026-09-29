@@ -136,6 +136,13 @@ class StageResourceAssignmentView(BaseModel):
     source_version: int = Field(default=0, ge=0)
     ordered_sections: list[OrderedSection] = Field(default_factory=list)
     fallback_search_terms: list[str] = Field(default_factory=list)
+    node_ids: list[str] = Field(default_factory=list)
+    title: str = ""
+    media_type: str = ""
+    language: str = ""
+    documentation_version: str = ""
+    verification_status: str = "unverified"
+    warnings: list[str] = Field(default_factory=list)
 
 
 class KnowledgeExtensionView(BaseModel):
@@ -275,10 +282,13 @@ class ProgressPatchRequest(BaseModel):
 
 class WorkspaceNodeView(NodeView):
     prerequisite_ids: list[str] = Field(default_factory=list)
+    child_ids: list[str] = Field(default_factory=list)
+    progress: UnitProgress | None = None
 
 
 class WorkspaceUnitView(UnitView):
     node_ids: list[str] = Field(default_factory=list)
+    progress_recorded: bool = False
 
 
 class PreferenceView(BaseModel):

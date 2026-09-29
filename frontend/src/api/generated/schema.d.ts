@@ -751,6 +751,35 @@ export interface components {
             ordered_sections?: components["schemas"]["OrderedSection"][];
             /** Fallback Search Terms */
             fallback_search_terms?: string[];
+            /** Node Ids */
+            node_ids?: string[];
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+            /**
+             * Media Type
+             * @default
+             */
+            media_type: string;
+            /**
+             * Language
+             * @default
+             */
+            language: string;
+            /**
+             * Documentation Version
+             * @default
+             */
+            documentation_version: string;
+            /**
+             * Verification Status
+             * @default unverified
+             */
+            verification_status: string;
+            /** Warnings */
+            warnings?: string[];
         };
         /**
          * StageResourceRole
@@ -827,6 +856,9 @@ export interface components {
             source_status: string;
             /** Prerequisite Ids */
             prerequisite_ids?: string[];
+            /** Child Ids */
+            child_ids?: string[];
+            progress?: components["schemas"]["UnitProgress"] | null;
         };
         /** WorkspaceUnitView */
         WorkspaceUnitView: {
@@ -844,6 +876,11 @@ export interface components {
             progress: components["schemas"]["UnitProgress"];
             /** Node Ids */
             node_ids?: string[];
+            /**
+             * Progress Recorded
+             * @default false
+             */
+            progress_recorded: boolean;
         };
         /**
          * PlanSnapshot

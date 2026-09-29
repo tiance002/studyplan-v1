@@ -1632,6 +1632,45 @@
             },
             "type": "array",
             "title": "Fallback Search Terms"
+          },
+          "node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Node Ids"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": ""
+          },
+          "media_type": {
+            "type": "string",
+            "title": "Media Type",
+            "default": ""
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": ""
+          },
+          "documentation_version": {
+            "type": "string",
+            "title": "Documentation Version",
+            "default": ""
+          },
+          "verification_status": {
+            "type": "string",
+            "title": "Verification Status",
+            "default": "unverified"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
           }
         },
         "type": "object",
@@ -1835,6 +1874,23 @@
             },
             "type": "array",
             "title": "Prerequisite Ids"
+          },
+          "child_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Child Ids"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UnitProgress"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -1885,6 +1941,11 @@
             },
             "type": "array",
             "title": "Node Ids"
+          },
+          "progress_recorded": {
+            "type": "boolean",
+            "title": "Progress Recorded",
+            "default": false
           }
         },
         "type": "object",

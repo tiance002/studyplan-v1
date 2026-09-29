@@ -17,8 +17,9 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass
-from typing import Mapping, Sequence
+from typing import Any, Mapping, Sequence
 
 from app.domain.enums import StageResourceRole
 from app.domain.resources.curation import (
@@ -40,6 +41,40 @@ __all__ = [
 _DEFAULT_FALLBACK = "该阶段 学习资源"
 
 
+def restrict_pack_resources(state: Mapping[str, Any], pack: Mapping[str, Any]) -> dict[str, Any]:
+    """A real catalog row is insufficient: it must belong to this selected pack."""
+    result = deepcopy(dict(state))
+    sources = {s["source_id"]: s for s in pack.get("resources", [])}
+    approved_urls = {section["url"] for source in sources.values() for section in source.get("sections", [])}
+    for stage in (result.get("outline") or {}).get("sections", []):
+        stage_nodes = {n for u in result.get("units", []) if u.get("section_key") == stage["stable_key"]
+                       for n in u.get("node_keys", [])}
+        for item in stage.get("resources", []):
+            source = sources.get(item.get("source_ref"))
+            sections = {s["section_id"]: s for s in source.get("sections", [])} if source else {}
+            refs = item.get("section_refs", [])
+            valid = bool(source and refs and item.get("source_version") == source["source_version"]
+                         and all(ref in sections for ref in refs))
+            if valid and source is not None and pack.get("pack_key") == "agent.application":
+                valid = source.get("verification_status") == "reviewed" and all(
+                    sections[ref].get("verification_status") == "reviewed" for ref in refs)
+                applicable = {k for ref in refs for k in sections[ref].get("applicable_node_keys", [])}
+                linked = set(item.get("node_keys") or stage_nodes) & stage_nodes & applicable
+                valid = valid and bool(linked)
+                item["node_keys"] = sorted(linked)
+            else:
+                item["node_keys"] = sorted(set(item.get("node_keys") or stage_nodes) & stage_nodes)
+            if not valid:
+                item.update(source_ref="", section_refs=[], source_version=0)
+                item["fallback_search_terms"] = item.get("fallback_search_terms") or [stage["title"] + " 官方文档 教程"]
+        for extension in stage.get("extensions", []):
+            links = extension.get("links", [])
+            extension["links"] = [url for url in links if url in approved_urls]
+            if len(extension["links"]) != len(links):
+                extension["search_hints"] = extension.get("search_hints") or [extension.get("topic", stage["title"]) + " 官方文档"]
+    return result
+
+
 @dataclass(frozen=True, slots=True)
 class StageResourceView:
     """阶段资源分配的可展示视图（已核验章节 + 显式降级说明）。"""
@@ -53,6 +88,12 @@ class StageResourceView:
     ordered_sections: tuple[ResolvedSection, ...]
     fallback_search_terms: tuple[str, ...]
     warnings: tuple[str, ...]
+    node_ids: tuple[str, ...] = ()
+    title: str = ""
+    media_type: str = ""
+    language: str = ""
+    documentation_version: str = ""
+    verification_status: str = "unverified"
 
     @property
     def degraded(self) -> bool:
@@ -103,6 +144,12 @@ def resolve_stage_resources(
                 ordered_sections=resolved.sections,
                 fallback_search_terms=resolved.fallback_search_terms,
                 warnings=resolved.warnings,
+                node_ids=assignment.node_ids,
+                title=source.title if source else "",
+                media_type=source.media_type if source else "",
+                language=source.language if source else "",
+                documentation_version=source.documentation_version if source else "",
+                verification_status=source.verification_status if source and not resolved.degraded else "unverified",
             )
         )
     return tuple(views)
@@ -150,6 +197,7 @@ def normalize_stage_resources(
                 order_index=assignment.order_index,
                 source_version=0,
                 fallback_search_terms=fallback,
+                node_ids=assignment.node_ids,
             )
         )
     return tuple(normalized)

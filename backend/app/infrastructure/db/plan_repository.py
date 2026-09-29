@@ -137,6 +137,7 @@ def _assignment_payload(a: StageResourceAssignment) -> dict[str, Any]:
         "order_index": a.order_index,
         "source_version": a.source_version,
         "fallback_search_terms": list(a.fallback_search_terms),
+        **({"node_ids": list(a.node_ids)} if a.node_ids else {}),
     }
 
 
@@ -237,6 +238,7 @@ def _assignment_from(row: dict[str, Any], *, project_id: str, plan_id: str) -> S
         source_version=int(row.get("source_version") or 0),
         fallback_search_terms=tuple(str(s) for s in _as_list(row.get("fallback_search_terms"))),
         snapshot_at=row.get("snapshot_at"),  # type: ignore[arg-type]
+        node_ids=tuple(str(n) for n in _as_list(row.get("node_ids"))),
     )
 
 
@@ -689,8 +691,8 @@ class PgPlanRepository:
                         INSERT INTO stage_resource_assignments
                             (assignment_id, project_id, plan_id, stage_id, role, source_ref,
                              section_refs, order_index, source_version, fallback_search_terms,
-                             snapshot_at)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                             snapshot_at, node_ids)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         """,
                         (
                             assignment.assignment_id,
@@ -705,6 +707,7 @@ class PgPlanRepository:
                             assignment.source_version,
                             Jsonb(list(assignment.fallback_search_terms)),
                             assignment.snapshot_at,
+                            Jsonb(list(assignment.node_ids)),
                         ),
                     )
                 for extension in revision.extensions:

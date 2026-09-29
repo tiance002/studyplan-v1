@@ -38,10 +38,11 @@ function App() {
       ? (location.hash.slice(1) as Page)
       : "dashboard",
   );
-  const [stageId, setStageId] = useState(""),
-    [nodeId, setNodeId] = useState(""),
-    [fake, setFake] = useState<boolean | null>(null);
+  const [position, setPosition] = useState({ stage: "", node: "", storageKey: "" });
+  const [fake, setFake] = useState<boolean | null>(null);
+  const stageId = position.stage, nodeId = position.node;
   const project = session?.project_ids[0] || "";
+  const positionKey = workspace ? `studyplan-position:${session?.username}:${project}:${workspace.plan.revision}` : "";
   function navigate(p: Page) {
     location.hash = p;
     setPage(p);
@@ -74,42 +75,37 @@ function App() {
   }
   useEffect(() => {
     setWorkspace(null);
-    setStageId("");
-    setNodeId("");
+    setPosition({ stage: "", node: "", storageKey: "" });
     if (project) refresh().catch((e) => setError(e.message));
   }, [project]);
   useEffect(() => {
     if (!workspace) return;
-    const key = `studyplan-position:${project}:${workspace.plan.revision}`;
     let saved: { stage: string; node: string } | null = null;
     try {
-      saved = JSON.parse(localStorage.getItem(key) || "null");
+      saved = JSON.parse(localStorage.getItem(positionKey) || localStorage.getItem(`studyplan-position:${project}:${workspace.plan.revision}`) || "null");
     } catch {}
     const stage =
       workspace.stages.find((s) => s.stage.stage_id === saved?.stage) ||
       workspace.stages[0];
-    setStageId(stage?.stage.stage_id || "");
-    setNodeId(
-      stage?.nodes.find((n) => n.node_id === saved?.node)?.node_id ||
-        stage?.nodes[0]?.node_id ||
-        "",
-    );
-  }, [workspace, project]);
+    setPosition({ stage: stage?.stage.stage_id || "", storageKey: positionKey,
+      node: stage?.nodes.find((n) => n.node_id === saved?.node)?.node_id || stage?.nodes[0]?.node_id || "" });
+  }, [workspace, project, positionKey]);
   useEffect(() => {
-    if (workspace && stageId)
+    if (workspace && stageId && position.storageKey === positionKey &&
+        workspace.stages.some(s => s.stage.stage_id === stageId && (!nodeId || s.nodes.some(n => n.node_id === nodeId))))
       localStorage.setItem(
-        `studyplan-position:${project}:${workspace.plan.revision}`,
+        positionKey,
         JSON.stringify({ stage: stageId, node: nodeId }),
       );
-  }, [stageId, nodeId, workspace, project]);
+  }, [stageId, nodeId, workspace, positionKey, position.storageKey]);
   const stage = workspace?.stages.find((s) => s.stage.stage_id === stageId);
   function selectStage(id: string) {
-    setStageId(id);
-    setNodeId(
-      workspace?.stages.find((s) => s.stage.stage_id === id)?.nodes[0]
-        ?.node_id || "",
-    );
+    setPosition({ storageKey: positionKey, stage: id,
+      node: workspace?.stages.find((s) => s.stage.stage_id === id)?.nodes[0]?.node_id || "" });
     navigate("workspace");
+  }
+  function selectNode(id: string) {
+    if (stage?.nodes.some(n => n.node_id === id)) setPosition({ storageKey: positionKey, stage: stageId, node: id });
   }
   async function logout() {
     try {
@@ -143,7 +139,7 @@ function App() {
       stageId={stageId}
       nodeId={nodeId}
       selectStage={selectStage}
-      selectNode={setNodeId}
+      selectNode={selectNode}
       logout={logout}
     >
       {error && (
@@ -188,7 +184,7 @@ function App() {
           stage={stage}
           nodeId={nodeId}
           allNodes={workspace?.stages.flatMap((s) => s.nodes) || []}
-          selectNode={setNodeId}
+          selectNode={selectNode}
           create={() => navigate("planning")}
         />
       )}

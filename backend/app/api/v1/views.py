@@ -95,6 +95,13 @@ def resource_view(view: StageResourceView) -> StageResourceAssignmentView:
         creator=view.creator,
         source_ref=view.source_ref,
         source_version=view.source_version,
+        node_ids=list(view.node_ids),
+        title=view.title,
+        media_type=view.media_type,
+        language=view.language,
+        documentation_version=view.documentation_version,
+        verification_status=view.verification_status,
+        warnings=list(view.warnings),
         ordered_sections=[
             OrderedSection(
                 section_id=s.section_id,

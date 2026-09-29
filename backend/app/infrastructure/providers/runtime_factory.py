@@ -3,7 +3,6 @@ from dataclasses import replace
 
 from app.core.errors import ValidationAppError
 from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor
-from app.infrastructure.domain_pack import load_python_pack
 from app.infrastructure.providers import build_llm
 from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
 from app.infrastructure.providers.endpoint_policy import ModelEndpointPolicy
@@ -31,7 +30,7 @@ class PersonalPlanningRuntimeFactory:
                 raise ValidationAppError("Unsupported model API protocol")
             provider = OpenAICompatibleLLM(base_url=selected.base_url,api_key=selected.api_key,model=selected.model_id,
                 timeout=self.settings.llm_timeout_seconds,max_tokens=self.settings.llm_max_output_tokens,
-                domain_pack=load_python_pack(),endpoint_guard=self.policy.validate)
+                endpoint_guard=self.policy.validate)
             provider.configuration_ref = f"personal:{scope.actor_id}:{selected.version}"
         else:
             # Do not select Fake when a personal setting is absent or revoked.

@@ -34,6 +34,8 @@ def _source_from(row: dict[str, Any]) -> PublicResourceSource:
         provenance=str(row.get("provenance") or ""),
         checked_at=row.get("checked_at"),  # type: ignore[arg-type]
         created_at=row.get("created_at"),  # type: ignore[arg-type]
+        documentation_version=str(row.get("documentation_version") or ""),
+        verification_status=str(row.get("verification_status") or "legacy_index"),
     )
 
 
@@ -48,6 +50,8 @@ def _section_from(row: dict[str, Any]) -> PublicResourceSection:
         url=url,
         anchor=str(row.get("anchor") or ""),
         checked_at=row.get("checked_at"),  # type: ignore[arg-type]
+        verification_status=str(row.get("verification_status") or "legacy_index"),
+        review_note=str(row.get("review_note") or ""),
     )
 
 

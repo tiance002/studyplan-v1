@@ -57,7 +57,9 @@ export function LearningPlanSidebar({
             onClick={() => selectNode(n.node_id)}
           >
             <span className="side-title">{n.title}</span>
-            <small title="生成内容尚未完成学习核验">待学习</small>
+            <small title={n.progress ? "已记录的节点学习状态" : "该知识节点尚无学习进度记录"}>
+              {n.progress === "completed" ? "已完成" : n.progress === "in_progress" ? "学习中" : "知识节点"}
+            </small>
           </button>
         ))}
         {!stage?.nodes.length && <p className="side-empty">暂无知识节点</p>}

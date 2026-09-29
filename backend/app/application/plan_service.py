@@ -42,6 +42,7 @@ from app.application.plan_resources import (
     StageResourceView,
     normalize_stage_resources,
     resolve_stage_resources,
+    restrict_pack_resources,
 )
 from app.core.errors import ConflictError, NotFoundError, ValidationAppError
 from app.core.ids import new_id
@@ -137,6 +138,7 @@ class PlanService:
         planning_executor: PlanningExecutorPort | None = None,
         runtime_factory: Callable[[AuthContext,str,str],PlanningRuntime] | None = None,
         run_timeout_seconds: int = 1800,
+        domain_pack_selector: Callable[[str], dict[str, Any]] | None = None,
     ) -> None:
         self._repo = repository
         self._runs = runs
@@ -150,6 +152,7 @@ class PlanService:
         self._source_pack_version = source_pack_version
         self._publication = PlanPublicationService(repository)
         self._run_timeout_seconds = run_timeout_seconds
+        self._domain_pack_selector = domain_pack_selector
 
     # ------------------------------------------------------------------ 生成
 
@@ -195,11 +198,14 @@ class PlanService:
             "goal": cleaned_goal,
             "prefs_snapshot": dict(prefs_snapshot or {}),
         }
+        selected_pack = self._domain_pack_selector(cleaned_goal) if self._domain_pack_selector else None
+        if selected_pack is not None:
+            initial["domain_pack"] = selected_pack
         try:
             runtime = self._runtime_factory(scope,project_id,run_id) if self._runtime_factory else None
             executor = runtime.executor if runtime else self._executor
             nodes = self._build_nodes(project_id=project_id, run_id=run_id, goal=cleaned_goal,
-                                      llm=runtime.llm if runtime else None)
+                                      llm=runtime.llm if runtime else None, selected_pack=selected_pack)
             trace = (executor.execute(nodes, initial, thread_id)
                      if executor is not None else run_planning_graph(nodes, initial))
         except LLMDispatchUnknownError:
@@ -404,12 +410,13 @@ class PlanService:
             resources=self._resolve(final_draft.stage_resources, final_draft.stages),
         )
 
-    def _build_nodes(self, *, project_id: str, run_id: str, goal: str, llm: LLMPort | None = None) -> PlanningNodes:
+    def _build_nodes(self, *, project_id: str, run_id: str, goal: str, llm: LLMPort | None = None,
+                     selected_pack: Mapping[str, Any] | None = None) -> PlanningNodes:
         """装配图节点，并把「保存草案」接回应用层的投影 + 物化 + 仓储。"""
 
         def save_draft(state: PlanningState) -> dict[str, str]:
             return self._persist_draft(
-                project_id=project_id, run_id=run_id, goal=goal, state=state
+                project_id=project_id, run_id=run_id, goal=goal, state=state, selected_pack=selected_pack
             )
 
         return PlanningNodes(
@@ -423,9 +430,12 @@ class PlanService:
         )
 
     def _persist_draft(
-        self, *, project_id: str, run_id: str, goal: str, state: PlanningState
+        self, *, project_id: str, run_id: str, goal: str, state: PlanningState,
+        selected_pack: Mapping[str, Any] | None = None,
     ) -> dict[str, str]:
         """把图产物投影为 ``PlanDraft`` 并持久化（B2-V §三 §五）。"""
+        if selected_pack is not None:
+            state = restrict_pack_resources(state, selected_pack)  # type: ignore[assignment]
         catalog_ids = self._catalog.materialize(
             project_id=project_id,
             nodes=list(state.get("nodes") or []),
@@ -442,8 +452,8 @@ class PlanService:
             revision_candidate=revision_candidate,
             state=state,
             catalog=catalog_ids,
-            source_pack_key=self._source_pack_key,
-            source_pack_version=self._source_pack_version,
+            source_pack_key=str(selected_pack.get("pack_key", "")) if selected_pack is not None else self._source_pack_key,
+            source_pack_version=int(selected_pack.get("version", 0)) if selected_pack is not None else self._source_pack_version,
         )
         # §五：落库前把无法核验的公共资源引用降级为搜索建议，
         # 使正式版本的 source_ref 外键不会指向不存在的来源。

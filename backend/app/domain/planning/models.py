@@ -191,6 +191,8 @@ def _structure_payload(
                 "source_version": a.source_version,
                 # B2-V §四：搜索建议也是用户可见内容，必须进指纹。
                 "fallback_search_terms": list(a.fallback_search_terms),
+                # Omit an empty new field so pre-0010 hashes stay byte-compatible.
+                **({"node_ids": list(a.node_ids)} if a.node_ids else {}),
             }
             for a in stage_resources
         ],
@@ -579,6 +581,7 @@ def build_revision_snapshot(
                 order_index=a.order_index,
                 source_version=a.source_version,
                 fallback_search_terms=a.fallback_search_terms,
+                node_ids=a.node_ids,
             )
             for a in stage_resources
         ),

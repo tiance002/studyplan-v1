@@ -1,5 +1,7 @@
 """Explicit local Fake LLM scenario. Never claims a cloud call or verified resource."""
 
+from copy import deepcopy
+
 from app.infrastructure.providers.fake import FakeLLM
 
 TOPICS = [
@@ -90,5 +92,79 @@ def practice(purpose, payload):
 
 def build_planning_demo():
     return FakeLLM(
-        {"planning.outline": outline, "planning.structure": structure, "planning.practice": practice}
+        {"planning.outline": selected_output, "planning.structure": selected_output,
+         "planning.practice": selected_output, "planning.repair": selected_output}
     )
+
+
+def selected_output(purpose, payload):
+    """Exercise the existing graph using reviewed blueprints, with no cloud call."""
+    if "domain_pack" not in payload:
+        return {"planning.outline": outline, "planning.structure": structure,
+                "planning.practice": practice}.get(purpose, structure)(purpose, payload)
+    pack = payload["domain_pack"]
+    sections = deepcopy(pack.get("stage_blueprints", []))
+    goal = str(payload.get("goal", "学习目标"))
+    if not sections:
+        sections = [
+            {"stable_key": f"stage.general.{i}", "title": f"{goal}：{title}", "section_kind": kind,
+             "objective": f"围绕“{goal}”完成{objective}", "extensions": [],
+             "resources": [{"role": "primary", "source_ref": "", "section_refs": [],
+                            "source_version": 0, "order_index": 0,
+                            "fallback_search_terms": [goal + " " + title + " 教程"]}]}
+            for i, (title, kind, objective) in enumerate([
+                ("基础与范围", "foundation", "必要概念与前置条件梳理"),
+                ("核心方法", "core", "核心方法的对照练习"),
+                ("实践与验证", "practice", "可展示的作品与结果检查"),
+            ])
+        ]
+    nodes = deepcopy(pack.get("knowledge_blueprints", []))
+    if not nodes:
+        nodes = [{"stable_key": f"node.scope.{i}", "title": s["title"], "node_type": "concept",
+                  "objectives": [s["objective"]]} for i, s in enumerate(sections)]
+        for i, section in enumerate(sections):
+            section["node_keys"] = [f"node.scope.{i}"]
+    units = []
+    for i, section in enumerate(sections):
+        unit_nodes = section["node_keys"]
+        units.append({"stable_key": "unit." + section["stable_key"], "title": section["title"],
+                      "section_key": section["stable_key"], "order_index": i,
+                      "node_keys": unit_nodes, "objectives": [section["objective"]]})
+        for resource in section.get("resources", []):
+            resource.setdefault("node_keys", unit_nodes)
+    relations = []
+    for node in nodes:
+        for dep in node.get("prerequisite_keys", []):
+            relations.append({"from_stable_key": dep, "to_stable_key": node["stable_key"],
+                              "relation_type": "prerequisite"})
+        if node.get("parent_key"):
+            relations.append({"from_stable_key": node["parent_key"], "to_stable_key": node["stable_key"],
+                              "relation_type": "contains"})
+    if not relations:
+        relations = [{"from_stable_key": nodes[i - 1]["stable_key"], "to_stable_key": nodes[i]["stable_key"],
+                      "relation_type": "prerequisite"} for i in range(1, len(nodes))]
+    templates = {t.get("section_key"): t for t in pack.get("practice_blueprints", [])}
+    tasks = []
+    task_links = []
+    for i, section in enumerate(sections):
+        template = templates.get(section["stable_key"], {})
+        key = str(template.get("stable_key", "task." + section["stable_key"]))
+        linked_nodes = template.get("node_keys", section["node_keys"][:1])
+        links = [{"node_stable_key": n, "role": "core"} for n in linked_nodes]
+        tasks.append({"stable_key": key, "title": template.get("title", section["title"] + "阶段练习"),
+                      "section_key": section["stable_key"], "order_index": i,
+                      "goal": template.get("goal", section["objective"]), "knowledge_links": links,
+                      "in_scope": template.get("in_scope", [section["objective"]]),
+                      "out_scope": template.get("out_scope", []),
+                      "acceptance": template.get("acceptance", ["展示练习结果并说明验证步骤和已知限制"]),
+                      })
+        task_links.extend({"task_stable_key": key, **link} for link in links)
+    proposal = {"stable_key": "practice.route", "title": goal + "实践", "idea": goal,
+                "tasks": tasks, "task_knowledge_links": task_links}
+    outputs = {
+        "planning.outline": {"outline_ref": "fake-reviewed-skeleton", "sections": sections},
+        "planning.structure": {"nodes": nodes, "units": units, "relations": relations},
+        "planning.practice": proposal,
+        "planning.repair": {"nodes": nodes, "units": units, "relations": relations, "practice_proposal": proposal},
+    }
+    return outputs[purpose]

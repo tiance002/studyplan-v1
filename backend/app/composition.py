@@ -70,7 +70,6 @@ def build_container(settings: Settings) -> AppContainer:
         llm = UnconfiguredLLM()
     executor = None
     runtime_factory = None
-    pack_key, pack_version = "", 0
     if not settings.use_fake_llm:
         from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor
         from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -84,7 +83,7 @@ def build_container(settings: Settings) -> AppContainer:
             raise RuntimeError("Business and checkpoint databases must be separate")
         executor = PgPlanningExecutor(to_psycopg_dsn(settings.checkpoint_database_url),llm=llm)
         runtime_factory = PersonalPlanningRuntimeFactory(settings,model_repository)
-        pack_key, pack_version = "python.engineering", 1
+    from app.infrastructure.domain_pack import select_domain_pack
     plan_service = PlanService(
         repository=PgPlanRepository(dsn),
         runs=PgRunRepository(dsn),
@@ -92,7 +91,7 @@ def build_container(settings: Settings) -> AppContainer:
         resources=PgPublicResourceCatalog(dsn),
         llm=llm,
         graph_version=settings.graph_version or GRAPH_VERSION,
-        planning_executor=executor,source_pack_key=pack_key,source_pack_version=pack_version,
+        planning_executor=executor,domain_pack_selector=select_domain_pack,
         runtime_factory=runtime_factory,
         run_timeout_seconds=max(1800, 3 * (settings.graph_max_repair_attempts + 1) * settings.llm_timeout_seconds + 300),
     )

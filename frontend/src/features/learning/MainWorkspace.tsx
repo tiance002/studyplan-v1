@@ -3,9 +3,11 @@ import { Resources } from "../../components/Resources";
 export function KnowledgeNodeView({
   node,
   allNodes,
+  selectNode,
 }: {
   node: DTO["WorkspaceNodeView"];
   allNodes: DTO["WorkspaceNodeView"][];
+  selectNode: (id: string) => void;
 }) {
   return (
     <section className="panel node-detail">
@@ -26,6 +28,19 @@ export function KnowledgeNodeView({
         </ul>
       ) : (
         <p className="muted">该节点暂无补充学习目标。</p>
+      )}
+      {!!node.child_ids?.length && (
+        <>
+          <h3>子知识</h3>
+          <div className="chips">
+            {node.child_ids.map((id) => (
+              <button className="btn" key={id} onClick={() => selectNode(id)}
+                title={allNodes.find((n) => n.node_id === id)?.objectives?.join("；")}>
+                {allNodes.find((n) => n.node_id === id)?.title || "关联子知识"}
+              </button>
+            ))}
+          </div>
+        </>
       )}
       <h3>前置知识</h3>
       {node.prerequisite_ids?.length ? (
@@ -94,13 +109,13 @@ export function MainWorkspace({
               </button>
             ))}
           </div>
-          {node && <KnowledgeNodeView node={node} allNodes={allNodes} />}
+          {node && <KnowledgeNodeView node={node} allNodes={allNodes} selectNode={selectNode} />}
           <div className="section-heading">
             <h2>学习资源</h2>
             <span className="muted">资料来源如实标记</span>
           </div>
           <section className="panel">
-            <Resources items={stage.resources} />
+            <Resources items={stage.resources.filter((r) => !r.node_ids?.length || r.node_ids.includes(node?.node_id || ""))} />
           </section>
           <div className="section-heading">
             <h2>学习单元</h2>
@@ -111,7 +126,7 @@ export function MainWorkspace({
                 <span className="task-circle" />
                 <strong>{u.title}</strong>
                 <small>
-                  {u.progress === "completed"
+                  {!u.progress_recorded ? "学习单元" : u.progress === "completed"
                     ? "已完成"
                     : u.progress === "in_progress"
                       ? "学习中"
@@ -120,7 +135,7 @@ export function MainWorkspace({
               </div>
             ))}
             <p className="form-note">
-              当前显示已记录的学习进度。进度记录和总结评审将在后续开放。
+              有进度记录时显示实际状态。进度记录和总结评审将在后续开放。
             </p>
           </section>
         </>

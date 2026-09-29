@@ -139,7 +139,7 @@ export function PlanningPage({
           <div className="section-heading">
             <p className="form-note">
               {fake === true
-                ? "Fake LLM 本地演示 · 预设 Agent 学习场景，无云模型调用"
+                ? "Fake LLM 本地演示 · 按领域蓝图生成，无云模型调用"
                 : fake === false
                   ? "当前使用已有个人或部署模型配置 · 生成可能产生服务商费用"
                   : "正在读取模型运行模式…"}
@@ -157,6 +157,7 @@ export function PlanningPage({
             </button>
           </div>
         </form>
+        <p className="form-note">支持 Agent 应用开发与 Python 工程入门；其他方向生成通用结构，仅提供资料搜索建议。</p>
       </section>
       {run && (
         <div className="run-banner" role="status">

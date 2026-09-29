@@ -37,7 +37,11 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping
 
 from app.agent_workflows.state import PlanningState
-from app.agent_workflows.validators import MAX_REPAIR_ATTEMPTS, validate_plan_structure
+from app.agent_workflows.validators import (
+    MAX_REPAIR_ATTEMPTS,
+    validate_plan_structure,
+    validate_route_structure,
+)
 from app.ports.llm import LLMDispatchUnknownError, LLMFailure, LLMPort
 
 #: 路由目标常量。
@@ -207,7 +211,8 @@ class PlanningNodes:
         """
         result = self.llm.generate_structured(
             purpose="planning.outline",
-            payload={"goal": state.get("goal"), "prefs": state.get("prefs_snapshot")},
+            payload={"goal": state.get("goal"), "prefs": state.get("prefs_snapshot"),
+                     **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {})},
             schema_name="OutlineV1",
             run_id=state.get("run_id", ""),
             attempt_id=f"{state.get('run_id', '')}:outline:1",
@@ -250,7 +255,8 @@ class PlanningNodes:
         outline = state.get("outline") or {}
         result = self.llm.generate_structured(
             purpose="planning.structure",
-            payload={"goal": state.get("goal"), "outline": outline},
+            payload={"goal": state.get("goal"), "outline": outline,
+                     **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {})},
             schema_name="KnowledgeStructureV1",
             run_id=state.get("run_id", ""),
             attempt_id=f"{state.get('run_id', '')}:structure:1",
@@ -299,7 +305,9 @@ class PlanningNodes:
         """
         result = self.llm.generate_structured(
             purpose="planning.practice",
-            payload={"goal": state.get("goal"), "units": state.get("units") or []},
+            payload={"goal": state.get("goal"), "units": state.get("units") or [],
+                     "outline": state.get("outline") or {}, "nodes": state.get("nodes") or [],
+                     **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {})},
             schema_name="PracticeProposalV1",
             run_id=state.get("run_id", ""),
             attempt_id=f"{state.get('run_id', '')}:practice:1",
@@ -336,7 +344,7 @@ class PlanningNodes:
             tasks=list(proposal.get("tasks") or []),
             task_knowledge_links=list(proposal.get("task_knowledge_links") or []),
         )
-        return _with_aggregate({"structure_errors": list(outcome.errors)}, state)
+        return _with_aggregate({"structure_errors": list(outcome.errors) + validate_route_structure(state)}, state)
 
     def repair_content(self, state: PlanningState) -> dict[str, Any]:
         """有界修复：把校验错误回灌给模型重生成。
@@ -353,6 +361,7 @@ class PlanningNodes:
             purpose="planning.repair",
             payload={
                 "goal": state.get("goal"),
+                **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {}),
                 # 回灌**本轮**校验错误，而不是历史错误。
                 "errors": list(state.get("structure_errors") or state.get("validation_errors") or []),
                 "outline": state.get("outline") or {},

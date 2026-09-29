@@ -59,6 +59,8 @@ class PublicResourceSource:
     provenance: str = ""
     checked_at: datetime | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    documentation_version: str = ""
+    verification_status: str = "legacy_index"
 
     @staticmethod
     def create(
@@ -103,6 +105,8 @@ class PublicResourceSection:
     url: str
     anchor: str = ""
     checked_at: datetime | None = None
+    verification_status: str = "legacy_index"
+    review_note: str = ""
 
     @staticmethod
     def create(
@@ -157,6 +161,7 @@ class StageResourceAssignment:
     source_version: int = 0
     fallback_search_terms: tuple[str, ...] = ()
     snapshot_at: datetime | None = None
+    node_ids: tuple[str, ...] = ()
 
     @staticmethod
     def create(
@@ -171,6 +176,7 @@ class StageResourceAssignment:
         source_version: int = 0,
         fallback_search_terms: tuple[str, ...] = (),
         now: datetime | None = None,
+        node_ids: tuple[str, ...] = (),
     ) -> "StageResourceAssignment":
         for name, value in (("project_id", project_id), ("stage_id", stage_id)):
             if not value:
@@ -194,6 +200,7 @@ class StageResourceAssignment:
             source_version=source_version,
             fallback_search_terms=fallback,
             snapshot_at=now or datetime.now(timezone.utc),
+            node_ids=tuple(node_ids),
         )
 
     def bound_to_plan(self, plan_id: str) -> "StageResourceAssignment":
@@ -425,6 +432,10 @@ def resolve_assignment_output(
         warnings.append("未指定已核验资源来源，仅提供搜索建议")
     elif source is None:
         warnings.append(f"引用的资源来源不存在：{source_ref}；已降级为搜索建议")
+    elif source.verification_status == "unverified" or (source.verification_status == "reviewed" and source.checked_at is None):
+        warnings.append("资源来源未完成内容与索引核对；已降级为搜索建议")
+    elif assignment.source_version and assignment.source_version != source.source_version:
+        warnings.append("资源版本与已确认索引不一致；已降级为搜索建议")
     else:
         for ref in assignment.section_refs:
             section = known_sections.get(ref)
@@ -433,6 +444,9 @@ def resolve_assignment_output(
                 continue
             if section.source_id != source_ref:
                 warnings.append(f"章节 {ref} 不属于来源 {source_ref}")
+                continue
+            if section.verification_status == "unverified" or (section.verification_status == "reviewed" and section.checked_at is None):
+                warnings.append(f"章节未完成内容与索引核对：{ref}")
                 continue
             sections.append(
                 ResolvedSection(

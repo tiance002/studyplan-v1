@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any, Mapping
 
 from app.domain.catalog.models import (
     KnowledgeRelation,
@@ -241,6 +242,58 @@ def _check_soft_limits(
             )
 
 
+def validate_route_structure(state: Mapping[str, Any]) -> list[str]:
+    """Guard complete per-run routes before projection; legacy states keep their contract."""
+    if "domain_pack" not in state:
+        return []
+    errors: list[str] = []
+    sections = (state.get("outline") or {}).get("sections", [])
+    nodes = state.get("nodes") or []
+    units = state.get("units") or []
+    tasks = (state.get("practice_proposal") or {}).get("tasks", [])
+    if not sections or any(not isinstance(s, dict) for s in sections):
+        return ["领域纲要分节无效"]
+    stage_keys = [s.get("stable_key", "") for s in sections]
+    if any(not k for k in stage_keys) or len(stage_keys) != len(set(stage_keys)):
+        errors.append("领域纲要阶段稳定键为空或重复")
+    known_nodes = {n.get("stable_key") for n in nodes if isinstance(n, dict)}
+    required = set((state.get("domain_pack") or {}).get("required_node_keys", []))
+    missing = required - known_nodes
+    if missing:
+        errors.append("领域纲要缺少必要知识分支：" + ", ".join(sorted(missing)))
+    attached_nodes: set[str] = set()
+    for unit in units:
+        if unit.get("section_key") not in stage_keys:
+            errors.append("学习单元引用未知纲要阶段：" + str(unit.get("section_key")))
+        attached_nodes.update(unit.get("node_keys") or [])
+    if known_nodes - attached_nodes:
+        errors.append("知识节点未关联到学习单元")
+    for task in tasks:
+        if task.get("section_key") not in stage_keys:
+            errors.append("实践任务引用未知纲要阶段：" + str(task.get("section_key")))
+    for section in sections:
+        key = section["stable_key"]
+        stage_units = [u for u in units if u.get("section_key") == key]
+        stage_nodes = {n for u in stage_units for n in u.get("node_keys", [])}
+        if not stage_units:
+            errors.append("纲要阶段没有学习单元：" + key)
+        if not any(t.get("section_key") == key for t in tasks):
+            errors.append("纲要阶段没有阶段实践：" + key)
+        for resource in section.get("resources", []):
+            if set(resource.get("node_keys", [])) - stage_nodes:
+                errors.append("资源知识关联不属于当前阶段：" + key)
+    relations = {(r.get("from_stable_key"), r.get("to_stable_key"), r.get("relation_type"))
+                 for r in state.get("relations", [])}
+    for blueprint in (state.get("domain_pack") or {}).get("knowledge_blueprints", []):
+        key = blueprint["stable_key"]
+        if blueprint.get("parent_key") and (blueprint["parent_key"], key, "contains") not in relations:
+            errors.append("缺少子知识关联：" + key)
+        for dep in blueprint.get("prerequisite_keys", []):
+            if (dep, key, "prerequisite") not in relations:
+                errors.append("缺少领域前置依赖：" + dep + " -> " + key)
+    return errors
+
+
 __all__ = [
     "MAX_REPAIR_ATTEMPTS",
     "SOFT_LIMIT_NODES",
@@ -248,4 +301,5 @@ __all__ = [
     "SOFT_LIMIT_UNITS",
     "ValidationOutcome",
     "validate_plan_structure",
+    "validate_route_structure",
 ]

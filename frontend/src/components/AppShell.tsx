@@ -64,6 +64,8 @@ export function AppShell({
     toggle = (panel: "nav" | "plan" | "assistant") =>
       setPanels((s) => togglePanel(s, panel, width));
   const stage = workspace?.stages.find((s) => s.stage.stage_id === stageId);
+  const node = stage?.nodes.find((n) => n.node_id === nodeId) || stage?.nodes[0];
+  const currentGoal = node?.objectives?.join("；") || stage?.stage.objective || workspace?.plan.goal_snapshot || "";
   return (
     <div
       className="app-shell"
@@ -125,8 +127,8 @@ export function AppShell({
         {page === "workspace" && workspace && (
           <div className="learning-pin">
             <span className="pill">当前目标</span>
-            <span title={workspace.plan.goal_snapshot}>
-              {workspace.plan.goal_snapshot}
+            <span title={currentGoal}>
+              {currentGoal}
             </span>
           </div>
         )}

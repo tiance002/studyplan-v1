@@ -203,6 +203,7 @@ def project_draft(
                     section_refs=tuple(_str_list(resource.get("section_refs"))),
                     order_index=_as_int(resource.get("order_index"), order),
                     source_version=_as_int(resource.get("source_version"), 0),
+                    node_ids=tuple(catalog.node_ids[k] for k in _str_list(resource.get("node_keys")) if k in catalog.node_ids),
                     fallback_search_terms=tuple(
                         _str_list(resource.get("fallback_search_terms"))
                     ),

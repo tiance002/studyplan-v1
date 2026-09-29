@@ -45,10 +45,9 @@ def build_llm(settings: Settings) -> LLMPort:
             raise ProviderConfigurationError("Fill LLM_API_KEY, LLM_MODEL_ID and LLM_BASE_URL in .env")
         if not settings.llm_base_url.startswith("https://") and not settings.is_development:
             raise ProviderConfigurationError("Provider base URL must use HTTPS")
-        from app.infrastructure.domain_pack import load_python_pack
         return OpenAICompatibleLLM(base_url=settings.llm_base_url, api_key=settings.llm_api_key,
                                    model=settings.llm_model_id,timeout=settings.llm_timeout_seconds,
-                                   max_tokens=settings.llm_max_output_tokens,domain_pack=load_python_pack())
+                                   max_tokens=settings.llm_max_output_tokens)
 
     if provider not in SUPPORTED_PROVIDERS:
         # 真实 provider 尚未实现（B3）。此处**拒绝启动**而不是悄悄用 Fake ——

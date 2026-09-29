@@ -55,6 +55,7 @@ class PlanningState(TypedDict, total=False):
     # ---- 输入 ----
     goal: str
     prefs_snapshot: dict[str, Any]
+    domain_pack: dict[str, Any]
     # ---- 生成中间产物（只存引用/结构化内容，不存完整检索文本）----
     outline_ref: str
     outline: dict[str, Any]
