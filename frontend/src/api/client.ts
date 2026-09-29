@@ -18,24 +18,33 @@ async function request<T>(
   body?: unknown,
   method?: string,
 ): Promise<T> {
-  const response = await fetch(`/api/v1${url}`, {
-    method: method ?? (body === undefined ? "GET" : "POST"),
-    credentials: "include",
-    headers: {
-      ...(body === undefined ? {} : { "Content-Type": "application/json" }),
-      ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
-    },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  const data = await response.json();
+  let response: Response;
+  try {
+    response = await fetch(`/api/v1${url}`, {
+      method: method ?? (body === undefined ? "GET" : "POST"),
+      credentials: "include",
+      headers: {
+        ...(body === undefined ? {} : { "Content-Type": "application/json" }),
+        ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch {
+    throw new ApiError(0, "无法连接服务，请检查网络连接后重试。");
+  }
+  const data = await response.json().catch(() => null);
   if (!response.ok)
     throw new ApiError(
       response.status,
-      data.message ??
-        (typeof data.detail === "string"
-          ? data.detail
-          : `请求失败（${response.status}），请检查输入或重新加载。`),
+      data?.message ??
+        (response.status >= 500
+          ? "服务暂时不可用，请稍后重试。"
+          : typeof data?.detail === "string"
+            ? data.detail
+            : `请求失败（${response.status}），请检查输入或重新加载。`),
     );
+  if (data === null)
+    throw new ApiError(response.status, "服务返回了无法读取的内容，请稍后重试。");
   return data as T;
 }
 const scope = (project: string) => `?project_id=${encodeURIComponent(project)}`;

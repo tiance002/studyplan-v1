@@ -916,6 +916,44 @@ p {
   font-size: 26px;
   margin-bottom: 7px;
 }
+.auth-modes {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin: 18px 0 24px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--stone);
+}
+.auth-modes button {
+  flex: 1;
+  padding: 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.auth-modes button[aria-pressed="true"] {
+  background: var(--accent);
+  color: white;
+}
+.auth-hint {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+.auth-card .error .text-button {
+  display: block;
+  margin-top: 10px;
+  padding: 0;
+  text-decoration: underline;
+}
 .auth-card > .muted {
   margin-bottom: 27px;
 }

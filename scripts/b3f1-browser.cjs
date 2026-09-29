@@ -16,7 +16,7 @@ const fs = require("node:fs");
   await page.waitForLoadState("networkidle");
   console.log("initial:", await page.locator("h2").allTextContents());
   await page.screenshot({path:'output/playwright/b3f1-login.png'});
-  await page.getByRole("button", { name: "还没有账号？开放注册" }).click();
+  await page.getByRole("button", { name: "注册", exact: true }).click();
   await page
     .getByLabel("用户名", { exact: true })
     .fill("浏览验收" + Date.now().toString().slice(-8));
