@@ -1,0 +1,63 @@
+B3-F2 Task 2 — durable queue / local single Worker
+Date: 2026-09-29
+Scope: Fake/MockTransport and disposable studyplan_test_* PostgreSQL only.
+DeepSeek paid calls: NOT RUN. Existing business/checkpoint databases: not migrated or cleared.
+B3-F2 overall: IN PROGRESS; batched graph, recovery, binding/progress, frontend and final acceptance remain.
+
+RED command:
+.venv/Scripts/python.exe -m pytest backend/tests/integration/test_planning_jobs_pg.py backend/tests/e2e/test_async_generation.py -q
+exit 1: ModuleNotFoundError: No module named 'app.infrastructure.db.job_repository'
+
+Final focused command:
+.venv/Scripts/python.exe -m pytest backend/tests/integration/test_planning_jobs_pg.py backend/tests/e2e/test_async_generation.py -o addopts= -q
+.............                                                            [100%]
+13 passed in 14.24s
+exit 0
+
+Coverage: atomic run/event/job insertion; duplicate enqueue; event/job fault rollback;
+stale and expired lease fencing; concurrent claim exclusion; actor/project RLS and spoof rejection;
+single process advisory lock; subprocess Worker kill and expired claim recovery;
+terminal/waiting/unknown Run exclusion; ambiguous submission rejection;
+HTTP 202 with zero model calls; blocked Fake permits another HTTP submission;
+old Worker returning after lease loss cannot dispatch the next model call or save a draft.
+
+Browser-auth/route regression command:
+.venv/Scripts/python.exe -m pytest backend/tests/integration/test_planning_jobs_pg.py backend/tests/e2e/test_async_generation.py backend/tests/e2e/test_b3f1_access.py backend/tests/e2e/test_b3f2_learning_route.py -o addopts= -q
+...............                                                          [100%]
+15 passed in 39.21s
+exit 0 (before six additional focused tests were added)
+
+Backend regression command:
+.venv/Scripts/python.exe -m pytest backend/tests -o addopts= -q
+4 failed, 447 passed in 197.38s (0:03:17)
+exit 1. All four failures were the real-socket test harness referencing TestClient.app
+on an httpx.Client after generation became asynchronous. The harness now explicitly
+retains and ticks the server's Worker.
+
+Affected regression rerun:
+.venv/Scripts/python.exe -m pytest backend/tests/e2e/test_b2v_socket_counterexamples.py -o addopts= -q
+....                                                                     [100%]
+4 passed in 17.31s
+exit 0
+The full-suite result above is preserved as executed, not relabeled as a fresh green run.
+
+Static checks:
+.venv/Scripts/python.exe -m ruff check backend
+All checks passed! (exit 0)
+.venv/Scripts/python.exe -m mypy backend/app
+Success: no issues found in 88 source files (exit 0; two pre-existing unchecked-body notes)
+git diff --check
+exit 0
+git diff --name-only -- backend/alembic/versions
+empty (no historical migration edits)
+
+Deployment blocker:
+PLANNING_WORKER_ACTOR_IDS is local development/security verification only. New
+registered accounts outside the explicit scope receive a clear 403 before enqueue.
+README, environment example and Worker startup enforce/document this limitation.
+Public open-registration cloud V1 must first add an RLS-safe claim mechanism that
+does not require manual per-user registration, with cross-user/concurrent/spoof tests.
+The Worker entry point refuses non-development environments.
+
+Remaining planned work: new protocol manifest/model binding and checkpoint recovery
+are implemented in Tasks 3–5; Task 2 retains the existing graph generation semantics.

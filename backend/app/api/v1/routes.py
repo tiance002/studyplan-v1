@@ -71,7 +71,7 @@ def generate_plan(
 ) -> PlanGenerateResponse:
     """发起规划。返回 ``run_id``；草案内容通过 ``GET /runs/{run_id}`` 与
     ``GET /plans/drafts/{draft_id}`` 获取（本响应**不**回显草案）。"""
-    run_id = service.generate(
+    run_id = service.submit_generation(
         scope=scope,
         project_id=project_id,
         goal=payload.goal,

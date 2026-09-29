@@ -84,6 +84,8 @@ class Settings:
     local_project_id: str = "local_project"
     model_settings_encryption_key: str = ""
     llm_allowed_hosts: tuple[str, ...] = ("api.openai.com", "api.deepseek.com")
+    # Local/security-validation actor scope only; not the cloud open-registration claim design.
+    planning_worker_actor_ids: tuple[str, ...] = ()
 
     @property
     def is_development(self) -> bool:
@@ -142,6 +144,10 @@ def get_settings() -> Settings:
         local_project_id=_env("STUDYPLAN_LOCAL_PROJECT_ID", "local_project"),
         model_settings_encryption_key=_env("MODEL_SETTINGS_ENCRYPTION_KEY", ""),
         llm_allowed_hosts=tuple(host.strip().lower() for host in _env("LLM_ALLOWED_HOSTS", "api.openai.com,api.deepseek.com").split(",") if host.strip()),
+        planning_worker_actor_ids=tuple(dict.fromkeys(
+            actor.strip() for actor in os.environ.get("PLANNING_WORKER_ACTOR_IDS", "").split(",")
+            if actor.strip()
+        )),
     )
 
 

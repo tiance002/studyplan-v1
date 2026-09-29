@@ -31,7 +31,9 @@ from app.infrastructure.db import (
     PgPublicResourceCatalog,
     PgRunRepository,
 )
+from app.infrastructure.db.job_repository import PgPlanningJobRepository
 from app.infrastructure.providers import SUPPORTED_PROVIDERS, build_llm
+from app.infrastructure.worker.planning_worker import PlanningWorker
 
 __all__ = ["build_container"]
 
@@ -84,6 +86,11 @@ def build_container(settings: Settings) -> AppContainer:
         executor = PgPlanningExecutor(to_psycopg_dsn(settings.checkpoint_database_url),llm=llm)
         runtime_factory = PersonalPlanningRuntimeFactory(settings,model_repository)
     from app.infrastructure.domain_pack import select_domain_pack
+    planning_jobs = PgPlanningJobRepository(
+        dsn,
+        actor_ids=settings.planning_worker_actor_ids,
+        max_attempts=settings.worker_max_attempts,
+    )
     plan_service = PlanService(
         repository=PgPlanRepository(dsn),
         runs=PgRunRepository(dsn),
@@ -94,5 +101,17 @@ def build_container(settings: Settings) -> AppContainer:
         planning_executor=executor,domain_pack_selector=select_domain_pack,
         runtime_factory=runtime_factory,
         run_timeout_seconds=max(1800, 3 * (settings.graph_max_repair_attempts + 1) * settings.llm_timeout_seconds + 300),
+        planning_jobs=planning_jobs,
+        worker_actor_ids=settings.planning_worker_actor_ids,
     )
-    return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service,model_settings_service=model_service, browser_auth=browser_auth, workspace_reader=workspace_reader)
+    planning_worker = PlanningWorker(
+        jobs=planning_jobs,
+        execute=plan_service.execute_generation,
+        actor_ids=settings.planning_worker_actor_ids,
+        poll_interval_seconds=settings.worker_poll_interval_seconds,
+        lease_seconds=settings.worker_lease_seconds,
+        is_development=settings.is_development,
+    )
+    return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service,
+                        model_settings_service=model_service, browser_auth=browser_auth,
+                        workspace_reader=workspace_reader, planning_worker=planning_worker)

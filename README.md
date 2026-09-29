@@ -93,7 +93,16 @@ prompt_review_graph      START -> load_task_from_revision -> review_once -> vali
 
 ## B3 模型能力
 
-已有 OpenAI 兼容 `/chat/completions`、实际 StateGraph、独立 PG Checkpointer 与 Python 工程入门领域包。同步生成完成后返回 HTTP 202，尚无异步 worker。运行异常进入 failed；超过配置预算仍未完成的运行在下一次读取时进入待核对，不自动再次调用模型。
+已有 OpenAI 兼容 `/chat/completions`、实际 StateGraph、独立 PG Checkpointer 与 Python 工程入门领域包。规划 POST 现在只把任务原子写入现有 `ai_jobs` 并返回 HTTP 202；需在另一个终端显式启动单 Worker：
+
+```powershell
+# 本地 .env 需显式配置 PLANNING_WORKER_ACTOR_IDS=user-id-1,user-id-2
+./scripts/b3f1-dev.ps1 -Worker
+```
+
+**部署限制：** `PLANNING_WORKER_ACTOR_IDS` 白名单仅供本地开发与安全验证。当前开放注册会让新用户在未登记时无法生成计划；此机制不能作为云端公开 V1。开放上线前必须补齐无需逐用户手动登记、同时保持 RLS 隔离的安全领取方式，并通过伪造项目与跨用户并发验收。Worker 启动器会拒绝非开发环境，未配置的用户也会在入队时收到清晰错误。
+
+运行异常进入 failed；超过配置预算仍未完成的运行在下一次读取时进入待核对，不自动再次调用模型。
 
 个人 Base URL、模型名称和 API Key 由服务端按当前用户隔离保存；密钥加密且 GET 不回显。须通过部署 secret 提供稳定的 Fernet `MODEL_SETTINGS_ENCRYPTION_KEY`，并用 `LLM_ALLOWED_HOSTS` 管理允许的服务商。当前不支持 Anthropic `/messages` 协议。真实模型历史证据见 `docs/acceptance/B3-minimal-report.md`；本轮未运行付费云模型验证。
 

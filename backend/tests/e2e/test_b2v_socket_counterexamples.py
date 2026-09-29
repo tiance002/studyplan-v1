@@ -34,6 +34,7 @@ def test_real_socket_counterexample(case, db, monkeypatch):
         servers.append((server,thread,sock))
         thread.start()
         client = httpx.Client(base_url=f"http://127.0.0.1:{port}",timeout=60)
+        client.planning_worker = app.state.container.planning_worker
         clients.append(client)
         for _ in range(100):
             if server.started:

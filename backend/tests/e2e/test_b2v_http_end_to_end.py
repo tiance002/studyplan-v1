@@ -128,6 +128,7 @@ def migrated_db() -> PgTestDatabase:
 
 #: 每个测试前清空业务表（保留 learning_projects 与公共资源）。
 _PLAN_TABLES = (
+    "ai_jobs",
     "ai_runs",
     "plan_task_knowledge_links",
     "summary_attempts",
@@ -310,6 +311,11 @@ def _container(db: PgTestDatabase, *, llm: FakeLLM | None = None) -> AppContaine
             ),
         )
     )
+    from app.infrastructure.db.job_repository import PgPlanningJobRepository
+    from app.infrastructure.worker.planning_worker import PlanningWorker
+
+    worker_actors = (ACTOR_A1, ACTOR_A2)
+    jobs = PgPlanningJobRepository(db.app_dsn, actor_ids=worker_actors)
     service = PlanService(
         repository=PgPlanRepository(db.app_dsn),
         runs=PgRunRepository(db.app_dsn),
@@ -317,8 +323,12 @@ def _container(db: PgTestDatabase, *, llm: FakeLLM | None = None) -> AppContaine
         resources=PgPublicResourceCatalog(db.app_dsn),
         llm=llm or _fake_llm(),
         graph_version=settings.graph_version,
+        planning_jobs=jobs,
+        worker_actor_ids=worker_actors,
     )
-    return AppContainer(settings=settings, sessions=sessions, plan_service=service)
+    worker = PlanningWorker(jobs=jobs, execute=service.execute_generation,
+                            actor_ids=worker_actors, lease_seconds=30)
+    return AppContainer(settings=settings, sessions=sessions, plan_service=service, planning_worker=worker)
 
 
 def _client(db: PgTestDatabase, *, llm: FakeLLM | None = None, cookie: str = SESSION_A1):
@@ -341,6 +351,12 @@ def _generate(client, *, goal: str = GOAL_A, project_id: str = PROJECT_P1) -> di
         json={"goal": goal, "prefs_snapshot": {"mode": "text_first", "language": "zh"}},
     )
     assert resp.status_code == 202, resp.text
+    # Existing synchronous end-to-end scenarios explicitly drive the Worker;
+    # the async-generation test posts directly and proves it remains queued.
+    worker = getattr(client, "planning_worker", None)
+    if worker is None:
+        worker = client.app.state.container.planning_worker
+    assert worker.tick()
     return resp.json()
 
 
@@ -391,7 +407,7 @@ def test_full_chain_generate_edit_approve_readback(db: PgTestDatabase) -> None:
     run_view = _get_run(client, run["run_id"])
     assert run_view["status"] == "waiting_user"
     assert run_view["next_action"] == "review_draft"
-    assert run_view["version"] == 2, "create(1) → update(2)"
+    assert run_view["version"] == 3, "create(1) → Worker claim(2) → waiting_user(3)"
     draft_id = run_view["result_ref"]
     assert draft_id.startswith("drf_")
 

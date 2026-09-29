@@ -30,9 +30,11 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence, cast
 
 from app.agent_workflows.graphs import graph_thread_id, run_planning_graph
 from app.agent_workflows.nodes import PlanningNodes
@@ -67,6 +69,7 @@ from app.domain.runs.models import RunRecord
 from app.domain.workspace.models import AuthContext
 from app.ports.graph_runner import PlanningExecutorPort, PlanningRuntime
 from app.ports.llm import LLMDispatchUnknownError, LLMPort
+from app.ports.planning_jobs import PlanningJobsPort
 from app.ports.public_resources import PublicResourceCatalogPort
 from app.ports.runs import PlanningCatalogPort, RunRepositoryPort
 
@@ -139,6 +142,8 @@ class PlanService:
         runtime_factory: Callable[[AuthContext,str,str],PlanningRuntime] | None = None,
         run_timeout_seconds: int = 1800,
         domain_pack_selector: Callable[[str], dict[str, Any]] | None = None,
+        planning_jobs: PlanningJobsPort | None = None,
+        worker_actor_ids: tuple[str, ...] = (),
     ) -> None:
         self._repo = repository
         self._runs = runs
@@ -153,8 +158,136 @@ class PlanService:
         self._publication = PlanPublicationService(repository)
         self._run_timeout_seconds = run_timeout_seconds
         self._domain_pack_selector = domain_pack_selector
+        self._planning_jobs = planning_jobs
+        self._worker_actor_ids = tuple(dict.fromkeys(worker_actor_ids))
 
     # ------------------------------------------------------------------ 生成
+
+    def submit_generation(
+        self,
+        *,
+        scope: AuthContext,
+        project_id: str,
+        goal: str,
+        prefs_snapshot: Mapping[str, Any] | None = None,
+    ) -> str:
+        """Validate and durably enqueue one planning run; never invoke the model."""
+        scope.require_project(project_id)
+        if self._planning_jobs is None:
+            raise ValidationAppError("规划后台 Worker 未装配")
+        if scope.actor_id not in self._worker_actor_ids:
+            from app.core.errors import ForbiddenError
+
+            raise ForbiddenError(
+                "当前账户尚未纳入本地规划 Worker 服务范围；开放注册云端 V1 需先完成免人工登记的 RLS 安全领取"
+            )
+        cleaned_goal = goal.strip()
+        if not cleaned_goal:
+            raise ValidationAppError("学习目标不能为空")
+
+        run_id = new_id("run")
+        thread_id = graph_thread_id(run_id=run_id, graph_version=self._graph_version)
+        selected_pack = self._domain_pack_selector(cleaned_goal) if self._domain_pack_selector else None
+        pack_json = json.dumps(selected_pack, ensure_ascii=False, sort_keys=True, separators=(",", ":")) if selected_pack is not None else ""
+        initial: PlanningState = {
+            "run_id": run_id,
+            "project_id": project_id,
+            "graph_version": self._graph_version,
+            "goal": cleaned_goal,
+            "prefs_snapshot": dict(prefs_snapshot or {}),
+        }
+        if selected_pack is not None:
+            initial["domain_pack"] = selected_pack
+        manifest: dict[str, object] = {
+            "protocol": "planning-legacy-v1",
+            "graph_version": self._graph_version,
+            "domain_pack_sha256": hashlib.sha256(pack_json.encode("utf-8")).hexdigest() if pack_json else "",
+            "domain_pack_key": str(selected_pack.get("pack_key", "")) if selected_pack else "",
+            "domain_pack_version": int(selected_pack.get("version", 0)) if selected_pack else 0,
+            "model_configuration_ref": None,
+        }
+        run = RunRecord(
+            run_id=run_id,
+            actor_id=scope.actor_id,
+            project_id=project_id,
+            kind=AiRunKind.PLAN_GENERATE.value,
+            graph_name=GraphName.PLANNING.value,
+            graph_version=self._graph_version,
+            status=AiRunStatus.QUEUED,
+            next_action=AiRunNextAction.WAIT,
+            thread_id=thread_id,
+            version=1,
+        )
+        self._planning_jobs.enqueue(run, dict(initial), manifest)
+        return run_id
+
+    def execute_generation(self, project_id: str, run_id: str, *, guard: Callable[[], None] = lambda: None) -> None:
+        """Execute one persisted submission. Only the fenced Worker calls this."""
+        if self._planning_jobs is None:
+            raise ValidationAppError("规划后台 Worker 未装配")
+        guard()
+        submission = self._planning_jobs.read_submission(project_id, run_id)
+        initial = submission.get("initial")
+        if not isinstance(initial, dict):
+            raise ConflictError("规划提交内容格式错误", reason="planning_submission_invalid")
+        run = self._runs.get_run(project_id=project_id, run_id=run_id)
+        if run is None or run.status not in {AiRunStatus.QUEUED, AiRunStatus.RUNNING}:
+            return
+        scope = AuthContext(
+            actor_id=run.actor_id,
+            session_id="planning-worker",
+            issued_at=datetime.now(timezone.utc),
+            learning_project_scope=(project_id,),
+        )
+        goal = str(initial.get("goal") or "")
+        selected_pack = initial.get("domain_pack")
+        if not isinstance(selected_pack, Mapping):
+            selected_pack = None
+        try:
+            runtime = self._runtime_factory(scope, project_id, run_id) if self._runtime_factory else None
+            executor = runtime.executor if runtime else self._executor
+            nodes = self._build_nodes(
+                project_id=project_id,
+                run_id=run_id,
+                goal=goal,
+                llm=runtime.llm if runtime else None,
+                selected_pack=selected_pack,
+                guard=guard,
+            )
+            trace = executor.execute(nodes, initial, run.thread_id) if executor is not None else run_planning_graph(nodes, cast(PlanningState, initial))
+        except LLMDispatchUnknownError:
+            guard()
+            self._update_run(
+                project_id=project_id, run_id=run_id,
+                status=AiRunStatus.RECONCILIATION_REQUIRED,
+                next_action=AiRunNextAction.RECONCILE,
+                error_class="provider_dispatch_unknown",
+            )
+            return
+        except Exception:
+            guard()
+            self._update_run(
+                project_id=project_id, run_id=run_id,
+                status=AiRunStatus.FAILED, next_action=AiRunNextAction.RETRY,
+                error_class=ERROR_PLANNING_FAILED,
+            )
+            return
+
+        guard()
+        if trace.stopped_at == "await_approval":
+            draft_id = str(trace.state.get("draft_ref") or "")
+            self._update_run(
+                project_id=project_id, run_id=run_id,
+                status=AiRunStatus.WAITING_USER,
+                next_action=AiRunNextAction.REVIEW_DRAFT,
+                result_ref=draft_id or None,
+            )
+        else:
+            self._update_run(
+                project_id=project_id, run_id=run_id,
+                status=AiRunStatus.FAILED, next_action=AiRunNextAction.RETRY,
+                error_class=ERROR_PLANNING_FAILED,
+            )
 
     def generate(
         self,
@@ -411,16 +544,18 @@ class PlanService:
         )
 
     def _build_nodes(self, *, project_id: str, run_id: str, goal: str, llm: LLMPort | None = None,
-                     selected_pack: Mapping[str, Any] | None = None) -> PlanningNodes:
+                     selected_pack: Mapping[str, Any] | None = None,
+                     guard: Callable[[], None] = lambda: None) -> PlanningNodes:
         """装配图节点，并把「保存草案」接回应用层的投影 + 物化 + 仓储。"""
 
         def save_draft(state: PlanningState) -> dict[str, str]:
+            guard()
             return self._persist_draft(
                 project_id=project_id, run_id=run_id, goal=goal, state=state, selected_pack=selected_pack
             )
 
         return PlanningNodes(
-            llm=_ScopedLLM(llm if llm is not None else self._llm, project_id),
+            llm=_ScopedLLM(llm if llm is not None else self._llm, project_id, guard),
             save_draft=save_draft,
             # 生成路径在 await_approval 处停下，以下回调不会被执行；
             # 决策路径由本服务的 decide() 负责，**不**重复实现第二套规则。
@@ -527,11 +662,13 @@ class PlanService:
 
 class _ScopedLLM:
     """The server adds project context for the durable attempt ledger."""
-    def __init__(self, llm: LLMPort, project_id: str):
+    def __init__(self, llm: LLMPort, project_id: str, guard: Callable[[], None] = lambda: None):
         self.llm = llm
         self.project_id = project_id
+        self.guard = guard
 
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
+        self.guard()
         return self.llm.generate_structured(purpose=purpose,
             payload={**payload,"_project_id":self.project_id},schema_name=schema_name,
             run_id=run_id,attempt_id=attempt_id)

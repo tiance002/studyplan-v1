@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 from tests.e2e.test_b2v_http_end_to_end import migrated_db as fixture_db
 from tests.e2e.test_b3_closed_loop import checkpoint_db as checkpoint_db
+from tests.helpers.planning_worker import configure_test_worker
 
 pytestmark = pytest.mark.postgres
 
@@ -20,11 +21,13 @@ def migrated_db():
 
 
 def route(client, session, goal):
+    worker = configure_test_worker(client)
     project = session["project_ids"][0]
     suffix = f"?project_id={project}"
     headers = {"X-CSRF-Token": session["csrf_token"]}
     generated = client.post("/api/v1/plans/generate" + suffix, json={"goal": goal}, headers=headers)
     assert generated.status_code == 202, generated.text
+    assert worker.tick()
     run = client.get("/api/v1/runs/" + generated.json()["run_id"] + suffix).json()
     assert run["status"] == "waiting_user", run
     url = "/api/v1/plans/drafts/" + run["result_ref"]

@@ -1,4 +1,4 @@
-param([switch]$Frontend, [switch]$Demo, [switch]$Migrate)
+param([switch]$Frontend, [switch]$Demo, [switch]$Migrate, [switch]$Worker)
 $ErrorActionPreference = 'Stop'
 $taskRoot = Split-Path -Parent $PSScriptRoot
 foreach ($line in Get-Content -LiteralPath (Join-Path $taskRoot '.env') -Encoding utf8) {
@@ -12,6 +12,9 @@ if ($Migrate) {
 } elseif ($Frontend) {
     Push-Location (Join-Path $taskRoot 'frontend')
     try { npm run dev -- --host 127.0.0.1 } finally { Pop-Location }
+} elseif ($Worker) {
+    Push-Location (Join-Path $taskRoot 'backend')
+    try { & (Join-Path $taskRoot '.venv/Scripts/python.exe') -m app.tools.planning_worker } finally { Pop-Location }
 } else {
     & (Join-Path $taskRoot '.venv/Scripts/python.exe') -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 }

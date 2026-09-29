@@ -22,6 +22,7 @@ from app.application.model_settings import ModelSettingsService
 from app.application.plan_service import PlanService
 from app.core.config import Settings
 from app.ports.browser_auth import BrowserAuthPort
+from app.ports.planning_jobs import PlanningWorkerPort
 from app.ports.sessions import SessionResolverPort
 from app.ports.workspace import WorkspaceReaderPort
 
@@ -42,3 +43,5 @@ class AppContainer:
     model_settings_service: ModelSettingsService | None = None
     browser_auth: BrowserAuthPort | None = None
     workspace_reader: WorkspaceReaderPort | None = None
+    # Constructed for an explicit CLI process; the API never starts it.
+    planning_worker: PlanningWorkerPort | None = None

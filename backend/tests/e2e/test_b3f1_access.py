@@ -10,6 +10,7 @@ from app.main import create_app
 from fastapi.testclient import TestClient
 
 from tests.e2e.test_b2v_http_end_to_end import migrated_db as b2v_database_fixture
+from tests.helpers.planning_worker import configure_test_worker
 
 
 @pytest.fixture(scope="module")
@@ -40,6 +41,10 @@ def test_browser_registration_persistence_csrf_logout_and_isolation(migrated_db)
     assert "HttpOnly" in registered.headers["set-cookie"]
     assert session["username"] == "学习者甲"
     project = session["project_ids"][0]
+    unserved = a.post(f"/api/v1/plans/generate?project_id={project}", json={"goal": "Agent开发"},
+                      headers={"X-CSRF-Token": session["csrf_token"]})
+    assert unserved.status_code == 403
+    assert "Worker" in unserved.json()["message"]
     assert (
         a.post(
             "/api/v1/auth/login", json=payload, headers={"Origin": "https://untrusted.invalid"}
@@ -119,12 +124,14 @@ def test_real_plan_workspace_edit_publish_refresh(migrated_db):
     )
     client = TestClient(create_app(build_container(settings)))
     s = client.post("/api/v1/auth/register", json={"username": "业务验收", "password": "123456"}).json()
+    worker = configure_test_worker(client)
     headers = {"X-CSRF-Token": s["csrf_token"]}
     suffix = f"?project_id={s['project_ids'][0]}"
     response = client.post(
         "/api/v1/plans/generate" + suffix, json={"goal": "学习 Agent 开发"}, headers=headers
     )
     assert response.status_code == 202
+    assert worker.tick()
     run = client.get("/api/v1/runs/" + response.json()["run_id"] + suffix).json()
     assert run["status"] == "waiting_user", run
     draft_url = "/api/v1/plans/drafts/" + run["result_ref"]
@@ -169,8 +176,10 @@ def test_interrupted_running_becomes_reconciliation_without_retry(migrated_db):
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
     client = TestClient(create_app(build_container(settings)))
     session = client.post("/api/v1/auth/register", json={"username": "中断恢复", "password": "123456"}).json()
+    worker = configure_test_worker(client)
     suffix = f'?project_id={session["project_ids"][0]}'
     result = client.post("/api/v1/plans/generate" + suffix, json={"goal": "Agent 开发"}, headers={"X-CSRF-Token": session["csrf_token"]}).json()
+    assert worker.tick()
     url = "/api/v1/runs/" + result["run_id"] + suffix
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
         conn.execute("UPDATE ai_runs SET updated_at=now()-interval '2 hours' WHERE run_id=%s", (result["run_id"],))
