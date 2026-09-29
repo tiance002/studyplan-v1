@@ -76,11 +76,12 @@ def for_purpose(self, purpose):
     return target
 ```
 
-- [ ] 用 MockTransport 捕获实际 HTTP 请求。分别测试官方 Flash、其他模型名、其他 host，只有已确认条件发送 thinking。完整 JSON、非法 JSON、length 含 reasoning、usage 缺失、信封为 list、字段类型错误均有反例。NULL 计量不得 `or 0`。
+- [ ] 每个 Provider 测试明确构造并注入 `BudgetPolicy(...)`；测试还须捕获 MockTransport 请求体并断言各 purpose 实际 `max_tokens`，不能只检查构造属性或依赖 Provider 的 fallback 策略。分别测试官方 Flash、其他模型名、其他 host，只有已确认条件发送 thinking。完整 JSON、非法 JSON、length 含 reasoning、usage 缺失、信封为 list、字段类型错误均有反例。NULL 计量不得 `or 0`。
 
 ```python
 def test_length_retains_usage():
     import httpx
+    from app.application.planning_budget import BudgetPolicy
     from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
     from app.ports.llm import LLMFailure
     def reply(request):
@@ -88,7 +89,8 @@ def test_length_retains_usage():
             "prompt_tokens": 11, "completion_tokens": 23}, "choices": [{
             "finish_reason": "length", "message": {"content": "{", "reasoning_content": "abc"}}]})
     with httpx.Client(transport=httpx.MockTransport(reply)) as client:
-        llm = OpenAICompatibleLLM(base_url="https://api.deepseek.com", api_key="mock", model="deepseek-flash", client=client)
+        budget = BudgetPolicy(4096,8192,4096,8192,8192,393216)
+        llm = OpenAICompatibleLLM(base_url="https://api.deepseek.com", api_key="mock", model="deepseek-flash", budget_policy=budget, client=client)
         result = llm.generate_structured(purpose="planning.outline", payload={}, schema_name="OutlineV2", run_id="r", attempt_id="r:o:1")
     assert isinstance(result, LLMFailure)
     assert (result.input_tokens, result.output_tokens) == (11, 23)
@@ -132,6 +134,7 @@ ORDER BY j.created_at,j.job_id FOR UPDATE OF j SKIP LOCKED LIMIT 1;
 
 - [ ] renew/finish 的 WHERE 同时含 job_id、run_id、lease_token、running；不能用旧 claim 覆盖新租约。Worker 持有全局单进程 advisory lock；模型调用期间独立连接每 lease/3 续租，不新增队列服务。
 - [ ] Worker actor allowlist 从服务端配置 `PLANNING_WORKER_ACTOR_IDS` 读取；用 app.actor_id 查其 learning_projects，再 app.project_id 领取，重新验证 owner。API 拒绝服务范围未配置 actor；文档说明新增用户需加入范围，首版不自动发现全库。
+- [ ] 将 allowlist 限定为本地开发/安全验收配置，并在 README/Worker启动错误/验收报告标记为云端开放注册的发布阻断项。公开 V1 前另需设计无需逐用户登记、仍有 RLS 隔离的安全领取方式，并添加跨用户/并发抢占/伪造项目测试；此轮不得声称它已支持任意新注册云用户。
 - [ ] test：两个 Worker 竞争仅一个执行；旧租约 renew/finish 为 False；无上下文看不到别项目；错误 actor 不派发。采用 multiprocessing + sentinel 验证强杀释放锁后可领取过期任务。
 - [ ] 重跑相关命令、保留原始输出到 `M2-jobs-tests.txt` 后提交。
 
@@ -171,6 +174,8 @@ def test_manifest_preserves_agent_requirements():
 - [ ] 写失败传播测试，Fake 在 outline、第5结构批、第3实践批分别返回 length；调用数分别=1、6、13，没有之后阶段或 repair。空实践也是失败；先前有效批次仍在 state。
 - [ ] `.venv/Scripts/python.exe -m pytest backend/tests/unit/test_batched_planning.py backend/tests/integration/test_run_budget_pg.py`，先确认 FAIL。
 - [ ] 新 State 加 manifest、structure_batches、practice_batches、current_structure_index/current_practice_index、repair_target、repair_count、protocol；每个模型节点只执行一个 Attempt。图增加 conditional edges，在每个生成失败处直接 record_failure/END。
+- [ ] 对目的域包以外的目标构造 `search_only` 验收样例：四个槽位只是请求预算边界，run/draft/前端都标记通用、未核验和资料待核验；不得报告完整领域路线。
+- [ ] 对 search_only 测四槽位结果：scope/status/progress/draft resource support 明确返回 `search_only`, `generic_unverified`, `needs_resource_review`; UI 和序列化不得写成 complete/comprehensive/verified。Agent pack 仍必须 9 stages/27 keys。
 - [ ] 领域包作为不可改基线：由应用确定 keys/stages/required edges/resources；模型输出只填写可个性化字段及补充节点。矛盾键、资源替换、越阶段归属在局部校验时失败，不通过静默重新分配让测试绿。
 - [ ] 结构批次验证 node/unit 非空、objective 非空、稳定键、unit 关联、已声明外部前置键；实践只接收该阶段结构、任务 acceptance/in_scope/out_scope/core 关联。阶段依赖及含子关系从审核蓝图合并，全局检测模型新增循环或未知引用。
 - [ ] merge 按骨架顺序重排全局 order_index，缺阶段/缺 required_node/重复键拒绝；调用现有 validate_plan_structure + validate_route_structure 并补 resource/version 真伪、学习顺序验证，完整通过才调用原 save_draft。
@@ -265,6 +270,8 @@ npm --prefix frontend run build
 node frontend/tests/planning-progress.browser.cjs
 git diff --check
 ```
+
+运行预算策略单测必须在 Provider 构造时显式传入 `BudgetPolicy`，并通过 MockTransport 捕获请求体验证派发值；直接断言无策略 Provider 的默认 `max_tokens` 不构成证据。
 
 完整PG测试若环境不可用报告NOT RUN，不通过跳过伪造PASS。脚本输出Tee到对应原始日志，记录实际执行命令、exit code、测试数量，失败修复后仅重跑受影响检查；无新改动不反复全量回归。
 

@@ -119,7 +119,8 @@ def test_per_run_factory_never_mutates_shared_model(db, monkeypatch):
     for run,actor,project in [("runtime-one",ACTOR_A1,PROJECT_P1),("runtime-two",ACTOR_A2,PROJECT_P2)]:
         container.plan_service._runs.create_run(RunRecord(run_id=run,actor_id=actor,project_id=project,kind="plan_generate",
             graph_name="planning",graph_version="1",status=AiRunStatus.RUNNING,next_action=AiRunNextAction.WAIT,version=1))
-    factory = PersonalPlanningRuntimeFactory(replace(get_settings(),database_url=db.app_dsn),repo)
+    factory = PersonalPlanningRuntimeFactory(replace(get_settings(),database_url=db.app_dsn,
+                                                      llm_model_max_output_tokens=8192),repo)
     with ThreadPoolExecutor(2) as pool:
         a,b = list(pool.map(lambda args:factory(*args),[(container.sessions.resolve(SESSION_A1),PROJECT_P1,"runtime-one"),(container.sessions.resolve(SESSION_A2),PROJECT_P2,"runtime-two")]))
     assert a.llm.provider.model == "actor-one"
@@ -144,7 +145,8 @@ def test_personal_runtime_works_without_deployment_credentials(db):
     container = _container(db)
     container.plan_service._runs.create_run(RunRecord(run_id="personal-only-run",actor_id=ACTOR_A1,project_id=PROJECT_P1,
         kind="plan_generate",graph_name="planning",graph_version="1",status=AiRunStatus.RUNNING,next_action=AiRunNextAction.WAIT,version=1))
-    settings = replace(get_settings(),database_url=db.app_dsn,llm_api_key="",llm_model_id="")
+    settings = replace(get_settings(),database_url=db.app_dsn,llm_api_key="",llm_model_id="",
+                       llm_model_max_output_tokens=8192)
     runtime = PersonalPlanningRuntimeFactory(settings,repo)(container.sessions.resolve(SESSION_A1),PROJECT_P1,"personal-only-run")
     assert runtime.llm.provider.model == "personal-only"
     assert runtime.llm.provider.api_key == "test-key"
@@ -225,7 +227,8 @@ def test_personal_settings_drive_http_real_graph_without_shared_provider(db, che
     monkeypatch.setattr(module,"OpenAICompatibleLLM",provider)
     container = _container(db)
     base = container.plan_service
-    base._runtime_factory = module.PersonalPlanningRuntimeFactory(replace(container.settings,database_url=db.app_dsn,checkpoint_database_url=checkpoint_db.migrator_dsn),repo)
+    base._runtime_factory = module.PersonalPlanningRuntimeFactory(replace(container.settings,database_url=db.app_dsn,
+        checkpoint_database_url=checkpoint_db.migrator_dsn,llm_model_max_output_tokens=8192),repo)
     base._executor = PgPlanningExecutor(checkpoint_db.migrator_dsn,llm=UnconfiguredLLM())
     with TestClient(create_app(container)) as client:
         client.cookies.set(COOKIE,SESSION_A1)

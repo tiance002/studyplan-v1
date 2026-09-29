@@ -1,0 +1,35 @@
+B3-F2 Task 1: purpose budgets, request diagnostics, nullable token accounting
+All provider tests explicitly injected BudgetPolicy where effective provider budgets were asserted. Request budgets were read from MockTransport's captured JSON bodies.
+
+RED evidence before implementation
+Command: .\.venv\Scripts\python.exe -m pytest backend/tests/unit/test_batched_budget.py backend/tests/unit/test_b3_provider.py -q
+Result: FAIL during collection as expected: ModuleNotFoundError: app.application.planning_budget
+
+Focused GREEN regression
+Command: .\.venv\Scripts\python.exe -m pytest backend/tests/unit/test_batched_budget.py backend/tests/unit/test_b3_provider.py backend/tests/unit/test_b3f2_planning.py -q
+Result: PASS, 32 test cases, [100%].
+
+Existing personal model / old attempt compatibility regressions
+Command: .\.venv\Scripts\python.exe -m pytest backend/tests/e2e/test_model_settings.py::test_per_run_factory_never_mutates_shared_model backend/tests/e2e/test_model_settings.py::test_personal_runtime_works_without_deployment_credentials backend/tests/e2e/test_model_settings.py::test_pre_settings_deployment_attempt_replays_without_dispatch backend/tests/e2e/test_model_settings.py::test_personal_settings_drive_http_real_graph_without_shared_provider -q
+Result: PASS, 4 passed, [100%]. These exercise isolated temporary PostgreSQL databases.
+
+Complete backend regression (raw pytest progress output follows)
+Command: .\.venv\Scripts\python.exe -m pytest backend/tests -q
+Exit: 0 (task-done records completion only for exit 0).
+Result: PASS, all progress reached [100%]; 445 passed-case progress markers; zero failure markers.
+
+........................................................................ [ 16%]
+........................................................................ [ 32%]
+........................................................................ [ 48%]
+........................................................................ [ 64%]
+........................................................................ [ 80%]
+........................................................................ [ 97%]
+.............                                                            [100%]
+
+Lint
+Command: .\.venv\Scripts\ruff.exe check backend/app backend/tests/unit/test_batched_budget.py backend/tests/unit/test_b3_provider.py backend/tests/e2e/test_model_settings.py
+Result: PASS — All checks passed!
+
+An earlier complete run exposed four expected compatibility issues: personal custom models lacked an explicit capability ceiling in test settings; the legacy pre-budget deployment fingerprint was computed with the new fields and did not replay. After setting an explicit 8192 model ceiling in those test configurations and restoring the historical fingerprint as read-only compatibility, all four targeted integration regressions and the complete backend suite passed.
+
+No model endpoint was contacted. PostgreSQL tests used the existing test harness and its disposable `studyplan_test_*` databases. No existing business DB/checkpoint, migration, or historical Attempt was modified.

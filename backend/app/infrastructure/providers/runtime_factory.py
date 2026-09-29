@@ -1,6 +1,7 @@
 """Create a fresh provider/ledger/runtime for each authenticated run."""
 from dataclasses import replace
 
+from app.application.planning_budget import budget_policy_for_model
 from app.core.errors import ValidationAppError
 from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor
 from app.infrastructure.providers import build_llm
@@ -28,9 +29,10 @@ class PersonalPlanningRuntimeFactory:
         if selected:
             if selected.protocol != "openai":
                 raise ValidationAppError("Unsupported model API protocol")
+            policy = budget_policy_for_model(self.settings, model=selected.model_id, base_url=selected.base_url)
             provider = OpenAICompatibleLLM(base_url=selected.base_url,api_key=selected.api_key,model=selected.model_id,
                 timeout=self.settings.llm_timeout_seconds,max_tokens=self.settings.llm_max_output_tokens,
-                endpoint_guard=self.policy.validate)
+                endpoint_guard=self.policy.validate, budget_policy=policy)
             provider.configuration_ref = f"personal:{scope.actor_id}:{selected.version}"
         else:
             # Do not select Fake when a personal setting is absent or revoked.

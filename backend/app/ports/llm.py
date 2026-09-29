@@ -27,12 +27,13 @@ class LLMResult:
     payload: dict[str, object]
     model_id: str
     provider: str
-    input_tokens: int = 0
-    output_tokens: int = 0
-    cost_micros: int = 0
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    cost_micros: int | None = None
     latency_ms: int = 0
     finish_reason: str = "stop"
     attempts: int = 1
+    diagnostics: dict[str, object] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)

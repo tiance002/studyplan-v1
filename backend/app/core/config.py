@@ -58,6 +58,11 @@ class Settings:
     llm_model_id: str
     llm_timeout_seconds: int
     llm_max_output_tokens: int
+    llm_outline_output_tokens: int
+    llm_structure_output_tokens: int
+    llm_practice_output_tokens: int
+    llm_repair_output_tokens: int
+    llm_model_max_output_tokens: int
 
     github_token: str
     rag_base_url: str
@@ -116,7 +121,12 @@ def get_settings() -> Settings:
         llm_api_key=_env("LLM_API_KEY", ""),
         llm_model_id=_env("LLM_MODEL_ID", ""),
         llm_timeout_seconds=_env_int("LLM_TIMEOUT_SECONDS", 120),
-        llm_max_output_tokens=_env_int("LLM_MAX_OUTPUT_TOKENS", 8000),
+        llm_max_output_tokens=_env_int("LLM_MAX_OUTPUT_TOKENS", 8192),
+        llm_outline_output_tokens=_env_int("LLM_OUTLINE_OUTPUT_TOKENS", 4096),
+        llm_structure_output_tokens=_env_int("LLM_STRUCTURE_OUTPUT_TOKENS", 8192),
+        llm_practice_output_tokens=_env_int("LLM_PRACTICE_OUTPUT_TOKENS", 4096),
+        llm_repair_output_tokens=_env_int("LLM_REPAIR_OUTPUT_TOKENS", 8192),
+        llm_model_max_output_tokens=_env_int("LLM_MODEL_MAX_OUTPUT_TOKENS", 0),
         github_token=_env("GITHUB_TOKEN", ""),
         rag_base_url=_env("RAG_BASE_URL", ""),
         rag_api_key=_env("RAG_API_KEY", ""),
