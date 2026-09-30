@@ -47,7 +47,7 @@ class ScriptedLLM:
         self.invalid_at = invalid_at
         #: Same occurrence keeps returning invalid content even after a repair.
         self.persistent_invalid = persistent_invalid
-        #: Empty result -> immediate termination, never a repair.
+        #: Empty JSON object -> schema content errors eligible for local repair.
         self.empty_at = empty_at
         self.empty_practice_stages = set(empty_practice_stages)
         self.forged_node_key = forged_node_key

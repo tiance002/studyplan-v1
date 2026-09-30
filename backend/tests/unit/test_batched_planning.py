@@ -7,7 +7,7 @@ These tests pin the *protocol mechanics* only (no real model, no cloud call):
   at most two repairs);
 - an unsupported direction is a generic, explicitly unverified ``search_only``
   skeleton whose slot count is a request-budget boundary, not domain coverage;
-- a model failure / truncation / empty result stops immediately with the exact
+- a model failure / truncation stops immediately with the exact
   request count and never triggers a later stage or a repair;
 - only localisable content errors consume the shared two-repair budget;
 - merge is deterministic and rejects duplicates, missing stages and forged
@@ -138,13 +138,15 @@ def test_truncation_at_third_practice_batch_stops_with_thirteen_requests():
     assert llm.count(REPAIR) == 0
 
 
-def test_empty_practice_result_terminates_without_repair():
+def test_empty_practice_object_enters_content_repair():
     pack = _pack()
     llm = ScriptedLLM(pack, empty_at=(PRACTICE, 1))
     trace = _run(pack, llm)
-    assert trace.stopped_at == "failed"
-    assert llm.count(REPAIR) == 0
-    assert trace.state["practice_batches"] == []
+    assert trace.stopped_at == "await_approval"
+    assert llm.count(REPAIR) == 1
+    repair = next(c for c in llm.calls if c["purpose"] == REPAIR)
+    assert repair["payload"]["batch"] == {}
+    assert any("缺少必需字段：tasks" in error for error in repair["payload"]["errors"])
 
 
 # ---------------------------------------------------------------------------

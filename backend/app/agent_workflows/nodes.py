@@ -641,19 +641,8 @@ class PlanningNodes:
                 state,
             )
         produced = result.payload
-        nodes_ = _as_list(produced.get("nodes"))
-        units_ = _as_list(produced.get("units"))
-        if not nodes_ or not units_:
-            return _with_aggregate(
-                _extend_generation_errors(state, {
-                    "generation_errors": [f"知识结构生成失败：模型返回空结果（{stage_key}）"],
-                    "failure_stage": stage_key,
-                }),
-                state,
-            )
         batches = list(state.get("structure_batches") or [])
-        entry = {"stage_key": stage_key, "batch_index": index,
-                 "nodes": nodes_, "units": units_, "relations": _as_list(produced.get("relations"))}
+        entry = {**deepcopy(produced), "stage_key": stage_key, "batch_index": index}
         if index < len(batches):
             batches[index] = entry
         else:
@@ -700,15 +689,6 @@ class PlanningNodes:
                 state,
             )
         produced = result.payload
-        tasks = _as_list(produced.get("tasks"))
-        if not tasks:
-            return _with_aggregate(
-                _extend_generation_errors(state, {
-                    "generation_errors": [f"实践任务生成失败：模型返回空结果（{stage_key}）"],
-                    "failure_stage": stage_key,
-                }),
-                state,
-            )
         batches = list(state.get("practice_batches") or [])
         entry = {"stage_key": stage_key, "batch_index": index, "payload": produced}
         if index < len(batches):
@@ -784,10 +764,7 @@ class PlanningNodes:
         produced = result.payload
         if kind == "structure":
             batches = list(state.get("structure_batches") or [])
-            batches[index] = {"stage_key": stage_key, "batch_index": index,
-                              "nodes": _as_list(produced.get("nodes")),
-                              "units": _as_list(produced.get("units")),
-                              "relations": _as_list(produced.get("relations"))}
+            batches[index] = {**deepcopy(produced), "stage_key": stage_key, "batch_index": index}
             delta: dict[str, Any] = {"structure_batches": batches, "repair_count": repair_index}
         else:
             batches = list(state.get("practice_batches") or [])

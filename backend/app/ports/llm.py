@@ -20,6 +20,9 @@ from typing import Protocol, runtime_checkable
 class LLMResult:
     """一次结构化生成的返回。
 
+    ``payload`` 是解析后的 JSON object，不代表业务 schema 已通过校验。
+    批次缺失业务字段时保留原对象，由 planning validator 和有界 repair 处理。
+
     ``raw_usage`` 只记录计量事实（tokens / cost），不含提示词原文，
     以便写入 ``ai_provider_attempts`` 而不泄露用户内容。
     """

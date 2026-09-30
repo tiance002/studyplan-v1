@@ -266,12 +266,11 @@ def test_practice_provider_classifies_envelope_json_and_shape_without_retry_or_s
     assert malformed.error_class == "provider_invalid_json"
     assert malformed.details["content_has_code_fence"] is True
     assert malformed.retryable is False
-    assert isinstance(missing, LLMFailure)
-    assert missing.error_class == "provider_invalid_shape"
-    assert missing.details["missing_top_level_fields"] == [
+    assert isinstance(missing, LLMResult)
+    assert missing.payload == {"tasks": valid["tasks"]}
+    assert missing.diagnostics["missing_top_level_fields"] == [
         "idea", "stable_key", "task_knowledge_links", "title"
     ]
-    assert missing.retryable is False
     assert isinstance(good, LLMResult)
     assert good.payload == valid
     assert isinstance(absent, LLMFailure)
@@ -280,7 +279,7 @@ def test_practice_provider_classifies_envelope_json_and_shape_without_retry_or_s
     assert absent.retryable is False
     assert len(requests) == 4
     for result in (malformed, missing, absent):
-        diagnostic = json.dumps(result.details)
+        diagnostic = json.dumps(result.details if isinstance(result, LLMFailure) else result.diagnostics)
         assert secret not in diagnostic
         assert "Authorization" not in diagnostic
         assert "```json" not in diagnostic
