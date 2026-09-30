@@ -26,6 +26,31 @@ def test_real_provider_protocol_and_timeout():
     assert isinstance(result, LLMFailure) and result.dispatch_unknown and not result.retryable
 
 
+def test_transport_failure_records_exception_type_without_leaking_or_retrying():
+    api_key = "test-secret-api-key"
+    requests = []
+
+    def fail_transport(request):
+        requests.append(request)
+        raise httpx.ReadError(f"failed Authorization: Bearer {api_key}")
+
+    with httpx.Client(transport=httpx.MockTransport(fail_transport)) as client:
+        llm = OpenAICompatibleLLM(base_url="https://provider.example", api_key=api_key,
+                                  model="test-model", client=client)
+        result = llm.generate_structured(purpose="planning.structure", payload={},
+                                         schema_name="KnowledgeStructureV1", run_id="r", attempt_id="a")
+
+    assert isinstance(result, LLMFailure)
+    assert result.error_class == "provider_transport_unknown"
+    assert result.dispatch_unknown is True
+    assert result.retryable is False
+    assert result.details["transport_exception_type"] == "ReadError"
+    assert len(requests) == 1
+    safe_diagnostics = json.dumps(result.details)
+    assert api_key not in safe_diagnostics
+    assert "Authorization" not in safe_diagnostics
+
+
 def test_structure_and_repair_prompt_define_valid_relation_contract():
     import json
     contexts = []

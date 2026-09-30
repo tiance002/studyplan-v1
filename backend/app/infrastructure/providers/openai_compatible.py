@@ -117,9 +117,10 @@ class OpenAICompatibleLLM:
                     response = client.post(self.base_url + "/chat/completions", headers={"Authorization": "Bearer " + self.api_key}, json=body)
             else:
                 response = self.client.post(self.base_url + "/chat/completions", headers={"Authorization": "Bearer " + self.api_key}, json=body, timeout=self.timeout)
-        except (httpx.TimeoutException, httpx.TransportError):
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
             return LLMFailure("provider_transport_unknown", "Provider outcome unknown", dispatch_unknown=True,
-                              details=diagnostics, latency_ms=int((time.monotonic()-started)*1000))
+                              details={**diagnostics, "transport_exception_type": type(exc).__name__},
+                              latency_ms=int((time.monotonic()-started)*1000))
         if response.status_code >= 500:
             return LLMFailure("provider_server_unknown", "Provider outcome unknown", dispatch_unknown=True,
                               details=diagnostics, latency_ms=int((time.monotonic()-started)*1000))
