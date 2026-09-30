@@ -287,9 +287,14 @@ def validate_structure_batch(
     """Validate one structure batch against its frozen slice. No model call."""
     errors: list[str] = []
     stage_key = batch["stage_key"]
+    for field in ("nodes", "units", "relations"):
+        if field not in payload:
+            errors.append(f"KnowledgeStructureV1 缺少必需字段：{field}（{stage_key}）")
     nodes = payload.get("nodes") if isinstance(payload, dict) else None
     units = payload.get("units") if isinstance(payload, dict) else None
-    relations = payload.get("relations") if isinstance(payload, dict) else []
+    relations = payload.get("relations")
+    if not isinstance(relations, list):
+        errors.append(f"结构批次 relations 必须是列表：{stage_key}")
     if not isinstance(nodes, list) or not nodes:
         errors.append(f"结构批次缺少知识节点：{stage_key}")
     if not isinstance(units, list) or not units:
@@ -297,7 +302,7 @@ def validate_structure_batch(
 
     node_keys = _stable_keys(nodes, "知识节点", errors)
     unit_keys = _stable_keys(units, "学习单元", errors)
-    for unit in units or []:
+    for unit in units if isinstance(units, list) else []:
         if not isinstance(unit, dict):
             continue
         if unit.get("section_key") != stage_key:
@@ -313,7 +318,7 @@ def validate_structure_batch(
                 errors.append(f"学习单元引用未知知识节点：{key}")
 
     allowed = node_keys | set(batch.get("declared_external_prerequisite_keys") or [])
-    for relation in relations or []:
+    for relation in relations if isinstance(relations, list) else []:
         if not isinstance(relation, dict):
             errors.append("关系包含非对象项")
             continue
@@ -349,13 +354,22 @@ def validate_practice_batch(
 ) -> list[str]:
     """Validate one practice batch against its stage's validated structure."""
     errors: list[str] = []
+    for field in ("stable_key", "title", "idea", "tasks", "task_knowledge_links"):
+        if field not in payload:
+            errors.append(f"PracticeProposalV1 缺少必需字段：{field}（{stage_key}）")
+    for field in ("stable_key", "title", "idea"):
+        value = payload.get(field)
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"实践批次 {field} 必须是非空字符串：{stage_key}")
+    links = payload.get("task_knowledge_links")
+    if not isinstance(links, list):
+        errors.append(f"实践批次 task_knowledge_links 必须是列表：{stage_key}")
     tasks = payload.get("tasks") if isinstance(payload, dict) else None
     if not isinstance(tasks, list) or not tasks:
         errors.append(f"实践批次缺少任务：{stage_key}")
         return errors
     node_keys = {str(n.get("stable_key", "")) for n in (structure.get("nodes") or []) if isinstance(n, dict)}
     task_keys = _stable_keys(tasks, "实践任务", errors)
-    links = payload.get("task_knowledge_links") or []
     for task in tasks:
         if not isinstance(task, dict):
             continue
@@ -370,7 +384,7 @@ def validate_practice_batch(
         for link in task.get("knowledge_links") or []:
             if not isinstance(link, dict) or link.get("node_stable_key") not in node_keys:
                 errors.append(f"实践任务引用未知知识节点：{task.get('stable_key')}")
-    for link in links:
+    for link in links if isinstance(links, list) else []:
         if not isinstance(link, dict):
             errors.append("任务知识关联包含非对象项")
             continue

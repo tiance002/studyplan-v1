@@ -202,10 +202,16 @@ class OpenAICompatibleLLM:
                               details={**diagnostics, "content_has_code_fence": "```" in content,
                                        "json_error_line": exc.lineno, "json_error_column": exc.colno},
                               **failure)
-        if not isinstance(parsed, dict) or not set(shape).issubset(parsed):
-            missing = sorted(set(shape) - set(parsed)) if isinstance(parsed, dict) else sorted(shape)
+        missing = sorted(set(shape) - set(parsed)) if isinstance(parsed, dict) else sorted(shape)
+        # Batch schema completeness belongs to deterministic planning validation.
+        # Preserve partial objects (including repair output) for bounded local repair.
+        batch_content = schema_name in {"KnowledgeStructureV1", "PracticeProposalV1"} and purpose in {
+            "planning.structure", "planning.practice", "planning.repair",
+        }
+        if not isinstance(parsed, dict) or (missing and not batch_content):
             return LLMFailure("provider_invalid_shape", "Provider returned JSON with an invalid field shape",
                               details={**diagnostics, "missing_top_level_fields": missing}, **failure)
+        diagnostics["missing_top_level_fields"] = missing
         return LLMResult(payload=parsed, model_id=str(data.get("model") or self.model),
                          provider="openai_compatible", input_tokens=failure["input_tokens"],
                          output_tokens=failure["output_tokens"], cost_micros=None,
