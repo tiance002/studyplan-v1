@@ -5,6 +5,9 @@ submission, business-only progress, and an independent Fake E2E. No cloud model
 was called; no migration was added; only disposable `studyplan_test_*` databases
 were used; nothing was merged to `master` or deployed.
 
+Due to earlier GitHub API replay, the remote SHA differs from the original local
+SHA; the entries below use the actual GitHub SHAs.
+
 ## 1. What was delivered (Tasks 1–7)
 
 | Task | Deliverable | Commit |
@@ -13,9 +16,11 @@ were used; nothing was merged to `master` or deployed.
 | 2 | Durable enqueue + fenced local Worker | `38d042e` |
 | 3 | `b3f2-batch-v1` batched planning graph + frozen manifest | `47cc67f` |
 | 4 | Checkpoint recovery by graph version; real legacy checkpoints finished | `2bd8445` |
-| 5 | Single protocol, frozen submission, business `RunProgress`, HTTP default switch | `572b068` |
-| 6 | Frontend per-stage progress on the business DTO only | `32d837e` |
-| 7 | Independent disposable-PG Fake E2E + real-graph consistency fix | this change |
+| 5 | Single protocol, frozen submission, business `RunProgress`, HTTP default switch | `3a769cd7f5d9bd66850de8f5f672e3cae45ec418` |
+| 6 | Frontend per-stage progress on the business DTO only | `e0e272ff92bb261b999e4cb2d4e67041cef18e0b` |
+| 7 | Independent disposable-PG Fake E2E + real-graph consistency fix | `880362eb460dbf702402e9746e34cd8f7e06f86f` |
+
+Final evidence alignment commit: `6e51dfb34da955604894731aece695acda248156`.
 
 ## 2. The protocol
 

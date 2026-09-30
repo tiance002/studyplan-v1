@@ -54,6 +54,7 @@ function baseProgress(overrides) {
   try {
     const page = await browser.newPage();
     let runView = null;
+    let runReads = 0, generations = 0;
     await page.route("**/api/v1/session", (r) =>
       r.fulfill({
         json: { username: "进度测试", project_ids: [PROJECT], csrf_token: "test" },
@@ -62,9 +63,14 @@ function baseProgress(overrides) {
     await page.route("**/healthz", (r) =>
       r.fulfill({ json: { llm_provider: "fake" } }),
     );
-    await page.route("**/api/v1/runs/run-test?**", (r) =>
-      r.fulfill({ json: runView }),
-    );
+    await page.route("**/api/v1/runs/run-test?**", (r) => {
+      runReads++;
+      return r.fulfill({ json: runView });
+    });
+    await page.route("**/api/v1/plans/generate?**", (r) => {
+      generations++;
+      return r.fulfill({ status: 202, json: { run_id: "run-test" } });
+    });
 
     const open = async () => {
       await page.goto(`${BASE}/#planning`);
@@ -106,6 +112,27 @@ function baseProgress(overrides) {
         .getAttribute("aria-valuenow"),
       "56",
     );
+
+    // Both active statuses keep polling and reject even programmatic submits.
+    for (const status of ["queued", "running"]) {
+      runView = { ...runView, status, progress: baseProgress({
+        input_tokens: null, output_tokens: null, usage_complete: false,
+      }) };
+      await open();
+      await page.locator(".run-progress").waitFor();
+      assert.equal(await page.locator("button.btn.primary").first().isDisabled(), true);
+      assert.match(await page.locator(".run-progress").innerText(), /尚未完整上报/);
+      assert.doesNotMatch(await page.locator(".run-progress").innerText(), /输入 0|输出 0|费用/);
+      const readsBefore = runReads;
+      const nextRead = page.waitForResponse(r => r.url().includes("/runs/run-test"));
+      await page.locator("form").evaluate(form => {
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      });
+      await nextRead;
+      assert.ok(runReads > readsBefore, `${status} stopped polling`);
+      assert.equal(generations, 0, `${status} submitted a second Run`);
+    }
 
     // 2) Failed run: business failure location, not a graph node name.
     runView = {
@@ -158,8 +185,23 @@ function baseProgress(overrides) {
         `DOM leaked a graph internal: ${token}`,
       );
     }
+    // Two submits in the same event turn create exactly one accepted Run.
+    runView = { ...runView, status: "waiting_user" };
+    await open();
+    await page.locator(".run-banner").waitFor();
+    assert.equal(await page.locator("button.btn.primary").first().isDisabled(), false);
+    runView = { ...runView, status: "queued" };
+    const submitted = page.waitForResponse(r => r.url().includes("/plans/generate"));
+    await page.locator("form").evaluate(form => {
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    });
+    await submitted;
+    await page.getByText("等待生成", { exact: true }).waitFor();
+    assert.equal(generations, 1);
+    assert.equal(await page.locator("button.btn.primary").first().isDisabled(), true);
     console.log(
-      "PASS: business-only per-stage progress, failure location, no-progress fallback, no graph internals",
+      "PASS: queued/running polling and duplicate-submit guards, NULL usage, business-only progress, failure location, no-progress fallback",
     );
   } finally {
     await browser.close();
