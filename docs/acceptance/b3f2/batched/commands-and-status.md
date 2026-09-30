@@ -3,6 +3,9 @@
 Branch: `codex/b3-f1`. All commands are run from the repo root with the project
 venv (`.venv/Scripts/python.exe`). Raw outputs live under `var/`.
 
+Due to earlier GitHub API replay, the remote SHA differs from the original local
+SHA; the entries below use the actual GitHub SHAs.
+
 ## Per-task commits
 
 | Task | Commit | Subject |
@@ -11,9 +14,11 @@ venv (`.venv/Scripts/python.exe`). Raw outputs live under `var/`.
 | 2 | `38d042e` | enqueue planning runs and add a fenced local worker |
 | 3 | `47cc67f` | add batched planning protocol with frozen budget and bounded repair |
 | 4 | `2bd8445` | resume batched runs by graph version and finish real legacy checkpoints |
-| 5 | `572b068` | single batched protocol, frozen submission and RunProgress |
-| 6 | `32d837e` | per-stage generation progress on the planning page |
-| 7 | (this change) | independent Fake E2E + real-graph progress consistency fix |
+| 5 | `3a769cd7f5d9bd66850de8f5f672e3cae45ec418` | single batched protocol, frozen submission and RunProgress |
+| 6 | `e0e272ff92bb261b999e4cb2d4e67041cef18e0b` | per-stage generation progress on the planning page |
+| 7 | `880362eb460dbf702402e9746e34cd8f7e06f86f` | independent Fake E2E + real-graph progress consistency fix |
+
+Final evidence alignment commit: `6e51dfb34da955604894731aece695acda248156`.
 
 ## Lint
 
