@@ -94,11 +94,16 @@ def test_b3_paid_ledger_replay_and_unknown(db):
         raise httpx.ReadTimeout("unknown")
     provider.client = httpx.Client(transport=httpx.MockTransport(timeout))
     args["attempt_id"] = "b3-paid-2"
-    assert ledger.generate_structured(**args).dispatch_unknown
-    assert ledger.generate_structured(**args).dispatch_unknown
+    unknown = ledger.generate_structured(**args)
+    assert unknown.dispatch_unknown
+    assert unknown.details["transport_exception_type"] == "ReadTimeout"
+    replay = ledger.generate_structured(**args)
+    assert replay.dispatch_unknown
+    assert replay.error_class == "attempt_dispatch_unknown"
     assert len(calls) == 2
     with psycopg.connect(db.migrator_dsn) as conn:
         assert conn.execute("SELECT status FROM ai_provider_attempts WHERE attempt_id='b3-paid-2'").fetchone()[0] == "reconciliation_required"
+        assert conn.execute("SELECT count(*) FROM ai_provider_attempts WHERE attempt_id='b3-paid-2'").fetchone()[0] == 1
 
 
 def test_b3_checkpoint_ack_failure_reconciles_without_republish(db, checkpoint_db):
