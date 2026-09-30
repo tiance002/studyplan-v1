@@ -99,6 +99,9 @@ def test_worker_killed_mid_run_resumes_without_redispatching_completed_batches(
     _saver_setup(recovery_db)
     thread_id = f"run-recover::{PROTOCOL_VERSION}"
     sentinel = tmp_path / "blocked.json"
+    # A reused ``--basetemp`` can leave a stale sentinel from an earlier run; if it
+    # is not removed the child would be killed before committing any checkpoint.
+    sentinel.unlink(missing_ok=True)
     script = BLOCKING_CHILD.format(backend=str(BACKEND_DIR), goal=AGENT_GOAL, proto=PROTOCOL_VERSION)
     proc = subprocess.Popen(
         [sys.executable, "-c", script, recovery_db.migrator_dsn, thread_id, str(sentinel)],

@@ -557,8 +557,10 @@ def recursion_limit(manifest: dict[str, Any]) -> int:
     Super-step accounting for the real ``StateGraph`` (one node execution each):
 
     - per structure/practice batch: ``generate_*_batch`` + ``validate_*_batch`` +
-      ``advance_*_batch`` = 3, **except** the last batch of each phase which routes
-      straight to the next phase and never advances (so subtract one per phase);
+      ``advance_*_batch`` = 3, **including** the last batch of each phase — the
+      phase transition is decided *after* ``advance_*_batch``, so the completed
+      index reaches the full batch count (matching the interpreter and the
+      business progress projection);
     - each bounded repair re-runs ``repair_batch`` + ``validate_*_batch`` = 2;
     - fixed steps: ``normalize`` + ``generate_skeleton`` + ``merge_and_validate`` +
       ``save_draft_projection`` + ``await_approval`` (the interrupt that ends the
@@ -571,7 +573,7 @@ def recursion_limit(manifest: dict[str, Any]) -> int:
     structure = len(manifest.get("structure_batches") or [])
     practice = len(manifest.get("practice_batches") or [])
     repairs = int(manifest.get("max_repairs", 0))
-    batch_steps = 3 * (structure + practice) - (1 if structure else 0) - (1 if practice else 0)
+    batch_steps = 3 * (structure + practice)
     repair_steps = 2 * repairs
     fixed = 5 + 10  # normalize/skeleton/merge/save/await + safety margin
     return batch_steps + repair_steps + fixed
@@ -871,14 +873,19 @@ def build_batched_planning_graph(nodes: Any, *, checkpointer: Any = None) -> Any
     graph.add_edge("generate_structure_batch", "validate_structure_batch")
     graph.add_conditional_edges("validate_structure_batch", route_after_structure_validate, {
         ROUTE_REPAIR: "repair_batch", ROUTE_ADVANCE_STRUCTURE: "advance_structure_batch",
-        ROUTE_GENERATE_PRACTICE: "generate_practice_batch", ROUTE_FAIL: "record_failure"})
-    graph.add_edge("advance_structure_batch", "generate_structure_batch")
+        ROUTE_FAIL: "record_failure"})
+    # The last structure batch advances too, then the phase transition is decided
+    # from the completed index (never from a "is this the last batch?" shortcut),
+    # so ``current_structure_index`` ends at the full batch count.
+    graph.add_conditional_edges("advance_structure_batch", route_after_advance_structure, {
+        ROUTE_GENERATE_STRUCTURE: "generate_structure_batch", ROUTE_GENERATE_PRACTICE: "generate_practice_batch"})
     graph.add_edge("repair_batch", "validate_structure_batch")
     graph.add_edge("generate_practice_batch", "validate_practice_batch")
     graph.add_conditional_edges("validate_practice_batch", route_after_practice_validate, {
         ROUTE_REPAIR: "repair_batch", ROUTE_ADVANCE_PRACTICE: "advance_practice_batch",
-        ROUTE_MERGE: "merge_and_validate", ROUTE_FAIL: "record_failure"})
-    graph.add_edge("advance_practice_batch", "generate_practice_batch")
+        ROUTE_FAIL: "record_failure"})
+    graph.add_conditional_edges("advance_practice_batch", route_after_advance_practice, {
+        ROUTE_GENERATE_PRACTICE: "generate_practice_batch", ROUTE_MERGE: "merge_and_validate"})
     graph.add_conditional_edges("merge_and_validate", route_after_merge,
                                 {ROUTE_DRAFT: "save_draft_projection", ROUTE_FAIL: "record_failure"})
     graph.add_edge("save_draft_projection", "await_approval")
@@ -906,26 +913,36 @@ def route_after_structure_validate(state: PlanningState) -> str:
     if state.get("generation_errors"):
         return ROUTE_FAIL
     if not state.get("structure_errors"):
-        index = int(state.get("current_structure_index", 0))
-        if index + 1 < int(state["manifest"]["structure_batches_count"]):
-            return ROUTE_ADVANCE_STRUCTURE
-        return ROUTE_GENERATE_PRACTICE
+        return ROUTE_ADVANCE_STRUCTURE
     if int(state.get("repair_count", 0)) >= int(state["manifest"]["max_repairs"]):
         return ROUTE_FAIL
     return ROUTE_REPAIR
+
+
+def route_after_advance_structure(state: PlanningState) -> str:
+    """After a structure batch is committed, decide the next phase by index."""
+    index = int(state.get("current_structure_index", 0))
+    if index < int(state["manifest"]["structure_batches_count"]):
+        return ROUTE_GENERATE_STRUCTURE
+    return ROUTE_GENERATE_PRACTICE
 
 
 def route_after_practice_validate(state: PlanningState) -> str:
     if state.get("generation_errors"):
         return ROUTE_FAIL
     if not state.get("structure_errors"):
-        index = int(state.get("current_practice_index", 0))
-        if index + 1 < int(state["manifest"]["practice_batches_count"]):
-            return ROUTE_ADVANCE_PRACTICE
-        return ROUTE_MERGE
+        return ROUTE_ADVANCE_PRACTICE
     if int(state.get("repair_count", 0)) >= int(state["manifest"]["max_repairs"]):
         return ROUTE_FAIL
     return ROUTE_REPAIR
+
+
+def route_after_advance_practice(state: PlanningState) -> str:
+    """After a practice batch is committed, decide merge vs next batch by index."""
+    index = int(state.get("current_practice_index", 0))
+    if index < int(state["manifest"]["practice_batches_count"]):
+        return ROUTE_GENERATE_PRACTICE
+    return ROUTE_MERGE
 
 
 def route_after_merge(state: PlanningState) -> str:
@@ -964,6 +981,8 @@ __all__ = [
     "route_after_practice_validate",
     "route_after_skeleton",
     "route_after_structure_validate",
+    "route_after_advance_practice",
+    "route_after_advance_structure",
     "run_batched_planning_graph",
     "stage_spec",
     "structure_payload",

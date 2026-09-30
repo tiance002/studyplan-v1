@@ -1,0 +1,137 @@
+# B3-F2 Task 7 — independent Fake E2E + full acceptance evidence
+
+Scope: an independent, disposable-PostgreSQL end-to-end acceptance of the only
+official protocol (`b3f2-batch-v1`), driven over the real HTTP routes with the
+**real** LangGraph executor and a deterministic Fake provider. Plus lint, types,
+directed suites and the full backend regression.
+
+Environment note: any test that spawns a child process which writes to PostgreSQL
+(the kill-recovery test) must run **outside the tool sandbox**, and must use a
+**fresh** pytest `--basetemp` (see §6 — a reused basetemp leaves a stale sentinel).
+
+## 1. New E2E file
+
+    backend/tests/e2e/test_batched_agent_route.py
+
+One disposable business DB (`studyplan_test_b3f2_e2e*`, migrated + Agent pack
+seeded) and one disposable checkpoint DB (`studyplan_test_b3f2_e2e_cp*`), each
+dropped afterwards. A real container + `PgPlanningExecutor` (real `StateGraph`)
+backs the real `/api/v1` routes. Six tests:
+
+1. `test_full_batched_generation_reaches_waiting_user_and_publishes`
+   full batched generation -> `waiting_user` -> approve -> publish; business-only
+   `RunProgress` with `phase=done`, 9/9 structure + 9/9 practice = 18/18 batches,
+   frozen cap `max_requests=21`; the Fake dispatched exactly 19 requests
+   (`planning.outline` + `planning.structure`x9 + `planning.practice`x9); ledger
+   counters stay `0`/`NULL` because the in-process Fake writes no paid attempts
+   (never fabricated); no `thread_id`/`checkpoint`/`node_name` leaks.
+2. `test_submission_freezes_protocol_model_and_manifest`
+   the frozen submission event holds `protocol=graph_version=b3f2-batch-v1`, a
+   non-secret `model_ref`, `max_requests=21`, `max_output_budget=131072`,
+   9 structure + 9 practice batches; `manifest_is_intact` true and tamper-detecting.
+3. `test_interrupted_run_resumes_without_recalling_completed_batches`
+   a Worker killed while dispatching the 5th structure batch (4 committed) resumes
+   and dispatches only the remaining 5 structure + 9 practice = 14 requests.
+4. `test_waiting_user_checkpoint_is_not_auto_continued`
+   a second `execute_or_resume` on a `waiting_user` checkpoint raises
+   `GraphRecoveryError("等待用户确认...")` and dispatches nothing new.
+5. `test_cancel_is_terminal_and_idempotent`
+   cancel is terminal; a subsequent approve on the cancelled draft is `409`.
+6. `test_legacy_and_unknown_protocols_are_refused`
+   `builder_for_version` refuses `"1"`, `"planning-legacy-v1"`, `"b3f2-batch-v99"`,
+   `""`; `PlanService(graph_version="1")` raises `ValidationAppError`.
+
+## 2. Lint — ruff
+
+    .venv/Scripts/python.exe -m ruff check backend/app backend/tests
+    -> All checks passed!   (exit 0)
+
+## 3. Types — mypy
+
+    .venv/Scripts/python.exe -m mypy backend/app
+    -> Success: no issues found in 90 source files   (exit 0)
+
+## 4. Directed suites (raw: var/b3f2-task7-directed.txt)
+
+    .venv/Scripts/python.exe -m pytest \
+        backend/tests/e2e/test_batched_agent_route.py \
+        backend/tests/e2e/test_b3f2_learning_route.py \
+        backend/tests/e2e/test_async_generation.py \
+        backend/tests/integration/test_batched_recovery_pg.py \
+        backend/tests/unit/test_batched_planning.py \
+        backend/tests/contract -o addopts= -q
+    -> 76 passed in 147.90s   (exit 0)
+
+## 5. Full backend regression (raw: var/b3f2-task7-nosock.txt)
+
+    .venv/Scripts/python.exe -m pytest backend/tests \
+        --ignore=backend/tests/e2e/test_b2v_socket_counterexamples.py \
+        -o addopts= -q
+    -> 500 passed in 398.49s   (exit 0)
+
+(494 before Task 7 + 6 new E2E tests = 500.)
+
+The socket counterexample file is the **pre-existing flaky baseline** and is
+recorded separately, never counted as a green pass (see §7).
+
+## 6. Defect found and fixed while validating Task 7
+
+### 6a. Real `StateGraph` off-by-one on the last batch of each phase (production)
+
+The real graph routed the last structure/practice batch straight to the next
+phase, **skipping `advance_*_batch`**, so `current_structure_index` stopped at
+`count-1` (e.g. 8/9). The interpreter (`run_batched_planning_graph`, used by the
+Fake path) advanced every batch (9/9). Consequences on the **real** path (the one
+production uses when a real provider + checkpoint DB are configured):
+
+- `derive_progress` reported `phase="structure"` and `completed_structure_batches
+  = count-1` even after every batch had committed;
+- the two protocols' state semantics diverged — exactly the "state consistency"
+  the design revision forbids.
+
+Fix (`app/agent_workflows/planning_batches.py`):
+
+- `validate_structure_batch` / `validate_practice_batch` now always route to the
+  matching `advance_*` on success;
+- new `route_after_advance_structure` / `route_after_advance_practice` decide the
+  phase transition **from the completed index**, not from an "is this the last
+  batch?" shortcut;
+- `recursion_limit()` now charges exactly `3` super-steps per batch (generate +
+  validate + advance), with no per-phase subtraction.
+
+Surfaced by: `test_batched_agent_route.py::test_full_batched_generation_...`
+(the new E2E is the only test that drives the real graph over HTTP with a full
+9-stage pack). Verified: `phase=done`, 9/9 + 9/9 = 18/18.
+
+### 6b. Stale-sentinel harness fragility in the Task 4 kill-recovery test
+
+`test_batched_recovery_pg.py::test_worker_killed_mid_run_...` writes a sentinel to
+`tmp_path/blocked.json` and never removes it. When a run reuses a fixed
+`--basetemp`, the stale sentinel is seen immediately, the child is killed before
+committing any checkpoint, and the test fails at `assert before.next`. Fix: the
+test now `unlink(missing_ok=True)`s the sentinel before launching the child. With
+a fresh basetemp the test passes deterministically (verified: 1 passed).
+
+## 7. Known flaky socket baseline (pre-existing, recorded separately)
+
+    .venv/Scripts/python.exe -m pytest \
+        backend/tests/e2e/test_b2v_socket_counterexamples.py -o addopts= -q
+    -> 4 failed in 22.86s
+
+All four fail with `AssertionError: {"detail":"Not Found"}  assert 404 == 200`.
+This is the same pre-existing baseline characterised in `M5-service-tests.txt` §5:
+the run row is committed but the immediately following `GET /runs/{id}` 404s under
+the socket transport (a visibility/scope race over FORCE-RLS `ai_runs`), not a
+B3-F2 defect. Not part of the acceptance and not counted as green.
+
+## 8. Design-revision conformance (Task 7 items)
+
+- One protocol (`b3f2-batch-v1`) and one recovery semantic: the real graph and the
+  interpreter now agree, and both refuse every other version.
+- Unknown / legacy versions are explicitly rejected (builder + service), never
+  silently converted.
+- Frozen budget & model config: asserted from the persisted submission event.
+- Completed batches are not re-called on resume; `waiting_user` is never
+  auto-continued; cancel is terminal.
+- Frontend consumes only the business `RunProgress` DTO (Task 6, see
+  `M6-frontend-tests.txt`).
