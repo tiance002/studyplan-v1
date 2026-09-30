@@ -782,6 +782,25 @@ p {
 .run-banner p {
   width: 100%;
 }
+.run-progress {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 17px;
+  margin-top: 12px;
+}
+.run-progress-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+.run-progress .progress-track {
+  margin-top: 12px;
+}
+.run-progress .form-note {
+  margin-top: 8px;
+}
 .assistant-panel {
   width: var(--assistant-width);
   flex: 0 0 var(--assistant-width);

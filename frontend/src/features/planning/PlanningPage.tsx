@@ -2,6 +2,76 @@ import { useEffect, useState } from "react";
 import { api, ApiError } from "../../api/client";
 import type { DTO } from "../../api/types";
 import { Resources } from "../../components/Resources";
+
+//: 分批生成阶段 → 面向用户的说明。只使用后端业务 DTO 的闭集枚举，不映射任何图内部名称。
+const PROGRESS_PHASE_LABELS: Record<DTO["RunProgress"]["phase"], string> = {
+  outline: "正在生成路线骨架",
+  structure: "正在生成阶段知识结构",
+  practice: "正在生成阶段实践任务",
+  validation: "正在合并并校验草案",
+  done: "草案已生成",
+};
+
+function RunProgressPanel({ progress }: { progress: DTO["RunProgress"] }) {
+  const totalBatches =
+    progress.total_structure_batches + progress.total_practice_batches;
+  const percent =
+    totalBatches > 0
+      ? Math.min(
+          100,
+          Math.round((progress.completed_batches / totalBatches) * 100),
+        )
+      : progress.phase === "done"
+        ? 100
+        : 0;
+  const stageLabel =
+    progress.current_stage_index !== null &&
+    progress.current_stage_index !== undefined
+      ? `阶段 ${progress.current_stage_index + 1} / ${progress.total_stages}` +
+        (progress.current_stage_title
+          ? ` · ${progress.current_stage_title}`
+          : "")
+      : `共 ${progress.total_stages} 个阶段`;
+  const usage =
+    progress.usage_complete &&
+    progress.input_tokens !== null &&
+    progress.output_tokens !== null
+      ? `模型计量：输入 ${progress.input_tokens} · 输出 ${progress.output_tokens}`
+      : "模型计量：尚未完整上报";
+  return (
+    <div className="run-progress" aria-label="生成进度">
+      <div className="run-progress-head">
+        <strong>{PROGRESS_PHASE_LABELS[progress.phase]}</strong>
+        <span className="pill">{stageLabel}</span>
+      </div>
+      <div
+        className="progress-track"
+        role="progressbar"
+        aria-valuenow={percent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <span style={{ width: `${percent}%` }} />
+      </div>
+      <p className="form-note">
+        已完成 {progress.completed_batches} / {totalBatches} 个批次（结构{" "}
+        {progress.completed_structure_batches}/
+        {progress.total_structure_batches} · 实践{" "}
+        {progress.completed_practice_batches}/{progress.total_practice_batches}）
+      </p>
+      <p className="form-note">
+        模型请求 {progress.request_count} / {progress.max_requests} · {usage}
+      </p>
+      {progress.failure_stage && (
+        <p className="form-note">
+          失败位置：{progress.failure_phase === "practice" ? "实践" : "结构"}批次{" "}
+          {progress.failure_stage}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function PlanningPage({
   project,
   onPublished,
@@ -186,6 +256,7 @@ export function PlanningPage({
           </button>
         </div>
       )}
+      {run?.progress && <RunProgressPanel progress={run.progress} />}
       {error && (
         <div role="alert" className="error">
           {error}

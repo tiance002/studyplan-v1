@@ -7,6 +7,7 @@
     "test": "node --test tests/*.test.mjs",
     "test:auth": "node tests/auth.browser.cjs",
     "test:workspace": "node tests/workspace.browser.cjs",
+    "test:progress": "node tests/planning-progress.browser.cjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",

@@ -1,0 +1,53 @@
+# Task 6 (B3-F2) frontend evidence — per-stage generation progress
+
+The Planning page consumes only the business `RunProgress` DTO from Task 5. No
+graph internals (thread id, node name, checkpoint, prompt) are rendered.
+
+## tsc -b (type check)
+exit=0
+
+## vite build (tsc -b && vite build)
+  dist/index.html                   0.41 kB | gzip:  0.30 kB
+  dist/assets/index-*.css          15.02 kB | gzip:  3.89 kB
+  dist/assets/index-*.js          267.76 kB | gzip: 82.88 kB
+built in ~1.7s
+exit=0
+
+## node --test tests/*.test.mjs
+# tests 4
+# pass 4
+# fail 0
+
+## browser: tests/planning-progress.browser.cjs (Playwright Mock)
+PASS: business-only per-stage progress, failure location, no-progress fallback, no graph internals
+exit=0
+
+Scenarios asserted against canned API responses (no backend required):
+  1. running run  -> phase label "正在生成阶段实践任务", "阶段 2 / 9 · 核心实现",
+     "已完成 10 / 18 个批次", "模型请求 11 / 21", "输入 1100 · 输出 2200",
+     progress bar aria-valuenow=56;
+  2. failed run   -> business failure location "失败位置：结构批次 stage.core"
+     (never a LangGraph node name);
+  3. no progress  -> renders no `.run-progress` panel;
+  4. DOM text contains none of: thread_id, checkpoint, graph_version,
+     generate_structure_batch, generate_practice_batch, await_approval,
+     merge_and_validate, node_name, prompt.
+
+## browser: tests/workspace.browser.cjs (regression)
+PASS: selected-node goal, neutral labels, exact chapter URL, refresh position and subknowledge
+exit=0
+
+## OpenAPI contract cross-check
+  .venv/Scripts/python.exe -m pytest backend/tests/contract -o addopts= -q
+  -> 31 passed
+
+`RunProgress` is present in the regenerated `frontend/src/api/generated/schema.d.ts`
+(committed with the backend DTO in Task 5), so the generated types and the contract
+stay in sync.
+
+## Notes
+- `tests/auth.browser.cjs` is not runnable in this environment: it exercises the
+  real auth endpoints through the Vite proxy (`/api` -> 127.0.0.1:8000) and needs a
+  live backend; it is unrelated to the Planning page. The new progress test mocks
+  `/api/v1/session` and `/healthz` directly, so it needs no backend.
+- The dev server was started with `vite --host 127.0.0.1 --port 5173`.
