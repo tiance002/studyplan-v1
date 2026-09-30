@@ -1,0 +1,481 @@
+{
+  "source": {
+    "run_id": "run_bc41446c11754fccbc468bcc7170af9c",
+    "baseline_sha": "a0c02181f078a8debfcd6b663f3410d2f427470e",
+    "prompt_version": "b3f2-v5-practice-json"
+  },
+  "original": {
+    "stage.tools": {
+      "nodes": [
+        {
+          "title": "工具调用与结构化输出",
+          "node_type": "skill",
+          "objectives": [
+            "把模型决策转为受校验的工具请求",
+            "能设计符合 schema 的工具定义并处理结构化结果",
+            "识别并拒绝非法参数或越权调用"
+          ],
+          "stable_key": "node.tools"
+        },
+        {
+          "title": "工具 schema 与权限边界",
+          "node_type": "concept",
+          "objectives": [
+            "拒绝非法参数并限制工具能力",
+            "能根据业务需求定义工具参数 schema 与权限范围"
+          ],
+          "stable_key": "node.tools.1"
+        },
+        {
+          "title": "结构化结果与错误处理",
+          "node_type": "concept",
+          "objectives": [
+            "用 schema 校验结果且不把失败当成功",
+            "能对工具返回结果进行解析、校验与错误分类"
+          ],
+          "stable_key": "node.tools.2"
+        }
+      ],
+      "units": [
+        {
+          "title": "工具定义与权限控制",
+          "rubric": {
+            "criteria": [
+              "能独立设计一个包含参数类型、必填项、枚举范围与权限声明的工具 schema",
+              "能识别并拒绝非法参数及越权调用"
+            ]
+          },
+          "node_keys": [
+            "node.tools.1"
+          ],
+          "objectives": [
+            "掌握工具 schema 的设计方法",
+            "理解权限边界与最小授权原则",
+            "能编写工具调用的参数校验逻辑"
+          ],
+          "stable_key": "unit.tools.schema",
+          "order_index": 0,
+          "section_key": "stage.tools"
+        },
+        {
+          "title": "结构化输出校验与错误处理",
+          "rubric": {
+            "criteria": [
+              "能编写校验逻辑并正确识别不符合 schema 的结果",
+              "能把失败结果显式标记为错误而非静默当作成功"
+            ]
+          },
+          "node_keys": [
+            "node.tools.2"
+          ],
+          "objectives": [
+            "掌握结构化结果的定义与解析",
+            "能对工具返回结果进行 schema 校验",
+            "能区分成功、业务错误和系统错误并做相应处理"
+          ],
+          "stable_key": "unit.tools.result",
+          "order_index": 1,
+          "section_key": "stage.tools"
+        }
+      ],
+      "relations": [
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.tools",
+          "from_stable_key": "node.model_api"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.tools.1",
+          "from_stable_key": "node.tools"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.tools.2",
+          "from_stable_key": "node.tools"
+        }
+      ]
+    },
+    "stage.rag": {
+      "nodes": [
+        {
+          "title": "RAG 检索与知识库",
+          "node_type": "skill",
+          "objectives": [
+            "构建有来源依据的检索生成链路"
+          ],
+          "stable_key": "node.rag"
+        },
+        {
+          "title": "文档切分、嵌入与检索",
+          "node_type": "concept",
+          "objectives": [
+            "把小型文档集转换为可检索片段"
+          ],
+          "stable_key": "node.rag.1"
+        },
+        {
+          "title": "上下文引用与无结果处理",
+          "node_type": "concept",
+          "objectives": [
+            "为回答绑定来源并处理检索为空"
+          ],
+          "stable_key": "node.rag.2"
+        }
+      ],
+      "units": [
+        {
+          "title": "文档切分与嵌入检索",
+          "rubric": {
+            "实现": 2,
+            "理解": 1,
+            "验证": 2
+          },
+          "node_keys": [
+            "node.rag.1"
+          ],
+          "objectives": [
+            "完成小型文档集切分，生成嵌入并实现 Top-K 相似度检索"
+          ],
+          "stable_key": "unit.rag.ingest",
+          "order_index": 0,
+          "section_key": "stage.rag"
+        },
+        {
+          "title": "引用绑定与空结果处理",
+          "rubric": {
+            "实现": 2,
+            "理解": 1,
+            "验证": 2
+          },
+          "node_keys": [
+            "node.rag.2"
+          ],
+          "objectives": [
+            "在回答中绑定来源片段，并对检索为空给出明确兜底"
+          ],
+          "stable_key": "unit.rag.grounded",
+          "order_index": 1,
+          "section_key": "stage.rag"
+        }
+      ],
+      "relations": [
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.rag.1",
+          "from_stable_key": "node.rag"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.rag.2",
+          "from_stable_key": "node.rag"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.rag",
+          "from_stable_key": "node.model_api"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.rag",
+          "from_stable_key": "node.tools"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.rag.2",
+          "from_stable_key": "node.rag.1"
+        }
+      ]
+    },
+    "stage.context": {
+      "nodes": [
+        {
+          "title": "记忆与上下文管理基础",
+          "node_type": "skill",
+          "objectives": [
+            "保持有限会话状态并控制上下文长度"
+          ],
+          "stable_key": "node.context"
+        },
+        {
+          "title": "会话状态与检查点",
+          "node_type": "concept",
+          "objectives": [
+            "区分会话状态和跨会话长期存储"
+          ],
+          "stable_key": "node.context.1"
+        },
+        {
+          "title": "裁剪、摘要及上下文预算",
+          "node_type": "concept",
+          "objectives": [
+            "比较裁剪与摘要，保留任务必要信息"
+          ],
+          "stable_key": "node.context.2"
+        }
+      ],
+      "units": [
+        {
+          "title": "会话状态与检查点",
+          "rubric": {
+            "criteria": [
+              "能列举会话状态包含的信息类型",
+              "能说明检查点在会话恢复中的作用",
+              "能正确区分会话状态与长期记忆"
+            ]
+          },
+          "node_keys": [
+            "node.context.1"
+          ],
+          "objectives": [
+            "解释会话状态与跨会话长期存储的区别",
+            "在有限会话中维护状态并管理检查点"
+          ],
+          "stable_key": "unit.context.state",
+          "order_index": 0,
+          "section_key": "stage.context"
+        },
+        {
+          "title": "上下文预算与摘要裁剪",
+          "rubric": {
+            "criteria": [
+              "能解释裁剪与摘要的适用场景",
+              "能根据任务重要性排列上下文片段",
+              "能演示在预算内保留必要信息"
+            ]
+          },
+          "node_keys": [
+            "node.context.2"
+          ],
+          "objectives": [
+            "比较裁剪与摘要两种上下文控制策略",
+            "为给定任务设定并控制上下文预算"
+          ],
+          "stable_key": "unit.context.budget",
+          "order_index": 1,
+          "section_key": "stage.context"
+        }
+      ],
+      "relations": [
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.context.1",
+          "from_stable_key": "node.context"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.context.2",
+          "from_stable_key": "node.context"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.context",
+          "from_stable_key": "node.langgraph"
+        }
+      ]
+    }
+  },
+  "repaired": {
+    "stage.tools": {
+      "nodes": [
+        {
+          "title": "工具调用与结构化输出",
+          "node_type": "skill",
+          "objectives": [
+            "把模型决策转为受校验的工具请求",
+            "能设计符合 schema 的工具定义并处理结构化结果",
+            "识别并拒绝非法参数或越权调用"
+          ],
+          "stable_key": "node.tools"
+        },
+        {
+          "title": "工具 schema 与权限边界",
+          "node_type": "concept",
+          "objectives": [
+            "拒绝非法参数并限制工具能力",
+            "能根据业务需求定义工具参数 schema 与权限范围"
+          ],
+          "stable_key": "node.tools.1"
+        },
+        {
+          "title": "结构化结果与错误处理",
+          "node_type": "concept",
+          "objectives": [
+            "用 schema 校验结果且不把失败当成功",
+            "能对工具返回结果进行解析、校验与错误分类"
+          ],
+          "stable_key": "node.tools.2"
+        }
+      ],
+      "units": [
+        {
+          "title": "工具定义与权限控制",
+          "rubric": {
+            "criteria": [
+              "能独立设计一个包含参数类型、必填项、枚举范围与权限声明的工具 schema",
+              "能识别并拒绝非法参数及越权调用"
+            ]
+          },
+          "node_keys": [
+            "node.tools",
+            "node.tools.1"
+          ],
+          "objectives": [
+            "掌握工具 schema 的设计方法",
+            "理解权限边界与最小授权原则",
+            "能编写工具调用的参数校验逻辑"
+          ],
+          "stable_key": "unit.tools.schema",
+          "order_index": 0,
+          "section_key": "stage.tools"
+        },
+        {
+          "title": "结构化输出校验与错误处理",
+          "rubric": {
+            "criteria": [
+              "能编写校验逻辑并正确识别不符合 schema 的结果",
+              "能把失败结果显式标记为错误而非静默当作成功"
+            ]
+          },
+          "node_keys": [
+            "node.tools",
+            "node.tools.2"
+          ],
+          "objectives": [
+            "掌握结构化结果的定义与解析",
+            "能对工具返回结果进行 schema 校验",
+            "能区分成功、业务错误和系统错误并做相应处理"
+          ],
+          "stable_key": "unit.tools.result",
+          "order_index": 1,
+          "section_key": "stage.tools"
+        }
+      ],
+      "relations": [
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.tools",
+          "from_stable_key": "node.model_api"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.tools.1",
+          "from_stable_key": "node.tools"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.tools.2",
+          "from_stable_key": "node.tools"
+        }
+      ]
+    },
+    "stage.rag": {
+      "nodes": [
+        {
+          "title": "RAG 检索与知识库",
+          "node_type": "skill",
+          "objectives": [
+            "构建有来源依据的检索生成链路"
+          ],
+          "stable_key": "node.rag"
+        },
+        {
+          "title": "文档切分、嵌入与检索",
+          "node_type": "concept",
+          "objectives": [
+            "把小型文档集转换为可检索片段"
+          ],
+          "stable_key": "node.rag.1"
+        },
+        {
+          "title": "上下文引用与无结果处理",
+          "node_type": "concept",
+          "objectives": [
+            "为回答绑定来源并处理检索为空"
+          ],
+          "stable_key": "node.rag.2"
+        }
+      ],
+      "units": [
+        {
+          "title": "RAG 链路与知识库基础",
+          "rubric": {
+            "实现": 1,
+            "理解": 2,
+            "验证": 1
+          },
+          "node_keys": [
+            "node.rag"
+          ],
+          "objectives": [
+            "说明 RAG 检索生成链路的整体流程与各环节职责"
+          ],
+          "stable_key": "unit.rag.foundation",
+          "order_index": 0,
+          "section_key": "stage.rag"
+        },
+        {
+          "title": "文档切分与嵌入检索",
+          "rubric": {
+            "实现": 2,
+            "理解": 1,
+            "验证": 2
+          },
+          "node_keys": [
+            "node.rag.1"
+          ],
+          "objectives": [
+            "完成小型文档集切分，生成嵌入并实现 Top-K 相似度检索"
+          ],
+          "stable_key": "unit.rag.ingest",
+          "order_index": 1,
+          "section_key": "stage.rag"
+        },
+        {
+          "title": "引用绑定与空结果处理",
+          "rubric": {
+            "实现": 2,
+            "理解": 1,
+            "验证": 2
+          },
+          "node_keys": [
+            "node.rag.2"
+          ],
+          "objectives": [
+            "在回答中绑定来源片段，并对检索为空给出明确兜底"
+          ],
+          "stable_key": "unit.rag.grounded",
+          "order_index": 2,
+          "section_key": "stage.rag"
+        }
+      ],
+      "relations": [
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.rag.1",
+          "from_stable_key": "node.rag"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.rag.2",
+          "from_stable_key": "node.rag"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.rag",
+          "from_stable_key": "node.model_api"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.rag",
+          "from_stable_key": "node.tools"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.rag.2",
+          "from_stable_key": "node.rag.1"
+        }
+      ]
+    }
+  }
+}
