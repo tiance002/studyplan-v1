@@ -13,6 +13,11 @@ if ($AcceptanceId -notmatch '\A[A-Za-z0-9][A-Za-z0-9._-]{0,79}\z' -or $Acceptanc
     Write-Output 'NOT RUN: Invalid AcceptanceId.'
     exit 2
 }
+$windowsDeviceNamePattern = '(?i)\A(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?\z'
+if ($AcceptanceId -match $windowsDeviceNamePattern) {
+    Write-Output 'NOT RUN: Invalid AcceptanceId.'
+    exit 2
+}
 $reservedAcceptanceIds = @('legacy', '1', 'first', 'b3f2-real-20260930-01', 'b3f2-real-20260930-1')
 if ($reservedAcceptanceIds -contains $AcceptanceId) {
     Write-Output 'NOT RUN: Invalid AcceptanceId.'

@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import re
+import stat
 import tempfile
 from dataclasses import replace
 from pathlib import Path
@@ -20,6 +21,9 @@ _ACCEPTANCE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}")
 _RESERVED_ACCEPTANCE_IDS = frozenset({
     "legacy", "1", "first", "b3f2-real-20260930-01", "b3f2-real-20260930-1",
 })
+_WINDOWS_DEVICE_ACCEPTANCE_ID = re.compile(
+    r"(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?", re.IGNORECASE,
+)
 _RUN_STATUSES = frozenset({
     "queued", "running", "waiting_user", "succeeded", "failed", "cancelled", "reconciliation_required",
 })
@@ -33,9 +37,20 @@ _EVIDENCE_ATTEMPT_FIELDS = (
 def validate_acceptance_id(acceptance_id: str) -> str:
     """Validate a manually supplied identifier without interpreting it as a path."""
     if (not isinstance(acceptance_id, str) or not _ACCEPTANCE_ID.fullmatch(acceptance_id)
-            or ".." in acceptance_id or acceptance_id.casefold() in _RESERVED_ACCEPTANCE_IDS):
+            or ".." in acceptance_id or acceptance_id.casefold() in _RESERVED_ACCEPTANCE_IDS
+            or _WINDOWS_DEVICE_ACCEPTANCE_ID.fullmatch(acceptance_id)):
         raise ValueError("Invalid AcceptanceId")
     return acceptance_id
+
+
+def _is_symlink_or_reparse_point(path: Path) -> bool:
+    try:
+        metadata = path.lstat()
+    except FileNotFoundError:
+        return False
+    attributes = getattr(metadata, "st_file_attributes", 0)
+    reparse_point = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    return stat.S_ISLNK(metadata.st_mode) or bool(attributes & reparse_point)
 
 
 def acceptance_paths(git_dir: str | Path, acceptance_id: str) -> tuple[Path, Path]:
@@ -45,6 +60,8 @@ def acceptance_paths(git_dir: str | Path, acceptance_id: str) -> tuple[Path, Pat
     if not root.is_dir():
         raise ValueError("Git metadata directory is unavailable")
     directory = root / "b3f2-controlled-live"
+    if _is_symlink_or_reparse_point(directory):
+        raise ValueError("Acceptance journal directory is a symlink or reparse point")
     resolved_directory = directory.resolve()
     if resolved_directory.parent != root:
         raise ValueError("Acceptance journal directory escaped Git metadata directory")

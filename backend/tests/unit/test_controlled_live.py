@@ -92,6 +92,7 @@ def test_powershell_gate_requires_confirmation_and_acceptance_id():
 
 @pytest.mark.parametrize("acceptance_id", [
     "../x", "a/b", "a\\b", "legacy", "1", "first", "b3f2-real-20260930-01",
+    "CON", "con.json", "NUL.txt", "PRN", "AUX", "COM1.foo", "com9.json", "LPT1", "lpt9.txt",
 ])
 def test_powershell_rejects_path_acceptance_ids_before_starting_python(acceptance_id):
     result = _run_controlled_live_powershell(
@@ -113,13 +114,38 @@ def _git_dir(tmp_path):
     return git_dir
 
 
+def _make_directory_symlink(link, target):
+    try:
+        link.symlink_to(target, target_is_directory=True)
+    except OSError as exc:
+        if os.name == "nt" and (isinstance(exc, PermissionError) or getattr(exc, "winerror", None) == 1314):
+            pytest.skip("Directory symlink creation is unavailable without elevation")
+        raise
+
+
+def _make_directory_junction(link, target):
+    target.mkdir(parents=True)
+    result = subprocess.run(
+        ["cmd.exe", "/c", "mklink", "/J", str(link), str(target)],
+        capture_output=True, text=True, timeout=10, check=False,
+    )
+    if result.returncode != 0:
+        pytest.skip("Directory junction creation is unavailable without elevation")
+    attributes = getattr(link.lstat(), "st_file_attributes", 0)
+    if not attributes & 0x400:  # FILE_ATTRIBUTE_REPARSE_POINT
+        os.rmdir(link)
+        pytest.skip("This Python runtime does not expose reparse-point attributes")
+
+
 def test_acceptance_id_validation_rejects_reserved_and_unsafe_values():
     validate = _new_acceptance_api("validate_acceptance_id")
     assert validate("b3f2-real-20260930-02") == "b3f2-real-20260930-02"
     assert validate("A_2.release-x") == "A_2.release-x"
     assert validate("x" * 80) == "x" * 80
     for invalid in ("", "../x", "a/b", "a\\b", "..", "bad..id", "bad\nid",
-                    "x" * 81, "legacy", "1", "first", "b3f2-real-20260930-01"):
+                    "x" * 81, "legacy", "1", "first", "b3f2-real-20260930-01",
+                    "CON", "con.json", "NUL.txt", "PRN", "AUX", "COM1.foo", "com9.json",
+                    "LPT1", "lpt9.txt"):
         with pytest.raises(ValueError):
             validate(invalid)
 
@@ -141,6 +167,52 @@ def test_acceptance_paths_are_confined_and_leave_legacy_files_untouched(tmp_path
     assert evidence.name == "b3f2-real-20260930-02-evidence.json"
     assert acceptance_dir.parent == git_dir.resolve()
     assert (legacy_journal.read_bytes(), legacy_evidence.read_bytes()) == original
+
+
+@pytest.mark.parametrize("target_kind", ["git_sibling", "outside_repo"])
+def test_controlled_live_directory_symlink_fails_before_submission(tmp_path, target_kind):
+    submit_run = _new_acceptance_api("submit_authorized_run")
+    git_dir = _git_dir(tmp_path)
+    target = git_dir / "logs" if target_kind == "git_sibling" else tmp_path / "outside"
+    target.mkdir()
+    _make_directory_symlink(git_dir / "b3f2-controlled-live", target)
+    submissions = []
+
+    def unexpected_submission():
+        submissions.append("run-created")
+        return SimpleNamespace(status_code=202, json=lambda: {"run_id": "mock-run"})
+
+    with pytest.raises(ValueError, match="symlink|reparse"):
+        submit_run(git_dir=git_dir, acceptance_id="b3f2-real-20260930-02", project_id="project-1",
+                   actor_id="actor-1", model_id="deepseek-flash",
+                   post=unexpected_submission)
+
+    assert submissions == []
+    assert not (target / "b3f2-real-20260930-02.json").exists()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows junction/reparse-point behavior")
+def test_controlled_live_directory_junction_fails_before_submission(tmp_path):
+    submit_run = _new_acceptance_api("submit_authorized_run")
+    git_dir = _git_dir(tmp_path)
+    target = git_dir / "logs"
+    link = git_dir / "b3f2-controlled-live"
+    _make_directory_junction(link, target)
+    submissions = []
+
+    try:
+        def unexpected_submission():
+            submissions.append("run-created")
+            return SimpleNamespace(status_code=202, json=lambda: {"run_id": "mock-run"})
+
+        with pytest.raises(ValueError, match="symlink|reparse"):
+            submit_run(git_dir=git_dir, acceptance_id="b3f2-real-20260930-02", project_id="project-1",
+                       actor_id="actor-1", model_id="deepseek-flash",
+                       post=unexpected_submission)
+        assert submissions == []
+        assert not (target / "b3f2-real-20260930-02.json").exists()
+    finally:
+        os.rmdir(link)
 
 
 def test_new_acceptance_is_exclusive_and_journal_precedes_run_submission(tmp_path):
