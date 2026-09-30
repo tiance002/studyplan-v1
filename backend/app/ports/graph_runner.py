@@ -64,7 +64,24 @@ __all__ = ["GraphRecoveryError", "GraphRunnerPort", "PlanningRuntime", "ResumeRe
 
 class PlanningExecutorPort(Protocol):
     """Generation and acknowledgment of already committed business decisions."""
+
     def execute(self, nodes: Any, initial: Any, thread_id: str) -> Any: ...
+
+    def execute_or_resume(
+        self,
+        nodes: Any,
+        initial: Any,
+        thread_id: str,
+        graph_version: str,
+        guard: Any,
+    ) -> Any:
+        """Run or resume one thread under its stored graph version.
+
+        ``guard`` is a zero-argument callable revalidating the lease and Run status
+        before each step and before every paid dispatch.
+        """
+        ...
+
     def finish(self, *, thread_id: str, graph_version: str, decision: str,
                result_id: str, draft_hash: str) -> None: ...
 @dataclass(frozen=True)

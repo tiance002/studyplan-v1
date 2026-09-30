@@ -822,6 +822,14 @@ class PlanningNodes:
         delta["structure_errors"] = list(outcome.errors) + validate_route_structure({**state, **delta})
         return _with_aggregate(delta, state)
 
+    def advance_structure_batch(self, state: PlanningState) -> dict[str, Any]:
+        """结构批次通过后推进完成索引（显式节点，使真实图可 checkpoint 恢复）。"""
+        return {"current_structure_index": int(state.get("current_structure_index", 0)) + 1}
+
+    def advance_practice_batch(self, state: PlanningState) -> dict[str, Any]:
+        """实践批次通过后推进完成索引（显式节点，使真实图可 checkpoint 恢复）。"""
+        return {"current_practice_index": int(state.get("current_practice_index", 0)) + 1}
+
     def await_approval(self, state: PlanningState) -> dict[str, Any]:
         """真实图中的 interrupt 节点（供 b3f2-batch-v1 装配复用）。"""
         from app.agent_workflows.graphs import _await_approval

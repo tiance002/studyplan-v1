@@ -1,0 +1,38 @@
+# Task 4 — M3/new-graph recovery + real legacy checkpoint compatibility
+# Generated: 2026-09-30T01:17:01Z
+
+## Command 1
+$ .venv/Scripts/python.exe -m pytest backend/tests/integration/test_batched_recovery_pg.py backend/tests/integration/test_legacy_checkpoint_compatibility.py -q -o addopts=
+........                                                                 [100%]
+8 passed in 30.15s
+
+## Command 2
+$ .venv/Scripts/python.exe -m ruff check backend
+All checks passed!
+
+## Command 3
+$ .venv/Scripts/python.exe -m mypy backend/app
+Success: no issues found in 89 source files
+
+## Command 4 (full backend regression)
+$ .venv/Scripts/python.exe -m pytest backend/tests -q -o addopts=
+4 failed, 491 passed in 352.85s (0:05:52)
+Same 4 pre-existing socket-harness failures as on base 38d042e; not caused by Task 4.
+
+## Legacy source pinned to commit 39e79ad (real pre-Task-1 code)
+532f71dedfbae0ff6b8212e7d8809203c32aa88e644204a71d69f865f54d3672  backend/app/agent_workflows/graphs.py
+196833cba08b8a8bd43b28cb18d02e1dda7a0024f70b6d4fc299372e96b881f6  backend/app/agent_workflows/nodes.py
+36274552e49ad11f1af2c17aa072eb380b4e0802ead0633e382a3b1fee3bce6a  backend/app/agent_workflows/state.py
+0fd2e54d936639d7c2b77c07f5e51575a15694bb05588ddc74d60aeb973150e5  backend/app/agent_workflows/validators.py
+combined digest: 768dafa091dc448ada18f4502e2a244971b5366a108a718df8dbd7ba8b403d16
+
+## Recovery evidence (real b3f2-batch-v1 checkpoints)
+- Worker killed after 4 committed structure batches; resume dispatches only the
+  remaining 5 structure + 9 practice = 14 requests (no re-dispatch of the 4 done).
+- waiting_user checkpoint: execute_or_resume refuses to auto-continue (19 calls, unchanged).
+- unknown graph version refused; lost-lease guard aborts before any dispatch.
+
+## NOT RUN
+- Real DeepSeek paid calls: NOT RUN (Fake only).
+- Business-level publication idempotency for legacy threads is asserted by the
+  existing test_plan_publication.py / test_b3_closed_loop.py, not re-created here.

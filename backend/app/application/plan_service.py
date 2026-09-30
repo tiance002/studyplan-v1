@@ -254,7 +254,11 @@ class PlanService:
                 selected_pack=selected_pack,
                 guard=guard,
             )
-            trace = executor.execute(nodes, initial, run.thread_id) if executor is not None else run_planning_graph(nodes, cast(PlanningState, initial))
+            trace = (
+                self._run_executor(executor, nodes, initial, run.thread_id, run.graph_version, guard)
+                if executor is not None
+                else run_planning_graph(nodes, cast(PlanningState, initial))
+            )
         except LLMDispatchUnknownError:
             guard()
             self._update_run(
@@ -339,8 +343,11 @@ class PlanService:
             executor = runtime.executor if runtime else self._executor
             nodes = self._build_nodes(project_id=project_id, run_id=run_id, goal=cleaned_goal,
                                       llm=runtime.llm if runtime else None, selected_pack=selected_pack)
-            trace = (executor.execute(nodes, initial, thread_id)
-                     if executor is not None else run_planning_graph(nodes, initial))
+            trace = (
+                self._run_executor(executor, nodes, initial, thread_id, self._graph_version, lambda: None)
+                if executor is not None
+                else run_planning_graph(nodes, initial)
+            )
         except LLMDispatchUnknownError:
             self._update_run(project_id=project_id, run_id=run_id,
                              status=AiRunStatus.RECONCILIATION_REQUIRED,
@@ -542,6 +549,24 @@ class PlanService:
             draft=final_draft,
             resources=self._resolve(final_draft.stage_resources, final_draft.stages),
         )
+
+    @staticmethod
+    def _run_executor(
+        executor: PlanningExecutorPort,
+        nodes: PlanningNodes,
+        initial: Any,
+        thread_id: str,
+        graph_version: str,
+        guard: Callable[[], None],
+    ) -> Any:
+        """Prefer the version-aware ``execute_or_resume`` when the executor offers it.
+
+        Keeps a plain ``execute``-only executor (test doubles) working unchanged.
+        """
+        resume = getattr(executor, "execute_or_resume", None)
+        if callable(resume):
+            return resume(nodes, initial, thread_id, graph_version, guard)
+        return executor.execute(nodes, initial, thread_id)
 
     def _build_nodes(self, *, project_id: str, run_id: str, goal: str, llm: LLMPort | None = None,
                      selected_pack: Mapping[str, Any] | None = None,
