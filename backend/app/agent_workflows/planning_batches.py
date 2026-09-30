@@ -29,6 +29,7 @@ from typing import Any
 
 from app.agent_workflows.state import PlanningState
 from app.application.planning_budget import BudgetPolicy
+from app.domain.enums import TaskKnowledgeRole
 
 PROTOCOL_VERSION = "b3f2-batch-v1"
 DEFAULT_GENERIC_STAGE_COUNT = 4
@@ -302,6 +303,7 @@ def validate_structure_batch(
 
     node_keys = _stable_keys(nodes, "知识节点", errors)
     unit_keys = _stable_keys(units, "学习单元", errors)
+    attached_nodes: set[str] = set()
     for unit in units if isinstance(units, list) else []:
         if not isinstance(unit, dict):
             continue
@@ -313,9 +315,12 @@ def validate_structure_batch(
         if not isinstance(owned, list) or not owned:
             errors.append(f"学习单元未关联知识节点：{unit.get('stable_key')}")
             continue
+        attached_nodes.update(key for key in owned if isinstance(key, str))
         for key in owned:
             if key not in node_keys:
                 errors.append(f"学习单元引用未知知识节点：{key}")
+    for key in sorted(node_keys - attached_nodes):
+        errors.append(f"结构批次知识节点未关联到学习单元：{key}（{stage_key}）")
 
     allowed = node_keys | set(batch.get("declared_external_prerequisite_keys") or [])
     for relation in relations if isinstance(relations, list) else []:
@@ -384,7 +389,7 @@ def validate_practice_batch(
         for link in task.get("knowledge_links") or []:
             if not isinstance(link, dict) or link.get("node_stable_key") not in node_keys:
                 errors.append(f"实践任务引用未知知识节点：{task.get('stable_key')}")
-    for link in links if isinstance(links, list) else []:
+    for index, link in enumerate(links if isinstance(links, list) else []):
         if not isinstance(link, dict):
             errors.append("任务知识关联包含非对象项")
             continue
@@ -392,6 +397,12 @@ def validate_practice_batch(
             errors.append(f"任务知识关联引用未知任务：{link.get('task_stable_key')}")
         if link.get("node_stable_key") not in node_keys:
             errors.append(f"任务知识关联引用未知节点：{link.get('node_stable_key')}")
+        # Use the final validator's domain enum and missing-role default.
+        role = link.get("role", TaskKnowledgeRole.CORE.value)
+        try:
+            TaskKnowledgeRole(str(role))
+        except ValueError:
+            errors.append(f"实践批次第 {index} 条任务知识关联的 role 非法：{role!r}（{stage_key}）")
     return errors
 
 
