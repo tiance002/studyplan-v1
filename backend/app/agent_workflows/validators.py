@@ -257,6 +257,7 @@ def validate_route_structure(state: Mapping[str, Any]) -> list[str]:
     if any(not k for k in stage_keys) or len(stage_keys) != len(set(stage_keys)):
         errors.append("领域纲要阶段稳定键为空或重复")
     known_nodes = {n.get("stable_key") for n in nodes if isinstance(n, dict)}
+    allowed_sources = {str(r) for r in ((state.get("domain_pack") or {}).get("resource_refs") or [])}
     required = set((state.get("domain_pack") or {}).get("required_node_keys", []))
     missing = required - known_nodes
     if missing:
@@ -282,6 +283,12 @@ def validate_route_structure(state: Mapping[str, Any]) -> list[str]:
         for resource in section.get("resources", []):
             if set(resource.get("node_keys", [])) - stage_nodes:
                 errors.append("资源知识关联不属于当前阶段：" + key)
+            # 资源真伪：模型不得引用受审核清单之外的来源，也不得凭空虚构 verified。
+            source_ref = str(resource.get("source_ref", "") or "")
+            if source_ref and source_ref not in allowed_sources:
+                errors.append("资源来源未在受审核清单中：" + source_ref)
+            if resource.get("verified") is True and source_ref not in allowed_sources:
+                errors.append("资源被标记为已核验但来源未经审核：" + key)
     relations = {(r.get("from_stable_key"), r.get("to_stable_key"), r.get("relation_type"))
                  for r in state.get("relations", [])}
     for blueprint in (state.get("domain_pack") or {}).get("knowledge_blueprints", []):

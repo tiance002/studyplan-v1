@@ -1,0 +1,820 @@
+"""B3-F2 batched planning protocol.
+
+This module owns the *new* generation protocol ``b3f2-batch-v1`` only. The legacy
+``build_planning_graph`` stays untouched for old checkpoints (see Task 4).
+
+Core ideas (design spec §数据与流程, §输出预算与模型适配, §失败、修复与恢复):
+
+- **Frozen manifest**: at submission time the reviewed domain pack, per-purpose
+  budgets, batch list and request/output caps are frozen into an immutable JSON
+  manifest. The model may personalise titles/objectives and fill extra nodes, but
+  it can never re-key, re-assign or replace authoritative facts.
+- **One request per node**: the graph dispatches exactly one model request per
+  node (outline, each structure batch, each practice batch, bounded repairs).
+- **Local validation**: each batch is validated against its own frozen slice, not
+  against the whole route. Global relations are checked only after merge.
+- **Deterministic merge**: batches are re-ordered by the skeleton; duplicates,
+  missing stages or missing required nodes are rejected, never silently merged.
+- **Fail fast**: a model failure, truncation or empty result stops the run
+  immediately; only localisable content errors may consume the shared repair
+  budget (at most two repairs per run).
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from copy import deepcopy
+from typing import Any
+
+from app.agent_workflows.state import PlanningState
+from app.application.planning_budget import BudgetPolicy
+
+PROTOCOL_VERSION = "b3f2-batch-v1"
+DEFAULT_GENERIC_STAGE_COUNT = 4
+MAX_REPAIR_TOTAL = 2
+
+OUTLINE_PURPOSE = "planning.outline"
+STRUCTURE_PURPOSE = "planning.structure"
+PRACTICE_PURPOSE = "planning.practice"
+REPAIR_PURPOSE = "planning.repair"
+
+#: Deployment default used by the deterministic Fake demo and the interpreter
+#: when no frozen policy is supplied. Real runs always pass the frozen policy.
+DEFAULT_BUDGET = BudgetPolicy(4096, 8192, 4096, 8192, 8192, 393216)
+
+#: Route targets for the batched graph.
+ROUTE_FAIL = "fail_batched"
+ROUTE_NEXT_STRUCTURE = "next_structure"
+ROUTE_NEXT_PRACTICE = "next_practice"
+ROUTE_PRACTICE = "practice"
+ROUTE_MERGE = "merge"
+ROUTE_REPAIR = "repair_batch"
+ROUTE_DRAFT = "save_draft_projection"
+
+
+# ---------------------------------------------------------------------------
+# Manifest
+# ---------------------------------------------------------------------------
+
+
+def _canonical_json(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+
+
+def _canonical_hash(value: Any) -> str:
+    return hashlib.sha256(_canonical_json(value).encode("utf-8")).hexdigest()
+
+
+def freeze_manifest(
+    pack: dict[str, Any],
+    policy: BudgetPolicy,
+    model_ref: str,
+    generic_stage_count: int = DEFAULT_GENERIC_STAGE_COUNT,
+) -> dict[str, Any]:
+    """Freeze the reviewed pack + budget into an immutable execution manifest.
+
+    Reviewed packs keep every stage/node key from the pack. Unsupported
+    directions fall back to ``search_only`` generic stage slots whose count is a
+    fixed batch/request budget boundary, **not** a claim of domain coverage.
+    """
+    stages = deepcopy(pack.get("stage_blueprints") or [])
+    reviewed = bool(stages) and pack.get("resource_support") != "search_only"
+    blueprints = {b.get("stable_key"): b for b in (pack.get("knowledge_blueprints") or [])}
+
+    if reviewed:
+        stage_specs = [{
+            "stage_key": stage["stable_key"],
+            "title": stage.get("title", ""),
+            "section_kind": stage.get("section_kind", "core"),
+            "objective": stage.get("objective", ""),
+            "node_keys": list(stage.get("node_keys") or []),
+        } for stage in stages]
+        required_node_keys = list(pack.get("required_node_keys") or [])
+        resource_support = pack.get("resource_support", "reviewed_index")
+    else:
+        stage_specs = [{
+            "stage_key": f"stage.general.{index}",
+            "title": f"通用阶段 {index + 1}",
+            "section_kind": "general",
+            "objective": "",
+            "node_keys": [],
+        } for index in range(generic_stage_count)]
+        required_node_keys = []
+        resource_support = "search_only"
+
+    structure_batches: list[dict[str, Any]] = []
+    for index, spec in enumerate(stage_specs):
+        stage_nodes = set(spec["node_keys"])
+        external: set[str] = set()
+        for key in spec["node_keys"]:
+            blueprint = blueprints.get(key) or {}
+            for dependency in blueprint.get("prerequisite_keys") or []:
+                if dependency not in stage_nodes:
+                    external.add(str(dependency))
+        structure_batches.append({
+            "batch_index": index,
+            "stage_key": spec["stage_key"],
+            "scope": "stage",
+            "node_keys": list(spec["node_keys"]),
+            "declared_external_prerequisite_keys": sorted(external),
+        })
+
+    practice_batches = [{"batch_index": index, "stage_key": spec["stage_key"]}
+                        for index, spec in enumerate(stage_specs)]
+
+    budget = policy.as_dict()
+    max_requests = 1 + len(structure_batches) + len(practice_batches) + MAX_REPAIR_TOTAL
+    max_output_budget = (
+        policy.outline
+        + len(structure_batches) * policy.structure
+        + len(practice_batches) * policy.practice
+        + MAX_REPAIR_TOTAL * policy.repair
+    )
+
+    manifest: dict[str, Any] = {
+        "protocol": PROTOCOL_VERSION,
+        "model_ref": str(model_ref),
+        "pack_key": pack.get("pack_key", ""),
+        "pack_version": pack.get("version", 0),
+        "pack_hash": _canonical_hash(pack),
+        "resource_support": resource_support,
+        "reviewed": reviewed,
+        "stages": stage_specs,
+        "required_node_keys": required_node_keys,
+        "structure_batches": structure_batches,
+        "practice_batches": practice_batches,
+        "structure_batches_count": len(structure_batches),
+        "practice_batches_count": len(practice_batches),
+        "budget": budget,
+        "max_repairs": MAX_REPAIR_TOTAL,
+        "max_requests": max_requests,
+        "max_output_budget": max_output_budget,
+    }
+    manifest["manifest_hash"] = _canonical_hash(manifest)
+    return manifest
+
+
+def manifest_is_intact(manifest: dict[str, Any]) -> bool:
+    """Verify a manifest was not tampered with after freezing."""
+    if not isinstance(manifest, dict) or "manifest_hash" not in manifest:
+        return False
+    body = {key: value for key, value in manifest.items() if key != "manifest_hash"}
+    return _canonical_hash(body) == manifest["manifest_hash"]
+
+
+def stage_spec(manifest: dict[str, Any], stage_key: str) -> dict[str, Any]:
+    for spec in manifest.get("stages") or []:
+        if spec.get("stage_key") == stage_key:
+            return spec
+    raise KeyError(f"unknown stage key: {stage_key}")
+
+
+def attempt_key(
+    run_id: str,
+    purpose: str,
+    stage_key: str = "",
+    batch_index: int = 0,
+    repair_index: int = 0,
+) -> str:
+    """Stable, deterministic attempt id (never a random retry key)."""
+    return f"{run_id}:{PROTOCOL_VERSION}:{purpose}:{stage_key or 'root'}:{batch_index}:{repair_index}"
+
+
+# ---------------------------------------------------------------------------
+# Local payloads (what a single request may see)
+# ---------------------------------------------------------------------------
+
+
+def structure_payload(state: PlanningState, batch: dict[str, Any]) -> dict[str, Any]:
+    """Local context for one structure batch: this stage only, plus declared deps."""
+    manifest = state["manifest"]
+    spec = stage_spec(manifest, batch["stage_key"])
+    pack = state.get("domain_pack") or {}
+    owned = set(spec.get("node_keys") or [])
+    blueprints = []
+    for blueprint in pack.get("knowledge_blueprints") or []:
+        if blueprint.get("stable_key") in owned:
+            blueprints.append({
+                "stable_key": blueprint["stable_key"],
+                "title": blueprint.get("title", ""),
+                "node_type": blueprint.get("node_type", "concept"),
+                "objectives": list(blueprint.get("objectives") or []),
+                "parent_key": blueprint.get("parent_key", ""),
+                "prerequisite_keys": list(blueprint.get("prerequisite_keys") or []),
+            })
+    stage_blueprint: dict[str, Any] = next(
+        (s for s in (pack.get("stage_blueprints") or []) if s.get("stable_key") == spec["stage_key"]),
+        {},
+    )
+    return {
+        "goal": state.get("goal"),
+        "stage": {
+            "stable_key": spec["stage_key"],
+            "title": spec.get("title", ""),
+            "section_kind": spec.get("section_kind", "core"),
+            "objective": spec.get("objective", ""),
+        },
+        "node_blueprints": blueprints,
+        "resources": deepcopy(stage_blueprint.get("resources") or []),
+        "declared_external_prerequisite_keys": list(batch.get("declared_external_prerequisite_keys") or []),
+        "resource_support": manifest["resource_support"],
+    }
+
+
+def practice_payload(state: PlanningState, stage_key: str) -> dict[str, Any]:
+    """Local context for one practice batch: only this stage's validated structure."""
+    manifest = state["manifest"]
+    spec = stage_spec(manifest, stage_key)
+    pack = state.get("domain_pack") or {}
+    stage_structure = next(
+        (b for b in (state.get("structure_batches") or []) if b.get("stage_key") == stage_key),
+        {},
+    )
+    practice_blueprint: dict[str, Any] = next(
+        (p for p in (pack.get("practice_blueprints") or []) if p.get("section_key") == stage_key),
+        {},
+    )
+    return {
+        "goal": state.get("goal"),
+        "stage": {
+            "stable_key": spec["stage_key"],
+            "title": spec.get("title", ""),
+            "objective": spec.get("objective", ""),
+        },
+        "structure": {
+            "nodes": deepcopy(stage_structure.get("nodes") or []),
+            "units": deepcopy(stage_structure.get("units") or []),
+        },
+        "practice_blueprint": deepcopy(practice_blueprint),
+        "resource_support": manifest["resource_support"],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Local validation
+# ---------------------------------------------------------------------------
+
+
+def _stable_keys(items: Any, label: str, errors: list[str]) -> set[str]:
+    keys: set[str] = set()
+    if not isinstance(items, list):
+        errors.append(f"{label}必须是列表")
+        return keys
+    for item in items:
+        if not isinstance(item, dict):
+            errors.append(f"{label}包含非对象项")
+            continue
+        key = str(item.get("stable_key", "")).strip()
+        if not key:
+            errors.append(f"{label}存在空 stable_key")
+            continue
+        if key in keys:
+            errors.append(f"{label}稳定键重复：{key}")
+        keys.add(key)
+    return keys
+
+
+def validate_structure_batch(
+    payload: dict[str, Any],
+    batch: dict[str, Any],
+    pack: dict[str, Any],
+) -> list[str]:
+    """Validate one structure batch against its frozen slice. No model call."""
+    errors: list[str] = []
+    stage_key = batch["stage_key"]
+    nodes = payload.get("nodes") if isinstance(payload, dict) else None
+    units = payload.get("units") if isinstance(payload, dict) else None
+    relations = payload.get("relations") if isinstance(payload, dict) else []
+    if not isinstance(nodes, list) or not nodes:
+        errors.append(f"结构批次缺少知识节点：{stage_key}")
+    if not isinstance(units, list) or not units:
+        errors.append(f"结构批次缺少学习单元：{stage_key}")
+
+    node_keys = _stable_keys(nodes, "知识节点", errors)
+    unit_keys = _stable_keys(units, "学习单元", errors)
+    for unit in units or []:
+        if not isinstance(unit, dict):
+            continue
+        if unit.get("section_key") != stage_key:
+            errors.append(f"学习单元归属未知阶段：{unit.get('section_key')}")
+        if not [o for o in (unit.get("objectives") or []) if str(o).strip()]:
+            errors.append(f"学习单元缺少目标：{unit.get('stable_key')}")
+        owned = unit.get("node_keys")
+        if not isinstance(owned, list) or not owned:
+            errors.append(f"学习单元未关联知识节点：{unit.get('stable_key')}")
+            continue
+        for key in owned:
+            if key not in node_keys:
+                errors.append(f"学习单元引用未知知识节点：{key}")
+
+    allowed = node_keys | set(batch.get("declared_external_prerequisite_keys") or [])
+    for relation in relations or []:
+        if not isinstance(relation, dict):
+            errors.append("关系包含非对象项")
+            continue
+        if str(relation.get("relation_type", "")) not in {"prerequisite", "contains"}:
+            errors.append(f"关系类型非法：{relation.get('relation_type')!r}")
+        for side in ("from_stable_key", "to_stable_key"):
+            if relation.get(side) not in allowed:
+                errors.append(f"关系引用未声明节点：{relation.get(side)}")
+
+    # The reviewed pack owns authoritative keys: reject invented nodes that are
+    # not part of the pack's declared node set for this stage.
+    reviewed = (pack.get("resource_support") or "") != "search_only" and bool(pack.get("stage_blueprints"))
+    if reviewed:
+        declared_owned = set(batch.get("node_keys") or [])
+        forged = node_keys - declared_owned
+        if forged:
+            errors.append("结构批次新增未审核知识节点：" + ", ".join(sorted(forged)))
+    if not unit_keys and units:
+        errors.append("学习单元稳定键无效")
+    return errors
+
+
+def validate_practice_batch(
+    payload: dict[str, Any],
+    stage_key: str,
+    structure: dict[str, Any],
+) -> list[str]:
+    """Validate one practice batch against its stage's validated structure."""
+    errors: list[str] = []
+    tasks = payload.get("tasks") if isinstance(payload, dict) else None
+    if not isinstance(tasks, list) or not tasks:
+        errors.append(f"实践批次缺少任务：{stage_key}")
+        return errors
+    node_keys = {str(n.get("stable_key", "")) for n in (structure.get("nodes") or []) if isinstance(n, dict)}
+    task_keys = _stable_keys(tasks, "实践任务", errors)
+    links = payload.get("task_knowledge_links") or []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        if task.get("section_key") != stage_key:
+            errors.append(f"实践任务归属未知阶段：{task.get('section_key')}")
+        if not str(task.get("goal", "")).strip():
+            errors.append(f"实践任务缺少目标：{task.get('stable_key')}")
+        if not [a for a in (task.get("acceptance") or []) if str(a).strip()]:
+            errors.append(f"实践任务缺少验收标准：{task.get('stable_key')}")
+        if not isinstance(task.get("in_scope"), list) or not isinstance(task.get("out_scope"), list):
+            errors.append(f"实践任务缺少范围/排除项：{task.get('stable_key')}")
+        for link in task.get("knowledge_links") or []:
+            if not isinstance(link, dict) or link.get("node_stable_key") not in node_keys:
+                errors.append(f"实践任务引用未知知识节点：{task.get('stable_key')}")
+    for link in links:
+        if not isinstance(link, dict):
+            errors.append("任务知识关联包含非对象项")
+            continue
+        if link.get("task_stable_key") not in task_keys:
+            errors.append(f"任务知识关联引用未知任务：{link.get('task_stable_key')}")
+        if link.get("node_stable_key") not in node_keys:
+            errors.append(f"任务知识关联引用未知节点：{link.get('node_stable_key')}")
+    return errors
+
+
+# ---------------------------------------------------------------------------
+# Deterministic merge
+# ---------------------------------------------------------------------------
+
+
+def merge_batches(
+    outline: dict[str, Any],
+    structure_batches: list[dict[str, Any]],
+    practice_batches: list[dict[str, Any]],
+    pack: dict[str, Any],
+    *,
+    manifest: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Merge validated batches in skeleton order into the legacy projection shape.
+
+    Rejects duplicate business keys, missing stages and missing required nodes.
+    The returned ``errors`` list is non-empty when the merge must fail.
+    """
+    errors: list[str] = []
+    sections = list((outline or {}).get("sections") or [])
+    stage_order = [section.get("stable_key") for section in sections]
+
+    by_stage_structure = {b.get("stage_key"): b for b in structure_batches}
+    by_stage_practice = {b.get("stage_key"): b for b in practice_batches}
+
+    nodes: list[dict[str, Any]] = []
+    units: list[dict[str, Any]] = []
+    relations: list[dict[str, Any]] = []
+    tasks: list[dict[str, Any]] = []
+    task_links: list[dict[str, Any]] = []
+
+    seen_node: set[str] = set()
+    seen_unit: set[str] = set()
+    seen_task: set[str] = set()
+
+    for stage_key in stage_order:
+        structure = by_stage_structure.get(stage_key)
+        if structure is None:
+            errors.append(f"缺少结构批次：{stage_key}")
+            continue
+        for node in structure.get("nodes") or []:
+            key = str(node.get("stable_key", ""))
+            if key in seen_node:
+                errors.append(f"知识节点重复：{key}")
+                continue
+            seen_node.add(key)
+            nodes.append(deepcopy(node))
+        for unit in structure.get("units") or []:
+            key = str(unit.get("stable_key", ""))
+            if key in seen_unit:
+                errors.append(f"学习单元重复：{key}")
+                continue
+            seen_unit.add(key)
+            units.append(deepcopy(unit))
+        relations.extend(deepcopy(structure.get("relations") or []))
+
+        practice = by_stage_practice.get(stage_key)
+        if practice is None:
+            errors.append(f"缺少实践批次：{stage_key}")
+            continue
+        payload = practice.get("payload") or {}
+        for task in payload.get("tasks") or []:
+            key = str(task.get("stable_key", ""))
+            if key in seen_task:
+                errors.append(f"实践任务重复：{key}")
+                continue
+            seen_task.add(key)
+            tasks.append(deepcopy(task))
+        task_links.extend(deepcopy(payload.get("task_knowledge_links") or []))
+
+    # Re-order units and tasks deterministically by skeleton order.
+    for index, unit in enumerate(units):
+        unit["order_index"] = index
+    for index, task in enumerate(tasks):
+        task["order_index"] = index
+
+    required = set((manifest or {}).get("required_node_keys") or pack.get("required_node_keys") or [])
+    missing = required - seen_node
+    if missing:
+        errors.append("缺少必要知识节点：" + ", ".join(sorted(missing)))
+
+    for stage_key in stage_order:
+        if not any(u.get("section_key") == stage_key for u in units):
+            errors.append(f"阶段缺少学习单元：{stage_key}")
+        if not any(t.get("section_key") == stage_key for t in tasks):
+            errors.append(f"阶段缺少实践任务：{stage_key}")
+
+    reviewed = (pack.get("resource_support") or "") != "search_only" and bool(pack.get("stage_blueprints"))
+    return {
+        "errors": errors,
+        "outline": outline,
+        "nodes": nodes,
+        "units": units,
+        "relations": relations,
+        "practice_proposal": {
+            "stable_key": "practice.route",
+            "title": (pack.get("title") or "学习路线") + "实践",
+            "idea": (pack.get("title") or ""),
+            "tasks": tasks,
+            "task_knowledge_links": task_links,
+        },
+        "route_scope": "reviewed" if reviewed else "search_only",
+        "route_status": "reviewed" if reviewed else "generic_unverified",
+        "resource_support": "reviewed_index" if reviewed else "needs_resource_review",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Budget guard (pure; the ledger enforces it under a run advisory lock)
+# ---------------------------------------------------------------------------
+
+
+_PURPOSE_BUDGET_KEY = {
+    OUTLINE_PURPOSE: "outline",
+    STRUCTURE_PURPOSE: "structure",
+    PRACTICE_PURPOSE: "practice",
+    REPAIR_PURPOSE: "repair",
+}
+
+
+def output_budget_for(manifest: dict[str, Any], purpose: str) -> int:
+    """Reserved output budget for one purpose from the frozen manifest."""
+    key = _PURPOSE_BUDGET_KEY.get(purpose)
+    if key is None:
+        return int(manifest["max_output_budget"])
+    return int((manifest.get("budget") or {}).get(key, 0))
+
+
+def attempt_purpose(attempt_id: str) -> str:
+    """Parse the purpose back out of a stable attempt id."""
+    parts = attempt_id.split(":")
+    return parts[-4] if len(parts) >= 5 else ""
+
+
+def attempt_stage(attempt_id: str) -> str:
+    """Parse the stage key back out of a stable attempt id (``root`` -> "")."""
+    parts = attempt_id.split(":")
+    if len(parts) < 5:
+        return ""
+    stage = parts[-3]
+    return "" if stage == "root" else stage
+
+
+def allowed_attempt_keys(run_id: str, manifest: dict[str, Any]) -> set[str]:
+    """The frozen attempt catalog: no dispatch may use a key outside this set."""
+    keys = {attempt_key(run_id, OUTLINE_PURPOSE, "", 0, 0)}
+    repairs = int(manifest.get("max_repairs", 0))
+    structure = manifest.get("structure_batches") or []
+    practice = manifest.get("practice_batches") or []
+    for spec in structure:
+        index = int(spec["batch_index"])
+        keys.add(attempt_key(run_id, STRUCTURE_PURPOSE, spec["stage_key"], index, 0))
+        for repair_index in range(1, repairs + 1):
+            keys.add(attempt_key(run_id, REPAIR_PURPOSE, spec["stage_key"], index, repair_index))
+    offset = len(structure)
+    for spec in practice:
+        index = int(spec["batch_index"])
+        keys.add(attempt_key(run_id, PRACTICE_PURPOSE, spec["stage_key"], index, 0))
+        for repair_index in range(1, repairs + 1):
+            keys.add(attempt_key(run_id, REPAIR_PURPOSE, spec["stage_key"], offset + index, repair_index))
+    return keys
+
+
+def planned_output_budget(manifest: dict[str, Any]) -> int:
+    return int(manifest["max_output_budget"])
+
+
+def budget_violation(
+    manifest: dict[str, Any],
+    *,
+    request_count: int,
+    reserved_output: int,
+    stage_key: str,
+    purpose: str,
+) -> str | None:
+    """Return a reason string when a dispatch would exceed the frozen budget."""
+    if request_count >= int(manifest["max_requests"]):
+        return "run_budget_exhausted"
+    if reserved_output > int(manifest["max_output_budget"]):
+        return "run_budget_exhausted"
+    if purpose in {STRUCTURE_PURPOSE, PRACTICE_PURPOSE, REPAIR_PURPOSE}:
+        allowed_stages = {spec["stage_key"] for spec in manifest.get("stages") or []}
+        if stage_key and stage_key not in allowed_stages:
+            return "run_manifest_violation"
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Interpreter (mirrors the real StateGraph routing node-for-node)
+# ---------------------------------------------------------------------------
+
+
+def _merge_state(state: PlanningState, delta: dict[str, Any]) -> None:
+    mutable: dict[str, Any] = state  # type: ignore[assignment]
+    mutable.update(delta)
+
+
+def _initial_state(initial: PlanningState, manifest: dict[str, Any] | None) -> PlanningState:
+    state: PlanningState = dict(initial)  # type: ignore[assignment]
+    if manifest is not None:
+        state["manifest"] = manifest  # type: ignore[typeddict-unknown-key]
+    if not state.get("manifest"):
+        state["manifest"] = freeze_manifest(  # type: ignore[typeddict-unknown-key]
+            state.get("domain_pack") or {}, DEFAULT_BUDGET, "mock:default"
+        )
+    state.setdefault("protocol", PROTOCOL_VERSION)  # type: ignore[typeddict-item]
+    return state
+
+
+def run_batched_planning_graph(
+    nodes: Any,
+    initial: PlanningState,
+    *,
+    manifest: dict[str, Any] | None = None,
+    max_repair_total: int = MAX_REPAIR_TOTAL,
+    max_steps: int = 400,
+) -> Any:
+    """Deterministic interpreter for the batched graph.
+
+    Mirrors ``build_batched_planning_graph`` node-for-node so routing can be
+    mechanically proven without a real framework. ``resume_decision`` behaves as
+    in the legacy interpreter: ``None`` stops at ``await_approval``.
+    """
+    from app.agent_workflows.graphs import PlanningTrace  # local import avoids a cycle
+
+    state = _initial_state(initial, manifest)
+    frozen = state["manifest"]  # type: ignore[typeddict-item]
+    visited: list[str] = []
+
+    def fail() -> Any:
+        visited.append("record_failure")
+        _merge_state(state, nodes.record_failure_node(state))
+        return PlanningTrace(visited=visited, state=state, stopped_at="failed",
+                             failed_errors=list(state.get("validation_errors") or []))
+
+    steps = 0
+
+    def guard_steps() -> None:
+        nonlocal steps
+        steps += 1
+        if steps > max_steps:
+            raise RuntimeError("batched planning graph step limit exceeded")
+
+    # ---- normalize ----
+    visited.append("normalize")
+    _merge_state(state, nodes.normalize(state))
+    if state.get("input_errors"):
+        return fail()
+
+    # ---- skeleton ----
+    guard_steps()
+    visited.append("generate_skeleton")
+    _merge_state(state, nodes.generate_skeleton(state))
+    if state.get("generation_errors"):
+        return fail()
+
+    # ---- structure batches ----
+    structure_count = len(frozen["structure_batches"])
+    while True:
+        index = int(state.get("current_structure_index", 0))
+        if index >= structure_count:
+            break
+        guard_steps()
+        visited.append("generate_structure_batch")
+        _merge_state(state, nodes.generate_structure_batch(state))
+        if state.get("generation_errors"):
+            return fail()
+        while True:
+            guard_steps()
+            visited.append("validate_structure_batch")
+            _merge_state(state, nodes.validate_structure_batch_node(state))
+            if not state.get("structure_errors"):
+                break
+            if int(state.get("repair_count", 0)) >= max_repair_total:
+                return fail()
+            guard_steps()
+            visited.append("repair_batch")
+            _merge_state(state, nodes.repair_batch(state))
+            if state.get("generation_errors"):
+                return fail()
+        _merge_state(state, {"current_structure_index": index + 1})
+
+    # ---- practice batches ----
+    practice_count = len(frozen["practice_batches"])
+    while True:
+        index = int(state.get("current_practice_index", 0))
+        if index >= practice_count:
+            break
+        guard_steps()
+        visited.append("generate_practice_batch")
+        _merge_state(state, nodes.generate_practice_batch(state))
+        if state.get("generation_errors"):
+            return fail()
+        while True:
+            guard_steps()
+            visited.append("validate_practice_batch")
+            _merge_state(state, nodes.validate_practice_batch_node(state))
+            if not state.get("structure_errors"):
+                break
+            if int(state.get("repair_count", 0)) >= max_repair_total:
+                return fail()
+            guard_steps()
+            visited.append("repair_batch")
+            _merge_state(state, nodes.repair_batch(state))
+            if state.get("generation_errors"):
+                return fail()
+        _merge_state(state, {"current_practice_index": index + 1})
+
+    # ---- merge + global validation ----
+    guard_steps()
+    visited.append("merge_and_validate")
+    _merge_state(state, nodes.merge_and_validate(state))
+    if state.get("structure_errors") or state.get("generation_errors"):
+        return fail()
+
+    # ---- draft + await approval ----
+    guard_steps()
+    visited.append("save_draft_projection")
+    _merge_state(state, nodes.save_draft_projection(state))
+    return PlanningTrace(visited=visited, state=state, stopped_at="await_approval")
+
+
+def build_batched_planning_graph(nodes: Any, *, checkpointer: Any = None) -> Any:
+    """Assemble the real ``b3f2-batch-v1`` StateGraph (requires langgraph)."""
+    from app.agent_workflows.graphs import LANGGRAPH_AVAILABLE
+    from app.agent_workflows.state import PlanningState as _PlanningState
+
+    if not LANGGRAPH_AVAILABLE:
+        raise RuntimeError(
+            "langgraph 未安装，无法装配 StateGraph；请使用 run_batched_planning_graph 解释器"
+        )
+    from app.agent_workflows.nodes import route_after_decision  # local import avoids a cycle
+    from langgraph.graph import END, START, StateGraph  # type: ignore[import-not-found]
+
+    graph = StateGraph(_PlanningState)
+    graph.add_node("normalize", nodes.normalize)
+    graph.add_node("generate_skeleton", nodes.generate_skeleton)
+    graph.add_node("generate_structure_batch", nodes.generate_structure_batch)
+    graph.add_node("validate_structure_batch", nodes.validate_structure_batch_node)
+    graph.add_node("generate_practice_batch", nodes.generate_practice_batch)
+    graph.add_node("validate_practice_batch", nodes.validate_practice_batch_node)
+    graph.add_node("repair_batch", nodes.repair_batch)
+    graph.add_node("merge_and_validate", nodes.merge_and_validate)
+    graph.add_node("save_draft_projection", nodes.save_draft_projection)
+    graph.add_node("await_approval", nodes.await_approval)
+    graph.add_node("apply_decision", nodes.apply_decision)
+    graph.add_node("commit_plan_idempotently", nodes.commit_plan_idempotently)
+    graph.add_node("cancel_draft", nodes.cancel_draft_node)
+    graph.add_node("record_failure", nodes.record_failure_node)
+
+    graph.add_edge(START, "normalize")
+    graph.add_conditional_edges("normalize", route_after_normalize,
+                                {"generate_skeleton": "generate_skeleton", ROUTE_FAIL: "record_failure"})
+    graph.add_conditional_edges("generate_skeleton", route_after_skeleton,
+                                {"generate_structure_batch": "generate_structure_batch", ROUTE_FAIL: "record_failure"})
+    graph.add_edge("generate_structure_batch", "validate_structure_batch")
+    graph.add_conditional_edges("validate_structure_batch", route_after_structure_validate, {
+        ROUTE_REPAIR: "repair_batch", ROUTE_NEXT_STRUCTURE: "generate_structure_batch",
+        ROUTE_PRACTICE: "generate_practice_batch", ROUTE_FAIL: "record_failure"})
+    graph.add_edge("repair_batch", "validate_structure_batch")
+    graph.add_edge("generate_practice_batch", "validate_practice_batch")
+    graph.add_conditional_edges("validate_practice_batch", route_after_practice_validate, {
+        ROUTE_REPAIR: "repair_batch", ROUTE_NEXT_PRACTICE: "generate_practice_batch",
+        ROUTE_MERGE: "merge_and_validate", ROUTE_FAIL: "record_failure"})
+    graph.add_conditional_edges("merge_and_validate", route_after_merge,
+                                {ROUTE_DRAFT: "save_draft_projection", ROUTE_FAIL: "record_failure"})
+    graph.add_edge("save_draft_projection", "await_approval")
+    graph.add_edge("await_approval", "apply_decision")
+    graph.add_conditional_edges("apply_decision", route_after_decision, {
+        "commit_plan_idempotently": "commit_plan_idempotently", "validate": "merge_and_validate",
+        "cancel_draft": "cancel_draft", ROUTE_FAIL: "record_failure"})
+    graph.add_edge("commit_plan_idempotently", END)
+    graph.add_edge("cancel_draft", END)
+    graph.add_edge("record_failure", END)
+    return graph.compile(checkpointer=checkpointer)
+
+
+def route_after_normalize(state: PlanningState) -> str:
+    return ROUTE_FAIL if state.get("input_errors") else "generate_skeleton"
+
+
+def route_after_skeleton(state: PlanningState) -> str:
+    if state.get("generation_errors") or state.get("structure_errors"):
+        return ROUTE_FAIL
+    return "generate_structure_batch"
+
+
+def route_after_structure_validate(state: PlanningState) -> str:
+    if state.get("generation_errors"):
+        return ROUTE_FAIL
+    if not state.get("structure_errors"):
+        index = int(state.get("current_structure_index", 0))
+        if index + 1 < int(state["manifest"]["structure_batches_count"]):
+            return ROUTE_NEXT_STRUCTURE
+        return ROUTE_PRACTICE
+    if int(state.get("repair_count", 0)) >= int(state["manifest"]["max_repairs"]):
+        return ROUTE_FAIL
+    return ROUTE_REPAIR
+
+
+def route_after_practice_validate(state: PlanningState) -> str:
+    if state.get("generation_errors"):
+        return ROUTE_FAIL
+    if not state.get("structure_errors"):
+        index = int(state.get("current_practice_index", 0))
+        if index + 1 < int(state["manifest"]["practice_batches_count"]):
+            return ROUTE_NEXT_PRACTICE
+        return ROUTE_MERGE
+    if int(state.get("repair_count", 0)) >= int(state["manifest"]["max_repairs"]):
+        return ROUTE_FAIL
+    return ROUTE_REPAIR
+
+
+def route_after_merge(state: PlanningState) -> str:
+    if state.get("generation_errors") or state.get("structure_errors"):
+        return ROUTE_FAIL
+    return ROUTE_DRAFT
+
+
+__all__ = [
+    "DEFAULT_BUDGET",
+    "DEFAULT_GENERIC_STAGE_COUNT",
+    "MAX_REPAIR_TOTAL",
+    "PROTOCOL_VERSION",
+    "allowed_attempt_keys",
+    "attempt_key",
+    "attempt_purpose",
+    "attempt_stage",
+    "budget_violation",
+    "output_budget_for",
+    "build_batched_planning_graph",
+    "freeze_manifest",
+    "manifest_is_intact",
+    "merge_batches",
+    "planned_output_budget",
+    "practice_payload",
+    "route_after_merge",
+    "route_after_normalize",
+    "route_after_practice_validate",
+    "route_after_skeleton",
+    "route_after_structure_validate",
+    "run_batched_planning_graph",
+    "stage_spec",
+    "structure_payload",
+    "validate_practice_batch",
+    "validate_structure_batch",
+]

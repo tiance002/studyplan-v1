@@ -36,6 +36,18 @@ from collections.abc import Mapping as AbcMapping
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping
 
+from app.agent_workflows.planning_batches import (
+    OUTLINE_PURPOSE,
+    PRACTICE_PURPOSE,
+    REPAIR_PURPOSE,
+    STRUCTURE_PURPOSE,
+    attempt_key,
+    merge_batches,
+    practice_payload,
+    structure_payload,
+    validate_practice_batch,
+    validate_structure_batch,
+)
 from app.agent_workflows.state import PlanningState
 from app.agent_workflows.validators import (
     MAX_REPAIR_ATTEMPTS,
@@ -529,6 +541,298 @@ class PlanningNodes:
         """修复次数超限 / 输入非法：失败并**保留错误**（不静默丢弃）。"""
         self.on_failure(state, list(state.get("validation_errors") or []))
         return {}
+
+    # ------------------------------------------------------------------
+    # B3-F2 分批协议节点（b3f2-batch-v1）。每个节点只派发一个请求。
+    # ------------------------------------------------------------------
+
+    def generate_skeleton(self, state: PlanningState) -> dict[str, Any]:
+        """生成完整路线骨架；阶段稳定键必须与冻结清单一致。"""
+        manifest = state.get("manifest") or {}
+        result = self.llm.generate_structured(
+            purpose=OUTLINE_PURPOSE,
+            payload={
+                "goal": state.get("goal"),
+                "prefs": state.get("prefs_snapshot"),
+                "manifest": manifest,
+                **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {}),
+            },
+            schema_name="OutlineV1",
+            run_id=state.get("run_id", ""),
+            attempt_id=attempt_key(state.get("run_id", ""), OUTLINE_PURPOSE, "", 0, 0),
+        )
+        if isinstance(result, LLMFailure):
+            if result.dispatch_unknown:
+                raise LLMDispatchUnknownError(result.error_class)
+            return _with_aggregate(
+                _extend_generation_errors(state, {
+                    "generation_errors": [f"骨架生成失败：{result.error_class}"],
+                    "outline": {},
+                }),
+                state,
+            )
+        payload = result.payload
+        sections = _as_list(payload.get("sections"))
+        if not sections:
+            return _with_aggregate(
+                _extend_generation_errors(state, {
+                    "generation_errors": ["骨架生成失败：模型返回空骨架"],
+                    "outline": {},
+                }),
+                state,
+            )
+        errors = self._validate_skeleton(payload, manifest)
+        if errors:
+            return _with_aggregate(
+                _extend_generation_errors(state, {
+                    "generation_errors": errors,
+                    "outline": payload,
+                }),
+                state,
+            )
+        return _with_aggregate({
+            "outline": payload,
+            "outline_ref": str(payload.get("outline_ref", "skeleton")),
+            "structure_batches": [],
+            "practice_batches": [],
+            "current_structure_index": 0,
+            "current_practice_index": 0,
+            "structure_errors": [],
+            "generation_errors": [],
+        }, state)
+
+    def _validate_skeleton(self, payload: dict[str, Any], manifest: dict[str, Any]) -> list[str]:
+        errors: list[str] = []
+        sections = _as_list(payload.get("sections"))
+        keys = [s.get("stable_key") for s in sections if isinstance(s, dict)]
+        expected = [spec["stage_key"] for spec in (manifest.get("stages") or [])]
+        if keys != expected:
+            errors.append("骨架阶段与冻结清单不一致")
+        if len(set(keys)) != len(keys):
+            errors.append("骨架阶段稳定键重复")
+        for section in sections:
+            if not isinstance(section, dict) or not str(section.get("title", "")).strip():
+                errors.append("骨架阶段缺少标题")
+        return errors
+
+    def generate_structure_batch(self, state: PlanningState) -> dict[str, Any]:
+        """生成当前结构批次（单个阶段）。"""
+        manifest = state["manifest"]
+        index = int(state.get("current_structure_index", 0))
+        spec = manifest["structure_batches"][index]
+        stage_key = spec["stage_key"]
+        payload = structure_payload(state, spec)
+        result = self.llm.generate_structured(
+            purpose=STRUCTURE_PURPOSE,
+            payload={**payload, **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {})},
+            schema_name="KnowledgeStructureV1",
+            run_id=state.get("run_id", ""),
+            attempt_id=attempt_key(state.get("run_id", ""), STRUCTURE_PURPOSE, stage_key, index, 0),
+        )
+        if isinstance(result, LLMFailure):
+            if result.dispatch_unknown:
+                raise LLMDispatchUnknownError(result.error_class)
+            return _with_aggregate(
+                _extend_generation_errors(state, {
+                    "generation_errors": [f"知识结构生成失败：{result.error_class}"],
+                    "failure_stage": stage_key,
+                }),
+                state,
+            )
+        produced = result.payload
+        nodes_ = _as_list(produced.get("nodes"))
+        units_ = _as_list(produced.get("units"))
+        if not nodes_ or not units_:
+            return _with_aggregate(
+                _extend_generation_errors(state, {
+                    "generation_errors": [f"知识结构生成失败：模型返回空结果（{stage_key}）"],
+                    "failure_stage": stage_key,
+                }),
+                state,
+            )
+        batches = list(state.get("structure_batches") or [])
+        entry = {"stage_key": stage_key, "batch_index": index,
+                 "nodes": nodes_, "units": units_, "relations": _as_list(produced.get("relations"))}
+        if index < len(batches):
+            batches[index] = entry
+        else:
+            batches.append(entry)
+        return _with_aggregate({"structure_batches": batches, "structure_errors": []}, state)
+
+    def validate_structure_batch_node(self, state: PlanningState) -> dict[str, Any]:
+        """校验当前结构批次（确定性，无模型调用）。"""
+        manifest = state["manifest"]
+        index = int(state.get("current_structure_index", 0))
+        batches = state.get("structure_batches") or []
+        if index >= len(batches):
+            return _with_aggregate({"structure_errors": ["结构批次缺失"]}, state)
+        spec = manifest["structure_batches"][index]
+        errors = validate_structure_batch(batches[index], spec, state.get("domain_pack") or {})
+        if errors:
+            return _with_aggregate({
+                "structure_errors": errors,
+                "repair_target": {"kind": "structure", "stage_key": spec["stage_key"], "batch_index": index},
+            }, state)
+        return _with_aggregate({"structure_errors": [], "repair_target": {}}, state)
+
+    def generate_practice_batch(self, state: PlanningState) -> dict[str, Any]:
+        """生成当前实践批次（单个阶段）。"""
+        manifest = state["manifest"]
+        index = int(state.get("current_practice_index", 0))
+        stage_key = manifest["practice_batches"][index]["stage_key"]
+        payload = practice_payload(state, stage_key)
+        result = self.llm.generate_structured(
+            purpose=PRACTICE_PURPOSE,
+            payload={**payload, **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {})},
+            schema_name="PracticeProposalV1",
+            run_id=state.get("run_id", ""),
+            attempt_id=attempt_key(state.get("run_id", ""), PRACTICE_PURPOSE, stage_key, index, 0),
+        )
+        if isinstance(result, LLMFailure):
+            if result.dispatch_unknown:
+                raise LLMDispatchUnknownError(result.error_class)
+            return _with_aggregate(
+                _extend_generation_errors(state, {
+                    "generation_errors": [f"实践任务生成失败：{result.error_class}"],
+                    "failure_stage": stage_key,
+                }),
+                state,
+            )
+        produced = result.payload
+        tasks = _as_list(produced.get("tasks"))
+        if not tasks:
+            return _with_aggregate(
+                _extend_generation_errors(state, {
+                    "generation_errors": [f"实践任务生成失败：模型返回空结果（{stage_key}）"],
+                    "failure_stage": stage_key,
+                }),
+                state,
+            )
+        batches = list(state.get("practice_batches") or [])
+        entry = {"stage_key": stage_key, "batch_index": index, "payload": produced}
+        if index < len(batches):
+            batches[index] = entry
+        else:
+            batches.append(entry)
+        return _with_aggregate({"practice_batches": batches, "structure_errors": []}, state)
+
+    def validate_practice_batch_node(self, state: PlanningState) -> dict[str, Any]:
+        """校验当前实践批次（确定性，无模型调用）。"""
+        manifest = state["manifest"]
+        index = int(state.get("current_practice_index", 0))
+        batches = state.get("practice_batches") or []
+        if index >= len(batches):
+            return _with_aggregate({"structure_errors": ["实践批次缺失"]}, state)
+        stage_key = manifest["practice_batches"][index]["stage_key"]
+        structure = next((b for b in (state.get("structure_batches") or [])
+                          if b.get("stage_key") == stage_key), {})
+        errors = validate_practice_batch(batches[index]["payload"], stage_key, structure)
+        if errors:
+            return _with_aggregate({
+                "structure_errors": errors,
+                "repair_target": {"kind": "practice", "stage_key": stage_key, "batch_index": index},
+            }, state)
+        return _with_aggregate({"structure_errors": [], "repair_target": {}}, state)
+
+    def repair_batch(self, state: PlanningState) -> dict[str, Any]:
+        """有界局部修复：只重发当前无效批次，共享整次两次配额。"""
+        manifest = state["manifest"]
+        target = dict(state.get("repair_target") or {})
+        kind = target.get("kind")
+        index = int(target.get("batch_index", 0))
+        stage_key = str(target.get("stage_key", ""))
+        if kind == "structure":
+            context = structure_payload(state, manifest["structure_batches"][index])
+            schema_name = "KnowledgeStructureV1"
+            key_index = index
+        else:
+            context = practice_payload(state, stage_key)
+            schema_name = "PracticeProposalV1"
+            # Practice repairs share the run's repair budget but must not collide
+            # with structure repairs for the same stage, so their batch index is
+            # offset past the structure batches in the frozen attempt catalog.
+            key_index = len(manifest["structure_batches"]) + index
+        repair_index = int(state.get("repair_count", 0)) + 1
+        result = self.llm.generate_structured(
+            purpose=REPAIR_PURPOSE,
+            payload={
+                "goal": state.get("goal"),
+                "manifest": manifest,
+                **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {}),
+                "target": target,
+                "context": context,
+                "errors": list(state.get("structure_errors") or []),
+            },
+            schema_name=schema_name,
+            run_id=state.get("run_id", ""),
+            attempt_id=attempt_key(state.get("run_id", ""), REPAIR_PURPOSE, stage_key, key_index, repair_index),
+        )
+        if isinstance(result, LLMFailure):
+            if result.dispatch_unknown:
+                raise LLMDispatchUnknownError(result.error_class)
+            return _with_aggregate(
+                _extend_generation_errors(state, {
+                    "generation_errors": [f"修复失败：{result.error_class}"],
+                    "repair_count": repair_index,
+                }),
+                state,
+            )
+        produced = result.payload
+        if kind == "structure":
+            batches = list(state.get("structure_batches") or [])
+            batches[index] = {"stage_key": stage_key, "batch_index": index,
+                              "nodes": _as_list(produced.get("nodes")),
+                              "units": _as_list(produced.get("units")),
+                              "relations": _as_list(produced.get("relations"))}
+            delta: dict[str, Any] = {"structure_batches": batches, "repair_count": repair_index}
+        else:
+            batches = list(state.get("practice_batches") or [])
+            batches[index] = {"stage_key": stage_key, "batch_index": index, "payload": produced}
+            delta = {"practice_batches": batches, "repair_count": repair_index}
+        return _with_aggregate(delta, state)
+
+    def merge_and_validate(self, state: PlanningState) -> dict[str, Any]:
+        """确定性合并批次并做全局校验；通过后才是完整草案。"""
+        pack = state.get("domain_pack") or {}
+        structure_batches = [{"stage_key": b["stage_key"], "nodes": b.get("nodes") or [],
+                              "units": b.get("units") or [], "relations": b.get("relations") or []}
+                             for b in (state.get("structure_batches") or [])]
+        practice_batches = [{"stage_key": b["stage_key"], "payload": b.get("payload") or {}}
+                            for b in (state.get("practice_batches") or [])]
+        merged = merge_batches(state.get("outline") or {}, structure_batches, practice_batches,
+                               pack, manifest=state.get("manifest"))
+        if merged["errors"]:
+            return _with_aggregate({"structure_errors": list(merged["errors"])}, state)
+        delta: dict[str, Any] = {
+            "outline": merged["outline"],
+            "nodes": merged["nodes"],
+            "units": merged["units"],
+            "relations": merged["relations"],
+            "practice_proposal": merged["practice_proposal"],
+            "route_scope": merged["route_scope"],
+            "route_status": merged["route_status"],
+            "resource_support": merged["resource_support"],
+        }
+        proposal = merged["practice_proposal"]
+        outcome = validate_plan_structure(
+            nodes=merged["nodes"], units=merged["units"], relations=merged["relations"],
+            tasks=proposal.get("tasks") or [],
+            task_knowledge_links=proposal.get("task_knowledge_links") or [],
+        )
+        delta["structure_errors"] = list(outcome.errors) + validate_route_structure({**state, **delta})
+        return _with_aggregate(delta, state)
+
+    def await_approval(self, state: PlanningState) -> dict[str, Any]:
+        """真实图中的 interrupt 节点（供 b3f2-batch-v1 装配复用）。"""
+        from app.agent_workflows.graphs import _await_approval
+
+        return _await_approval(state)
+
+    def cancel_draft_node(self, state: PlanningState) -> dict[str, Any]:
+        """取消草案（供 b3f2-batch-v1 装配复用）。"""
+        from app.agent_workflows.graphs import _cancel_draft
+
+        return _cancel_draft(state)
 
 
 def route_after_normalize(state: PlanningState) -> str:

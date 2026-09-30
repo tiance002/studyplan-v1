@@ -89,6 +89,26 @@ class PlanningState(TypedDict, total=False):
     edited_draft: bool
     # ---- 结果 ----
     result_id: str
+    # ---- B3-F2 分批协议（b3f2-batch-v1）----
+    #: 冻结执行清单：领域包 hash、批次目录、各 purpose 预算、请求与输出上限。
+    manifest: dict[str, Any]
+    #: 生成协议版本；旧图缺省时按旧协议解释，绝不与新协议混用。
+    protocol: str
+    #: 已验证的结构批次（每个阶段一批），按 skeleton 顺序。
+    structure_batches: list[dict[str, Any]]
+    #: 已验证的实践批次（每个阶段一批），按 skeleton 顺序。
+    practice_batches: list[dict[str, Any]]
+    #: 当前正在生成的结构 / 实践批次下标（checkpoint 完成索引）。
+    current_structure_index: int
+    current_practice_index: int
+    #: 当前待修复目标：``{"kind": "structure"|"practice", "stage_key": ..., "batch_index": ...}``。
+    repair_target: dict[str, Any]
+    #: 失败位置（阶段键），供业务进度与前端展示；不暴露图内部状态。
+    failure_stage: str
+    #: 对外路由范围与状态：reviewed / search_only / generic_unverified / needs_resource_review。
+    route_scope: str
+    route_status: str
+    resource_support: str
 
 
 class ReviewState(TypedDict, total=False):

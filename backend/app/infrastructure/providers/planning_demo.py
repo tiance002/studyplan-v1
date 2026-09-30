@@ -97,8 +97,104 @@ def build_planning_demo():
     )
 
 
+def _stage_resources(payload, stage_key, node_keys, goal):
+    pack = payload.get("domain_pack") or {}
+    for stage in pack.get("stage_blueprints") or []:
+        if stage.get("stable_key") == stage_key:
+            resources = deepcopy(stage.get("resources") or [])
+            for resource in resources:
+                resource.setdefault("node_keys", list(node_keys))
+            return resources
+    return [{"role": "primary", "source_ref": "", "section_refs": [], "source_version": 0,
+             "order_index": 0, "node_keys": list(node_keys),
+             "fallback_search_terms": [goal + " 资料待核验"]}]
+
+
+def _skeleton_output(payload):
+    manifest = payload.get("manifest") or {}
+    goal = str(payload.get("goal", "学习目标"))
+    sections = []
+    for index, spec in enumerate(manifest.get("stages") or []):
+        node_keys = list(spec.get("node_keys") or [])
+        sections.append({
+            "stable_key": spec["stage_key"],
+            "title": spec.get("title") or f"{goal}：阶段 {index + 1}",
+            "section_kind": spec.get("section_kind") or "general",
+            "objective": spec.get("objective") or f"围绕“{goal}”完成阶段 {index + 1}",
+            "resources": _stage_resources(payload, spec["stage_key"], node_keys, goal),
+            "extensions": [],
+        })
+    return {"outline_ref": "fake-reviewed-skeleton", "sections": sections}
+
+
+def _structure_output(payload):
+    stage = payload["stage"]
+    blueprints = payload.get("node_blueprints") or []
+    nodes, relations = [], []
+    if blueprints:
+        for blueprint in blueprints:
+            nodes.append({"stable_key": blueprint["stable_key"], "title": blueprint.get("title", ""),
+                          "node_type": blueprint.get("node_type", "concept"),
+                          "objectives": list(blueprint.get("objectives") or [])})
+            if blueprint.get("parent_key"):
+                relations.append({"from_stable_key": blueprint["parent_key"],
+                                  "to_stable_key": blueprint["stable_key"], "relation_type": "contains"})
+            for dependency in blueprint.get("prerequisite_keys") or []:
+                relations.append({"from_stable_key": dependency,
+                                  "to_stable_key": blueprint["stable_key"], "relation_type": "prerequisite"})
+    else:
+        for index in range(2):
+            nodes.append({"stable_key": f"{stage['stable_key']}.node.{index}",
+                          "title": f"{stage.get('title', '')}要点 {index + 1}", "node_type": "concept",
+                          "objectives": [f"理解{stage.get('title', '')}要点 {index + 1}"]})
+    unit = {"stable_key": "unit." + stage["stable_key"], "title": stage.get("title") or stage["stable_key"],
+            "section_key": stage["stable_key"], "order_index": 0,
+            "node_keys": [node["stable_key"] for node in nodes],
+            "objectives": [stage.get("objective") or "阶段目标"]}
+    return {"nodes": nodes, "units": [unit], "relations": relations}
+
+
+def _practice_output(payload):
+    stage = payload["stage"]
+    structure = payload.get("structure") or {}
+    blueprint = payload.get("practice_blueprint") or {}
+    nodes = [node["stable_key"] for node in structure.get("nodes") or []]
+    linked = [key for key in (blueprint.get("node_keys") or nodes[:1]) if key in nodes] or nodes[:1]
+    task_key = blueprint.get("stable_key") or ("task." + stage["stable_key"])
+    task = {
+        "stable_key": task_key,
+        "title": blueprint.get("title") or (stage.get("title") or "") + "阶段练习",
+        "section_key": stage["stable_key"], "order_index": 0,
+        "goal": blueprint.get("goal") or stage.get("objective") or "完成阶段练习",
+        "in_scope": list(blueprint.get("in_scope") or ["阶段要点"]),
+        "out_scope": list(blueprint.get("out_scope") or []),
+        "acceptance": list(blueprint.get("acceptance") or ["展示练习结果并说明验证步骤"]),
+        "knowledge_links": [{"node_stable_key": key, "role": "core"} for key in linked],
+    }
+    return {"stable_key": "practice." + stage["stable_key"], "title": stage.get("title") or "",
+            "idea": stage.get("title") or "", "tasks": [task],
+            "task_knowledge_links": [{"task_stable_key": task_key, "node_stable_key": key, "role": "core"}
+                                     for key in linked]}
+
+
+def _repair_output(payload):
+    context = payload.get("context") or {}
+    if (payload.get("target") or {}).get("kind") == "practice":
+        return _practice_output(context)
+    return _structure_output(context)
+
+
 def selected_output(purpose, payload):
     """Exercise the existing graph using reviewed blueprints, with no cloud call."""
+    # ---- b3f2-batch-v1 local payloads ----
+    if "target" in payload and "context" in payload:
+        return _repair_output(payload)
+    if "stage" in payload and "structure" in payload:
+        return _practice_output(payload)
+    if "stage" in payload and "node_blueprints" in payload:
+        return _structure_output(payload)
+    if "manifest" in payload:
+        return _skeleton_output(payload)
     if "domain_pack" not in payload:
         return {"planning.outline": outline, "planning.structure": structure,
                 "planning.practice": practice}.get(purpose, structure)(purpose, payload)

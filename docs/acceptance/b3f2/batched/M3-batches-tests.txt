@@ -1,0 +1,33 @@
+# Task 3 — M3 batches / bounded repair / whole-run budget
+# Generated: 2026-09-30T01:02:55Z
+# Interpreter: .venv/Scripts/python.exe (managed venv)
+
+## Command 1
+$ .venv/Scripts/python.exe -m pytest backend/tests/unit/test_batched_planning.py backend/tests/integration/test_run_budget_pg.py -q -o addopts=
+
+.............................                                            [100%]
+29 passed in 8.12s
+
+## Command 2
+$ .venv/Scripts/python.exe -m ruff check backend
+All checks passed!
+
+## Command 3
+$ .venv/Scripts/python.exe -m mypy backend/app
+backend\app\infrastructure\providers\openai_compatible.py:119: note: By default the bodies of untyped functions are not checked, consider using --check-untyped-defs  [annotation-unchecked]
+Success: no issues found in 89 source files
+
+## Command 4 (full backend regression)
+$ .venv/Scripts/python.exe -m pytest backend/tests -q -o addopts=
+4 failed, 483 passed in 320.86s (0:05:20)
+
+The 4 failures are pre-existing on base commit 38d042e and are NOT caused by Task 3.
+Proof: stashing only the Task 3 tracked changes and re-running the same file reproduces
+$ .venv/Scripts/python.exe -m pytest backend/tests/e2e/test_b2v_socket_counterexamples.py -q -o addopts=
+4 failed in 18.85s   (identical failures)
+They are the socket-test harness assumption noted in the handoff (TestClient.app after async);
+the affected socket suite was not re-run green as a whole, so the full suite is NOT claimed PASS.
+
+## NOT RUN
+- Real DeepSeek paid calls: NOT RUN (Fake/MockTransport only).
+- Alembic migrations: unchanged (backend/alembic/versions untouched).
