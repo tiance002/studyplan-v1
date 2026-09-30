@@ -67,7 +67,7 @@ backs the real `/api/v1` routes. Six tests:
     .venv/Scripts/python.exe -m pytest backend/tests \
         --ignore=backend/tests/e2e/test_b2v_socket_counterexamples.py \
         -o addopts= -q
-    -> 500 passed in 398.49s   (exit 0)
+    -> 500 passed in 443.03s   (exit 0)
 
 (494 before Task 7 + 6 new E2E tests = 500.)
 

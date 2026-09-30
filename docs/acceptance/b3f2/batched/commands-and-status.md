@@ -41,7 +41,7 @@ venv (`.venv/Scripts/python.exe`). Raw outputs live under `var/`.
     .venv/Scripts/python.exe -m pytest backend/tests \
         --ignore=backend/tests/e2e/test_b2v_socket_counterexamples.py \
         -o addopts= -q
-    -> 500 passed in 398.49s                       exit 0
+    -> 500 passed in 443.03s                       exit 0
 
 ## Socket counterexamples — known flaky baseline (NOT green)
 
