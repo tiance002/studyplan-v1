@@ -132,7 +132,9 @@ def test_mock_http_provider_full_pg_graph_and_ledger(migrated_db, checkpoint_db)
         body = json.loads(request.content)
         prompt = json.loads(body["messages"][1]["content"])
         calls.append(prompt)
-        payload = {**prompt["context"], "domain_pack": prompt["domain_pack"]}
+        payload = dict(prompt["context"])
+        if "domain_pack" in prompt:
+            payload["domain_pack"] = prompt["domain_pack"]
         response = selected_output(prompt["purpose"], payload)
         return httpx.Response(200, json={"model": "mock-route-model", "usage": {"prompt_tokens": 100, "completion_tokens": 200},
                                        "choices": [{"finish_reason": "stop", "message": {"content": json.dumps(response)}}]})
@@ -151,7 +153,8 @@ def test_mock_http_provider_full_pg_graph_and_ledger(migrated_db, checkpoint_db)
             assert [c["purpose"] for c in calls] == (
                 ["planning.outline"] + ["planning.structure"] * 9 + ["planning.practice"] * 9
             )
-            assert all(c["domain_pack"]["pack_key"] == "agent.application" for c in calls)
+            assert calls[0]["domain_pack"]["pack_key"] == "agent.application"
+            assert all("domain_pack" not in c for c in calls[1:])
             body = {"decision": "approve", "expected_version": 0, "draft_hash": draft["draft_hash"], "idempotency_key": "mock-full-route"}
             approved = client.post(url + "/decision" + suffix, json=body, headers=headers)
             assert approved.status_code == 200, approved.text

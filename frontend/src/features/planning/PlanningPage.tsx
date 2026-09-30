@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "../../api/client";
 import type { DTO } from "../../api/types";
 import { Resources } from "../../components/Resources";
@@ -90,6 +90,11 @@ export function PlanningPage({
     [error, setError] = useState(""),
     [conflict, setConflict] = useState(false),
     [notice, setNotice] = useState("");
+  const generating = useRef(false);
+  const [acceptedRun, setAcceptedRun] = useState(false);
+  const generationBlocked = busy || acceptedRun || !goal.trim() || fake === null ||
+    run?.status === "queued" || run?.status === "running" ||
+    run?.status === "reconciliation_required";
   async function loadDraft(id: string) {
     const d = await api.draft(project, id);
     setDraft(d);
@@ -99,6 +104,7 @@ export function PlanningPage({
   async function loadRun(id: string) {
     const r = await api.run(project, id);
     setRun(r);
+    setAcceptedRun(["queued", "running", "reconciliation_required"].includes(r.status));
     if (r.next_action === "review_draft" && r.result_ref)
       await loadDraft(r.result_ref);
   }
@@ -186,14 +192,18 @@ export function PlanningPage({
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (generationBlocked || generating.current) return;
+            generating.current = true;
             act(async () => {
               const result = await api.generate(project, goal);
               localStorage.setItem(`studyplan-run:${project}`, result.run_id);
+              // A failed first GET is shown as an error, never another POST.
+              setAcceptedRun(true);
               setDraft(null);
               setConflict(false);
               setNotice("");
               await loadRun(result.run_id);
-            });
+            }).finally(() => { generating.current = false; });
           }}
         >
           <label>
@@ -216,12 +226,7 @@ export function PlanningPage({
             </p>
             <button
               className="btn primary"
-              disabled={
-                busy ||
-                !goal.trim() ||
-                fake === null ||
-                run?.status === "reconciliation_required"
-              }
+              disabled={generationBlocked}
             >
               {busy ? "正在处理…" : "生成学习草案 →"}
             </button>

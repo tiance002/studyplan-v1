@@ -72,12 +72,14 @@ Evidence that this is pre-existing and not introduced here:
   also fails exactly these 4 tests (4 failed, 24 passed).
 - They pass when the whole suite happens to run in one order and fail in another
   (both outcomes observed on this branch), i.e. they are order/timing dependent.
-- Diagnosed root cause: the run row IS committed (`status='waiting_user'`,
+- Historical observation (RLS root-cause inference withdrawn by B3-F2.1): the run row IS committed (`status='waiting_user'`,
   `project_id='b2v_p1'`, verified via the migrator role) but the immediately
   following `GET /runs/{id}` returns 404. `ai_runs` has FORCE ROW LEVEL SECURITY
-  with policy `project_id = current_setting('app.project_id')`, so the 404 is a
-  visibility/scope race on the socket transport path, not a missing row and not a
-  RunProgress/state-transition defect.
+  with policy `project_id = current_setting('app.project_id')`. Row existence and
+  that policy did not prove the GET reached this API or identify an RLS race.
+  B3-F2.1 proves an environment-proxy leak in the localhost test client and an
+  exact symptom reproduction; see ../hardening/Socket-visibility.md. Historical
+  failure counts above remain unchanged as historical evidence.
 
 Per the handoff these are recorded against the existing baseline and are not
 counted as a green pass.

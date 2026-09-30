@@ -50,6 +50,11 @@ Final evidence alignment commit: `6e51dfb34da955604894731aece695acda248156`.
 
 ## Socket counterexamples — known flaky baseline (NOT green)
 
+Historical result only. B3-F2.1 supersedes the earlier diagnosis and exclusion:
+see [Socket visibility](../hardening/Socket-visibility.md) and
+[complete regression](../hardening/Regression.md). This recorded failure count
+is retained; it is not the final hardening status.
+
     .venv/Scripts/python.exe -m pytest \
         backend/tests/e2e/test_b2v_socket_counterexamples.py -o addopts= -q
     -> 4 failed in 22.86s                          exit 1

@@ -33,6 +33,7 @@ Ports（``LLMPort`` 等）。B1 用 Fake LLM 跑通；真实模型在 B3 接入�
 from __future__ import annotations
 
 from collections.abc import Mapping as AbcMapping
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping
 
@@ -624,7 +625,7 @@ class PlanningNodes:
         payload = structure_payload(state, spec)
         result = self.llm.generate_structured(
             purpose=STRUCTURE_PURPOSE,
-            payload={**payload, **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {})},
+            payload=payload,
             schema_name="KnowledgeStructureV1",
             run_id=state.get("run_id", ""),
             attempt_id=attempt_key(state.get("run_id", ""), STRUCTURE_PURPOSE, stage_key, index, 0),
@@ -683,7 +684,7 @@ class PlanningNodes:
         payload = practice_payload(state, stage_key)
         result = self.llm.generate_structured(
             purpose=PRACTICE_PURPOSE,
-            payload={**payload, **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {})},
+            payload=payload,
             schema_name="PracticeProposalV1",
             run_id=state.get("run_id", ""),
             attempt_id=attempt_key(state.get("run_id", ""), PRACTICE_PURPOSE, stage_key, index, 0),
@@ -743,10 +744,12 @@ class PlanningNodes:
         stage_key = str(target.get("stage_key", ""))
         if kind == "structure":
             context = structure_payload(state, manifest["structure_batches"][index])
+            failed_batch = deepcopy((state.get("structure_batches") or [])[index])
             schema_name = "KnowledgeStructureV1"
             key_index = index
         else:
             context = practice_payload(state, stage_key)
+            failed_batch = deepcopy((state.get("practice_batches") or [])[index]["payload"])
             schema_name = "PracticeProposalV1"
             # Practice repairs share the run's repair budget but must not collide
             # with structure repairs for the same stage, so their batch index is
@@ -757,9 +760,10 @@ class PlanningNodes:
             purpose=REPAIR_PURPOSE,
             payload={
                 "goal": state.get("goal"),
-                "manifest": manifest,
-                **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {}),
+                "manifest": {key: manifest[key] for key in
+                             ("protocol", "manifest_hash", "pack_hash", "max_repairs")},
                 "target": target,
+                "batch": failed_batch,
                 "context": context,
                 "errors": list(state.get("structure_errors") or []),
             },

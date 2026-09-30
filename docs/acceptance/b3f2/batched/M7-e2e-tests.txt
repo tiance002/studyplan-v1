@@ -121,8 +121,10 @@ a fresh basetemp the test passes deterministically (verified: 1 passed).
 All four fail with `AssertionError: {"detail":"Not Found"}  assert 404 == 200`.
 This is the same pre-existing baseline characterised in `M5-service-tests.txt` §5:
 the run row is committed but the immediately following `GET /runs/{id}` 404s under
-the socket transport (a visibility/scope race over FORCE-RLS `ai_runs`), not a
-B3-F2 defect. Not part of the acceptance and not counted as green.
+the socket transport. The earlier inference of a FORCE-RLS visibility/scope race
+was not established and is withdrawn; see ../hardening/Socket-visibility.md for
+the proven proxy-path defect, repair and complete non-excluded regression.
+These historical failures are retained here and are not counted as green.
 
 ## 8. Design-revision conformance (Task 7 items)
 

@@ -33,7 +33,9 @@ def test_real_socket_counterexample(case, db, monkeypatch):
         thread = threading.Thread(target=lambda:server.run(sockets=[sock]),daemon=True)
         servers.append((server,thread,sock))
         thread.start()
-        client = httpx.Client(base_url=f"http://127.0.0.1:{port}",timeout=60)
+        # This is an in-process localhost server, never an environment proxy.
+        client = httpx.Client(base_url=f"http://127.0.0.1:{port}",timeout=60,trust_env=False)
+        client.app = app
         client.planning_worker = app.state.container.planning_worker
         clients.append(client)
         for _ in range(100):
