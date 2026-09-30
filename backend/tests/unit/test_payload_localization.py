@@ -32,6 +32,8 @@ def _assert_local(payload, pack, stage_key):
     if "node_blueprints" in context:
         own = next(s["node_keys"] for s in pack["stage_blueprints"] if s["stable_key"] == stage_key)
         assert {n["stable_key"] for n in context["node_blueprints"]} == set(own)
+        assert context["required_unit_node_keys"] == own
+        assert not set(context["required_unit_node_keys"]) & set(context["declared_external_prerequisite_keys"])
         expected_resources = next(s.get("resources", []) for s in pack["stage_blueprints"]
                                   if s["stable_key"] == stage_key)
         assert context["resources"] == expected_resources

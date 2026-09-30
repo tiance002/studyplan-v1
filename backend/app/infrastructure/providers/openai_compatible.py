@@ -30,6 +30,11 @@ STRUCTURE_RELATION_CONTRACT = (
     "to_stable_key=stable_key, relation_type='prerequisite'. During repair, fix both "
     "relation_type and endpoint direction. Preserve valid nodes and units and repair only "
     "the invalid local content."
+    " Every emitted node, including parent/skill nodes, must occur in at least one unit.node_keys; "
+    "contains relations do not satisfy unit coverage. Cover every key in the stage context's "
+    "required_unit_node_keys without changing its stable key. Declared external prerequisites "
+    "must not be added to local units. Choose suitable existing units or author a suitable unit; "
+    "do not omit parent nodes to make coverage pass. Apply the same rule during repair."
 )
 
 PRACTICE_JSON_CONTRACT = (
@@ -51,7 +56,7 @@ class OpenAICompatibleLLM:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
-        self.prompt_version = "b3f2-v5-practice-json"
+        self.prompt_version = "b3f2-v6-unit-coverage"
         self.timeout = timeout
         host = (urlsplit(self.base_url).hostname or "").lower()
         self.budget_policy = budget_policy or BudgetPolicy(
