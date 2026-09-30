@@ -19,12 +19,13 @@
 
 from __future__ import annotations
 
-from app.agent_workflows import GRAPH_VERSION
 from app.application.container import AppContainer
+from app.application.model_binding import SubmissionBinding
 from app.application.model_settings import ModelSettingsService
 from app.application.plan_service import PlanService
 from app.application.sessions import InMemorySessionStore, SessionRecord
 from app.core.config import Settings
+from app.domain.workspace.models import AuthContext
 from app.infrastructure.db import (
     PgPlanningCatalog,
     PgPlanRepository,
@@ -36,6 +37,13 @@ from app.infrastructure.providers import SUPPORTED_PROVIDERS, build_llm
 from app.infrastructure.worker.planning_worker import PlanningWorker
 
 __all__ = ["build_container"]
+
+
+def _fake_binding(scope: AuthContext, project_id: str) -> SubmissionBinding:
+    """Freeze the deployment default budget for the Fake / in-process deployment."""
+    from app.agent_workflows.planning_batches import DEFAULT_BUDGET
+
+    return SubmissionBinding(model_ref="fake:planning-demo", budget_policy=DEFAULT_BUDGET)
 
 
 def build_container(settings: Settings) -> AppContainer:
@@ -85,24 +93,27 @@ def build_container(settings: Settings) -> AppContainer:
             raise RuntimeError("Business and checkpoint databases must be separate")
         executor = PgPlanningExecutor(to_psycopg_dsn(settings.checkpoint_database_url),llm=llm)
         runtime_factory = PersonalPlanningRuntimeFactory(settings,model_repository)
+    from app.agent_workflows.planning_batches import PROTOCOL_VERSION
     from app.infrastructure.domain_pack import select_domain_pack
     planning_jobs = PgPlanningJobRepository(
         dsn,
         actor_ids=settings.planning_worker_actor_ids,
         max_attempts=settings.worker_max_attempts,
     )
+    binding_resolver = runtime_factory.bind_submission if runtime_factory is not None else _fake_binding
+
     plan_service = PlanService(
         repository=PgPlanRepository(dsn),
         runs=PgRunRepository(dsn),
         catalog=PgPlanningCatalog(dsn),
         resources=PgPublicResourceCatalog(dsn),
         llm=llm,
-        graph_version=settings.graph_version or GRAPH_VERSION,
+        graph_version=settings.graph_version or PROTOCOL_VERSION,
         planning_executor=executor,domain_pack_selector=select_domain_pack,
         runtime_factory=runtime_factory,
-        run_timeout_seconds=max(1800, 3 * (settings.graph_max_repair_attempts + 1) * settings.llm_timeout_seconds + 300),
         planning_jobs=planning_jobs,
         worker_actor_ids=settings.planning_worker_actor_ids,
+        binding_resolver=binding_resolver,
     )
     planning_worker = PlanningWorker(
         jobs=planning_jobs,

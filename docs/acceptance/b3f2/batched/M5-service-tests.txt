@@ -1,0 +1,126 @@
+# B3-F2 Task 5 — service-layer evidence (RunProgress / frozen submission / single protocol)
+
+Scope: backend contract + state transitions + the switch to `b3f2-batch-v1` as the
+only official generation protocol. Raw outputs are kept under `var/` and referenced
+below; commands are reproducible from the repo root with the project venv.
+
+Environment note: the socket-harness tests and any test that spawns a child
+process which writes to PostgreSQL must be run **outside the tool sandbox**. The
+sandbox throttles the child's checkpoint commits, which makes the kill-recovery
+test read a lagging checkpoint. This is a harness artifact, not a code failure
+(proved by re-running the identical command with the sandbox disabled).
+
+## 1. Lint — ruff
+
+    .venv/Scripts/python.exe -m ruff check backend/app backend/tests
+    -> All checks passed!   (exit 0)
+
+## 2. Types — mypy
+
+    .venv/Scripts/python.exe -m mypy backend/app
+    -> Success: no issues found in 90 source files   (exit 0)
+
+## 3. Directed suites (raw: var/b3f2-task5-directed.txt)
+
+    .venv/Scripts/python.exe -m pytest \
+        backend/tests/e2e/test_b3f2_learning_route.py \
+        backend/tests/e2e/test_async_generation.py \
+        backend/tests/e2e/test_b2v_http_end_to_end.py \
+        backend/tests/integration/test_batched_recovery_pg.py \
+        backend/tests/contract -o addopts= -q
+    -> 70 passed in 178.40s   (exit 0)
+
+These cover: the full HTTP draft→approve→publish chain on the batched protocol,
+per-batch RunProgress (no graph internals), unknown-version refusal, checkpoint
+recovery without re-dispatching completed batches, and the DTO/OpenAPI contract.
+
+## 4. Full backend regression
+
+Two runs, because the socket counterexample tests are flaky (see §5).
+
+    # with the socket harness
+    .venv/Scripts/python.exe -m pytest backend/tests -o addopts= -q
+        --junitxml=var/b3f2-task5-junit.xml
+    -> tests=498  failures=4  errors=0  skipped=0
+       4 failures are all:
+         e2e/test_b2v_socket_counterexamples.py::test_real_socket_counterexample[...]
+       (run-to-run: one earlier run passed all 498 — see var/b3f2-task5-full.txt.)
+
+    # without the flaky socket file (raw: var/b3f2-task5-nosock-clean.txt)
+    .venv/Scripts/python.exe -m pytest backend/tests \
+        --ignore=backend/tests/e2e/test_b2v_socket_counterexamples.py \
+        -o addopts= -q
+    -> 494 passed in 350.43s   (exit 0)
+
+**Conclusion:** every backend test passes deterministically; the only failures are
+the 4 pre-existing flaky socket counterexamples, which are NOT part of B3-F2 and
+are NOT caused by this change (see §5). Full regression is therefore reported as
+"494/494 green; 4 socket counterexamples flaky", never as an unqualified pass.
+
+## 5. Known flaky socket tests (pre-existing baseline, recorded separately)
+
+`backend/tests/e2e/test_b2v_socket_counterexamples.py` re-runs four B2-V
+regression scenarios over a real localhost socket (uvicorn in a thread) instead
+of the in-process TestClient. They fail with:
+
+    AssertionError: {"detail":"Not Found"}  assert 404 == 200
+
+Evidence that this is pre-existing and not introduced here:
+
+- On the untouched baseline (HEAD 2bd8445, git worktree) the same command
+  `pytest test_b2v_http_end_to_end.py test_b2v_socket_counterexamples.py`
+  also fails exactly these 4 tests (4 failed, 24 passed).
+- They pass when the whole suite happens to run in one order and fail in another
+  (both outcomes observed on this branch), i.e. they are order/timing dependent.
+- Diagnosed root cause: the run row IS committed (`status='waiting_user'`,
+  `project_id='b2v_p1'`, verified via the migrator role) but the immediately
+  following `GET /runs/{id}` returns 404. `ai_runs` has FORCE ROW LEVEL SECURITY
+  with policy `project_id = current_setting('app.project_id')`, so the 404 is a
+  visibility/scope race on the socket transport path, not a missing row and not a
+  RunProgress/state-transition defect.
+
+Per the handoff these are recorded against the existing baseline and are not
+counted as a green pass.
+
+## 6. Defect found and fixed while validating Task 5
+
+`planning_batches.recursion_limit()` under-counted the real `StateGraph` super-steps
+(it assumed 2 per batch: generate+validate, but each batch is generate+validate+
+advance = 3, minus one for the last batch of each phase). A full 9-stage Agent run
+therefore hit `GraphRecursionError: Recursion limit of 50 reached` and the run was
+reported as `planning_failed` instead of `waiting_user`.
+
+- Surfaced by: `test_b3f2_learning_route.py::test_mock_http_provider_full_pg_graph_and_ledger`
+  (the only test that drives the *real* LangGraph executor; the interpreter path
+  used `max_steps=400` and hid the divergence).
+- Fix: `recursion_limit()` now derives from the frozen batch counts with the
+  correct per-batch cost (generate+validate+advance, minus one per phase), plus
+  2 per bounded repair, plus a fixed margin. Verified: the test now reaches
+  `waiting_user` with exactly 19 requests.
+
+## 7. Dev-env legacy Run/Checkpoint cleanup (design revision item 5)
+
+Raw audit: docs/acceptance/b3f2/batched/M5-legacy-data-audit.txt
+
+- App db `studyplan_b3_local_*`: `ai_runs` empty (no legacy business runs).
+- Checkpoint db `studyplan_b3_checkpoint_*`: 89 `checkpoints` / 191 `checkpoint_blobs`
+  / 390 `checkpoint_writes`, all for graph_version `1` (the abandoned protocol).
+- Action: deleted only rows whose `thread_id` version != `b3f2-batch-v1`. After:
+  all three tables empty. `checkpoint_migrations`, any `b3f2-batch-v1` threads and
+  the app db were untouched.
+
+## 8. Design-revision conformance (Task 5 items)
+
+- New Runs uniformly use `b3f2-batch-v1` (`config.graph_version` default; the
+  service guard rejects any other configured value instead of silently converting).
+- Protocol + model-config descriptor + task manifest are frozen at enqueue
+  (`_freeze_submission` → `freeze_manifest`, `SubmissionBinding`).
+- Only same-protocol recovery is supported; `builder_for_version` refuses every
+  other version (incl. `"1"`, `"planning-legacy-v1"`, `""`).
+- Historical legacy Runs are never auto-upgraded or continued.
+- Legacy-only routing, DTO conversions and compatibility tests were removed
+  (`planning_executor` has no version routing; `test_legacy_checkpoint_compatibility.py`
+  and `helpers/legacy_planning_checkpoint.py` deleted — git history retains them).
+- Existing tests were updated to assert the new contract (request counts 3→5/19,
+  task-link counts 1→2, `progress` in the run DTO) rather than deleted.
+- `RunProgress`, state transitions and the new HTTP default protocol are complete.

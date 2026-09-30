@@ -29,6 +29,7 @@ import os
 import subprocess
 import sys
 import threading
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -70,8 +71,9 @@ COOKIE = "studyplan_session"
 #: 真实存在的公共资源（B2-V §五：``source_ref`` 必须能核验）。
 PUBLIC_SOURCE = "src_b2v_public"
 PUBLIC_SECTIONS = ("sec_b2v_1", "sec_b2v_2")
-#: 故意不存在的来源：用于验证「显式降级」而不是编造章节。
+#: 受审核清单内、但**故意不写入**测试库的来源：用于验证「显式降级」。
 MISSING_SOURCE = "src_b2v_missing"
+MISSING_SECTION = "sec_b2v_ghost"
 
 GOAL_A = "我想学会用 Agent 做一个 PDF 知识助手"
 GOAL_B = "我想学会用 Python 做数据分析"
@@ -156,96 +158,224 @@ def db(migrated_db: PgTestDatabase) -> PgTestDatabase:
     return migrated_db
 
 
+# -------------------------------------------------------------- 测试领域包
+#
+# 本套用例验收的是「草案 → 确认 → 发布」链路，而不是领域包的规模。因此显式注入
+# 一个**两阶段**的受审核包，使生成的批次与断言一一对应；生产组合根仍使用
+# ``select_domain_pack``（Agent 方向为九阶段）。
+#
+# ``MISSING_SOURCE`` 出现在受审核清单与本包 ``resources`` 中，但**不写入**测试库：
+# 因此落库前必须显式降级为搜索建议，绝不编造已核验章节。
+
+_B2V_PACK: dict[str, Any] = {
+    "pack_key": "b2v.test",
+    "version": 1,
+    "title": "B2V 测试路线",
+    "resource_support": "reviewed_index",
+    "resource_refs": [PUBLIC_SOURCE, MISSING_SOURCE],
+    "required_node_keys": ["node.python.env", "node.pdf.parse"],
+    "stage_blueprints": [
+        {
+            "stable_key": "stage.foundation",
+            "title": "基础准备",
+            "section_kind": "foundation",
+            "objective": "搭好环境，能跑通第一个脚本",
+            "node_keys": ["node.python.env"],
+        },
+        {
+            "stable_key": "stage.core",
+            "title": "核心实现",
+            "section_kind": "core",
+            "objective": "实现 PDF 文本解析",
+            "node_keys": ["node.pdf.parse"],
+        },
+    ],
+    "knowledge_blueprints": [
+        {
+            "stable_key": "node.python.env",
+            "title": "环境搭建",
+            "node_type": "skill",
+            "objectives": ["能安装依赖并运行脚本"],
+        },
+        {
+            "stable_key": "node.pdf.parse",
+            "title": "PDF 文本解析",
+            "node_type": "skill",
+            "objectives": ["能读出示例 PDF 的文本"],
+            "prerequisite_keys": ["node.python.env"],
+        },
+    ],
+    "resources": [
+        {
+            "source_id": PUBLIC_SOURCE,
+            "canonical_url": "https://example.com/b2v-course",
+            "title": "B2V 示例课程",
+            "creator": "示例作者",
+            "media_type": "course",
+            "language": "zh",
+            "source_version": 1,
+            "documentation_version": "B2V v1",
+            "verification_status": "reviewed",
+            "checked_at": "2026-09-29T00:00:00Z",
+            "sections": [
+                {
+                    "section_id": PUBLIC_SECTIONS[0],
+                    "title": "第一章 环境",
+                    "url": "https://example.com/b2v-course#1",
+                    "order_index": 0,
+                    "verification_status": "reviewed",
+                    "checked_at": "2026-09-29T00:00:00Z",
+                    "applicable_node_keys": ["node.python.env"],
+                },
+                {
+                    "section_id": PUBLIC_SECTIONS[1],
+                    "title": "第二章 第一个脚本",
+                    "url": "https://example.com/b2v-course#2",
+                    "order_index": 1,
+                    "verification_status": "reviewed",
+                    "checked_at": "2026-09-29T00:00:00Z",
+                    "applicable_node_keys": ["node.python.env"],
+                },
+            ],
+        },
+        {
+            "source_id": MISSING_SOURCE,
+            "canonical_url": "https://example.com/b2v-missing",
+            "title": "不存在的示例来源",
+            "creator": "示例作者",
+            "media_type": "course",
+            "language": "zh",
+            "source_version": 0,
+            "documentation_version": "",
+            "verification_status": "reviewed",
+            "checked_at": "2026-09-29T00:00:00Z",
+            "sections": [
+                {
+                    "section_id": MISSING_SECTION,
+                    "title": "幽灵章节",
+                    "url": "https://example.com/b2v-missing#1",
+                    "order_index": 0,
+                    "verification_status": "reviewed",
+                    "checked_at": "2026-09-29T00:00:00Z",
+                    "applicable_node_keys": ["node.pdf.parse"],
+                }
+            ],
+        },
+    ],
+}
+
+
+def _select_test_pack(goal: str) -> dict[str, Any]:
+    return deepcopy(_B2V_PACK)
+
+
 # -------------------------------------------------------------- Fake LLM
 
 
 def _outline_handler(purpose: str, payload: dict[str, object]) -> dict[str, object]:
-    """纲要：两个阶段，其中一个阶段的主线来源**不存在**（验证显式降级）。"""
+    """纲要：按冻结清单逐阶段生成骨架；一个阶段的主线来源不存在（验证降级）。"""
+    manifest = payload.get("manifest") or {}
     goal = str(payload.get("goal") or "").strip()
-    return {
-        "outline_ref": "outline:1",
-        "sections": [
+    titles = {
+        "stage.foundation": f"基础准备·{goal[:8]}",
+        "stage.core": f"核心实现·{goal[:8]}",
+    }
+    resources = {
+        "stage.foundation": [
             {
-                "stable_key": "stage.foundation",
-                "title": f"基础准备·{goal[:8]}",
-                "section_kind": "foundation",
-                "objective": "搭好环境，能跑通第一个脚本",
-                "resources": [
-                    {
-                        "role": "primary",
-                        "source_ref": PUBLIC_SOURCE,
-                        "section_refs": list(PUBLIC_SECTIONS),
-                        "order_index": 0,
-                        "source_version": 1,
-                        "fallback_search_terms": [],
-                    }
-                ],
-                "extensions": [
-                    {
-                        "topic": "关系型数据库认识与对比",
-                        "concepts": ["基本特点", "典型适用场景"],
-                        "guidance": "了解 SQLite / PostgreSQL / MySQL 的典型适用场景",
-                        "links": [],
-                        "search_hints": ["关系型数据库对比 入门"],
-                        "thinking_prompts": ["多人同时写入？"],
-                        "required": False,
-                        "order_index": 0,
-                    }
-                ],
-            },
+                "role": "primary",
+                "source_ref": PUBLIC_SOURCE,
+                "section_refs": list(PUBLIC_SECTIONS),
+                "order_index": 0,
+                "source_version": 1,
+                "fallback_search_terms": [],
+            }
+        ],
+        "stage.core": [
             {
-                "stable_key": "stage.core",
-                "title": f"核心实现·{goal[:8]}",
-                "section_kind": "core",
-                "objective": "实现 PDF 文本解析",
-                "resources": [
-                    {
-                        "role": "primary",
-                        # 该来源在公共目录里**不存在** → 必须降级为搜索建议。
-                        "source_ref": MISSING_SOURCE,
-                        "section_refs": ["sec_b2v_ghost"],
-                        "order_index": 0,
-                        "source_version": 0,
-                        "fallback_search_terms": [],
-                    }
-                ],
-                "extensions": [],
-            },
+                "role": "primary",
+                # 该来源在公共目录里**不存在** → 必须降级为搜索建议。
+                "source_ref": MISSING_SOURCE,
+                "section_refs": [MISSING_SECTION],
+                "order_index": 0,
+                "source_version": 0,
+                "fallback_search_terms": [],
+            }
         ],
     }
+    extensions = {
+        "stage.foundation": [
+            {
+                "topic": "关系型数据库认识与对比",
+                "concepts": ["基本特点", "典型适用场景"],
+                "guidance": "了解 SQLite / PostgreSQL / MySQL 的典型适用场景",
+                "links": [],
+                "search_hints": ["关系型数据库对比 入门"],
+                "thinking_prompts": ["多人同时写入？"],
+                "required": False,
+                "order_index": 0,
+            }
+        ],
+    }
+    sections = []
+    for spec in manifest.get("stages") or []:
+        key = str(spec.get("stage_key") or "")
+        sections.append(
+            {
+                "stable_key": key,
+                "title": titles.get(key, str(spec.get("title") or key)),
+                "section_kind": spec.get("section_kind") or "core",
+                "objective": spec.get("objective") or "",
+                "resources": deepcopy(resources.get(key, [])),
+                "extensions": deepcopy(extensions.get(key, [])),
+            }
+        )
+    return {"outline_ref": "outline:1", "sections": sections}
 
 
 def _structure_handler(purpose: str, payload: dict[str, object]) -> dict[str, object]:
+    """单个阶段的结构批次（一个请求只回答一个批次）。"""
+    stage = payload["stage"]
+    if stage["stable_key"] == "stage.foundation":
+        return {
+            "nodes": [
+                {
+                    "stable_key": "node.python.env",
+                    "title": "环境搭建",
+                    "node_type": "skill",
+                    "objectives": ["能安装依赖并运行脚本"],
+                }
+            ],
+            "units": [
+                {
+                    "stable_key": "unit.python.basics",
+                    "title": "Python 基础",
+                    "section_key": "stage.foundation",
+                    "order_index": 0,
+                    "node_keys": ["node.python.env"],
+                    "objectives": ["能安装依赖并运行脚本"],
+                }
+            ],
+            "relations": [],
+        }
     return {
         "nodes": [
-            {
-                "stable_key": "node.python.env",
-                "title": "环境搭建",
-                "node_type": "skill",
-                "objectives": ["能安装依赖并运行脚本"],
-            },
             {
                 "stable_key": "node.pdf.parse",
                 "title": "PDF 文本解析",
                 "node_type": "skill",
                 "objectives": ["能读出示例 PDF 的文本"],
-            },
+            }
         ],
         "units": [
-            {
-                "stable_key": "unit.python.basics",
-                "title": "Python 基础",
-                "section_key": "stage.foundation",
-                "order_index": 0,
-                "node_keys": ["node.python.env"],
-            },
             {
                 "stable_key": "unit.pdf.parse",
                 "title": "PDF 解析",
                 "section_key": "stage.core",
-                "order_index": 1,
+                "order_index": 0,
                 "node_keys": ["node.pdf.parse"],
-            },
+                "objectives": ["能读出示例 PDF 的文本"],
+            }
         ],
         "relations": [
             {
@@ -258,6 +388,30 @@ def _structure_handler(purpose: str, payload: dict[str, object]) -> dict[str, ob
 
 
 def _practice_handler(purpose: str, payload: dict[str, object]) -> dict[str, object]:
+    """单个阶段的实践批次（一个请求只回答一个批次）。"""
+    stage = payload["stage"]
+    if stage["stable_key"] == "stage.foundation":
+        return {
+            "stable_key": "practice.foundation",
+            "title": "环境实践",
+            "idea": "搭好可复现的 Python 环境",
+            "tasks": [
+                {
+                    "stable_key": "task.env",
+                    "title": "搭建开发环境",
+                    "goal": "安装依赖并跑通第一个脚本",
+                    "section_key": "stage.foundation",
+                    "order_index": 0,
+                    "in_scope": ["虚拟环境与依赖"],
+                    "out_scope": ["生产部署"],
+                    "acceptance": ["能复现一次依赖安装并运行脚本"],
+                    "knowledge_links": [{"node_stable_key": "node.python.env", "role": "core"}],
+                }
+            ],
+            "task_knowledge_links": [
+                {"task_stable_key": "task.env", "node_stable_key": "node.python.env", "role": "core"}
+            ],
+        }
     return {
         "stable_key": "practice.pdf_helper",
         "title": "PDF 知识助手",
@@ -269,6 +423,8 @@ def _practice_handler(purpose: str, payload: dict[str, object]) -> dict[str, obj
                 "goal": "读取本地 PDF 并输出纯文本",
                 "section_key": "stage.core",
                 "order_index": 0,
+                "in_scope": ["文本抽取"],
+                "out_scope": ["版面还原"],
                 "acceptance": ["能对示例 PDF 输出非空文本"],
                 "knowledge_links": [{"node_stable_key": "node.pdf.parse", "role": "core"}],
             }
@@ -325,6 +481,7 @@ def _container(db: PgTestDatabase, *, llm: FakeLLM | None = None) -> AppContaine
         graph_version=settings.graph_version,
         planning_jobs=jobs,
         worker_actor_ids=worker_actors,
+        domain_pack_selector=_select_test_pack,
     )
     worker = PlanningWorker(jobs=jobs, execute=service.execute_generation,
                             actor_ids=worker_actors, lease_seconds=30)
@@ -416,7 +573,7 @@ def test_full_chain_generate_edit_approve_readback(db: PgTestDatabase) -> None:
     assert draft["status"] == "awaiting_approval"
     assert draft["project_id"] == PROJECT_P1
     assert [s["stable_key"] for s in draft["stages"]] == ["stage.foundation", "stage.core"]
-    assert len(draft["unit_links"]) == 2 and len(draft["task_links"]) == 1
+    assert len(draft["unit_links"]) == 2 and len(draft["task_links"]) == 2
     assert draft["extensions"][0]["topic"] == "关系型数据库认识与对比"
 
     # 3) 编辑：改第一个阶段标题（必须完整覆盖全部阶段）
@@ -472,7 +629,7 @@ def test_full_chain_generate_edit_approve_readback(db: PgTestDatabase) -> None:
         "核心实现·我想学会用 Ag",
     ]
     assert len(current["unit_links"]) == 2
-    assert len(current["task_links"]) == 1
+    assert len(current["task_links"]) == 2
     assert len(current["extensions"]) == 1
     assert current["goal_snapshot"] == GOAL_A
 

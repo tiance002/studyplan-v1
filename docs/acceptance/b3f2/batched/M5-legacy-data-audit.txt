@@ -1,0 +1,20 @@
+# B3-F2 Task 5 — dev-env legacy Run/Checkpoint audit (item 5)
+dev checkpoint db: studyplan_b3_checkpoint_48fb59cc
+dev app db:        studyplan_b3_local_48fb59cc
+timestamp: 2026-09-30T10:44:29
+
+ai_runs by graph_version: (empty)
+[BEFORE]
+  checkpoints: [('1', 89)]
+  checkpoint_blobs: [('1', 191)]
+  checkpoint_writes: [('1', 390)]
+
+deleted legacy-only rows: {'checkpoint_writes': 390, 'checkpoint_blobs': 191, 'checkpoints': 89}
+
+[AFTER]
+  checkpoints: []
+  checkpoint_blobs: []
+  checkpoint_writes: []
+
+scope: only threads whose graph_version is not b3f2-batch-v1 were removed.
+untouched: checkpoint_migrations, all b3f2-batch-v1 threads, the app db.

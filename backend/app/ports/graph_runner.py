@@ -74,11 +74,14 @@ class PlanningExecutorPort(Protocol):
         thread_id: str,
         graph_version: str,
         guard: Any,
+        *,
+        progress: Any = None,
     ) -> Any:
         """Run or resume one thread under its stored graph version.
 
         ``guard`` is a zero-argument callable revalidating the lease and Run status
-        before each step and before every paid dispatch.
+        before each step and before every paid dispatch. ``progress`` is an
+        optional ``Callable[[state], None]`` invoked once per committed checkpoint.
         """
         ...
 

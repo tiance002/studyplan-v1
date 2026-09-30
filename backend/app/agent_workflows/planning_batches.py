@@ -325,12 +325,18 @@ def validate_structure_batch(
 
     # The reviewed pack owns authoritative keys: reject invented nodes that are
     # not part of the pack's declared node set for this stage.
+    #
+    # A stage that declares **no** node inventory reviews its resources/stages but
+    # not the node list (for example the Python pack); there is nothing
+    # authoritative to protect, so the model may author nodes there. Only a
+    # declared inventory is protected from invention.
     reviewed = (pack.get("resource_support") or "") != "search_only" and bool(pack.get("stage_blueprints"))
     if reviewed:
         declared_owned = set(batch.get("node_keys") or [])
-        forged = node_keys - declared_owned
-        if forged:
-            errors.append("结构批次新增未审核知识节点：" + ", ".join(sorted(forged)))
+        if declared_owned:
+            forged = node_keys - declared_owned
+            if forged:
+                errors.append("结构批次新增未审核知识节点：" + ", ".join(sorted(forged)))
     if not unit_keys and units:
         errors.append("学习单元稳定键无效")
     return errors
@@ -547,13 +553,28 @@ def recursion_limit(manifest: dict[str, Any]) -> int:
 
     Derived from the frozen batch counts (never the framework default of 25, which
     a 19-request Agent run would exceed) with a small fixed margin. Not unlimited.
+
+    Super-step accounting for the real ``StateGraph`` (one node execution each):
+
+    - per structure/practice batch: ``generate_*_batch`` + ``validate_*_batch`` +
+      ``advance_*_batch`` = 3, **except** the last batch of each phase which routes
+      straight to the next phase and never advances (so subtract one per phase);
+    - each bounded repair re-runs ``repair_batch`` + ``validate_*_batch`` = 2;
+    - fixed steps: ``normalize`` + ``generate_skeleton`` + ``merge_and_validate`` +
+      ``save_draft_projection`` + ``await_approval`` (the interrupt that ends the
+      initial run).
+
+    The interpreter (``run_batched_planning_graph``) uses its own ``max_steps``, so
+    this cap only bounds the real framework path; keeping it derived (not the
+    default 25) is what lets a full 9-stage run reach ``await_approval``.
     """
     structure = len(manifest.get("structure_batches") or [])
     practice = len(manifest.get("practice_batches") or [])
     repairs = int(manifest.get("max_repairs", 0))
-    # normalize + skeleton + 2 steps per batch (generate/validate + advance)
-    # + 2 steps per repair + merge + save + await + margin
-    return 2 + 2 * (structure + practice) + 2 * repairs + 8
+    batch_steps = 3 * (structure + practice) - (1 if structure else 0) - (1 if practice else 0)
+    repair_steps = 2 * repairs
+    fixed = 5 + 10  # normalize/skeleton/merge/save/await + safety margin
+    return batch_steps + repair_steps + fixed
 
 
 def budget_violation(
@@ -574,6 +595,89 @@ def budget_violation(
         if stage_key and stage_key not in allowed_stages:
             return "run_manifest_violation"
     return None
+
+
+# ---------------------------------------------------------------------------
+# Business progress projection
+# ---------------------------------------------------------------------------
+
+PHASE_OUTLINE = "outline"
+PHASE_STRUCTURE = "structure"
+PHASE_PRACTICE = "practice"
+PHASE_VALIDATION = "validation"
+PHASE_DONE = "done"
+
+#: Closed set of phases the API may expose. Anything else is refused, not guessed.
+PROGRESS_PHASES = frozenset({PHASE_OUTLINE, PHASE_STRUCTURE, PHASE_PRACTICE, PHASE_VALIDATION, PHASE_DONE})
+
+
+def derive_progress(state: PlanningState) -> dict[str, Any]:
+    """Project graph state into a **business-only** progress payload.
+
+    Only stable business fields are produced. Thread ids, LangGraph node names,
+    raw checkpoints and model prompts are deliberately absent: the projection is
+    the single authorised progress view.
+
+    Completed indices are **absolute** (not deltas), so writing the same
+    checkpoint twice can never double count. Token counts are *not* derived here
+    — the API layer corrects them from the paid-attempt ledger, keeping missing
+    usage ``NULL`` instead of pretending it is ``0``.
+    """
+    manifest = state.get("manifest") or {}
+    stages = manifest.get("stages") or []
+    total_stages = len(stages)
+    total_structure = int(
+        manifest.get("structure_batches_count") or len(manifest.get("structure_batches") or [])
+    )
+    total_practice = int(
+        manifest.get("practice_batches_count") or len(manifest.get("practice_batches") or [])
+    )
+    completed_structure = min(max(int(state.get("current_structure_index") or 0), 0), total_structure)
+    completed_practice = min(max(int(state.get("current_practice_index") or 0), 0), total_practice)
+
+    def stage_at(index: int) -> tuple[int | None, str]:
+        if 0 <= index < total_stages:
+            return index, str(stages[index].get("title") or "")
+        return None, ""
+
+    if not state.get("outline_ref"):
+        phase = PHASE_OUTLINE
+        stage_index, stage_title = (stage_at(0) if total_stages else (None, ""))
+    elif completed_structure < total_structure:
+        phase = PHASE_STRUCTURE
+        stage_index, stage_title = stage_at(completed_structure)
+    elif completed_practice < total_practice:
+        phase = PHASE_PRACTICE
+        stage_index, stage_title = stage_at(completed_practice)
+    elif state.get("draft_ref"):
+        phase = PHASE_DONE
+        stage_index, stage_title = (None, "")
+    else:
+        phase = PHASE_VALIDATION
+        stage_index, stage_title = (None, "")
+
+    failure_stage = str(state.get("failure_stage") or "")
+    failure_phase = ""
+    if failure_stage:
+        # Structure batches run first; a failure after every structure batch has
+        # committed is therefore a practice-phase failure.
+        failure_phase = PHASE_PRACTICE if completed_structure >= total_structure else PHASE_STRUCTURE
+
+    return {
+        "kind": "run_progress",
+        "phase": phase,
+        "current_stage_index": stage_index,
+        "current_stage_title": stage_title,
+        "total_stages": total_stages,
+        "completed_structure_batches": completed_structure,
+        "total_structure_batches": total_structure,
+        "completed_practice_batches": completed_practice,
+        "total_practice_batches": total_practice,
+        "completed_batches": completed_structure + completed_practice,
+        "max_requests": int(manifest.get("max_requests") or 0),
+        "failure_phase": failure_phase,
+        "failure_stage": failure_stage,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -605,12 +709,18 @@ def run_batched_planning_graph(
     manifest: dict[str, Any] | None = None,
     max_repair_total: int = MAX_REPAIR_TOTAL,
     max_steps: int = 400,
+    progress: Any = None,
 ) -> Any:
     """Deterministic interpreter for the batched graph.
 
     Mirrors ``build_batched_planning_graph`` node-for-node so routing can be
     mechanically proven without a real framework. ``resume_decision`` behaves as
     in the legacy interpreter: ``None`` stops at ``await_approval``.
+
+    ``progress`` is an optional ``Callable[[PlanningState], None]`` invoked only
+    at stable points (after each committed batch / merge / draft), never
+    mid-batch. It exists so the in-process path reports the same business
+    progress as the checkpointed one.
     """
     from app.agent_workflows.graphs import PlanningTrace  # local import avoids a cycle
 
@@ -618,9 +728,14 @@ def run_batched_planning_graph(
     frozen = state["manifest"]  # type: ignore[typeddict-item]
     visited: list[str] = []
 
+    def emit() -> None:
+        if progress is not None:
+            progress(state)
+
     def fail() -> Any:
         visited.append("record_failure")
         _merge_state(state, nodes.record_failure_node(state))
+        emit()
         return PlanningTrace(visited=visited, state=state, stopped_at="failed",
                              failed_errors=list(state.get("validation_errors") or []))
 
@@ -644,6 +759,7 @@ def run_batched_planning_graph(
     _merge_state(state, nodes.generate_skeleton(state))
     if state.get("generation_errors"):
         return fail()
+    emit()
 
     # ---- structure batches ----
     structure_count = len(frozen["structure_batches"])
@@ -671,6 +787,7 @@ def run_batched_planning_graph(
                 return fail()
         visited.append("advance_structure_batch")
         _merge_state(state, nodes.advance_structure_batch(state))
+        emit()
 
     # ---- practice batches ----
     practice_count = len(frozen["practice_batches"])
@@ -698,6 +815,7 @@ def run_batched_planning_graph(
                 return fail()
         visited.append("advance_practice_batch")
         _merge_state(state, nodes.advance_practice_batch(state))
+        emit()
 
     # ---- merge + global validation ----
     guard_steps()
@@ -705,11 +823,13 @@ def run_batched_planning_graph(
     _merge_state(state, nodes.merge_and_validate(state))
     if state.get("structure_errors") or state.get("generation_errors"):
         return fail()
+    emit()
 
     # ---- draft + await approval ----
     guard_steps()
     visited.append("save_draft_projection")
     _merge_state(state, nodes.save_draft_projection(state))
+    emit()
     return PlanningTrace(visited=visited, state=state, stopped_at="await_approval")
 
 
@@ -818,12 +938,19 @@ __all__ = [
     "DEFAULT_BUDGET",
     "DEFAULT_GENERIC_STAGE_COUNT",
     "MAX_REPAIR_TOTAL",
+    "PHASE_DONE",
+    "PHASE_OUTLINE",
+    "PHASE_PRACTICE",
+    "PHASE_STRUCTURE",
+    "PHASE_VALIDATION",
+    "PROGRESS_PHASES",
     "PROTOCOL_VERSION",
     "allowed_attempt_keys",
     "attempt_key",
     "attempt_purpose",
     "attempt_stage",
     "budget_violation",
+    "derive_progress",
     "output_budget_for",
     "build_batched_planning_graph",
     "freeze_manifest",

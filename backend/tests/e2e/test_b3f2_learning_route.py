@@ -147,17 +147,20 @@ def test_mock_http_provider_full_pg_graph_and_ledger(migrated_db, checkpoint_db)
             session = client.post("/api/v1/auth/register", json={"username": "适配器完整路线", "password": "123456"}).json()
             draft, url, suffix, headers = route(client, session, "Agent应用开发与知识助手")
             assert len(draft["stages"]) == 9 and draft["source_pack_key"] == "agent.application"
-            assert [c["purpose"] for c in calls] == ["planning.outline", "planning.structure", "planning.practice"]
+            # b3f2-batch-v1: one request per node — 1 skeleton + 9 structure + 9 practice.
+            assert [c["purpose"] for c in calls] == (
+                ["planning.outline"] + ["planning.structure"] * 9 + ["planning.practice"] * 9
+            )
             assert all(c["domain_pack"]["pack_key"] == "agent.application" for c in calls)
             body = {"decision": "approve", "expected_version": 0, "draft_hash": draft["draft_hash"], "idempotency_key": "mock-full-route"}
             approved = client.post(url + "/decision" + suffix, json=body, headers=headers)
             assert approved.status_code == 200, approved.text
             assert client.post(url + "/decision" + suffix, json=body, headers=headers).json()["plan"] == approved.json()["plan"]
-            assert len(calls) == 3
+            assert len(calls) == 19
             assert client.get("/api/v1/plans/current" + suffix).json() == approved.json()["plan"]
             with psycopg.connect(migrated_db.migrator_dsn) as conn:
                 attempts = conn.execute("SELECT status,input_tokens,output_tokens FROM ai_provider_attempts WHERE run_id IN (SELECT run_id FROM ai_runs WHERE project_id=%s)", (session["project_ids"][0],)).fetchall()
-                assert attempts == [("succeeded", 100, 200)] * 3
+                assert attempts == [("succeeded", 100, 200)] * 19
 
 
 def test_failed_provider_usage_is_retained_and_replayed_without_dispatch(migrated_db):

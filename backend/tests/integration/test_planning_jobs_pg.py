@@ -135,7 +135,7 @@ def _blocking_worker_process(dsn, sentinel):
 
     repo = PgPlanningJobRepository(dsn, actor_ids=("jobs_a1",))
 
-    def execute(project_id, run_id, *, guard):
+    def execute(project_id, run_id, *, guard, claim=None):
         guard()
         sentinel.put(run_id)
         Event().wait(30)

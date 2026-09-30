@@ -94,9 +94,10 @@ def get_run(
     scope: AuthContext = Depends(get_auth_context),
     service: PlanService = Depends(get_plan_service),
 ) -> RunView:
-    """对外运行状态：``status`` / ``next_action`` / ``result_ref``（不透明）。"""
-    run = service.get_run(scope=scope, project_id=project_id, run_id=run_id)
-    return run_view(run)
+    """对外运行状态：``status`` / ``next_action`` / ``result_ref``（不透明）
+    以及分批生成的业务进度 ``progress``（无图内部字段）。"""
+    bundle = service.get_run(scope=scope, project_id=project_id, run_id=run_id)
+    return run_view(bundle.run, bundle.progress)
 
 
 @router.get(

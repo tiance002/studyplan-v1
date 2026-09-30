@@ -18,7 +18,12 @@ from app.agent_workflows._msgpack_guard import STRICT_MSGPACK_ENV, enforce_stric
 #: 进程内记录一次实际生效值，供启动日志与测试断言。
 STRICT_MSGPACK_VALUE = enforce_strict_msgpack()
 
-GRAPH_VERSION = "1"
+#: 当前**唯一**的生成协议版本。
+#:
+#: 旧版单遍协议（版本 ``"1"``）已废弃：它不再被任何装配路径选中，也不再有
+#: 运行时路由。仍存在的历史线程不会被新协议重新解释 —— 未知版本一律明确拒绝。
+#: ``planning_batches.PROTOCOL_VERSION`` 必须与这里保持一致（有漂移门禁测试）。
+GRAPH_VERSION = "b3f2-batch-v1"
 
 __all__ = [
     "GRAPH_VERSION",

@@ -91,6 +91,49 @@ class PgRunRepository:
             ).fetchone()
         return _run_from(row) if row is not None else None
 
+    def get_progress(self, *, project_id: str, run_id: str) -> dict[str, Any] | None:
+        """Latest business progress event, corrected by the paid-attempt ledger.
+
+        The event holds only stable business fields (phase, stage index/title,
+        completed batch counts, frozen request cap). Request and token totals are
+        recomputed from ``ai_provider_attempts`` here, never trusted from the
+        event, so a replayed or stale event can never inflate them.
+
+        Missing usage stays ``None`` (never ``0``): ``usage_complete`` tells the
+        caller whether the reported subtotal covers every recorded attempt.
+        """
+        with self._tx(project_id) as conn:
+            row = conn.execute(
+                """SELECT detail FROM ai_run_events
+                WHERE run_id = %s AND status = 'progress' AND detail->>'kind' = 'run_progress'
+                ORDER BY event_id DESC LIMIT 1""",
+                (run_id,),
+            ).fetchone()
+            if row is None or not isinstance(row["detail"], dict):
+                return None
+            progress: dict[str, Any] = dict(row["detail"])
+            ledger = conn.execute(
+                """SELECT count(*) AS requests,
+                          count(*) FILTER (
+                              WHERE input_tokens IS NULL OR output_tokens IS NULL
+                          ) AS unknown_usage,
+                          sum(input_tokens) AS input_tokens,
+                          sum(output_tokens) AS output_tokens
+                FROM ai_provider_attempts WHERE run_id = %s""",
+                (run_id,),
+            ).fetchone()
+        assert ledger is not None
+        requests = int(ledger["requests"] or 0)
+        progress["request_count"] = requests
+        progress["input_tokens"] = (
+            None if ledger["input_tokens"] is None else int(ledger["input_tokens"])
+        )
+        progress["output_tokens"] = (
+            None if ledger["output_tokens"] is None else int(ledger["output_tokens"])
+        )
+        progress["usage_complete"] = requests > 0 and int(ledger["unknown_usage"] or 0) == 0
+        return progress
+
     def update_run(
         self,
         *,

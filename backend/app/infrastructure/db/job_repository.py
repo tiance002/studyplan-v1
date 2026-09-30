@@ -204,6 +204,34 @@ class PgPlanningJobRepository:
             )
         return cursor.rowcount == 1
 
+    def publish_progress(self, claim: JobClaim, progress: dict[str, object]) -> bool:
+        """Append one fenced business-progress event for the claimed run.
+
+        Fencing: the lease token, a live lease, a non-terminal run and the actor
+        are all re-checked **in the same transaction** as the insert, so a Worker
+        that lost its claim can never write progress for a run it no longer owns.
+        The payload carries absolute indices, so replaying the same checkpoint is
+        idempotent rather than additive.
+        """
+        detail = dict(progress)
+        detail["kind"] = "run_progress"
+        with self._tx(actor_id=claim.actor_id, project_id=claim.project_id) as conn:
+            owned = conn.execute(
+                """SELECT 1 FROM ai_jobs j JOIN ai_runs r USING(run_id)
+                WHERE j.job_id=%s AND j.run_id=%s AND j.lease_token=%s AND j.status='running'
+                  AND j.lease_expires_at>now() AND r.status IN ('queued','running')
+                  AND r.actor_id=%s""",
+                (claim.job_id, claim.run_id, claim.lease_token, claim.actor_id),
+            ).fetchone()
+            if owned is None:
+                return False
+            conn.execute(
+                "INSERT INTO ai_run_events(run_id,node_name,attempt_id,status,detail) "
+                "VALUES (%s,NULL,NULL,'progress',%s)",
+                (claim.run_id, Jsonb(detail)),
+            )
+        return True
+
     def read_submission(self, project_id: str, run_id: str) -> dict[str, object]:
         actor_id = ""
         rows: list[dict[str, object]] = []

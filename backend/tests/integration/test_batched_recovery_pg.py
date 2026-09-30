@@ -168,12 +168,18 @@ def test_waiting_user_checkpoint_is_not_auto_continued(recovery_db: PgTestDataba
 
 
 def test_unknown_graph_version_is_refused() -> None:
+    """Only the official protocol may be built; legacy/unknown values are refused.
+
+    The deprecated single-pass protocol (``"1"``) is no longer routable: a stored
+    legacy thread is never re-explained by the new protocol, and an unknown value
+    is never guessed from the current default.
+    """
     from app.infrastructure.checkpointer.planning_executor import builder_for_version
 
     assert builder_for_version(PROTOCOL_VERSION) is not None
-    assert builder_for_version("1") is not None
-    with pytest.raises(GraphRecoveryError, match="未知图版本"):
-        builder_for_version("b3f2-batch-v99")
+    for refused in ("1", "planning-legacy-v1", "b3f2-batch-v99", ""):
+        with pytest.raises(GraphRecoveryError, match="不支持的图协议版本"):
+            builder_for_version(refused)
 
 
 def test_guard_is_called_before_resume(recovery_db: PgTestDatabase) -> None:

@@ -132,7 +132,7 @@ def test_optional_list_fields_default_to_empty_list_not_null() -> None:
 
 
 def test_run_view_never_exposes_graph_internals() -> None:
-    """RunView 只暴露稳定 status/next_action，不含图内部节点名。"""
+    """RunView 只暴露稳定 status/next_action 与业务进度，不含图内部节点名。"""
     run_view = next(m for m in V1_SCHEMAS if m.__name__ == "RunView")
     assert set(run_view.model_fields) == {
         "run_id",
@@ -141,4 +141,40 @@ def test_run_view_never_exposes_graph_internals() -> None:
         "version",
         "result_ref",
         "error",
+        "progress",
     }
+
+
+def test_run_progress_never_exposes_graph_internals() -> None:
+    """业务进度只含稳定业务字段：无 thread_id / checkpoint / 节点名 / 提示词。"""
+    progress = next(m for m in V1_SCHEMAS if m.__name__ == "RunProgress")
+    assert set(progress.model_fields) == {
+        "phase",
+        "current_stage_index",
+        "current_stage_title",
+        "total_stages",
+        "completed_structure_batches",
+        "total_structure_batches",
+        "completed_practice_batches",
+        "total_practice_batches",
+        "completed_batches",
+        "request_count",
+        "max_requests",
+        "input_tokens",
+        "output_tokens",
+        "usage_complete",
+        "failure_phase",
+        "failure_stage",
+    }
+    forbidden = {
+        "thread_id",
+        "graph_version",
+        "checkpoint",
+        "node_name",
+        "nodes",
+        "prompt",
+        "batch_index",
+        "stage_key",
+        "attempt_id",
+    }
+    assert not (forbidden & set(progress.model_fields))

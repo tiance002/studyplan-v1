@@ -70,7 +70,8 @@ def test_b3_real_graph_pg_http_approve_and_restart(db, checkpoint_db):
             assert type(values["prefs_snapshot"]["mode"]) is str
             assert values["result_id"] == response.json()["plan"]["plan_id"]
             assert values["decision"] == "approve"
-        assert len(base._llm.calls) == 3
+        # b3f2-batch-v1: 1 skeleton + 2 structure batches + 2 practice batches.
+        assert len(base._llm.calls) == 5
 
 
 def test_b3_paid_ledger_replay_and_unknown(db):
@@ -125,7 +126,8 @@ def test_b3_checkpoint_ack_failure_reconciles_without_republish(db, checkpoint_d
         assert replay.status_code == 200, replay.text
         assert replay.json()["plan"]["plan_id"] == first.json()["plan"]["plan_id"]
         assert _get_run(client,run["run_id"])["status"] == "succeeded"
-        assert len(service._llm.calls) == 3
+        # b3f2-batch-v1: 1 skeleton + 2 structure batches + 2 practice batches.
+        assert len(service._llm.calls) == 5
 
 
 def test_b3_http_session_resolves_server_scope(db):

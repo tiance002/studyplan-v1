@@ -24,6 +24,15 @@ class RunRepositoryPort(Protocol):
 
     def get_run(self, *, project_id: str, run_id: str) -> RunRecord | None: ...
 
+    def get_progress(self, *, project_id: str, run_id: str) -> dict[str, object] | None:
+        """Latest **business** progress for a run, corrected by the paid-attempt ledger.
+
+        Returns ``None`` when the run never published progress (for example a run
+        from an older protocol). Never exposes thread ids, node names, raw
+        checkpoints or prompts; token counts stay ``None`` when unknown.
+        """
+        ...
+
     def update_run(
         self,
         *,

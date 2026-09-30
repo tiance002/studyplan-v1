@@ -137,7 +137,8 @@ def get_settings() -> Settings:
         worker_lease_seconds=_env_int("WORKER_LEASE_SECONDS", 300),
         worker_max_attempts=_env_int("WORKER_MAX_ATTEMPTS", 3),
         graph_max_repair_attempts=_env_int("GRAPH_MAX_REPAIR_ATTEMPTS", 2),
-        graph_version=_env("GRAPH_VERSION", "1"),
+        #: 唯一的生成协议版本；旧版单遍协议已废弃，不再是任何环境的默认值。
+        graph_version=_env("GRAPH_VERSION", "b3f2-batch-v1"),
         repository_backend=_env("STUDYPLAN_REPOSITORY_BACKEND", "memory"),
         local_session_token=_env("STUDYPLAN_LOCAL_SESSION_TOKEN", ""),
         local_actor_id=_env("STUDYPLAN_LOCAL_ACTOR_ID", "local_actor"),

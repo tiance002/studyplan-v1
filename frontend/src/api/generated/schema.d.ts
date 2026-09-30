@@ -54,7 +54,8 @@ export interface paths {
         };
         /**
          * 读取运行状态投影
-         * @description 对外运行状态：``status`` / ``next_action`` / ``result_ref``（不透明）。
+         * @description 对外运行状态：``status`` / ``next_action`` / ``result_ref``（不透明）
+         *     以及分批生成的业务进度 ``progress``（无图内部字段）。
          */
         get: operations["get_run"];
         put?: never;
@@ -657,6 +658,90 @@ export interface components {
             pace: "slow" | "normal" | "fast";
         };
         /**
+         * RunProgress
+         * @description 一次运行的分批生成**业务进度**（唯一可授权给前端的进度视图）。
+         *
+         *     只包含稳定业务字段：阶段、当前阶段位置、已完成批次数、冻结的请求上限、
+         *     以及由付费账本汇总的计量。**不含** thread_id、图节点名、内部 checkpoint
+         *     或模型提示词。
+         *
+         *     计量缺失时 ``input_tokens`` / ``output_tokens`` 保持 ``null``，
+         *     ``usage_complete`` 说明当前合计是否覆盖全部已记录请求 —— 绝不用 0 冒充未知。
+         */
+        RunProgress: {
+            /**
+             * Phase
+             * @enum {string}
+             */
+            phase: "outline" | "structure" | "practice" | "validation" | "done";
+            /** Current Stage Index */
+            current_stage_index?: number | null;
+            /**
+             * Current Stage Title
+             * @default
+             */
+            current_stage_title: string;
+            /**
+             * Total Stages
+             * @default 0
+             */
+            total_stages: number;
+            /**
+             * Completed Structure Batches
+             * @default 0
+             */
+            completed_structure_batches: number;
+            /**
+             * Total Structure Batches
+             * @default 0
+             */
+            total_structure_batches: number;
+            /**
+             * Completed Practice Batches
+             * @default 0
+             */
+            completed_practice_batches: number;
+            /**
+             * Total Practice Batches
+             * @default 0
+             */
+            total_practice_batches: number;
+            /**
+             * Completed Batches
+             * @default 0
+             */
+            completed_batches: number;
+            /**
+             * Request Count
+             * @default 0
+             */
+            request_count: number;
+            /**
+             * Max Requests
+             * @default 0
+             */
+            max_requests: number;
+            /** Input Tokens */
+            input_tokens?: number | null;
+            /** Output Tokens */
+            output_tokens?: number | null;
+            /**
+             * Usage Complete
+             * @default false
+             */
+            usage_complete: boolean;
+            /**
+             * Failure Phase
+             * @default
+             */
+            failure_phase: string;
+            /**
+             * Failure Stage
+             * @default
+             */
+            failure_stage: string;
+        };
+        /**
          * RunView
          * @description 对外运行状态投影（**唯一**可授权给前端的运行视图）。
          *
@@ -676,6 +761,8 @@ export interface components {
             /** Result Ref */
             result_ref?: string | null;
             error?: components["schemas"]["ErrorBody"] | null;
+            /** @description 分批生成业务进度；未发布过进度的运行（如旧版）为 null */
+            progress?: components["schemas"]["RunProgress"] | null;
         };
         /** SessionEntry */
         SessionEntry: {

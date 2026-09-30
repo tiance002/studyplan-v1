@@ -68,6 +68,37 @@ class PrefsSnapshot(BaseModel):
 # --------------------------------------------------------------------- 运行状态
 
 
+class RunProgress(BaseModel):
+    """一次运行的分批生成**业务进度**（唯一可授权给前端的进度视图）。
+
+    只包含稳定业务字段：阶段、当前阶段位置、已完成批次数、冻结的请求上限、
+    以及由付费账本汇总的计量。**不含** thread_id、图节点名、内部 checkpoint
+    或模型提示词。
+
+    计量缺失时 ``input_tokens`` / ``output_tokens`` 保持 ``null``，
+    ``usage_complete`` 说明当前合计是否覆盖全部已记录请求 —— 绝不用 0 冒充未知。
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    phase: Literal["outline", "structure", "practice", "validation", "done"]
+    current_stage_index: int | None = Field(default=None, ge=0)
+    current_stage_title: str = Field(default="", max_length=200)
+    total_stages: int = Field(default=0, ge=0)
+    completed_structure_batches: int = Field(default=0, ge=0)
+    total_structure_batches: int = Field(default=0, ge=0)
+    completed_practice_batches: int = Field(default=0, ge=0)
+    total_practice_batches: int = Field(default=0, ge=0)
+    completed_batches: int = Field(default=0, ge=0)
+    request_count: int = Field(default=0, ge=0)
+    max_requests: int = Field(default=0, ge=0)
+    input_tokens: int | None = Field(default=None, ge=0)
+    output_tokens: int | None = Field(default=None, ge=0)
+    usage_complete: bool = False
+    failure_phase: str = Field(default="", max_length=32)
+    failure_stage: str = Field(default="", max_length=128)
+
+
 class RunView(BaseModel):
     """对外运行状态投影（**唯一**可授权给前端的运行视图）。
 
@@ -81,6 +112,9 @@ class RunView(BaseModel):
     version: int = Field(..., ge=1, description="乐观并发版本号")
     result_ref: str | None = Field(default=None, max_length=128)
     error: ErrorBody | None = None
+    progress: RunProgress | None = Field(
+        default=None, description="分批生成业务进度；未发布过进度的运行（如旧版）为 null"
+    )
 
 
 class PlanGenerateRequest(BaseModel):
@@ -368,6 +402,7 @@ class PromptRevisionCreateRequest(BaseModel):
 V1_SCHEMAS: tuple[type[BaseModel], ...] = (
     ErrorBody,
     PrefsSnapshot,
+    RunProgress,
     RunView,
     PlanGenerateRequest,
     PlanGenerateResponse,

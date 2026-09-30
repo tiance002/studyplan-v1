@@ -79,7 +79,7 @@ class PlanningWorker:
 
         try:
             guard()
-            self._execute(claim.project_id, claim.run_id, guard=guard)
+            self._execute(claim.project_id, claim.run_id, guard=guard, claim=claim)
         except PlanningLeaseLostError:
             # A replacement Worker owns the run. The old claim cannot finish it.
             logger.warning("planning Worker stopped after losing lease for run %s", claim.run_id)

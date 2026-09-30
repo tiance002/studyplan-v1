@@ -7,12 +7,15 @@
 
 from __future__ import annotations
 
+from typing import Any, Mapping
+
 from app.api.v1.schemas import (
     ErrorBody,
     KnowledgeExtensionView,
     OrderedSection,
     PlanDraftView,
     PlanView,
+    RunProgress,
     RunView,
     StageDetail,
     StageResourceAssignmentView,
@@ -30,6 +33,7 @@ __all__ = [
     "draft_view",
     "extension_view",
     "plan_view",
+    "progress_view",
     "resource_view",
     "run_view",
     "stage_detail",
@@ -39,12 +43,53 @@ __all__ = [
 #: 运行失败类别 → 面向用户的稳定说明（不回显模型原文，不泄露图内部节点名）。
 _RUN_ERROR_MESSAGES: dict[str, str] = {
     "planning_failed": "计划生成未通过校验，可重新发起",
-    "run_interrupted": "生成运行已中断或超时，需要核对结果；不会自动再次调用模型",
+    "provider_dispatch_unknown": "模型调用结果未知，需要核对结果；不会自动再次调用模型",
+    "checkpoint_finalize_failed": "业务结果已提交，但断点收尾未确认，需要核对",
+    "model_not_configured": "尚未配置可用模型，无法开始生成",
+    "run_budget_exhausted": "本次运行已达到冻结的请求/输出预算上限，已停止派发",
+    "run_manifest_violation": "执行清单与冻结提交不一致，已拒绝派发",
 }
 
+#: 进度阶段闭集；未知值一律回落到 ``outline``，不猜测、不回显原始值。
+_PROGRESS_PHASES = frozenset({"outline", "structure", "practice", "validation", "done"})
 
-def run_view(run: RunRecord) -> RunView:
-    """运行投影 → ``RunView``。``result_ref`` 保持不透明。"""
+
+def progress_view(raw: Mapping[str, Any] | None) -> RunProgress | None:
+    """业务进度字典 → ``RunProgress``（仅稳定业务字段）。
+
+    未知阶段回落为 ``outline``，缺失计量保持 ``None``。
+    """
+    if not raw:
+        return None
+    phase = str(raw.get("phase") or "")
+    index = raw.get("current_stage_index")
+    return RunProgress(
+        phase=phase if phase in _PROGRESS_PHASES else "outline",  # type: ignore[arg-type]
+        current_stage_index=int(index) if index is not None else None,
+        current_stage_title=str(raw.get("current_stage_title") or ""),
+        total_stages=int(raw.get("total_stages") or 0),
+        completed_structure_batches=int(raw.get("completed_structure_batches") or 0),
+        total_structure_batches=int(raw.get("total_structure_batches") or 0),
+        completed_practice_batches=int(raw.get("completed_practice_batches") or 0),
+        total_practice_batches=int(raw.get("total_practice_batches") or 0),
+        completed_batches=int(raw.get("completed_batches") or 0),
+        request_count=int(raw.get("request_count") or 0),
+        max_requests=int(raw.get("max_requests") or 0),
+        input_tokens=_optional_int(raw.get("input_tokens")),
+        output_tokens=_optional_int(raw.get("output_tokens")),
+        usage_complete=bool(raw.get("usage_complete")),
+        failure_phase=str(raw.get("failure_phase") or ""),
+        failure_stage=str(raw.get("failure_stage") or ""),
+    )
+
+
+def _optional_int(value: Any) -> int | None:
+    """缺失保持 ``None``；只有真实数值才转换（绝不用 0 冒充未知）。"""
+    return None if value is None else int(value)
+
+
+def run_view(run: RunRecord, progress: Mapping[str, Any] | None = None) -> RunView:
+    """运行投影 + 业务进度 → ``RunView``。``result_ref`` 保持不透明。"""
     error: ErrorBody | None = None
     if run.error_class:
         error = ErrorBody(
@@ -60,6 +105,7 @@ def run_view(run: RunRecord) -> RunView:
         version=run.version,
         result_ref=run.result_ref,
         error=error,
+        progress=progress_view(progress),
     )
 
 

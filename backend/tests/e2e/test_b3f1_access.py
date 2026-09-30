@@ -170,7 +170,12 @@ def test_real_plan_workspace_edit_publish_refresh(migrated_db):
     assert data["stages"][0]["nodes"]
 
 
-def test_interrupted_running_becomes_reconciliation_without_retry(migrated_db):
+def test_healthy_long_run_is_not_interrupted_by_wall_clock(migrated_db):
+    """A live lease may run for arbitrarily long; wall-clock time never interrupts.
+
+    The old total-duration heuristic is gone. Only a lost lease / unknown paid
+    dispatch moves a run to ``reconciliation_required`` — never "it took a while".
+    """
     import psycopg
 
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
@@ -181,15 +186,46 @@ def test_interrupted_running_becomes_reconciliation_without_retry(migrated_db):
     result = client.post("/api/v1/plans/generate" + suffix, json={"goal": "Agent 开发"}, headers={"X-CSRF-Token": session["csrf_token"]}).json()
     assert worker.tick()
     url = "/api/v1/runs/" + result["run_id"] + suffix
-    with psycopg.connect(migrated_db.migrator_dsn) as conn:
-        conn.execute("UPDATE ai_runs SET updated_at=now()-interval '2 hours' WHERE run_id=%s", (result["run_id"],))
     assert client.get(url).json()["status"] == "waiting_user"
+
+    # Backdate the projection far beyond any former timeout while the run is
+    # still "running": GET must report it as running, not reconcile it.
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
-        conn.execute("UPDATE ai_runs SET status='running',next_action='wait' WHERE run_id=%s", (result["run_id"],))
+        conn.execute(
+            "UPDATE ai_runs SET status='running',next_action='wait',"
+            "updated_at=now()-interval '30 days' WHERE run_id=%s",
+            (result["run_id"],),
+        )
+    view = client.get(url).json()
+    assert view["status"] == "running", view
+    assert view["next_action"] == "wait"
+    assert view["error"] is None
+    repeated = client.get(url).json()
+    assert repeated["status"] == view["status"] and repeated["version"] == view["version"]
+
+
+def test_unknown_dispatch_run_requires_reconcile_without_retry(migrated_db):
+    """An unknown paid dispatch is surfaced as reconcile, never as a retry."""
+    import psycopg
+
+    settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
+    client = TestClient(create_app(build_container(settings)))
+    session = client.post("/api/v1/auth/register", json={"username": "核对结果", "password": "123456"}).json()
+    worker = configure_test_worker(client)
+    suffix = f'?project_id={session["project_ids"][0]}'
+    result = client.post("/api/v1/plans/generate" + suffix, json={"goal": "Agent 开发"}, headers={"X-CSRF-Token": session["csrf_token"]}).json()
+    assert worker.tick()
+    url = "/api/v1/runs/" + result["run_id"] + suffix
+    with psycopg.connect(migrated_db.migrator_dsn) as conn:
+        conn.execute(
+            "UPDATE ai_runs SET status='reconciliation_required',next_action='reconcile',"
+            "error_class='provider_dispatch_unknown' WHERE run_id=%s",
+            (result["run_id"],),
+        )
     view = client.get(url).json()
     assert view["status"] == "reconciliation_required", view
     assert view["next_action"] == "reconcile"
-    assert view["error"]["code"] == "run_interrupted"
+    assert view["error"]["code"] == "provider_dispatch_unknown"
     assert "重试" not in view["error"]["message"]
     repeated = client.get(url).json()
     assert repeated["status"] == view["status"] and repeated["version"] == view["version"]

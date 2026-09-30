@@ -229,12 +229,14 @@ def test_personal_settings_drive_http_real_graph_without_shared_provider(db, che
     base = container.plan_service
     base._runtime_factory = module.PersonalPlanningRuntimeFactory(replace(container.settings,database_url=db.app_dsn,
         checkpoint_database_url=checkpoint_db.migrator_dsn,llm_model_max_output_tokens=8192),repo)
+    # Enqueue must freeze the same configuration the runtime will later resolve.
+    base._binding_resolver = base._runtime_factory.bind_submission
     base._executor = PgPlanningExecutor(checkpoint_db.migrator_dsn,llm=UnconfiguredLLM())
     with TestClient(create_app(container)) as client:
         client.cookies.set(COOKIE,SESSION_A1)
         run,draft = _generate_to_draft(client)
         assert _decide(client,draft['draft_id'],_approve_body(draft,0,'personal-approved')).status_code == 200
-    assert len(calls) == 3
+    assert len(calls) == 5, "b3f2-batch-v1: 1 skeleton + 2 structure + 2 practice batches"
     with psycopg.connect(db.migrator_dsn) as conn:
         assert conn.execute("SELECT count(*) FROM ai_run_model_settings WHERE run_id=%s AND actor_id=%s",(run['run_id'],ACTOR_A1)).fetchone()[0] == 1
         assert conn.execute("SELECT DISTINCT model_id FROM ai_provider_attempts WHERE run_id=%s",(run['run_id'],)).fetchall() == [('personal-http-model',)]

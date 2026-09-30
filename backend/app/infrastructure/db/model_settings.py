@@ -91,6 +91,42 @@ class PgModelSettings:
                 conn.execute("UPDATE user_model_setting_versions SET encrypted_api_key=NULL WHERE actor_id=%s",(actor_id,))
             return self._view(row)
 
+    def bind_version(self, actor_id, project_id, run_id, version):
+        """Pin one *exact* settings revision to a run and return it.
+
+        Unlike :meth:`bind_run` this never falls back to the actor's current
+        revision: the run's frozen ``model_ref`` names a specific version, so a
+        later settings change must not swap the model under a queued run.
+        Returns ``None`` when that revision no longer exists or its credential was
+        revoked — the caller must fail clearly rather than silently re-bind.
+        """
+        with self._connect(actor_id, project_id) as conn:
+            run = conn.execute(
+                "SELECT actor_id FROM ai_runs WHERE run_id=%s AND project_id=%s",
+                (run_id, project_id),
+            ).fetchone()
+            if not run or run["actor_id"] != actor_id:
+                raise ConflictError("Run model settings ownership mismatch")
+            row = conn.execute(
+                """SELECT v.* FROM user_model_setting_versions v
+                WHERE v.actor_id=%s AND v.version=%s""",
+                (actor_id, version),
+            ).fetchone()
+            if row is None or not row["encrypted_api_key"]:
+                return None
+            conn.execute(
+                """INSERT INTO ai_run_model_settings(run_id,actor_id,settings_version)
+                VALUES (%s,%s,%s) ON CONFLICT(run_id) DO NOTHING""",
+                (run_id, actor_id, version),
+            )
+            # Read back the actual pinned revision in case another request won.
+            pinned = conn.execute(
+                """SELECT v.* FROM ai_run_model_settings r JOIN user_model_setting_versions v
+                ON v.actor_id=r.actor_id AND v.version=r.settings_version WHERE r.run_id=%s""",
+                (run_id,),
+            ).fetchone()
+            return self._configuration(pinned) if pinned else None
+
     def bind_run(self, actor_id, project_id, run_id):
         with self._connect(actor_id,project_id) as conn:
             # A run cannot borrow another actor's revision, even in the same project.

@@ -9,7 +9,8 @@
   :mod:`app.domain.planning.models` —— **只有一份**；
 - 持久化语义（单事务、状态条件、行数检查、RLS）在 ``PlanRepositoryPort``
   的实现里；
-- 图的推进由 :func:`app.agent_workflows.graphs.run_planning_graph` 完成。
+- 图的推进由 :func:`app.agent_workflows.planning_batches.build_batched_planning_graph`
+  完成（唯一的 ``b3f2-batch-v1`` 协议）。
 
 ## 为什么决策路径不重新驱动 Graph
 
@@ -24,22 +25,34 @@
 ## 生成路径
 
 生成是**多步 + 有界修复**，属于设计文档允许用 Graph 的场景，因此
-``generate`` 通过 :func:`run_planning_graph` 推进到 ``await_approval``，
+``generate`` 通过 ``b3f2-batch-v1`` 图推进到 ``await_approval``，
 并把图产物投影为持久化的 ``PlanDraft``（草案正文存业务表，图只存引用）。
+
+## 只有一个生成协议
+
+新 Run 一律使用 ``b3f2-batch-v1``；入队时冻结协议版本、模型配置引用与
+分批任务清单。历史 Run 不会被自动升级或继续执行，未知协议版本一律明确拒绝。
 """
 
 from __future__ import annotations
 
-import hashlib
-import json
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable, Mapping, Sequence, cast
 
-from app.agent_workflows.graphs import graph_thread_id, run_planning_graph
+from app.agent_workflows.graphs import graph_thread_id
 from app.agent_workflows.nodes import PlanningNodes
+from app.agent_workflows.planning_batches import (
+    DEFAULT_BUDGET,
+    PROTOCOL_VERSION,
+    derive_progress,
+    freeze_manifest,
+    run_batched_planning_graph,
+)
 from app.agent_workflows.state import PlanningState
 from app.application.draft_projection import project_draft
+from app.application.model_binding import SubmissionBinding
 from app.application.plan_resources import (
     StageResourceView,
     normalize_stage_resources,
@@ -69,9 +82,11 @@ from app.domain.runs.models import RunRecord
 from app.domain.workspace.models import AuthContext
 from app.ports.graph_runner import PlanningExecutorPort, PlanningRuntime
 from app.ports.llm import LLMDispatchUnknownError, LLMPort
-from app.ports.planning_jobs import PlanningJobsPort
+from app.ports.planning_jobs import JobClaim, PlanningJobsPort
 from app.ports.public_resources import PublicResourceCatalogPort
 from app.ports.runs import PlanningCatalogPort, RunRepositoryPort
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "DecisionCommand",
@@ -79,10 +94,28 @@ __all__ = [
     "DraftBundle",
     "PlanBundle",
     "PlanService",
+    "RunBundle",
 ]
 
 #: 生成失败时对外暴露的**稳定**错误类别（不泄露图内部节点名）。
 ERROR_PLANNING_FAILED = "planning_failed"
+
+
+def _unbound_submission(scope: AuthContext, project_id: str) -> SubmissionBinding:
+    """Fallback binding for a service without a model runtime (Fake/in-process).
+
+    It freezes the deployment default budget and a non-secret descriptor. Real
+    deployments always wire :meth:`PersonalPlanningRuntimeFactory.bind_submission`.
+    """
+    return SubmissionBinding(model_ref="unbound:deployment", budget_policy=DEFAULT_BUDGET)
+
+
+@dataclass(frozen=True, slots=True)
+class RunBundle:
+    """运行投影 + 业务进度（供 API 映射为 ``RunView``）。"""
+
+    run: RunRecord
+    progress: dict[str, object] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -139,11 +172,11 @@ class PlanService:
         source_pack_key: str = "",
         source_pack_version: int = 0,
         planning_executor: PlanningExecutorPort | None = None,
-        runtime_factory: Callable[[AuthContext,str,str],PlanningRuntime] | None = None,
-        run_timeout_seconds: int = 1800,
+        runtime_factory: Callable[...,PlanningRuntime] | None = None,
         domain_pack_selector: Callable[[str], dict[str, Any]] | None = None,
         planning_jobs: PlanningJobsPort | None = None,
         worker_actor_ids: tuple[str, ...] = (),
+        binding_resolver: Callable[[AuthContext, str], SubmissionBinding] | None = None,
     ) -> None:
         self._repo = repository
         self._runs = runs
@@ -152,16 +185,57 @@ class PlanService:
         self._llm = llm
         self._executor = planning_executor
         self._runtime_factory = runtime_factory
-        self._graph_version = graph_version
+        #: 唯一的生成协议。部署若把 ``GRAPH_VERSION`` 设成旧值，这里**明确失败**，
+        #: 而不是产出一个无法恢复的 Run（旧协议没有 builder）。
+        if graph_version and graph_version != PROTOCOL_VERSION:
+            raise ValidationAppError(
+                f"GRAPH_VERSION={graph_version!r} 不是受支持的生成协议；"
+                f"当前唯一协议为 {PROTOCOL_VERSION!r}，请更新部署配置"
+            )
+        self._graph_version = PROTOCOL_VERSION
         self._source_pack_key = source_pack_key
         self._source_pack_version = source_pack_version
         self._publication = PlanPublicationService(repository)
-        self._run_timeout_seconds = run_timeout_seconds
         self._domain_pack_selector = domain_pack_selector
         self._planning_jobs = planning_jobs
         self._worker_actor_ids = tuple(dict.fromkeys(worker_actor_ids))
+        self._binding_resolver = binding_resolver or _unbound_submission
 
     # ------------------------------------------------------------------ 生成
+
+    def _freeze_submission(
+        self,
+        *,
+        scope: AuthContext,
+        project_id: str,
+        goal: str,
+        prefs_snapshot: Mapping[str, Any] | None = None,
+    ) -> tuple[str, str, PlanningState, dict[str, Any]]:
+        """Freeze protocol, model configuration and batch catalog for a new run.
+
+        Everything the run will later depend on is captured here, before the run
+        row exists, so a later settings change cannot alter what was submitted.
+        """
+        run_id = new_id("run")
+        thread_id = graph_thread_id(run_id=run_id, graph_version=PROTOCOL_VERSION)
+        selected = self._domain_pack_selector(goal) if self._domain_pack_selector else None
+        pack: dict[str, Any] = dict(selected) if isinstance(selected, Mapping) else {}
+        binding = self._binding_resolver(scope, project_id)
+        manifest = freeze_manifest(
+            pack=pack, policy=binding.budget_policy, model_ref=binding.model_ref
+        )
+        initial: PlanningState = {
+            "run_id": run_id,
+            "project_id": project_id,
+            "graph_version": PROTOCOL_VERSION,
+            "goal": goal,
+            "prefs_snapshot": dict(prefs_snapshot or {}),
+            "manifest": manifest,
+            "protocol": PROTOCOL_VERSION,
+        }
+        if pack:
+            initial["domain_pack"] = pack
+        return run_id, thread_id, initial, manifest
 
     def submit_generation(
         self,
@@ -185,34 +259,16 @@ class PlanService:
         if not cleaned_goal:
             raise ValidationAppError("学习目标不能为空")
 
-        run_id = new_id("run")
-        thread_id = graph_thread_id(run_id=run_id, graph_version=self._graph_version)
-        selected_pack = self._domain_pack_selector(cleaned_goal) if self._domain_pack_selector else None
-        pack_json = json.dumps(selected_pack, ensure_ascii=False, sort_keys=True, separators=(",", ":")) if selected_pack is not None else ""
-        initial: PlanningState = {
-            "run_id": run_id,
-            "project_id": project_id,
-            "graph_version": self._graph_version,
-            "goal": cleaned_goal,
-            "prefs_snapshot": dict(prefs_snapshot or {}),
-        }
-        if selected_pack is not None:
-            initial["domain_pack"] = selected_pack
-        manifest: dict[str, object] = {
-            "protocol": "planning-legacy-v1",
-            "graph_version": self._graph_version,
-            "domain_pack_sha256": hashlib.sha256(pack_json.encode("utf-8")).hexdigest() if pack_json else "",
-            "domain_pack_key": str(selected_pack.get("pack_key", "")) if selected_pack else "",
-            "domain_pack_version": int(selected_pack.get("version", 0)) if selected_pack else 0,
-            "model_configuration_ref": None,
-        }
+        run_id, thread_id, initial, manifest = self._freeze_submission(
+            scope=scope, project_id=project_id, goal=cleaned_goal, prefs_snapshot=prefs_snapshot
+        )
         run = RunRecord(
             run_id=run_id,
             actor_id=scope.actor_id,
             project_id=project_id,
             kind=AiRunKind.PLAN_GENERATE.value,
             graph_name=GraphName.PLANNING.value,
-            graph_version=self._graph_version,
+            graph_version=PROTOCOL_VERSION,
             status=AiRunStatus.QUEUED,
             next_action=AiRunNextAction.WAIT,
             thread_id=thread_id,
@@ -221,7 +277,34 @@ class PlanService:
         self._planning_jobs.enqueue(run, dict(initial), manifest)
         return run_id
 
-    def execute_generation(self, project_id: str, run_id: str, *, guard: Callable[[], None] = lambda: None) -> None:
+    def _progress_sink(self, claim: JobClaim | None) -> Callable[[PlanningState], None] | None:
+        """Business-progress publisher for one fenced claim.
+
+        Progress is diagnostic and recomputable from the checkpoint, so a write
+        failure must not abort generation; it is logged and retried on the next
+        stable point. A lost lease simply stops reporting (``publish_progress``
+        returns ``False``) without touching the run.
+        """
+        jobs = self._planning_jobs
+        if claim is None or jobs is None:
+            return None
+
+        def publish(state: PlanningState) -> None:
+            try:
+                jobs.publish_progress(claim, derive_progress(state))
+            except Exception:  # progress is best-effort; generation must continue
+                logger.warning("planning progress publish failed for run %s", claim.run_id, exc_info=True)
+
+        return publish
+
+    def execute_generation(
+        self,
+        project_id: str,
+        run_id: str,
+        *,
+        guard: Callable[[], None] = lambda: None,
+        claim: JobClaim | None = None,
+    ) -> None:
         """Execute one persisted submission. Only the fenced Worker calls this."""
         if self._planning_jobs is None:
             raise ValidationAppError("规划后台 Worker 未装配")
@@ -243,8 +326,15 @@ class PlanService:
         selected_pack = initial.get("domain_pack")
         if not isinstance(selected_pack, Mapping):
             selected_pack = None
+        manifest = initial.get("manifest")
+        model_ref = str((manifest or {}).get("model_ref") or "") if isinstance(manifest, Mapping) else ""
+        progress = self._progress_sink(claim)
         try:
-            runtime = self._runtime_factory(scope, project_id, run_id) if self._runtime_factory else None
+            runtime = (
+                self._runtime_factory(scope, project_id, run_id, model_ref)
+                if self._runtime_factory
+                else None
+            )
             executor = runtime.executor if runtime else self._executor
             nodes = self._build_nodes(
                 project_id=project_id,
@@ -255,9 +345,11 @@ class PlanService:
                 guard=guard,
             )
             trace = (
-                self._run_executor(executor, nodes, initial, run.thread_id, run.graph_version, guard)
+                self._run_executor(executor, nodes, initial, run.thread_id, run.graph_version, guard, progress)
                 if executor is not None
-                else run_planning_graph(nodes, cast(PlanningState, initial))
+                else run_batched_planning_graph(
+                    nodes, cast(PlanningState, initial), progress=progress
+                )
             )
         except LLMDispatchUnknownError:
             guard()
@@ -311,8 +403,9 @@ class PlanService:
         if not cleaned_goal:
             raise ValidationAppError("学习目标不能为空")
 
-        run_id = new_id("run")
-        thread_id = graph_thread_id(run_id=run_id, graph_version=self._graph_version)
+        run_id, thread_id, initial, _manifest = self._freeze_submission(
+            scope=scope, project_id=project_id, goal=cleaned_goal, prefs_snapshot=prefs_snapshot
+        )
         self._runs.create_run(
             RunRecord(
                 run_id=run_id,
@@ -320,7 +413,7 @@ class PlanService:
                 project_id=project_id,
                 kind=AiRunKind.PLAN_GENERATE.value,
                 graph_name=GraphName.PLANNING.value,
-                graph_version=self._graph_version,
+                graph_version=PROTOCOL_VERSION,
                 status=AiRunStatus.RUNNING,
                 next_action=AiRunNextAction.WAIT,
                 thread_id=thread_id,
@@ -328,25 +421,20 @@ class PlanService:
             )
         )
 
-        initial: PlanningState = {
-            "run_id": run_id,
-            "project_id": project_id,
-            "graph_version": self._graph_version,
-            "goal": cleaned_goal,
-            "prefs_snapshot": dict(prefs_snapshot or {}),
-        }
-        selected_pack = self._domain_pack_selector(cleaned_goal) if self._domain_pack_selector else None
-        if selected_pack is not None:
-            initial["domain_pack"] = selected_pack
+        selected_pack = initial.get("domain_pack")
         try:
-            runtime = self._runtime_factory(scope,project_id,run_id) if self._runtime_factory else None
+            runtime = (
+                self._runtime_factory(scope, project_id, run_id, _manifest.get("model_ref", ""))
+                if self._runtime_factory
+                else None
+            )
             executor = runtime.executor if runtime else self._executor
             nodes = self._build_nodes(project_id=project_id, run_id=run_id, goal=cleaned_goal,
                                       llm=runtime.llm if runtime else None, selected_pack=selected_pack)
             trace = (
-                self._run_executor(executor, nodes, initial, thread_id, self._graph_version, lambda: None)
+                self._run_executor(executor, nodes, initial, thread_id, PROTOCOL_VERSION, lambda: None)
                 if executor is not None
-                else run_planning_graph(nodes, initial)
+                else run_batched_planning_graph(nodes, initial)
             )
         except LLMDispatchUnknownError:
             self._update_run(project_id=project_id, run_id=run_id,
@@ -385,27 +473,21 @@ class PlanService:
 
     # -------------------------------------------------------------- 读取视图
 
-    def get_run(self, *, scope: AuthContext, project_id: str, run_id: str) -> RunRecord:
+    def get_run(self, *, scope: AuthContext, project_id: str, run_id: str) -> RunBundle:
+        """运行投影 + 业务进度。
+
+        **没有**「按总时长判定中断」的逻辑：一个仍在续租的 Worker 可以让 19 批
+        生成持续任意长时间。租约丢失、终态与未知派发分别由 Worker 与账本处理，
+        而不是靠墙上时钟猜测。
+        """
         scope.require_project(project_id)
         run = self._runs.get_run(project_id=project_id, run_id=run_id)
         if run is None:
             raise NotFoundError("运行不存在")
-        # Sync generation is bounded. A process interruption cannot leave its
-        # projection running forever. Unknown paid dispatch is never retried.
-        if (run.status in {AiRunStatus.RUNNING, AiRunStatus.QUEUED} and run.updated_at
-                and (datetime.now(timezone.utc) - run.updated_at).total_seconds() > self._run_timeout_seconds):
-            try:
-                return self._runs.update_run(project_id=project_id, run_id=run_id,
-                    expected_version=run.version, status=AiRunStatus.RECONCILIATION_REQUIRED.value,
-                    next_action=AiRunNextAction.RECONCILE.value, result_ref=run.result_ref,
-                    error_class="run_interrupted")
-            except ConflictError:
-                # Generation may have completed concurrently with this read.
-                latest = self._runs.get_run(project_id=project_id, run_id=run_id)
-                if latest is None:
-                    raise NotFoundError("运行不存在") from None
-                return latest
-        return run
+        return RunBundle(
+            run=run,
+            progress=self._runs.get_progress(project_id=project_id, run_id=run_id),
+        )
 
     def get_draft(self, *, scope: AuthContext, project_id: str, draft_id: str) -> DraftBundle:
         scope.require_project(project_id)
@@ -558,15 +640,12 @@ class PlanService:
         thread_id: str,
         graph_version: str,
         guard: Callable[[], None],
+        progress: Callable[[PlanningState], None] | None = None,
     ) -> Any:
-        """Prefer the version-aware ``execute_or_resume`` when the executor offers it.
-
-        Keeps a plain ``execute``-only executor (test doubles) working unchanged.
-        """
-        resume = getattr(executor, "execute_or_resume", None)
-        if callable(resume):
-            return resume(nodes, initial, thread_id, graph_version, guard)
-        return executor.execute(nodes, initial, thread_id)
+        """Run or resume one thread under the stored (official) graph version."""
+        return executor.execute_or_resume(
+            nodes, initial, thread_id, graph_version, guard, progress=progress
+        )
 
     def _build_nodes(self, *, project_id: str, run_id: str, goal: str, llm: LLMPort | None = None,
                      selected_pack: Mapping[str, Any] | None = None,
