@@ -32,6 +32,18 @@ STRUCTURE_RELATION_CONTRACT = (
     "the invalid local content."
 )
 
+PRACTICE_JSON_CONTRACT = (
+    "PracticeProposalV1 must be one complete JSON object. No markdown fences or trailing text. "
+    "The top-level object must contain stable_key, title, idea, tasks, task_knowledge_links. "
+    "tasks must be a non-empty array; each task must contain stable_key, title, goal, "
+    "section_key, order_index, in_scope, out_scope, acceptance, knowledge_links. "
+    "Each task's section_key must match the supplied stage.stable_key. "
+    "Each knowledge_links item must have node_stable_key and role; each "
+    "task_knowledge_links item must have task_stable_key, node_stable_key and role. "
+    "Use only node keys from the supplied stage structure. During repair, preserve valid "
+    "task content and correct only the invalid local fields."
+)
+
 
 class OpenAICompatibleLLM:
     def __init__(self, *, base_url, api_key, model, timeout=120, max_tokens=8192, client=None,
@@ -39,7 +51,7 @@ class OpenAICompatibleLLM:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
-        self.prompt_version = "b3f2-v4-relations"
+        self.prompt_version = "b3f2-v5-practice-json"
         self.timeout = timeout
         host = (urlsplit(self.base_url).hostname or "").lower()
         self.budget_policy = budget_policy or BudgetPolicy(
@@ -95,6 +107,10 @@ class OpenAICompatibleLLM:
             purpose == "planning.repair" and schema_name == "KnowledgeStructureV1"
         ):
             system += " " + STRUCTURE_RELATION_CONTRACT
+        if purpose == "planning.practice" or (
+            purpose == "planning.repair" and schema_name == "PracticeProposalV1"
+        ):
+            system += " " + PRACTICE_JSON_CONTRACT
         context = {k:v for k,v in payload.items() if not k.startswith("_") and k != "domain_pack"}
         message = {"purpose": purpose, "schema": schema_name, "field_shape": shape, "context": context}
         if "domain_pack" in payload:
@@ -173,16 +189,25 @@ class OpenAICompatibleLLM:
             if diagnostics["finish_reason"] == "length":
                 return LLMFailure("provider_output_truncated", "The complete route exceeded the model output limit",
                                   details=diagnostics, **failure)
-            if not isinstance(content, str):
-                raise ValueError("Missing structured response content")
-            parsed = json.loads(content)
-            if not isinstance(parsed, dict) or not set(shape).issubset(parsed):
-                raise ValueError("Invalid structured response")
-            return LLMResult(payload=parsed, model_id=str(data.get("model") or self.model),
-                             provider="openai_compatible", input_tokens=failure["input_tokens"],
-                             output_tokens=failure["output_tokens"], cost_micros=None,
-                             latency_ms=failure["latency_ms"],
-                             finish_reason=diagnostics["finish_reason"] or "stop", diagnostics=diagnostics)
         except (ValueError, KeyError, IndexError, TypeError):
-            return LLMFailure("provider_invalid_json", "Provider returned invalid structured JSON",
+            return LLMFailure("provider_invalid_envelope", "Provider returned an invalid response envelope",
                               details=diagnostics, **failure)
+        if not isinstance(content, str):
+            return LLMFailure("provider_invalid_envelope", "Provider omitted structured response content",
+                              details={**diagnostics, "content_present": False}, **failure)
+        try:
+            parsed = json.loads(content)
+        except json.JSONDecodeError as exc:
+            return LLMFailure("provider_invalid_json", "Provider returned malformed JSON content",
+                              details={**diagnostics, "content_has_code_fence": "```" in content,
+                                       "json_error_line": exc.lineno, "json_error_column": exc.colno},
+                              **failure)
+        if not isinstance(parsed, dict) or not set(shape).issubset(parsed):
+            missing = sorted(set(shape) - set(parsed)) if isinstance(parsed, dict) else sorted(shape)
+            return LLMFailure("provider_invalid_shape", "Provider returned JSON with an invalid field shape",
+                              details={**diagnostics, "missing_top_level_fields": missing}, **failure)
+        return LLMResult(payload=parsed, model_id=str(data.get("model") or self.model),
+                         provider="openai_compatible", input_tokens=failure["input_tokens"],
+                         output_tokens=failure["output_tokens"], cost_micros=None,
+                         latency_ms=failure["latency_ms"],
+                         finish_reason=diagnostics["finish_reason"] or "stop", diagnostics=diagnostics)

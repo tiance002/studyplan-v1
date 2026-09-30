@@ -66,7 +66,7 @@ def test_structure_and_repair_prompt_define_valid_relation_contract():
     for purpose in ("planning.structure", "planning.repair"):
         llm.generate_structured(purpose=purpose,payload={},schema_name="KnowledgeStructureV1",run_id="r",attempt_id=purpose)
 
-    assert llm.prompt_version == "b3f2-v4-relations"
+    assert llm.prompt_version == "b3f2-v5-practice-json"
     assert len(requests) == 2
     for request in requests:
         system = request["messages"][0]["content"]
@@ -193,3 +193,94 @@ def test_success_with_missing_usage_keeps_unknown_values_null():
     assert result.cost_micros is None
     assert result.diagnostics["max_tokens"] == 4096
     assert result.diagnostics["requested_model"] == "explicit-model"
+
+
+def test_stage_environment_practice_prompt_defines_json_and_required_fields():
+    requests = []
+    pack = load_pack("agent-application-v1.json")
+    stage = next(s for s in pack["stage_blueprints"] if s["stable_key"] == "stage.environment")
+    blueprint = next(p for p in pack["practice_blueprints"] if p["section_key"] == "stage.environment")
+    payload = {
+        "stage": {"stable_key": "stage.environment"},
+        "structure": {"nodes": [{"stable_key": key} for key in stage["node_keys"]], "units": []},
+        "practice_blueprint": blueprint,
+    }
+
+    def reply(request):
+        requests.append(json.loads(request.content))
+        return httpx.Response(200, json={"choices": [{"message": {"content": "{}"}, "finish_reason": "stop"}]})
+
+    with httpx.Client(transport=httpx.MockTransport(reply)) as client:
+        llm = OpenAICompatibleLLM(base_url="https://provider.example", api_key="mock", model="mock", client=client)
+        for purpose, schema in (("planning.practice", "PracticeProposalV1"),
+                                ("planning.repair", "PracticeProposalV1")):
+            llm.generate_structured(purpose=purpose, payload=payload, schema_name=schema,
+                                    run_id="fake", attempt_id=purpose)
+
+    assert llm.prompt_version == "b3f2-v5-practice-json"
+    assert len(requests) == 2
+    for body in requests:
+        system = body["messages"][0]["content"]
+        assert "No markdown fences or trailing text" in system
+        assert "stable_key, title, idea, tasks, task_knowledge_links" in system
+        assert "section_key must match the supplied stage.stable_key" in system
+        assert "task_stable_key" in system and "node_stable_key" in system
+        message = json.loads(body["messages"][1]["content"])
+        assert message["context"] == payload
+        assert set(message["field_shape"]) == {
+            "stable_key", "title", "idea", "tasks", "task_knowledge_links"
+        }
+
+
+def test_practice_provider_classifies_envelope_json_and_shape_without_retry_or_secret():
+    secret = "test-secret-api-key"
+    valid = {
+        "stable_key": "practice.stage.environment", "title": "environment", "idea": "build",
+        "tasks": [{"stable_key": "task.environment", "title": "setup", "goal": "run",
+                   "section_key": "stage.environment", "order_index": 0,
+                   "in_scope": ["setup"], "out_scope": [], "acceptance": ["check"],
+                   "knowledge_links": [{"node_stable_key": "node.environment", "role": "core"}]}],
+        "task_knowledge_links": [{"task_stable_key": "task.environment",
+                                  "node_stable_key": "node.environment", "role": "core"}],
+    }
+    requests = []
+    contents = ["```json\n{}\n```", json.dumps({"tasks": valid["tasks"]}),
+                json.dumps(valid), None]
+
+    def reply(request):
+        requests.append(request)
+        content = contents[len(requests) - 1]
+        return httpx.Response(200, json={"model": "mock", "choices": [{
+            "message": {"content": content}, "finish_reason": "stop"}],
+            "usage": {"prompt_tokens": 940, "completion_tokens": 1096}})
+
+    with httpx.Client(transport=httpx.MockTransport(reply)) as client:
+        llm = OpenAICompatibleLLM(base_url="https://provider.example", api_key=secret,
+                                  model="mock", client=client)
+        results = [llm.generate_structured(purpose="planning.practice", payload={},
+                                           schema_name="PracticeProposalV1", run_id="fake",
+                                           attempt_id=f"fake-{i}") for i in range(4)]
+
+    malformed, missing, good, absent = results
+    assert isinstance(malformed, LLMFailure)
+    assert malformed.error_class == "provider_invalid_json"
+    assert malformed.details["content_has_code_fence"] is True
+    assert malformed.retryable is False
+    assert isinstance(missing, LLMFailure)
+    assert missing.error_class == "provider_invalid_shape"
+    assert missing.details["missing_top_level_fields"] == [
+        "idea", "stable_key", "task_knowledge_links", "title"
+    ]
+    assert missing.retryable is False
+    assert isinstance(good, LLMResult)
+    assert good.payload == valid
+    assert isinstance(absent, LLMFailure)
+    assert absent.error_class == "provider_invalid_envelope"
+    assert absent.details["content_present"] is False
+    assert absent.retryable is False
+    assert len(requests) == 4
+    for result in (malformed, missing, absent):
+        diagnostic = json.dumps(result.details)
+        assert secret not in diagnostic
+        assert "Authorization" not in diagnostic
+        assert "```json" not in diagnostic

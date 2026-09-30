@@ -399,7 +399,9 @@ def test_exact_deepseek_options_are_checked_without_dispatch():
         validate_provider(provider)
 
 
-@pytest.mark.parametrize("failure", ["provider_output_truncated", "provider_invalid_json", "provider_transport_unknown"])
+@pytest.mark.parametrize("failure", ["provider_output_truncated", "provider_invalid_json",
+                                     "provider_invalid_shape", "provider_invalid_envelope",
+                                     "provider_transport_unknown"])
 def test_first_failure_prevents_next_attempt(failure):
     class Provider:
         calls = 0
