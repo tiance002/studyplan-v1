@@ -334,6 +334,27 @@ def validate_structure_batch(
             if relation.get(side) not in allowed:
                 errors.append(f"关系引用未声明节点：{relation.get(side)}")
 
+    # Check completeness while the owning batch can still use local repair.
+    # Match the final route validator's exact direction and type; do not insert
+    # missing edges or require relations owned by a different frozen batch.
+    relation_keys = {
+        (r.get("from_stable_key"), r.get("to_stable_key"), r.get("relation_type"))
+        for r in relations if isinstance(r, dict)
+        and all(isinstance(r.get(field), str) for field in
+                ("from_stable_key", "to_stable_key", "relation_type"))
+    } if isinstance(relations, list) else set()
+    declared_owned = set(batch.get("node_keys") or [])
+    for blueprint in pack.get("knowledge_blueprints") or []:
+        key = blueprint["stable_key"]
+        if key not in declared_owned:
+            continue
+        parent = blueprint.get("parent_key")
+        if parent and (parent, key, "contains") not in relation_keys:
+            errors.append(f"缺少子知识关联：{key}（{stage_key}）")
+        for dependency in blueprint.get("prerequisite_keys") or []:
+            if (dependency, key, "prerequisite") not in relation_keys:
+                errors.append(f"缺少领域前置依赖：{dependency} -> {key}（{stage_key}）")
+
     # The reviewed pack owns authoritative keys: reject invented nodes that are
     # not part of the pack's declared node set for this stage.
     #

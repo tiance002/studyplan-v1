@@ -1,0 +1,2265 @@
+{
+  "outline": {
+    "outline_ref": "outline:1",
+    "sections": [
+      {
+        "stable_key": "stage.environment",
+        "title": "开发环境与必要语言基础",
+        "section_kind": "foundation",
+        "objective": "建立可复现的 Python 实验环境，并能编写带类型与输入校验的可测试工具函数。",
+        "resources": [
+          {
+            "role": "primary",
+            "source_ref": "src_agent_python_v1",
+            "section_refs": [
+              "sec_agent_venv_v1",
+              "sec_agent_functions_v1"
+            ],
+            "source_version": 1,
+            "order_index": 0,
+            "node_keys": [
+              "node.environment",
+              "node.environment.1",
+              "node.environment.2"
+            ],
+            "fallback_search_terms": [
+              "python venv tutorial virtual environments packages",
+              "python 控制流 函数 定义 教程"
+            ]
+          }
+        ],
+        "extensions": []
+      },
+      {
+        "stable_key": "stage.model_api",
+        "title": "LLM API 与 Prompt",
+        "section_kind": "core",
+        "objective": "能通过代码调用语言模型，并明确输入、输出、token 用量与错误边界。",
+        "resources": [
+          {
+            "role": "primary",
+            "source_ref": "src_agent_langchain_v1",
+            "section_refs": [
+              "sec_agent_models_v1",
+              "sec_agent_messages_v1"
+            ],
+            "source_version": 1,
+            "order_index": 0,
+            "node_keys": [
+              "node.model_api",
+              "node.model_api.1",
+              "node.model_api.2"
+            ],
+            "fallback_search_terms": [
+              "langchain python models init invoke parameters",
+              "langchain messages system user tool roles"
+            ]
+          }
+        ],
+        "extensions": []
+      },
+      {
+        "stable_key": "stage.tools",
+        "title": "工具调用与结构化输出",
+        "section_kind": "core",
+        "objective": "把模型决策转换为经过 schema 校验、权限受控的工具请求与结构化结果。",
+        "resources": [
+          {
+            "role": "primary",
+            "source_ref": "src_agent_langchain_v1",
+            "section_refs": [
+              "sec_agent_tools_v1",
+              "sec_agent_structured_v1"
+            ],
+            "source_version": 1,
+            "order_index": 0,
+            "node_keys": [
+              "node.tools",
+              "node.tools.1",
+              "node.tools.2"
+            ],
+            "fallback_search_terms": [
+              "langchain tools 定义 schema 参数 返回 错误",
+              "langchain structured output pydantic json schema"
+            ]
+          }
+        ],
+        "extensions": []
+      },
+      {
+        "stable_key": "stage.langgraph",
+        "title": "LangGraph 编排基础",
+        "section_kind": "core",
+        "objective": "用状态、节点与条件路由组织可恢复、可重复执行的 Agent 流程。",
+        "resources": [
+          {
+            "role": "primary",
+            "source_ref": "src_agent_langchain_v1",
+            "section_refs": [
+              "sec_agent_graph_v1",
+              "sec_agent_persistence_v1"
+            ],
+            "source_version": 1,
+            "order_index": 0,
+            "node_keys": [
+              "node.langgraph",
+              "node.langgraph.1",
+              "node.langgraph.2"
+            ],
+            "fallback_search_terms": [
+              "langgraph state graph nodes edges conditional routing",
+              "langgraph persistence checkpointer thread_id"
+            ]
+          }
+        ],
+        "extensions": []
+      },
+      {
+        "stable_key": "stage.rag",
+        "title": "RAG 检索与知识库",
+        "section_kind": "core",
+        "objective": "构建有来源依据的检索生成链路，并能处理检索为空的情况。",
+        "resources": [
+          {
+            "role": "primary",
+            "source_ref": "src_agent_langchain_v1",
+            "section_refs": [
+              "sec_agent_retrieval_v1"
+            ],
+            "source_version": 1,
+            "order_index": 0,
+            "node_keys": [
+              "node.rag",
+              "node.rag.1",
+              "node.rag.2"
+            ],
+            "fallback_search_terms": [
+              "langchain retrieval loaders splitters embeddings vector stores",
+              "rag 检索 引用 来源 无结果处理"
+            ]
+          }
+        ],
+        "extensions": []
+      },
+      {
+        "stable_key": "stage.mcp",
+        "title": "MCP 协议与工具接入",
+        "section_kind": "core",
+        "objective": "理解 MCP 的 host/client/server 角色与传输方式，明确工具发现与安全边界。",
+        "resources": [
+          {
+            "role": "primary",
+            "source_ref": "src_agent_mcp_v1",
+            "section_refs": [
+              "sec_agent_mcp_v1"
+            ],
+            "source_version": 1,
+            "order_index": 0,
+            "node_keys": [
+              "node.mcp",
+              "node.mcp.1",
+              "node.mcp.2"
+            ],
+            "fallback_search_terms": [
+              "model context protocol architecture host client server tools",
+              "mcp 协议 传输 stdio streamable http"
+            ]
+          }
+        ],
+        "extensions": []
+      },
+      {
+        "stable_key": "stage.context",
+        "title": "记忆与上下文管理基础",
+        "section_kind": "core",
+        "objective": "保持有限会话状态，控制上下文长度并区分会话状态与跨会话存储。",
+        "resources": [
+          {
+            "role": "primary",
+            "source_ref": "src_agent_langchain_v1",
+            "section_refs": [
+              "sec_agent_persistence_v1",
+              "sec_agent_memory_v1"
+            ],
+            "source_version": 1,
+            "order_index": 0,
+            "node_keys": [
+              "node.context",
+              "node.context.1",
+              "node.context.2"
+            ],
+            "fallback_search_terms": [
+              "langchain short term memory session state context window",
+              "上下文裁剪 摘要 预算 会话状态"
+            ]
+          }
+        ],
+        "extensions": []
+      },
+      {
+        "stable_key": "stage.reliability",
+        "title": "Agent 评价与可靠性",
+        "section_kind": "core",
+        "objective": "用固定评价集检验正确性、失败处理、重复执行与成本边界。",
+        "resources": [
+          {
+            "role": "primary",
+            "source_ref": "src_agent_evaluation_v1",
+            "section_refs": [
+              "sec_agent_evaluation_v1"
+            ],
+            "source_version": 1,
+            "order_index": 0,
+            "node_keys": [
+              "node.reliability",
+              "node.reliability.1",
+              "node.reliability.2"
+            ],
+            "fallback_search_terms": [
+              "langsmith evaluation datasets offline online criteria",
+              "agent 评价 失败分支 可观测性 成本"
+            ]
+          }
+        ],
+        "extensions": []
+      },
+      {
+        "stable_key": "stage.capstone",
+        "title": "综合实践：可验收的知识助手",
+        "section_kind": "practice",
+        "objective": "集成工具、检索、编排与评价，交付可复现、可验收的知识库 Agent 应用。",
+        "resources": [
+          {
+            "role": "primary",
+            "source_ref": "src_agent_langchain_v1",
+            "section_refs": [
+              "sec_agent_agents_v1",
+              "sec_agent_testing_v1"
+            ],
+            "source_version": 1,
+            "order_index": 0,
+            "node_keys": [
+              "node.capstone",
+              "node.capstone.1",
+              "node.capstone.2"
+            ],
+            "fallback_search_terms": [
+              "langchain agents model tool loop harness",
+              "agent 应用 验收 运行说明 已知限制"
+            ]
+          }
+        ],
+        "extensions": []
+      }
+    ]
+  },
+  "structure_batches": [
+    {
+      "nodes": [
+        {
+          "stable_key": "node.environment",
+          "title": "开发环境与必要语言基础",
+          "node_type": "skill",
+          "objectives": [
+            "建立可复现环境并运行可测试的工具函数"
+          ]
+        },
+        {
+          "stable_key": "node.environment.1",
+          "title": "虚拟环境与依赖",
+          "node_type": "concept",
+          "objectives": [
+            "在独立环境安装依赖并固定版本"
+          ]
+        },
+        {
+          "stable_key": "node.environment.2",
+          "title": "函数、类型与输入校验",
+          "node_type": "concept",
+          "objectives": [
+            "用函数处理合法与非法输入并返回明确结果"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "stable_key": "unit.environment.venv",
+          "title": "搭建虚拟环境与依赖管理",
+          "section_key": "stage.environment",
+          "order_index": 0,
+          "node_keys": [
+            "node.environment",
+            "node.environment.1"
+          ],
+          "objectives": [
+            "创建并激活隔离环境",
+            "安装依赖并生成锁定文件"
+          ],
+          "rubric": {
+            "check": "可复现",
+            "criterion": "从锁定文件重建环境后运行示例脚本不报错"
+          }
+        },
+        {
+          "stable_key": "unit.environment.functions",
+          "title": "函数、类型与输入校验",
+          "section_key": "stage.environment",
+          "order_index": 1,
+          "node_keys": [
+            "node.environment",
+            "node.environment.2"
+          ],
+          "objectives": [
+            "定义带类型标注的函数",
+            "对合法与非法输入分别校验"
+          ],
+          "rubric": {
+            "check": "可测试",
+            "criterion": "测试用例覆盖合法输入与至少两种非法输入并全部通过"
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_stable_key": "node.environment",
+          "to_stable_key": "node.environment.1",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.environment",
+          "to_stable_key": "node.environment.2",
+          "relation_type": "contains"
+        }
+      ],
+      "stage_key": "stage.environment",
+      "batch_index": 0
+    },
+    {
+      "nodes": [
+        {
+          "stable_key": "node.model_api",
+          "title": "LLM API 与 Prompt",
+          "node_type": "skill",
+          "objectives": [
+            "调用模型并明确输入、输出、token 与错误边界"
+          ]
+        },
+        {
+          "stable_key": "node.model_api.1",
+          "title": "模型请求与响应",
+          "node_type": "concept",
+          "objectives": [
+            "记录一次请求的模型、token 与失败状态"
+          ]
+        },
+        {
+          "stable_key": "node.model_api.2",
+          "title": "消息角色与提示词边界",
+          "node_type": "concept",
+          "objectives": [
+            "区分系统规则和不可信用户资料"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "stable_key": "unit.model_api.request_response",
+          "title": "模型请求、响应与失败记录",
+          "section_key": "stage.model_api",
+          "order_index": 0,
+          "node_keys": [
+            "node.model_api",
+            "node.model_api.1"
+          ],
+          "objectives": [
+            "能构造一次最小模型请求并读取响应",
+            "能记录该次请求的模型名、token 用量与失败状态"
+          ],
+          "rubric": {
+            "acceptance": "提交一条请求记录，含模型标识、输入输出内容、token 用量或错误信息",
+            "evidence": "请求记录文件或日志片段"
+          }
+        },
+        {
+          "stable_key": "unit.model_api.message_roles",
+          "title": "消息角色与提示词边界",
+          "section_key": "stage.model_api",
+          "order_index": 1,
+          "node_keys": [
+            "node.model_api",
+            "node.model_api.2"
+          ],
+          "objectives": [
+            "能按系统、用户、助手角色组织消息",
+            "能把不可信用户资料与系统规则分离"
+          ],
+          "rubric": {
+            "acceptance": "给出一段消息数组，系统规则与用户资料分属不同角色，并说明为何用户资料不可信",
+            "evidence": "消息数组示例与简短说明"
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_stable_key": "node.model_api",
+          "to_stable_key": "node.model_api.1",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.model_api",
+          "to_stable_key": "node.model_api.2",
+          "relation_type": "contains"
+        }
+      ],
+      "stage_key": "stage.model_api",
+      "batch_index": 1
+    },
+    {
+      "nodes": [
+        {
+          "stable_key": "node.tools",
+          "title": "工具调用与结构化输出",
+          "node_type": "skill",
+          "objectives": [
+            "把模型决策转为受校验的工具请求"
+          ]
+        },
+        {
+          "stable_key": "node.tools.1",
+          "title": "工具 schema 与权限边界",
+          "node_type": "concept",
+          "objectives": [
+            "拒绝非法参数并限制工具能力"
+          ]
+        },
+        {
+          "stable_key": "node.tools.2",
+          "title": "结构化结果与错误处理",
+          "node_type": "concept",
+          "objectives": [
+            "用 schema 校验结果且不把失败当成功"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "stable_key": "unit.tools.schema",
+          "title": "工具 Schema 定义与校验",
+          "section_key": "stage.tools",
+          "order_index": 0,
+          "node_keys": [
+            "node.tools.1"
+          ],
+          "objectives": [
+            "定义符合 JSON Schema 的工具参数结构",
+            "使用 schema 校验模型生成的参数并拒绝非法请求",
+            "限制工具的可访问范围与权限边界"
+          ],
+          "rubric": {
+            "schema.definition": "正确定义至少一个工具的 JSON Schema，包含必需字段与类型约束",
+            "validation.success": "对合法参数能成功通过校验并调用工具",
+            "validation.reject": "对缺失字段、类型错误或越权参数能返回明确错误且不执行工具"
+          }
+        },
+        {
+          "stable_key": "unit.tools.validation",
+          "title": "结构化结果校验与错误恢复",
+          "section_key": "stage.tools",
+          "order_index": 1,
+          "node_keys": [
+            "node.tools.2"
+          ],
+          "objectives": [
+            "使用 schema 校验工具返回结果",
+            "区分成功与失败响应，不将失败当成功处理",
+            "实现重试或降级策略以恢复错误"
+          ],
+          "rubric": {
+            "result.validation": "使用 schema 校验工具返回的 JSON 结构",
+            "error.detection": "能识别工具返回的错误状态并触发相应的错误处理流程",
+            "recovery": "提供重试或备用逻辑，且重试不会无限循环"
+          }
+        },
+        {
+          "stable_key": "unit.tools.integration",
+          "title": "端到端工具调用集成",
+          "section_key": "stage.tools",
+          "order_index": 2,
+          "node_keys": [
+            "node.tools"
+          ],
+          "objectives": [
+            "将工具定义、调用与结果校验整合到 Agent 循环中",
+            "确保模型决策转化为受校验的请求并处理整个生命周期"
+          ],
+          "rubric": {
+            "integration.flow": "Agent 能根据用户输入选择合适的工具，生成参数，执行调用并解析结果",
+            "error.handling": "集成流程中能正确处理参数错误与工具执行错误",
+            "end_to_end": "提供多个测试用例覆盖成功与失败场景，且所有失败不会导致 Agent 崩溃"
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_stable_key": "node.tools",
+          "to_stable_key": "node.tools.1",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.tools",
+          "to_stable_key": "node.tools.2",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.model_api",
+          "to_stable_key": "node.tools",
+          "relation_type": "prerequisite"
+        }
+      ],
+      "stage_key": "stage.tools",
+      "batch_index": 2
+    },
+    {
+      "nodes": [
+        {
+          "stable_key": "node.langgraph",
+          "title": "LangGraph 编排基础",
+          "node_type": "skill",
+          "objectives": [
+            "用状态、节点与路由组织可恢复的 Agent 流程"
+          ]
+        },
+        {
+          "stable_key": "node.langgraph.1",
+          "title": "StateGraph、状态与条件路由",
+          "node_type": "concept",
+          "objectives": [
+            "实现明确的状态更新与分支"
+          ]
+        },
+        {
+          "stable_key": "node.langgraph.2",
+          "title": "检查点与运行标识",
+          "node_type": "concept",
+          "objectives": [
+            "用 thread_id 恢复运行并说明重复执行边界"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "stable_key": "unit.langgraph.core",
+          "title": "构建可恢复的 LangGraph Agent 工作流",
+          "section_key": "stage.langgraph",
+          "order_index": 0,
+          "node_keys": [
+            "node.langgraph",
+            "node.langgraph.1",
+            "node.langgraph.2"
+          ],
+          "objectives": [
+            "用状态、节点与路由组织可恢复的 Agent 流程",
+            "实现明确的状态更新与分支",
+            "用 thread_id 恢复运行并说明重复执行边界"
+          ],
+          "rubric": {
+            "state_schema_defined": true,
+            "conditional_routing_implemented": true,
+            "checkpoint_and_resume_verified": true,
+            "thread_id_used": true
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_stable_key": "node.langgraph",
+          "to_stable_key": "node.langgraph.1",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.langgraph",
+          "to_stable_key": "node.langgraph.2",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.tools",
+          "to_stable_key": "node.langgraph",
+          "relation_type": "prerequisite"
+        }
+      ],
+      "stage_key": "stage.langgraph",
+      "batch_index": 3
+    },
+    {
+      "nodes": [
+        {
+          "stable_key": "node.rag",
+          "title": "RAG 检索与知识库",
+          "node_type": "skill",
+          "objectives": [
+            "构建有来源依据的检索生成链路"
+          ]
+        },
+        {
+          "stable_key": "node.rag.1",
+          "title": "文档切分、嵌入与检索",
+          "node_type": "concept",
+          "objectives": [
+            "把小型文档集转换为可检索片段"
+          ]
+        },
+        {
+          "stable_key": "node.rag.2",
+          "title": "上下文引用与无结果处理",
+          "node_type": "concept",
+          "objectives": [
+            "为回答绑定来源并处理检索为空"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "stable_key": "unit.rag.basics",
+          "title": "RAG 基础与来源依据",
+          "section_key": "stage.rag",
+          "order_index": 0,
+          "node_keys": [
+            "node.rag",
+            "node.rag.1"
+          ],
+          "objectives": [
+            "理解 RAG 检索增强生成的基本流程",
+            "能够对小型文档集进行切分、嵌入并执行检索"
+          ],
+          "rubric": {
+            "完成标准": "能够描述 RAG 流程，并完成文档切分、嵌入与检索操作",
+            "评分项": [
+              "理解 RAG 概念",
+              "完成文档切分",
+              "生成嵌入并检索到相关片段"
+            ]
+          }
+        },
+        {
+          "stable_key": "unit.rag.citations",
+          "title": "引用与无结果处理",
+          "section_key": "stage.rag",
+          "order_index": 1,
+          "node_keys": [
+            "node.rag.2"
+          ],
+          "objectives": [
+            "为回答绑定来源引用",
+            "处理检索为空的情况"
+          ],
+          "rubric": {
+            "完成标准": "能在回答中标注来源，并在无结果时给出恰当提示",
+            "评分项": [
+              "正确绑定引用",
+              "处理空检索结果"
+            ]
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_stable_key": "node.rag",
+          "to_stable_key": "node.rag.1",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.rag",
+          "to_stable_key": "node.rag.2",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.model_api",
+          "to_stable_key": "node.rag",
+          "relation_type": "prerequisite"
+        },
+        {
+          "from_stable_key": "node.tools",
+          "to_stable_key": "node.rag",
+          "relation_type": "prerequisite"
+        }
+      ],
+      "stage_key": "stage.rag",
+      "batch_index": 4
+    },
+    {
+      "nodes": [
+        {
+          "stable_key": "node.mcp",
+          "title": "MCP 协议与工具接入",
+          "node_type": "skill",
+          "objectives": [
+            "理解客户端、服务端及工具上下文边界",
+            "能够根据能力声明安全接入外部工具"
+          ]
+        },
+        {
+          "stable_key": "node.mcp.1",
+          "title": "MCP 角色、协议与传输",
+          "node_type": "concept",
+          "objectives": [
+            "解释 host/client/server 与两类传输",
+            "描述典型握手与消息流"
+          ]
+        },
+        {
+          "stable_key": "node.mcp.2",
+          "title": "工具发现与安全边界",
+          "node_type": "concept",
+          "objectives": [
+            "检查能力声明并拒绝越权工具请求",
+            "识别工具调用的权限与数据边界"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "stable_key": "unit.mcp.roles",
+          "title": "MCP 角色与传输机制",
+          "section_key": "stage.mcp",
+          "order_index": 0,
+          "node_keys": [
+            "node.mcp",
+            "node.mcp.1"
+          ],
+          "objectives": [
+            "说明 host/client/server 三类角色的职责",
+            "对比 stdio 与 Streamable HTTP 两类传输的适用场景"
+          ],
+          "rubric": {
+            "理解角色边界": "能准确区分 host、client、server 的职责",
+            "传输对比": "能说明两类传输的差异与选择依据"
+          }
+        },
+        {
+          "stable_key": "unit.mcp.security",
+          "title": "工具发现与安全接入",
+          "section_key": "stage.mcp",
+          "order_index": 1,
+          "node_keys": [
+            "node.mcp",
+            "node.mcp.2"
+          ],
+          "objectives": [
+            "读取服务端能力声明并列出可用工具",
+            "对越权工具请求进行拒绝并说明理由"
+          ],
+          "rubric": {
+            "能力声明检查": "能解析能力声明并匹配所需工具",
+            "越权拒绝": "能给出拒绝越权请求的策略与理由"
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_stable_key": "node.mcp",
+          "to_stable_key": "node.mcp.1",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.mcp",
+          "to_stable_key": "node.mcp.2",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.tools",
+          "to_stable_key": "node.mcp",
+          "relation_type": "prerequisite"
+        }
+      ],
+      "stage_key": "stage.mcp",
+      "batch_index": 5
+    },
+    {
+      "nodes": [
+        {
+          "stable_key": "node.context",
+          "title": "记忆与上下文管理基础",
+          "node_type": "skill",
+          "objectives": [
+            "保持有限会话状态并控制上下文长度"
+          ]
+        },
+        {
+          "stable_key": "node.context.1",
+          "title": "会话状态与检查点",
+          "node_type": "concept",
+          "objectives": [
+            "区分会话状态和跨会话长期存储"
+          ]
+        },
+        {
+          "stable_key": "node.context.2",
+          "title": "裁剪、摘要及上下文预算",
+          "node_type": "concept",
+          "objectives": [
+            "比较裁剪与摘要，保留任务必要信息"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "stable_key": "unit.context.state",
+          "title": "会话状态与检查点管理",
+          "section_key": "stage.context",
+          "order_index": 0,
+          "node_keys": [
+            "node.context",
+            "node.context.1"
+          ],
+          "objectives": [
+            "实现一个使用检查点保存会话状态的有限内存代理"
+          ],
+          "rubric": {
+            "criteria": [
+              "能够说明检查点在会话中的作用",
+              "能够区分会话状态与长期存储",
+              "能够演示状态在会话间被正确保存和恢复"
+            ]
+          }
+        },
+        {
+          "stable_key": "unit.context.budget",
+          "title": "上下文预算与压缩策略",
+          "section_key": "stage.context",
+          "order_index": 1,
+          "node_keys": [
+            "node.context",
+            "node.context.2"
+          ],
+          "objectives": [
+            "应用裁剪或摘要控制上下文长度并保留任务必要信息"
+          ],
+          "rubric": {
+            "criteria": [
+              "能够比较裁剪与摘要的适用场景",
+              "能够为给定对话设计上下文预算",
+              "能够验证压缩后任务关键信息未丢失"
+            ]
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_stable_key": "node.langgraph",
+          "to_stable_key": "node.context",
+          "relation_type": "prerequisite"
+        },
+        {
+          "from_stable_key": "node.context",
+          "to_stable_key": "node.context.1",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.context",
+          "to_stable_key": "node.context.2",
+          "relation_type": "contains"
+        }
+      ],
+      "stage_key": "stage.context",
+      "batch_index": 6
+    },
+    {
+      "nodes": [
+        {
+          "stable_key": "node.reliability",
+          "title": "Agent 评价与可靠性",
+          "node_type": "skill",
+          "objectives": [
+            "用固定评价集检验正确性、失败处理和成本边界"
+          ]
+        },
+        {
+          "stable_key": "node.reliability.1",
+          "title": "离线测试集与评价标准",
+          "node_type": "concept",
+          "objectives": [
+            "建立正常、边界和失败问题集"
+          ]
+        },
+        {
+          "stable_key": "node.reliability.2",
+          "title": "失败分支、重复执行与可观测性",
+          "node_type": "concept",
+          "objectives": [
+            "追踪失败并确认未知结果不会重复付费"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "stable_key": "unit.reliability.testset",
+          "title": "建立离线评价集与标准",
+          "section_key": "stage.reliability",
+          "order_index": 0,
+          "node_keys": [
+            "node.reliability",
+            "node.reliability.1"
+          ],
+          "objectives": [
+            "定义正常、边界、失败三类问题",
+            "明确每类问题的期望答案与判定规则"
+          ],
+          "rubric": {
+            "正确性": "评价集覆盖三类问题且判定规则可机器执行",
+            "可复核性": "他人可依据标准独立复测并得到一致结论"
+          }
+        },
+        {
+          "stable_key": "unit.reliability.failure",
+          "title": "失败分支与可观测性验证",
+          "section_key": "stage.reliability",
+          "order_index": 1,
+          "node_keys": [
+            "node.reliability",
+            "node.reliability.2"
+          ],
+          "objectives": [
+            "复现至少一种失败分支并定位原因",
+            "验证未知结果不会触发重复付费执行"
+          ],
+          "rubric": {
+            "可观测性": "日志能够区分成功、失败与未知结果",
+            "成本安全": "重复执行前有幂等或查询机制保障"
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_stable_key": "node.reliability",
+          "to_stable_key": "node.reliability.1",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.reliability",
+          "to_stable_key": "node.reliability.2",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.langgraph",
+          "to_stable_key": "node.reliability",
+          "relation_type": "prerequisite"
+        },
+        {
+          "from_stable_key": "node.rag",
+          "to_stable_key": "node.reliability",
+          "relation_type": "prerequisite"
+        },
+        {
+          "from_stable_key": "node.mcp",
+          "to_stable_key": "node.reliability",
+          "relation_type": "prerequisite"
+        },
+        {
+          "from_stable_key": "node.context",
+          "to_stable_key": "node.reliability",
+          "relation_type": "prerequisite"
+        }
+      ],
+      "stage_key": "stage.reliability",
+      "batch_index": 7
+    },
+    {
+      "nodes": [
+        {
+          "stable_key": "node.capstone",
+          "title": "综合实践：可验收的知识助手",
+          "node_type": "skill",
+          "objectives": [
+            "集成工具、检索、编排与评价，交付可复现应用"
+          ]
+        },
+        {
+          "stable_key": "node.capstone.1",
+          "title": "集成流程与资料来源",
+          "node_type": "concept",
+          "objectives": [
+            "让回答、工具结果和检索片段具有可追踪来源"
+          ]
+        },
+        {
+          "stable_key": "node.capstone.2",
+          "title": "验收、运行说明与已知限制",
+          "node_type": "concept",
+          "objectives": [
+            "用评价集证明成功与失败边界并编写运行说明"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "stable_key": "unit.capstone.integration",
+          "title": "知识助手集成实现",
+          "section_key": "stage.capstone",
+          "order_index": 0,
+          "node_keys": [
+            "node.capstone",
+            "node.capstone.1"
+          ],
+          "objectives": [
+            "搭建可运行的知识助手主流程",
+            "使回答、工具结果与检索片段具备可追踪来源"
+          ],
+          "rubric": {
+            "完成集成": "主流程可端到端运行并返回带来源标注的回答",
+            "来源可追踪": "每条关键结论可回溯到检索片段或工具结果"
+          }
+        },
+        {
+          "stable_key": "unit.capstone.acceptance",
+          "title": "验收与交付",
+          "section_key": "stage.capstone",
+          "order_index": 1,
+          "node_keys": [
+            "node.capstone",
+            "node.capstone.2"
+          ],
+          "objectives": [
+            "编写评价集与运行说明",
+            "界定并说明已知限制"
+          ],
+          "rubric": {
+            "验收可复现": "评价集可重复执行并给出通过/失败结论",
+            "说明完整": "运行说明覆盖环境、启动、样例与已知限制"
+          }
+        }
+      ],
+      "relations": [
+        {
+          "from_stable_key": "node.capstone",
+          "to_stable_key": "node.capstone.1",
+          "relation_type": "contains"
+        },
+        {
+          "from_stable_key": "node.capstone",
+          "to_stable_key": "node.capstone.2",
+          "relation_type": "contains"
+        }
+      ],
+      "stage_key": "stage.capstone",
+      "batch_index": 8
+    }
+  ],
+  "practice_batches": [
+    {
+      "stage_key": "stage.environment",
+      "batch_index": 0,
+      "payload": {
+        "stable_key": "practice.environment",
+        "title": "开发环境与必要语言基础实践",
+        "idea": "通过搭建隔离环境、编写带类型校验的工具函数，让学习者在进入 Agent 开发前形成可复现、可测试的工程习惯。实践以最小依赖和明确验收为边界。",
+        "tasks": [
+          {
+            "stable_key": "task.environment.reproducible-env",
+            "title": "搭建可复现的虚拟环境",
+            "goal": "在独立虚拟环境中安装依赖并生成锁定文件，确保从干净环境可以重建。",
+            "section_key": "stage.environment",
+            "order_index": 0,
+            "in_scope": [
+              "创建虚拟环境",
+              "安装依赖",
+              "生成并验证锁定文件"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "多机分布式部署"
+            ],
+            "acceptance": [
+              "从删除虚拟环境后的干净目录出发，可依据锁定文件重新安装全部依赖且无错误。",
+              "运行一段读取依赖版本并打印的脚本，输出与锁定文件记录一致。"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.environment",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.environment.1",
+                "role": "core"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.environment.typed-validation",
+            "title": "编写带类型与输入校验的工具函数",
+            "goal": "定义至少一个带类型标注的函数，对合法输入返回明确结果，对非法输入给出可断言错误。",
+            "section_key": "stage.environment",
+            "order_index": 1,
+            "in_scope": [
+              "函数与类型标注",
+              "合法输入处理",
+              "至少两种非法输入校验"
+            ],
+            "out_scope": [
+              "完整长期记忆系统",
+              "复杂 Agent 决策逻辑"
+            ],
+            "acceptance": [
+              "函数对合法输入返回预期结果，测试用例通过。",
+              "对至少两种非法输入分别抛出或返回明确错误，测试用例全部通过。"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.environment",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.environment.2",
+                "role": "core"
+              }
+            ]
+          }
+        ],
+        "task_knowledge_links": [
+          {
+            "task_stable_key": "task.environment.reproducible-env",
+            "node_stable_key": "node.environment",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.environment.reproducible-env",
+            "node_stable_key": "node.environment.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.environment.typed-validation",
+            "node_stable_key": "node.environment",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.environment.typed-validation",
+            "node_stable_key": "node.environment.2",
+            "role": "core"
+          }
+        ]
+      }
+    },
+    {
+      "stage_key": "stage.model_api",
+      "batch_index": 1,
+      "payload": {
+        "stable_key": "practice.model_api.implementation",
+        "title": "实现可观测的模型调用",
+        "idea": "用一个最小可运行脚本完成真实模型调用，把请求、消息角色、token 用量与失败状态写成可复查记录，从而建立对模型 API 的工程化直觉。",
+        "tasks": [
+          {
+            "stable_key": "task.model_api.request_response",
+            "title": "构造最小模型请求并记录响应",
+            "goal": "完成一次真实模型调用，并输出包含模型标识、输入输出内容与 token 用量的请求记录。",
+            "section_key": "stage.model_api",
+            "order_index": 0,
+            "in_scope": [
+              "构造最小请求",
+              "读取响应文本",
+              "记录模型名与 token 用量",
+              "记录请求耗时"
+            ],
+            "out_scope": [
+              "多轮对话",
+              "流式输出",
+              "并发调用"
+            ],
+            "acceptance": [
+              "脚本能成功执行一次模型调用并打印响应内容",
+              "请求记录文件包含模型标识、完整输入、完整输出、token 用量与耗时",
+              "记录中 token 用量字段非空，且与实际响应一致"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.model_api",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.model_api.1",
+                "role": "core"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.model_api.failure_logging",
+            "title": "覆盖超时与错误输入并记录失败状态",
+            "goal": "故意触发超时和非法输入，把失败状态与错误信息落盘，形成可对照的失败记录。",
+            "section_key": "stage.model_api",
+            "order_index": 1,
+            "in_scope": [
+              "超时设置",
+              "非法参数触发错误",
+              "失败状态记录",
+              "成功与失败记录统一格式"
+            ],
+            "out_scope": [
+              "自动重试策略",
+              "熔断与降级"
+            ],
+            "acceptance": [
+              "至少构造一次超时和一次非法输入，两次均产生失败记录",
+              "失败记录包含错误类型、错误信息与原始请求参数",
+              "成功记录与失败记录使用同一套字段结构，可直接对比"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.model_api",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.model_api.1",
+                "role": "supporting"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.model_api.message_roles",
+            "title": "按角色组织消息并划定提示词边界",
+            "goal": "用系统、用户、助手三种角色组织消息数组，把不可信用户资料放在用户角色中，并说明边界理由。",
+            "section_key": "stage.model_api",
+            "order_index": 2,
+            "in_scope": [
+              "系统角色写规则",
+              "用户角色放资料",
+              "助手角色放历史输出",
+              "标注用户资料不可信"
+            ],
+            "out_scope": [
+              "多模态消息",
+              "函数调用消息格式",
+              "提示词自动优化"
+            ],
+            "acceptance": [
+              "消息数组至少包含系统、用户、助手各一条，字段符合 API 要求",
+              "系统规则与用户资料分属不同角色，不混在同一条消息内",
+              "用一段说明指出哪些内容不可信、为什么不能进入系统角色",
+              "调用该消息数组能得到符合系统规则的响应"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.model_api",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.model_api.2",
+                "role": "core"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.model_api.schema_validation",
+            "title": "校验输出 schema 与用量记录",
+            "goal": "为模型输出定义消费端需要的字段结构，校验成功响应的 schema，并把校验结果与用量一起写入记录。",
+            "section_key": "stage.model_api",
+            "order_index": 3,
+            "in_scope": [
+              "定义输出字段结构",
+              "解析成功响应",
+              "校验字段是否齐全",
+              "把校验结果与用量合并记录"
+            ],
+            "out_scope": [
+              "复杂 JSON Schema 自动生成",
+              "多模型输出对比"
+            ],
+            "acceptance": [
+              "成功响应能解析出预期字段，缺字段时校验失败并给出明确提示",
+              "同一条记录中同时包含校验结果与 token 用量",
+              "用一条成功样本和一条缺字段样本验证校验逻辑均按预期工作"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.model_api",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.model_api.1",
+                "role": "supporting"
+              },
+              {
+                "node_stable_key": "node.model_api.2",
+                "role": "extension"
+              }
+            ]
+          }
+        ],
+        "task_knowledge_links": [
+          {
+            "task_stable_key": "task.model_api.request_response",
+            "node_stable_key": "node.model_api",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.model_api.request_response",
+            "node_stable_key": "node.model_api.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.model_api.failure_logging",
+            "node_stable_key": "node.model_api",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.model_api.failure_logging",
+            "node_stable_key": "node.model_api.1",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.model_api.message_roles",
+            "node_stable_key": "node.model_api",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.model_api.message_roles",
+            "node_stable_key": "node.model_api.2",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.model_api.schema_validation",
+            "node_stable_key": "node.model_api",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.model_api.schema_validation",
+            "node_stable_key": "node.model_api.1",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.model_api.schema_validation",
+            "node_stable_key": "node.model_api.2",
+            "role": "extension"
+          }
+        ]
+      }
+    },
+    {
+      "stage_key": "stage.tools",
+      "batch_index": 2,
+      "payload": {
+        "stable_key": "practice.route",
+        "title": "实现受控工具调用",
+        "idea": "本练习围绕工具调用与结构化输出阶段，通过三个递进任务掌握 JSON Schema 定义、参数校验、结果校验与错误恢复，最终整合到 Agent 循环中，确保模型决策转化为受校验、可安全执行的工具请求。",
+        "tasks": [
+          {
+            "stable_key": "task.tools.schema_design",
+            "title": "设计工具 Schema 并实现参数校验",
+            "goal": "为至少一个工具定义符合 JSON Schema 的参数结构，并实现对模型生成参数的校验逻辑，拒绝非法请求。",
+            "section_key": "stage.tools",
+            "order_index": 0,
+            "in_scope": [
+              "定义符合 JSON Schema 的工具参数结构",
+              "使用 schema 校验模型生成的参数",
+              "拒绝缺失字段、类型错误或越权参数",
+              "限制工具的可访问范围与权限边界"
+            ],
+            "out_scope": [
+              "实现工具的业务逻辑",
+              "处理工具执行结果"
+            ],
+            "acceptance": [
+              "定义至少一个工具的 JSON Schema，包含必需字段与类型约束",
+              "对合法参数能成功通过校验",
+              "对缺失必需字段的参数返回明确错误",
+              "对类型错误的参数返回明确错误",
+              "对试图访问未授权资源的参数返回明确错误且不执行工具"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.tools.1",
+                "role": "core"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.tools.result_validation",
+            "title": "校验工具返回结果并实现错误恢复",
+            "goal": "使用 schema 校验工具返回结果，区分成功与失败，实现重试或降级策略，确保失败不被当成成功处理。",
+            "section_key": "stage.tools",
+            "order_index": 1,
+            "in_scope": [
+              "使用 schema 校验工具返回的 JSON 结构",
+              "识别工具返回的错误状态",
+              "实现重试或降级策略",
+              "避免无限重试"
+            ],
+            "out_scope": [
+              "工具参数定义与校验",
+              "工具业务逻辑实现"
+            ],
+            "acceptance": [
+              "使用 schema 校验工具返回的 JSON 结构，对不符合结构的返回视为错误",
+              "能识别工具返回的错误状态（如 HTTP 错误码或错误字段）并触发错误处理流程",
+              "提供重试或备用逻辑处理可重试错误",
+              "重试逻辑不会无限循环，有最大重试次数或超时控制",
+              "错误处理流程不会将失败结果当成成功继续处理"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.tools.2",
+                "role": "core"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.tools.integration",
+            "title": "端到端集成工具调用到 Agent 循环",
+            "goal": "将工具定义、调用与结果校验整合到 Agent 循环中，确保模型决策转化为受校验的请求并处理整个生命周期。",
+            "section_key": "stage.tools",
+            "order_index": 2,
+            "in_scope": [
+              "整合工具定义、参数校验、执行、结果校验",
+              "处理整个工具调用生命周期",
+              "覆盖成功与失败场景的测试用例"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "Agent 能根据用户输入选择合适的工具，生成参数并执行调用",
+              "集成流程中能正确处理参数错误与工具执行错误，不会崩溃",
+              "提供多个测试用例覆盖成功与失败场景",
+              "所有失败场景下 Agent 能给出明确的错误信息或降级响应"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.tools",
+                "role": "core"
+              }
+            ]
+          }
+        ],
+        "task_knowledge_links": [
+          {
+            "task_stable_key": "task.tools.schema_design",
+            "node_stable_key": "node.tools.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.tools.result_validation",
+            "node_stable_key": "node.tools.2",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.tools.integration",
+            "node_stable_key": "node.tools",
+            "role": "core"
+          }
+        ]
+      }
+    },
+    {
+      "stage_key": "stage.langgraph",
+      "batch_index": 3,
+      "payload": {
+        "stable_key": "practice.langgraph",
+        "title": "构建可恢复的 LangGraph 知识库 Agent 工作流",
+        "idea": "围绕“知识库问答 Agent”的真实失败场景，先用 StateGraph 定义清晰的状态与条件路由，再用检查点与 thread_id 实现中断恢复和重复执行保护。所有任务都围绕可运行、可演示、可验收的行为展开。",
+        "tasks": [
+          {
+            "stable_key": "task.langgraph.state-schema",
+            "title": "定义知识库 Agent 的状态模式",
+            "goal": "用明确的状态字段承载用户问题、检索结果、答案与错误信息，并让每个节点只更新自己负责的字段。",
+            "section_key": "stage.langgraph",
+            "order_index": 0,
+            "in_scope": [
+              "定义 StateGraph 的状态结构",
+              "让每个节点返回局部状态更新",
+              "演示状态在不同节点之间的传递"
+            ],
+            "out_scope": [
+              "持久化存储后端选型",
+              "多用户并发隔离"
+            ],
+            "acceptance": [
+              "运行最小图后能打印出包含 question、retrieved_docs、answer 的状态快照",
+              "连续两次调用同一节点时，非本节点负责的字段不会被意外覆盖",
+              "能在讲解中说明每个字段由哪个节点写入"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.langgraph.1",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.langgraph",
+                "role": "supporting"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.langgraph.conditional-routing",
+            "title": "实现检索为空时的条件路由与失败分支",
+            "goal": "当知识库检索没有命中时，路由到澄清或兜底节点，而不是直接生成答案。",
+            "section_key": "stage.langgraph",
+            "order_index": 1,
+            "in_scope": [
+              "添加条件路由函数",
+              "根据状态里的检索结果决定分支",
+              "为失败分支提供可演示的兜底输出"
+            ],
+            "out_scope": [
+              "复杂的多跳检索策略",
+              "外部搜索 API 接入"
+            ],
+            "acceptance": [
+              "给出一个检索有命中的输入，能走到生成答案节点",
+              "给出一个检索为空的输入，能走到兜底节点并输出可读提示",
+              "演示两次输入得到不同分支的执行路径"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.langgraph.1",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.langgraph",
+                "role": "supporting"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.langgraph.checkpoint-resume",
+            "title": "用检查点与 thread_id 恢复中断的运行",
+            "goal": "在流程中途触发中断后，用同一个 thread_id 从检查点恢复，而不是从头重跑。",
+            "section_key": "stage.langgraph",
+            "order_index": 2,
+            "in_scope": [
+              "为图配置检查点存储",
+              "使用 thread_id 标识一次会话",
+              "演示中断后恢复并继续剩余节点"
+            ],
+            "out_scope": [
+              "生产级数据库迁移",
+              "跨机器的检查点同步"
+            ],
+            "acceptance": [
+              "第一次运行在指定节点前中断，并输出当前 thread_id",
+              "使用同一 thread_id 再次调用后，从断点继续完成剩余节点",
+              "能展示恢复后的状态字段与中断前的状态一致"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.langgraph.2",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.langgraph",
+                "role": "supporting"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.langgraph.idempotency-guard",
+            "title": "加入重复执行保护并说明边界",
+            "goal": "在恢复运行时避免重复写入或重复生成，并对无法完全避免的重复给出明确说明。",
+            "section_key": "stage.langgraph",
+            "order_index": 3,
+            "in_scope": [
+              "识别可能重复执行的节点",
+              "用状态标记或幂等键保护关键写入",
+              "书面说明哪些操作是幂等的、哪些不是"
+            ],
+            "out_scope": [
+              "分布式事务",
+              "外部系统的 exactly-once 保证"
+            ],
+            "acceptance": [
+              "模拟同一 thread_id 重复恢复时，关键写入只发生一次",
+              "能指出至少一个无法保证幂等的操作并说明原因",
+              "在 README 或代码注释中写明重复执行边界"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.langgraph.2",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.langgraph.1",
+                "role": "supporting"
+              },
+              {
+                "node_stable_key": "node.langgraph",
+                "role": "extension"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.langgraph.demo",
+            "title": "完成端到端演示与验收",
+            "goal": "把状态、条件路由、检查点恢复和重复执行保护串成一个可复现的完整演示。",
+            "section_key": "stage.langgraph",
+            "order_index": 4,
+            "in_scope": [
+              "按固定脚本运行完整流程",
+              "覆盖成功分支、失败分支和中断恢复",
+              "记录每一步的输入、输出与 thread_id"
+            ],
+            "out_scope": [
+              "前端界面",
+              "性能压测"
+            ],
+            "acceptance": [
+              "一次演示覆盖成功分支、失败分支和中断恢复三种路径",
+              "演示记录中包含每次运行的 thread_id 和状态快照",
+              "能根据记录复现同一结果，并解释重复执行保护在哪一步生效"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.langgraph",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.langgraph.1",
+                "role": "supporting"
+              },
+              {
+                "node_stable_key": "node.langgraph.2",
+                "role": "supporting"
+              }
+            ]
+          }
+        ],
+        "task_knowledge_links": [
+          {
+            "task_stable_key": "task.langgraph.state-schema",
+            "node_stable_key": "node.langgraph.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.langgraph.state-schema",
+            "node_stable_key": "node.langgraph",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.langgraph.conditional-routing",
+            "node_stable_key": "node.langgraph.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.langgraph.conditional-routing",
+            "node_stable_key": "node.langgraph",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.langgraph.checkpoint-resume",
+            "node_stable_key": "node.langgraph.2",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.langgraph.checkpoint-resume",
+            "node_stable_key": "node.langgraph",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.langgraph.idempotency-guard",
+            "node_stable_key": "node.langgraph.2",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.langgraph.idempotency-guard",
+            "node_stable_key": "node.langgraph.1",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.langgraph.idempotency-guard",
+            "node_stable_key": "node.langgraph",
+            "role": "extension"
+          },
+          {
+            "task_stable_key": "task.langgraph.demo",
+            "node_stable_key": "node.langgraph",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.langgraph.demo",
+            "node_stable_key": "node.langgraph.1",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.langgraph.demo",
+            "node_stable_key": "node.langgraph.2",
+            "role": "supporting"
+          }
+        ]
+      }
+    },
+    {
+      "stage_key": "stage.rag",
+      "batch_index": 4,
+      "payload": {
+        "stable_key": "practice.route.rag",
+        "title": "RAG 检索与知识库实践",
+        "idea": "围绕小型资料集，从文档切分、嵌入、检索到带引用回答，逐步完成一条可验收的检索生成链路，并处理无结果场景。",
+        "tasks": [
+          {
+            "stable_key": "task.rag",
+            "title": "完成小型资料检索实验",
+            "goal": "构建一条从文档切分、嵌入检索到带引用回答的最小链路，并验证无结果处理。",
+            "section_key": "stage.rag",
+            "order_index": 0,
+            "in_scope": [
+              "文档切分、嵌入与检索",
+              "上下文引用与无结果处理"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "固定问题命中正确片段；无依据时明确说明"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.rag",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.rag.1",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.rag.2",
+                "role": "supporting"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.rag.split",
+            "title": "文档切分与嵌入",
+            "goal": "把小型文档集切分为语义完整的片段并生成可检索嵌入。",
+            "section_key": "stage.rag",
+            "order_index": 1,
+            "in_scope": [
+              "文档切分",
+              "片段嵌入"
+            ],
+            "out_scope": [
+              "多模态文档解析",
+              "生产级向量数据库运维"
+            ],
+            "acceptance": [
+              "文档被切分为片段且每个片段有嵌入向量",
+              "对固定查询能返回至少一个相关片段"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.rag.1",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.rag",
+                "role": "supporting"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.rag.cite",
+            "title": "引用绑定与无结果处理",
+            "goal": "让回答绑定来源引用，并在检索为空时给出明确说明。",
+            "section_key": "stage.rag",
+            "order_index": 2,
+            "in_scope": [
+              "上下文引用",
+              "无结果处理"
+            ],
+            "out_scope": [
+              "自动引用纠错",
+              "大规模引用性能优化"
+            ],
+            "acceptance": [
+              "回答中标注来源片段标识",
+              "检索为空时明确说明依据不足且不编造内容"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.rag.2",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.rag",
+                "role": "supporting"
+              }
+            ]
+          }
+        ],
+        "task_knowledge_links": [
+          {
+            "task_stable_key": "task.rag",
+            "node_stable_key": "node.rag",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.rag",
+            "node_stable_key": "node.rag.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.rag",
+            "node_stable_key": "node.rag.2",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.rag.split",
+            "node_stable_key": "node.rag.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.rag.split",
+            "node_stable_key": "node.rag",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.rag.cite",
+            "node_stable_key": "node.rag.2",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.rag.cite",
+            "node_stable_key": "node.rag",
+            "role": "supporting"
+          }
+        ]
+      }
+    },
+    {
+      "stage_key": "stage.mcp",
+      "batch_index": 5,
+      "payload": {
+        "stable_key": "practice.route",
+        "title": "MCP 协议与工具接入实践",
+        "idea": "通过两次递进任务，先在本地会话中观察 MCP 的三类角色与两类传输，再完成工具发现、调用与越权拒绝，形成客户端、服务端与工具上下文边界的可验证记录。",
+        "tasks": [
+          {
+            "stable_key": "task.mcp",
+            "title": "演示 MCP 工具边界",
+            "goal": "理解并记录 MCP 客户端、服务端及工具上下文边界，验证工具发现和越权请求拒绝流程。",
+            "section_key": "stage.mcp",
+            "order_index": 0,
+            "in_scope": [
+              "MCP 角色、协议与传输",
+              "工具发现与安全边界"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "记录客户端与服务端的启动与握手流程",
+              "列出服务端能力声明中的可用工具",
+              "记录一次成功工具调用的上下文边界",
+              "记录一次越权工具请求被拒绝的结果与理由"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.mcp",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.mcp.1",
+                "role": "supporting"
+              },
+              {
+                "node_stable_key": "node.mcp.2",
+                "role": "supporting"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.mcp.roles",
+            "title": "对比 MCP 角色与传输机制",
+            "goal": "通过配置并运行两种传输方式的客户端/服务端组合，说明 host、client、server 职责以及 stdio 与 Streamable HTTP 的适用场景。",
+            "section_key": "stage.mcp",
+            "order_index": 1,
+            "in_scope": [
+              "host/client/server 三类角色职责",
+              "stdio 与 Streamable HTTP 传输差异",
+              "本地握手与消息流观察"
+            ],
+            "out_scope": [
+              "生产级部署运维",
+              "自定义传输协议实现"
+            ],
+            "acceptance": [
+              "分别用 stdio 与 Streamable HTTP 建立一次客户端到服务端连接",
+              "在记录中标注每次消息流对应的 host、client、server 角色",
+              "给出两类传输的差异表格与至少两条选择依据"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.mcp.1",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.mcp",
+                "role": "supporting"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.mcp.security",
+            "title": "工具发现与越权拒绝",
+            "goal": "基于能力声明完成工具发现，并在一次越权调用中执行拒绝策略并说明理由，验证工具调用的权限与数据边界。",
+            "section_key": "stage.mcp",
+            "order_index": 2,
+            "in_scope": [
+              "读取能力声明并列出可用工具",
+              "匹配任务所需工具",
+              "越权请求识别与拒绝策略"
+            ],
+            "out_scope": [
+              "完整权限管理系统",
+              "生产级鉴权网关"
+            ],
+            "acceptance": [
+              "从能力声明中解析出至少两个可用工具并匹配到所需工具",
+              "对一次越权工具请求返回拒绝结果并给出具体理由",
+              "记录拒绝决策与权限、数据边界的对应关系"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.mcp.2",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.mcp",
+                "role": "extension"
+              }
+            ]
+          }
+        ],
+        "task_knowledge_links": [
+          {
+            "task_stable_key": "task.mcp",
+            "node_stable_key": "node.mcp",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.mcp",
+            "node_stable_key": "node.mcp.1",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.mcp",
+            "node_stable_key": "node.mcp.2",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.mcp.roles",
+            "node_stable_key": "node.mcp.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.mcp.roles",
+            "node_stable_key": "node.mcp",
+            "role": "supporting"
+          },
+          {
+            "task_stable_key": "task.mcp.security",
+            "node_stable_key": "node.mcp.2",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.mcp.security",
+            "node_stable_key": "node.mcp",
+            "role": "extension"
+          }
+        ]
+      }
+    },
+    {
+      "stage_key": "stage.context",
+      "batch_index": 6,
+      "payload": {
+        "stable_key": "practice.context",
+        "title": "验证上下文管理策略",
+        "idea": "围绕“记忆与上下文管理基础”这一阶段目标，设计一个可验收的实践任务：实现一个使用检查点保存会话状态的有限内存代理，并通过裁剪或摘要控制上下文长度，确保在长输入下仍保留必要约束，且不同会话状态不串用。",
+        "tasks": [
+          {
+            "stable_key": "task.context.state",
+            "title": "实现会话状态与检查点管理",
+            "goal": "实现一个使用检查点保存会话状态的有限内存代理，演示状态在会话间被正确保存和恢复，且不与会话外长期存储混淆。",
+            "section_key": "stage.context",
+            "order_index": 0,
+            "in_scope": [
+              "会话状态与检查点",
+              "有限内存代理的状态保存",
+              "状态恢复验证"
+            ],
+            "out_scope": [
+              "生产级数据库持久化",
+              "分布式会话同步"
+            ],
+            "acceptance": [
+              "能够说明检查点在会话中的作用",
+              "能够区分会话状态与长期存储",
+              "提供可运行代码或伪代码演示状态保存与恢复",
+              "两个独立会话的状态不串用"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.context",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.context.1",
+                "role": "core"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.context.budget",
+            "title": "应用上下文预算与压缩策略",
+            "goal": "为给定对话设计上下文预算，应用裁剪或摘要控制上下文长度，并验证压缩后任务关键信息未丢失。",
+            "section_key": "stage.context",
+            "order_index": 1,
+            "in_scope": [
+              "裁剪与摘要的适用场景比较",
+              "上下文预算设计",
+              "压缩后关键信息保留验证"
+            ],
+            "out_scope": [
+              "完整长期记忆系统",
+              "生产级高并发上下文服务"
+            ],
+            "acceptance": [
+              "能够比较裁剪与摘要的适用场景",
+              "能够为给定对话设计上下文预算",
+              "能够验证压缩后任务关键信息未丢失",
+              "长输入仍保留必要约束"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.context",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.context.2",
+                "role": "core"
+              }
+            ]
+          }
+        ],
+        "task_knowledge_links": [
+          {
+            "task_stable_key": "task.context.state",
+            "node_stable_key": "node.context",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.context.state",
+            "node_stable_key": "node.context.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.context.budget",
+            "node_stable_key": "node.context",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.context.budget",
+            "node_stable_key": "node.context.2",
+            "role": "core"
+          }
+        ]
+      }
+    },
+    {
+      "stage_key": "stage.reliability",
+      "batch_index": 7,
+      "payload": {
+        "stable_key": "practice.route",
+        "title": "Agent 评价与可靠性：可复现测试与失败分支验证",
+        "idea": "围绕知识库 Agent 的可靠性目标，先建立覆盖正常、边界和失败三类问题的离线评价集与可机器执行的判定规则，再通过结构化的失败注入与幂等核查验证 Agent 在异常分支下的行为，最终形成一份可被他人独立复测的可靠性证据包。",
+        "tasks": [
+          {
+            "stable_key": "task.reliability.testset",
+            "title": "建立离线评价集与评价标准",
+            "goal": "为知识库 Agent 产出一套覆盖正常、边界、失败三类问题的离线评价集，并给出每类问题可机器执行的判定规则。",
+            "section_key": "stage.reliability",
+            "order_index": 0,
+            "in_scope": [
+              "定义正常、边界、失败三类问题的分布与样本量",
+              "为每类问题写明期望答案或期望行为",
+              "将判定规则写成可复现的检查清单或脚本逻辑"
+            ],
+            "out_scope": [
+              "生产级高并发压测",
+              "完整长期记忆系统评价",
+              "模型微调与训练评估"
+            ],
+            "acceptance": [
+              "评价集包含不少于 15 个案例，且正常、边界、失败三类均有覆盖",
+              "每个案例包含问题、期望答案或期望行为、判定规则三项字段",
+              "判定规则可由他人依据文本或脚本逻辑独立复跑并得到一致结论",
+              "正常类案例的通过标准明确区分‘回答正确’与‘引用来源正确’"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.reliability",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.reliability.1",
+                "role": "core"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.reliability.failure",
+            "title": "复现失败分支并验证幂等与可观测性",
+            "goal": "在受控条件下复现至少一种失败分支，通过日志定位原因，并验证未知结果不会触发重复付费执行。",
+            "section_key": "stage.reliability",
+            "order_index": 1,
+            "in_scope": [
+              "构造或模拟检索失败、模型超时、工具调用异常中的至少一种场景",
+              "在日志中区分成功、失败和未知结果三类状态",
+              "验证在未知结果下重复执行前有幂等或查询机制保障"
+            ],
+            "out_scope": [
+              "生产环境故障演练",
+              "跨区域容灾设计",
+              "全链路分布式追踪系统搭建"
+            ],
+            "acceptance": [
+              "至少复现一种失败分支，并记录完整的输入、异常现象和错误日志路径",
+              "日志能清晰区分成功、失败与未知结果三种状态",
+              "在未知结果场景下，重复执行前存在可验证的幂等键或结果查询步骤",
+              "给出一次重复执行的成本影响说明，证明未发生重复付费调用"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.reliability",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.reliability.2",
+                "role": "core"
+              }
+            ]
+          }
+        ],
+        "task_knowledge_links": [
+          {
+            "task_stable_key": "task.reliability.testset",
+            "node_stable_key": "node.reliability",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.reliability.testset",
+            "node_stable_key": "node.reliability.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.reliability.failure",
+            "node_stable_key": "node.reliability",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.reliability.failure",
+            "node_stable_key": "node.reliability.2",
+            "role": "core"
+          }
+        ]
+      }
+    },
+    {
+      "stage_key": "stage.capstone",
+      "batch_index": 8,
+      "payload": {
+        "stable_key": "practice.knowledge_agent_capstone",
+        "title": "交付并验收知识助手",
+        "idea": "以可追踪来源和可复现验收为主线，集成检索、工具与编排，交付一个带运行说明和已知限制的知识助手。",
+        "tasks": [
+          {
+            "stable_key": "task.knowledge_agent_capstone.integration",
+            "title": "集成可追踪来源的知识助手主流程",
+            "goal": "搭建端到端可运行的知识助手，使回答、工具结果和检索片段具备可追踪来源。",
+            "section_key": "stage.capstone",
+            "order_index": 0,
+            "in_scope": [
+              "编排检索与工具调用",
+              "为回答标注检索片段或工具结果来源",
+              "记录关键中间步骤"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "主流程可端到端运行并返回带来源标注的回答",
+              "每条关键结论可回溯到具体检索片段或工具结果",
+              "中间步骤有可检查的日志或记录"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.capstone",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.capstone.1",
+                "role": "core"
+              }
+            ]
+          },
+          {
+            "stable_key": "task.knowledge_agent_capstone.acceptance",
+            "title": "构建评价集并编写运行说明与已知限制",
+            "goal": "用评价集证明成功与失败边界，编写可复现的运行说明并界定已知限制。",
+            "section_key": "stage.capstone",
+            "order_index": 1,
+            "in_scope": [
+              "编写覆盖成功、无依据、工具失败和状态隔离的评价集",
+              "编写环境、启动、样例与已知限制的运行说明",
+              "使评价可重复执行并给出通过/失败结论"
+            ],
+            "out_scope": [
+              "生产级高并发",
+              "完整长期记忆系统"
+            ],
+            "acceptance": [
+              "评价集可重复执行并给出通过/失败结论",
+              "评价集至少覆盖成功回答、无依据、工具失败、状态隔离和可复现启动",
+              "运行说明覆盖环境、启动、样例与已知限制"
+            ],
+            "knowledge_links": [
+              {
+                "node_stable_key": "node.capstone",
+                "role": "core"
+              },
+              {
+                "node_stable_key": "node.capstone.2",
+                "role": "core"
+              }
+            ]
+          }
+        ],
+        "task_knowledge_links": [
+          {
+            "task_stable_key": "task.knowledge_agent_capstone.integration",
+            "node_stable_key": "node.capstone",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.knowledge_agent_capstone.integration",
+            "node_stable_key": "node.capstone.1",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.knowledge_agent_capstone.acceptance",
+            "node_stable_key": "node.capstone",
+            "role": "core"
+          },
+          {
+            "task_stable_key": "task.knowledge_agent_capstone.acceptance",
+            "node_stable_key": "node.capstone.2",
+            "role": "core"
+          }
+        ]
+      }
+    }
+  ],
+  "final_errors": [
+    "缺少领域前置依赖：node.environment -> node.model_api",
+    "缺少领域前置依赖：node.reliability -> node.capstone"
+  ]
+}
