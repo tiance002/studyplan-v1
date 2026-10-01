@@ -5,7 +5,7 @@ executor, driven over the real HTTP routes. The new protocol only.
 
 Covers, per the design revision:
 
-1. full batched generation -> ``waiting_user`` -> approve -> publish, with a
+1. full short generation -> ``succeeded`` + awaiting business draft -> approve -> publish, with a
    business-only, complete ``RunProgress``;
 2. the submission frozen at enqueue (protocol + model descriptor + manifest hash
    + request/output budget);
@@ -56,7 +56,7 @@ from tests.helpers.planning_worker import configure_test_worker  # noqa: E402
 from tests.pg_harness import PgTestDatabase, create_test_database  # noqa: E402
 
 AGENT_GOAL = "从 Python 基础学习 Agent 应用开发"
-AGENT_PACK = "agent-application-v1.json"
+AGENT_PACK = "agent-application-v2.json"
 #: 9 stages -> 1 outline + 9 structure + 9 practice = 19 requests; max 21 with 2 repairs.
 EXPECTED_REQUESTS = 19
 MAX_REQUESTS = 21
@@ -132,7 +132,7 @@ def _client(agent_db: PgTestDatabase, checkpoint_db: PgTestDatabase):
 
 def _register(client, username: str) -> dict:
     response = client.post(
-        "/api/v1/auth/register", json={"username": username, "password": "123456"}
+        "/api/v1/auth/register", json={"username": username, "password": "Controlled-test-password-2026!"}
     )
     assert response.status_code == 200, response.text
     return response.json()
@@ -165,14 +165,14 @@ def _generate_to_run(client, session, goal=AGENT_GOAL) -> tuple[str, str, dict]:
 # ------------------------------------------------------------------- 1. happy path
 
 
-def test_full_batched_generation_reaches_waiting_user_and_publishes(agent_db, checkpoint_db):
+def test_full_batched_generation_succeeds_with_awaiting_draft_and_publishes(agent_db, checkpoint_db):
     client = _client(agent_db, checkpoint_db)
     session = _register(client, "e2e完整路线")
     run_id, suffix, headers = _generate_to_run(client, session)
 
     run = client.get("/api/v1/runs/" + run_id + suffix).json()
-    assert run["status"] == "waiting_user", run
-    assert run["next_action"] == "review_draft"
+    assert run["status"] == "succeeded", run
+    assert run["next_action"] == "none"
     progress = run["progress"]
     assert progress["phase"] == "done"
     assert progress["total_stages"] == 9
@@ -212,6 +212,7 @@ def test_full_batched_generation_reaches_waiting_user_and_publishes(agent_db, ch
     assert published["revision"] == 1
     assert client.get("/api/v1/plans/current" + suffix).json() == published
     assert client.get("/api/v1/runs/" + run_id + suffix).json()["status"] == "succeeded"
+    assert client.get("/api/v1/runs/" + run_id + suffix).json()['result_ref'] == draft['draft_id']
 
 
 # --------------------------------------------------- 2. frozen submission + budget
@@ -232,7 +233,8 @@ def test_submission_freezes_protocol_model_and_manifest(agent_db, checkpoint_db)
     detail = submission[0]
     initial, manifest = detail["initial"], detail["manifest"]
     assert initial["protocol"] == PROTOCOL_VERSION
-    assert initial["graph_version"] == PROTOCOL_VERSION
+    from app.agent_workflows.planning_batches import SHORT_GENERATION_VERSION
+    assert initial["graph_version"] == SHORT_GENERATION_VERSION
     assert initial["manifest"]["protocol"] == PROTOCOL_VERSION
     assert manifest["protocol"] == PROTOCOL_VERSION
     assert manifest["model_ref"]  # a frozen, non-secret descriptor

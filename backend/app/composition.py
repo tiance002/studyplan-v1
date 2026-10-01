@@ -94,11 +94,12 @@ def build_container(settings: Settings) -> AppContainer:
         executor = PgPlanningExecutor(to_psycopg_dsn(settings.checkpoint_database_url),llm=llm)
         runtime_factory = PersonalPlanningRuntimeFactory(settings,model_repository)
     from app.agent_workflows.planning_batches import PROTOCOL_VERSION
-    from app.infrastructure.domain_pack import select_domain_pack
+    from app.infrastructure.db.domain_pack_catalog import PgDomainPackCatalog
     planning_jobs = PgPlanningJobRepository(
         dsn,
         actor_ids=settings.planning_worker_actor_ids,
         max_attempts=settings.worker_max_attempts,
+        admission_mode=settings.planning_worker_admission_mode,
     )
     binding_resolver = runtime_factory.bind_submission if runtime_factory is not None else _fake_binding
 
@@ -109,10 +110,11 @@ def build_container(settings: Settings) -> AppContainer:
         resources=PgPublicResourceCatalog(dsn),
         llm=llm,
         graph_version=settings.graph_version or PROTOCOL_VERSION,
-        planning_executor=executor,domain_pack_selector=select_domain_pack,
+        planning_executor=executor,domain_pack_selector=PgDomainPackCatalog(dsn).select,
         runtime_factory=runtime_factory,
         planning_jobs=planning_jobs,
         worker_actor_ids=settings.planning_worker_actor_ids,
+        planning_worker_admission_mode=settings.planning_worker_admission_mode,
         binding_resolver=binding_resolver,
     )
     planning_worker = PlanningWorker(
@@ -122,6 +124,7 @@ def build_container(settings: Settings) -> AppContainer:
         poll_interval_seconds=settings.worker_poll_interval_seconds,
         lease_seconds=settings.worker_lease_seconds,
         is_development=settings.is_development,
+        admission_mode=settings.planning_worker_admission_mode,
     )
     return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service,
                         model_settings_service=model_service, browser_auth=browser_auth,

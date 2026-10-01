@@ -59,9 +59,9 @@ export const api = {
       "DELETE",
     ),
   session: () => request<DTO["SessionView"]>("/session"),
-  login: (body: DTO["CredentialsRequest"]) =>
+  login: (body: DTO["LoginRequest"]) =>
     request<DTO["SessionView"]>("/auth/login", body),
-  register: (body: DTO["CredentialsRequest"]) =>
+  register: (body: DTO["RegistrationRequest"]) =>
     request<DTO["SessionView"]>("/auth/register", body),
   logout: () => request<{ logged_out: boolean }>("/auth/logout", {}),
   workspace: (project: string) =>

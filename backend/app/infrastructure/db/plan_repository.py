@@ -40,7 +40,7 @@ from datetime import datetime
 from typing import Any
 
 import psycopg
-from app.core.errors import ConflictError
+from app.core.errors import ConflictError, VersionConflictError
 from app.core.ids import new_id
 from app.domain.enums import (
     OutlineSectionKind,
@@ -62,6 +62,8 @@ from app.domain.resources.curation import (
     KnowledgeExtension,
     StageResourceAssignment,
 )
+from app.domain.runs.fencing import PlanningWriteFence
+from app.infrastructure.db.planning_fence import lock_plan_version, lock_planning_write
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
@@ -300,13 +302,24 @@ class PgPlanRepository:
 
     # ------------------------------------------------------------- 草案
 
-    def save_draft(self, draft: PlanDraft, *, expected_hash: str | None = None) -> None:
+    @staticmethod
+    def _lock_plan_version(conn: Any, project_id: str, expected_version: int | None) -> None:
+        """Serialize decisions/publication and recheck the current plan version."""
+        lock_plan_version(conn, project_id, expected_version)
+
+    def save_draft(self, draft: PlanDraft, *, expected_hash: str | None = None,
+                   expected_version: int | None = None,
+                   write_fence: PlanningWriteFence | None = None) -> None:
         """保存草案；**状态条件**更新 + **检查受影响行数**（B2-V §二.4）。
 
         - 已 ``cancelled`` / 已 ``approved`` 的草案不得被改写（行数为 0）；
         - 被条件挡下时**抛** :class:`ConflictError`，不静默忽略。
         """
         with self._tx(draft.project_id) as conn:
+            if expected_version is not None:
+                self._lock_plan_version(conn, draft.project_id, expected_version)
+            if write_fence is not None:
+                lock_planning_write(conn, project_id=draft.project_id, run_id=draft.run_id, fence=write_fence)
             cursor = conn.execute(
                 """
                 INSERT INTO plan_drafts
@@ -345,7 +358,8 @@ class PgPlanRepository:
                     draft_id=draft.draft_id,
                 )
 
-    def cancel_draft(self, *, project_id: str, draft_id: str) -> None:
+    def cancel_draft(self, *, project_id: str, draft_id: str,
+                     expected_hash: str | None = None, expected_version: int | None = None) -> None:
         """**状态条件**取消草案（B2-V §二.4）。
 
         只有 ``awaiting_approval`` / ``pending`` 的草案可被取消；已被发布的
@@ -353,14 +367,18 @@ class PgPlanRepository:
         失败的一方一定会**显式报错**，不会留下不一致状态。
         """
         with self._tx(project_id) as conn:
+            self._lock_plan_version(conn, project_id, expected_version)
             cursor = conn.execute(
                 "UPDATE plan_drafts SET status = %s, updated_at = now() "
-                "WHERE project_id = %s AND draft_id = %s AND status = ANY(%s)",
+                "WHERE project_id = %s AND draft_id = %s AND status = ANY(%s) "
+                "AND (%s::text IS NULL OR content_hash = %s)",
                 (
                     PlanDraftStatus.CANCELLED.value,
                     project_id,
                     draft_id,
                     list(PUBLISHABLE_DRAFT_STATUSES),
+                    expected_hash,
+                    expected_hash,
                 ),
             )
             if cursor.rowcount != 1:
@@ -562,6 +580,14 @@ class PgPlanRepository:
         """
         project_id = revision.project_id
         with self._tx(project_id) as conn:
+            expected_version = superseded.version if superseded is not None else (0 if created else revision.version)
+            try:
+                self._lock_plan_version(conn, project_id, expected_version)
+            except VersionConflictError as exc:
+                # Repository callers already use ConflictError for concurrent
+                # publication losers; preserve that surface while moving the
+                # version check inside the publication transaction.
+                raise ConflictError("计划版本已变化，发布已中止", reason="plan_version_mismatch") from exc
             # 0) **事务内复核草案最新状态**（不信任调用方持有的旧对象）。
             row = conn.execute(
                 "SELECT status, content_hash FROM plan_drafts "

@@ -1,8 +1,7 @@
-"""Persist actual StateGraph checkpoints for the one official generation protocol.
+"""Persist short-generation checkpoints without reinterpreting legacy threads.
 
-There is exactly **one** generation protocol: ``b3f2-batch-v1``. This module
-therefore does not route by version any more — it either builds the batched graph
-or refuses.
+New ``b3f2-short-v2`` threads end after saving the draft. The historical
+``b3f2-batch-v1`` builder remains frozen for existing checkpoint interpretation.
 
 Rules that still hold:
 
@@ -24,7 +23,9 @@ from app.agent_workflows.graphs import PlanningTrace
 from app.agent_workflows.nodes import PlanningNodes
 from app.agent_workflows.planning_batches import (
     PROTOCOL_VERSION,
+    SHORT_GENERATION_VERSION,
     build_batched_planning_graph,
+    build_short_planning_graph,
     recursion_limit,
 )
 from app.agent_workflows.runtime import Command, PostgresSaver
@@ -36,7 +37,7 @@ __all__ = ["PgPlanningExecutor", "builder_for_version"]
 
 
 def builder_for_version(graph_version: str) -> Any:
-    """Return the builder for the only supported protocol; refuse anything else.
+    """Select the explicitly frozen builder; refuse unknown protocols.
 
     A legacy or unknown version is **never** guessed from the current default:
     re-explaining an old thread with the new protocol would silently change what
@@ -44,9 +45,11 @@ def builder_for_version(graph_version: str) -> Any:
     """
     if graph_version == PROTOCOL_VERSION:
         return build_batched_planning_graph
+    if graph_version == SHORT_GENERATION_VERSION:
+        return build_short_planning_graph
     raise GraphRecoveryError(
         f"不支持的图协议版本，拒绝按当前默认版本解释：{graph_version!r}；"
-        f"当前唯一协议为 {PROTOCOL_VERSION!r}"
+        f"支持的协议为 {PROTOCOL_VERSION!r} 与 {SHORT_GENERATION_VERSION!r}"
     )
 
 
@@ -100,7 +103,14 @@ class PgPlanningExecutor:
             guard()
             existing = graph.get_state(config)
             if existing.values:
+                stored_version = existing.values.get("graph_version")
+                if stored_version is not None and stored_version != graph_version:
+                    raise GraphRecoveryError("Checkpoint graph version mismatch")
                 if not existing.next:
+                    if graph_version == SHORT_GENERATION_VERSION:
+                        # A crash after the final checkpoint but before the Run
+                        # projection committed must read its result, not dispatch.
+                        return PlanningTrace([], existing.values, None)
                     raise GraphRecoveryError("Checkpoint 已到终态，拒绝重新生成")
                 if existing.next == ("await_approval",):
                     raise GraphRecoveryError("Checkpoint 等待用户确认，Worker 不得自动续跑")

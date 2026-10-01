@@ -13,15 +13,22 @@ DUMMY_HASH = HASHER.hash("dummy-secret")
 
 
 def credentials(username: str, password: str) -> tuple[str, str]:
+    """Validate a new registration secret without normalizing it."""
+    DEFAULT_CREDENTIAL_POLICY.validate_password(password)
+    return _username(username)
+
+
+def login_credentials(username: str, password: str) -> tuple[str, str]:
+    """Accept legacy secrets; the stored Argon2 hash decides authenticity."""
+    DEFAULT_CREDENTIAL_POLICY.validate_login_password(password)
+    return _username(username)
+
+
+def _username(username: str) -> tuple[str, str]:
     username = unicodedata.normalize("NFKC", username).strip()
     DEFAULT_CREDENTIAL_POLICY.validate_username(username)
-    DEFAULT_CREDENTIAL_POLICY.validate_password(password)
     if not re.fullmatch(r"[A-Za-z\u3400-\u9fff][A-Za-z0-9_\u3400-\u9fff-]*", username):
         raise ValidationAppError("用户名须以字母或汉字开头，仅支持汉字、字母、数字、下划线和短横线")
-    try:
-        password.encode("utf-8")
-    except UnicodeEncodeError as exc:
-        raise ValidationAppError("密码含非法字符") from exc
     return username, username.casefold()
 
 

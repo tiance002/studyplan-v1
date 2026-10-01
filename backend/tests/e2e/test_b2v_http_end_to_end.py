@@ -547,8 +547,10 @@ def _generate_to_draft(client, *, goal: str = GOAL_A, project_id: str = PROJECT_
     """生成并返回 ``(run, draft)``。"""
     run = _generate(client, goal=goal, project_id=project_id)
     run_view = _get_run(client, run["run_id"], project_id=project_id)
-    assert run_view["status"] == "waiting_user", run_view
+    assert run_view["status"] == "succeeded", run_view
+    assert run_view['next_action'] == 'none'
     draft = _get_draft(client, run_view["result_ref"], project_id=project_id)
+    assert draft['status'] == 'awaiting_approval'
     return run_view, draft
 
 
@@ -562,9 +564,9 @@ def test_full_chain_generate_edit_approve_readback(db: PgTestDatabase) -> None:
     # 1) 生成
     run = _generate(client)
     run_view = _get_run(client, run["run_id"])
-    assert run_view["status"] == "waiting_user"
-    assert run_view["next_action"] == "review_draft"
-    assert run_view["version"] == 3, "create(1) → Worker claim(2) → waiting_user(3)"
+    assert run_view["status"] == "succeeded"
+    assert run_view["next_action"] == "none"
+    assert run_view["version"] == 3, "create(1) → Worker claim(2) → succeeded(3)"
     draft_id = run_view["result_ref"]
     assert draft_id.startswith("drf_")
 
@@ -617,7 +619,7 @@ def test_full_chain_generate_edit_approve_readback(db: PgTestDatabase) -> None:
     run_after = _get_run(client, run["run_id"])
     assert run_after["status"] == "succeeded"
     assert run_after["next_action"] == "none"
-    assert run_after["result_ref"] == plan["plan_id"]
+    assert run_after["result_ref"] == draft_id
 
     # 7) 当前路线读回，且与「确认的结构」逐字段一致（核心断言）
     current = client.get(f"{V1}/plans/current", params={"project_id": PROJECT_P1}).json()
@@ -820,7 +822,7 @@ def test_cancel_then_approve_is_rejected(db: PgTestDatabase) -> None:
     client = _client(db)
     _, draft = _generate_to_draft(client)
     cancelled = _decide(
-        client, draft["draft_id"], {"decision": "cancel", "expected_version": 0}
+        client, draft["draft_id"], {"decision": "cancel", "expected_version": 0, 'draft_hash': draft['draft_hash']}
     )
     assert cancelled.status_code == 200, cancelled.text
     assert cancelled.json()["draft"]["status"] == "cancelled"
@@ -855,7 +857,7 @@ def test_approve_then_cancel_is_rejected(db: PgTestDatabase) -> None:
     )
     assert approved.status_code == 200, approved.text
 
-    rejected = _decide(client, draft["draft_id"], {"decision": "cancel", "expected_version": 1})
+    rejected = _decide(client, draft["draft_id"], {"decision": "cancel", "expected_version": 1, 'draft_hash': draft['draft_hash']})
     assert rejected.status_code == 409, rejected.text
     current = client.get(f"{V1}/plans/current", params={"project_id": PROJECT_P1})
     assert current.status_code == 200 and current.json()["status"] == "approved"
@@ -887,7 +889,7 @@ def test_concurrent_cancel_and_publish_exactly_one_wins(db: PgTestDatabase) -> N
     def cancel() -> None:
         c = _client(db)
         barrier.wait()
-        r = _decide(c, draft["draft_id"], {"decision": "cancel", "expected_version": 0})
+        r = _decide(c, draft["draft_id"], {"decision": "cancel", "expected_version": 0, 'draft_hash': draft['draft_hash']})
         results.append("cancelled" if r.status_code == 200 else f"cancel-{r.status_code}")
 
     threads = [threading.Thread(target=publish), threading.Thread(target=cancel)]
@@ -957,7 +959,7 @@ def test_pending_draft_survives_process_restart(db: PgTestDatabase) -> None:
 
     # 模拟重启：全新的应用实例与容器（新的 PlanService / 仓储对象 / 会话存储）。
     restarted = _client(db)
-    assert _get_run(restarted, run["run_id"])["status"] == "waiting_user"
+    assert _get_run(restarted, run["run_id"])["status"] == "succeeded"
     revived = _get_draft(restarted, draft["draft_id"])
     assert revived["draft_hash"] == draft["draft_hash"], "重启后草案内容与哈希不变"
 
@@ -1145,7 +1147,7 @@ def test_regression_catalog_history_and_keys(db):
                                "planning.structure": changed_structure,
                                "planning.practice": changed_practice})
     _, second = _generate_to_draft(_client(db, llm=changed), goal=GOAL_B)
-    assert _decide(client, second["draft_id"], dict(decision="cancel", expected_version=1)).status_code == 200
+    assert _decide(client, second["draft_id"], dict(decision="cancel", expected_version=1, draft_hash=second['draft_hash'])).status_code == 200
     after = snapshot()
     for table, rows in before.items():
         by_id = {row[0]: row for row in after[table]}

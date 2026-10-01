@@ -5,6 +5,8 @@ const assert = require("node:assert/strict");
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   try {
     const page = await browser.newPage();
+    await page.route("**/api/v1/session", r => r.fulfill({ status: 401, json: { message: "未登录" } }));
+    await page.route("**/healthz", r => r.fulfill({ json: { llm_provider: "fake" } }));
     const requests = [];
     let failure = { status: 401, body: { message: "用户名或密码错误" } };
     await page.route("**/api/v1/auth/*", async (route) => {
@@ -29,13 +31,13 @@ const assert = require("node:assert/strict");
     const beforeValidation = requests.length;
     await page.getByRole("button", { name: "注册并进入", exact: true }).click();
     await page.getByRole("alert").waitFor();
-    assert.match(await page.getByRole("alert").innerText(), /密码须为 6–12/);
+    assert.match(await page.getByRole("alert").innerText(), /新密码须为 15–128/);
     assert.equal(requests.length, beforeValidation, "invalid input is rejected before sending");
-    await page.getByLabel("密码", { exact: true }).fill("1234567890123");
+    await page.getByLabel("密码", { exact: true }).fill("😀".repeat(129));
     await page.getByRole("button", { name: "注册并进入", exact: true }).click();
-    assert.equal(await page.getByLabel("密码", { exact: true }).inputValue(), "1234567890123", "password must not be silently truncated");
+    assert.equal(await page.getByLabel("密码", { exact: true }).inputValue(), "😀".repeat(129), "password must not be silently truncated");
     assert.equal(requests.length, beforeValidation);
-    await page.getByLabel("密码", { exact: true }).fill("123456");
+    await page.getByLabel("密码", { exact: true }).fill("😀".repeat(128));
     assert.equal(await page.getByRole("alert").count(), 0, "password editing clears error");
     failure = { status: 409, body: { message: "用户名已存在" } };
     await page.getByRole("button", { name: "注册并进入", exact: true }).click();
@@ -47,7 +49,7 @@ const assert = require("node:assert/strict");
     assert.equal(await page.getByLabel("用户名", { exact: true }).inputValue(), "回归测试二");
     for (const [status, body, expected] of [
       [401, { message: "用户名或密码错误" }, /尚未注册.*注册/],
-      [422, { detail: [] }, /用户名.*2.*32.*密码.*6.*12/],
+      [422, { detail: [] }, /用户名.*2.*32.*密码.*128/],
       [429, { message: "尝试次数过多，请十分钟后再试" }, /十分钟/],
       [502, "Bad gateway", /服务暂时不可用/],
       [0, "", /无法连接/],

@@ -5,7 +5,7 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 import psycopg
-from app.application.browser_auth import HASHER, credentials, verify_password
+from app.application.browser_auth import HASHER, credentials, login_credentials, verify_password
 from app.core.errors import AppError, ConflictError, ErrorCode, UnauthenticatedError
 from app.core.ids import new_id
 from app.domain.workspace.models import AuthContext
@@ -65,7 +65,7 @@ class PgBrowserAuth:
         return self.issue(actor)
 
     def login(self, username: str, password: str, peer: str) -> str:
-        username, key = credentials(username, password)
+        username, key = login_credentials(username, password)
         self.throttle(peer, key)
         with self.connection() as conn:
             conn.execute("SELECT set_config('app.auth_username',%s,true)", (key,))

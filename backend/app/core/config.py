@@ -84,7 +84,8 @@ class Settings:
     local_project_id: str = "local_project"
     model_settings_encryption_key: str = ""
     llm_allowed_hosts: tuple[str, ...] = ("api.openai.com", "api.deepseek.com")
-    # Local/security-validation actor scope only; not the cloud open-registration claim design.
+    # The server claims jobs atomically; allowlist remains for controlled legacy harnesses.
+    planning_worker_admission_mode: str = "trusted_server"
     planning_worker_actor_ids: tuple[str, ...] = ()
 
     @property
@@ -138,13 +139,14 @@ def get_settings() -> Settings:
         worker_max_attempts=_env_int("WORKER_MAX_ATTEMPTS", 3),
         graph_max_repair_attempts=_env_int("GRAPH_MAX_REPAIR_ATTEMPTS", 2),
         #: 唯一的生成协议版本；旧版单遍协议已废弃，不再是任何环境的默认值。
-        graph_version=_env("GRAPH_VERSION", "b3f2-batch-v1"),
+        graph_version=_env("GRAPH_VERSION", "b3f2-short-v2"),
         repository_backend=_env("STUDYPLAN_REPOSITORY_BACKEND", "memory"),
         local_session_token=_env("STUDYPLAN_LOCAL_SESSION_TOKEN", ""),
         local_actor_id=_env("STUDYPLAN_LOCAL_ACTOR_ID", "local_actor"),
         local_project_id=_env("STUDYPLAN_LOCAL_PROJECT_ID", "local_project"),
         model_settings_encryption_key=_env("MODEL_SETTINGS_ENCRYPTION_KEY", ""),
         llm_allowed_hosts=tuple(host.strip().lower() for host in _env("LLM_ALLOWED_HOSTS", "api.openai.com,api.deepseek.com").split(",") if host.strip()),
+        planning_worker_admission_mode=_env("PLANNING_WORKER_ADMISSION_MODE", "trusted_server"),
         planning_worker_actor_ids=tuple(dict.fromkeys(
             actor.strip() for actor in os.environ.get("PLANNING_WORKER_ACTOR_IDS", "").split(",")
             if actor.strip()

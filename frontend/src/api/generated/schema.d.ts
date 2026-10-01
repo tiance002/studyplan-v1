@@ -256,13 +256,6 @@ export interface components {
          * @enum {string}
          */
         AiRunStatus: "queued" | "running" | "waiting_user" | "succeeded" | "failed" | "cancelled" | "reconciliation_required";
-        /** CredentialsRequest */
-        CredentialsRequest: {
-            /** Username */
-            username: string;
-            /** Password */
-            password: string;
-        };
         /**
          * DraftDecision
          * @description 等待用户时的三种决定。
@@ -389,6 +382,13 @@ export interface components {
             completed_units: number;
             /** Total Units */
             total_units: number;
+        };
+        /** LoginRequest */
+        LoginRequest: {
+            /** Username */
+            username: string;
+            /** Password */
+            password: string;
         };
         /** ModelSettingsClear */
         ModelSettingsClear: {
@@ -656,6 +656,13 @@ export interface components {
              * @enum {string}
              */
             pace: "slow" | "normal" | "fast";
+        };
+        /** RegistrationRequest */
+        RegistrationRequest: {
+            /** Username */
+            username: string;
+            /** Password */
+            password: string;
         };
         /**
          * RunProgress
@@ -1372,7 +1379,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CredentialsRequest"];
+                "application/json": components["schemas"]["RegistrationRequest"];
             };
         };
         responses: {
@@ -1405,7 +1412,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CredentialsRequest"];
+                "application/json": components["schemas"]["LoginRequest"];
             };
         };
         responses: {

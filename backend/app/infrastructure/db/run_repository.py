@@ -20,8 +20,10 @@ from typing import Any
 import psycopg
 from app.core.errors import ConflictError
 from app.domain.enums import AiRunNextAction, AiRunStatus
+from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
+from app.infrastructure.db.planning_fence import lock_plan_version, lock_planning_write
 from psycopg.rows import dict_row
 
 __all__ = ["PgRunRepository"]
@@ -144,8 +146,14 @@ class PgRunRepository:
         next_action: str,
         result_ref: str | None = None,
         error_class: str | None = None,
+        write_fence: PlanningWriteFence | None = None,
+        expected_plan_version: int | None = None,
     ) -> RunRecord:
         with self._tx(project_id) as conn:
+            if expected_plan_version is not None:
+                lock_plan_version(conn, project_id, expected_plan_version)
+            if write_fence is not None:
+                lock_planning_write(conn, project_id=project_id, run_id=run_id, fence=write_fence)
             cursor = conn.execute(
                 """
                 UPDATE ai_runs

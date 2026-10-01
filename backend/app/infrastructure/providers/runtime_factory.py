@@ -6,6 +6,8 @@ are never consulted at execution time, so editing or clearing model settings
 after submission cannot silently swap the model under a queued run — a revoked
 frozen revision fails loudly instead.
 """
+import hashlib
+import json
 from dataclasses import replace
 from typing import cast
 
@@ -55,7 +57,7 @@ class PersonalPlanningRuntimeFactory:
         scope.require_project(project_id)
         view = self.repository.get(scope.actor_id)
         if view is None or not view.has_api_key:
-            raise ValidationAppError("请先配置个人模型设置后再发起生成")
+            return self._deployment_binding()
         policy = budget_policy_for_model(
             self.settings, model=view.model_id, base_url=view.base_url
         )
@@ -63,9 +65,28 @@ class PersonalPlanningRuntimeFactory:
             model_ref=f"personal:{scope.actor_id}:{view.version}", budget_policy=policy
         )
 
+    def _deployment_binding(self) -> SubmissionBinding:
+        settings = self.settings
+        if settings.use_fake_llm or not all((settings.llm_api_key, settings.llm_model_id, settings.llm_base_url)):
+            raise ValidationAppError("请先配置个人模型或部署模型后再发起生成")
+        base_url = self.policy.validate(settings.llm_base_url)
+        policy = budget_policy_for_model(settings, model=settings.llm_model_id, base_url=base_url)
+        # This opaque server descriptor detects rotation without storing a plaintext key.
+        revision = hashlib.sha256(json.dumps(
+            [base_url, settings.llm_model_id, settings.llm_api_key, policy.as_dict()],
+            sort_keys=True, ensure_ascii=False,
+        ).encode()).hexdigest()
+        return SubmissionBinding(model_ref=f"deployment:{revision}", budget_policy=policy)
+
     def for_bound_run(self, scope, project_id, run_id, model_ref) -> "OpenAICompatibleLLM":
         """Resolve the revision a run froze; refuse silently swapping the model."""
         scope.require_project(project_id)
+        if model_ref.startswith("deployment:"):
+            if model_ref != self._deployment_binding().model_ref:
+                raise ValidationAppError("该 Run 冻结的部署模型配置已变更；拒绝静默改用当前配置")
+            provider = self._deployment_provider()
+            provider.configuration_ref = model_ref
+            return provider
         parsed = parse_personal_ref(model_ref)
         if parsed is None:
             raise ValidationAppError("该 Run 的模型配置引用不可识别，拒绝按当前设置执行")

@@ -32,7 +32,9 @@ from typing import Any
 
 import psycopg
 from app.core.ids import new_id
+from app.domain.runs.fencing import PlanningWriteFence
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
+from app.infrastructure.db.planning_fence import lock_plan_version, lock_planning_write
 from app.ports.runs import CatalogIds
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
@@ -91,6 +93,8 @@ class PgPlanningCatalog:
         units: Sequence[dict[str, object]],
         relations: Sequence[dict[str, object]],
         practice: dict[str, object] | None = None,
+        write_fence: PlanningWriteFence | None = None,
+        expected_plan_version: int | None = None,
     ) -> CatalogIds:
         node_ids: dict[str, str] = {}
         unit_ids: dict[str, str] = {}
@@ -103,6 +107,10 @@ class PgPlanningCatalog:
                              ensure_ascii=False, separators=(",", ":"))
         namespace = project_id + ":" + hashlib.sha256(content.encode()).hexdigest()
         with self._tx(project_id) as conn:
+            if expected_plan_version is not None:
+                lock_plan_version(conn, project_id, expected_plan_version)
+            if write_fence is not None:
+                lock_planning_write(conn, project_id=project_id, run_id=write_fence.run_id, fence=write_fence)
             for node in nodes:
                 key = _text(node.get("stable_key"))
                 if not key:

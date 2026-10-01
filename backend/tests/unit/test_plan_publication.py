@@ -184,7 +184,14 @@ class FakePlanRepository(PlanRepositoryPort):
     def get_draft(self, *, project_id: str, draft_id: str) -> PlanDraft | None:
         return self.drafts.get(draft_id)
 
-    def save_draft(self, draft: PlanDraft, *, expected_hash: str | None = None) -> None:
+    def _require_version(self, expected_version: int | None) -> None:
+        actual = self.current.version if self.current else 0
+        if expected_version is not None and expected_version != actual:
+            raise VersionConflictError("stale version", expected_version=expected_version, actual_version=actual)
+
+    def save_draft(self, draft: PlanDraft, *, expected_hash: str | None = None,
+                   expected_version: int | None = None, write_fence=None) -> None:
+        self._require_version(expected_version)
         # 契约：终态（cancelled / approved）草案不得被改写（B2-V §二.4）。
         existing = self.drafts.get(draft.draft_id)
         if existing is not None and existing.status in {
@@ -197,7 +204,9 @@ class FakePlanRepository(PlanRepositoryPort):
             )
         self.drafts[draft.draft_id] = draft
 
-    def cancel_draft(self, *, project_id: str, draft_id: str) -> None:
+    def cancel_draft(self, *, project_id: str, draft_id: str,
+                     expected_hash: str | None = None, expected_version: int | None = None) -> None:
+        self._require_version(expected_version)
         stored = self.drafts.get(draft_id)
         if stored is None or stored.status not in {
             PlanDraftStatus.AWAITING_APPROVAL,

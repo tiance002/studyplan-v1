@@ -56,8 +56,13 @@ export function AuthPage({
             setError("用户名须为 2–32 个字符，以汉字或字母开头，仅支持汉字、字母、数字、下划线和短横线。");
             return;
           }
-          if (Array.from(password).length < 6 || Array.from(password).length > 12) {
-            setError("密码须为 6–12 个字符，请检查后重试。");
+          const passwordLength = Array.from(password).length;
+          if (Array.from(password).some((character) => /^[\uD800-\uDFFF]$/.test(character))) {
+            setError("密码含非法字符，请检查后重试。");
+            return;
+          }
+          if (passwordLength < (register ? 15 : 1) || passwordLength > 128) {
+            setError(register ? "新密码须为 15–128 个字符，支持长口令。" : "请输入原有密码，最多 128 个字符。");
             return;
           }
           setBusy(true);
@@ -76,7 +81,9 @@ export function AuthPage({
             } else if (err instanceof ApiError && err.status === 409 && register) {
               setError("这个用户名已被使用。如果是你的账号，请切换到登录；也可以更换用户名后注册。");
             } else if (err instanceof ApiError && err.status === 422) {
-              setError("请检查输入：用户名为 2–32 个字符，密码为 6–12 个字符。用户名须以汉字或字母开头，且不能包含空格。");
+              setError(register
+                ? "请检查输入：用户名为 2–32 个字符，新密码为 15–128 个字符。用户名须以汉字或字母开头，且不能包含空格。"
+                : "请检查输入：用户名为 2–32 个字符，原有密码不能为空且最多 128 个字符。");
             } else {
               setError(err instanceof Error ? err.message : "操作失败，请稍后重试。");
             }
@@ -121,11 +128,10 @@ export function AuthPage({
             value={password}
             disabled={busy}
             onChange={(e) => { setPassword(e.target.value); setError(""); }}
-            minLength={6}
             required
-            placeholder="6–12 位密码"
+            placeholder={register ? "15–128 个字符，支持长口令" : "输入原有密码"}
           />
-          {register && <span id="password-hint" className="auth-hint">6–12 个字符，请记住密码以便下次登录。</span>}
+          {register && <span id="password-hint" className="auth-hint">15–128 个字符，支持长口令和粘贴，无需混合特定字符。请记住密码以便下次登录。</span>}
         </label>
         {error && (
           <div role="alert" className="error">

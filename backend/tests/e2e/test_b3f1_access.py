@@ -15,7 +15,14 @@ from tests.helpers.planning_worker import configure_test_worker
 
 @pytest.fixture(scope="module")
 def migrated_db(request):
-    yield from b2v_database_fixture.__wrapped__()
+    import psycopg
+    from app.infrastructure.domain_pack import load_pack
+    from app.tools.seed_b3 import seed_reviewed_pack
+
+    for database in b2v_database_fixture.__wrapped__():
+        with psycopg.connect(database.migrator_dsn) as conn:
+            seed_reviewed_pack(conn, load_pack("agent-application-v2.json"))
+        yield database
 
 
 pytestmark = pytest.mark.postgres
@@ -28,13 +35,15 @@ def test_browser_registration_persistence_csrf_logout_and_isolation(migrated_db)
         llm_provider="fake",
         local_session_token="",
         session_cookie_secure=False,
+        planning_worker_admission_mode="allowlist",  # Explicit legacy admission safety scenario.
     )
 
     def client():
         return TestClient(create_app(build_container(settings)))
 
     a, b = client(), client()
-    payload = {"username": "学习者甲", "password": "密码123456"}
+    # V2 guidance replaces the old 6–12 registration fixtures, retaining safety assertions.
+    payload = {"username": "学习者甲", "password": "密码123456长口令用于学习"}
     registered = a.post("/api/v1/auth/register", json=payload)
     assert registered.status_code == 200, registered.text
     session = registered.json()
@@ -59,7 +68,7 @@ def test_browser_registration_persistence_csrf_logout_and_isolation(migrated_db)
     restarted.cookies.update(a.cookies)
     assert restarted.get("/api/v1/session").json()["project_ids"] == [project]
     assert (
-        b.post("/api/v1/auth/register", json={"username": "学习者乙", "password": "123456"}).status_code
+        b.post("/api/v1/auth/register", json={"username": "学习者乙", "password": "long passphrase for learning"}).status_code
         == 200
     )
     assert b.get(f"/api/v1/plans/current?project_id={project}").status_code == 403
@@ -78,14 +87,14 @@ def test_auth_database_default_deny_expiry_and_normalized_username(migrated_db):
         get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token=""
     )
     client = TestClient(create_app(build_container(settings)))
-    response = client.post("/api/v1/auth/register", json={"username": "Ａlpha中文", "password": "abcdef"})
+    response = client.post("/api/v1/auth/register", json={"username": "Ａlpha中文", "password": "long passphrase for learning"})
     assert response.status_code == 200
     assert (
-        client.post("/api/v1/auth/register", json={"username": "alpha中文", "password": "abcdef"}).status_code
+        client.post("/api/v1/auth/register", json={"username": "alpha中文", "password": "long passphrase for learning"}).status_code
         == 409
     )
     assert (
-        client.post("/api/v1/auth/login", json={"username": "ALPHA中文", "password": "abcdef"}).status_code
+        client.post("/api/v1/auth/login", json={"username": "ALPHA中文", "password": "long passphrase for learning"}).status_code
         == 200
     )
     with psycopg.connect(migrated_db.app_dsn) as conn:
@@ -105,7 +114,7 @@ def test_password_policy_secret_redaction_and_rate_limit(migrated_db):
         get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token=""
     )
     client = TestClient(create_app(build_container(settings)))
-    for password in ["12345", "1234567890123", "\ud800abcde"]:
+    for password in ["12345", "a" * 14, "a" * 129, "\ud800" + "a" * 15]:
         response = client.post(
             "/api/v1/auth/register",
             content=json.dumps({"username": "非法测试", "password": password}),
@@ -118,12 +127,41 @@ def test_password_policy_secret_redaction_and_rate_limit(migrated_db):
     assert response.status_code == 429
 
 
+def test_new_passphrase_code_points_and_existing_short_hash_login(migrated_db):
+    """Only new registration policy changes; existing hashes keep working."""
+    import psycopg
+    from app.application.browser_auth import HASHER
+
+    settings = replace(
+        get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token=""
+    )
+    client = TestClient(create_app(build_container(settings)))
+    payload = {"username": "旧密码兼容", "password": "😀" * 128}
+    registered = client.post("/api/v1/auth/register", json=payload)
+    assert registered.status_code == 200, registered.text
+    projects = registered.json()["project_ids"]
+    assert client.post("/api/v1/auth/login", json=payload).status_code == 200
+    # Test-only persisted legacy hash in this harness-owned isolated database.
+    with psycopg.connect(migrated_db.migrator_dsn) as conn:
+        conn.execute(
+            "UPDATE auth_users SET password_hash=%s WHERE username_key=%s",
+            (HASHER.hash("123456"), "旧密码兼容"),
+        )
+    legacy = {"username": "旧密码兼容", "password": "123456"}
+    login = client.post("/api/v1/auth/login", json=legacy)
+    assert login.status_code == 200, login.text
+    assert login.json()["project_ids"] == projects
+    rejected = client.post("/api/v1/auth/register", json={**legacy, "username": "新短密码"})
+    assert rejected.status_code == 422
+    assert "123456" not in rejected.text
+
+
 def test_real_plan_workspace_edit_publish_refresh(migrated_db):
     settings = replace(
         get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token=""
     )
     client = TestClient(create_app(build_container(settings)))
-    s = client.post("/api/v1/auth/register", json={"username": "业务验收", "password": "123456"}).json()
+    s = client.post("/api/v1/auth/register", json={"username": "业务验收", "password": "long passphrase for learning"}).json()
     worker = configure_test_worker(client)
     headers = {"X-CSRF-Token": s["csrf_token"]}
     suffix = f"?project_id={s['project_ids'][0]}"
@@ -133,7 +171,7 @@ def test_real_plan_workspace_edit_publish_refresh(migrated_db):
     assert response.status_code == 202
     assert worker.tick()
     run = client.get("/api/v1/runs/" + response.json()["run_id"] + suffix).json()
-    assert run["status"] == "waiting_user", run
+    assert run["status"] == "succeeded" and run["next_action"] == "none", run
     draft_url = "/api/v1/plans/drafts/" + run["result_ref"]
     draft = client.get(draft_url + suffix).json()
     stages = draft["stages"]
@@ -180,13 +218,13 @@ def test_healthy_long_run_is_not_interrupted_by_wall_clock(migrated_db):
 
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
     client = TestClient(create_app(build_container(settings)))
-    session = client.post("/api/v1/auth/register", json={"username": "中断恢复", "password": "123456"}).json()
+    session = client.post("/api/v1/auth/register", json={"username": "中断恢复", "password": "long passphrase for learning"}).json()
     worker = configure_test_worker(client)
     suffix = f'?project_id={session["project_ids"][0]}'
     result = client.post("/api/v1/plans/generate" + suffix, json={"goal": "Agent 开发"}, headers={"X-CSRF-Token": session["csrf_token"]}).json()
     assert worker.tick()
     url = "/api/v1/runs/" + result["run_id"] + suffix
-    assert client.get(url).json()["status"] == "waiting_user"
+    assert client.get(url).json()["status"] == "succeeded"
 
     # Backdate the projection far beyond any former timeout while the run is
     # still "running": GET must report it as running, not reconcile it.
@@ -210,7 +248,7 @@ def test_unknown_dispatch_run_requires_reconcile_without_retry(migrated_db):
 
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
     client = TestClient(create_app(build_container(settings)))
-    session = client.post("/api/v1/auth/register", json={"username": "核对结果", "password": "123456"}).json()
+    session = client.post("/api/v1/auth/register", json={"username": "核对结果", "password": "long passphrase for learning"}).json()
     worker = configure_test_worker(client)
     suffix = f'?project_id={session["project_ids"][0]}'
     result = client.post("/api/v1/plans/generate" + suffix, json={"goal": "Agent 开发"}, headers={"X-CSRF-Token": session["csrf_token"]}).json()

@@ -1,6 +1,6 @@
 """Freeze the protocol, model configuration and budget for a new planning run.
 
-There is exactly **one** official generation protocol (``b3f2-batch-v1``). A run
+New generation uses ``b3f2-short-v2``; historical Runs retain their protocol. A run
 freezes everything it will later depend on *at enqueue time*:
 
 - the protocol version (a run is never re-explained by a different protocol);

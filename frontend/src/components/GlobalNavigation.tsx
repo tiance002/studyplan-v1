@@ -65,7 +65,7 @@ export function GlobalNavigation({
         <span className="avatar">{username[0]}</span>
         {expanded && <strong title={username}>{username}</strong>}
       </div>
-      <button className="nav-link" title="退出登录" onClick={logout}>
+      <button className="nav-link" title="退出登录" aria-label="退出登录" onClick={logout}>
         <span className="nav-icon">↪</span>
         {expanded && "退出登录"}
       </button>

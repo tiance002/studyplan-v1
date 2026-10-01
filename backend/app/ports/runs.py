@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from typing import Protocol, Sequence, runtime_checkable
 
+from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
 
 
@@ -43,6 +44,8 @@ class RunRepositoryPort(Protocol):
         next_action: str,
         result_ref: str | None = None,
         error_class: str | None = None,
+        write_fence: PlanningWriteFence | None = None,
+        expected_plan_version: int | None = None,
     ) -> RunRecord:
         """**状态条件**更新（乐观并发）：版本号自增，返回更新后的记录。"""
         ...
@@ -60,6 +63,8 @@ class PlanningCatalogPort(Protocol):
         units: Sequence[dict[str, object]],
         relations: Sequence[dict[str, object]],
         practice: dict[str, object] | None = None,
+        write_fence: PlanningWriteFence | None = None,
+        expected_plan_version: int | None = None,
     ) -> "CatalogIds": ...
 
 

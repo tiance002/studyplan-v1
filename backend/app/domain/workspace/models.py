@@ -16,8 +16,8 @@ from app.core.ids import new_id, slugify_stable_key
 
 MIN_USERNAME_LEN = 2
 MAX_USERNAME_LEN = 32
-MIN_PASSWORD_LEN = 6
-MAX_PASSWORD_LEN = 12
+MIN_PASSWORD_LEN = 15
+MAX_PASSWORD_LEN = 128
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,7 +133,7 @@ class Membership:
 
 @dataclass(frozen=True, slots=True)
 class CredentialPolicy:
-    """既定产品约束：中文用户名、6–12 位密码、无邀请码。"""
+    """V2 新设密码：15–128 Unicode 码点；已存密码验证单独兼容。"""
 
     username_min: int = MIN_USERNAME_LEN
     username_max: int = MAX_USERNAME_LEN
@@ -152,10 +152,20 @@ class CredentialPolicy:
         return value
 
     def validate_password(self, password: str) -> str:
-        if not (self.password_min <= len(password) <= self.password_max):
+        return self._validate_password(password, self.password_min)
+
+    def validate_login_password(self, password: str) -> str:
+        return self._validate_password(password, 1)
+
+    def _validate_password(self, password: str, minimum: int) -> str:
+        if not (minimum <= len(password) <= self.password_max):
             raise ValidationAppError(
-                f"密码长度需在 {self.password_min}-{self.password_max} 之间"
+                f"密码长度需在 {minimum}-{self.password_max} 个字符之间"
             )
+        try:
+            password.encode("utf-8")
+        except UnicodeEncodeError as exc:
+            raise ValidationAppError("密码含非法字符") from exc
         return password
 
 

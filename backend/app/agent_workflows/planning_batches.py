@@ -1,7 +1,8 @@
 """B3-F2 batched planning protocol.
 
-This module owns the *new* generation protocol ``b3f2-batch-v1`` only. The legacy
-``build_planning_graph`` stays untouched for old checkpoints (see Task 4).
+Batch generation and repair keep their ``b3f2-batch-v1`` content protocol.
+The ``b3f2-short-v2`` lifecycle reuses those nodes and ends at saved draft;
+the legacy builder retains its user interrupt for historical checkpoints.
 
 Core ideas (design spec §数据与流程, §输出预算与模型适配, §失败、修复与恢复):
 
@@ -32,6 +33,7 @@ from app.application.planning_budget import BudgetPolicy
 from app.domain.enums import TaskKnowledgeRole
 
 PROTOCOL_VERSION = "b3f2-batch-v1"
+SHORT_GENERATION_VERSION = "b3f2-short-v2"
 DEFAULT_GENERIC_STAGE_COUNT = 4
 MAX_REPAIR_TOTAL = 2
 
@@ -879,11 +881,21 @@ def run_batched_planning_graph(
     visited.append("save_draft_projection")
     _merge_state(state, nodes.save_draft_projection(state))
     emit()
-    return PlanningTrace(visited=visited, state=state, stopped_at="await_approval")
+    stopped_at = None if state.get("graph_version") == SHORT_GENERATION_VERSION else "await_approval"
+    return PlanningTrace(visited=visited, state=state, stopped_at=stopped_at)
 
 
 def build_batched_planning_graph(nodes: Any, *, checkpointer: Any = None) -> Any:
     """Assemble the real ``b3f2-batch-v1`` StateGraph (requires langgraph)."""
+    return _build_batched_graph(nodes, checkpointer=checkpointer, short_generation=False)
+
+
+def build_short_planning_graph(nodes: Any, *, checkpointer: Any = None) -> Any:
+    """Generate and persist a draft, then finish without a user interrupt."""
+    return _build_batched_graph(nodes, checkpointer=checkpointer, short_generation=True)
+
+
+def _build_batched_graph(nodes: Any, *, checkpointer: Any, short_generation: bool) -> Any:
     from app.agent_workflows.graphs import LANGGRAPH_AVAILABLE
     from app.agent_workflows.state import PlanningState as _PlanningState
 
@@ -906,10 +918,11 @@ def build_batched_planning_graph(nodes: Any, *, checkpointer: Any = None) -> Any
     graph.add_node("repair_batch", nodes.repair_batch)
     graph.add_node("merge_and_validate", nodes.merge_and_validate)
     graph.add_node("save_draft_projection", nodes.save_draft_projection)
-    graph.add_node("await_approval", nodes.await_approval)
-    graph.add_node("apply_decision", nodes.apply_decision)
-    graph.add_node("commit_plan_idempotently", nodes.commit_plan_idempotently)
-    graph.add_node("cancel_draft", nodes.cancel_draft_node)
+    if not short_generation:
+        graph.add_node("await_approval", nodes.await_approval)
+        graph.add_node("apply_decision", nodes.apply_decision)
+        graph.add_node("commit_plan_idempotently", nodes.commit_plan_idempotently)
+        graph.add_node("cancel_draft", nodes.cancel_draft_node)
     graph.add_node("record_failure", nodes.record_failure_node)
 
     graph.add_edge(START, "normalize")
@@ -938,13 +951,16 @@ def build_batched_planning_graph(nodes: Any, *, checkpointer: Any = None) -> Any
         ROUTE_GENERATE_PRACTICE: "generate_practice_batch", ROUTE_MERGE: "merge_and_validate"})
     graph.add_conditional_edges("merge_and_validate", route_after_merge,
                                 {ROUTE_DRAFT: "save_draft_projection", ROUTE_FAIL: "record_failure"})
-    graph.add_edge("save_draft_projection", "await_approval")
-    graph.add_edge("await_approval", "apply_decision")
-    graph.add_conditional_edges("apply_decision", route_after_decision, {
-        "commit_plan_idempotently": "commit_plan_idempotently", "validate": "merge_and_validate",
-        "cancel_draft": "cancel_draft", ROUTE_FAIL: "record_failure"})
-    graph.add_edge("commit_plan_idempotently", END)
-    graph.add_edge("cancel_draft", END)
+    if short_generation:
+        graph.add_edge("save_draft_projection", END)
+    else:
+        graph.add_edge("save_draft_projection", "await_approval")
+        graph.add_edge("await_approval", "apply_decision")
+        graph.add_conditional_edges("apply_decision", route_after_decision, {
+            "commit_plan_idempotently": "commit_plan_idempotently", "validate": "merge_and_validate",
+            "cancel_draft": "cancel_draft", ROUTE_FAIL: "record_failure"})
+        graph.add_edge("commit_plan_idempotently", END)
+        graph.add_edge("cancel_draft", END)
     graph.add_edge("record_failure", END)
     return graph.compile(checkpointer=checkpointer)
 
@@ -1024,6 +1040,7 @@ __all__ = [
     "PHASE_VALIDATION",
     "PROGRESS_PHASES",
     "PROTOCOL_VERSION",
+    "SHORT_GENERATION_VERSION",
     "allowed_attempt_keys",
     "attempt_key",
     "attempt_purpose",
@@ -1032,6 +1049,7 @@ __all__ = [
     "derive_progress",
     "output_budget_for",
     "build_batched_planning_graph",
+    "build_short_planning_graph",
     "freeze_manifest",
     "manifest_is_intact",
     "merge_batches",

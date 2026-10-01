@@ -54,6 +54,7 @@ from app.domain.resources.curation import (
     validate_extensions,
     validate_mainline_continuity,
 )
+from app.domain.runs.fencing import PlanningWriteFence
 
 #: 软上限：超过时给出警告但不阻断（避免为了「美观」而删掉必要内容）。
 SOFT_LIMIT_UNITS = 40
@@ -826,9 +827,13 @@ class PlanPublicationService:
             case DraftDecision.CANCEL:
                 # 取消走**状态条件**更新：若草案已被发布（approved），
                 # 仓储会抛 ConflictError，**不会**把已发布版本对应的草案改坏。
-                self._repo.cancel_draft(
-                    project_id=draft.project_id, draft_id=draft.draft_id
-                )
+                if presented_hash:
+                    draft.verify_hash(presented_hash)
+                    self._repo.cancel_draft(project_id=draft.project_id, draft_id=draft.draft_id,
+                        expected_hash=presented_hash, expected_version=expected_version)
+                else:
+                    # Existing internal callers predate guarded browser commands.
+                    self._repo.cancel_draft(project_id=draft.project_id, draft_id=draft.draft_id)
                 draft.status = PlanDraftStatus.CANCELLED
                 # 取消后的草案绝不可被 worker 稍后发布：保存与发布都按状态过滤。
                 return None
@@ -911,7 +916,9 @@ class PlanRepositoryPort(Protocol):
 
     def get_draft(self, *, project_id: str, draft_id: str) -> PlanDraft | None: ...
 
-    def save_draft(self, draft: PlanDraft, *, expected_hash: str | None = None) -> None:
+    def save_draft(self, draft: PlanDraft, *, expected_hash: str | None = None,
+                   expected_version: int | None = None,
+                   write_fence: PlanningWriteFence | None = None) -> None:
         """保存草案。实现**必须按状态条件**更新并**检查受影响行数**：
 
         - 已 ``cancelled`` 的草案不得被覆盖为可发布（设计 §3 C6）；
@@ -921,7 +928,8 @@ class PlanRepositoryPort(Protocol):
         """
         ...
 
-    def cancel_draft(self, *, project_id: str, draft_id: str) -> None:
+    def cancel_draft(self, *, project_id: str, draft_id: str,
+                     expected_hash: str | None = None, expected_version: int | None = None) -> None:
         """把草案置为 ``cancelled``（**状态条件**更新，行数为 0 即抛冲突）。
 
         与 :meth:`publish_revision` 并发时由行锁串行化：谁先拿到行谁生效，

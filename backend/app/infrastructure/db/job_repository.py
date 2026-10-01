@@ -9,9 +9,11 @@ from typing import Any
 import psycopg
 from app.core.errors import ConflictError, ForbiddenError, ValidationAppError
 from app.core.ids import new_id
+from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
-from app.ports.planning_jobs import JobClaim
+from app.infrastructure.db.planning_fence import lock_planning_write
+from app.ports.planning_jobs import JobClaim, PlanningLeaseLostError
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
@@ -23,15 +25,19 @@ _FINISH_STATUSES = frozenset({"completed", "failed", "reconciliation_required"})
 class PgPlanningJobRepository:
     """Application-role-only repository with actor/project RLS context.
 
-    ``actor_ids`` is deliberately an explicit local-validation allowlist. It is
-    not a cloud open-registration mechanism; the Worker CLI rejects production
-    use until an owner-independent, RLS-safe claim path exists.
+    Legacy allowlist admission remains available for controlled tests. Explicit
+    trusted_server admission uses a narrow database claim function; subsequent
+    business reads/writes retain actor/project RLS and lease fencing.
     """
 
-    def __init__(self, dsn: str, *, actor_ids: tuple[str, ...] = (), max_attempts: int = 3) -> None:
+    def __init__(self, dsn: str, *, actor_ids: tuple[str, ...] = (), max_attempts: int = 3,
+                 admission_mode: str = "allowlist") -> None:
+        if admission_mode not in {"allowlist", "trusted_server"} or not 1 <= max_attempts <= 10:
+            raise ValidationAppError("Worker admission 参数无效")
         self._dsn = to_psycopg_dsn(dsn)
         self._actor_ids = tuple(dict.fromkeys(a.strip() for a in actor_ids if a.strip()))
         self._max_attempts = max_attempts
+        self._admission_mode = admission_mode
         self._lock_connection: psycopg.Connection[Any] | None = None
 
     @contextmanager
@@ -47,7 +53,7 @@ class PgPlanningJobRepository:
         """Write run, one submission event, and one queue row in one transaction."""
         if run.status.value != "queued":
             raise ValidationAppError("规划任务只能以 queued 状态入队")
-        if run.actor_id not in self._actor_ids:
+        if self._admission_mode == "allowlist" and run.actor_id not in self._actor_ids:
             raise ForbiddenError("后台 Worker 尚未配置服务当前账户；请联系部署管理员")
         submission: dict[str, object] = {
             "kind": "planning_submission",
@@ -58,8 +64,11 @@ class PgPlanningJobRepository:
         }
         job_key = f"planning:{run.run_id}"
         with self._tx(actor_id=run.actor_id, project_id=run.project_id) as conn:
+            if self._admission_mode == "trusted_server":
+                conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
+                             (f"studyplan:planning-project:{run.project_id}",))
             owner = conn.execute(
-                "SELECT owner_actor_id FROM learning_projects WHERE project_id=%s",
+                "SELECT owner_actor_id FROM learning_projects WHERE project_id=%s AND archived_at IS NULL",
                 (run.project_id,),
             ).fetchone()
             if owner is None or owner["owner_actor_id"] != run.actor_id:
@@ -82,6 +91,15 @@ class PgPlanningJobRepository:
                 if len(events) == 1 and events[0]["detail"] == submission and job == {"job_key": job_key}:
                     return
                 raise ConflictError("同一 Run 已存在但提交内容或队列记录不一致", reason="planning_enqueue_conflict")
+
+            if self._admission_mode == "trusted_server":
+                active = conn.execute(
+                    "SELECT 1 FROM ai_runs WHERE project_id=%s AND kind='plan_generate' "
+                    "AND status IN ('queued','running','reconciliation_required') LIMIT 1",
+                    (run.project_id,),
+                ).fetchone()
+                if active is not None:
+                    raise ConflictError("此学习空间已有活动规划任务", reason="planning_project_active")
 
             conn.execute(
                 """INSERT INTO ai_runs
@@ -165,30 +183,44 @@ class PgPlanningJobRepository:
                 )
         return None
 
+    def claim_next(self, worker_id: str, lease_seconds: int) -> JobClaim | None:
+        if self._admission_mode != "trusted_server":
+            raise ForbiddenError("Worker 未启用 trusted_server admission")
+        if not worker_id.strip() or not 1 <= len(worker_id) <= 128 or not 1 <= lease_seconds <= 3600:
+            raise ValidationAppError("Worker claim 参数无效")
+        with psycopg.connect(self._dsn, row_factory=dict_row) as conn:
+            row = conn.execute(
+                "SELECT * FROM public.claim_next_planning_job(%s,%s,%s)",
+                (worker_id, lease_seconds, self._max_attempts),
+            ).fetchone()
+        return JobClaim(**row) if row else None
+
     def renew(self, claim: JobClaim, lease_seconds: int) -> bool:
-        if lease_seconds < 1:
-            raise ValidationAppError("Worker lease 必须为正数")
+        if not 1 <= lease_seconds <= 3600:
+            raise ValidationAppError("Worker lease 必须在 1–3600 秒之间")
         with self._tx(actor_id=claim.actor_id, project_id=claim.project_id) as conn:
+            if not self._lock_live_claim(conn, claim):
+                return False
             cursor = conn.execute(
-                """UPDATE ai_jobs SET lease_expires_at=now()+(%s * interval '1 second')
+                """UPDATE ai_jobs SET lease_expires_at=clock_timestamp()+(%s * interval '1 second')
                 WHERE job_id=%s AND run_id=%s AND lease_token=%s AND status='running'
-                  AND lease_expires_at > now()""",
+                  AND lease_expires_at>clock_timestamp()""",
                 (lease_seconds, claim.job_id, claim.run_id, claim.lease_token),
             )
         return cursor.rowcount == 1
 
     def check_claim(self, claim: JobClaim) -> bool:
-        if claim.actor_id not in self._actor_ids:
+        if self._admission_mode == "allowlist" and claim.actor_id not in self._actor_ids:
             return False
         with self._tx(actor_id=claim.actor_id, project_id=claim.project_id) as conn:
             row = conn.execute(
                 """SELECT 1 FROM ai_jobs j JOIN ai_runs r USING(run_id)
                 JOIN learning_projects p ON p.project_id=r.project_id
                 WHERE j.job_id=%s AND j.run_id=%s AND j.lease_token=%s
-                  AND j.status='running' AND j.lease_expires_at>now()
-                  AND r.status IN ('queued','running') AND r.actor_id=%s
+                  AND j.status='running' AND j.lease_expires_at>clock_timestamp()
+                  AND r.status IN ('queued','running') AND r.actor_id=%s AND r.project_id=%s
                   AND p.owner_actor_id=%s AND p.archived_at IS NULL""",
-                (claim.job_id, claim.run_id, claim.lease_token, claim.actor_id, claim.actor_id),
+                (claim.job_id, claim.run_id, claim.lease_token, claim.actor_id, claim.project_id, claim.actor_id),
             ).fetchone()
         return row is not None
 
@@ -196,10 +228,14 @@ class PgPlanningJobRepository:
         if status not in _FINISH_STATUSES:
             raise ValidationAppError("未知 Worker job 终态")
         with self._tx(actor_id=claim.actor_id, project_id=claim.project_id) as conn:
+            if not self._lock_live_claim(
+                conn, claim, allowed_run_statuses=("queued", "running", "waiting_user", "succeeded", "failed")
+            ):
+                return False
             cursor = conn.execute(
                 """UPDATE ai_jobs SET status=%s,lease_expires_at=NULL
                 WHERE job_id=%s AND run_id=%s AND lease_token=%s AND status='running'
-                  AND lease_expires_at > now()""",
+                  AND lease_expires_at>clock_timestamp()""",
                 (status, claim.job_id, claim.run_id, claim.lease_token),
             )
         return cursor.rowcount == 1
@@ -216,14 +252,7 @@ class PgPlanningJobRepository:
         detail = dict(progress)
         detail["kind"] = "run_progress"
         with self._tx(actor_id=claim.actor_id, project_id=claim.project_id) as conn:
-            owned = conn.execute(
-                """SELECT 1 FROM ai_jobs j JOIN ai_runs r USING(run_id)
-                WHERE j.job_id=%s AND j.run_id=%s AND j.lease_token=%s AND j.status='running'
-                  AND j.lease_expires_at>now() AND r.status IN ('queued','running')
-                  AND r.actor_id=%s""",
-                (claim.job_id, claim.run_id, claim.lease_token, claim.actor_id),
-            ).fetchone()
-            if owned is None:
+            if not self._lock_live_claim(conn, claim):
                 return False
             conn.execute(
                 "INSERT INTO ai_run_events(run_id,node_name,attempt_id,status,detail) "
@@ -258,6 +287,35 @@ class PgPlanningJobRepository:
         if detail.get("actor_id") != actor_id or detail.get("project_id") != project_id:
             raise ConflictError("规划提交归属与 Run 不一致", reason="planning_submission_ambiguous")
         return detail
+
+    def read_claim_submission(self, claim: JobClaim) -> dict[str, object]:
+        """Read only the live claim's submission under its exact RLS scope."""
+        with self._tx(actor_id=claim.actor_id, project_id=claim.project_id) as conn:
+            if not self._lock_live_claim(conn, claim):
+                raise ConflictError("规划租约已失效", reason="planning_claim_stale")
+            rows = conn.execute(
+                "SELECT detail FROM ai_run_events WHERE run_id=%s AND status='submission' "
+                "AND detail->>'kind'='planning_submission' ORDER BY event_id", (claim.run_id,),
+            ).fetchall()
+        if len(rows) != 1 or not isinstance(rows[0]["detail"], dict):
+            raise ConflictError("规划提交事件缺失或存在矛盾版本", reason="planning_submission_ambiguous")
+        detail = rows[0]["detail"]
+        if detail.get("actor_id") != claim.actor_id or detail.get("project_id") != claim.project_id:
+            raise ConflictError("规划提交归属与 Run 不一致", reason="planning_submission_ambiguous")
+        return detail
+
+    @staticmethod
+    def _lock_live_claim(conn: Any, claim: JobClaim, *,
+                         allowed_run_statuses: tuple[str, ...] = ("queued", "running")) -> bool:
+        fence = PlanningWriteFence(job_id=claim.job_id, run_id=claim.run_id,
+                                   project_id=claim.project_id, actor_id=claim.actor_id,
+                                   lease_token=claim.lease_token)
+        try:
+            lock_planning_write(conn, project_id=claim.project_id, run_id=claim.run_id,
+                                fence=fence, allowed_run_statuses=allowed_run_statuses)
+        except PlanningLeaseLostError:
+            return False
+        return True
 
     def acquire_worker_lock(self) -> bool:
         """Hold a PostgreSQL session advisory lock for the life of one Worker."""

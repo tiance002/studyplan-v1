@@ -125,7 +125,7 @@ def test_old_worker_returning_after_lease_loss_cannot_dispatch_or_save_draft(db)
 
 
 def test_progress_is_per_batch_and_never_exposes_graph_internals(db) -> None:
-    """GET 逐批进度：queued → running（结构/实践批次）→ waiting_user；无图内部字段。"""
+    """GET 逐批进度：queued → running（结构/实践批次）→ succeeded；无图内部字段。"""
     entered = threading.Event()
     release = threading.Event()
 
@@ -185,7 +185,7 @@ def test_progress_is_per_batch_and_never_exposes_graph_internals(db) -> None:
             assert not work.is_alive()
 
         final = _get_run(client, run_id)
-        assert final["status"] == "waiting_user"
+        assert final["status"] == "succeeded"
         assert final["progress"]["phase"] == "done"
         assert final["progress"]["completed_batches"] == 4
         assert final["progress"]["completed_structure_batches"] == 2

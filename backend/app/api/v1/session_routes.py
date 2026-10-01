@@ -11,10 +11,16 @@ from pydantic import BaseModel, ConfigDict, Field
 router = APIRouter(prefix="/api/v1")
 
 
-class CredentialsRequest(BaseModel):
+class RegistrationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     username: str = Field(min_length=2, max_length=32)
-    password: str = Field(min_length=6, max_length=12)
+    password: str = Field(min_length=15, max_length=128)
+
+
+class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    username: str = Field(min_length=2, max_length=32)
+    password: str = Field(min_length=1, max_length=128)
 
 
 class SessionView(BaseModel):
@@ -93,7 +99,7 @@ def authenticate(payload, request, response, container, registration):
 
 @router.post("/auth/register", response_model=SessionView, operation_id="register_user")
 def register(
-    payload: CredentialsRequest,
+    payload: RegistrationRequest,
     request: Request,
     response: Response,
     container: AppContainer = Depends(get_container),
@@ -103,7 +109,7 @@ def register(
 
 @router.post("/auth/login", response_model=SessionView, operation_id="login_user")
 def login(
-    payload: CredentialsRequest,
+    payload: LoginRequest,
     request: Request,
     response: Response,
     container: AppContainer = Depends(get_container),

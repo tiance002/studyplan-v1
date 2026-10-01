@@ -20,6 +20,8 @@
 
 from __future__ import annotations
 
+from urllib.parse import quote, urlencode
+
 from app.api.v1.deps import get_auth_context, get_plan_service
 from app.api.v1.schemas import (
     DraftDecisionRequest,
@@ -78,7 +80,8 @@ def generate_plan(
         prefs_snapshot=payload.prefs_snapshot.model_dump(mode="json"),
     )
     return PlanGenerateResponse(
-        run_id=run_id, status_url=f"{API_PREFIX}/runs/{run_id}"
+        run_id=run_id,
+        status_url=f"{API_PREFIX}/runs/{quote(run_id, safe='')}?{urlencode({'project_id': project_id})}",
     )
 
 

@@ -91,22 +91,37 @@ export function PlanningPage({
     [conflict, setConflict] = useState(false),
     [notice, setNotice] = useState("");
   const generating = useRef(false);
+  const loadedDraft = useRef<string | null>(null);
+  const [pollAttempt, setPollAttempt] = useState(0);
   const [acceptedRun, setAcceptedRun] = useState(false);
   const generationBlocked = busy || acceptedRun || !goal.trim() || fake === null ||
+    draft?.status === "awaiting_approval" ||
     run?.status === "queued" || run?.status === "running" ||
     run?.status === "reconciliation_required";
-  async function loadDraft(id: string) {
+  async function loadDraft(id: string, force = false) {
+    // Status polling must never replace the user's editable snapshot or its base version.
+    if (!force && loadedDraft.current === id) return;
     const d = await api.draft(project, id);
+    const current = await api.current(project);
+    loadedDraft.current = id;
     setDraft(d);
     setStages(d.stages ?? []);
-    setBaseVersion((await api.current(project))?.revision ?? 0);
+    setBaseVersion(current?.revision ?? 0);
   }
   async function loadRun(id: string) {
     const r = await api.run(project, id);
     setRun(r);
     setAcceptedRun(["queued", "running", "reconciliation_required"].includes(r.status));
-    if (r.next_action === "review_draft" && r.result_ref)
-      await loadDraft(r.result_ref);
+    if (r.result_ref && (r.next_action === "review_draft" || r.status === "succeeded")) {
+      try {
+        await loadDraft(r.result_ref);
+      } catch (e) {
+        // Historical successful Runs reference a plan. Resolve it by API identity,
+        // without assuming the opaque result_ref has a particular prefix.
+        if (!(e instanceof ApiError && e.status === 404 &&
+            (await api.current(project))?.plan_id === r.result_ref)) throw e;
+      }
+    }
   }
   useEffect(() => {
     const id = localStorage.getItem(`studyplan-run:${project}`);
@@ -115,11 +130,12 @@ export function PlanningPage({
   useEffect(() => {
     if (!run || !["queued", "running"].includes(run.status)) return;
     const timer = setTimeout(
-      () => loadRun(run.run_id).catch((e) => setError(e.message)),
-      1500,
+      () => loadRun(run.run_id).catch((e) => setError(e.message))
+        .finally(() => setPollAttempt(n => n + 1)),
+      document.hidden ? 30000 : Math.min(10000, 1500 * 1.5 ** pollAttempt),
     );
     return () => clearTimeout(timer);
-  }, [run]);
+  }, [run, pollAttempt]);
   async function act(fn: () => Promise<void>) {
     setBusy(true);
     setError("");
@@ -199,6 +215,8 @@ export function PlanningPage({
               localStorage.setItem(`studyplan-run:${project}`, result.run_id);
               // A failed first GET is shown as an error, never another POST.
               setAcceptedRun(true);
+              setPollAttempt(0);
+              loadedDraft.current = null;
               setDraft(null);
               setConflict(false);
               setNotice("");
@@ -237,8 +255,14 @@ export function PlanningPage({
       {run && (
         <div className="run-banner" role="status">
           <strong>
-            {run.status === "waiting_user"
+            {draft?.status === "awaiting_approval"
               ? "草案已生成 · 等待确认"
+              : draft?.status === "approved"
+                ? "路线已发布"
+                : draft?.status === "cancelled"
+                  ? "草案已取消"
+              : run.status === "waiting_user"
+                ? "草案等待确认"
               : run.status === "running"
                 ? "正在生成"
                 : run.status === "queued"
@@ -248,7 +272,7 @@ export function PlanningPage({
                     : run.status === "reconciliation_required"
                       ? "运行需要核对，请勿重复调用"
                       : run.status === "succeeded"
-                        ? "计划已发布"
+                        ? "生成已完成"
                         : "运行已取消"}
           </strong>
           {run.error && <p>{run.error.message}</p>}
@@ -278,7 +302,7 @@ export function PlanningPage({
           disabled={busy}
           onClick={() =>
             act(async () => {
-              await loadDraft(draft.draft_id);
+              await loadDraft(draft.draft_id, true);
               setConflict(false);
               setError("");
             })

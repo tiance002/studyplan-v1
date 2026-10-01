@@ -278,9 +278,9 @@ def test_soft_limits_warn_but_do_not_block() -> None:
 
 
 def test_credential_policy_matches_product_constraint() -> None:
-    """开放注册 / 中文用户名 / 6–12 位密码 / 无邀请码。"""
+    """V2 guidance explicitly replaces 6–12 with 15–128 for new secrets."""
     policy = DEFAULT_CREDENTIAL_POLICY
-    assert (policy.password_min, policy.password_max) == (6, 12)
+    assert (policy.password_min, policy.password_max) == (15, 128)
     assert policy.require_invite_code is False
 
 
@@ -294,9 +294,9 @@ def test_credential_policy_accepts_short_chinese_username() -> None:
 
 def test_credential_policy_rejects_bad_password_length() -> None:
     with pytest.raises(ValidationAppError):
-        DEFAULT_CREDENTIAL_POLICY.validate_password("12345")
+        DEFAULT_CREDENTIAL_POLICY.validate_password("a" * 14)
     with pytest.raises(ValidationAppError):
-        DEFAULT_CREDENTIAL_POLICY.validate_password("1234567890123")
+        DEFAULT_CREDENTIAL_POLICY.validate_password("a" * 129)
 
 
 def test_credential_policy_rejects_whitespace_username() -> None:

@@ -57,19 +57,26 @@ def test_b3_real_graph_pg_http_approve_and_restart(db, checkpoint_db):
         run, draft = _generate_to_draft(client)
         record = base._runs.get_run(project_id=PROJECT_P1, run_id=run["run_id"])
         with PostgresSaver.from_conn_string(checkpoint_db.migrator_dsn) as saver:
-            assert saver.get_tuple({"configurable":{"thread_id":record.thread_id}}) is not None
+            before = saver.get_tuple({"configurable":{"thread_id":record.thread_id}})
+            assert before is not None
         # Reconstruct the service/runtime, then approve the durable business draft.
         base._executor = PgPlanningExecutor(checkpoint_db.migrator_dsn, llm=base._llm)
+        def forbidden_resume(*args, **kwargs):
+            pytest.fail('Business confirmation must not resume the generation graph')
+        base._executor.resume_decision = forbidden_resume
         response = _decide(client, draft["draft_id"], _approve_body(draft,0,"b3-publish"))
         assert response.status_code == 200, response.text
         assert _get_run(client,run["run_id"])["status"] == "succeeded"
         with PostgresSaver.from_conn_string(checkpoint_db.migrator_dsn) as saver:
             saved = saver.get_tuple({"configurable":{"thread_id":record.thread_id}})
+            assert saved.checkpoint == before.checkpoint
             values = saved.checkpoint["channel_values"]
             assert values["prefs_snapshot"]["mode"] == "text_first"
             assert type(values["prefs_snapshot"]["mode"]) is str
-            assert values["result_id"] == response.json()["plan"]["plan_id"]
-            assert values["decision"] == "approve"
+            assert values['draft_ref'] == draft['draft_id']
+            assert values.get('result_id') != response.json()['plan']['plan_id']
+            assert values.get('decision') != 'approve'
+            assert _get_run(client, run['run_id'])['result_ref'] == draft['draft_id']
         # b3f2-batch-v1: 1 skeleton + 2 structure batches + 2 practice batches.
         assert len(base._llm.calls) == 5
 
@@ -106,7 +113,7 @@ def test_b3_paid_ledger_replay_and_unknown(db):
         assert conn.execute("SELECT count(*) FROM ai_provider_attempts WHERE attempt_id='b3-paid-2'").fetchone()[0] == 1
 
 
-def test_b3_checkpoint_ack_failure_reconciles_without_republish(db, checkpoint_db):
+def test_b3_checkpoint_outage_does_not_affect_business_confirmation_or_republish(db, checkpoint_db):
     from app.main import create_app
     from fastapi.testclient import TestClient
 
@@ -118,19 +125,21 @@ def test_b3_checkpoint_ack_failure_reconciles_without_republish(db, checkpoint_d
     with TestClient(create_app(container)) as client:
         client.cookies.set(COOKIE,SESSION_A1)
         run,draft = _generate_to_draft(client)
-        original_finish = executor.finish
+        calls = []
         def fail(**kwargs):
+            calls.append(kwargs)
             raise RuntimeError("checkpoint offline")
         executor.finish = fail
         body = _approve_body(draft,0,"b3-ack")
         first = _decide(client,draft["draft_id"],body)
         assert first.status_code == 200, first.text
-        assert _get_run(client,run["run_id"])["next_action"] == "reconcile"
-        executor.finish = original_finish
+        assert _get_run(client,run["run_id"])["next_action"] == "none"
+        assert _get_run(client,run["run_id"])["result_ref"] == draft['draft_id']
         replay = _decide(client,draft["draft_id"],body)
         assert replay.status_code == 200, replay.text
         assert replay.json()["plan"]["plan_id"] == first.json()["plan"]["plan_id"]
         assert _get_run(client,run["run_id"])["status"] == "succeeded"
+        assert calls == []
         # b3f2-batch-v1: 1 skeleton + 2 structure batches + 2 practice batches.
         assert len(service._llm.calls) == 5
 

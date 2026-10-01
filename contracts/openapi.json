@@ -359,7 +359,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CredentialsRequest"
+                "$ref": "#/components/schemas/RegistrationRequest"
               }
             }
           },
@@ -397,7 +397,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CredentialsRequest"
+                "$ref": "#/components/schemas/LoginRequest"
               }
             }
           },
@@ -604,29 +604,6 @@
         ],
         "title": "AiRunStatus",
         "description": "对外可授权的运行状态。\n\n图跑成功 **不自动等于**知识已学会、任务已验收。"
-      },
-      "CredentialsRequest": {
-        "properties": {
-          "username": {
-            "type": "string",
-            "maxLength": 32,
-            "minLength": 2,
-            "title": "Username"
-          },
-          "password": {
-            "type": "string",
-            "maxLength": 12,
-            "minLength": 6,
-            "title": "Password"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "username",
-          "password"
-        ],
-        "title": "CredentialsRequest"
       },
       "DraftDecision": {
         "type": "string",
@@ -853,6 +830,29 @@
           "total_units"
         ],
         "title": "LearningWorkspaceView"
+      },
+      "LoginRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 2,
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginRequest"
       },
       "ModelSettingsClear": {
         "properties": {
@@ -1446,6 +1446,29 @@
         "type": "object",
         "title": "PrefsSnapshot",
         "description": "资源偏好快照（请求内联，非独立资源）。"
+      },
+      "RegistrationRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 2,
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 15,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "RegistrationRequest"
       },
       "RunProgress": {
         "properties": {

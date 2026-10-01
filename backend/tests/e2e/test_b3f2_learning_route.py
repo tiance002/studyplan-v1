@@ -29,25 +29,27 @@ def route(client, session, goal):
     assert generated.status_code == 202, generated.text
     assert worker.tick()
     run = client.get("/api/v1/runs/" + generated.json()["run_id"] + suffix).json()
-    assert run["status"] == "waiting_user", run
+    assert run["status"] == "succeeded", run
+    assert run['next_action'] == 'none'
     url = "/api/v1/plans/drafts/" + run["result_ref"]
     draft_response = client.get(url + suffix)
     assert draft_response.status_code == 200, draft_response.text
+    assert draft_response.json()['status'] == 'awaiting_approval'
     return draft_response.json(), url, suffix, headers
 
 
 def test_agent_pack_chapters_nodes_publish_readback_and_history(migrated_db):
     from app.tools.seed_b3 import seed_reviewed_pack
 
-    pack = load_pack("agent-application-v1.json")
+    pack = load_pack("agent-application-v2.json")
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
         seed_reviewed_pack(conn, pack)
         seed_reviewed_pack(conn, load_python_pack())
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
     client = TestClient(create_app(build_container(settings)))
-    session = client.post("/api/v1/auth/register", json={"username": "完整路线甲", "password": "123456"}).json()
+    session = client.post("/api/v1/auth/register", json={"username": "完整路线甲", "password": "Controlled-test-password-2026!"}).json()
     draft, url, suffix, headers = route(client, session, "从 Python 基础学习 Agent 应用开发")
-    assert draft["source_pack_key"] == "agent.application" and draft["source_pack_version"] == 1
+    assert draft["source_pack_key"] == "agent.application" and draft["source_pack_version"] == 2
     assert len(draft["stages"]) > 2
     expected_chapters = {c["section_id"]: c["url"] for r in pack["resources"] for c in r["sections"]}
     assert draft["stage_resources"] and all(r["node_ids"] and r["ordered_sections"] for r in draft["stage_resources"])
@@ -92,7 +94,7 @@ def test_agent_pack_chapters_nodes_publish_readback_and_history(migrated_db):
         assert conn.execute("SELECT status FROM unit_progress WHERE unit_id=%s", (old_unit,)).fetchone()[0] == "completed"
         assert conn.execute("SELECT count(*) FROM plan_revisions WHERE project_id=%s", (session["project_ids"][0],)).fetchone()[0] == 2
     other = TestClient(create_app(build_container(settings)))
-    other.post("/api/v1/auth/register", json={"username": "完整路线乙", "password": "123456"})
+    other.post("/api/v1/auth/register", json={"username": "完整路线乙", "password": "Controlled-test-password-2026!"})
     assert other.get("/api/v1/workspace" + suffix).status_code == 403
     assert other.get(url + suffix).status_code == 403
     # The same actor's second space has its own plan and entity references.
@@ -109,7 +111,7 @@ def test_agent_pack_chapters_nodes_publish_readback_and_history(migrated_db):
 def test_unsupported_direction_never_binds_known_python_resources(migrated_db):
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
     client = TestClient(create_app(build_container(settings)))
-    session = client.post("/api/v1/auth/register", json={"username": "通用路线", "password": "123456"}).json()
+    session = client.post("/api/v1/auth/register", json={"username": "通用路线", "password": "Controlled-test-password-2026!"}).json()
     draft, _, _, _ = route(client, session, "水彩构图入门")
     assert draft["source_pack_key"] == "" and draft["source_pack_version"] == 0
     assert all(not r["source_ref"] and not r["ordered_sections"] and r["fallback_search_terms"] for r in draft["stage_resources"])
@@ -126,7 +128,7 @@ def test_mock_http_provider_full_pg_graph_and_ledger(migrated_db, checkpoint_db)
     from app.tools.seed_b3 import seed_reviewed_pack
 
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
-        seed_reviewed_pack(conn, load_pack("agent-application-v1.json"))
+        seed_reviewed_pack(conn, load_pack("agent-application-v2.json"))
     calls = []
     def reply(request):
         body = json.loads(request.content)
@@ -146,7 +148,7 @@ def test_mock_http_provider_full_pg_graph_and_ledger(migrated_db, checkpoint_db)
         container.plan_service._llm = ledger
         container.plan_service._executor = PgPlanningExecutor(checkpoint_db.migrator_dsn, llm=ledger)
         with TestClient(create_app(container)) as client:
-            session = client.post("/api/v1/auth/register", json={"username": "适配器完整路线", "password": "123456"}).json()
+            session = client.post("/api/v1/auth/register", json={"username": "适配器完整路线", "password": "Controlled-test-password-2026!"}).json()
             draft, url, suffix, headers = route(client, session, "Agent应用开发与知识助手")
             assert len(draft["stages"]) == 9 and draft["source_pack_key"] == "agent.application"
             # b3f2-batch-v1: one request per node — 1 skeleton + 9 structure + 9 practice.
@@ -176,7 +178,7 @@ def test_failed_provider_usage_is_retained_and_replayed_without_dispatch(migrate
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
     container = build_container(settings)
     client = TestClient(create_app(container))
-    session = client.post("/api/v1/auth/register", json={"username": "失败用量留存", "password": "123456"}).json()
+    session = client.post("/api/v1/auth/register", json={"username": "失败用量留存", "password": "Controlled-test-password-2026!"}).json()
     draft, _, _, _ = route(client, session, "Agent开发")
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
         run_id = conn.execute("SELECT run_id FROM plan_drafts WHERE draft_id=%s", (draft["draft_id"],)).fetchone()[0]
