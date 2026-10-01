@@ -1,158 +1,56 @@
-# studyplan — 学习规划助手 V1.1
+# studyplan — 个人本地学习规划助手
 
-> 面向「想学 Agent 开发 / 云服务等可落地工程领域，并希望用 AI 编码工具做出真实项目」的用户：
-> 从零生成完整知识体系 → 路径草案 → 用户确认 → 单元资料 → 自主总结 → AI 引导反馈 →
-> 阶段实践任务 → 用户写实现思路 → AI 评审 → 导出 Prompt → 外部实现 → 证据验收 → 进入下一阶段。
+V1 面向个人本地学习，首个领域是 Agent 应用开发。目标闭环为：生成知识结构与路线 → 用户确认 → 学习与总结 → 反馈与实践 → 提交成果 → 证据核验 → 调整路线。
 
-**当前状态：B2-V 发布闭环、B3 模型设置及 B3-F1 正式前端已实现。**
-可操作链路：注册 / 登录 → 学习目标 → 生成草案 → 编辑 / 确认 → 正式学习路径 → 阶段工作区。认证、计划、知识目录及进度读取使用真实 PostgreSQL；React 前端以 V6.3 为视觉基线。
+这是交付目标。完整学习闭环尚未验收，具体完成度以实际代码和验收证据为准。
 
-本轮验收使用明确标识的 Fake LLM 预设 Agent 场景，不代表任意领域规划质量，也没有新增云模型验收。已有 OpenAI 兼容模型与加密个人配置仍可使用。会话、总结写入、评审及实践提交尚未开放。
+## 当前基线
 
-- 基线与保全记录：`docs/reviews/B3-F1-baseline.md`
-- 启动配置：`docs/development/B3-F1-startup.md`
-- 验收证据及延期项：`docs/acceptance/B3-F1-report.md`
-- 开发版本边界：`docs/development/B3-F1-scope.md`
+截至 2026-10-01，本地 develop 已完成 S0 规格收口，复用已有计划版本、模型设置、前端工作区和分批规划能力。Acceptance09 的真实生成证据核对到 Draft / waiting_user；本次真实批准、发布及完整闭环尚未 Verified。
 
----
+develop 仍保留旧注册登录入口与基于内容 hash 的知识节点身份。M1.1 本地安全入口实现位于独立功能分支，尚未集成到 develop；随后是 M1.2 稳定知识逻辑身份。不能将目标设计或功能分支状态当成当前基线已交付能力。
 
-## 1. 这个仓库是什么
+开发前从 [项目约束](AGENTS.md) 和 [文档导航](docs/README.md) 开始。当前范围及后续顺序统一查阅 [V1 设计包](docs/design-package/README.md)、[实施路线](docs/design-package/IMPLEMENTATION_PLAN.md) 和 [差距审查](docs/reviews/2026-10-01-v1-gap-analysis.md)。
 
-| 层 | 技术 | 职责 |
-|---|---|---|
-| 前端 | React 19 + TypeScript + Vite | 仅消费 OpenAPI 生成的 typed client，不自造业务状态、不自报身份 |
-| 接入 | FastAPI + Pydantic | `/api/v1` HTTP 层，`AuthContext` 由服务端会话生成 |
-| 应用 | application use cases | 跨领域事务协调，一个命令一个可辨识事务边界 |
-| 领域 | domain（纯 Python） | 六个限界上下文：workspace / catalog / planning / resources / reflections / practice |
-| 端口 | ports（Protocol） | LLM / Resource / RAG / GraphRunner / Repository |
-| 工作流 | LangGraph StateGraph | 三张小图：规划、总结评审、Prompt 评审 |
-| 基础设施 | Postgres / worker / providers | 业务库 + 独立 checkpoint 库、租约队列、真实/外部适配器 |
+## 目录用途
 
-严格依赖方向：`api -> application -> domain & ports <- infrastructure`。
-`domain` **不得** import FastAPI、LangGraph、ORM 或任何 SDK —— 这条由
-`backend/tests/unit/test_import_direction.py` **机械保证**，不靠评审记忆。
+| 位置 | 内容 |
+|---|---|
+| `backend/app/` | FastAPI 接入、Application 用例、Domain 规则、Ports 和 Infrastructure |
+| `backend/app/agent_workflows/` | LangGraph 有界编排及现有图协议 |
+| `backend/alembic/` | 追加式数据库迁移；已发布迁移不改写 |
+| `backend/tests/` | unit / contract / integration / e2e |
+| `frontend/src/` | React 界面、业务 features、共享组件和 API 客户端 |
+| `contracts/` | OpenAPI、契约示例及前后端共同接口 |
+| [docs/](docs/README.md) | 当前规格、决策、操作说明和历史证据 |
+| [scripts/](scripts/README.md) | 启动、检查、契约生成和受控验收工具 |
+| [output/](output/README.md) | 历史浏览器证据及忽略的本地临时输出 |
+| `.planning/` | 按任务分目录的执行计划、发现和进度，不是产品规格 |
+| `var/`、`.venv/` | 本机运行数据与 Python 环境，不入库 |
 
-## 2. 三个权威状态源（不要混用）
+依赖方向为 `api -> application -> domain & ports <- infrastructure`。业务表保存业务事实，checkpoint 保存执行位置，`ai_runs` 提供可授权运行投影。详细边界见 [架构规格](docs/design-package/ARCHITECTURE.md) 与 [ADR 索引](docs/adr/README.md)。
 
-| 状态 | 存放地 | 说明 |
-|---|---|---|
-| 业务事实 | `studyplan_app` 领域表 | 进度、计划版本、总结、任务、成果；**唯一真相** |
-| 图断点 | `studyplan_checkpoint`（独立库/角色） | 只保存工作流执行位置，不是业务状态 |
-| 对外运行态 | `ai_runs` 投影 | 可授权的 RunView，浏览器只看这个 |
+## 本地开发
 
-## 3. 快速开始
+配置与启动入口见 [开发说明](docs/development/README.md)。在当前 develop 上，既有启动脚本仍对应历史认证入口；本地无登录入口按 M1.1 独立交付，不通过关闭身份或 RLS 检查实现。
 
-已有本地数据库与 `.env` 时，先安装依赖并运行增量迁移，再分别启动后端和前端：
+已有本机 `.env`、数据库和依赖时，可用两个终端启动 Fake 演示：
 
 ```powershell
-.venv/Scripts/python -m pip install -e ".[dev,agent,postgres]"
-npm --prefix frontend ci
-./scripts/b3f1-dev.ps1 -Migrate
-# 两个终端分别执行
 ./scripts/b3f1-dev.ps1 -Demo
 ./scripts/b3f1-dev.ps1 -Frontend
 ```
 
-打开 `http://127.0.0.1:5173`，点击开放注册。用户名支持中文，密码 6–12 个 Unicode 码点，无邀请码。注册自动创建服务端归属学习空间；无需输入 actor、project 或访问令牌。
+前端默认地址为 `http://127.0.0.1:5173`。环境安装、增量迁移、worker 启动及历史注册流程分别见开发说明。Fake 演示不证明真实模型质量。
 
-Demo 仅对启动进程设置 Fake LLM，不修改 `.env` 云模型凭据。使用已有真实模型配置时启动 `./scripts/b3f1-dev.ps1`，前端模型设置仍有效；模型调用可能产生服务商费用。
+日常验证按改动范围选择 Unit → Targeted Integration → Critical E2E，完整验证留到里程碑或相关输入变化时。命令和副作用分类见 [脚本导航](scripts/README.md)，历史结果见 [验收索引](docs/acceptance/README.md)。真实 provider 验证每次需要新的明确授权。
 
-新环境的 PostgreSQL 角色、独立业务/Checkpoint 数据库与环境变量配置见 `docs/development/B3-F1-startup.md`。应用角色无 DDL；迁移角色与应用角色必须分离。未配置 PG 时仅能访问健康检查和接口文档，不能伪造成功业务结果。
+## 文档维护
 
-```powershell
-.venv/Scripts/python -m pytest -o addopts= -q -rs
-.venv/Scripts/python -m ruff check backend
-.venv/Scripts/python -m mypy backend/app
-npm --prefix frontend test
-npm --prefix frontend run build
-node scripts/b3f1-browser.cjs
-```
+README 只维护项目概览和入口；业务规则写在所属规格，架构决定写在 ADR，实施细节写在任务计划，验证结论写在验收记录。通过链接引用，避免复制成多份容易过时的说明。
 
-浏览器脚本需要运行中的两端服务和本机 Chrome；自动注册独立验收用户，截图写入 `output/playwright/`。后端 PG 测试只使用 `studyplan_test_*` 临时库，无可用安全 PG 时显式 SKIP。最终结果见验收报告。
+产品内模型调用策略见 [产品 MODEL_ROUTING](docs/design-package/MODEL_ROUTING.md)；Codex 开发模型及子代理规则见 [执行约束](docs/execution/README.md)。两者职责不同。
 
-## 4. 三张图
+## 许可证
 
-```
-planning_graph
-  START -> normalize -> generate_outline -> build_dependencies_and_units
-        -> propose_practice -> validate -> [repair <= 2] -> save_draft_projection
-        -> await_approval(interrupt) -> (cancel | edit+validate | approve)
-        -> commit_plan_idempotently -> END
-
-summary_review_graph     START -> load_rubric_snapshot -> review_once -> validate_review -> persist_review_idempotently -> END
-prompt_review_graph      START -> load_task_from_revision -> review_once -> validate_review -> persist_review_idempotently -> END
-```
-
-只有 `planning_graph` 可暂停等待用户。总结与 Prompt 的每次修订 = 新的 `attempt/revision + run`，
-**不会**让图挂起数月。普通 CRUD 与状态机使用应用服务，不包 Graph。
-
-> **B1 说明**：图逻辑由 `app/agent_workflows/graphs.py` 的确定性解释器实现并测试；
-> 安装 `langgraph`（`pip install -e ".[agent]"`）后可切换为真实 `StateGraph`。
-> 这一顺序是刻意的 —— 图的**转移逻辑**（修复上限、interrupt 位置、取消语义）
-> 才是风险所在，把它写成可独立测试的纯函数风险最低。
-
-## B3 模型能力
-
-已有 OpenAI 兼容 `/chat/completions`、实际 StateGraph、独立 PG Checkpointer 与 Python 工程入门领域包。规划 POST 现在只把任务原子写入现有 `ai_jobs` 并返回 HTTP 202；需在另一个终端显式启动单 Worker：
-
-```powershell
-# 本地 .env 需显式配置 PLANNING_WORKER_ACTOR_IDS=user-id-1,user-id-2
-./scripts/b3f1-dev.ps1 -Worker
-```
-
-**部署限制：** `PLANNING_WORKER_ACTOR_IDS` 白名单仅供本地开发与安全验证。当前开放注册会让新用户在未登记时无法生成计划；此机制不能作为云端公开 V1。开放上线前必须补齐无需逐用户手动登记、同时保持 RLS 隔离的安全领取方式，并通过伪造项目与跨用户并发验收。Worker 启动器会拒绝非开发环境，未配置的用户也会在入队时收到清晰错误。
-
-运行异常进入 failed；超过配置预算仍未完成的运行在下一次读取时进入待核对，不自动再次调用模型。
-
-个人 Base URL、模型名称和 API Key 由服务端按当前用户隔离保存；密钥加密且 GET 不回显。须通过部署 secret 提供稳定的 Fernet `MODEL_SETTINGS_ENCRYPTION_KEY`，并用 `LLM_ALLOWED_HOSTS` 管理允许的服务商。当前不支持 Anthropic `/messages` 协议。真实模型历史证据见 `docs/acceptance/B3-minimal-report.md`；本轮未运行付费云模型验证。
-
-## 5. 仓库结构
-
-```
-backend/app/api/v1/           HTTP DTO / routes / auth adapter（B2）
-backend/app/application/      跨域用例、事务协调（B2）
-backend/app/domain/{workspace,catalog,planning,resources,reflections,practice}/
-backend/app/ports/            LLM / Resource / RAG / GraphRunner / Repository
-backend/app/agent_workflows/  graph builders / state / nodes / validators
-backend/app/infrastructure/   db / checkpointer / worker / providers / external
-backend/app/core/             id / error / config / request_id / idempotency
-backend/tests/{unit,contract,integration,e2e}
-frontend/src/                 api(generated) / features / shared
-contracts/                    openapi.json + examples
-docs/                         design-package / adr / migration / acceptance
-scripts/                      safe test / dev
-var/ .venv/                   仅本机，不入库
-```
-
-## 6. 关键不变量（改代码前请先读）
-
-- **跳过 ≠ 完成 ≠ 掌握**：`UnitProgress.skipped` 不赋予任何掌握标签。
-- **只有用户确认的 `PlanRevision` 是当前路线**；草案不得覆盖正式路线；取消/失败不影响当前计划。
-- **发布计划必须在一个事务内**完成：校验草案 hash + `expected_version` + 幂等键 → 新增 revision/links → 设置当前引用。
-- **`run_id + operation_key` 唯一且可重放**：重复确认不能生成两份计划。
-- **付费调用结果未知不自动重发**：进入 `reconciliation_required`，不盲目重试。
-- **资源 HTTP 200 ≠ 内容质量**；找不到真实资源返回 `unavailable`，**绝不伪造 URL 或视频时间戳**。
-- **不得自动 clone 并执行外部仓库代码**；外部网页内容视为不可信数据（防 SSRF / XSS）。
-- **AI 生成的知识先为项目私有草稿**，验证后才共享；关系图必须无环。
-- **AI 不能独立作出「验收通过」结论**：须由用户确认或系统核验证据。
-- **`thread_id` 与 checkpoint 结构永不返回给前端**；前端只拿稳定 `next_action`。
-- **错误体固定含** `code / message / request_id / details`，不回显敏感输入。
-- **认证**：开放注册、中文用户名、6–12 位密码、**无邀请码**（见 `docs/adr/ADR-0006`）。
-
-## 7. 文档索引
-
-| 文档 | 内容 |
-|---|---|
-| `docs/design-package/SOFTWARE_DESIGN.md` | 软件架构与详细设计（V1.1-LG） |
-| `docs/design-package/IMPLEMENTATION_PLAN.md` | 实施方案与 B0–B6 里程碑 |
-| `docs/adr/` | 6 条已冻结架构决策（含被拒绝的备选方案） |
-| `docs/migration/legacy-inventory.md` | B0 本机审计事实（旧 HEAD / dirty / 分支） |
-| `docs/migration/module-reuse-matrix.md` | 逐模块 copy/adapt/reference-only/drop 判定 |
-| `docs/migration/source-provenance.md` | 每个文件的 SHA-256 与来源 |
-| `docs/acceptance/B1-report.md` | B1 验收：changed files / commands / results / risks |
-
-## 8. 许可证
-
-见 `LICENSE`（MIT）。
-⚠️ 若引入 `psycopg`（LGPL-3.0-only），分发时须随附其许可证文本，
-参见 `docs/migration/module-reuse-matrix.md` §2.2。
+项目许可证见 [LICENSE](LICENSE)。第三方依赖的许可处理见 [模块复用与许可记录](docs/migration/module-reuse-matrix.md)。
