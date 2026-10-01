@@ -20,7 +20,7 @@
 | F14 | Outcome成果归集 | IMPLEMENTED | 七类实际保存资料归集、完整计数/有界分页/精确历史详情及空分类待补充已接，真实PG/HTTP/Chrome PASS，不编造指标或通过结论。完整Outcome Profile、目标选择与完整内容质量验收继续F02/F03；负责人体验NOT RUN，见[G4成果报告](../acceptance/G4-submissions-outcomes-2026-10-02.md) |
 | F15 | Seed导入/校验/DB发布/审核边界 | IMPLEMENTED | 0011完整payload、严格校验、幂等/冲突回滚/DB目录/CLI：16规则+真实PG PASS；真生成使用发布Agent v2。三Blueprint内容及新网页审核仍待补 |
 | F16 | 真模型/持久任务/取消/恢复 | IMPLEMENTED | 真云模型累计23/50请求，含G3总结1及Prompt已知失败1/成功1，unknown0；短任务、冻结绑定、锁后fence、崩溃草案/反馈复用已实测；完整用户恢复/故障UX后续验收 |
-| F17 | 独立RAG真实薄集成 | BLOCKED | Port已定义；RAG_BASE_URL/RAG_API_KEY未配置，无真实检索/越权/故障证据 |
+| F17 | 独立RAG真实薄集成 | BLOCKED | Port已定义；2026-10-02只读定位独立工程E:\RAG quention，现有三个Docker API实例OpenAPI/healthz HTTP200。StudyPlan配置仍未接线；实例选择、纯检索/授权scope契约及真实检索/越权/故障证据尚缺，健康检查不代表集成验收 |
 | F18 | 成品界面/启动/部署/备份恢复 | IMPLEMENTED | React/服务基础已有；本轮真实构建、完整流程、独立恢复和授权交付未完成 |
 
 ## 四层证据

@@ -29,6 +29,18 @@ LLM_REPAIR_OUTPUT_TOKENS=8000
 
 独立 RAG 的现有配置名为 `RAG_BASE_URL`、`RAG_API_KEY`、`RAG_TIMEOUT_SECONDS`，具体服务契约仍待确认。
 
+2026-10-02用户询问工程位置与运行状态后，本轮进行了只读定位：独立工程为 `E:\RAG quention`，Docker Compose工作目录 `E:\RAG quention\deploy`、配置 `deploy\compose.yml`；`D:\codex-rag-tools` 是工具/实验目录，不是服务工程。三个既有实例均运行且 `GET /openapi.json`、`GET /healthz` 返回HTTP200，无检索、问答、模型调用、配置修改或重启：
+
+| Docker API实例 | API地址 | 对应前端 |
+| --- | --- | --- |
+| raglocalfirst0930-api-1 | http://127.0.0.1:18086 | http://127.0.0.1:14186 |
+| deploy-api-1 | http://127.0.0.1:18087 | http://127.0.0.1:14187 |
+| ragv1final0927-api-1 | http://127.0.0.1:8000 | http://127.0.0.1:4173 |
+
+本机接口快照为 `E:\RAG quention\contracts\openapi.json`，运行说明为工程根 `README.md`，在线文档可从对应API的 `/docs` 或 `/openapi.json` 查看。当前在线OpenAPI公开知识库/文档/会话消息/Run引用接口，没有独立纯检索端点，也未声明securitySchemes；所查当前源码为单机个人工作台，不能假设通用 `RAG_API_KEY` 已受支持。需要先确认保留实例及服务端授权映射、证据检索契约，再决定StudyPlan适配和凭证类型；用户不需要发送模型key或RAG秘密。F17仍BLOCKED，真实检索、跨账号拒绝和故障验收NOT RUN。用户可只打开三个前端，反馈哪一套是自己常用且资料正常的实例；无需新上传、提问或重启。
+
+三实例健康响应均为 `data.status=ok`、`cloud_enabled=false`、`local_query_enabled=false`：服务监听正常，健康检查不证明问答/检索可用；不为探测开启模型或云端许可。
+
 ## 已运行证据与余额
 
 专用隔离G1验收实际执行模型20次（含1repair），G3总结反馈1次、Prompt反馈已知HTTP400失败1次及新成功1次；累计 **23/50**，有结果23、未知0。Tavily预检和G2实际页面各一次HTTP200、各1credit，累计 **2/1000**。G2 request_id `6cbd7349-21f3-43a4-91a5-aaf32207d55c`。三项搜索配置足够，不需另装SDK或搜索模型。后续切片不重置额度。详情见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)、[G2资源报告](../acceptance/G2-resources-2026-10-01.md)、[G3总结报告](../acceptance/G3-summaries-2026-10-01.md)与[G3 Prompt报告](../acceptance/G3-prompts-2026-10-01.md)。失败请求不退还本轮请求额度；未返回usage时不猜费用。

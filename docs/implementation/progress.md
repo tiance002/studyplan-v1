@@ -186,3 +186,19 @@ Rawls只读review实际gpt-6-luna/max已由2026/10/02 JSONL核实；指定owner/
 代码 `9cf4cdb94d8db073f98b386da89766d15be66ca8` 已正常commit/push且ls-remote相等，22个白名单文件。详见[G4成果报告](../acceptance/G4-submissions-outcomes-2026-10-02.md)。旧自有22376按精确命令/port确认后停止，当前`var/v2-g4/submission_acceptance_server.py` exec52925、8021/PID55044，无Worker/外部派发；专用business DB0022，cp库不变。原8000/PID43688、PG/PID8124、Ollama/PID22760、5175/PID41308和5174/PID49752未重启。累计仍模型23/50、搜索2/1000、unknown0；已完成实际脚本不重跑，所有raw/intent/账号/packet留ignored var，不提交秘密。
 
 F12人工存档/决定与F14首批实际分类档案Implemented/Integrated，负责人体验NOT RUN，完整Goal active/NOT_READY。下一安全动作推进F02目标/Outcome Profile与剩余F13有界操作/全路线新版本，并补F01项目管理、F03三个Blueprint内容及完整Q门禁；GitHubApp/RAG缺条件只暂停相关真实分支。不能把初始档案当完整Profile或一批人工验收当F01–F18完成；不merge develop/master或标milestone。文档提交随后承接，续接读取实际HEAD。
+
+文档提交 `da580f4e1b6bcb9a05951993be1e8a3084df371b` 已正常push并核对GitHub存在；26个文档链接、两原指导hash、quota23/search2/unknown0及diff PASS。本轮最新presence-only检查RAG_BASE_URL/RAG_API_KEY及GitHub三个App变量均MISSING，不打印值。
+
+下一批准备：复用已实际核实gpt-6-luna/max的Rawls，只读定位F01现有项目管理/身份范围/API/UI与生成fence；collaboration.list_agents已确认running，非凭旧状态推定。root独立读取F02现有PlanGenerateRequest/PlanningPage/Seed验证入口，事实包var/v2-g4/goal-profile-facts.md：目前只有goal+资料prefs，澄清/时间/Profile未实现，不以自然语言目标替代。尚未冻结新公开契约或启动本批业务写入，不把定位当功能完成。续接读取Rawls具体结果、先冻结F01管理边界再派发；不能重跑已完成G4实际脚本/23次收费证据。当前保留server52925/8021/PID55044、业务库0022及原服务，root本进度改动未提交；原禁目录仍不处理。
+
+## 2026-10-02用户进展评估与RAG只读定位
+
+用户新增实施约束已写入AGENTS：针对已定位问题优先复用独立成熟组件/清晰算法，核对收益、依赖、许可证及回滚成本；收益不足且牵引大量工作时改用更小方案，临近交付不轻易迁移整套框架。
+
+当前功能矩阵为16项IMPLEMENTED、1项VERIFIED、1项BLOCKED；这些是整项状态，不能换算成17/18完成。Q门禁6项已有范围内PASS、6项完整验收NOT RUN。核心纵向流程有真实证据，可开始负责人早期体验；完整项目管理、目标澄清/时间/Outcome Profile、三Blueprint内容、完整重规划、GitHub账号授权/RAG、全量门禁/启动备份恢复仍为实质剩余工作。用户体验不能替代技术隔离/恢复门禁。当前5175 HTTP200，8021仍为无Worker/外部派发的G4限定验收预览，只允许登录/退出及成果相关写入；其它写入403是wrapper保护，不能邀请用户把该入口当整套正常运行版本。可用保留测试账号浏览已发布路线、原文与成果档案；真实个人完整体验入口须下一独立准备，不恢复旧Acceptance或新增收费生成。
+
+日期仅作条件性排布：以10月2日现状，早期体验收口目标10月4–5日，完整交付候选目标10月8–10日；剩余约4–6个有效开发日加1–2日集成/用户反馈修复，非已完成承诺。原七天目标继续作为冲刺目标，外部授权/scope契约未明确前不可保证完整READY日期；不得用删功能或未运行门禁换日期。
+
+只读本机定位发现独立RAG工程 `E:\RAG quention`，三个现有Docker API在8000/18086/18087；在线Personal RAG OpenAPI与healthz均HTTP200，已有契约文件contracts/openapi.json。D:\codex-rag-tools仅工具/实验目录。外部调用为健康/文档GET，无检索/问答/模型/私有资料读取，无服务改动；费用累计模型23/50、搜索2/1000不变。先前“无接口条件”表述补充为已找到接口/服务，但StudyPlan接线、实例选择、纯检索与跨账号授权契约未解决；当前OpenAPI无独立检索endpoint及securitySchemes，不要求用户发送模型密钥或猜填RAG_API_KEY。具体实例/前端对应见external-services.md，F17仍BLOCKED。用户只需确认哪套是常用且资料正常的实例。
+
+本轮再次从JSONL元数据核实：Gauss/g1_credentials Sol Medium；Kuhn/g1_short_generation Sol High；Helmholtz/g1_seed Sol Medium；Lovelace/g1_binding_review Sol High；Rawls/g4_submission_review Luna Max。界面省略模型的具体原因无法由此证明，后续派发说明显式展示实际模型/effort，复用不冒称切换。
