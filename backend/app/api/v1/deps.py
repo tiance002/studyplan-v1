@@ -12,9 +12,12 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from app.application.container import AppContainer
 from app.application.plan_service import PlanService
-from app.core.errors import DependencyUnavailableError, UnauthenticatedError
+from app.application.sessions import validate_local_binding
+from app.core.errors import DependencyUnavailableError, ForbiddenError, UnauthenticatedError
 from app.domain.workspace.models import AuthContext
 from fastapi import Depends, Request
 
@@ -49,6 +52,14 @@ def get_auth_context(
     context = container.sessions.resolve(token) if token else None
     if context is None:
         raise UnauthenticatedError()
+    if container.settings.local_entry_enabled:
+        validate_local_binding(container.settings)
+        if container.browser_auth is None:
+            raise DependencyUnavailableError("本地入口需要持久会话 adapter")
+        if context.actor_id != container.settings.local_actor_id:
+            raise ForbiddenError("会话不属于本地绑定 actor")
+        projects = container.browser_auth.local_binding(context.actor_id, container.settings.local_project_id)
+        context = replace(context, learning_project_scope=tuple(projects))
     from app.api.v1.session_routes import check_csrf
     check_csrf(request, container)
     return context

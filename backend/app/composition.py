@@ -53,7 +53,7 @@ def build_container(settings: Settings) -> AppContainer:
     内存实现只用于测试，不作为生产降级路径。
     """
     sessions = InMemorySessionStore()
-    if settings.is_development and settings.local_session_token:
+    if not settings.local_entry_enabled and settings.is_development and settings.local_session_token:
         sessions.add(SessionRecord(token=settings.local_session_token,
                      actor_id=settings.local_actor_id,session_id="local-session",
                      learning_project_scope=(settings.local_project_id,)))

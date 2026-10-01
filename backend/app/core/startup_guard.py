@@ -18,6 +18,9 @@
 
 from __future__ import annotations
 
+from ipaddress import ip_address
+from urllib.parse import urlsplit
+
 from app.core.config import Settings
 
 #: 开发默认密钥，生产出现即为致命错误。
@@ -50,6 +53,11 @@ def validate_startup_security(settings: Settings) -> None:
 
     开发环境直接返回（骨架允许 Fake / 内存后端）。
     """
+    if settings.local_entry_enabled:
+        _require(is_loopback(settings.app_host), "本地入口 APP_HOST 必须为 loopback IP")
+        _require(settings.csrf_enabled, "本地入口必须启用 CSRF")
+        for origin in settings.allow_origins:
+            _require(is_local_origin(origin), "本地入口 ALLOW_ORIGINS 必须为精确本地 Origin")
     if settings.is_development:
         return
 
@@ -109,6 +117,26 @@ def validate_startup_security(settings: Settings) -> None:
         provider in SUPPORTED_PROVIDERS,
         f"未知的 LLM provider：{provider!r}，受支持集合为 {sorted(SUPPORTED_PROVIDERS)}",
     )
+
+
+def is_loopback(value: str) -> bool:
+    try:
+        return ip_address(value).is_loopback
+    except ValueError:
+        return False
+
+
+def is_local_origin(value: str) -> bool:
+    try:
+        parsed = urlsplit(value)
+        return (parsed.scheme in {"http", "https"}
+                and parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+                and not parsed.username and not parsed.password
+                and not parsed.path and not parsed.query and not parsed.fragment
+                and parsed.port != 0
+                and value == f"{parsed.scheme}://{parsed.netloc}")
+    except ValueError:
+        return False
 
 
 __all__ = [

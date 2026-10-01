@@ -133,6 +133,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/session/entry-mode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Entry Mode */
+        get: operations["get_session_entry_mode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/session/local": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enter Local Session */
+        post: operations["enter_local_session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/session": {
         parameters: {
             query?: never;
@@ -390,6 +424,8 @@ export interface components {
             /** Total Units */
             total_units: number;
         };
+        /** LocalSessionEntry */
+        LocalSessionEntry: Record<string, never>;
         /** ModelSettingsClear */
         ModelSettingsClear: {
             /** Expected Version */
@@ -769,6 +805,11 @@ export interface components {
             /** Token */
             token: string;
         };
+        /** SessionEntryMode */
+        SessionEntryMode: {
+            /** Local Entry Enabled */
+            local_entry_enabled: boolean;
+        };
         /** SessionView */
         SessionView: {
             /** Project Ids */
@@ -783,6 +824,11 @@ export interface components {
              * @default
              */
             csrf_token: string;
+            /**
+             * Default Project Id
+             * @default
+             */
+            default_project_id: string;
         };
         /**
          * StageDetail
@@ -1297,6 +1343,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_session_entry_mode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionEntryMode"];
+                };
+            };
+        };
+    };
+    enter_local_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LocalSessionEntry"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionView"];
                 };
             };
             /** @description Validation Error */

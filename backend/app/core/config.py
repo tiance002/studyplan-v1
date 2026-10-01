@@ -86,6 +86,7 @@ class Settings:
     llm_allowed_hosts: tuple[str, ...] = ("api.openai.com", "api.deepseek.com")
     # Local/security-validation actor scope only; not the cloud open-registration claim design.
     planning_worker_actor_ids: tuple[str, ...] = ()
+    local_entry_enabled: bool = False
 
     @property
     def is_development(self) -> bool:
@@ -140,6 +141,7 @@ def get_settings() -> Settings:
         #: 唯一的生成协议版本；旧版单遍协议已废弃，不再是任何环境的默认值。
         graph_version=_env("GRAPH_VERSION", "b3f2-batch-v1"),
         repository_backend=_env("STUDYPLAN_REPOSITORY_BACKEND", "memory"),
+        local_entry_enabled=_env_bool("STUDYPLAN_LOCAL_ENTRY_ENABLED", False),
         local_session_token=_env("STUDYPLAN_LOCAL_SESSION_TOKEN", ""),
         local_actor_id=_env("STUDYPLAN_LOCAL_ACTOR_ID", "local_actor"),
         local_project_id=_env("STUDYPLAN_LOCAL_PROJECT_ID", "local_project"),

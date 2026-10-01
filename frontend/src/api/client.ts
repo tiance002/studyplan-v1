@@ -59,6 +59,8 @@ export const api = {
       "DELETE",
     ),
   session: () => request<DTO["SessionView"]>("/session"),
+  entryMode: () => request<DTO["SessionEntryMode"]>("/session/entry-mode"),
+  enterLocal: () => request<DTO["SessionView"]>("/session/local", {}),
   login: (body: DTO["CredentialsRequest"]) =>
     request<DTO["SessionView"]>("/auth/login", body),
   register: (body: DTO["CredentialsRequest"]) =>
@@ -100,3 +102,15 @@ export const api = {
       body,
     ),
 };
+
+export async function restoreSession(onMode: (local: boolean) => void): Promise<DTO["SessionView"]> {
+  const mode = await api.entryMode();
+  onMode(mode.local_entry_enabled);
+  try {
+    return await api.session();
+  } catch (error) {
+    if (mode.local_entry_enabled && error instanceof ApiError && error.status === 401)
+      return api.enterLocal();
+    throw error;
+  }
+}

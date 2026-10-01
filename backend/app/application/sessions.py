@@ -26,9 +26,24 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
+from app.core.config import Settings
+from app.core.errors import DependencyUnavailableError
 from app.domain.workspace.models import AuthContext
 
 __all__ = ["InMemorySessionStore", "SessionRecord"]
+
+
+def validate_local_binding(settings: Settings) -> None:
+    """Only explicit server configuration may select an existing identity/project."""
+    actor, project = settings.local_actor_id, settings.local_project_id
+    if (not actor or actor != actor.strip() or actor == "local_actor"
+            or any(c in actor for c in ",;\r\n")
+            or not project or project != project.strip() or project == "local_project"
+            or actor not in settings.planning_worker_actor_ids):
+        raise DependencyUnavailableError(
+            "本地入口绑定不可用：请在本机确认 STUDYPLAN_LOCAL_ACTOR_ID、"
+            "STUDYPLAN_LOCAL_PROJECT_ID 与 PLANNING_WORKER_ACTOR_IDS；不会创建新身份"
+        )
 
 
 @dataclass(frozen=True, slots=True)

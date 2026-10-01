@@ -297,6 +297,62 @@
         }
       }
     },
+    "/api/v1/session/entry-mode": {
+      "get": {
+        "summary": "Entry Mode",
+        "operationId": "get_session_entry_mode",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionEntryMode"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/session/local": {
+      "post": {
+        "summary": "Enter Local Session",
+        "operationId": "enter_local_session",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LocalSessionEntry"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/session": {
       "get": {
         "summary": "Get Session",
@@ -853,6 +909,12 @@
           "total_units"
         ],
         "title": "LearningWorkspaceView"
+      },
+      "LocalSessionEntry": {
+        "properties": {},
+        "additionalProperties": false,
+        "type": "object",
+        "title": "LocalSessionEntry"
       },
       "ModelSettingsClear": {
         "properties": {
@@ -1655,6 +1717,19 @@
         ],
         "title": "SessionEntry"
       },
+      "SessionEntryMode": {
+        "properties": {
+          "local_entry_enabled": {
+            "type": "boolean",
+            "title": "Local Entry Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "local_entry_enabled"
+        ],
+        "title": "SessionEntryMode"
+      },
       "SessionView": {
         "properties": {
           "project_ids": {
@@ -1672,6 +1747,11 @@
           "csrf_token": {
             "type": "string",
             "title": "Csrf Token",
+            "default": ""
+          },
+          "default_project_id": {
+            "type": "string",
+            "title": "Default Project Id",
             "default": ""
           }
         },

@@ -21,6 +21,7 @@ from app.api.v1.deps import CONTAINER_STATE_KEY
 from app.api.v1.model_settings_routes import router as model_settings_router
 from app.api.v1.routes import router as v1_router
 from app.api.v1.schemas import V1_SCHEMAS
+from app.api.v1.session_routes import check_local_request
 from app.api.v1.session_routes import router as session_router
 from app.api.v1.workspace_routes import router as workspace_router
 from app.application.container import AppContainer
@@ -70,11 +71,13 @@ def _install_error_handling(application: FastAPI) -> None:
 
     @application.exception_handler(RequestValidationError)
     async def _validation_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-        if request.url.path == "/api/v1/model-settings" or request.url.path.startswith("/api/v1/auth/"):
+        if (request.url.path == "/api/v1/model-settings"
+                or request.url.path.startswith("/api/v1/auth/")
+                or request.url.path.startswith("/api/v1/session")):
             # FastAPI's default validation response includes raw input, including
             # malformed API Key objects. Never echo input/ctx on this secret route.
             return JSONResponse(status_code=422,content={"detail":[
-                {"loc":error["loc"],"type":error["type"],"msg":"Invalid model setting value"}
+                {"loc":error["loc"],"type":error["type"],"msg":"Invalid value"}
                 for error in exc.errors()]})
         return await request_validation_exception_handler(request,exc)
 
@@ -123,7 +126,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
     Raises:
         StartupSecurityError: 生产配置中存在任一安全违规。
     """
-    settings = get_settings()
+    settings = container.settings if container is not None else get_settings()
     # 组合根把"声明可用"与"实际可用"对齐：校验失败即拒绝启动。
     validate_startup_security(settings)
     application = FastAPI(
@@ -148,6 +151,15 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
 
     # 容器：测试可注入；否则按配置装配（缺 DATABASE_URL 时业务端点返回 503）。
     setattr(application.state, CONTAINER_STATE_KEY, container or build_container(settings))
+
+    @application.middleware("http")
+    async def local_boundary(request: Request, call_next: Any) -> Any:
+        if settings.local_entry_enabled:
+            try:
+                check_local_request(request, getattr(application.state, CONTAINER_STATE_KEY))
+            except AppError as exc:
+                return JSONResponse(status_code=exc.http_status, content=exc.to_view())
+        return await call_next(request)
 
     _install_request_id(application)
     _install_error_handling(application)

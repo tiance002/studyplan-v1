@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { api, ApiError, setCsrfToken } from "./api/client";
+import { api, ApiError, restoreSession, setCsrfToken } from "./api/client";
 import type { DTO, Page } from "./api/types";
 import { AuthPage } from "./features/auth/AuthPage";
 import { AppShell } from "./components/AppShell";
@@ -29,6 +29,7 @@ const pages: Page[] = [
 function App() {
   const [session, setSession] = useState<DTO["SessionView"] | null>(null),
     [loading, setLoading] = useState(true);
+  const [localEntry, setLocalEntry] = useState<boolean | null>(null);
   const [workspace, setWorkspace] = useState<
       DTO["LearningWorkspaceView"] | null
     >(null),
@@ -41,7 +42,7 @@ function App() {
   const [position, setPosition] = useState({ stage: "", node: "", storageKey: "" });
   const [fake, setFake] = useState<boolean | null>(null);
   const stageId = position.stage, nodeId = position.node;
-  const project = session?.project_ids[0] || "";
+  const project = localEntry ? session?.default_project_id || "" : session?.project_ids[0] || "";
   const positionKey = workspace ? `studyplan-position:${session?.username}:${project}:${workspace.plan.revision}` : "";
   function navigate(p: Page) {
     location.hash = p;
@@ -52,8 +53,7 @@ function App() {
     setSession(s);
   }
   useEffect(() => {
-    api
-      .session()
+    restoreSession(setLocalEntry)
       .then(accept)
       .catch((e) => {
         if (!(e instanceof ApiError && e.status === 401)) setError(e.message);
@@ -118,6 +118,15 @@ function App() {
     }
   }
   if (loading) return <div className="loading">正在恢复学习空间…</div>;
+  if (!session && localEntry !== false)
+    return (
+      <div className="content" role="alert">
+        <h1>本地学习空间尚未就绪</h1>
+        <p>{error || "本地会话已关闭。重新进入将恢复原学习空间。"}</p>
+        <p>请在本机核对原 actor、Project 绑定和 Worker 范围，不会注册或创建替代身份。</p>
+        <button onClick={() => location.reload()}>重新进入</button>
+      </div>
+    );
   if (!session)
     return (
       <>
