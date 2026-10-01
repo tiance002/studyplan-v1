@@ -31,7 +31,7 @@ LLM_REPAIR_OUTPUT_TOKENS=8000
 
 ## 已运行证据与余额
 
-专用隔离G1验收实际执行模型20次（含1repair），有结果20、未知0；累计 **20/50**。Tavily预检和G2实际页面各一次HTTP200、各1credit，累计 **2/1000**。G2 request_id `6cbd7349-21f3-43a4-91a5-aaf32207d55c`。三项搜索配置足够，不需另装SDK或搜索模型。后续切片不重置额度。详情见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)与[G2资源报告](../acceptance/G2-resources-2026-10-01.md)。
+专用隔离G1验收实际执行模型20次（含1repair），G3新验收单次总结反馈1次；累计 **21/50**，有结果21、未知0。Tavily预检和G2实际页面各一次HTTP200、各1credit，累计 **2/1000**。G2 request_id `6cbd7349-21f3-43a4-91a5-aaf32207d55c`。三项搜索配置足够，不需另装SDK或搜索模型。后续切片不重置额度。详情见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)、[G2资源报告](../acceptance/G2-resources-2026-10-01.md)与[G3总结报告](../acceptance/G3-summaries-2026-10-01.md)。
 
 产品0013的计数器按单部署数据库持久累计，所有账号共用，不因请求失败退还；0禁用派发，最高1000。验收另沿用.git/v2-search-quota-20261001，在每个真实HTTP前独占预约，跨隔离库累计已有2次，不能用新库计数0重置本轮授权。重复同键只读已有状态，结果未知保留记录，不自动重派；正常只读恢复可按幂等键GET查询。
 
@@ -44,3 +44,5 @@ GitHub提供[远程MCP与宿主集成说明](https://github.com/github/github-mc
 后续应用维护者注册App并配置client ID/client secret/固定callback URL，普通用户只做浏览器授权。具体环境变量和回调路径在实现契约确定后写入.env.example，当前尚未接线。现有`GITHUB_TOKEN`仅为历史服务端字段，不作为所有用户共享账号连接；公开候选和手动URL接入可先独立实现。
 
 用户已在官网看到搜索消费，确认密钥有效；无需为此重复发送搜索。GitHub维护者配置入口是GitHub账号 **Settings → Developer settings → GitHub Apps**。这里注册本软件的App、取得Client ID、创建Client secret并登记与后端实现完全一致的Callback URL。普通用户无需填写这些维护者凭证，只在浏览器确认自己的账号和仓库授权。当前Callback路由和App配置尚未实现，不填写猜测的回调地址；也不把Codex插件的凭证或账号连接复制给本软件。
+
+2026-10-01续接核对官方用户授权文档：GitHub App的浏览器流程支持S256 PKCE；授权请求携带随机state与固定redirect_uri，回调校验state后用code、client_secret和code_verifier换取用户token。用户token权限是用户与App权限的交集，访问仓库也取双方可访问仓库的交集；App安装与账号授权须分别显示。后续薄集成依此实现服务端一次性会话绑定与按账号加密存储，不由前端存token，也不把手动URL或OAuth页面打开当作连接成功。此为下一实施契约的来源核对，当前账号连接仍未实现，实际授权验收NOT RUN。[GitHub官方授权流程](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app)

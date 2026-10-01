@@ -12,14 +12,14 @@
 | F06 | Exposure/进度/跳过/返回/历史 | IMPLEMENTED | 完整位置独立四态/CAS/幂等/不可变知识与来源快照、旧版本历史真实PG PASS；Chrome+真实HTTP+PG开始/完成/跳过/返回/刷新PASS。稳定逻辑模块身份与完整重规划链由F03/F13继续核对，负责人体验NOT RUN |
 | F07 | 项目/单元/节点资料偏好覆盖 | IMPLEMENTED | 三层完整设置优先级、CAS、恢复继承保留版本、双层旧值修复PG PASS；生成冻结/搜索实际偏好接入HTTP PASS，Chrome项目/单元保存恢复刷新PASS、节点界面mock PASS。负责人体验NOT RUN |
 | F08 | 真搜索/资源替换/GitHub/手动接入 | IMPLEMENTED | Tavily实际API+Chrome+PG候选选取/手动GitHub URL/刷新回读PASS，累计2/1000；受控主线差异→确认新版本→私人资料明确沿用→旧进度保留Chrome+真实HTTP+PG PASS。GitHub账号OAuth仍未接线，手动URL不代表账号连接 |
-| F09 | 总结/反馈/修订/历史 | NOT_STARTED | SummaryAttempt/Review与评审节点已有基础；用户保存/真实反馈API及界面未接 |
+| F09 | 总结/反馈/修订/历史 | IMPLEMENTED | 原文保存/CAS/幂等/不可变修订/分页与旧版档案、单次有界反馈已接；规则+PG41及契约/HTTP12 PASS，Chrome+真实模型+HTTP+PG原文先存/反馈绑定旧版/新版与编辑保留/刷新PASS。负责人体验NOT RUN，见G3报告 |
 | F10 | 主项目/阶段任务/知识/标准 | IMPLEMENTED | 规划可产生practice基础；用户自选项目及任务完整业务链待接 |
 | F11 | 方案/Prompt评审/修订/指定导出 | NOT_STARTED | 领域基础存在，Prompt工作台未接；超时/冲突原文保全和绑定导出待实证 |
 | F12 | 成果/证据/验收/补充 | NOT_STARTED | EvidenceGrade/Verification基础存在；提交/实际验收链未接 |
 | F13 | 局部修改/全路线新版本/历史 | IMPLEMENTED | 首个受控操作为阶段主线替换，差异/来源冻结/新版本/CAS/幂等/旧Exposure与资料保留实际PG和Chrome PASS；其它受控操作及总结/成果原文完整保全仍待G3/G4验收 |
 | F14 | Outcome成果归集 | NOT_STARTED | 尚无实际任务/证据归集页面与服务 |
 | F15 | Seed导入/校验/DB发布/审核边界 | IMPLEMENTED | 0011完整payload、严格校验、幂等/冲突回滚/DB目录/CLI：16规则+真实PG PASS；真生成使用发布Agent v2。三Blueprint内容及新网页审核仍待补 |
-| F16 | 真模型/持久任务/取消/恢复 | IMPLEMENTED | 真云模型20/50请求，9阶段/27必需节点/unknown0；短任务、冻结绑定、锁后fence、崩溃草案复用已实测；完整用户恢复/故障UX后续验收 |
+| F16 | 真模型/持久任务/取消/恢复 | IMPLEMENTED | 真云模型累计21/50请求，G1九阶段/27必需节点及G3一次总结反馈，unknown0；短任务、冻结绑定、锁后fence、崩溃草案/反馈复用已实测；完整用户恢复/故障UX后续验收 |
 | F17 | 独立RAG真实薄集成 | BLOCKED | Port已定义；RAG_BASE_URL/RAG_API_KEY未配置，无真实检索/越权/故障证据 |
 | F18 | 成品界面/启动/部署/备份恢复 | IMPLEMENTED | React/服务基础已有；本轮真实构建、完整流程、独立恢复和授权交付未完成 |
 
@@ -42,7 +42,7 @@
 | Q07 | 重规划历史、Exposure独立记录 | NOT RUN：G2 Exposure不同位置/版本独立、旧历史/原receipt保留PG PASS；G4总结/Prompt/成果完整新版本链待接 |
 | Q08 | 搜索/资源/RAG故障显式降级 | NOT RUN：Tavily真实成功及离线故障/未知/单元资源隔离PASS；完整真实故障矩阵和RAG契约仍缺 |
 | Q09 | 合法JSON非法引用阻断 | NOT RUN：现有校验基础与新Seed目录绑定须实测 |
-| Q10 | Summary/Prompt失败原文不丢、正确导出 | NOT RUN：G3用户写入链待接 |
+| Q10 | Summary/Prompt失败原文不丢、正确导出 | NOT RUN：Summary不可变原文、失败/取消/unknown、409与迟到反馈规则/真实PG/Mock PASS，真实反馈及新原文/编辑保全Chrome PASS；Prompt修订与指定导出待接 |
 | Q11 | 可查询status_url、终态停轮询、错误可操作 | PASS：G1实际PG status_url直接200，浏览器终态停止轮询、刷新/409保留编辑 |
 | Q12 | 构建/启动/重登录/独立备份恢复 | NOT RUN：构建/隔离启动/重登录已PASS，独立备份恢复待G6 |
 

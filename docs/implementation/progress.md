@@ -1,6 +1,6 @@
 # V2.0实施进度（唯一当前检查点）
 
-日期：2026-10-01。整体 **NOT_READY**；目标仍为F01–F18、G0–G6、Q01–Q12和用户实际验收。G1技术纵向链已实测，G2真实搜索/单元资料第一批已实测，继续G2余项。
+日期：2026-10-01。整体 **NOT_READY**；目标仍为F01–F18、G0–G6、Q01–Q12和用户实际验收。G1技术纵向链与G2搜索、学习控件、受控主线替换已实测；当前进入G3总结保存、反馈和修订历史，GitHub授权及RAG局部缺口继续保留。
 
 ## 基线与归属
 
@@ -12,7 +12,7 @@
 
 root实际turn_context为gpt-6.1-sol/high。此前仅根据工具返回将子代理实际解析记为NOT OBSERVABLE；用户追问模型显示后补查本机JSONL的session_meta父线程/agent_path与最新turn_context，已获得运行证据：Gauss/g1_credentials为gpt-6.1-sol/medium，Kuhn/g1_short_generation为gpt-6.1-sol/high，Helmholtz/g1_seed为gpt-6.1-sol/medium，Lovelace/g1_binding_review为gpt-6.1-sol/high。这些既有代理没有使用Luna Max；复用工具followup_task/send_message没有model/effort参数，本轮新增代理又被agent thread limit拒绝。不能把提示词或失败spawn当路由证据，未改全局配置。之后派发说明同时展示任务、日志核实模型/effort和复用/新建状态；低风险可新建时明确路由Luna Max，工具限制时报告限制，不把Sol标为Luna。原始实现者报告保留其当时可观测判断，以本条补充审计为准。
 
-用户授权累计模型50请求、Tavily1000请求：**模型20/50，搜索2/1000（2credit）**，下一切片不重置。20模型及2实际搜索均有结果/回执，外部unknown0。Tavily三项配置已存在，预检和G2实际API/PG/Chrome成功。RAG地址/契约/凭证缺失，只阻塞其实际调用；公网部署未授权。GitHub浏览器授权需求已记录，尚未注册App或安装MCP；手动GitHub资料不是账号连接。见[外部服务](external-services.md)。
+用户授权累计模型50请求、Tavily1000请求：**模型21/50，搜索2/1000（2credit）**，下一切片不重置。21模型及2实际搜索均有结果/回执，外部unknown0。G3新增一次真实总结反馈。Tavily三项配置已存在，预检和G2实际API/PG/Chrome成功。RAG地址/契约/凭证缺失，只阻塞其实际调用；公网部署未授权。GitHub浏览器授权需求已记录，尚未注册App或安装MCP；手动GitHub资料不是账号连接。见[外部服务](external-services.md)。
 
 模型沿用DeepSeek Flash/cap8000，专用验收structure/repair目标8000，不提升cap、不改私有.env。免费预检先因缺dotenv和预算不一致FAIL；复用加载语义、限制目标后PASS。派发前append-only计量：.git/v2-paid-quota-20261001/request-01..20.json及result；搜索.git/v2-search-quota-20261001/request-0001..0002.json及result。未知结果阻断继续，禁止修改记录或重跑同AcceptanceId。产品计数器按单部署DB，验收跨库仍由.git计量承接旧消费。
 
@@ -78,3 +78,29 @@ Tests/Evidence：规则/契约→隔离PG归属/CAS/幂等/取消竞争/目录�
 当前专用PG已到0017并受控导入Agent v3，旧v2 payload不动。旧30734/PID11360 controls服务按命令路径核验后关闭；当前session23755、8021/PID28388为var/v2-g2/replacement_acceptance_server.py，Acceptance03、无modelworker、搜索累计wrapper承接2次。前端5175/PID41308不变；原8000/5432/11434未重启。新的真实浏览器脚本完成报告后拒绝重跑；若未来仅观察恢复，读取既有结果，不重新创建proposal。累计仍模型20/50、搜索2/1000，unknown0。GitHub账号授权未接线、真实RAG缺契约仍局部BLOCKED，整体Goal保持active/NOT_READY；下一独立切片为GitHub薄授权与G3总结/Prompt原文历史，继续F01–F18。
 
 G2第三批代码已正常commit/push，远端存在SHA `a294078b590d0f8a5d04c652b0c7d0af22fd8aea`，ls-remote与本地相等；未改develop/master。随后本验收/当前检查点/服务配置及矩阵文档提交需续接读取实际HEAD，不猜SHA。Ruff受影响Python/diff/新真实脚本syntax/秘密忽略规则及两份原指导hash PASS。业务编辑已停止；只有原禁操作目录未跟踪，不清理或提交。
+
+## G3第一批执行边界（进行中）
+
+上一轮分类：progress，依据本机session_meta与turn_context核实了四个既有代理的实际模型，纠正“不可观测”记录。当前实际HEAD `891208188bb7b242ade5fda739d2aa1a881d6de1`，业务工作区无未提交内容；既有禁操作目录不动。本批复用Kuhn/SolHigh与Gauss/SolMedium；followup没有模型切换参数，不能假称新路由。
+
+Goal：用户结束学习时按两项固定问题和一项情境问题写简短总结；原文先明确保存，保存成为不可变修订；随后可选择真实模型反馈，反馈绑定该修订，旧原文/反馈及计划版本仍可读。失败、迟到、刷新与409不覆盖本地编辑。此批是F09/Q10的增量，不取代G3主项目、阶段任务、Prompt评审/导出及完整F01–F18目标。
+
+Ruling：V2简短总结允许1–20,000个Unicode码点的非空白原文，保存时保留所有空白；旧领域50字符下限不再作为保存门禁。原文保存不发模型、不改变Exposure/掌握。反馈为引导，不能成为强制通关或证据验收。每个新出现位置独立CAS头，attempt_no保留单元全局递增的既有约束；历史缺少位置/快照的旧记录显式标明来源不完整，不冒充新版本事实。
+
+Constraints/Non-goals：保留服务端owner/project scope、RLS、现有ai_jobs/ai_runs与付费Attempt账本、不盲重派unknown、同事务lease/cancel/owner fence。复用现有load→review→validate→persist有界评审执行器，不新增通用工作流/第二套队列。原服务/数据库、历史Run/草案/checkpoint/journal不操作；不外发原用户私有内容；真实新验收只使用隔离测试账号自建内容并承接累计额度，先免费preflight。模型20/50、搜索2/1000，目前无新增调用。
+
+Allowed changes/Ownership：Kuhn/SolHigh拥有总结领域、Port、Application、DB/API/测试、新0018及必要0019窄领取扩展、现有queue/provider账本与评审的有界接入；Gauss/SolMedium拥有总结前端、客户端方法及独立浏览器Mock。root拥有公共契约裁决、组合根/容器/路由注册、生成OpenAPI、证据与实际验收。两人编辑业务时root只维护文档及只读核查。模型绑定/预算/同键异体及结果写入事务由High负责。
+
+Tests/Evidence：先原文/短文/CAS/幂等/跨账号/不可变历史规则与真实PG，再异步反馈一次派发、原文先落库、未知恢复/取消/lease/迟到结果性质；前端Mock覆盖网络/409/迟到反馈/终态停轮询，再用专用PG和Chrome验证真实保存/反馈/刷新。当前新测试NOT RUN，不以Mock或静态检查代替真实反馈。新迁移只增量，不改已发布迁移。
+
+Rollback：保留已有有效历史及收费证据，仅本feature分支正常增量commit/push；非空总结/回执历史不允许破坏性downgrade。未完成全Goal不合并develop/master、不标milestone；缺GitHub App/RAG配置仅暂停相关实际分支。
+
+本批收口：两名业务代理均已停止编辑。最终总结unit/真实PG及既有queue/budget41项PASS exit0；root公共契约9/真实HTTP3组合12项PASS exit0。OpenAPI、生成类型、frontend4单元、build与最新Chrome Mock PASS。只读review发现头/窗口快照不一致P2，单SQL读和真实PG barrier已修复；root发现private来源进入反馈payload的P1，白名单projection保留本地完整快照，真实PG RED→GREEN。root首批HTTP因不存在actors夹具FAIL，修为实际auth_users后最终组合PASS；早期失败详见[G3报告](../acceptance/G3-summaries-2026-10-01.md)，不重标。
+
+新AcceptanceId v2-g3-20261001-01，免费preflight PASS，Chrome+真实HTTP+专用PG+实际deepseek-flash一次反馈PASS，Run run_824fccdb1b8848b1bd9d614b1df76df0 succeeded。原文先保存，排队期间再保存新版并继续未保存编辑；反馈仍绑定第一版，新版/编辑及Exposure不变，刷新读回两版原文和历史反馈。RLS只读检查1 succeeded Attempt、unknown0，当前新journal/evidence按已有工具收口；旧ID不动。累计模型21/50、搜索2/1000。
+
+当前服务：旧23755/PID28388按命令路径核验后关闭；新session21096为var/v2-g3/summary_acceptance_server.py，8021 listener PID38980（Python launcher PID53156），受控最多新派发1次，现已消费。前端5175/PID41308仍在，原8000/PID43688未操作。专用业务库studyplan_test_v2g1real_2f6ac462迁移到0019；cp库不变。var/v2-g3保存实现者报告、分阶段回执、预检、真实浏览器JSON/PNG及只读Run元数据，禁止提交私密原文与账号文件。后续只GET保留结果，不盲重跑新服务器/验收。
+
+下一条安全动作：继续G3主项目/阶段任务和Prompt评审/修订/指定导出，保持一次反馈引擎及历史保全；GitHub薄授权与RAG真实契约局部缺口另记。F09技术第一批已IMPLEMENTED，负责人体验NOT RUN；整体active/NOT_READY，未合并develop/master或接受milestone。
+
+G3本批代码167345827a61049450f0f35c37f0075425e4a19c已正常push，ls-remote与本地相等；develop/master未改。验收/路由显示说明/当前检查点文档提交随后承接，续接读取实际HEAD。秘密忽略规则、两份原指导hash、Ruff/diff及浏览器脚本syntax PASS。只剩原禁操作目录未跟踪，不处理它们。
