@@ -128,3 +128,35 @@ Tests/Evidence：先规则/真实PG/CAS/幂等/归属/取消/未知/隐私/导�
 本批代码 `dff7fc10eaed1339b3ec40134a8d9d347c546ca8` 已正常commit/push并ls-remote核对存在；仅31个白名单代码/契约/前端/测试文件提交，未提交原禁操作目录。实际服务：先后按精确命令路径停止自有summary listener38980及失败Prompt listener4368，当前session94246、8021/PID33812为prompt_corrected_acceptance_server.py；前端5175/PID41308保留，原8000/PID43688、PG/PID8124、Ollama/PID22760未重启。专用业务库增量到0020，cp库不变；当前wrapper已消费唯一派发，不盲重启。
 
 F11技术第一批IMPLEMENTED/Integrated，Q10代表技术门禁PASS；负责人体验NOT RUN。见[G3 Prompt报告](../acceptance/G3-prompts-2026-10-01.md)。下一安全动作为G3/F10自选主项目和阶段任务的受控Proposal→差异→明确确认新计划版本，保留旧Summary/Prompt/Exposure及来源；随后推进G4成果/Outcome及其余缺口。GitHub App与RAG缺契约仅暂停对应实际分支，整体继续active/NOT_READY，不合并develop/master或标milestone。本验收文档提交后的实际HEAD续接时读取，不猜SHA。
+
+## G3第三批执行边界（进行中）
+
+基线为已核对远端 `6fb56dbdd81f83d76e11383ab4e3642698b9663b`；上一业务轮分类progress（F11真实失败/成功与指定版本导出、代码/文档已推送）。模型23/50、搜索2/1000、unknown0。原服务不变，自有8021的已消费验收wrapper不再次派发。本批不调用模型/搜索。
+
+Goal：用户沿用候选主项目或填写自己的项目，修改/添加阶段任务、明确交付物/范围/知识/验收标准，先看完整差异与历史影响，再确认新PlanRevision；旧实体与Summary/Prompt/Exposure/成果历史保留。不会把手写方案或新任务标为已验收。
+
+Constraints/Ruling：复用现有PlanPublicationService及同事务发布/私人选择复制；现有publisher仅保存task链接，正文不在结构指纹内，禁止原位改旧project/task正文。项目内容变化时新project及对应tasks；只改任务时保持project和未变task身份，更新任务为服务端新ID/key并保存精确前身lineage，保留UNIQUE(practice_project_id,stable_key)。知识ID不变，只允许当前计划引用的节点及合法角色，至少一core。新任务pending，历史不冒充新证据；受保护草案不能绕过预览入口普通发布/编辑/取消。
+
+Allowed changes/Ownership：Kuhn（复用gpt-6.1-sol/high）拥有新practice_changes领域/Port/Application/DB/API、0021、新测试及窄plan_repository guard/resource_changes复制与digest helper提取；Gauss（复用gpt-6.1-sol/medium）拥有新PracticeChangePanel/客户端/Mock、PromptPage嵌入与旧路线未保存原文可见恢复、main回调和局部样式。root冻结公共契约/迁移编号并拥有后续组合根/生成类型/实际验收；双业务代理编辑期间root只写本进度/ignored证据，读取必要边界，不写业务代码。契约var/v2-g3/practice-change-contract.md，事实映射practice-version-map.md；按已接受V2连续实施授权推进，不重复请求普通设计授权。
+
+Tests/Evidence：当前本批NOT RUN。规则→隔离PG原文/旧实体保全、归属/CAS/幂等、绕过拒绝、basis/private/source漂移、取消与发布竞争、事务注入回滚→HTTP/生成类型/build/Chrome Mock→自有真实PG+Chrome无费用发布新版本与旧历史回读。独立事实映射已完成，NOT RUN测试、不当作验收。Non-goals：不执行外部代码、不建新工作流/通用Proposal框架；其它F13操作及全路线重规划仍须后续切片。Rollback为普通增量Git，非空新历史拒绝破坏性降级；不写原数据库、旧Run/Draft/journal，不合并master/milestone，整体active/NOT_READY。
+
+本批追加边界：Kuhn已完整读冻结契约并开始规则/实际PG RED；其发现guard读取保护标记早于advisory等待，root同意将resource/practice闭合保护重查放在advisory之后并锁draft，同批用PG barrier证明拒绝绕过，不扩大通用框架。Gauss前端仍编辑中。collaboration.list_agents已确认两者running，并针对它们执行一次60秒有界wait（未完成）；不得以观察超时当作终止/重启。当前没有本批完成测试声明，后续先读真实回传/当前文件，不重复已有效F11收费验收。RAG/GitHub配置presence-only本机检查仍MISSING，不打印端点/密钥；只暂停相应实际接口。
+
+2026-10-02跨日续接：仍同一Goal/分支/累计授权，不重置.git/v2-paid-quota-20261001（23/50）或搜索（2/1000）。Kuhn报告advisory保护标记barrier原4FAIL→锁后重查4PASS exit0 9.26s（save/publish×resource/practice），0021在新隔离harness upgrade；主preview从事务stub RED1开始，未完成整体PG声明。Gauss首轮Chrome Mock与build PASS，临时DTO遵守冻结契约，旧路线脏Prompt已有可见恢复/复制，尚在补预览元数据与回归，未STOP；实际HTTP/PG/浏览器NOT RUN。新验收日期按实际执行记录，原指导/已完成历史报告不因跨日重写。
+
+Gauss（实际gpt-6.1-sol/medium）已BUSINESS EDITS STOP；root（实际gpt-6.1-sol/high）随后成为第二个业务写者，拥有组合根/main/生成类型与HTTP测试，Kuhn（实际gpt-6.1-sol/high）继续后端事务及其PG验证。metadata-only route auditor再次核实上述路由；历史Helmholtz为Sol/medium，Lovelace有Sol/high日志但pending_init不能当作活跃复核。未成功创建Luna，不声称低风险任务已经改走Luna。
+
+Root实际Cookie/CSRF/隔离PG HTTP：新入口404 RED→服务装配/路由/私密422后3 PASS；中间测试把未确认警告的DomainError误期望为422，实际400，修正测试后PASS（字段无效仍422）。新窄知识角色DTO输入后HTTP3+契约9 PASS exit0。OpenAPI/gen aliases/build52模块/frontend4单元 PASS；第一次接generated aliases因旧Prompt知识role为宽string而TS FAIL，新PracticeChangeTaskKnowledgeView仅收紧本接口响应角色为三枚举后build PASS，不改旧Prompt DTO。
+
+Gauss复用只读复核报告一项P2：主项目clone→refresh保留旧form.projectId，而选择器显示新项目，后续提交错目标。Root先新增定向Mock FAIL，再显示旧目标占位、明确选择新项目时保留本地文字、旧任务不自动赋新身份且核对前禁预览，Mock PASS exit0；另无实践项目context初挂载缺空状态已定向FAIL→最小null form/空提示→PASS。已解决，不延期。受guard新输入影响的PlanRepository/PlanningJobs/Publication72用例 PASS exit0，非模型调用。
+
+Kuhn最新完整Practice PG29 PASS exit0 47.23s；其新增basis结构指纹调用漏括号导致中间20 FAIL/9 PASS，修复后重跑29 PASS，失败如实保留。最终规则/Ruff及受影响Resource PG仍在执行，尚未STOP。Root准备新无费用手动Acceptance `v2-g3-20261002-01`，但专用0021迁移/服务重启/实际Chrome发布仍NOT RUN；不因准备脚本声称实际验收。原8000/PG/Ollama和5175核对PID保持，当前owned8021仍已消费Prompt wrapper，累计23/2不重置。
+
+本批收口：Kuhn BUSINESS EDITS STOP，最终规则6+Practice PG29+Resource PG17组合52 PASS exit0 74.02s；追加双pending预览竞争及旧Prompt历史2 PASS exit0 7.66s，去重覆盖全部30新PG；其owned11文件Ruff PASS。根组合根/HTTP/生成类型已接；定向Mock新增空context、clone后旧项目/旧task与stage ID更新的RED→GREEN恢复防线，最终Mock/build52模块/前端4单元 PASS。按现有publisher新stage/assignment ID重映射核对冻结资源内容，只读脚本原错误逐字ID断言FAIL已注明，最终owner RLS只读PASS，未重发业务。
+
+新无费用Acceptance `v2-g3-20261002-01` 实际Chrome+HTTP+保留PG PASS exit0：专用库0020→0021，新自选主项目和任务预览后明确确认，Plan2→3，clone30。提案pcp_f4088a2bc95a4cd69bf14b76d3f19b4d confirmed，preview/confirm两回执。旧project/tasks正文、2版Summary/2版Prompt/反馈/两种已存export及旧Plan2 Exposure观察保持；该Plan2实际记录Exposure0，非空旧进度由PG策略用例证明，不扩大浏览器证据。新task pending、新Prompt空、新Exposure not_started/v0。旧Plan未保存原文可见只读并复制，Windows LF→CRLF归一相同；刷新新路线/旧历史PASS，两PNG已看。模型23/50/search2/1000/unknown0不变，没有新Run/付费journal。
+
+精确核对后只停自有旧8021/PID33812，当前自有practice_acceptance_server.py session43312、8021/PID22376无模型Worker/外部派发；原8000/PID43688、PG/PID8124、Ollama/PID22760与5175/PID41308保持。完成的实际脚本拒绝重跑，部分intent必须先读取已知提案/当前路线。F10技术Implemented/Integrated，负责人体验NOT RUN；F13其它操作、F12/F14及全功能缺口继续，整体active/NOT_READY。
+
+代码 `e01b82ad47fea1db0c24e37b3f0463d18c3ace1d` 已正常commit/push，GitHub ls-remote一致，24个白名单文件；两指导文档原hash不变。详细[G3实践报告](../acceptance/G3-practice-changes-2026-10-02.md)与ignored前后端包/实际分阶段元数据。文档提交随后承接，续接读取实际HEAD。未合并develop/master、标milestone或代负责人接受。下一安全动作G4/F12成果及可检查证据/分级验收，F14Outcome归集；缺GitHub/RAG配置仅暂停相关实际分支。

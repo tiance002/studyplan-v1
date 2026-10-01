@@ -45,4 +45,6 @@ GitHub提供[远程MCP与宿主集成说明](https://github.com/github/github-mc
 
 用户已在官网看到搜索消费，确认密钥有效；无需为此重复发送搜索。GitHub维护者配置入口是GitHub账号 **Settings → Developer settings → GitHub Apps**。这里注册本软件的App、取得Client ID、创建Client secret并登记与后端实现完全一致的Callback URL。普通用户无需填写这些维护者凭证，只在浏览器确认自己的账号和仓库授权。当前Callback路由和App配置尚未实现，不填写猜测的回调地址；也不把Codex插件的凭证或账号连接复制给本软件。
 
+2026-10-02 G3/F10手动实践变更实际Chrome+HTTP+保留PG PASS，新模型请求0、搜索0；累计仍23/50和2/1000、unknown0。专用验收无模型Worker且阻断外部派发，只有预览/明确确认普通事务，不创建付费Run或沿用旧Acceptance journal。详见[G3实践报告](../acceptance/G3-practice-changes-2026-10-02.md)。
+
 2026-10-01续接核对官方用户授权文档：GitHub App的浏览器流程支持S256 PKCE；授权请求携带随机state与固定redirect_uri，回调校验state后用code、client_secret和code_verifier换取用户token。用户token权限是用户与App权限的交集，访问仓库也取双方可访问仓库的交集；App安装与账号授权须分别显示。后续薄集成依此实现服务端一次性会话绑定与按账号加密存储，不由前端存token，也不把手动URL或OAuth页面打开当作连接成功。此为下一实施契约的来源核对，当前账号连接仍未实现，实际授权验收NOT RUN。[GitHub官方授权流程](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app)
