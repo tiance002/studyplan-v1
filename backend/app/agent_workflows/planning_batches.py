@@ -905,7 +905,10 @@ def build_batched_planning_graph(nodes: Any, *, checkpointer: Any = None) -> Any
     # so ``current_structure_index`` ends at the full batch count.
     graph.add_conditional_edges("advance_structure_batch", route_after_advance_structure, {
         ROUTE_GENERATE_STRUCTURE: "generate_structure_batch", ROUTE_GENERATE_PRACTICE: "generate_practice_batch"})
-    graph.add_edge("repair_batch", "validate_structure_batch")
+    graph.add_conditional_edges("repair_batch", route_after_batch_repair, {
+        "validate_structure_batch": "validate_structure_batch",
+        "validate_practice_batch": "validate_practice_batch",
+        ROUTE_FAIL: "record_failure"})
     graph.add_edge("generate_practice_batch", "validate_practice_batch")
     graph.add_conditional_edges("validate_practice_batch", route_after_practice_validate, {
         ROUTE_REPAIR: "repair_batch", ROUTE_ADVANCE_PRACTICE: "advance_practice_batch",
@@ -943,6 +946,18 @@ def route_after_structure_validate(state: PlanningState) -> str:
     if int(state.get("repair_count", 0)) >= int(state["manifest"]["max_repairs"]):
         return ROUTE_FAIL
     return ROUTE_REPAIR
+
+
+def route_after_batch_repair(state: PlanningState) -> str:
+    """Revalidate the repaired batch kind; refuse failed or unknown targets."""
+    if state.get("generation_errors"):
+        return ROUTE_FAIL
+    kind = (state.get("repair_target") or {}).get("kind")
+    if kind == "structure":
+        return "validate_structure_batch"
+    if kind == "practice":
+        return "validate_practice_batch"
+    return ROUTE_FAIL
 
 
 def route_after_advance_structure(state: PlanningState) -> str:
@@ -1003,6 +1018,7 @@ __all__ = [
     "practice_payload",
     "recursion_limit",
     "route_after_merge",
+    "route_after_batch_repair",
     "route_after_normalize",
     "route_after_practice_validate",
     "route_after_skeleton",
