@@ -4,7 +4,7 @@
 
 ## 基线与归属
 
-正式目录D:\studyplan；origin=tiance002/studyplan-v1。起点develop为aa37e4bfa33a41aadb4cb689557e2c7d491d550f；工作分支feat/v2-g1-user-slice。V2入口54c7d3e及G1代码be802e27dfa131ee232d07d40d9650dbd9d5ac21/验收6713c18已推送。G2资源代码本地提交237d8c3f385de04f432eeaeca37c3269af0e6f64，检查点保存后待推送。本轮业务编辑均停止，未提交内容仅本轮验收文档。既有.workbuddy/和design-preview/禁止操作/提交。develop/master不变，未接受milestone。
+正式目录D:\studyplan；origin=tiance002/studyplan-v1。起点develop为aa37e4bfa33a41aadb4cb689557e2c7d491d550f；工作分支feat/v2-g1-user-slice。V2入口54c7d3e及G1代码be802e27dfa131ee232d07d40d9650dbd9d5ac21/验收6713c18已推送。G2资源代码237d8c3f385de04f432eeaeca37c3269af0e6f64及验收73e9f8466660d98a8286be056aad47301dd2d4b2也已推送。本轮业务编辑均停止；下一轮先核对实际HEAD/状态，不重做已有效验收。既有.workbuddy/和design-preview/禁止操作/提交。develop/master不变，未接受milestone。
 
 原后端8000、PG5432、Ollama11434未重启。原业务库迁移0010，13账号/18项目/26Run，盘点只读；旧waiting_user、unknown、Acceptance09及live journal未处理。原文哈希保持：指导7531B8DA74B043D169E8AE6DFEB1BB738747A0BE936E15B1934C53416D974F35，Goal D4DBCF0FD8F72CDE53385C307F1CCED02F81DC9D7E4449A1A17C4731A350E13B。文件专属whitespace规则保留CRLF及Markdown双空格，不改原文。
 
@@ -43,4 +43,4 @@ root实际turn_context为gpt-6.1-sol/high；认证/Seed请求SolMedium，短生�
 
 忽略目录var/v2-g1与var/v2-g2包含代理report、短生成日志、真实report/browser JSON、PNG、Tavily预检/新回执和有计量的专用server脚本。*-browser-private.json有测试账号秘密，禁止打印/提交。保留收费证据和专用库，复用未失效检查。
 
-下一条安全动作：推送当前G2代码/证据到既有feature分支，不宣称master里程碑接受。继续G2 Exposure独立出现位置/进度/跳过/返回/历史及局部偏好/六角色。复用plan_unit_links、KnowledgeNode稳定键及既有四态规则，不把单元完成当模块掌握，不污染旧计划版本。GitHub账号OAuth尚需维护者App配置，RAG缺契约仅暂停对应真实调用。每批先固定契约/迁移编号与归属，不重复G0审计。
+下一条安全动作：继续G2 Exposure独立出现位置/进度/跳过/返回/历史及局部偏好/六角色。复用plan_unit_links、KnowledgeNode稳定键及既有四态规则，不把单元完成当模块掌握，不污染旧计划版本。GitHub账号OAuth尚需维护者App配置，RAG缺契约仅暂停对应真实调用。每批先固定契约/迁移编号与归属，不重复G0审计；本轮收费调用不重复运行。
