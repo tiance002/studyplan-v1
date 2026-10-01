@@ -194,7 +194,8 @@ function App() {
       )}
       <div hidden={page !== 'summary'}><SummaryDetail key={project} project={project}
         workspace={workspace} initialStage={stageId} active={page === 'summary'}/></div>
-      {page === "practice" && <PracticeDetail stage={stage} />}
+      <div hidden={page !== 'practice'}><PracticeDetail key={project} project={project}
+        workspace={workspace} initialStage={stageId} active={page === 'practice'}/></div>
       {page === "conversations" && <ConversationList />}
       {page === "settings" && (
         <div className="content">

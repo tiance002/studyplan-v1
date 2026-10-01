@@ -17,10 +17,24 @@ from app.ports.summaries import ReviewPersistenceInterrupted, SummariesPort
 
 
 class SummaryService:
+    subject_label = "总结"
+    basis_label = "评分依据"
+    protocol = SUMMARY_PROTOCOL
+    purpose = SUMMARY_PURPOSE
+    subject_column = "attempt_id"
+    snapshot_column = "rubric_snapshot"
+    raw_column = "content"
+    claim_column = "_summary_claim"
+    schema_name = "SummaryReviewV1"
+    attempt_suffix = ":summary_review:1"
+    invalid_error_class = "summary_review_invalid"
+    build_manifest = staticmethod(summary_manifest)
+    feedback_valid = staticmethod(validate_feedback)
+    review_context = staticmethod(review_rubric_context)
     def __init__(self, repository: SummariesPort, *, bind_submission=None, provider_resolver=None,
                  admission_mode="allowlist", actor_ids=()):
         if admission_mode not in {"allowlist", "trusted_server"}:
-            raise ValidationAppError("总结反馈 Worker admission 无效")
+            raise ValidationAppError(f"{self.subject_label}反馈 Worker admission 无效")
         self.repository = repository
         self.bind_submission = bind_submission
         self.provider_resolver = provider_resolver
@@ -53,7 +67,7 @@ class SummaryService:
         scope.require_project(project_id)
         self._key(idempotency_key)
         if consent_to_model is not True:
-            raise ValidationAppError("请明确同意把本次保存的总结和评分依据发送至所选模型")
+            raise ValidationAppError(f"请明确同意把本次保存的{self.subject_label}和{self.basis_label}发送至所选模型")
         prior = self.repository.review_receipt(scope, project_id, attempt_id, idempotency_key)
         if prior:
             return prior
@@ -62,9 +76,9 @@ class SummaryService:
         if self.admission_mode == "allowlist" and scope.actor_id not in self.actor_ids:
             raise ForbiddenError("后台 Worker 尚未配置服务当前账户")
         if self.bind_submission is None:
-            raise DependencyUnavailableError("总结反馈模型尚未装配；原文已保存")
+            raise DependencyUnavailableError(f"{self.subject_label}反馈模型尚未装配；原文已保存")
         binding = self.bind_submission(scope, project_id)
-        return self.repository.enqueue_review(scope, project_id, attempt_id, idempotency_key, summary_manifest(binding))
+        return self.repository.enqueue_review(scope, project_id, attempt_id, idempotency_key, self.build_manifest(binding))
 
     def cancel_review(self, scope, project_id, attempt_id, run_id, expected_version, idempotency_key):
         self._key(idempotency_key)
@@ -74,49 +88,49 @@ class SummaryService:
 
     def execute_review(self, project_id, run_id, *, guard, claim):
         if claim is None or claim.project_id != project_id or claim.run_id != run_id:
-            raise PlanningLeaseLostError("总结反馈需要准确的 Worker 领取凭证")
+            raise PlanningLeaseLostError(f"{self.subject_label}反馈需要准确的 Worker 领取凭证")
         guard()
         submission = self.repository.review_submission(claim)
         attempt, manifest = submission["attempt"], submission["manifest"]
         scope = AuthContext(claim.actor_id, "summary-worker", datetime.now(UTC), (project_id,))
         try:
             if self.provider_resolver is None:
-                raise DependencyUnavailableError("总结反馈模型尚未装配")
+                raise DependencyUnavailableError(f"{self.subject_label}反馈模型尚未装配")
             llm = self.provider_resolver(scope, project_id, run_id, manifest["model_ref"], manifest)
             def review_once(state):
                 guard()
-                result = llm.generate_structured(purpose=SUMMARY_PURPOSE,
-                    payload={"_project_id": project_id, "content": attempt["content"],
-                             "rubric_snapshot": state["rubric_snapshot"],
-                             "_summary_claim": {"job_id": claim.job_id, "run_id": claim.run_id,
+                result = llm.generate_structured(purpose=self.purpose,
+                    payload={"_project_id": project_id, self.raw_column: attempt[self.raw_column],
+                             self.snapshot_column: state["rubric_snapshot"],
+                             self.claim_column: {"job_id": claim.job_id, "run_id": claim.run_id,
                                  "project_id": claim.project_id, "actor_id": claim.actor_id, "lease_token": claim.lease_token}},
-                    schema_name="SummaryReviewV1", run_id=run_id, attempt_id=run_id + ":summary_review:1")
+                    schema_name=self.schema_name, run_id=run_id, attempt_id=run_id + self.attempt_suffix)
                 if isinstance(result, LLMFailure):
                     if result.dispatch_unknown:
-                        raise LLMDispatchUnknownError("总结反馈结果需要核对")
+                        raise LLMDispatchUnknownError(f"{self.subject_label}反馈结果需要核对")
                     raise _ReviewFailure(result.error_class)
                 return {"review": result.payload}
 
             def persist(state):
                 guard()
-                return self.repository.finish_review(claim, attempt["attempt_id"], state["review"])
+                return self.repository.finish_review(claim, attempt[self.subject_column], state["review"])
 
             trace = run_review_graph(initial={"run_id": run_id, "project_id": project_id,
-                "graph_version": SUMMARY_PROTOCOL, "subject_id": attempt["attempt_id"]},
-                load_snapshot=lambda state: {"rubric_snapshot": review_rubric_context(attempt["rubric_snapshot"])},
-                review_once=review_once, validate_review=validate_feedback, persist_review=persist)
+                "graph_version": self.protocol, "subject_id": attempt[self.subject_column]},
+                load_snapshot=lambda state: {"rubric_snapshot": self.review_context(attempt[self.snapshot_column])},
+                review_once=review_once, validate_review=self.feedback_valid, persist_review=persist)
             if trace.failed_errors:
-                self.repository.finish_review(claim, attempt["attempt_id"], error_class="summary_review_invalid")
+                self.repository.finish_review(claim, attempt[self.subject_column], error_class=self.invalid_error_class)
         except PlanningLeaseLostError:
             raise
         except LLMDispatchUnknownError:
-            self.repository.finish_review(claim, attempt["attempt_id"], error_class="attempt_dispatch_unknown", unknown=True)
+            self.repository.finish_review(claim, attempt[self.subject_column], error_class="attempt_dispatch_unknown", unknown=True)
         except _ReviewFailure as error:
-            self.repository.finish_review(claim, attempt["attempt_id"], error_class=error.error_class)
+            self.repository.finish_review(claim, attempt[self.subject_column], error_class=error.error_class)
         except (ValidationAppError, DependencyUnavailableError):
-            self.repository.finish_review(claim, attempt["attempt_id"], error_class="model_configuration_unavailable")
+            self.repository.finish_review(claim, attempt[self.subject_column], error_class="model_configuration_unavailable")
         except Exception as error:
-            raise ReviewPersistenceInterrupted("总结反馈事务未完成；保留队列供安全恢复") from error
+            raise ReviewPersistenceInterrupted(f"{self.subject_label}反馈事务未完成；保留队列供安全恢复") from error
         # Unexpected persistence/crash exceptions deliberately propagate. Retained
         # provider results can be replayed; dispatched unknowns are never retried.
 

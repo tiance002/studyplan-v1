@@ -57,6 +57,7 @@ async function request<T>(
   return data as T;
 }
 const scope = (project: string) => `?project_id=${encodeURIComponent(project)}`;
+export { request as requestApi };
 const resourceScope = (project: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
   `${scope(project)}&${new URLSearchParams({plan_id:target.plan_id,stage_id:target.stage_id,unit_id:target.unit_id})}`;
 export const api = {

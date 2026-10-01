@@ -14,6 +14,7 @@ from app.agent_workflows.planning_batches import (
     manifest_is_intact,
     output_budget_for,
 )
+from app.domain.prompts import PROMPT_PROTOCOL, PROMPT_PURPOSE, prompt_manifest_intact
 from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.summaries import SUMMARY_PROTOCOL, SUMMARY_PURPOSE, summary_manifest_intact
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -21,6 +22,11 @@ from app.infrastructure.db.planning_fence import lock_plan_version, lock_plannin
 from app.ports.llm import LLMDispatchUnknownError, LLMFailure, LLMNotDispatchedError, LLMResult
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
+
+REVIEW_PROTOCOLS = {
+    SUMMARY_PURPOSE: (SUMMARY_PROTOCOL, summary_manifest_intact, "_summary_claim", ":summary_review:1", "summary_review"),
+    PROMPT_PURPOSE: (PROMPT_PROTOCOL, prompt_manifest_intact, "_prompt_claim", ":prompt_review:1", "prompt_review"),
+}
 
 
 class PgAttemptLLM:
@@ -45,11 +51,12 @@ class PgAttemptLLM:
         batch catalog.
         """
         if self.manifest is None:
-            return "run_manifest_violation" if purpose == SUMMARY_PURPOSE else None
-        if self.manifest.get("protocol") == SUMMARY_PROTOCOL:
-            if (not summary_manifest_intact(self.manifest) or purpose != SUMMARY_PURPOSE
-                    or attempt_id != run_id + ":summary_review:1"
-                    or self.provider.prompt_version != SUMMARY_PROTOCOL
+            return "run_manifest_violation" if purpose in REVIEW_PROTOCOLS else None
+        if purpose in REVIEW_PROTOCOLS or self.manifest.get("protocol") in {SUMMARY_PROTOCOL, PROMPT_PROTOCOL}:
+            protocol, valid, _, suffix, _ = REVIEW_PROTOCOLS.get(purpose, (None, lambda value: False, None, "", None))
+            if (not valid(self.manifest)
+                    or attempt_id != run_id + suffix
+                    or self.provider.prompt_version != protocol
                     or self.provider.configuration_ref != self.manifest["model_ref"]):
                 return "run_manifest_violation"
             conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (f"studyplan:plan-budget:{run_id}",))
@@ -91,7 +98,7 @@ class PgAttemptLLM:
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
         project_id = str(payload.get("_project_id") or "")
         request_options = self.provider.request_options(purpose)
-        semantic_payload = {k: v for k, v in payload.items() if k != "_summary_claim"} if purpose == SUMMARY_PURPOSE else payload
+        semantic_payload = {k: v for k, v in payload.items() if k != REVIEW_PROTOCOLS[purpose][2]} if purpose in REVIEW_PROTOCOLS else payload
         identity = [purpose,semantic_payload,schema_name,self.provider.model,self.provider.prompt_version,
                     self.provider.domain_pack,request_options,self.provider.budget_policy.as_dict()]
         fingerprint = hashlib.sha256(json.dumps([*identity,self.provider.base_url,self.provider.configuration_ref], sort_keys=True, ensure_ascii=False).encode()).hexdigest()
@@ -104,15 +111,16 @@ class PgAttemptLLM:
             rejection = self._budget_rejection(conn, run_id=run_id, attempt_id=attempt_id, purpose=purpose)
             if rejection is not None:
                 return LLMFailure(rejection, "Run budget or manifest guard rejected this dispatch")
-            if purpose == SUMMARY_PURPOSE:
-                raw_fence = payload.get("_summary_claim")
+            if purpose in REVIEW_PROTOCOLS:
+                protocol, _, claim_key, _, kind = REVIEW_PROTOCOLS[purpose]
+                raw_fence = payload.get(claim_key)
                 if not isinstance(raw_fence, dict) or set(raw_fence) != {"job_id", "run_id", "project_id", "actor_id", "lease_token"}:
-                    return LLMFailure("summary_claim_missing", "Summary dispatch requires its exact live server claim")
+                    return LLMFailure("summary_claim_missing" if purpose == SUMMARY_PURPOSE else "prompt_claim_missing", "Review dispatch requires its exact live server claim")
                 fence = PlanningWriteFence(**raw_fence)
                 lock_plan_version(conn, project_id, None)
                 lock_planning_write(conn, project_id=project_id, run_id=run_id, fence=fence)
                 run = conn.execute("SELECT kind,graph_version FROM ai_runs WHERE run_id=%s", (run_id,)).fetchone()
-                if run is None or run["kind"] != "summary_review" or run["graph_version"] != SUMMARY_PROTOCOL:
+                if run is None or run["kind"] != kind or run["graph_version"] != protocol:
                     return LLMFailure("run_manifest_violation", "Summary run protocol mismatch")
             inserted = conn.execute("""INSERT INTO ai_provider_attempts
                 (attempt_id,run_id,provider,model_id,prompt_version,status,request_fingerprint,schema_name)

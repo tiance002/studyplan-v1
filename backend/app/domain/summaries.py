@@ -42,18 +42,26 @@ class SummarySaveCommand:
 
 
 def summary_manifest(binding):
+    return review_manifest(binding, protocol=SUMMARY_PROTOCOL)
+
+
+def review_manifest(binding, *, protocol):
     policy = binding.budget_policy
-    body = {"protocol": SUMMARY_PROTOCOL, "model_ref": binding.model_ref, "max_requests": 1,
+    body = {"protocol": protocol, "model_ref": binding.model_ref, "max_requests": 1,
             "output_cap": min(policy.practice, policy.deployment_cap, policy.model_cap),
             "budget_policy": policy.as_dict(), "consent_to_model": True}
     return {**body, "manifest_hash": content_hash(body)}
 
 
 def summary_manifest_intact(manifest):
+    return review_manifest_intact(manifest, protocol=SUMMARY_PROTOCOL)
+
+
+def review_manifest_intact(manifest, *, protocol):
     if not isinstance(manifest, dict):
         return False
     body = {k: v for k, v in manifest.items() if k != "manifest_hash"}
-    return (body.get("protocol") == SUMMARY_PROTOCOL and type(body.get("max_requests")) is int and body.get("max_requests") == 1
+    return (body.get("protocol") == protocol and type(body.get("max_requests")) is int and body.get("max_requests") == 1
             and type(body.get("output_cap")) is int and body["output_cap"] > 0
             and body.get("consent_to_model") is True and bool(body.get("model_ref"))
             and manifest.get("manifest_hash") == content_hash(body))

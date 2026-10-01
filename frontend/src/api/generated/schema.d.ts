@@ -332,6 +332,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/prompts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Thread */
+        get: operations["get_prompt_thread"];
+        put?: never;
+        /** Save Original */
+        post: operations["save_prompt_original"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prompts/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get History */
+        get: operations["get_prompt_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prompts/revisions/{revision_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Revision */
+        get: operations["get_prompt_revision"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prompts/revisions/{revision_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Review Attempt */
+        post: operations["request_prompt_review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prompts/revisions/{revision_id}/cancel-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Review */
+        post: operations["cancel_prompt_review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prompts/revisions/{revision_id}/exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Export Revision */
+        post: operations["export_prompt_revision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/prompts/exports/{export_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Export */
+        get: operations["get_prompt_export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -1213,6 +1333,238 @@ export interface components {
              * @enum {string}
              */
             pace: "slow" | "normal" | "fast";
+        };
+        /** PromptCancelRequest */
+        PromptCancelRequest: {
+            /** Run Id */
+            run_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** PromptExportRequest */
+        PromptExportRequest: {
+            /**
+             * Format
+             * @enum {string}
+             */
+            format: "raw" | "implementation";
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** PromptExportView */
+        PromptExportView: {
+            /** Export Id */
+            export_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Task Id */
+            task_id: string;
+            /** Revision Id */
+            revision_id: string;
+            /** Revision No */
+            revision_no: number;
+            /**
+             * Format
+             * @enum {string}
+             */
+            format: "raw" | "implementation";
+            /** Export Text */
+            export_text: string;
+            /** Content Hash */
+            content_hash: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** PromptHistoryView */
+        PromptHistoryView: {
+            /** Items */
+            items: components["schemas"]["PromptRevisionView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** PromptKnowledgeView */
+        PromptKnowledgeView: {
+            /** Node Id */
+            node_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Role */
+            role: string;
+            /** Content Version */
+            content_version: number;
+        };
+        /** PromptPracticeProjectView */
+        PromptPracticeProjectView: {
+            /** Practice Project Id */
+            practice_project_id: string;
+            /** Title */
+            title: string;
+            /** Idea */
+            idea: string;
+            /** Repo Url */
+            repo_url: string | null;
+            /** Status */
+            status: string;
+            /** Version */
+            version: number;
+        };
+        /** PromptReviewRequest */
+        PromptReviewRequest: {
+            /**
+             * Consent To Model
+             * @constant
+             */
+            consent_to_model: true;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** PromptReviewRunView */
+        PromptReviewRunView: {
+            /** Run Id */
+            run_id: string;
+            /** Revision Id */
+            revision_id: string;
+            /** Status Url */
+            status_url: string;
+            /** Status */
+            status: string;
+            /** Next Action */
+            next_action: string;
+            /** Version */
+            version: number;
+        };
+        /** PromptReviewView */
+        PromptReviewView: {
+            /** Review Id */
+            review_id: string;
+            /** Revision Id */
+            revision_id: string;
+            /** Task Id */
+            task_id: string;
+            /** Strengths */
+            strengths: string[];
+            /** Gaps */
+            gaps: string[];
+            /** Suggestions */
+            suggestions: string[];
+            /** Run Id */
+            run_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** PromptRevisionView */
+        PromptRevisionView: {
+            /** Revision Id */
+            revision_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string | null;
+            /** Stage Id */
+            stage_id: string | null;
+            /** Task Id */
+            task_id: string;
+            /** Revision No */
+            revision_no: number;
+            /** Version */
+            version: number;
+            /** User Draft */
+            user_draft: string;
+            /** Content Hash */
+            content_hash: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Task Snapshot */
+            task_snapshot: {
+                [key: string]: unknown;
+            };
+            review: components["schemas"]["PromptReviewView"] | null;
+            /** Run Id */
+            run_id: string | null;
+            /** Run Status */
+            run_status: string | null;
+            /** Legacy Review */
+            legacy_review?: {
+                [key: string]: unknown;
+            } | null;
+            /** Legacy Review Recorded At */
+            legacy_review_recorded_at?: string | null;
+        };
+        /** PromptSaveRequest */
+        PromptSaveRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Task Id */
+            task_id: string;
+            /** User Draft */
+            user_draft: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** PromptSaveView */
+        PromptSaveView: {
+            thread: components["schemas"]["PromptThreadView"];
+            revision: components["schemas"]["PromptRevisionView"];
+            /** Replayed */
+            replayed: boolean;
+        };
+        /** PromptTaskView */
+        PromptTaskView: {
+            /** Task Id */
+            task_id: string;
+            /** Title */
+            title: string;
+            /** Goal */
+            goal: string;
+            /** In Scope */
+            in_scope: string[];
+            /** Out Scope */
+            out_scope: string[];
+            /** Acceptance */
+            acceptance: string[];
+            /** Status */
+            status: string;
+            /** Knowledge Links */
+            knowledge_links: components["schemas"]["PromptKnowledgeView"][];
+        };
+        /** PromptThreadView */
+        PromptThreadView: {
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Task Id */
+            task_id: string;
+            /** Version */
+            version: number;
+            practice_project: components["schemas"]["PromptPracticeProjectView"];
+            task: components["schemas"]["PromptTaskView"];
+            /** Revisions */
+            revisions: components["schemas"]["PromptRevisionView"][];
+            /**
+             * History Truncated
+             * @default false
+             */
+            history_truncated: boolean;
         };
         /** RegistrationRequest */
         RegistrationRequest: {
@@ -3090,6 +3442,293 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SummaryReviewRunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_prompt_thread: {
+        parameters: {
+            query: {
+                plan_id: string;
+                stage_id: string;
+                task_id: string;
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptThreadView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_prompt_original: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromptSaveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptSaveView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_prompt_history: {
+        parameters: {
+            query: {
+                cursor?: string | null;
+                limit?: number;
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptHistoryView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_prompt_revision: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                revision_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptRevisionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_prompt_review: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                revision_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromptReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptReviewRunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_prompt_review: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                revision_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromptCancelRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptReviewRunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_prompt_revision: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                revision_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromptExportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptExportView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_prompt_export: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                export_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptExportView"];
                 };
             };
             /** @description Validation Error */

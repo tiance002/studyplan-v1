@@ -396,7 +396,7 @@ class SummaryCreateRequest(BaseModel):
 class PromptRevisionCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    user_draft: str = Field(..., min_length=50, max_length=40000)
+    user_draft: str = Field(..., min_length=1, max_length=40000)
     idempotency_key: str = Field(..., min_length=1, max_length=200)
 
 

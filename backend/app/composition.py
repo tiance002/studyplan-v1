@@ -154,6 +154,24 @@ def build_container(settings: Settings) -> AppContainer:
         actor_ids=settings.planning_worker_actor_ids,
     )
 
+    from app.application.prompts import PromptService
+    from app.infrastructure.db.prompts import PgPrompts
+
+    def prompt_provider(scope, project_id, run_id, model_ref, manifest):
+        from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
+
+        provider = runtime_factory.for_bound_run(scope, project_id, run_id, model_ref)
+        provider.prompt_version = "prompt-review-v1"
+        return PgAttemptLLM(dsn, provider, manifest=manifest)
+
+    prompt_service = PromptService(
+        PgPrompts(dsn),
+        bind_submission=runtime_factory.bind_submission if runtime_factory is not None else None,
+        provider_resolver=prompt_provider if runtime_factory is not None else None,
+        admission_mode=settings.planning_worker_admission_mode,
+        actor_ids=settings.planning_worker_actor_ids,
+    )
+
     def execute_job(project_id, run_id, *, guard, claim):
         from app.core.errors import ValidationAppError
 
@@ -164,6 +182,8 @@ def build_container(settings: Settings) -> AppContainer:
             return plan_service.execute_generation(project_id, run_id, guard=guard, claim=claim)
         if kind == "summary_review_submission":
             return summary_service.execute_review(project_id, run_id, guard=guard, claim=claim)
+        if kind == "prompt_review_submission":
+            return prompt_service.execute_review(project_id, run_id, guard=guard, claim=claim)
         raise ValidationAppError("后台任务提交协议不可识别")
 
     planning_worker = PlanningWorker(
@@ -180,4 +200,4 @@ def build_container(settings: Settings) -> AppContainer:
                         workspace_reader=workspace_reader, planning_worker=planning_worker,
                         resource_service=resource_service, exposure_service=exposure_service,
                         preference_service=preference_service, resource_change_service=resource_change_service,
-                        summary_service=summary_service)
+                        summary_service=summary_service, prompt_service=prompt_service)

@@ -31,8 +31,9 @@ from app.domain.enums import (
 
 MIN_IDEA_CHARS = 10
 MAX_IDEA_CHARS = 4_000
-MIN_PROMPT_CHARS = 50
+MIN_PROMPT_CHARS = 1
 MAX_PROMPT_CHARS = 40_000
+MAX_PROMPT_EXPORT_CHARS = 240_000
 MAX_EVIDENCE_ITEMS = 50
 
 
@@ -288,12 +289,16 @@ class PromptExport:
         export_text: str,
         now: datetime | None = None,
     ) -> "PromptExport":
-        _require_text(export_text, "导出内容", max_len=MAX_PROMPT_CHARS)
+        if (not isinstance(export_text, str) or not export_text.strip() or len(export_text) > MAX_PROMPT_EXPORT_CHARS
+                or "\x00" in export_text or any(0xD800 <= ord(char) <= 0xDFFF for char in export_text)):
+            raise ValidationAppError("导出内容无效或超出大小限制")
+        if task_id != revision.task_id:
+            raise ValidationAppError("导出任务与指定修订不一致")
         return PromptExport(
             export_id=new_id("pex"),
             task_id=task_id,
             revision_id=revision.revision_id,
-            export_text=export_text.strip(),
+            export_text=export_text,
             created_at=now or datetime.now(timezone.utc),
         )
 
@@ -460,9 +465,11 @@ def _normalize_prompt(text: str) -> str:
     stripped = text.strip()
     if len(stripped) < MIN_PROMPT_CHARS:
         raise ValidationAppError(f"实现思路至少需要 {MIN_PROMPT_CHARS} 个字符")
-    if len(stripped) > MAX_PROMPT_CHARS:
+    if len(text) > MAX_PROMPT_CHARS:
         raise ValidationAppError(f"实现思路不得超过 {MAX_PROMPT_CHARS} 个字符")
-    return stripped
+    if "\x00" in text or any(0xD800 <= ord(char) <= 0xDFFF for char in text):
+        raise ValidationAppError("实现思路含无法保存的字符")
+    return text
 
 
 def _clean(items: list[str]) -> list[str]:

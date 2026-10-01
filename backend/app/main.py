@@ -21,6 +21,7 @@ from app.api.v1.deps import CONTAINER_STATE_KEY
 from app.api.v1.exposure_routes import router as exposure_router
 from app.api.v1.model_settings_routes import router as model_settings_router
 from app.api.v1.preference_routes import router as preference_router
+from app.api.v1.prompt_routes import router as prompt_router
 from app.api.v1.resource_change_routes import router as resource_change_router
 from app.api.v1.resource_routes import router as resource_router
 from app.api.v1.routes import router as v1_router
@@ -76,7 +77,7 @@ def _install_error_handling(application: FastAPI) -> None:
     @application.exception_handler(RequestValidationError)
     async def _validation_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
         if (request.url.path == "/api/v1/model-settings"
-                or request.url.path.startswith(("/api/v1/auth/", "/api/v1/summaries"))):
+                or request.url.path.startswith(("/api/v1/auth/", "/api/v1/summaries", "/api/v1/prompts"))):
             # FastAPI's default validation response includes raw input, including
             # malformed API Key objects. Never echo input/ctx on this secret route.
             return JSONResponse(status_code=422,content={"detail":[
@@ -159,6 +160,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
     application.include_router(preference_router)
     application.include_router(resource_change_router)
     application.include_router(summary_router)
+    application.include_router(prompt_router)
 
     _install_request_id(application)
     _install_error_handling(application)

@@ -15,7 +15,7 @@ from app.core.errors import (
 )
 from app.core.ids import content_hash, new_id
 from app.domain.runs.fencing import PlanningWriteFence
-from app.domain.summaries import SUMMARY_PROTOCOL, summary_manifest_intact
+from app.domain.summaries import SUMMARY_PROTOCOL, summary_manifest_intact, validate_feedback
 from app.infrastructure.db.learning_exposures import PgLearningExposures, _json
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
 from app.infrastructure.db.planning_fence import lock_plan_version, lock_planning_write
@@ -24,6 +24,21 @@ from psycopg.types.json import Jsonb
 
 
 class PgSummaries:
+    # Closed internal specialization for the two original-review domains.
+    receipt_table = "summary_receipts"
+    original_table = "summary_attempts"
+    binding_table = "summary_review_bindings"
+    review_table = "summary_reviews"
+    subject_column = "attempt_id"
+    snapshot_column = "rubric_snapshot"
+    run_kind = "summary_review"
+    subject_label = "总结"
+    protocol = SUMMARY_PROTOCOL
+    job_prefix = "summary:"
+    review_id_prefix = "srv"
+    manifest_valid = staticmethod(summary_manifest_intact)
+    feedback_valid = staticmethod(validate_feedback)
+
     def __init__(self, dsn):
         self.dsn = to_psycopg_dsn(dsn)
 
@@ -40,9 +55,9 @@ class PgSummaries:
                 raise ForbiddenError()
             yield conn
 
-    @staticmethod
-    def _receipt(conn, scope, project, key, action, fingerprint):
-        row = conn.execute("SELECT * FROM summary_receipts WHERE project_id=%s AND actor_id=%s AND idempotency_key=%s",
+    @classmethod
+    def _receipt(cls, conn, scope, project, key, action, fingerprint):
+        row = conn.execute(f"SELECT * FROM {cls.receipt_table} WHERE project_id=%s AND actor_id=%s AND idempotency_key=%s",
                            (project, scope.actor_id, key)).fetchone()
         if row:
             if row["action"] != action or row["input_hash"] != fingerprint:
@@ -50,9 +65,9 @@ class PgSummaries:
             return row["response_snapshot"]
         return None
 
-    @staticmethod
-    def _record(conn, scope, project, key, action, fingerprint, response):
-        conn.execute("INSERT INTO summary_receipts(receipt_id,project_id,actor_id,idempotency_key,action,input_hash,response_snapshot) "
+    @classmethod
+    def _record(cls, conn, scope, project, key, action, fingerprint, response):
+        conn.execute(f"INSERT INTO {cls.receipt_table}(receipt_id,project_id,actor_id,idempotency_key,action,input_hash,response_snapshot) "
                      "VALUES(%s,%s,%s,%s,%s,%s,%s)",
                      (new_id("sumrcpt"), project, scope.actor_id, key, action, fingerprint, Jsonb(_json(response))))
 
@@ -163,7 +178,7 @@ class PgSummaries:
 
     def history(self, scope, project_id, cursor=None, limit=20):
         if type(limit) is not int or not 1 <= limit <= 100:
-            raise ValidationAppError("总结历史分页大小无效")
+            raise ValidationAppError(f"{self.subject_label}历史分页大小无效")
         boundary = None
         if cursor:
             try:
@@ -176,63 +191,63 @@ class PgSummaries:
                 if boundary[0].tzinfo is None or not isinstance(body["id"], str) or not 1 <= len(body["id"]) <= 512:
                     raise ValueError()
             except (ValueError, TypeError, KeyError, UnicodeError):
-                raise ValidationAppError("总结历史游标无效") from None
+                raise ValidationAppError(f"{self.subject_label}历史游标无效") from None
         with self._tx(scope, project_id) as conn:
-            rows = conn.execute("SELECT attempt_id,created_at FROM summary_attempts WHERE project_id=%s "
-                + ("AND (created_at,attempt_id)<(%s,%s) " if boundary else "")
-                + "ORDER BY created_at DESC,attempt_id DESC LIMIT %s",
+            rows = conn.execute(f"SELECT {self.subject_column},created_at FROM {self.original_table} WHERE project_id=%s "
+                + (f"AND (created_at,{self.subject_column})<(%s,%s) " if boundary else "")
+                + f"ORDER BY created_at DESC,{self.subject_column} DESC LIMIT %s",
                 (project_id, *boundary, limit+1) if boundary else (project_id, limit+1)).fetchall()
             page = rows[:limit]
             next_cursor = None
             if len(rows) > limit:
                 last = page[-1]
                 next_cursor = base64.urlsafe_b64encode(json.dumps({"project": project_id,
-                    "time": last["created_at"].isoformat(), "id": last["attempt_id"]}).encode()).decode().rstrip("=")
-            return {"items": [self._attempt(conn, project_id, row["attempt_id"]) for row in page], "next_cursor": next_cursor}
+                    "time": last["created_at"].isoformat(), "id": last[self.subject_column]}).encode()).decode().rstrip("=")
+            return {"items": [self._attempt(conn, project_id, row[self.subject_column]) for row in page], "next_cursor": next_cursor}
 
-    @staticmethod
-    def _handle(run, attempt_id):
-        return {"run_id": run["run_id"], "attempt_id": attempt_id, "status": run["status"],
+    @classmethod
+    def _handle(cls, run, attempt_id):
+        return {"run_id": run["run_id"], cls.subject_column: attempt_id, "status": run["status"],
                 "next_action": run["next_action"], "version": run["version"],
                 "status_url": f"/api/v1/runs/{run['run_id']}?project_id={run['project_id']}"}
 
     def review_receipt(self, scope, project_id, attempt_id, key):
         with self._tx(scope, project_id) as conn:
             self._attempt(conn, project_id, attempt_id)
-            return self._receipt(conn, scope, project_id, key, "review", content_hash({"attempt_id": attempt_id, "consent_to_model": True}))
+            return self._receipt(conn, scope, project_id, key, "review", content_hash({self.subject_column: attempt_id, "consent_to_model": True}))
 
     def enqueue_review(self, scope, project_id, attempt_id, key, manifest):
-        fingerprint = content_hash({"attempt_id": attempt_id, "consent_to_model": True})
+        fingerprint = content_hash({self.subject_column: attempt_id, "consent_to_model": True})
         with self._tx(scope, project_id, write=True) as conn:
             previous = self._receipt(conn, scope, project_id, key, "review", fingerprint)
             if previous:
                 return previous
             attempt = self._attempt(conn, project_id, attempt_id)
-            binding = conn.execute("SELECT r.* FROM summary_review_bindings b JOIN ai_runs r USING(run_id) "
-                "WHERE b.project_id=%s AND b.attempt_id=%s", (project_id, attempt_id)).fetchone()
+            binding = conn.execute(f"SELECT r.* FROM {self.binding_table} b JOIN ai_runs r USING(run_id) "
+                f"WHERE b.project_id=%s AND b.{self.subject_column}=%s", (project_id, attempt_id)).fetchone()
             if binding:
                 result = self._handle(binding, attempt_id)
             else:
-                if not summary_manifest_intact(manifest):
-                    raise ValidationAppError("总结评审预算或协议无效")
-                if attempt["rubric_snapshot"].get("snapshot_status") != "frozen":
-                    raise ValidationAppError("旧总结没有当时评分依据，请先保存新的总结修订")
+                if not self.manifest_valid(manifest):
+                    raise ValidationAppError(f"{self.subject_label}评审预算或协议无效")
+                if attempt[self.snapshot_column].get("snapshot_status") != "frozen":
+                    raise ValidationAppError(f"旧{self.subject_label}没有当时评分依据，请先保存新的{self.subject_label}修订")
                 active = conn.execute("SELECT count(*) AS n FROM ai_runs WHERE project_id=%s AND actor_id=%s "
-                    "AND kind='summary_review' AND status IN('queued','running','reconciliation_required')",
+                    "AND kind IN('summary_review','prompt_review') AND status IN('queued','running','reconciliation_required')",
                     (project_id, scope.actor_id)).fetchone()["n"]
                 if active >= 3:
                     raise ConflictError("当前学习空间最多保留三个待处理总结反馈，请先处理已有任务")
                 run_id = new_id("run")
                 conn.execute("""INSERT INTO ai_runs(run_id,actor_id,project_id,kind,graph_name,graph_version,status,next_action,thread_id)
-                    VALUES(%s,%s,%s,'summary_review','summary_review_graph',%s,'queued','wait',%s)""",
-                    (run_id, scope.actor_id, project_id, SUMMARY_PROTOCOL, run_id + "::" + SUMMARY_PROTOCOL))
-                conn.execute("INSERT INTO summary_review_bindings(project_id,attempt_id,run_id,actor_id,manifest) VALUES(%s,%s,%s,%s,%s)",
+                    VALUES(%s,%s,%s,%s,%s,%s,'queued','wait',%s)""",
+                    (run_id, scope.actor_id, project_id, self.run_kind, self.run_kind+"_graph", self.protocol, run_id + "::" + self.protocol))
+                conn.execute(f"INSERT INTO {self.binding_table}(project_id,{self.subject_column},run_id,actor_id,manifest) VALUES(%s,%s,%s,%s,%s)",
                     (project_id, attempt_id, run_id, scope.actor_id, Jsonb(manifest)))
-                submission = {"kind": "summary_review_submission", "actor_id": scope.actor_id,
-                              "project_id": project_id, "attempt_id": attempt_id, "manifest": manifest}
+                submission = {"kind": self.run_kind+"_submission", "actor_id": scope.actor_id,
+                              "project_id": project_id, self.subject_column: attempt_id, "manifest": manifest}
                 conn.execute("INSERT INTO ai_run_events(run_id,status,detail) VALUES(%s,'submission',%s)", (run_id, Jsonb(submission)))
                 conn.execute("INSERT INTO ai_jobs(job_id,run_id,job_key,status) VALUES(%s,%s,%s,'pending')",
-                             (new_id("job"), run_id, "summary:" + run_id))
+                             (new_id("job"), run_id, self.job_prefix + run_id))
                 run = conn.execute("SELECT * FROM ai_runs WHERE run_id=%s", (run_id,)).fetchone()
                 result = self._handle(run, attempt_id)
             self._record(conn, scope, project_id, key, "review", fingerprint, result)
@@ -240,23 +255,23 @@ class PgSummaries:
 
     def has_review_binding(self, scope, project_id, attempt_id):
         with self._tx(scope, project_id) as conn:
-            return conn.execute("SELECT 1 FROM summary_review_bindings WHERE project_id=%s AND attempt_id=%s",
+            return conn.execute(f"SELECT 1 FROM {self.binding_table} WHERE project_id=%s AND {self.subject_column}=%s",
                                 (project_id, attempt_id)).fetchone() is not None
 
     def cancel_review(self, scope, project_id, attempt_id, run_id, expected_version, key):
-        fingerprint = content_hash({"attempt_id": attempt_id, "run_id": run_id, "expected_version": expected_version})
+        fingerprint = content_hash({self.subject_column: attempt_id, "run_id": run_id, "expected_version": expected_version})
         with self._tx(scope, project_id, write=True, fenced=True) as conn:
             prior = self._receipt(conn, scope, project_id, key, "cancel", fingerprint)
             if prior:
                 return prior
-            run = conn.execute("""SELECT r.* FROM ai_runs r JOIN ai_jobs j USING(run_id)
-                JOIN summary_review_bindings b USING(run_id) JOIN learning_projects p ON p.project_id=r.project_id
-                WHERE r.project_id=%s AND r.actor_id=%s AND r.kind='summary_review'
-                    AND b.attempt_id=%s AND b.project_id=%s AND r.run_id=%s
+            run = conn.execute(f"""SELECT r.* FROM ai_runs r JOIN ai_jobs j USING(run_id)
+                JOIN {self.binding_table} b USING(run_id) JOIN learning_projects p ON p.project_id=r.project_id
+                WHERE r.project_id=%s AND r.actor_id=%s AND r.kind=%s
+                    AND b.{self.subject_column}=%s AND b.project_id=%s AND r.run_id=%s
                     AND p.owner_actor_id=%s AND p.archived_at IS NULL FOR UPDATE OF j,r,p""",
-                (project_id, scope.actor_id, attempt_id, project_id, run_id, scope.actor_id)).fetchone()
+                (project_id, scope.actor_id, self.run_kind, attempt_id, project_id, run_id, scope.actor_id)).fetchone()
             if not run:
-                raise NotFoundError("总结反馈任务不存在")
+                raise NotFoundError(f"{self.subject_label}反馈任务不存在")
             if run["version"] != expected_version:
                 raise VersionConflictError(actual_version=run["version"], expected_version=expected_version)
             if run["status"] not in {"queued", "running", "cancelled"}:
@@ -284,31 +299,33 @@ class PgSummaries:
     def review_submission(self, claim):
         with self._tx(self._claim_scope(claim), claim.project_id, write=True, fenced=True) as conn:
             lock_planning_write(conn, project_id=claim.project_id, run_id=claim.run_id, fence=self._fence(claim))
-            row = conn.execute("""SELECT b.* FROM summary_review_bindings b JOIN ai_runs r USING(run_id)
-                WHERE b.project_id=%s AND b.run_id=%s AND b.actor_id=%s AND r.kind='summary_review'
-                AND r.graph_version=%s""", (claim.project_id, claim.run_id, claim.actor_id, SUMMARY_PROTOCOL)).fetchone()
-            if row is None or not summary_manifest_intact(row["manifest"]):
-                raise ValidationAppError("总结反馈任务提交缺失或预算协议无效")
-            return {"attempt": self._attempt(conn, claim.project_id, row["attempt_id"]), "manifest": row["manifest"]}
+            row = conn.execute(f"""SELECT b.* FROM {self.binding_table} b JOIN ai_runs r USING(run_id)
+                WHERE b.project_id=%s AND b.run_id=%s AND b.actor_id=%s AND r.kind=%s
+                AND r.graph_version=%s""", (claim.project_id, claim.run_id, claim.actor_id, self.run_kind, self.protocol)).fetchone()
+            if row is None or not self.manifest_valid(row["manifest"]):
+                raise ValidationAppError(f"{self.subject_label}反馈任务提交缺失或预算协议无效")
+            return {"attempt": self._attempt(conn, claim.project_id, row[self.subject_column]), "manifest": row["manifest"]}
+
+    def _review_body(self, attempt, review):
+        return dict(review, rubric_version=attempt["rubric_snapshot"]["rubric_version"])
 
     def finish_review(self, claim, attempt_id, review=None, *, error_class=None, unknown=False):
         with self._tx(self._claim_scope(claim), claim.project_id, write=True, fenced=True) as conn:
             lock_planning_write(conn, project_id=claim.project_id, run_id=claim.run_id, fence=self._fence(claim))
-            binding = conn.execute("SELECT 1 FROM summary_review_bindings b JOIN ai_runs r USING(run_id) WHERE b.project_id=%s "
-                "AND b.run_id=%s AND b.attempt_id=%s AND b.actor_id=%s AND r.kind='summary_review' AND r.graph_version=%s",
-                (claim.project_id, claim.run_id, attempt_id, claim.actor_id, SUMMARY_PROTOCOL)).fetchone()
+            binding = conn.execute(f"SELECT 1 FROM {self.binding_table} b JOIN ai_runs r USING(run_id) WHERE b.project_id=%s "
+                f"AND b.run_id=%s AND b.{self.subject_column}=%s AND b.actor_id=%s AND r.kind=%s AND r.graph_version=%s",
+                (claim.project_id, claim.run_id, attempt_id, claim.actor_id, self.run_kind, self.protocol)).fetchone()
             if not binding:
                 raise ForbiddenError()
             attempt = self._attempt(conn, claim.project_id, attempt_id)
             identifier = None
             if review is not None:
-                from app.domain.summaries import validate_feedback
-                if validate_feedback(review):
-                    raise ValidationAppError("总结反馈校验失败")
-                identifier = new_id("srv")
-                body = dict(review, rubric_version=attempt["rubric_snapshot"]["rubric_version"])
+                if self.feedback_valid(review):
+                    raise ValidationAppError(f"{self.subject_label}反馈校验失败")
+                identifier = new_id(self.review_id_prefix)
+                body = self._review_body(attempt, review)
                 lock_planning_write(conn, project_id=claim.project_id, run_id=claim.run_id, fence=self._fence(claim))
-                conn.execute("INSERT INTO summary_reviews(review_id,project_id,attempt_id,review,run_id) VALUES(%s,%s,%s,%s,%s)",
+                conn.execute(f"INSERT INTO {self.review_table}(review_id,project_id,{self.subject_column},review,run_id) VALUES(%s,%s,%s,%s,%s)",
                     (identifier, claim.project_id, attempt_id, Jsonb(body), claim.run_id))
             status = "succeeded" if identifier else ("reconciliation_required" if unknown else "failed")
             action = "reconcile" if unknown else "none"
