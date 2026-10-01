@@ -8,7 +8,7 @@
 
 **Tech Stack:** 当前仓库的 FastAPI/Pydantic、PostgreSQL、LangGraph、React/TypeScript/Vite；本轮 S0 交付文档，不引入依赖。
 
-**Spec:** `C:/Users/22088/Downloads/studyplan_requirements_design_supplement_2026-10-01.md`。用户明确：与旧计划冲突时新计划优先。S0 应将原文逐字保存至 `docs/design-package/supplements/studyplan_requirements_design_supplement_2026-10-01.md`，避免长期依赖 Downloads 路径。
+**Spec:** `D:/studyplan/docs/design-package/supplements/studyplan_requirements_design_supplement_2026-10-01.md`。用户明确：与旧计划冲突时新计划优先。S0 应将原文逐字保存至 `docs/design-package/supplements/studyplan_requirements_design_supplement_2026-10-01.md`，避免长期依赖 Downloads 路径。
 
 ## Global Constraints
 
@@ -73,11 +73,11 @@
 
 **Interfaces:** 输入补充原文、当前 HEAD、既有正式文档与关键实现；输出可定位的事实索引及五类 Gap 表。
 
-- [ ] 记录 HEAD、tracked diff 和原文 SHA256；逐字复制新规格，确认源文件与仓库副本哈希相同。
-- [ ] 建立权威顺序：用户最新明确决定 → 本补充 → 已对齐正式文档/ADR → 实施任务；冲突项给出旧条款、新条款及优先结论。
-- [ ] 按 A Requirement Gap / B Design Gap / C Implementation Gap / D Overengineering / E Conflict 建立表。每项包含来源章节、代码路径、已核对证据、业务影响、处理方式、归属里程碑和验收。
-- [ ] 对已有能力分别标记 Implemented / Tested / Integrated / Verified；缺乏证据写清“未核对”，避免由文件名或历史 README 推断完成。
-- [ ] 核对 B3-F2 的生成与发布边界，保留 Acceptance 09 待审批事实；将人工 Draft 内容审核/批准列为单独后续验证，不为记录收口重新生成计划。
+- [x] 记录 HEAD、tracked diff 和原文 SHA256；逐字复制新规格，确认源文件与仓库副本哈希相同。
+- [x] 建立权威顺序：用户最新明确决定 → 本补充 → 已对齐正式文档/ADR → 实施任务；冲突项给出旧条款、新条款及优先结论。
+- [x] 按 A Requirement Gap / B Design Gap / C Implementation Gap / D Overengineering / E Conflict 建立表。每项包含来源章节、代码路径、已核对证据、业务影响、处理方式、归属里程碑和验收。
+- [x] 对已有能力分别标记 Implemented / Tested / Integrated / Verified；缺乏证据写清“未核对”，避免由文件名或历史 README 推断完成。
+- [x] 核对 B3-F2 的生成与发布边界，保留 Acceptance 09 待审批事实；将人工 Draft 内容审核/批准列为单独后续验证，不为记录收口重新生成计划。
 
 ### Task 2：先统一产品与领域规则，再更新设计/ADR
 
@@ -88,16 +88,16 @@
 
 **Interfaces:** 消费 Task 1 的已确认差异；输出可用于后端/前端实现的统一领域状态、版本、证据、隐私和工作流契约。
 
-- [ ] PRODUCT_SCOPE 固定首个 Agent 开发领域、V1 全闭环、V2 能力；明确本地单用户产品入口与已存在 actor/project/model 配置的数据衔接方案。
-- [ ] DOMAIN_MODEL 映射现有实体到新术语；复用稳定 node_id、PlanRevision。定义 NOT_STARTED、LEARNING、LEARNED、VERIFIED、REVIEW_NEEDED、SKIPPED 六态、证据来源、降回 REVIEW_NEEDED 规则，以及 UnitProgress 的独立语义。
-- [ ] LEARNING_WORKFLOW 固定资料→总结→反馈→方案评审→外部实现→提交证据→验收→进度→调整，逐步列出输入/输出、版本绑定、确定性动作和模型动作。
-- [ ] ARCHITECTURE/SOFTWARE_DESIGN 固定业务事实、Run 投影、checkpoint 三者职责；提出 State 收缩步骤及旧图安全恢复策略，不要求一次替换全部工作流。
-- [ ] RAG_DESIGN 固定 retrieval scope/filters、Evidence 来源/版本/引用、证据不足路径、个人 RAG Adapter 边界；不在 StudyPlan 建第二套检索引擎。
-- [ ] MEMORY_CONTEXT 固定原始会话保留、source_event_ids、PROJECT/SESSION 范围和受控 Memory Candidate 写入；长期记忆功能按产品需要实施。
-- [ ] MODEL_ROUTING 定义 allow_cloud/allow_external_data/budget/privacy_scope 的业务边界；L1 为可选增量，云端失败/本地失败/检索不足分别处理。
-- [ ] FRONTEND_INTERACTION 固定 11/17/72、N/P/C/A、Canvas 约 600px 下限及窄窗规则、助手拖拽、current_node_id 与 Session 绑定。
-- [ ] EVALUATION_ACCEPTANCE 将八个真实场景逐项挂到 M1–M4.5，定义 P0/P1 门槛与 P2/P3 延期登记。
-- [ ] 对 Review Focus 五项分别写具体验收：原 actor 数据可达、旧版 Session 恢复、自述不升 VERIFIED、无静默外发/虚构引用、旧 waiting_user 安全恢复且新增付费请求为 0。
+- [x] PRODUCT_SCOPE 固定首个 Agent 开发领域、V1 全闭环、V2 能力；明确本地单用户产品入口与已存在 actor/project/model 配置的数据衔接方案。
+- [x] DOMAIN_MODEL 映射现有实体到新术语；复用稳定 node_id、PlanRevision。定义 NOT_STARTED、LEARNING、LEARNED、VERIFIED、REVIEW_NEEDED、SKIPPED 六态、证据来源、降回 REVIEW_NEEDED 规则，以及 UnitProgress 的独立语义。
+- [x] LEARNING_WORKFLOW 固定资料→总结→反馈→方案评审→外部实现→提交证据→验收→进度→调整，逐步列出输入/输出、版本绑定、确定性动作和模型动作。
+- [x] ARCHITECTURE/SOFTWARE_DESIGN 固定业务事实、Run 投影、checkpoint 三者职责；提出 State 收缩步骤及旧图安全恢复策略，不要求一次替换全部工作流。
+- [x] RAG_DESIGN 固定 retrieval scope/filters、Evidence 来源/版本/引用、证据不足路径、个人 RAG Adapter 边界；不在 StudyPlan 建第二套检索引擎。
+- [x] MEMORY_CONTEXT 固定原始会话保留、source_event_ids、PROJECT/SESSION 范围和受控 Memory Candidate 写入；长期记忆功能按产品需要实施。
+- [x] MODEL_ROUTING 定义 allow_cloud/allow_external_data/budget/privacy_scope 的业务边界；L1 为可选增量，云端失败/本地失败/检索不足分别处理。
+- [x] FRONTEND_INTERACTION 固定 11/17/72、N/P/C/A、Canvas 约 600px 下限及窄窗规则、助手拖拽、current_node_id 与 Session 绑定。
+- [x] EVALUATION_ACCEPTANCE 将八个真实场景逐项挂到 M1–M4.5，定义 P0/P1 门槛与 P2/P3 延期登记。
+- [x] 对 Review Focus 五项分别写具体验收：原 actor 数据可达、旧版 Session 恢复、自述不升 VERIFIED、无静默外发/虚构引用、旧 waiting_user 安全恢复且新增付费请求为 0。
 
 ### Task 3：更新实施路线与开发入口
 
@@ -107,13 +107,13 @@
 
 **Interfaces:** 消费统一规格；输出每轮 Goal 的依赖、已完成基础、实际缺口、允许文件、定向验收及停止点。
 
-- [ ] 把 B0–B6 保留为历史交付索引，建立 M0–M4.5 映射；修正 README 的过时完成状态。
-- [ ] 每个 Gap 只分配一个主责任里程碑；先复用/适配，再新增，停止重复实现已有版本/证据/Provider 能力。
-- [ ] 每轮采用 Goal / Constraints / Allowed changes / Non-goals / Tests / Evidence / Rollback；S0 结束后只启动最小可验收的 M1 剩余切片。
-- [ ] AGENTS 加入权威文档顺序、V1 范围、当前状态、验证策略、延期规则与付费 Gate；保留 Git/迁移历史规则。
-- [ ] 自审八场景、五类 Gap 和全部新规格章节的覆盖；定位未分配或相互矛盾的条款。
-- [ ] 运行 `git diff --check`，检查文档链接与原文副本哈希。业务测试/真实模型均 NOT RUN；记录原因是文档收口。
-- [ ] 文档分支 commit 后 `--no-ff` 合入 develop；提交规格收口结果供负责人确认，不创建 milestone tag。
+- [x] 把 B0–B6 保留为历史交付索引，建立 M0–M4.5 映射；修正 README 的过时完成状态。
+- [x] 每个 Gap 只分配一个主责任里程碑；先复用/适配，再新增，停止重复实现已有版本/证据/Provider 能力。
+- [x] 每轮采用 Goal / Constraints / Allowed changes / Non-goals / Tests / Evidence / Rollback；S0 结束后只启动最小可验收的 M1 剩余切片。
+- [x] AGENTS 加入权威文档顺序、V1 范围、当前状态、验证策略、延期规则与付费 Gate；保留 Git/迁移历史规则。
+- [x] 自审八场景、五类 Gap 和全部新规格章节的覆盖；定位未分配或相互矛盾的条款。
+- [x] 运行 `git diff --check`，检查文档链接与原文副本哈希。业务测试/真实模型均 NOT RUN；记录原因是文档收口。
+- [x] 文档分支 commit 后 `--no-ff` 合入 develop；提交规格收口结果供负责人确认，不创建 milestone tag。
 
 **S0 完成条件:** 五类 Gap 有来源/证据/处置，正式规格一致，现有能力有证据等级，新排期完整映射，首个实现 Goal 可独立执行。没有业务改码/数据库写入/真实模型请求。
 
@@ -138,4 +138,4 @@ MCP/Sandbox/Skills Runtime 等产品运行能力进入 V2 backlog。RRF/reranker
 4. M3/M4 逐步把资源、实践、证据和调整串入同一主项目。
 5. M4.5 才作完整 V1 可交付判断；新付费验证始终单独授权。
 
-本文件是下一步规划；尚未执行完整 Gap Analysis、修改正式规格或实现新业务功能。
+S0的Task 1–3已执行，结果见 docs/acceptance/S0-spec-freeze-report.md；M1及后续业务实现未启动。规格审查发现现有内容hash节点ID不能保证跨重生成逻辑身份稳定，按ADR-0009在M1.2补齐。Git收口结果以最终报告为准。

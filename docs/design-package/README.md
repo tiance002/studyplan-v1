@@ -1,36 +1,23 @@
-# 设计包
+# V1 设计包入口
 
-本目录存放 V1.1 的**设计基线**，由用户提供，是实现的权威依据。
+2026-10-01 / S0。权威顺序：用户最新明确决定 → [补充原文](supplements/studyplan_requirements_design_supplement_2026-10-01.md) → 对齐规格/ADR → 实施任务。新补充优先于旧V1.1/B0–B6排期；原验收报告保留为历史。
 
-| 文件 | 内容 |
+| 文档 | 唯一主要职责 |
 |---|---|
-| `SOFTWARE_DESIGN.md` | 软件架构与详细设计。含总体架构、模块内聚矩阵、业务实体与约束、三张图、Run/队列/检查点、偏好与资源、API 契约、状态枚举、分级验收、冻结的 ADR |
-| `IMPLEMENTATION_PLAN.md` | 实施方案与 B0–B6 里程碑、复用与迁移策略、技术方案、开发顺序 |
+| [PRODUCT_SCOPE](PRODUCT_SCOPE.md) | 个人本地、首个领域、V1/V2与交付目标 |
+| [DOMAIN_MODEL](DOMAIN_MODEL.md) | 稳定身份、版本、六态、证据门 |
+| [ARCHITECTURE](ARCHITECTURE.md) | 分层、工作流/Repository/State、错误和外部依赖 |
+| [LEARNING_WORKFLOW](LEARNING_WORKFLOW.md) | 学习→总结→反馈→实践→验收→调整 |
+| [RAG_DESIGN](RAG_DESIGN.md) | 独立RAG边界、检索Evidence、引用和缺证据 |
+| [MEMORY_CONTEXT](MEMORY_CONTEXT.md) | 原会话、来源、记忆scope/写入、ContextBuilder |
+| [MODEL_ROUTING](MODEL_ROUTING.md) | L0/L1/L2、许可/隐私/预算、失败边界 |
+| [FRONTEND_INTERACTION](FRONTEND_INTERACTION.md) | N/P/C/A、节点/版本/Session联动 |
+| [EVALUATION_ACCEPTANCE](EVALUATION_ACCEPTANCE.md) | 八场景、证据等级、P0–P3、付费Gate |
+| [SOFTWARE_DESIGN](SOFTWARE_DESIGN.md) | 总体设计导航与公共契约 |
+| [IMPLEMENTATION_PLAN](IMPLEMENTATION_PLAN.md) | B0–B6历史映射与M0–M4.5剩余任务 |
 
-## 执行方式
+[ADR索引](../adr/README.md)、[Gap Analysis](../reviews/2026-10-01-v1-gap-analysis.md)、根AGENTS是执行入口。新文档是目标设计，不等于代码已实现。
 
-**B0–B6 是独立 Goal，禁止一次性吞下全部批次。** 每个批次的交付要求：
-`Goal / Constraints / Allowed changes / Non-goals / Tests / Evidence / Rollback`。
+当前：B0/B1骨架、B2业务/版本、B3模型、B3-F1前端与B3-F2真实生成已有证据；Acceptance09Verified到waiting_user。本次真实Draft批准/正式发布、Session/总结反馈、成果核验和完整V1闭环尚待验收。下一实现切片M1.1本地身份入口，M1.2稳定知识连接点。
 
-| 批次 | 内容 | 状态 |
-|---|---|---|
-| B0 | 本机事实审计、隔离与复用清单 | ✅ 完成（`docs/migration/`、`docs/adr/`） |
-| B1 | 新骨架、领域契约与 Graph 最小恢复演练 | ✅ 骨架就绪（`docs/acceptance/B1-report.md`） |
-| B2 | 知识与计划业务域 | 待开始 |
-| B3 | 真实规划 Graph 与云模型 | 待开始 |
-| B4 | 资源索引与总结闭环 | 待开始 |
-| B5 | 项目实践与 Prompt 工作台后端 | 待开始 |
-| B6 | 前后端联调与可交付验收 | 待开始 |
-
-## B1 入口的前置阅读顺序
-
-1. 本目录两份设计文档；
-2. `docs/migration/module-reuse-matrix.md`（哪些能复用、哪些禁止迁入）；
-3. `docs/adr/`（6 条已冻结决策及其理由）；
-4. `docs/acceptance/B1-report.md`（B1 实际交付与 known risks）。
-
-## 冻结时点
-
-B1 结束时应冻结：领域术语、状态枚举、Pydantic 请求/响应、统一错误体、
-运行生命周期、Mock 样例、OpenAPI v1。前端可改变展示与布局，
-但**不能**自行定义业务状态、Graph 内部节点或自报用户/租户身份。
+本目录B3-minimal-plan/B3-user-model-settings-design及既有superpowers计划记录历史批次边界；可参考已实施契约，不能覆盖新范围。每个业务Goal独立交付与验证，不一次执行所有里程碑。
