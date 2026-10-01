@@ -9,8 +9,8 @@
 | F03 | Blueprint/Module/依赖 | IMPLEMENTED | 有Agent/Python领域包及模型结构校验；DB运行发布版与三Blueprint完整内容待补 |
 | F04 | 全阶段纲要/草案编辑/业务确认 | VERIFIED | G1真模型9阶段草案、浏览器编辑保存/独立业务发布revision1/刷新重登录PASS；仅G1已有Agent v2内容范围，三Blueprint内容由F03继续验收 |
 | F05 | 主线/章节/资源角色 | IMPLEMENTED | 公共source/section/映射已有；连续区间及全部角色待验收 |
-| F06 | Exposure/进度/跳过/返回/历史 | NOT_STARTED | 有UnitProgress基础，但无Exposure实际学习链路；不将读取进度当实现 |
-| F07 | 项目/单元/节点资料偏好覆盖 | IMPLEMENTED | prefs基础与优先级模型已有；局部写入与不污染默认值待实现 |
+| F06 | Exposure/进度/跳过/返回/历史 | IMPLEMENTED | 完整位置独立四态/CAS/幂等/不可变知识与来源快照、旧版本历史真实PG PASS；Chrome+真实HTTP+PG开始/完成/跳过/返回/刷新PASS。稳定逻辑模块身份与完整重规划链由F03/F13继续核对，负责人体验NOT RUN |
+| F07 | 项目/单元/节点资料偏好覆盖 | IMPLEMENTED | 三层完整设置优先级、CAS、恢复继承保留版本、双层旧值修复PG PASS；生成冻结/搜索实际偏好接入HTTP PASS，Chrome项目/单元保存恢复刷新PASS、节点界面mock PASS。负责人体验NOT RUN |
 | F08 | 真搜索/资源替换/GitHub/手动接入 | IMPLEMENTED | Tavily实际API+Chrome+PG候选选取/手动GitHub URL/刷新回读PASS，累计2/1000；单元资料私有快照/幂等/预算/fence已接；已确认主线替换及GitHub账号OAuth仍未交付 |
 | F09 | 总结/反馈/修订/历史 | NOT_STARTED | SummaryAttempt/Review与评审节点已有基础；用户保存/真实反馈API及界面未接 |
 | F10 | 主项目/阶段任务/知识/标准 | IMPLEMENTED | 规划可产生practice基础；用户自选项目及任务完整业务链待接 |
@@ -25,7 +25,7 @@
 
 ## 四层证据
 
-规则/Fake与真实PG分别记录；G1真模型20/50，G2产品Tavily累计2/1000、Chrome+真实HTTP+PG已PASS，详见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)和[G2资源报告](../acceptance/G2-resources-2026-10-01.md)。RAG契约仍缺，仅阻塞相关真实调用；负责人最终体验单独确认。
+规则/Fake与真实PG分别记录；G1真模型20/50，G2产品Tavily累计2/1000，新增学习控件没有外部派发。Chrome+真实HTTP+PG已PASS，详见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)、[G2资源报告](../acceptance/G2-resources-2026-10-01.md)及[G2学习控件报告](../acceptance/G2-learning-controls-2026-10-01.md)。RAG契约仍缺，仅阻塞相关真实调用；负责人最终体验单独确认。
 
 本轮最新测试证据、退出码、输入版本和切片报告链接由 [progress](progress.md) 维护。状态为BLOCKED只暂停对应真实调用，不移除功能或终止其它独立实现。
 
@@ -39,7 +39,7 @@
 | Q04 | 取消/发布竞争、迟到结果、编辑竞争 | PASS：G1实际PG事务hash/version/token与锁等待至lease过期；未来重规划竞争仍须验证 |
 | Q05 | 三个退出点恢复不盲目重复付费 | NOT RUN：已有实际PG短图保存后崩溃复用/unknown拒绝证据，完整真实服务退出点验收尚缺 |
 | Q06 | Seed历史稳定、异体导入不半发布 | PASS：0011完整payload实际PG幂等/冲突/旧版本稳定；三Blueprint内容独立验收 |
-| Q07 | 重规划历史、Exposure独立记录 | NOT RUN：G2/G4完整链待接 |
+| Q07 | 重规划历史、Exposure独立记录 | NOT RUN：G2 Exposure不同位置/版本独立、旧历史/原receipt保留PG PASS；G4总结/Prompt/成果完整新版本链待接 |
 | Q08 | 搜索/资源/RAG故障显式降级 | NOT RUN：Tavily真实成功及离线故障/未知/单元资源隔离PASS；完整真实故障矩阵和RAG契约仍缺 |
 | Q09 | 合法JSON非法引用阻断 | NOT RUN：现有校验基础与新Seed目录绑定须实测 |
 | Q10 | Summary/Prompt失败原文不丢、正确导出 | NOT RUN：G3用户写入链待接 |
