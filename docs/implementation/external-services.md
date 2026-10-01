@@ -31,7 +31,7 @@ LLM_REPAIR_OUTPUT_TOKENS=8000
 
 ## 已运行证据与余额
 
-专用隔离G1验收实际执行模型20次（含1repair），G3新验收单次总结反馈1次；累计 **21/50**，有结果21、未知0。Tavily预检和G2实际页面各一次HTTP200、各1credit，累计 **2/1000**。G2 request_id `6cbd7349-21f3-43a4-91a5-aaf32207d55c`。三项搜索配置足够，不需另装SDK或搜索模型。后续切片不重置额度。详情见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)、[G2资源报告](../acceptance/G2-resources-2026-10-01.md)与[G3总结报告](../acceptance/G3-summaries-2026-10-01.md)。
+专用隔离G1验收实际执行模型20次（含1repair），G3总结反馈1次、Prompt反馈已知HTTP400失败1次及新成功1次；累计 **23/50**，有结果23、未知0。Tavily预检和G2实际页面各一次HTTP200、各1credit，累计 **2/1000**。G2 request_id `6cbd7349-21f3-43a4-91a5-aaf32207d55c`。三项搜索配置足够，不需另装SDK或搜索模型。后续切片不重置额度。详情见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)、[G2资源报告](../acceptance/G2-resources-2026-10-01.md)、[G3总结报告](../acceptance/G3-summaries-2026-10-01.md)与[G3 Prompt报告](../acceptance/G3-prompts-2026-10-01.md)。失败请求不退还本轮请求额度；未返回usage时不猜费用。
 
 产品0013的计数器按单部署数据库持久累计，所有账号共用，不因请求失败退还；0禁用派发，最高1000。验收另沿用.git/v2-search-quota-20261001，在每个真实HTTP前独占预约，跨隔离库累计已有2次，不能用新库计数0重置本轮授权。重复同键只读已有状态，结果未知保留记录，不自动重派；正常只读恢复可按幂等键GET查询。
 

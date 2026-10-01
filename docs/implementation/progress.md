@@ -12,9 +12,9 @@
 
 root实际turn_context为gpt-6.1-sol/high。此前仅根据工具返回将子代理实际解析记为NOT OBSERVABLE；用户追问模型显示后补查本机JSONL的session_meta父线程/agent_path与最新turn_context，已获得运行证据：Gauss/g1_credentials为gpt-6.1-sol/medium，Kuhn/g1_short_generation为gpt-6.1-sol/high，Helmholtz/g1_seed为gpt-6.1-sol/medium，Lovelace/g1_binding_review为gpt-6.1-sol/high。这些既有代理没有使用Luna Max；复用工具followup_task/send_message没有model/effort参数，本轮新增代理又被agent thread limit拒绝。不能把提示词或失败spawn当路由证据，未改全局配置。之后派发说明同时展示任务、日志核实模型/effort和复用/新建状态；低风险可新建时明确路由Luna Max，工具限制时报告限制，不把Sol标为Luna。原始实现者报告保留其当时可观测判断，以本条补充审计为准。
 
-用户授权累计模型50请求、Tavily1000请求：**模型21/50，搜索2/1000（2credit）**，下一切片不重置。21模型及2实际搜索均有结果/回执，外部unknown0。G3新增一次真实总结反馈。Tavily三项配置已存在，预检和G2实际API/PG/Chrome成功。RAG地址/契约/凭证缺失，只阻塞其实际调用；公网部署未授权。GitHub浏览器授权需求已记录，尚未注册App或安装MCP；手动GitHub资料不是账号连接。见[外部服务](external-services.md)。
+用户授权累计模型50请求、Tavily1000请求：**模型23/50，搜索2/1000（2credit）**，下一切片不重置。23模型及2实际搜索均有结果/回执，外部unknown0。G3总结1次，Prompt已知HTTP400失败1次及新成功1次；失败不退还请求额度，usage缺失不猜费用。Tavily三项配置已存在，预检和G2实际API/PG/Chrome成功。RAG地址/契约/凭证缺失，只阻塞其实际调用；公网部署未授权。GitHub浏览器授权需求已记录，尚未注册App或安装MCP；手动GitHub资料不是账号连接。见[外部服务](external-services.md)。
 
-模型沿用DeepSeek Flash/cap8000，专用验收structure/repair目标8000，不提升cap、不改私有.env。免费预检先因缺dotenv和预算不一致FAIL；复用加载语义、限制目标后PASS。派发前append-only计量：.git/v2-paid-quota-20261001/request-01..20.json及result；搜索.git/v2-search-quota-20261001/request-0001..0002.json及result。未知结果阻断继续，禁止修改记录或重跑同AcceptanceId。产品计数器按单部署DB，验收跨库仍由.git计量承接旧消费。
+模型沿用DeepSeek Flash/cap8000，专用验收structure/repair目标8000，不提升cap、不改私有.env。免费预检先因缺dotenv和预算不一致FAIL；复用加载语义、限制目标后PASS。派发前append-only计量：.git/v2-paid-quota-20261001/request-01..23.json及result；搜索.git/v2-search-quota-20261001/request-0001..0002.json及result。未知结果阻断继续，禁止修改记录或重跑同AcceptanceId。产品计数器按单部署DB，验收跨库仍由.git计量承接旧消费。
 
 ## G1已实测事实
 
@@ -104,3 +104,27 @@ Rollback：保留已有有效历史及收费证据，仅本feature分支正常�
 下一条安全动作：继续G3主项目/阶段任务和Prompt评审/修订/指定导出，保持一次反馈引擎及历史保全；GitHub薄授权与RAG真实契约局部缺口另记。F09技术第一批已IMPLEMENTED，负责人体验NOT RUN；整体active/NOT_READY，未合并develop/master或接受milestone。
 
 G3本批代码167345827a61049450f0f35c37f0075425e4a19c已正常push，ls-remote与本地相等；develop/master未改。验收/路由显示说明/当前检查点文档提交随后承接，续接读取实际HEAD。秘密忽略规则、两份原指导hash、Ruff/diff及浏览器脚本syntax PASS。只剩原禁操作目录未跟踪，不处理它们。
+
+## G3第二批执行边界（进行中）
+
+上一轮分类progress：总结真实验收和代码/文档已推送，当前HEAD0241f376b6cb1178d156fb66ba240bacda6f84d4，跟踪业务工作区clean。Goal为已有主项目/阶段任务要求→用户方案/Prompt明确保存→指定修订单次反馈→指定版本复制/下载及历史；保持全F01–F18，后续自选实践方向/任务调整仍须受控新版本，不能以本批读取候选要求冒充全部F10。
+
+Constraints：复用现有practice_projects/tasks、plan_task_links/knowledge快照、review graph、队列及Attempt账本；不重建引擎、不改已发布0018/0019、不写原库/原服务/旧Run或journal。原文1–40000 Unicode码点非空白、保留所有空白，先存后反馈；导出明确选定不可变修订，raw精确原文，implementation确定性绑定冻结要求，不产生模型润色或伪造成果。反馈不得更改学习/实践验收状态，未知不重派。Summary与Prompt活动反馈额度合并计算。
+
+Allowed changes/Ownership：Kuhn（本机日志gpt-6.1-sol/high、复用）拥有Prompt领域/Port/应用/DB/API、0020及必要provider/ledger/claim扩展和真实PG性质测试；Gauss（gpt-6.1-sol/medium、复用）拥有PromptPage、独立promptClient、main实践挂载/SupportingPages、practice样式及Chrome Mock。root冻结公共DTO，维护组合根、生成契约、实际验收和证据；两个业务代理编辑期间root不写业务代码。低风险事实由工具直接核对，既有thread数量限制下不伪称已新建Luna。冻结契约位于忽略证据var/v2-g3/prompt-contract.md。
+
+Non-goals：本批不做外部项目执行、真实成果验收、通用MCP/Skills/Sandbox或任意AI覆盖用户原文；自选项目及任务新版本仍继续推进，GitHub/RAG缺配置只保留对应局部BLOCKED。
+
+Tests/Evidence：先规则/真实PG/CAS/幂等/归属/取消/未知/隐私/导出版本，再公共HTTP/类型/build/Chrome Mock，最后新AcceptanceId下已授权额度内代表真实反馈与实际导出。当前本批测试NOT RUN；累计模型21/50、搜索2/1000，不重置。Rollback使用正常增量提交，非空Prompt/导出/回执拒绝破坏性降级；历史原文与账本保留，完整Goal未完成不标master/milestone。
+
+本批收口：Kuhn与Gauss均停止业务编辑，root完成组合根/生成契约和实际验收。规则/provider/domain/budget最终67 PASS exit0（真实HTTP400修复后0.56s）；Prompt实际隔离PG17 PASS exit0 35.56s。受影响Summary/规划队列/预算33个用例PASS，其组合命令整体FAIL exit1，因为Prompt夹具导入被Ruff删除导致17个setup error；恢复测试import后只重跑Prompt17 PASS，不虚构组合exit0。Root Prompt3+Summary3实际Cookie/CSRF/HTTP6 PASS exit0 23.47s、契约9 PASS、OpenAPI/生成类型/build50modules/frontend4单元/Chrome Mock/Ruff/diff PASS。独立只读复核无可复现P0/P1/P2，具体范围与限制保留于ignored报告，不当作运行验收。
+
+上一轮模型显示追问分类progress：本机JSONL核实了实际路由并纠正用户可见说明；本轮继续业务验收。第一次Acceptance02真实Run `run_4fdb6092681d4711905fe5e0023fdacb` HTTP400、failed、unknown0：Prompt JSON模式缺少明确JSON输出指令。离线回归RED1→最小提示词修复→最终67 PASS。既有失败原文/Run/Attempt/证据全部保留；同一Run不重派。真实失败浏览器观察原文/历史/指定旧版导出/继续编辑保全PASS，没有新增模型调用。
+
+新Acceptance03 `v2-g3-20261001-03` 免费预检PASS；真实Chrome+配置deepseek-flash+HTTP+保留PG一次反馈PASS。Run `run_a492896d702d4ee5ac68ce7232dc99f4` succeeded；433input/723output、4428ms、cap4096、unknown0。原文先存，排队中再保存新版和输入未保存文字；反馈绑定旧版，新版和编辑不动。旧版raw/实施导出、实际复制/下载、Exposure及task状态不变、刷新读回与历史PASS。Windows剪贴板会将LF转CRLF，按换行归一化后完全一致；服务端导出和UTF8下载逐字相同。初次逐字剪贴板断言FAIL及阶段文件独占写FAIL如实保留，只调整平台观察/沿用已有导出，没有重派收费。
+
+累计模型23/50，搜索2/1000；02为已知失败1、03为成功1。两个本批新journal/evidence通过已有工具分别按真实failed/succeeded终态收口，旧ID与账本未改写。var/v2-g3保存preflight、失败/成功元数据、分阶段原文/回执、两个PNG及实现/只读review报告；秘密原文、账号与.env不提交。已完成实际脚本拒绝重跑。
+
+本批代码 `dff7fc10eaed1339b3ec40134a8d9d347c546ca8` 已正常commit/push并ls-remote核对存在；仅31个白名单代码/契约/前端/测试文件提交，未提交原禁操作目录。实际服务：先后按精确命令路径停止自有summary listener38980及失败Prompt listener4368，当前session94246、8021/PID33812为prompt_corrected_acceptance_server.py；前端5175/PID41308保留，原8000/PID43688、PG/PID8124、Ollama/PID22760未重启。专用业务库增量到0020，cp库不变；当前wrapper已消费唯一派发，不盲重启。
+
+F11技术第一批IMPLEMENTED/Integrated，Q10代表技术门禁PASS；负责人体验NOT RUN。见[G3 Prompt报告](../acceptance/G3-prompts-2026-10-01.md)。下一安全动作为G3/F10自选主项目和阶段任务的受控Proposal→差异→明确确认新计划版本，保留旧Summary/Prompt/Exposure及来源；随后推进G4成果/Outcome及其余缺口。GitHub App与RAG缺契约仅暂停对应实际分支，整体继续active/NOT_READY，不合并develop/master或标milestone。本验收文档提交后的实际HEAD续接时读取，不猜SHA。

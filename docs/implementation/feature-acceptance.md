@@ -14,12 +14,12 @@
 | F08 | 真搜索/资源替换/GitHub/手动接入 | IMPLEMENTED | Tavily实际API+Chrome+PG候选选取/手动GitHub URL/刷新回读PASS，累计2/1000；受控主线差异→确认新版本→私人资料明确沿用→旧进度保留Chrome+真实HTTP+PG PASS。GitHub账号OAuth仍未接线，手动URL不代表账号连接 |
 | F09 | 总结/反馈/修订/历史 | IMPLEMENTED | 原文保存/CAS/幂等/不可变修订/分页与旧版档案、单次有界反馈已接；规则+PG41及契约/HTTP12 PASS，Chrome+真实模型+HTTP+PG原文先存/反馈绑定旧版/新版与编辑保留/刷新PASS。负责人体验NOT RUN，见G3报告 |
 | F10 | 主项目/阶段任务/知识/标准 | IMPLEMENTED | 规划可产生practice基础；用户自选项目及任务完整业务链待接 |
-| F11 | 方案/Prompt评审/修订/指定导出 | NOT_STARTED | 领域基础存在，Prompt工作台未接；超时/冲突原文保全和绑定导出待实证 |
+| F11 | 方案/Prompt评审/修订/指定导出 | IMPLEMENTED | 明确保存/CAS/不可变修订/单次反馈/历史及指定旧版raw与实施导出已接；规则67/Prompt PG17/HTTP6/契约9及Chrome Mock PASS，真实失败保全与新真实反馈/下载/刷新PASS；Windows复制仅转换换行。负责人体验NOT RUN，见[G3 Prompt](../acceptance/G3-prompts-2026-10-01.md) |
 | F12 | 成果/证据/验收/补充 | NOT_STARTED | EvidenceGrade/Verification基础存在；提交/实际验收链未接 |
 | F13 | 局部修改/全路线新版本/历史 | IMPLEMENTED | 首个受控操作为阶段主线替换，差异/来源冻结/新版本/CAS/幂等/旧Exposure与资料保留实际PG和Chrome PASS；其它受控操作及总结/成果原文完整保全仍待G3/G4验收 |
 | F14 | Outcome成果归集 | NOT_STARTED | 尚无实际任务/证据归集页面与服务 |
 | F15 | Seed导入/校验/DB发布/审核边界 | IMPLEMENTED | 0011完整payload、严格校验、幂等/冲突回滚/DB目录/CLI：16规则+真实PG PASS；真生成使用发布Agent v2。三Blueprint内容及新网页审核仍待补 |
-| F16 | 真模型/持久任务/取消/恢复 | IMPLEMENTED | 真云模型累计21/50请求，G1九阶段/27必需节点及G3一次总结反馈，unknown0；短任务、冻结绑定、锁后fence、崩溃草案/反馈复用已实测；完整用户恢复/故障UX后续验收 |
+| F16 | 真模型/持久任务/取消/恢复 | IMPLEMENTED | 真云模型累计23/50请求，含G3总结1及Prompt已知失败1/成功1，unknown0；短任务、冻结绑定、锁后fence、崩溃草案/反馈复用已实测；完整用户恢复/故障UX后续验收 |
 | F17 | 独立RAG真实薄集成 | BLOCKED | Port已定义；RAG_BASE_URL/RAG_API_KEY未配置，无真实检索/越权/故障证据 |
 | F18 | 成品界面/启动/部署/备份恢复 | IMPLEMENTED | React/服务基础已有；本轮真实构建、完整流程、独立恢复和授权交付未完成 |
 
@@ -33,7 +33,7 @@
 
 | ID | 性质 | 本轮状态 / 尚缺证据 |
 |---|---|---|
-| Q01 | 全对象跨账号隔离、RAG私有证据 | NOT RUN：认证/现有对象可定向核对，未来Summary/Prompt/RAG仍须验证 |
+| Q01 | 全对象跨账号隔离、RAG私有证据 | NOT RUN：已接认证、Summary/Prompt原文/历史/导出及其它当前对象有真实PG/HTTP隔离PASS；未来成果/RAG及全对象矩阵仍须验证 |
 | Q02 | 持久提交、断开浏览器重新打开 | PASS：G1真实PG持久提交及Chrome刷新/退出重登录；后续新模块须延续验证 |
 | Q03 | 重复确认同结果、同键异体冲突 | PASS：新业务确认PG幂等/并发/冲突；不是所有未来写入接口完成 |
 | Q04 | 取消/发布竞争、迟到结果、编辑竞争 | PASS：G1实际PG事务hash/version/token与锁等待至lease过期；未来重规划竞争仍须验证 |
@@ -42,7 +42,7 @@
 | Q07 | 重规划历史、Exposure独立记录 | NOT RUN：G2 Exposure不同位置/版本独立、旧历史/原receipt保留PG PASS；G4总结/Prompt/成果完整新版本链待接 |
 | Q08 | 搜索/资源/RAG故障显式降级 | NOT RUN：Tavily真实成功及离线故障/未知/单元资源隔离PASS；完整真实故障矩阵和RAG契约仍缺 |
 | Q09 | 合法JSON非法引用阻断 | NOT RUN：现有校验基础与新Seed目录绑定须实测 |
-| Q10 | Summary/Prompt失败原文不丢、正确导出 | NOT RUN：Summary不可变原文、失败/取消/unknown、409与迟到反馈规则/真实PG/Mock PASS，真实反馈及新原文/编辑保全Chrome PASS；Prompt修订与指定导出待接 |
+| Q10 | Summary/Prompt失败原文不丢、正确导出 | PASS：规则/真实PG与Chrome Mock覆盖超时/unknown、409、取消及迟到反馈保全；真实Summary反馈、Prompt HTTP400失败保全及新成功反馈/指定旧版导出/下载/刷新PASS。Windows剪贴板仅LF→CRLF，服务端/下载逐字一致；负责人体验NOT RUN |
 | Q11 | 可查询status_url、终态停轮询、错误可操作 | PASS：G1实际PG status_url直接200，浏览器终态停止轮询、刷新/409保留编辑 |
 | Q12 | 构建/启动/重登录/独立备份恢复 | NOT RUN：构建/隔离启动/重登录已PASS，独立备份恢复待G6 |
 
