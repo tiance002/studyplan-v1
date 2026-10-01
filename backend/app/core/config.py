@@ -87,6 +87,9 @@ class Settings:
     # The server claims jobs atomically; allowlist remains for controlled legacy harnesses.
     planning_worker_admission_mode: str = "trusted_server"
     planning_worker_actor_ids: tuple[str, ...] = ()
+    search_provider: str = ""
+    tavily_api_key: str = ""
+    search_request_limit: int = 1000
 
     @property
     def is_development(self) -> bool:
@@ -151,6 +154,9 @@ def get_settings() -> Settings:
             actor.strip() for actor in os.environ.get("PLANNING_WORKER_ACTOR_IDS", "").split(",")
             if actor.strip()
         )),
+        search_provider=_env("SEARCH_PROVIDER", ""),
+        tavily_api_key=_env("TAVILY_API_KEY", ""),
+        search_request_limit=_env_int("SEARCH_REQUEST_LIMIT", 1000),
     )
 
 

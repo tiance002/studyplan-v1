@@ -4,6 +4,109 @@
  */
 
 export interface paths {
+    "/api/v1/resources/searches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Search Resources */
+        post: operations["search_learning_resources"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/searches/{search_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Search */
+        get: operations["get_resource_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/searches/by-key/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Search By Key */
+        get: operations["get_resource_search_by_key"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/selections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Selected */
+        get: operations["list_selected_resources"];
+        put?: never;
+        /** Select Resource */
+        post: operations["select_learning_resource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/manual": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Manual Resource */
+        post: operations["add_manual_learning_resource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/selections/{selection_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Resource */
+        delete: operations["remove_learning_resource"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -390,6 +493,24 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** ManualResourceRequest */
+        ManualResourceRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Url */
+            url: string;
+            /** Title */
+            title: string;
+        };
+        /**
+         * MediaType
+         * @enum {string}
+         */
+        MediaType: "text" | "video" | "interactive" | "repo" | "course";
         /** ModelSettingsClear */
         ModelSettingsClear: {
             /** Expected Version */
@@ -664,6 +785,94 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** ResourceCandidateView */
+        ResourceCandidateView: {
+            /** Resource Id */
+            resource_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Url */
+            url: string;
+            /** Title */
+            title: string;
+            media_type: components["schemas"]["MediaType"];
+            /** Language */
+            language: string;
+            provenance: components["schemas"]["ResourceProvenance"];
+            /**
+             * Verification Status
+             * @default unverified
+             * @constant
+             */
+            verification_status: "unverified";
+            /** Section Anchor */
+            section_anchor?: string | null;
+            /** Checked At */
+            checked_at?: string | null;
+            /**
+             * Source Note
+             * @default
+             */
+            source_note: string;
+        };
+        /**
+         * ResourceProvenance
+         * @description 资源出处。``OFFICIAL`` 必须能给出官方来源证据。
+         * @enum {string}
+         */
+        ResourceProvenance: "official" | "community" | "user_provided" | "curated_pool" | "github_candidate" | "search_candidate";
+        /** ResourceRemovalView */
+        ResourceRemovalView: {
+            /** Removed */
+            removed: boolean;
+        };
+        /** ResourceSearchRequest */
+        ResourceSearchRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Query */
+            query: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** ResourceSearchView */
+        ResourceSearchView: {
+            /** Search Id */
+            search_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "dispatched" | "succeeded" | "failed" | "reconciliation_required";
+            /** Query */
+            query: string;
+            /** Candidates */
+            candidates: components["schemas"]["ResourceCandidateView"][];
+            /** Error */
+            error?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** ResourceSelectionRequest */
+        ResourceSelectionRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Search Id */
+            search_id: string;
+            /** Candidate Id */
+            candidate_id: string;
+        };
         /**
          * RunProgress
          * @description 一次运行的分批生成**业务进度**（唯一可授权给前端的进度视图）。
@@ -770,6 +979,17 @@ export interface components {
             error?: components["schemas"]["ErrorBody"] | null;
             /** @description 分批生成业务进度；未发布过进度的运行（如旧版）为 null */
             progress?: components["schemas"]["RunProgress"] | null;
+        };
+        /** SelectedResourceView */
+        SelectedResourceView: {
+            /** Selection Id */
+            selection_id: string;
+            resource: components["schemas"]["ResourceCandidateView"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** SessionEntry */
         SessionEntry: {
@@ -1121,6 +1341,260 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    search_learning_resources: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourceSearchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceSearchView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_resource_search: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                plan_id: string;
+                stage_id: string;
+                unit_id: string;
+            };
+            header?: never;
+            path: {
+                search_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceSearchView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_resource_search_by_key: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                plan_id: string;
+                stage_id: string;
+                unit_id: string;
+            };
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceSearchView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_selected_resources: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                plan_id: string;
+                stage_id: string;
+                unit_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectedResourceView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    select_learning_resource: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourceSelectionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectedResourceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_manual_learning_resource: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualResourceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SelectedResourceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_learning_resource: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                plan_id: string;
+                stage_id: string;
+                unit_id: string;
+            };
+            header?: never;
+            path: {
+                selection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceRemovalView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     healthz_healthz_get: {
         parameters: {
             query?: never;

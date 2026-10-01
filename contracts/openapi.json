@@ -6,6 +6,498 @@
     "version": "1.1.0"
   },
   "paths": {
+    "/api/v1/resources/searches": {
+      "post": {
+        "summary": "Search Resources",
+        "operationId": "search_learning_resources",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceSearchView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/searches/{search_id}": {
+      "get": {
+        "summary": "Get Search",
+        "operationId": "get_resource_search",
+        "parameters": [
+          {
+            "name": "search_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Search Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Stage Id"
+            }
+          },
+          {
+            "name": "unit_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Unit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceSearchView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/searches/by-key/{key}": {
+      "get": {
+        "summary": "Get Search By Key",
+        "operationId": "get_resource_search_by_key",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Stage Id"
+            }
+          },
+          {
+            "name": "unit_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Unit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceSearchView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/selections": {
+      "get": {
+        "summary": "List Selected",
+        "operationId": "list_selected_resources",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Stage Id"
+            }
+          },
+          {
+            "name": "unit_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Unit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SelectedResourceView"
+                  },
+                  "title": "Response List Selected Resources"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Select Resource",
+        "operationId": "select_learning_resource",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceSelectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectedResourceView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/manual": {
+      "post": {
+        "summary": "Manual Resource",
+        "operationId": "add_manual_learning_resource",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualResourceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectedResourceView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/selections/{selection_id}": {
+      "delete": {
+        "summary": "Remove Resource",
+        "operationId": "remove_learning_resource",
+        "parameters": [
+          {
+            "name": "selection_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Selection Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Stage Id"
+            }
+          },
+          {
+            "name": "unit_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Unit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceRemovalView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "tags": [
@@ -854,6 +1346,61 @@
         ],
         "title": "LoginRequest"
       },
+      "ManualResourceRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "unit_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Unit Id"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 4096,
+            "minLength": 1,
+            "title": "Url"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "stage_id",
+          "unit_id",
+          "url",
+          "title"
+        ],
+        "title": "ManualResourceRequest"
+      },
+      "MediaType": {
+        "type": "string",
+        "enum": [
+          "text",
+          "video",
+          "interactive",
+          "repo",
+          "course"
+        ],
+        "title": "MediaType"
+      },
       "ModelSettingsClear": {
         "properties": {
           "expected_version": {
@@ -1470,6 +2017,249 @@
         ],
         "title": "RegistrationRequest"
       },
+      "ResourceCandidateView": {
+        "properties": {
+          "resource_id": {
+            "type": "string",
+            "title": "Resource Id"
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "media_type": {
+            "$ref": "#/components/schemas/MediaType"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/ResourceProvenance"
+          },
+          "verification_status": {
+            "type": "string",
+            "const": "unverified",
+            "title": "Verification Status",
+            "default": "unverified"
+          },
+          "section_anchor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section Anchor"
+          },
+          "checked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked At"
+          },
+          "source_note": {
+            "type": "string",
+            "title": "Source Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "resource_id",
+          "project_id",
+          "url",
+          "title",
+          "media_type",
+          "language",
+          "provenance"
+        ],
+        "title": "ResourceCandidateView"
+      },
+      "ResourceProvenance": {
+        "type": "string",
+        "enum": [
+          "official",
+          "community",
+          "user_provided",
+          "curated_pool",
+          "github_candidate",
+          "search_candidate"
+        ],
+        "title": "ResourceProvenance",
+        "description": "资源出处。``OFFICIAL`` 必须能给出官方来源证据。"
+      },
+      "ResourceRemovalView": {
+        "properties": {
+          "removed": {
+            "type": "boolean",
+            "title": "Removed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "removed"
+        ],
+        "title": "ResourceRemovalView"
+      },
+      "ResourceSearchRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "unit_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Unit Id"
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Query"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "stage_id",
+          "unit_id",
+          "query",
+          "idempotency_key"
+        ],
+        "title": "ResourceSearchRequest"
+      },
+      "ResourceSearchView": {
+        "properties": {
+          "search_id": {
+            "type": "string",
+            "title": "Search Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "dispatched",
+              "succeeded",
+              "failed",
+              "reconciliation_required"
+            ],
+            "title": "Status"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceCandidateView"
+            },
+            "type": "array",
+            "title": "Candidates"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "search_id",
+          "status",
+          "query",
+          "candidates",
+          "created_at"
+        ],
+        "title": "ResourceSearchView"
+      },
+      "ResourceSelectionRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "unit_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Unit Id"
+          },
+          "search_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Search Id"
+          },
+          "candidate_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Candidate Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "stage_id",
+          "unit_id",
+          "search_id",
+          "candidate_id"
+        ],
+        "title": "ResourceSelectionRequest"
+      },
       "RunProgress": {
         "properties": {
           "phase": {
@@ -1661,6 +2451,29 @@
         ],
         "title": "RunView",
         "description": "对外运行状态投影（**唯一**可授权给前端的运行视图）。\n\n``status`` 成功 **不自动等于** 知识已学会/任务已验收。\n``result_ref`` 是不透明引用；前端不得解析其内部结构。"
+      },
+      "SelectedResourceView": {
+        "properties": {
+          "selection_id": {
+            "type": "string",
+            "title": "Selection Id"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/ResourceCandidateView"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "selection_id",
+          "resource",
+          "created_at"
+        ],
+        "title": "SelectedResourceView"
       },
       "SessionEntry": {
         "properties": {

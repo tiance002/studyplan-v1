@@ -1,5 +1,7 @@
 import type { StageWorkspace, DTO } from "../../api/types";
 import { Resources } from "../../components/Resources";
+import { useState } from 'react';
+import { ResourcePicker } from './ResourcePicker';
 export function KnowledgeNodeView({
   node,
   allNodes,
@@ -64,13 +66,19 @@ export function MainWorkspace({
   allNodes,
   selectNode,
   create,
+  projectId,
+  planId,
 }: {
   stage: StageWorkspace | undefined;
   nodeId: string;
   allNodes: DTO["WorkspaceNodeView"][];
   selectNode: (id: string) => void;
   create: () => void;
+  projectId: string;
+  planId: string;
 }) {
+  const [unitChoice, setUnitChoice] = useState('');
+  const unitId = stage?.units.some(u => u.unit_id === unitChoice) ? unitChoice : stage?.units[0]?.unit_id;
   const node =
     stage?.nodes.find((n) => n.node_id === nodeId) || stage?.nodes[0];
   return (
@@ -117,6 +125,13 @@ export function MainWorkspace({
           <section className="panel">
             <Resources items={stage.resources.filter((r) => !r.node_ids?.length || r.node_ids.includes(node?.node_id || ""))} />
           </section>
+          {unitId && stage && <>
+            <label>资料所属学习单元<select aria-label="资料所属学习单元" value={unitId} onChange={e => setUnitChoice(e.target.value)}>
+              {stage.units.map(u => <option key={u.unit_id} value={u.unit_id}>{u.title}</option>)}
+            </select></label>
+            <ResourcePicker key={`${projectId}:${planId}:${stage.stage.stage_id}:${unitId}`} projectId={projectId}
+              target={{plan_id: planId, stage_id: stage.stage.stage_id, unit_id: unitId}} />
+          </>}
           <div className="section-heading">
             <h2>学习单元</h2>
           </div>

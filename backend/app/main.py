@@ -19,6 +19,7 @@ from app import agent_workflows  # noqa: F401  (副作用：设置 LANGGRAPH_STR
 from app.agent_workflows import GRAPH_VERSION
 from app.api.v1.deps import CONTAINER_STATE_KEY
 from app.api.v1.model_settings_routes import router as model_settings_router
+from app.api.v1.resource_routes import router as resource_router
 from app.api.v1.routes import router as v1_router
 from app.api.v1.schemas import V1_SCHEMAS
 from app.api.v1.session_routes import router as session_router
@@ -148,6 +149,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
 
     # 容器：测试可注入；否则按配置装配（缺 DATABASE_URL 时业务端点返回 503）。
     setattr(application.state, CONTAINER_STATE_KEY, container or build_container(settings))
+    application.include_router(resource_router)
 
     _install_request_id(application)
     _install_error_handling(application)

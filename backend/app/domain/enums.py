@@ -272,6 +272,7 @@ class ResourceProvenance(StrEnum):
     USER_PROVIDED = "user_provided"
     CURATED_POOL = "curated_pool"
     GITHUB_CANDIDATE = "github_candidate"
+    SEARCH_CANDIDATE = "search_candidate"
 
 
 class DomainPackStatus(StrEnum):

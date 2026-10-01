@@ -48,7 +48,23 @@ async function request<T>(
   return data as T;
 }
 const scope = (project: string) => `?project_id=${encodeURIComponent(project)}`;
+const resourceScope = (project: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
+  `${scope(project)}&${new URLSearchParams(target)}`;
 export const api = {
+  searchResources: (project: string, body: DTO['ResourceSearchRequest']) =>
+    request<DTO['ResourceSearchView']>(`/resources/searches${scope(project)}`, body),
+  resourceSearch: (project: string, id: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
+    request<DTO['ResourceSearchView']>(`/resources/searches/${encodeURIComponent(id)}${resourceScope(project, target)}`),
+  resourceSearchByKey: (project: string, key: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
+    request<DTO['ResourceSearchView']>(`/resources/searches/by-key/${encodeURIComponent(key)}${resourceScope(project, target)}`),
+  selectedResources: (project: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
+    request<DTO['SelectedResourceView'][]>(`/resources/selections${resourceScope(project, target)}`),
+  selectResource: (project: string, body: DTO['ResourceSelectionRequest']) =>
+    request<DTO['SelectedResourceView']>(`/resources/selections${scope(project)}`, body),
+  manualResource: (project: string, body: DTO['ManualResourceRequest']) =>
+    request<DTO['SelectedResourceView']>(`/resources/manual${scope(project)}`, body),
+  removeResource: (project: string, id: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
+    request<DTO['ResourceRemovalView']>(`/resources/selections/${encodeURIComponent(id)}${resourceScope(project, target)}`, undefined, 'DELETE'),
   modelSettings: () => request<DTO["ModelSettingsResponse"]>("/model-settings"),
   saveModelSettings: (body: DTO["ModelSettingsRequest"]) =>
     request<DTO["ModelSettingsResponse"]>("/model-settings", body, "PUT"),

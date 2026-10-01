@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from app.application.learning_resources import LearningResourceService
 from app.application.model_settings import ModelSettingsService
 from app.application.plan_service import PlanService
 from app.core.config import Settings
@@ -45,3 +46,4 @@ class AppContainer:
     workspace_reader: WorkspaceReaderPort | None = None
     # Constructed for an explicit CLI process; the API never starts it.
     planning_worker: PlanningWorkerPort | None = None
+    resource_service: LearningResourceService | None = None

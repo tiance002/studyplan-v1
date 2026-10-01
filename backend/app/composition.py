@@ -64,6 +64,13 @@ def build_container(settings: Settings) -> AppContainer:
     browser_auth = PgBrowserAuth(dsn, settings.session_ttl_seconds)
     from app.infrastructure.db.workspace import PgWorkspaceReader
     workspace_reader = PgWorkspaceReader(dsn)
+    from app.application.learning_resources import LearningResourceService
+    from app.infrastructure.db.learning_resources import PgLearningResources
+    from app.infrastructure.resources.tavily import TavilyResourceIndex
+    if settings.search_provider not in ("", "tavily"):
+        raise RuntimeError("Unsupported search provider")
+    search_index = TavilyResourceIndex(settings.tavily_api_key) if settings.search_provider == "tavily" and settings.tavily_api_key else None
+    resource_service = LearningResourceService(PgLearningResources(dsn), search_index, settings.search_request_limit)
     sessions = browser_auth
     if settings.llm_provider.strip().lower() not in SUPPORTED_PROVIDERS:
         build_llm(settings)
@@ -128,4 +135,5 @@ def build_container(settings: Settings) -> AppContainer:
     )
     return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service,
                         model_settings_service=model_service, browser_auth=browser_auth,
-                        workspace_reader=workspace_reader, planning_worker=planning_worker)
+                        workspace_reader=workspace_reader, planning_worker=planning_worker,
+                        resource_service=resource_service)

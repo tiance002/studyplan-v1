@@ -181,6 +181,8 @@ function App() {
       )}
       {page === "workspace" && (
         <MainWorkspace
+          projectId={project}
+          planId={workspace?.plan.plan_id || ''}
           stage={stage}
           nodeId={nodeId}
           allNodes={workspace?.stages.flatMap((s) => s.nodes) || []}
