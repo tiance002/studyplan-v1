@@ -181,6 +181,7 @@ class PlanService:
         worker_actor_ids: tuple[str, ...] = (),
         binding_resolver: Callable[[AuthContext, str], SubmissionBinding] | None = None,
         planning_worker_admission_mode: str = "allowlist",
+        preference_resolver: Callable[[AuthContext, str], Any] | None = None,
     ) -> None:
         self._repo = repository
         self._runs = runs
@@ -206,6 +207,7 @@ class PlanService:
             raise ValidationAppError("规划 Worker admission mode 无效")
         self._planning_worker_admission_mode = planning_worker_admission_mode
         self._binding_resolver = binding_resolver or _unbound_submission
+        self._preference_resolver = preference_resolver
 
     # ------------------------------------------------------------------ 生成
 
@@ -231,6 +233,10 @@ class PlanService:
             pack=pack, policy=binding.budget_policy, model_ref=binding.model_ref
         )
         current = self._repo.get_current(project_id=project_id)
+        if prefs_snapshot is None and self._preference_resolver is not None:
+            preference = self._preference_resolver(scope, project_id)
+            prefs_snapshot = {"mode": preference.mode.value, "language": preference.language,
+                              "official_priority": preference.official_priority, "pace": preference.pace}
         initial: PlanningState = {
             "run_id": run_id,
             "project_id": project_id,

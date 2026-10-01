@@ -1,13 +1,14 @@
 """Offline search adapter properties: authorization, bounded dispatch, honest candidates."""
 
 import json
+from dataclasses import replace
 from datetime import datetime, timezone
 
 import httpx
 import pytest
 from app.core.errors import ForbiddenError, ValidationAppError
-from app.domain.enums import ResourceProvenance, ResourceVerificationStatus
-from app.domain.resources.models import DEFAULT_SYSTEM_PREFERENCE, UnavailableResult
+from app.domain.enums import PreferenceMode, PreferenceScope, ResourceProvenance, ResourceVerificationStatus
+from app.domain.resources.models import DEFAULT_SYSTEM_PREFERENCE, ResourcePreference, UnavailableResult
 from app.domain.workspace.models import AuthContext
 from app.infrastructure.resources.tavily import UNKNOWN_SEARCH_REASON, TavilyResourceIndex
 from app.ports.resource_index import ResourceQuery
@@ -55,6 +56,21 @@ def test_one_fixed_basic_request_returns_only_private_unverified_candidates():
     assert candidate.checked_at is None
     assert "Tavily" in candidate.source_note and "搜索时间" in candidate.source_note
     assert "secret body" not in repr(candidate) and "external instructions" not in repr(candidate)
+
+
+def test_explicit_preference_guides_search_but_does_not_certify_result_language():
+    seen = []
+    def respond(request):
+        seen.append(json.loads(request.content))
+        return streaming_json({"results": [{"title": "Guide", "url": "https://example.com/guide"}]})
+    preference = ResourcePreference(scope=PreferenceScope.NODE, scope_ref="node-private-id",
+        mode=PreferenceMode.VIDEO_FIRST, language="fr", official_priority=True, pace="slow")
+    result = TavilyResourceIndex("key", transport=httpx.MockTransport(respond)).find(
+        replace(query(), preference=preference))
+    assert "video" in seen[0]["query"] and "fr" in seen[0]["query"]
+    assert "node-private-id" not in repr(seen)
+    assert result[0].language == "und"
+    assert "语言未核验" in result[0].source_note
 
 
 @pytest.mark.parametrize("url", [

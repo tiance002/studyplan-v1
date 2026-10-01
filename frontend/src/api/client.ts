@@ -49,8 +49,20 @@ async function request<T>(
 }
 const scope = (project: string) => `?project_id=${encodeURIComponent(project)}`;
 const resourceScope = (project: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
-  `${scope(project)}&${new URLSearchParams(target)}`;
+  `${scope(project)}&${new URLSearchParams({plan_id:target.plan_id,stage_id:target.stage_id,unit_id:target.unit_id})}`;
 export const api = {
+  listExposures: (project: string, plan: string, stage: string) =>
+    request<DTO['ExposureView'][]>(`/exposures${scope(project)}&${new URLSearchParams({plan_id: plan, stage_id: stage})}`),
+  changeExposure: (project: string, body: DTO['ExposureChangeRequest']) =>
+    request<DTO['ExposureChangeView']>(`/exposures${scope(project)}`, body, 'PUT'),
+  exposureHistory: (project: string, target: Pick<DTO['ExposureChangeRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
+    request<DTO['ExposureEventView'][]>(`/exposures/history${resourceScope(project, target)}`),
+  resourcePreferences: (project: string, target: Pick<DTO['PreferencePutRequest'], 'plan_id' | 'stage_id' | 'unit_id' | 'node_id'>) =>
+    request<DTO['PreferenceContextView']>(`/preferences${resourceScope(project, target)}${target.node_id ? `&node_id=${encodeURIComponent(target.node_id)}` : ''}`),
+  saveResourcePreference: (project: string, body: DTO['PreferencePutRequest']) =>
+    request<DTO['PreferenceContextView']>(`/preferences${scope(project)}`, body, 'PUT'),
+  restoreResourcePreference: (project: string, body: DTO['PreferenceDeleteRequest']) =>
+    request<DTO['PreferenceContextView']>(`/preferences${scope(project)}`, body, 'DELETE'),
   searchResources: (project: string, body: DTO['ResourceSearchRequest']) =>
     request<DTO['ResourceSearchView']>(`/resources/searches${scope(project)}`, body),
   resourceSearch: (project: string, id: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>

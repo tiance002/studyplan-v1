@@ -498,6 +498,409 @@
         }
       }
     },
+    "/api/v1/exposures": {
+      "get": {
+        "summary": "List Exposures",
+        "operationId": "list_learning_exposures",
+        "parameters": [
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Stage Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExposureView"
+                  },
+                  "title": "Response List Learning Exposures"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Change Exposure",
+        "operationId": "change_learning_exposure",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExposureChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExposureChangeView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/exposures/history": {
+      "get": {
+        "summary": "Exposure History",
+        "operationId": "get_learning_exposure_history",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Stage Id"
+            }
+          },
+          {
+            "name": "unit_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Unit Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExposureEventView"
+                  },
+                  "title": "Response Get Learning Exposure History"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/preferences": {
+      "get": {
+        "summary": "Get Preferences",
+        "operationId": "get_resource_preferences",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Stage Id"
+            }
+          },
+          {
+            "name": "unit_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Unit Id"
+            }
+          },
+          {
+            "name": "node_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Node Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferenceContextView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Put Preference",
+        "operationId": "put_resource_preference",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreferencePutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferenceContextView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Restore Preference",
+        "operationId": "restore_resource_preference",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreferenceDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferenceContextView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "tags": [
@@ -1191,6 +1594,337 @@
         ],
         "title": "ErrorBody",
         "description": "统一错误视图：``code/message/request_id/details``，不回显敏感输入。\n\n``code`` 是一个**稳定**标识：HTTP 响应里取 ``core.errors.ErrorCode``；\n出现在 ``RunView.error`` 里时表示**运行失败类别**（同样是稳定闭集，\n不含图内部节点名）。前端按 ``code`` 分支，**不解析** ``message``。"
+      },
+      "ExposureChangeRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "unit_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Unit Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UnitProgress"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "stage_id",
+          "unit_id",
+          "status",
+          "expected_version",
+          "idempotency_key"
+        ],
+        "title": "ExposureChangeRequest"
+      },
+      "ExposureChangeView": {
+        "properties": {
+          "exposure": {
+            "$ref": "#/components/schemas/ExposureView"
+          },
+          "event": {
+            "$ref": "#/components/schemas/ExposureEventView"
+          },
+          "replayed": {
+            "type": "boolean",
+            "title": "Replayed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "exposure",
+          "event",
+          "replayed"
+        ],
+        "title": "ExposureChangeView"
+      },
+      "ExposureEventView": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "exposure_id": {
+            "type": "string",
+            "title": "Exposure Id"
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "title": "Stage Id"
+          },
+          "unit_id": {
+            "type": "string",
+            "title": "Unit Id"
+          },
+          "actor_id": {
+            "type": "string",
+            "title": "Actor Id"
+          },
+          "from_status": {
+            "$ref": "#/components/schemas/UnitProgress"
+          },
+          "to_status": {
+            "$ref": "#/components/schemas/UnitProgress"
+          },
+          "expected_version": {
+            "type": "integer",
+            "title": "Expected Version"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "node_snapshot": {
+            "items": {
+              "$ref": "#/components/schemas/ExposureNodeSnapshot"
+            },
+            "type": "array",
+            "title": "Node Snapshot"
+          },
+          "source_snapshot": {
+            "$ref": "#/components/schemas/ExposureSourceSnapshot"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "exposure_id",
+          "project_id",
+          "plan_id",
+          "stage_id",
+          "unit_id",
+          "actor_id",
+          "from_status",
+          "to_status",
+          "expected_version",
+          "version",
+          "node_snapshot",
+          "source_snapshot",
+          "created_at"
+        ],
+        "title": "ExposureEventView"
+      },
+      "ExposureNodeSnapshot": {
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "stable_key": {
+            "type": "string",
+            "title": "Stable Key"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "node_type": {
+            "type": "string",
+            "title": "Node Type"
+          },
+          "objectives": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Objectives"
+          },
+          "content_version": {
+            "type": "integer",
+            "title": "Content Version"
+          },
+          "source_status": {
+            "type": "string",
+            "title": "Source Status"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index"
+          },
+          "source_pack_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Pack Key"
+          },
+          "source_pack_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Pack Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node_id",
+          "stable_key",
+          "title",
+          "node_type",
+          "objectives",
+          "content_version",
+          "source_status",
+          "role",
+          "order_index",
+          "source_pack_key",
+          "source_pack_version"
+        ],
+        "title": "ExposureNodeSnapshot"
+      },
+      "ExposureSourceSnapshot": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "assigned_source_bindings",
+            "title": "Kind"
+          },
+          "public_assignments": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Public Assignments"
+          },
+          "private_selections": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Private Selections"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "public_assignments",
+          "private_selections"
+        ],
+        "title": "ExposureSourceSnapshot"
+      },
+      "ExposureView": {
+        "properties": {
+          "exposure_id": {
+            "type": "string",
+            "title": "Exposure Id"
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "title": "Stage Id"
+          },
+          "unit_id": {
+            "type": "string",
+            "title": "Unit Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/UnitProgress"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "recorded": {
+            "type": "boolean",
+            "title": "Recorded"
+          },
+          "node_snapshot": {
+            "items": {
+              "$ref": "#/components/schemas/ExposureNodeSnapshot"
+            },
+            "type": "array",
+            "title": "Node Snapshot"
+          },
+          "source_snapshot": {
+            "$ref": "#/components/schemas/ExposureSourceSnapshot"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "exposure_id",
+          "project_id",
+          "plan_id",
+          "stage_id",
+          "unit_id",
+          "status",
+          "version",
+          "recorded",
+          "node_snapshot",
+          "source_snapshot",
+          "updated_at"
+        ],
+        "title": "ExposureView"
       },
       "HTTPValidationError": {
         "properties": {
@@ -1950,6 +2684,138 @@
         "title": "PracticeTaskView",
         "description": "实践任务。``thinking_prompts`` 在实践工作台重点展示。\n\n``acceptance`` 必填：没有「怎样算完成」的任务无法验收。"
       },
+      "PreferenceContextView": {
+        "properties": {
+          "project": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreferenceView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreferenceView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "node": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreferenceView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "effective": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreferenceView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "invalid_scopes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "project",
+                "unit",
+                "node"
+              ]
+            },
+            "type": "array",
+            "title": "Invalid Scopes"
+          },
+          "inherited": {
+            "type": "boolean",
+            "title": "Inherited"
+          },
+          "versions": {
+            "$ref": "#/components/schemas/PreferenceVersions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "project",
+          "unit",
+          "node",
+          "effective",
+          "inherited",
+          "versions"
+        ],
+        "title": "PreferenceContextView"
+      },
+      "PreferenceDeleteRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "unit_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Unit Id"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "project",
+              "unit",
+              "node"
+            ],
+            "title": "Scope"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "stage_id",
+          "unit_id",
+          "scope",
+          "expected_version"
+        ],
+        "title": "PreferenceDeleteRequest"
+      },
       "PreferenceMode": {
         "type": "string",
         "enum": [
@@ -1960,6 +2826,172 @@
         ],
         "title": "PreferenceMode",
         "description": "资源形态偏好。"
+      },
+      "PreferencePutRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "unit_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Unit Id"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "project",
+              "unit",
+              "node"
+            ],
+            "title": "Scope"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/PreferenceMode"
+          },
+          "language": {
+            "type": "string",
+            "maxLength": 16,
+            "minLength": 1,
+            "title": "Language",
+            "default": "zh"
+          },
+          "official_priority": {
+            "type": "boolean",
+            "title": "Official Priority",
+            "default": true
+          },
+          "pace": {
+            "type": "string",
+            "enum": [
+              "slow",
+              "normal",
+              "fast"
+            ],
+            "title": "Pace",
+            "default": "normal"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "stage_id",
+          "unit_id",
+          "scope",
+          "mode",
+          "expected_version"
+        ],
+        "title": "PreferencePutRequest"
+      },
+      "PreferenceScope": {
+        "type": "string",
+        "enum": [
+          "system",
+          "project",
+          "unit",
+          "node"
+        ],
+        "title": "PreferenceScope",
+        "description": "偏好优先级：节点 > 单元 > 学习空间默认 > 系统默认。"
+      },
+      "PreferenceVersions": {
+        "properties": {
+          "project": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Project"
+          },
+          "unit": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Unit"
+          },
+          "node": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Node"
+          }
+        },
+        "type": "object",
+        "required": [
+          "project",
+          "unit",
+          "node"
+        ],
+        "title": "PreferenceVersions"
+      },
+      "PreferenceView": {
+        "properties": {
+          "scope": {
+            "$ref": "#/components/schemas/PreferenceScope"
+          },
+          "scope_ref": {
+            "type": "string",
+            "title": "Scope Ref"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/PreferenceMode"
+          },
+          "language": {
+            "type": "string",
+            "maxLength": 16,
+            "title": "Language"
+          },
+          "official_priority": {
+            "type": "boolean",
+            "title": "Official Priority"
+          },
+          "pace": {
+            "type": "string",
+            "maxLength": 16,
+            "title": "Pace"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "scope",
+          "scope_ref",
+          "mode",
+          "language",
+          "official_priority",
+          "pace",
+          "version"
+        ],
+        "title": "PreferenceView"
       },
       "PrefsSnapshot": {
         "properties": {
@@ -2137,6 +3169,19 @@
             "maxLength": 512,
             "minLength": 1,
             "title": "Unit Id"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
           },
           "query": {
             "type": "string",
@@ -2922,6 +3967,33 @@
             "type": "boolean",
             "title": "Progress Recorded",
             "default": false
+          },
+          "exposure_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exposure Id"
+          },
+          "exposure_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Exposure Version",
+            "default": 0
+          },
+          "legacy_progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UnitProgress"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -3109,61 +4181,6 @@
           "expected_version"
         ],
         "title": "ProgressPatchRequest",
-        "type": "object"
-      },
-      "PreferenceScope": {
-        "description": "偏好优先级：节点 > 单元 > 学习空间默认 > 系统默认。",
-        "enum": [
-          "system",
-          "project",
-          "unit",
-          "node"
-        ],
-        "title": "PreferenceScope",
-        "type": "string"
-      },
-      "PreferenceView": {
-        "properties": {
-          "scope": {
-            "$ref": "#/components/schemas/PreferenceScope"
-          },
-          "scope_ref": {
-            "title": "Scope Ref",
-            "type": "string"
-          },
-          "mode": {
-            "$ref": "#/components/schemas/PreferenceMode"
-          },
-          "language": {
-            "maxLength": 16,
-            "title": "Language",
-            "type": "string"
-          },
-          "official_priority": {
-            "title": "Official Priority",
-            "type": "boolean"
-          },
-          "pace": {
-            "maxLength": 16,
-            "title": "Pace",
-            "type": "string"
-          },
-          "version": {
-            "minimum": 1,
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "scope",
-          "scope_ref",
-          "mode",
-          "language",
-          "official_priority",
-          "pace",
-          "version"
-        ],
-        "title": "PreferenceView",
         "type": "object"
       },
       "PreferenceUpdateRequest": {

@@ -10,7 +10,7 @@ const provenanceLabels: Record<DTO['ResourceCandidateView']['provenance'], strin
   search_candidate: '搜索候选',
 };
 
-export function ResourcePicker({ projectId, target }: { projectId: string; target: Target }) {
+export function ResourcePicker({ projectId, target, nodeId }: { projectId: string; target: Target; nodeId?: string }) {
   const alive = useRef(true);
   const [query, setQuery] = useState('');
   const [pending, setPending] = useState<DTO['ResourceSearchRequest'] | null>(null);
@@ -42,7 +42,7 @@ export function ResourcePicker({ projectId, target }: { projectId: string; targe
     if (alive.current) { setSearch(value); setNotSubmitted(false); }
   }
   function start() {
-    const body = { ...target, query: query.trim(), idempotency_key: crypto.randomUUID() };
+    const body = { ...target, ...(nodeId ? {node_id: nodeId} : {}), query: query.trim(), idempotency_key: crypto.randomUUID() };
     setPending(body); setSearch(null); setNotSubmitted(false);
     void act(() => submit(body));
   }
@@ -65,7 +65,7 @@ export function ResourcePicker({ projectId, target }: { projectId: string; targe
   }
   return <section className="panel" aria-label="单元资料选取">
     <h3>补充本单元资料</h3>
-    <p className="form-note">点击搜索会将搜索词发送给搜索服务。搜索结果与手动网址均为未核验候选，选取资料不代表完成学习。</p>
+    <p className="form-note">点击搜索会将搜索词和当前资料偏好发送给搜索服务。搜索结果与手动网址均为未核验候选，选取资料不代表完成学习。</p>
     <label>搜索词<input aria-label="搜索词" maxLength={500} value={query} onChange={e => setQuery(e.target.value)} /></label>
     <div className="chips">
       <button className="btn" disabled={busy || !query.trim()} onClick={start}>{pending ? '重新搜索' : '搜索资料'}</button>

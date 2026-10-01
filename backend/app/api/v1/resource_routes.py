@@ -32,7 +32,10 @@ def target(project_id, body):
 def search_resources(body: ResourceSearchRequest, project_id: str = ProjectId,
                      scope: AuthContext = Depends(get_auth_context),
                      service: LearningResourceService = Depends(get_resource_service)):
-    return service.search(scope, target(project_id, body), body.query, body.idempotency_key)
+    position = target(project_id, body)
+    if body.node_id is not None:
+        position["node_id"] = body.node_id
+    return service.search(scope, position, body.query, body.idempotency_key)
 
 
 @router.get("/searches/{search_id}", response_model=ResourceSearchView, operation_id="get_resource_search")

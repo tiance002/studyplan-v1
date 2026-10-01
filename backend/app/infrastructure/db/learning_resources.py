@@ -28,15 +28,15 @@ class PgLearningResources:
         with psycopg.connect(self.dsn, row_factory=dict_row) as conn:
             conn.execute("SELECT set_config('app.project_id',%s,true),set_config('app.actor_id',%s,true)",
                          (target["project_id"], scope.actor_id))
+            if current:
+                # Generation locks plan decision before its job/Run/owner rows.
+                # Reuse that order and validate approved only after the wait.
+                lock_plan_version(conn, target["project_id"], None)
             owner = conn.execute("SELECT project_id FROM learning_projects WHERE project_id=%s "
                 "AND owner_actor_id=%s AND archived_at IS NULL" + (" FOR UPDATE" if lock else ""),
                 (target["project_id"], scope.actor_id)).fetchone()
             if owner is None:
                 raise ForbiddenError()
-            if current:
-                # Same version lock as publication; re-read approved only after
-                # acquiring it so a waited publication cannot leave a stale write.
-                lock_plan_version(conn, target["project_id"], None)
             found = conn.execute("""SELECT l.unit_id FROM plan_unit_links l JOIN plan_revisions r
                 ON r.project_id=l.project_id AND r.plan_id=l.plan_id
                 WHERE l.project_id=%s AND l.plan_id=%s AND l.stage_id=%s AND l.unit_id=%s"""

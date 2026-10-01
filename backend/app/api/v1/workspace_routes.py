@@ -28,11 +28,22 @@ def workspace(
     data = container.workspace_reader.read(
         scope, project_id, [u.unit_id for u in plan.unit_links], [t.task_id for t in plan.task_links]
     )
+    # New progress is scoped to this exact plan position. Legacy unit records
+    # remain visible separately; they cannot complete new plan appearances.
+    exposures = (container.exposure_service.list(scope, project_id, plan.plan_id)
+                 if container.exposure_service else None)
+    exposure_positions = {(e["stage_id"], e["unit_id"]): e for e in exposures or []}
     stages = []
     for stage in plan.stages:
         ids = [u.unit_id for u in plan.unit_links if u.stage_id == stage.stage_id]
         tasks = [t.task_id for t in plan.task_links if t.stage_id == stage.stage_id]
-        units = [u for u in data["units"] if u["unit_id"] in ids]
+        units = [dict(u) for u in data["units"] if u["unit_id"] in ids]
+        if exposures is not None:
+            for unit in units:
+                exposure = exposure_positions[(stage.stage_id, unit["unit_id"])]
+                unit["legacy_progress"] = unit["progress"] if unit["progress_recorded"] else None
+                unit.update(progress=exposure["status"], progress_recorded=exposure["recorded"],
+                            exposure_id=exposure["exposure_id"], exposure_version=exposure["version"])
         node_ids = {n for u in units for n in u["node_ids"]}
         stages.append(
             StageWorkspaceView(
@@ -46,6 +57,6 @@ def workspace(
     return LearningWorkspaceView(
         plan=plan,
         stages=stages,
-        total_units=len(data["units"]),
-        completed_units=sum(u["progress"] == "completed" for u in data["units"]),
+        total_units=sum(len(stage.units) for stage in stages),
+        completed_units=sum(u.progress == "completed" for stage in stages for u in stage.units),
     )

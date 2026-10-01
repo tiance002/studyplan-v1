@@ -2,6 +2,8 @@ import type { StageWorkspace, DTO } from "../../api/types";
 import { Resources } from "../../components/Resources";
 import { useState } from 'react';
 import { ResourcePicker } from './ResourcePicker';
+import { ExposurePanel, progressLabels } from './ExposurePanel';
+import { PreferencePanel } from './PreferencePanel';
 export function KnowledgeNodeView({
   node,
   allNodes,
@@ -78,9 +80,12 @@ export function MainWorkspace({
   planId: string;
 }) {
   const [unitChoice, setUnitChoice] = useState('');
+  const [localProgress, setLocalProgress] = useState<Record<string, DTO['ExposureView']>>({});
   const unitId = stage?.units.some(u => u.unit_id === unitChoice) ? unitChoice : stage?.units[0]?.unit_id;
   const node =
     stage?.nodes.find((n) => n.node_id === nodeId) || stage?.nodes[0];
+  const validNodeId = stage?.units.find(u=>u.unit_id === unitId)?.node_ids?.includes(node?.node_id || '') ? node?.node_id : undefined;
+  const positionKey = `${projectId}:${planId}:${stage?.stage.stage_id}:${unitId}:${validNodeId || ''}`;
   return (
     <div className="content">
       <p className="eyebrow">STAGE WORKSPACE</p>
@@ -129,7 +134,11 @@ export function MainWorkspace({
             <label>资料所属学习单元<select aria-label="资料所属学习单元" value={unitId} onChange={e => setUnitChoice(e.target.value)}>
               {stage.units.map(u => <option key={u.unit_id} value={u.unit_id}>{u.title}</option>)}
             </select></label>
-            <ResourcePicker key={`${projectId}:${planId}:${stage.stage.stage_id}:${unitId}`} projectId={projectId}
+            <ExposurePanel key={`progress:${positionKey}`} projectId={projectId}
+              target={{plan_id:planId,stage_id:stage.stage.stage_id,unit_id:unitId}} onChange={value=>setLocalProgress(old=>({...old,[`${value.plan_id}:${value.stage_id}:${value.unit_id}`]:value}))} />
+            <PreferencePanel key={`prefs:${positionKey}`} projectId={projectId}
+              target={{plan_id:planId,stage_id:stage.stage.stage_id,unit_id:unitId,...(validNodeId ? {node_id:validNodeId} : {})}} />
+            <ResourcePicker key={`resources:${positionKey}`} projectId={projectId} nodeId={validNodeId}
               target={{plan_id: planId, stage_id: stage.stage.stage_id, unit_id: unitId}} />
           </>}
           <div className="section-heading">
@@ -141,16 +150,14 @@ export function MainWorkspace({
                 <span className="task-circle" />
                 <strong>{u.title}</strong>
                 <small>
-                  {!u.progress_recorded ? "学习单元" : u.progress === "completed"
-                    ? "已完成"
-                    : u.progress === "in_progress"
-                      ? "学习中"
-                      : "未开始"}
+                  {localProgress[`${planId}:${stage.stage.stage_id}:${u.unit_id}`]
+                    ? progressLabels[localProgress[`${planId}:${stage.stage.stage_id}:${u.unit_id}`].status]
+                    : !u.progress_recorded ? "学习单元" : progressLabels[u.progress]}
                 </small>
               </div>
             ))}
             <p className="form-note">
-              有进度记录时显示实际状态。进度记录和总结评审将在后续开放。
+              显示当前出现位置的自述进度；跳过不等于完成，进度不代表知识掌握核验。
             </p>
           </section>
         </>

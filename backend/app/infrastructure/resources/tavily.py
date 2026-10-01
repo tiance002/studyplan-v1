@@ -13,7 +13,7 @@ from urllib.parse import urlsplit
 import httpx
 from app.core.errors import ForbiddenError, ValidationAppError
 from app.core.ids import new_id
-from app.domain.enums import MediaType, ResourceProvenance, ResourceVerificationStatus
+from app.domain.enums import MediaType, PreferenceScope, ResourceProvenance, ResourceVerificationStatus
 from app.domain.resources.models import ResourceRecord, UnavailableResult
 from app.domain.workspace.models import AuthContext
 from app.ports.resource_index import ResourceQuery
@@ -91,7 +91,12 @@ class TavilyResourceIndex:
         limit = min(query.limit, 5)
         if not self._key:
             return UnavailableResult("tavily_not_configured")
-        payload = {"query": words, "search_depth": "basic", "auto_parameters": False,
+        search_words = words
+        if query.preference.scope is not PreferenceScope.SYSTEM:
+            search_words += (f"\nPreferred format: {query.preference.mode.value}; "
+                             f"language: {query.preference.language}; "
+                             f"official sources preferred: {query.preference.official_priority}")
+        payload = {"query": search_words, "search_depth": "basic", "auto_parameters": False,
                    "max_results": limit, "include_answer": False,
                    "include_raw_content": False, "include_usage": True}
         started = time.monotonic()
@@ -152,10 +157,10 @@ class TavilyResourceIndex:
             seen.add(url)
             candidates.append(ResourceRecord(
                 resource_id=new_id("res"), project_id=project_id, url=url, title=title,
-                media_type=MediaType.TEXT, language=query.preference.language,
+                media_type=MediaType.TEXT, language="und",
                 provenance=ResourceProvenance.SEARCH_CANDIDATE,
                 verification_status=ResourceVerificationStatus.UNVERIFIED, checked_at=None,
-                source_note=f"Tavily 搜索候选；搜索时间 {searched_at}；未检查链接、内容覆盖或教学质量。",
+                source_note=f"Tavily 搜索候选；搜索时间 {searched_at}；语言未核验；未检查链接、内容覆盖或教学质量。",
             ))
             if len(candidates) == limit:
                 break

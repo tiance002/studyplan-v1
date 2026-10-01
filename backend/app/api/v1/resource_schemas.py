@@ -14,6 +14,7 @@ class ResourceTargetRequest(BaseModel):
 
 
 class ResourceSearchRequest(ResourceTargetRequest):
+    node_id: str | None = Field(default=None, min_length=1, max_length=512)
     query: str = Field(min_length=1, max_length=500)
     idempotency_key: str = Field(min_length=1, max_length=128)
 

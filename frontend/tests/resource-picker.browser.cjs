@@ -2,6 +2,7 @@ const {chromium}=require('playwright-core');
 const assert=require('node:assert/strict');
 (async()=>{const browser=await chromium.launch({channel:'chrome',headless:true});try{
  const page=await browser.newPage();
+ await page.route('**/api/v1/**',r=>r.abort('blockedbyclient'));
  const stage={stage_id:'s1',stable_key:'stage.test',title:'测试阶段',section_kind:'core',order_index:0,objective:'测试学习'};
  const units=['u1','u2'].map((unit_id,i)=>({unit_id,stable_key:'unit.'+i,title:'单元'+(i+1),objectives:[],rubric_version:1,progress:'not_started',node_ids:[],progress_recorded:false}));
  const workspace={plan:{plan_id:'p1',project_id:'project',revision:1,goal_snapshot:'学习目标',stages:[stage],unit_links:[],task_links:[],stage_resources:[],extensions:[]},stages:[{stage,nodes:[],units,resources:[],tasks:[]}],total_units:2,completed_units:0};
@@ -11,6 +12,8 @@ const assert=require('node:assert/strict');
  await page.route('**/api/v1/session',r=>r.fulfill({json:{username:'测试用户',project_ids:['project'],csrf_token:'test'}}));
  await page.route('**/api/v1/workspace?**',r=>r.fulfill({json:workspace}));
  await page.route('**/healthz',r=>r.fulfill({json:{llm_provider:'fake'}}));
+ await page.route('**/api/v1/exposures**',r=>r.fulfill({json:r.request().url().includes('/history')?[]:units.map(u=>({exposure_id:'ex-'+u.unit_id,project_id:'project',plan_id:'p1',stage_id:'s1',unit_id:u.unit_id,status:'not_started',version:0,recorded:false,node_snapshot:[],source_snapshot:{kind:'assigned_source_bindings',public_assignments:[],private_selections:[]},updated_at:null}))}));
+ await page.route('**/api/v1/preferences?**',r=>r.fulfill({json:{project:null,unit:null,node:null,effective:{scope:'system',scope_ref:'system',mode:'mixed',language:'zh',official_priority:true,pace:'normal',version:1},inherited:true,versions:{project:0,unit:0,node:0},invalid_scopes:[]}}));
  await page.route('**/api/v1/resources/**',async r=>{const req=r.request(),url=new URL(req.url()),body=req.postDataJSON();const unit=url.searchParams.get('unit_id')||body?.unit_id;
  if(url.pathname.endsWith('/searches')){posts.push(body);if(posts.length===1)return r.abort('failed');if(slow){signalSlow();await new Promise(resolve=>{releaseSlow=resolve;});}return r.fulfill({json:search});}
  if(url.pathname.includes('/searches/')){reads++;if(missing)return r.fulfill({status:404,json:{message:'原查询尚未保存'}});return r.fulfill({json:search});}
@@ -41,7 +44,7 @@ const assert=require('node:assert/strict');
  assert.equal(posts.length,3);assert.equal(posts[1].idempotency_key,posts[2].idempotency_key);assert.equal(posts[1].query,posts[2].query);
  await page.getByLabel('资料标题').fill('手动GitHub候选');await page.getByLabel('资料网址').fill('https://github.com/example/repository');
  manualFails=true;
- await page.getByRole('button',{name:'保存手动资料'}).click();await page.getByRole('alert').waitFor();
+ await page.getByRole('button',{name:'保存手动资料'}).click();await page.locator('[aria-label="单元资料选取"]').getByRole('alert').waitFor();
  assert.equal(await page.getByLabel('资料标题').inputValue(),'手动GitHub候选');assert.equal(await page.getByLabel('资料网址').inputValue(),'https://github.com/example/repository');
  manualFails=false;
  await page.getByRole('button',{name:'保存手动资料'}).click();await page.getByRole('link',{name:'手动GitHub候选'}).waitFor();

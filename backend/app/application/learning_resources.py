@@ -6,7 +6,12 @@ from dataclasses import asdict
 from app.core.errors import DependencyUnavailableError, NotFoundError, ValidationAppError
 from app.core.ids import new_id
 from app.domain.enums import MediaType, ResourceProvenance, ResourceVerificationStatus
-from app.domain.resources.models import DEFAULT_SYSTEM_PREFERENCE, ResourceRecord, UnavailableResult
+from app.domain.resources.models import (
+    DEFAULT_SYSTEM_PREFERENCE,
+    ResourceRecord,
+    UnavailableResult,
+    rank_resources,
+)
 from app.ports.learning_resources import LearningResourcesPort
 from app.ports.resource_index import ResourceIndexPort, ResourceQuery
 
@@ -14,10 +19,12 @@ UNKNOWN_SEARCH_REASON = "搜索响应未知，请核对后再显式发起新搜�
 
 
 class LearningResourceService:
-    def __init__(self, repository: LearningResourcesPort, search: ResourceIndexPort | None, request_limit: int):
+    def __init__(self, repository: LearningResourcesPort, search: ResourceIndexPort | None, request_limit: int,
+                 *, preference_resolver=None):
         self.repository = repository
         self.index = search
         self.request_limit = max(0, min(1000, request_limit))
+        self.preference_resolver = preference_resolver
 
     def search(self, scope, target, query, idempotency_key):
         scope.require_project(target["project_id"])
@@ -33,6 +40,10 @@ class LearningResourceService:
         if self.index is None:
             raise DependencyUnavailableError("搜索服务未配置；可以手动接入资料")
         query = query.strip()
+        # Validate the selected node and complete preference before reserving
+        # quota; a wrong node or uninterpretable setting never dispatches.
+        preference = (self.preference_resolver(scope, target) if self.preference_resolver
+                      else DEFAULT_SYSTEM_PREFERENCE)
         input_hash = hashlib.sha256(json.dumps([target, query], sort_keys=True).encode()).hexdigest()
         saved, fresh = self.repository.reserve(scope, target, query, idempotency_key, input_hash, self.request_limit)
         if not fresh:
@@ -40,8 +51,10 @@ class LearningResourceService:
         # Reservation is committed before any network dispatch. A process exit
         # leaves dispatched, which repeat-key reads never automatically replay.
         try:
-            result = self.index.find(ResourceQuery(scope=scope, node_keys=(), preference=DEFAULT_SYSTEM_PREFERENCE,
+            result = self.index.find(ResourceQuery(scope=scope, node_keys=(), preference=preference,
                 limit=5, extra={"project_id": target["project_id"], "query": query}))
+            if not isinstance(result, UnavailableResult):
+                result = rank_resources(result, preference=preference)
         except Exception:
             # Never expose a transport/config exception (possibly containing
             # secrets), or assume a failed local response implies zero charges.

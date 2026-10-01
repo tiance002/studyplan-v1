@@ -323,6 +323,9 @@ class WorkspaceNodeView(NodeView):
 class WorkspaceUnitView(UnitView):
     node_ids: list[str] = Field(default_factory=list)
     progress_recorded: bool = False
+    exposure_id: str | None = None
+    exposure_version: int = Field(default=0, ge=0)
+    legacy_progress: UnitProgress | None = None
 
 
 class PreferenceView(BaseModel):

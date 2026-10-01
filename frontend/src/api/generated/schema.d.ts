@@ -107,6 +107,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/exposures": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Exposures */
+        get: operations["list_learning_exposures"];
+        /** Change Exposure */
+        put: operations["change_learning_exposure"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exposures/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Exposure History */
+        get: operations["get_learning_exposure_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Preferences */
+        get: operations["get_resource_preferences"];
+        /** Put Preference */
+        put: operations["put_resource_preference"];
+        post?: never;
+        /** Restore Preference */
+        delete: operations["restore_resource_preference"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -419,6 +473,122 @@ export interface components {
             details?: {
                 [key: string]: unknown;
             };
+        };
+        /** ExposureChangeRequest */
+        ExposureChangeRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            status: components["schemas"]["UnitProgress"];
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** ExposureChangeView */
+        ExposureChangeView: {
+            exposure: components["schemas"]["ExposureView"];
+            event: components["schemas"]["ExposureEventView"];
+            /** Replayed */
+            replayed: boolean;
+        };
+        /** ExposureEventView */
+        ExposureEventView: {
+            /** Event Id */
+            event_id: string;
+            /** Exposure Id */
+            exposure_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Actor Id */
+            actor_id: string;
+            from_status: components["schemas"]["UnitProgress"];
+            to_status: components["schemas"]["UnitProgress"];
+            /** Expected Version */
+            expected_version: number;
+            /** Version */
+            version: number;
+            /** Node Snapshot */
+            node_snapshot: components["schemas"]["ExposureNodeSnapshot"][];
+            source_snapshot: components["schemas"]["ExposureSourceSnapshot"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** ExposureNodeSnapshot */
+        ExposureNodeSnapshot: {
+            /** Node Id */
+            node_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Node Type */
+            node_type: string;
+            /** Objectives */
+            objectives: string[];
+            /** Content Version */
+            content_version: number;
+            /** Source Status */
+            source_status: string;
+            /** Role */
+            role: string;
+            /** Order Index */
+            order_index: number;
+            /** Source Pack Key */
+            source_pack_key: string | null;
+            /** Source Pack Version */
+            source_pack_version: number | null;
+        };
+        /** ExposureSourceSnapshot */
+        ExposureSourceSnapshot: {
+            /**
+             * Kind
+             * @constant
+             */
+            kind: "assigned_source_bindings";
+            /** Public Assignments */
+            public_assignments: {
+                [key: string]: unknown;
+            }[];
+            /** Private Selections */
+            private_selections: {
+                [key: string]: unknown;
+            }[];
+        };
+        /** ExposureView */
+        ExposureView: {
+            /** Exposure Id */
+            exposure_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            status: components["schemas"]["UnitProgress"];
+            /** Version */
+            version: number;
+            /** Recorded */
+            recorded: boolean;
+            /** Node Snapshot */
+            node_snapshot: components["schemas"]["ExposureNodeSnapshot"][];
+            source_snapshot: components["schemas"]["ExposureSourceSnapshot"];
+            /** Updated At */
+            updated_at: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -748,12 +918,107 @@ export interface components {
             /** Thinking Prompts */
             thinking_prompts?: string[];
         };
+        /** PreferenceContextView */
+        PreferenceContextView: {
+            project: components["schemas"]["PreferenceView"] | null;
+            unit: components["schemas"]["PreferenceView"] | null;
+            node: components["schemas"]["PreferenceView"] | null;
+            effective: components["schemas"]["PreferenceView"] | null;
+            /** Invalid Scopes */
+            invalid_scopes?: ("project" | "unit" | "node")[];
+            /** Inherited */
+            inherited: boolean;
+            versions: components["schemas"]["PreferenceVersions"];
+        };
+        /** PreferenceDeleteRequest */
+        PreferenceDeleteRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Node Id */
+            node_id?: string | null;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "project" | "unit" | "node";
+            /** Expected Version */
+            expected_version: number;
+        };
         /**
          * PreferenceMode
          * @description 资源形态偏好。
          * @enum {string}
          */
         PreferenceMode: "text_first" | "video_first" | "mixed" | "both";
+        /** PreferencePutRequest */
+        PreferencePutRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Node Id */
+            node_id?: string | null;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "project" | "unit" | "node";
+            mode: components["schemas"]["PreferenceMode"];
+            /**
+             * Language
+             * @default zh
+             */
+            language: string;
+            /**
+             * Official Priority
+             * @default true
+             */
+            official_priority: boolean;
+            /**
+             * Pace
+             * @default normal
+             * @enum {string}
+             */
+            pace: "slow" | "normal" | "fast";
+            /** Expected Version */
+            expected_version: number;
+        };
+        /**
+         * PreferenceScope
+         * @description 偏好优先级：节点 > 单元 > 学习空间默认 > 系统默认。
+         * @enum {string}
+         */
+        PreferenceScope: "system" | "project" | "unit" | "node";
+        /** PreferenceVersions */
+        PreferenceVersions: {
+            /** Project */
+            project: number;
+            /** Unit */
+            unit: number;
+            /** Node */
+            node: number;
+        };
+        /** PreferenceView */
+        PreferenceView: {
+            scope: components["schemas"]["PreferenceScope"];
+            /** Scope Ref */
+            scope_ref: string;
+            mode: components["schemas"]["PreferenceMode"];
+            /** Language */
+            language: string;
+            /** Official Priority */
+            official_priority: boolean;
+            /** Pace */
+            pace: string;
+            /** Version */
+            version: number;
+        };
         /**
          * PrefsSnapshot
          * @description 资源偏好快照（请求内联，非独立资源）。
@@ -834,6 +1099,8 @@ export interface components {
             stage_id: string;
             /** Unit Id */
             unit_id: string;
+            /** Node Id */
+            node_id?: string | null;
             /** Query */
             query: string;
             /** Idempotency Key */
@@ -1195,6 +1462,14 @@ export interface components {
              * @default false
              */
             progress_recorded: boolean;
+            /** Exposure Id */
+            exposure_id?: string | null;
+            /**
+             * Exposure Version
+             * @default 0
+             */
+            exposure_version: number;
+            legacy_progress?: components["schemas"]["UnitProgress"] | null;
         };
         /**
          * PlanSnapshot
@@ -1268,27 +1543,6 @@ export interface components {
             status: components["schemas"]["UnitProgress"];
             /** Expected Version */
             expected_version: number;
-        };
-        /**
-         * PreferenceScope
-         * @description 偏好优先级：节点 > 单元 > 学习空间默认 > 系统默认。
-         * @enum {string}
-         */
-        PreferenceScope: "system" | "project" | "unit" | "node";
-        /** PreferenceView */
-        PreferenceView: {
-            scope: components["schemas"]["PreferenceScope"];
-            /** Scope Ref */
-            scope_ref: string;
-            mode: components["schemas"]["PreferenceMode"];
-            /** Language */
-            language: string;
-            /** Official Priority */
-            official_priority: boolean;
-            /** Pace */
-            pace: string;
-            /** Version */
-            version: number;
         };
         /** PreferenceUpdateRequest */
         PreferenceUpdateRequest: {
@@ -1582,6 +1836,219 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ResourceRemovalView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_learning_exposures: {
+        parameters: {
+            query: {
+                plan_id: string;
+                stage_id?: string | null;
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExposureView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    change_learning_exposure: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExposureChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExposureChangeView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_learning_exposure_history: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                plan_id: string;
+                stage_id: string;
+                unit_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExposureEventView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_resource_preferences: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                plan_id: string;
+                stage_id: string;
+                unit_id: string;
+                node_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferenceContextView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    put_resource_preference: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferencePutRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferenceContextView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restore_resource_preference: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferenceDeleteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferenceContextView"];
                 };
             };
             /** @description Validation Error */

@@ -64,13 +64,20 @@ def build_container(settings: Settings) -> AppContainer:
     browser_auth = PgBrowserAuth(dsn, settings.session_ttl_seconds)
     from app.infrastructure.db.workspace import PgWorkspaceReader
     workspace_reader = PgWorkspaceReader(dsn)
+    from app.application.learning_exposures import LearningExposureService
+    from app.application.resource_preferences import ResourcePreferenceService
+    from app.infrastructure.db.learning_exposures import PgLearningExposures
+    from app.infrastructure.db.resource_preferences import PgResourcePreferences
+    exposure_service = LearningExposureService(PgLearningExposures(dsn))
+    preference_service = ResourcePreferenceService(PgResourcePreferences(dsn))
     from app.application.learning_resources import LearningResourceService
     from app.infrastructure.db.learning_resources import PgLearningResources
     from app.infrastructure.resources.tavily import TavilyResourceIndex
     if settings.search_provider not in ("", "tavily"):
         raise RuntimeError("Unsupported search provider")
     search_index = TavilyResourceIndex(settings.tavily_api_key) if settings.search_provider == "tavily" and settings.tavily_api_key else None
-    resource_service = LearningResourceService(PgLearningResources(dsn), search_index, settings.search_request_limit)
+    resource_service = LearningResourceService(PgLearningResources(dsn), search_index, settings.search_request_limit,
+                                               preference_resolver=preference_service.resolve)
     sessions = browser_auth
     if settings.llm_provider.strip().lower() not in SUPPORTED_PROVIDERS:
         build_llm(settings)
@@ -123,6 +130,7 @@ def build_container(settings: Settings) -> AppContainer:
         worker_actor_ids=settings.planning_worker_actor_ids,
         planning_worker_admission_mode=settings.planning_worker_admission_mode,
         binding_resolver=binding_resolver,
+        preference_resolver=preference_service.project_default,
     )
     planning_worker = PlanningWorker(
         jobs=planning_jobs,
@@ -136,4 +144,5 @@ def build_container(settings: Settings) -> AppContainer:
     return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service,
                         model_settings_service=model_service, browser_auth=browser_auth,
                         workspace_reader=workspace_reader, planning_worker=planning_worker,
-                        resource_service=resource_service)
+                        resource_service=resource_service, exposure_service=exposure_service,
+                        preference_service=preference_service)
