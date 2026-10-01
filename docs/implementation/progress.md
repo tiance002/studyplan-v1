@@ -10,7 +10,7 @@
 
 ## 路由与外部条件
 
-root实际turn_context为gpt-6.1-sol/high；认证/Seed请求SolMedium，短生成请求SolHigh。工具接受派发但实际解析值 **NOT OBSERVABLE**，不把请求参数当运行证明；未改全局配置。
+root实际turn_context为gpt-6.1-sol/high。此前仅根据工具返回将子代理实际解析记为NOT OBSERVABLE；用户追问模型显示后补查本机JSONL的session_meta父线程/agent_path与最新turn_context，已获得运行证据：Gauss/g1_credentials为gpt-6.1-sol/medium，Kuhn/g1_short_generation为gpt-6.1-sol/high，Helmholtz/g1_seed为gpt-6.1-sol/medium，Lovelace/g1_binding_review为gpt-6.1-sol/high。这些既有代理没有使用Luna Max；复用工具followup_task/send_message没有model/effort参数，本轮新增代理又被agent thread limit拒绝。不能把提示词或失败spawn当路由证据，未改全局配置。之后派发说明同时展示任务、日志核实模型/effort和复用/新建状态；低风险可新建时明确路由Luna Max，工具限制时报告限制，不把Sol标为Luna。原始实现者报告保留其当时可观测判断，以本条补充审计为准。
 
 用户授权累计模型50请求、Tavily1000请求：**模型20/50，搜索2/1000（2credit）**，下一切片不重置。20模型及2实际搜索均有结果/回执，外部unknown0。Tavily三项配置已存在，预检和G2实际API/PG/Chrome成功。RAG地址/契约/凭证缺失，只阻塞其实际调用；公网部署未授权。GitHub浏览器授权需求已记录，尚未注册App或安装MCP；手动GitHub资料不是账号连接。见[外部服务](external-services.md)。
 
@@ -58,3 +58,23 @@ Tests/Evidence：最终受影响后端组合139项PASS，exit0，78.73s，覆盖
 Rollback：新功能在本feature分支保留有意义提交；0014/0015只作增量迁移，非空学习历史迁移拒绝破坏性降级。仅受控测试库可应用新迁移，原库不写入；不重置计量或清除验收证据。完整Goal仍active/NOT_READY，不合并master或标记milestone。
 
 下一条安全动作：继续G2六角色/章节连续性与受控资料替换，沿用现有公共source/section与计划版本机制；GitHub浏览器授权按薄集成及维护者App配置推进，RAG只暂停缺契约分支。随后G3总结/Prompt原文与反馈历史。不重复G0、真实生成或已完成搜索/控件验收，不将G2本批当完整Goal。
+
+## G2第三批执行边界（进行中）
+
+上一轮分类：progress。当前HEAD57bb309d8ed5342a6b039d710dcfafa780a12073，与已核对远端一致；工作区仅既有禁操作目录未跟踪，业务基线无未提交内容。本批不重跑收费验收，模型20/50、搜索2/1000继续累计。
+
+Goal：六种资料角色可表达；主线连续章节区间依据作者目录相邻位置校验；替换主线先生成可回读差异预览，再由用户明确确认新计划版本。历史来源标题/URL/章节/版本保存，旧出现位置进度与资料选择不被改写。
+
+Constraints/Non-goals：保留现有业务publisher/版本构造和source/section，禁止重复publisher、伪造模型Run或知识事实源；不依据标题相似/URL可达性证明覆盖或掌握。无真实模型/搜索调用，原数据库/服务和旧journal不动，不运行外部仓库，不改已发布迁移/Seed版本。GitHub/RAG缺配置仅暂停对应分支。
+
+Allowed changes/Ownership：SolMedium拥有角色enum/curation/Seed验证/资源角色schema与0016及针对测试；SolHigh拥有新resource_changes领域/Port/应用/DB/API/0017、必要的旧publisher事务复用与正式来源快照读写、针对性质测试。root维护唯一契约、组合根、前端与当前检查点；两个后端写入者活动时root不写业务代码。迁移0017依赖稳定0016，不并行改相同文件。派发参数被工具接受不作为实际模型解析证据，仍NOT OBSERVABLE。
+
+Tests/Evidence：规则/契约→隔离PG归属/CAS/幂等/取消竞争/目录变更/回滚/旧历史→前端mock与自有计划的真实HTTP/Chrome。依据目录rank验证连续性，允许作者order_index稀疏，禁止排序掩盖倒序/重复/缺章。本批测试NOT RUN，待实际产物核对。非空新历史迁移拒绝丢失数据的downgrade；正常revert保留历史表和回执，不做master/milestone合并。
+
+本批增量证据：角色实现者已停止业务编辑，规则/curation/provider 58项PASS，六角色CHECK与完整目录读取真实PG 2项PASS。0017首次FK无匹配unique导致迁移FAIL，已在新0017修复；临时表夹具首次缺DEFAULTS导致FAIL，修夹具后定向PASS。Root严格目录检查发现已发布agent v2 context主线跳过retrieval，新增受控v3保留v1/v2原文，更新当前bootstrap和测试夹具；旧v2仍明确拒绝新的严格导入，不放宽规则。v3性质先FAIL（新文件未存在），后一次错误消息匹配FAIL（11通过），修断言后Seed/角色/真实Seed PG组合37项PASS，exit0；出版/curation/新快照规则组合76项PASS，exit0；更新v3后G1纵向/私有资料/偏好PG组合20项PASS，exit0。一次错误测试路径命令FAIL（未运行测试）已用实际路径纠正，不算业务验证。Frontend build PASS；六角色标签和历史来源未知说明已可显示。Root组合根接线进行中，proposal API/PG竞争与替换浏览器仍NOT RUN，不提交未完整代码。累计外部调用仍20/50、2/1000。
+
+本批收口：业务与测试实现者均已停止编辑。独立只读review发现私人绑定集合漂移及新增source锁等待跨越lease两项P1，实际PG RED4→GREEN4，阶段内修复。最终实现者20项PASS（2unit+17实际proposal PG+1关键G1），root最新HTTP/G1/Seed PG组合8项PASS；早期较宽组合50通过/1测试import失败不重标全PASS。后端离线unit+contract551 PASS/2 skipped NOT RUN发生在P1修复前，相关后续PG已核对修复输入。OpenAPI/export/gen/build/4单元和Chrome mock PASS。真实Acceptance03 Chrome+HTTP+保留PG发布revision2、沿用2份私有绑定、旧Exposure原值保留、新版全version0未开始和刷新PASS。第一次实际浏览器FAIL在成功发布后的测试DTO层级误读，修断言后只GET同proposal/回执继续PASS，无再生成/发布。报告[G2资料替换](../acceptance/G2-resource-replacement-2026-10-01.md)。
+
+当前专用PG已到0017并受控导入Agent v3，旧v2 payload不动。旧30734/PID11360 controls服务按命令路径核验后关闭；当前session23755、8021/PID28388为var/v2-g2/replacement_acceptance_server.py，Acceptance03、无modelworker、搜索累计wrapper承接2次。前端5175/PID41308不变；原8000/5432/11434未重启。新的真实浏览器脚本完成报告后拒绝重跑；若未来仅观察恢复，读取既有结果，不重新创建proposal。累计仍模型20/50、搜索2/1000，unknown0。GitHub账号授权未接线、真实RAG缺契约仍局部BLOCKED，整体Goal保持active/NOT_READY；下一独立切片为GitHub薄授权与G3总结/Prompt原文历史，继续F01–F18。
+
+G2第三批代码已正常commit/push，远端存在SHA `a294078b590d0f8a5d04c652b0c7d0af22fd8aea`，ls-remote与本地相等；未改develop/master。随后本验收/当前检查点/服务配置及矩阵文档提交需续接读取实际HEAD，不猜SHA。Ruff受影响Python/diff/新真实脚本syntax/秘密忽略规则及两份原指导hash PASS。业务编辑已停止；只有原禁操作目录未跟踪，不清理或提交。

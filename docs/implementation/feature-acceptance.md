@@ -8,15 +8,15 @@
 | F02 | 目标/必要澄清/时间偏好/Outcome | IMPLEMENTED | 已有目标及prefs DTO；澄清默认值确认、Outcome还未接成品链路 |
 | F03 | Blueprint/Module/依赖 | IMPLEMENTED | 有Agent/Python领域包及模型结构校验；DB运行发布版与三Blueprint完整内容待补 |
 | F04 | 全阶段纲要/草案编辑/业务确认 | VERIFIED | G1真模型9阶段草案、浏览器编辑保存/独立业务发布revision1/刷新重登录PASS；仅G1已有Agent v2内容范围，三Blueprint内容由F03继续验收 |
-| F05 | 主线/章节/资源角色 | IMPLEMENTED | 公共source/section/映射已有；连续区间及全部角色待验收 |
+| F05 | 主线/章节/资源角色 | IMPLEMENTED | 六角色及完整作者目录连续区间规则/实际PG PASS；稀疏索引、倒序/漏章/重复已测，浏览器Mock展示六角色PASS；已发布v2保留、新v3修正漏章。完整三Blueprint内容及负责人体验继续验收 |
 | F06 | Exposure/进度/跳过/返回/历史 | IMPLEMENTED | 完整位置独立四态/CAS/幂等/不可变知识与来源快照、旧版本历史真实PG PASS；Chrome+真实HTTP+PG开始/完成/跳过/返回/刷新PASS。稳定逻辑模块身份与完整重规划链由F03/F13继续核对，负责人体验NOT RUN |
 | F07 | 项目/单元/节点资料偏好覆盖 | IMPLEMENTED | 三层完整设置优先级、CAS、恢复继承保留版本、双层旧值修复PG PASS；生成冻结/搜索实际偏好接入HTTP PASS，Chrome项目/单元保存恢复刷新PASS、节点界面mock PASS。负责人体验NOT RUN |
-| F08 | 真搜索/资源替换/GitHub/手动接入 | IMPLEMENTED | Tavily实际API+Chrome+PG候选选取/手动GitHub URL/刷新回读PASS，累计2/1000；单元资料私有快照/幂等/预算/fence已接；已确认主线替换及GitHub账号OAuth仍未交付 |
+| F08 | 真搜索/资源替换/GitHub/手动接入 | IMPLEMENTED | Tavily实际API+Chrome+PG候选选取/手动GitHub URL/刷新回读PASS，累计2/1000；受控主线差异→确认新版本→私人资料明确沿用→旧进度保留Chrome+真实HTTP+PG PASS。GitHub账号OAuth仍未接线，手动URL不代表账号连接 |
 | F09 | 总结/反馈/修订/历史 | NOT_STARTED | SummaryAttempt/Review与评审节点已有基础；用户保存/真实反馈API及界面未接 |
 | F10 | 主项目/阶段任务/知识/标准 | IMPLEMENTED | 规划可产生practice基础；用户自选项目及任务完整业务链待接 |
 | F11 | 方案/Prompt评审/修订/指定导出 | NOT_STARTED | 领域基础存在，Prompt工作台未接；超时/冲突原文保全和绑定导出待实证 |
 | F12 | 成果/证据/验收/补充 | NOT_STARTED | EvidenceGrade/Verification基础存在；提交/实际验收链未接 |
-| F13 | 局部修改/全路线新版本/历史 | NOT_STARTED | 版本/编辑/原子发布基础存在；受控操作预览、新版本、旧成果/原文保全待接 |
+| F13 | 局部修改/全路线新版本/历史 | IMPLEMENTED | 首个受控操作为阶段主线替换，差异/来源冻结/新版本/CAS/幂等/旧Exposure与资料保留实际PG和Chrome PASS；其它受控操作及总结/成果原文完整保全仍待G3/G4验收 |
 | F14 | Outcome成果归集 | NOT_STARTED | 尚无实际任务/证据归集页面与服务 |
 | F15 | Seed导入/校验/DB发布/审核边界 | IMPLEMENTED | 0011完整payload、严格校验、幂等/冲突回滚/DB目录/CLI：16规则+真实PG PASS；真生成使用发布Agent v2。三Blueprint内容及新网页审核仍待补 |
 | F16 | 真模型/持久任务/取消/恢复 | IMPLEMENTED | 真云模型20/50请求，9阶段/27必需节点/unknown0；短任务、冻结绑定、锁后fence、崩溃草案复用已实测；完整用户恢复/故障UX后续验收 |

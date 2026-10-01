@@ -42,3 +42,5 @@ LLM_REPAIR_OUTPUT_TOKENS=8000
 GitHub提供[远程MCP与宿主集成说明](https://github.com/github/github-mcp-server/blob/main/docs/host-integration.md)：宿主仍须处理OAuth/回调/token及工具范围。使用远程服务无需本地安装完整GitHub服务，但仅增加MCP配置不代表软件已有连接功能。当前Goal不新增通用平台MCP Runtime；浏览器授权可用GitHub App+API完成。官方[GitHub App用户授权流程](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app)说明client ID、client secret和callback。
 
 后续应用维护者注册App并配置client ID/client secret/固定callback URL，普通用户只做浏览器授权。具体环境变量和回调路径在实现契约确定后写入.env.example，当前尚未接线。现有`GITHUB_TOKEN`仅为历史服务端字段，不作为所有用户共享账号连接；公开候选和手动URL接入可先独立实现。
+
+用户已在官网看到搜索消费，确认密钥有效；无需为此重复发送搜索。GitHub维护者配置入口是GitHub账号 **Settings → Developer settings → GitHub Apps**。这里注册本软件的App、取得Client ID、创建Client secret并登记与后端实现完全一致的Callback URL。普通用户无需填写这些维护者凭证，只在浏览器确认自己的账号和仓库授权。当前Callback路由和App配置尚未实现，不填写猜测的回调地址；也不把Codex插件的凭证或账号连接复制给本软件。
