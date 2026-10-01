@@ -1,6 +1,6 @@
 # 文档导航
 
-当前产品基线：2026-10-01 / V1 S0。先区分当前规格、任务计划和历史证据，再判断哪些要求适用于本次开发。
+当前实施入口：2026-10-01 / V2.0；S0和旧V1文档保留未被替换的不变量与历史语义。
 
 ## 从哪里开始
 
@@ -8,19 +8,20 @@
 |---|---|
 | 了解项目、目录及当前 develop 状态 | [项目 README](../README.md) |
 | 开始开发、核对操作边界 | [AGENTS](../AGENTS.md) → [开发模型路由](execution/README.md) |
-| 理解当前需求与设计 | [补充规格原文](design-package/supplements/studyplan_requirements_design_supplement_2026-10-01.md) → [设计包索引](design-package/README.md) |
-| 判断下一步及已有缺口 | [Gap Analysis](reviews/2026-10-01-v1-gap-analysis.md) → [实施路线](design-package/IMPLEMENTATION_PLAN.md) |
+| 理解当前需求与设计 | [V2.0指导](implementation/CODEX_GUIDANCE_V2.0.md) → [替代ADR0010](adr/ADR-0010-v2-complete-product-slices.md) → 未被取代的设计包 |
+| 判断下一步及已有缺口 | [当前进度](implementation/progress.md) → [F01–F18验收矩阵](implementation/feature-acceptance.md)；旧Gap/实施路线保留作溯源 |
 | 核对架构取舍与替代关系 | [ADR 索引](adr/README.md) |
 | 配置、启动或执行检查 | [开发说明](development/README.md) → [脚本导航](../scripts/README.md) |
 | 核对已完成范围与实际证据 | [验收索引](acceptance/README.md) |
 
-权威顺序以 AGENTS 为准：用户最新明确决定 → 补充规格 → 已对齐规格与当前 ADR → 实施任务。历史文件保留当时事实，不因文件名或旧报告的完成声明恢复被取代的要求。
+权威顺序以 AGENTS 为准：用户最新明确决定 → V2.0明确替换 → 未被取代的规格/ADR → 实施任务。历史文件保留当时事实，不因文件名或旧报告的完成声明恢复被取代的要求。
 
 ## 文件应该放在哪里
 
 | 目录 | 唯一主要用途 | 维护方式 |
 |---|---|---|
 | `design-package/` | 当前产品、领域、架构和验收规格 | 修改所属专题，其他入口通过链接引用 |
+| `implementation/` | V2.0指导原文、连续Goal、唯一当前进度与验收映射 | 原文不改，进度持续更新，避免多份现状说明 |
 | `design-package/supplements/` | 用户原始补充要求 | 保留原文字节与来源，不重写 |
 | `adr/` | 架构决策及其当前效力 | 新决策明确取代范围，历史正文保留 |
 | `development/` | 环境、启动和开发批次边界 | 入口说明适用基线，历史操作说明保留 |

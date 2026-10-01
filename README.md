@@ -6,9 +6,9 @@ V1 面向个人本地学习，首个领域是 Agent 应用开发。目标闭环�
 
 ## 当前基线
 
-截至 2026-10-01，本地 develop 已完成 S0 规格收口，复用已有计划版本、模型设置、前端工作区和分批规划能力。Acceptance09 的真实生成证据核对到 Draft / waiting_user；本次真实批准、发布及完整闭环尚未 Verified。
+截至 2026-10-01，develop 的 S0 历史基线与 Acceptance09 证据保留。当前实施按 [V2.0指导](docs/implementation/CODEX_GUIDANCE_V2.0.md) 与 [连续Goal](docs/implementation/STUDYPLAN_CODEX_GOAL_V2.0.md) 推进；实际状态见 [进度](docs/implementation/progress.md) 和 [F01–F18验收矩阵](docs/implementation/feature-acceptance.md)。完整产品仍未验收。
 
-develop 仍保留旧注册登录入口与基于内容 hash 的知识节点身份。M1.1 本地安全入口实现位于独立功能分支，尚未集成到 develop；随后是 M1.2 稳定知识逻辑身份。不能将目标设计或功能分支状态当成当前基线已交付能力。
+V2 保留注册登录并增量改造短任务、数据库 Seed、知识身份与完整学习链路；M1.1 无登录分支不集成。功能分支和目标设计不等于 develop 已交付，历史等待用户的 Run 不自动恢复或批准。
 
 开发前从 [项目约束](AGENTS.md) 和 [文档导航](docs/README.md) 开始。当前范围及后续顺序统一查阅 [V1 设计包](docs/design-package/README.md)、[实施路线](docs/design-package/IMPLEMENTATION_PLAN.md) 和 [差距审查](docs/reviews/2026-10-01-v1-gap-analysis.md)。
 
@@ -32,7 +32,7 @@ develop 仍保留旧注册登录入口与基于内容 hash 的知识节点身份
 
 ## 本地开发
 
-配置与启动入口见 [开发说明](docs/development/README.md)。在当前 develop 上，既有启动脚本仍对应历史认证入口；本地无登录入口按 M1.1 独立交付，不通过关闭身份或 RLS 检查实现。
+配置与启动入口见 [开发说明](docs/development/README.md)，模型与 Tavily 配置见 [外部服务](docs/implementation/external-services.md)。保持服务端身份、项目授权和 RLS。
 
 已有本机 `.env`、数据库和依赖时，可用两个终端启动 Fake 演示：
 
