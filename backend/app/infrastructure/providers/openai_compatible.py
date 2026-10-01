@@ -45,6 +45,8 @@ PRACTICE_JSON_CONTRACT = (
     "Each task's section_key must match the supplied stage.stable_key. "
     "Each knowledge_links item must have node_stable_key and role; each "
     "task_knowledge_links item must have task_stable_key, node_stable_key and role. "
+    "In both knowledge_links and task_knowledge_links, role must be exactly 'core', 'supporting' or 'extension'; "
+    "'support' is invalid. During repair, correct invalid role values using this enum without changing valid keys. "
     "Use only node keys from the supplied stage structure. During repair, preserve valid "
     "task content and correct only the invalid local fields."
 )
@@ -56,7 +58,7 @@ class OpenAICompatibleLLM:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
-        self.prompt_version = "b3f2-v6-unit-coverage"
+        self.prompt_version = "b3f2-v7-practice-repair"
         self.timeout = timeout
         host = (urlsplit(self.base_url).hostname or "").lower()
         self.budget_policy = budget_policy or BudgetPolicy(
