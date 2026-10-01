@@ -122,6 +122,9 @@ def test_stage_tools_relation_fixture_rejects_part_of_and_accepts_contract_edges
     assert validate_structure_batch(invalid, batch, pack) == [
         "关系类型非法：'part_of'",
         "关系类型非法：'part_of'",
+        "缺少领域前置依赖：node.model_api -> node.tools（stage.tools）",
+        "缺少子知识关联：node.tools.1（stage.tools）",
+        "缺少子知识关联：node.tools.2（stage.tools）",
     ]
 
     repaired = {
