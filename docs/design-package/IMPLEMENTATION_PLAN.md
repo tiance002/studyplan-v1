@@ -1,122 +1,64 @@
-# 学习规划助手 V1.1：实施方案（LangGraph + 新旧工程隔离）
+# V1 实施路线：M0–M4.5
 
-> 版本 V1.1-LG，日期 2026-09-27。此文件为**待实施设计**，不是代码运行报告。配套 `SOFTWARE_DESIGN.md`、`FRONTEND_HANDOFF.md` 与 `B0_CODEX_GOAL.md` 共同组成开发基线。
+2026-10-01 / S0。上位输入为 [补充规格](supplements/studyplan_requirements_design_supplement_2026-10-01.md) 与 [Gap Analysis](../reviews/2026-10-01-v1-gap-analysis.md)。不重新从零实现B0–B3，不迁旧E盘数据/API，不一次启动全部阶段。
 
-## 当前批次边界（2026-09-29）
+## 1. 已有基础和映射
 
-B3-F1 将普通浏览器注册登录提前交付，并接通正式 React 前端和阶段只读聚合。原计划中 B6 的认证排期及 B3 最小单用户会话描述是历史排期，不再代表当前实现。执行边界以 `docs/development/B3-F1-scope.md` 为准；B3-F1 完成后停止，不自动启动 B3-F2。旧工程在本批次完全不操作。
-
-## 0. 冻结决策和机器路径
-
-| 名称 | Windows 路径 | 允许事项 | 禁止事项 |
-|---|---|---|---|
-| LEGACY_ROOT | `E:\codex_workspace\study-plan` | 只读查看、执行不会修改源码/数据的审计、确定被复用模块及 HEAD | 原地重构、清库、删除、在旧目录提交新版、无证据安装或修改依赖 |
-| NEW_ROOT | `D:\studyplan` | 新建独立工程、选择性复制代码、开发测试、独立 Git 历史 | 不经审计直接全量复制旧工程、复用旧数据库或旧密钥 |
-
-无法从远端访问用户的本机 E/D 盘。本文件没有声称对本机目录或未推送分支完成审计。B0 必须以本机真实 HEAD、工作区变更和运行事实为准；GitHub 默认分支仅是参考样本。若 `D:\studyplan` 已有仓库/文件，先盘点和备份，不执行 `git init`、覆盖、删除或重置，除非已确认安全。
-
-**新旧隔离**：新工程独立 `.git/`、`.venv/`、`.env`、`var/`、日志、端口和数据库；旧路径不进入新运行配置，不通过 symlink/junction 连接旧工作区。不复制 `.git/`、`.venv/`、`__pycache__/`、`node_modules/`、`.env*`（仅人工重建 `.env.example`）、`var/`、本地数据库、审计/密钥、上传文件及旧 Checkpoint。复制模块时记录 `legacy HEAD / 源路径 / 目标路径 / 许可证 / 修改原因 / 测试证据`。
-
-可按 `D:\studyplan` 独立 Git 根组织：`backend/`、`frontend/`、`contracts/`、`docs/`、`scripts/`、`tests/`、`.venv/`（忽略）、`var/`（忽略）。新版固定 `D:\studyplan` 是工作目录，不要把设计包所在 `/mnt/data` 当成用户本机工程路径。
-
-## 1. 产品 V1 范围
-
-目标用户：希望学习 Agent 开发、云服务等可落地工程领域，并能借助 AI 编码工具形成实际项目的人。统一按零基础生成知识体系；用户可跳过、返回、修改资源偏好。用户不依赖本平台执行代码，平台指导其组织思路、评审 Prompt，外部平台实施后再提交成果。
-
-核心业务链：**学习目标（项目想法可选）→全量领域索引纲要→知识节点/单元/前置关系→路径草案→确认→当前单元资料链接→自主总结→AI 引导反馈→阶段项目任务→用户编写实现思路→AI 评审→导出 Prompt→外部实现→证据验收→进度/下一阶段**。
-
-| P0 必须有 | V1 最小交付方式 |
-|---|---|
-| 统一从零规划与可跳过 | 不做基础评估；跳过与完成、掌握相互独立 |
-| 体系/单元/路线 | 一次生成完整可浏览纲要，详细卡片按需展开；依赖不成环 |
-| 路线确认和再规划 | 草案与正式版本分离；局部修改、保留旧总结/任务 |
-| 资源偏好与索引 | 全局/单元/节点优先级；有限的真实、已检查资源池；失效如实标记 |
-| 用户总结与反馈 | 用户先写，模型依据单元目标提出缺口和引导问题；允许结束/跳过 |
-| 主实践项目 | 用户提供想法或从候选中选；围绕一个项目迭代，按阶段拆分有验收的任务 |
-| Prompt 评审与导出 | 原始草案+多次修订；导出绑定确定版本；警告不等于强制死循环 |
-| 成果验收 | 区分用户自述、外部报告和本系统实际可核验证据 |
-| 后端可独立使用 | OpenAPI、fixtures、真实 PostgreSQL、真实云模型、单独 worker、pytest |
-
-GitHub 参考项目：V1 必须有候选显示/手动 URL 接入和许可证/规模/技术栈的元数据结构；有网络时可调用 `GitHubReferencePort`，但其不可用时已验证的小项目池不阻断闭环。**不得自动 clone 并运行外部仓库代码。** 用户学习资料优先索引地址/章节，不批量复制第三方全文。不做长期能力评分、复杂图谱、全网课程质量分、多模型精细路由、自动在线代码运行或微服务治理。
-
-## 2. 复用与迁移策略（按本机证据决策）
-
-| 旧能力 | 新版判定方向 | 迁移原则 |
+| 历史批次 | 复用内容 / 证据 | 新里程碑 |
 |---|---|---|
-| `core` ID/hash/error/request-id/idempotency | 优先复制/适配 | 单一实现，配套测试；脱离旧依赖后可独立使用 |
-| 身份/注册/登录/Cookie、`tenancy` | 复用最终开放注册版本 | 保留中文用户名、6–12 位密码、无邀请码的既定产品约束；密码安全散列/限流/会话安全仍需验收；禁止从旧默认分支恢复邀请码 |
-| PostgreSQL、Alembic、RLS | 选择性复用机制 | 新数据库和新迁移基线；不要把旧迁移序号直接套在新库上；新表按项目授权 |
-| `product` 项目、会话、计划版本/任务 | 拆领域复用 | 保留项目与版本设计、单独新增知识结构/单元/实践关系；不要靠旧任务 `title` 承载全部字段 |
-| `learning` 提交/证据 | 选择性复用 | 历史不可变提交思路保留，V1 不使用旧掌握度打分决定学习进度 |
-| `teaching` provider/attempt/budget/run | 提取通用部分 | 不复用“有检索引用才允许回答”的教学结论门作为所有规划任务门；真实 Provider 是否存在以本机为准 |
-| `knowledge` 解析/检索/引用 | 交由独立 RAG 项目维护 | 主项目保留资源 URL 元数据/来源引用与 `RAGPort`；不在新主服务继续发展另一套索引引擎 |
-| 旧 `workflow/registry/execution/policy` | 安全机制按需抽取、旧图隔离 | LangGraph 是新业务编排唯一入口；不能同时有两个争夺业务状态的工作流引擎 |
-| 旧单页 HTML | 仅参考旧行为 | React/TS/Vite 正式前端；旧 HTML 不定义新 API |
+| B0/B1 | 独立工程、分层、契约、DB角色、Run/恢复骨架；ADR0001–0005及B1报告 | M0已用；M1继续复用 |
+| B2-C/B2-V | 节点/单元/实践关系、PlanRevision、单事务发布/幂等/历史；B2报告 | M1基础，非稳定逻辑ID/六态全部完成 |
+| B3/模型设置 | LLMPort、个人模型/预算/ledger、Run和worker | M1/M2/M4基础 |
+| B3-F1 | React正式入口/只读workspace/注册登录/布局 | 布局复用；账号产品范围由ADR0007取代 |
+| B3-F2/Hardening/Acceptance09 | 真实分批、有限repair、待审批Draft；20请求成功已核对 | M1生成部分Verified；本次真实批准/发布NOT RUN |
+| 原B4/B5/B6 | 资源/总结/实践/前端闭环的历史任务意图 | 重新按M2/M3/M4/M4.5剩余缺口安排 |
 
-**迁移不是一键复制。** B0 输出逐模块 `copy/adapt/reference-only/drop` 清单；B1 才按依赖闭包选择性迁入。对于需要大量旧框架才能运行的少量通用函数，优先按其契约重新实现最小模块并保留出处和测试，而不是搬整个旧执行引擎。禁止为了兼容已放弃的旧业务数据，构建长期双模型/双 API 兼容层。
+历史报告保留为当时事实，不能用文件名/测试数声称整个阶段完成。
 
-## 3. 技术方案
+## 2. 阶段与停止点
 
-- 前端：React + TypeScript + Vite；同源反代 `/api/v1`，前端仅使用 OpenAPI 生成的 typed client。
-- 后端：FastAPI + Pydantic；清晰的 API/Application/Domain/Infrastructure 分层；当前仅一个主业务服务。
-- Agent：LangGraph `StateGraph`，三张小图（规划、总结评审、Prompt 评审）；轻量领域规则/应用服务承担普通 CRUD、状态、成果验收。
-- 数据：PostgreSQL 业务库 + 同 PostgreSQL 实例的独立 Checkpoint 数据库与受限角色；Alembic 管理业务结构；Graph `thread_id` 由服务端创建并映射。
-- 异步：主服务创建 `ai_run` 与持久任务；worker 领取后驱动 Graph；HTTP 返回 202，轮询为 V1 基线，SSE 仅为体验增强。
-- 模型：一个统一 `LLMPort`，云模型先行，Fake 仅用于测试；本地模型后续可插拔而不污染领域层。
-- 外部：`ResourcePort`、`GitHubReferencePort`、`RAGPort`；真实服务故障时只做明确降级，不伪造资源或评审。
+| 阶段 | 交付 / Gap主责任 | 必须验收 |
+|---|---|---|
+| M0/S0 | 五类Gap、9份契约、架构入口、ADR、AGENTS与路线 | 文档一致、来源/链接/哈希、无业务改码/DB写/provider |
+| M1.1 | 本地个人入口/安全身份装配；D1/E1，复用LOCAL配置 | 原actor Project/模型/Run可达；伪造/错归属/缺绑定/非本地/错误Origin拒绝 |
+| M1.2 | 稳定知识逻辑身份+不可变内容映射；B1/E4 | 局部变更两版未变节点逻辑ID一致；历史ID/FK/内容/成果保留；冲突映射fail closed |
+| M1.3 | 最小确定性调整Proposal/用户确认/新版本、跳过/顺序；C5 | S2/S8，依赖正确，重复提交幂等，未批准不改计划 |
+| M1.4 | 有界State候选引用、安全错误分类；B2/A3 | 新Run新版本；旧waiting_user恢复不生成、不重复发布；分类安全可定位 |
+| M2 | LearningSession/原事件/Reflection/Feedback/节点六态；A1/B3/C1–C3 | S5/S7，一节点学习纵向切片，异步回答不串节点，旧版本上下文正确 |
+| M3 | 资源偏好/检索Adapter/Context/许可/路径外Proposal；A2/A4/B4/C7 | S3/S4；来源/版本、缺证据明确、禁云0请求、无静默外发 |
+| M4 | 同一主项目方案/导出/外部实现/成果/证据/核验/进度；C4 | S6，证据门、覆盖目标/版本、支持VERIFIED |
+| M4.5 | 八场景+真实全链路，P0/P1清零、P2/P3确认 | V1可交付，冻结契约/模型/内容/验收证据，负责人接受后tag |
 
-## 4. 后端与前端并行的冻结时点
+C6由M1用户审核现有Draft和正式读回、M4.5完整场景验收解决。State收缩不得阻塞已验证旧图用户决定，先为新Run做协议边界；M2优先完成纵向闭环，避免把M1.4扩大为全框架重构。
 
-B1 结束冻结领域术语、状态枚举、Pydantic 请求/响应、统一错误体、运行生命周期、Mock 样例、OpenAPI v1。前端可以改变树/图/卡片展示、布局与组件库，但不能自行定义业务状态、Graph 内部节点或自报用户/租户身份。
+## 3. 第一个实现 Goal：M1.1 本地入口
 
-运行契约：`POST` AI 操作创建 `run_id`；`GET /runs/{run_id}` 返回 `queued/running/waiting_user/succeeded/failed/cancelled/reconciliation_required` 与 `next_action`；`waiting_user` 的草案预览确认走业务 API。浏览器断线不等于取消任务。统一 400/401/403/404/409/422/429/503，错误体保留 `request_id`，用户可恢复编辑内容。
+**Goal:** 为原本机actor提供无注册登录的本地学习入口，保持原Project/模型/Run可达和server scope。
 
-## 5. 开发里程碑：独立 Goal，小范围验收
+**Constraints:** ADR0007；复用 STUDYPLAN_LOCAL_ACTOR_ID 等既有配置；不得自动选首账号/创建替代actor，不改历史Run/数据库迁移，不禁用RLS/项目约束，不调用真实模型。
 
-### B0：本机事实审计、隔离和复用清单
-读取 `LEGACY_ROOT` 的分支、HEAD、dirty files、运行/测试/迁移现状，确认 `NEW_ROOT` 是否已有数据；不在旧目录产生写入。建立备份/来源清单、项目依赖图、认证现状、迁移策略与独立目录方案。产出 `docs/migration/legacy-inventory.md`、`module-reuse-matrix.md`、`source-provenance.md`、`docs/adr/`。若旧工作树存在未提交修改，先保全并记录，绝不覆盖或盲拷。**本批次不进行全仓库迁移。**
+**Allowed changes:** `backend/app/core/config.py`、`composition.py`、`application/sessions.py`、`ports/sessions.py`、`api/v1/deps.py`/`session_routes.py`/schemas；`frontend/src/main.tsx`及auth入口/client/generated；匹配的单元/HTTP/PG/浏览器测试与必要文档。先读现有实现再定最小签名；保留现有受控CLI身份流程直到单独完成其衔接，不能静默破坏下一次preflight。
 
-验收：旧目录源码/数据哈希和 Git 状态无意外变化；新目录身份清晰；复用条目每项都标明证据和依赖，未验证标 `unverified`。
+**Non-goals:** 删除auth表/口令记录、云端认证、RBAC、账号数据迁移、自动批准Acceptance09、改图/模型配置。
 
-### B1：新骨架、领域契约与 Graph 最小恢复演练
-在 `D:\studyplan` 建独立后端/前端占位、统一启动配置和可测试新库；定义领域 ID、DTO、状态枚举与 OpenAPI、JSON 示例；按 B0 选择性迁入认证和核心 utils；搭建最小 `ai_runs`/queue 与 `StateGraph` Fake 图，验证 Postgres checkpoint、interrupt/resume/重启恢复。前端自此开始 Mock 设计；B1 的样例数据与 OpenAPI 匹配后才标“契约冻结”。
+**Tests:** 缺/无效actor绑定拒绝；原归属读回；客户端actor/project伪造拒绝；非loopback/Host/Origin拒绝；本地页面无需注册；服务重启归属不变；旧waiting_user读/决定Fake证明provider请求0。定向Unit→API/PG→浏览器关键路径，真实验收单独授权。
 
-验收：目录不依赖 E 盘而启动；只用 Fake 的断点可跨进程恢复；run 越权拒绝；OpenAPI 无重复 operationId；前端可生成 TypeScript client。
+**Evidence:** 命令/exit code/结果、配置名无值、OpenAPI与截图、原历史哈希和actor绑定证明（不打印秘密）。
 
-### B2：知识与计划业务域
-实现知识节点/关系/单元/路径草案与发布、路径版本、进度、实践任务与知识多对多、偏好/资源表、核心迁移与权限。使用固定示例数据完成「创建→草案→确认→跳过→重新规划→进度保留」。同一计划草案重复确认不能重建两份；编辑必须重新验证。
+**Rollback:** 撤销该分支代码/本地模式配置回到原认证入口；不得回滚已发布数据或删身份。代码实现前写小范围实现计划，按TDD执行。
 
-### B3：真实规划 Graph 与云模型
-接入真实云模型、结构化输出和受控修复（至多 2 次）；先纲要再分期详情；合法草案发布前需用户确认；无项目想法提供候选项目或可延后选择；资源检索不阻断结构生成。每次模型调用记录 attempt/model/prompt/schema/成本。真实端到端可通过 API 演示。
+## 4. 后续切片细化与验收
 
-### B4：资源索引与总结闭环
-加入有限真实资源池与验证元数据，按全局/单元/节点偏好排序；总结提交保存原文和 rubric 版本，图生成 covered/gaps/misconceptions/questions；每次修订创建独立 run，不让长期 Graph 挂起数月；允许补学/跳过。
+M1.2先冻结逻辑身份映射/FK及歧义策略，追加0010之后迁移，测试两版内容变化和历史读回；M2先复用SummaryAttempt/Review，增加plan/node/content/session来源，一节点端到端后再扩范围。各Goal均写 Goal/Constraints/Allowed changes/Non-goals/Tests/Evidence/Rollback。
 
-### B5：项目实践与 Prompt 工作台后端
-任务绑定核心/支撑/扩展知识；用户先写方案；图评审并保存修订、可导出指定版本；外部开发结果/日志/仓库链接以证据等级归档；接受/待补充/未通过分明；不因 AI 生成代码报告直接声明系统已验证。
+现有Acceptance09可由用户先人工审核/批准并验证正式路线；该业务决定与新付费授权不同，本S0不代为执行、不再生成。后续付费测试每次新ID、免费preflight、新明确授权，历史unknown不replay。
 
-### B6：前后端联调与可交付验收
-React 接 OpenAPI typed client；用户完成注册、创建目标、确认计划、资源切换、总结、Prompt、导出、提交成果和验收，重新登录数据保持。测试错误/重复/断线/等待用户/服务不可用等边界。拆出后续 P2/P3 队列，不以高并发优化阻断首版。
+## 5. 验证和范围控制
 
-### 开发顺序调整说明
-- B0 只能审计与准备，**不能在 E 盘建立新版开发分支**；新 Git 只在 D 盘。
-- B1 先确立领域契约和最小可运行 Graph，再开发全部领域表；避免 Graph 在实体未定时写死逻辑。
-- B2 固定业务事实结构，B3 才接真模型；B4/B5 可并行开发，但共同依赖 B1/B2 的接口。
-- 各 Goal 均要求 `Goal / Constraints / Allowed changes / Non-goals / Tests / Evidence / Rollback`，不交付一份一次性包揽 B0–B6 的巨型 Goal。
+按 [验收契约](EVALUATION_ACCEPTANCE.md) 执行；日常不重复大型suite，只有相关输入改变才重验；Milestone冻结时组合实际存在的验证脚本/命令，不声称`make verify-mX`已存在。
 
-## 6. 故障、成本及质量优先级
+P0/P1阶段内修；P2负责人确认延期；P3 backlog。新增复杂度必须直接帮助完整学习闭环。Reuse→Adapter→Extend→Build；个人RAG能力/License/版本接入前核对，不自动抓取/执行外部项目。
 
-**阻断 V1**：认证/项目越权、数据丢失、Graph 跨用户恢复、重复批准造成重复计划、重复付费派发、无法恢复核心流程、误把模拟器当真实模型、错误宣称安全/工程验收已通过。**可后延**：精美知识图谱、高并发调优、全网资源评分、多层记忆/模型路由、全面自动项目测试、SSE 动效。对外部副作用的未知结果不自动重派；模型失败保留原文与草案，允许人工核对/重新启动新的明确操作。
+## 6. S0 状态
 
-控制用量：outline 先行、卡片按需展开、每单元默认一次总结、每阶段默认一项主实践；模型输入只带授权项目上下文和必要节点；资源/偏好/进度用确定性代码；结构校验失败至多 2 次修复；无真实 provider 时明确失败而非输出假内容。
-
-## 7. V1 验收情景
-
-用户零基础学 Agent，主项目 PDF 知识助手：无需诊断生成知识索引，用户确认路线；跳过 Python 基础后仍可返回；文字默认+单节点视频覆盖；用户总结 RAG 后模型指出检索策略缺口；用户自己写 PDF 上传方案，经评审导出指定版本 Prompt；外部工具执行后提交结果，平台将自述、报告、实际验证区分；重规划不删除总结与成果；其他用户访问同一资源 ID 或 run ID 被拒；关停 worker/重启再恢复 waiting_user；缺 RAG/GitHub 网络也能使用已有资源池完成闭环。
-
-## 8. 外部文档核对（以安装的锁定版本为准）
-- https://docs.langchain.com/oss/python/langgraph/graph-api
-- https://docs.langchain.com/oss/python/langgraph/interrupts
-- https://docs.langchain.com/oss/python/langgraph/persistence
-- https://reference.langchain.com/python/langgraph.checkpoint.postgres
-- https://fastapi.tiangolo.com/advanced/generate-clients/
+S0规格与Gap已收口；文档检查/最终审核/Git结果见 [S0验收记录](../acceptance/S0-spec-freeze-report.md)。M1.1之后的业务实现未启动，业务/大型测试、付费调用均NOT RUN。
