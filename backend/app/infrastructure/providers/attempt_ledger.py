@@ -14,7 +14,10 @@ from app.agent_workflows.planning_batches import (
     manifest_is_intact,
     output_budget_for,
 )
+from app.domain.runs.fencing import PlanningWriteFence
+from app.domain.summaries import SUMMARY_PROTOCOL, SUMMARY_PURPOSE, summary_manifest_intact
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
+from app.infrastructure.db.planning_fence import lock_plan_version, lock_planning_write
 from app.ports.llm import LLMDispatchUnknownError, LLMFailure, LLMNotDispatchedError, LLMResult
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
@@ -42,6 +45,20 @@ class PgAttemptLLM:
         batch catalog.
         """
         if self.manifest is None:
+            return "run_manifest_violation" if purpose == SUMMARY_PURPOSE else None
+        if self.manifest.get("protocol") == SUMMARY_PROTOCOL:
+            if (not summary_manifest_intact(self.manifest) or purpose != SUMMARY_PURPOSE
+                    or attempt_id != run_id + ":summary_review:1"
+                    or self.provider.prompt_version != SUMMARY_PROTOCOL
+                    or self.provider.configuration_ref != self.manifest["model_ref"]):
+                return "run_manifest_violation"
+            conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (f"studyplan:plan-budget:{run_id}",))
+            rows = conn.execute("SELECT attempt_id FROM ai_provider_attempts WHERE run_id=%s", (run_id,)).fetchall()
+            if any(row["attempt_id"] != attempt_id for row in rows) or len(rows) > 1:
+                return "run_budget_exceeded"
+            options = self.provider.request_options(purpose)
+            if type(options.get("max_tokens")) is not int or not 0 < options["max_tokens"] <= self.manifest["output_cap"]:
+                return "run_budget_exceeded"
             return None
         if not manifest_is_intact(self.manifest):
             return "run_manifest_violation"
@@ -74,18 +91,29 @@ class PgAttemptLLM:
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
         project_id = str(payload.get("_project_id") or "")
         request_options = self.provider.request_options(purpose)
-        identity = [purpose,payload,schema_name,self.provider.model,self.provider.prompt_version,
+        semantic_payload = {k: v for k, v in payload.items() if k != "_summary_claim"} if purpose == SUMMARY_PURPOSE else payload
+        identity = [purpose,semantic_payload,schema_name,self.provider.model,self.provider.prompt_version,
                     self.provider.domain_pack,request_options,self.provider.budget_policy.as_dict()]
         fingerprint = hashlib.sha256(json.dumps([*identity,self.provider.base_url,self.provider.configuration_ref], sort_keys=True, ensure_ascii=False).encode()).hexdigest()
         # Preserve replay of pre-budget deployment attempts. This fingerprint is
         # only used to read an existing result; it never authorizes a new dispatch.
-        legacy_identity = [purpose,payload,schema_name,self.provider.model,
+        legacy_identity = [purpose,semantic_payload,schema_name,self.provider.model,
                           self.provider.prompt_version,self.provider.domain_pack]
         legacy_fingerprint = hashlib.sha256(json.dumps(legacy_identity, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
         with self._connect(project_id) as conn:
             rejection = self._budget_rejection(conn, run_id=run_id, attempt_id=attempt_id, purpose=purpose)
             if rejection is not None:
                 return LLMFailure(rejection, "Run budget or manifest guard rejected this dispatch")
+            if purpose == SUMMARY_PURPOSE:
+                raw_fence = payload.get("_summary_claim")
+                if not isinstance(raw_fence, dict) or set(raw_fence) != {"job_id", "run_id", "project_id", "actor_id", "lease_token"}:
+                    return LLMFailure("summary_claim_missing", "Summary dispatch requires its exact live server claim")
+                fence = PlanningWriteFence(**raw_fence)
+                lock_plan_version(conn, project_id, None)
+                lock_planning_write(conn, project_id=project_id, run_id=run_id, fence=fence)
+                run = conn.execute("SELECT kind,graph_version FROM ai_runs WHERE run_id=%s", (run_id,)).fetchone()
+                if run is None or run["kind"] != "summary_review" or run["graph_version"] != SUMMARY_PROTOCOL:
+                    return LLMFailure("run_manifest_violation", "Summary run protocol mismatch")
             inserted = conn.execute("""INSERT INTO ai_provider_attempts
                 (attempt_id,run_id,provider,model_id,prompt_version,status,request_fingerprint,schema_name)
                 VALUES (%s,%s,'openai_compatible',%s,%s,'dispatched',%s,%s)

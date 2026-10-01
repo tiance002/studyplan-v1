@@ -26,6 +26,7 @@ from app.api.v1.resource_routes import router as resource_router
 from app.api.v1.routes import router as v1_router
 from app.api.v1.schemas import V1_SCHEMAS
 from app.api.v1.session_routes import router as session_router
+from app.api.v1.summary_routes import router as summary_router
 from app.api.v1.workspace_routes import router as workspace_router
 from app.application.container import AppContainer
 from app.composition import build_container
@@ -74,11 +75,12 @@ def _install_error_handling(application: FastAPI) -> None:
 
     @application.exception_handler(RequestValidationError)
     async def _validation_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
-        if request.url.path == "/api/v1/model-settings" or request.url.path.startswith("/api/v1/auth/"):
+        if (request.url.path == "/api/v1/model-settings"
+                or request.url.path.startswith(("/api/v1/auth/", "/api/v1/summaries"))):
             # FastAPI's default validation response includes raw input, including
             # malformed API Key objects. Never echo input/ctx on this secret route.
             return JSONResponse(status_code=422,content={"detail":[
-                {"loc":error["loc"],"type":error["type"],"msg":"Invalid model setting value"}
+                {"loc":error["loc"],"type":error["type"],"msg":"Invalid request value"}
                 for error in exc.errors()]})
         return await request_validation_exception_handler(request,exc)
 
@@ -156,6 +158,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
     application.include_router(exposure_router)
     application.include_router(preference_router)
     application.include_router(resource_change_router)
+    application.include_router(summary_router)
 
     _install_request_id(application)
     _install_error_handling(application)

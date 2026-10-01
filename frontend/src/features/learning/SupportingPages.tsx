@@ -16,27 +16,7 @@ export function ConversationList() {
     </div>
   );
 }
-export function SummaryDetail() {
-  return (
-    <div className="content">
-      <p className="eyebrow">KNOWLEDGE SUMMARY</p>
-      <h1>知识总结</h1>
-      <p className="lede">用自己的语言，整理理解与收获。</p>
-      <div className="tabs">
-        <span className="tab active">我的总结</span>
-        <span className="tab">评审反馈</span>
-      </div>
-      <div className="panel empty">
-        <h2>还没有学习总结</h2>
-        <p>总结写入和评审尚未开放。完成学习后，将在这里整理自己的知识。</p>
-      </div>
-      <div className="note-callout">
-        <h3>从理解到表达</h3>
-        <p>围绕学习目标，梳理关键概念、实践体会和未解决的问题。</p>
-      </div>
-    </div>
-  );
-}
+export { SummaryPage as SummaryDetail } from './SummaryPage';
 export function PracticeDetail({
   stage,
 }: {

@@ -1,6 +1,15 @@
 import type { components } from "./generated/schema";
 
 type DTO = components["schemas"];
+export type SummarySaveBody = DTO['SummarySaveRequest'];
+export type SummaryTarget = Pick<SummarySaveBody, 'plan_id' | 'stage_id' | 'unit_id'>;
+export type SummaryReview = DTO['SummaryReviewView'];
+export type SummaryAttempt = DTO['SummaryAttemptView'];
+export type SummaryThread = DTO['SummaryThreadView'];
+export type SummarySave = DTO['SummarySaveView'];
+export type SummaryReviewBody = DTO['SummaryReviewRequest'];
+export type SummaryReviewRun = DTO['SummaryReviewRunView'];
+export type SummaryCancelBody = DTO['SummaryCancelRequest'];
 let csrfToken = "";
 export const setCsrfToken = (token: string) => {
   csrfToken = token;
@@ -51,6 +60,12 @@ const scope = (project: string) => `?project_id=${encodeURIComponent(project)}`;
 const resourceScope = (project: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
   `${scope(project)}&${new URLSearchParams({plan_id:target.plan_id,stage_id:target.stage_id,unit_id:target.unit_id})}`;
 export const api = {
+  summaryThread: (project: string, target: SummaryTarget) => request<SummaryThread>(`/summaries${scope(project)}&${new URLSearchParams(target)}`),
+  saveSummary: (project: string, body: SummarySaveBody) => request<SummarySave>(`/summaries${scope(project)}`, body),
+  summaryAttempt: (project: string, id: string) => request<SummaryAttempt>(`/summaries/attempts/${encodeURIComponent(id)}${scope(project)}`),
+  reviewSummary: (project: string, id: string, body: SummaryReviewBody) => request<SummaryReviewRun>(`/summaries/attempts/${encodeURIComponent(id)}/review${scope(project)}`, body),
+  cancelSummaryReview: (project: string, id: string, body: SummaryCancelBody) => request<SummaryReviewRun>(`/summaries/attempts/${encodeURIComponent(id)}/cancel-review${scope(project)}`, body),
+  summaryHistory: (project: string, cursor?: string) => request<DTO['SummaryHistoryView']>(`/summaries/history${scope(project)}&limit=20${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`),
   resourceChangeCatalog: (project: string) => request<DTO['ResourceCatalogView'][]>(`/resource-changes/catalog${scope(project)}`),
   previewResourceChange: (project: string, body: DTO['ResourceChangeRequest']) => request<DTO['ResourceChangePreviewView']>(`/resource-changes${scope(project)}`, body),
   resourceChange: (project: string, id: string) => request<DTO['ResourceChangePreviewView']>(`/resource-changes/${encodeURIComponent(id)}${scope(project)}`),

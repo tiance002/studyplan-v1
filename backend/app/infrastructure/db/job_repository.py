@@ -53,6 +53,8 @@ class PgPlanningJobRepository:
         """Write run, one submission event, and one queue row in one transaction."""
         if run.status.value != "queued":
             raise ValidationAppError("规划任务只能以 queued 状态入队")
+        if run.kind != "plan_generate":
+            raise ValidationAppError("此提交接口只接受规划生成任务")
         if self._admission_mode == "allowlist" and run.actor_id not in self._actor_ids:
             raise ForbiddenError("后台 Worker 尚未配置服务当前账户；请联系部署管理员")
         submission: dict[str, object] = {
@@ -155,6 +157,10 @@ class PgPlanningJobRepository:
                     """SELECT j.job_id,j.run_id,r.actor_id
                     FROM ai_jobs j JOIN ai_runs r ON r.run_id=j.run_id
                     WHERE r.project_id=%s AND r.actor_id=%s AND r.status IN ('queued','running')
+                      AND r.kind IN ('plan_generate','summary_review')
+                      AND (r.kind='plan_generate' OR (r.graph_version='summary-review-v1'
+                        AND NOT EXISTS(SELECT 1 FROM ai_provider_attempts a WHERE a.run_id=r.run_id
+                            AND a.status IN('dispatched','reconciliation_required'))))
                       AND (j.status='pending' OR (j.status='running' AND j.lease_expires_at < now()))
                       AND j.available_at <= now() AND j.attempts < %s
                     ORDER BY j.created_at,j.job_id
@@ -295,13 +301,17 @@ class PgPlanningJobRepository:
                 raise ConflictError("规划租约已失效", reason="planning_claim_stale")
             rows = conn.execute(
                 "SELECT detail FROM ai_run_events WHERE run_id=%s AND status='submission' "
-                "AND detail->>'kind'='planning_submission' ORDER BY event_id", (claim.run_id,),
+                "AND detail->>'kind' IN('planning_submission','summary_review_submission') ORDER BY event_id", (claim.run_id,),
             ).fetchall()
+            run = conn.execute("SELECT kind,graph_version FROM ai_runs WHERE run_id=%s", (claim.run_id,)).fetchone()
         if len(rows) != 1 or not isinstance(rows[0]["detail"], dict):
             raise ConflictError("规划提交事件缺失或存在矛盾版本", reason="planning_submission_ambiguous")
         detail = rows[0]["detail"]
         if detail.get("actor_id") != claim.actor_id or detail.get("project_id") != claim.project_id:
             raise ConflictError("规划提交归属与 Run 不一致", reason="planning_submission_ambiguous")
+        expected_kind = {"plan_generate": "planning_submission", "summary_review": "summary_review_submission"}.get(run["kind"] if run else "")
+        if expected_kind is None or detail.get("kind") != expected_kind:
+            raise ValidationAppError("Worker 提交种类与 Run 不一致")
         return detail
 
     @staticmethod

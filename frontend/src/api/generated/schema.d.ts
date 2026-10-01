@@ -246,6 +246,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/summaries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Thread */
+        get: operations["get_summary_thread"];
+        put?: never;
+        /** Save Original */
+        post: operations["save_summary_original"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summaries/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get History */
+        get: operations["get_summary_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summaries/attempts/{attempt_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Attempt */
+        get: operations["get_summary_attempt"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summaries/attempts/{attempt_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Review Attempt */
+        post: operations["request_summary_review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/summaries/attempts/{attempt_id}/cancel-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel Review */
+        post: operations["cancel_summary_review"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -1790,6 +1876,161 @@ export interface components {
             /** Tasks */
             tasks: components["schemas"]["PracticeTaskView"][];
         };
+        /** SummaryAttemptView */
+        SummaryAttemptView: {
+            /** Attempt Id */
+            attempt_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string | null;
+            /** Stage Id */
+            stage_id: string | null;
+            /** Unit Id */
+            unit_id: string;
+            /** Attempt No */
+            attempt_no: number;
+            /** Version */
+            version: number;
+            /** Content */
+            content: string;
+            /** Content Hash */
+            content_hash: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Rubric Snapshot */
+            rubric_snapshot: {
+                [key: string]: unknown;
+            };
+            review: components["schemas"]["SummaryReviewView"] | null;
+            /** Run Id */
+            run_id: string | null;
+            /** Run Status */
+            run_status: string | null;
+            /** Legacy Review */
+            legacy_review?: {
+                [key: string]: unknown;
+            } | null;
+            /** Legacy Review Recorded At */
+            legacy_review_recorded_at?: string | null;
+        };
+        /** SummaryCancelRequest */
+        SummaryCancelRequest: {
+            /** Run Id */
+            run_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** SummaryHistoryView */
+        SummaryHistoryView: {
+            /** Items */
+            items: components["schemas"]["SummaryAttemptView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** SummaryReviewRequest */
+        SummaryReviewRequest: {
+            /** Idempotency Key */
+            idempotency_key: string;
+            /**
+             * Consent To Model
+             * @constant
+             */
+            consent_to_model: true;
+        };
+        /** SummaryReviewRunView */
+        SummaryReviewRunView: {
+            /** Run Id */
+            run_id: string;
+            /** Attempt Id */
+            attempt_id: string;
+            /** Status Url */
+            status_url: string;
+            /** Status */
+            status: string;
+            /** Next Action */
+            next_action: string;
+            /** Version */
+            version: number;
+        };
+        /** SummaryReviewView */
+        SummaryReviewView: {
+            /** Review Id */
+            review_id: string;
+            /** Attempt Id */
+            attempt_id: string;
+            /**
+             * Conclusion
+             * @enum {string}
+             */
+            conclusion: "satisfied" | "needs_revision" | "misconception";
+            /** Covered */
+            covered: string[];
+            /** Gaps */
+            gaps: string[];
+            /** Misconceptions */
+            misconceptions: string[];
+            /** Questions */
+            questions: string[];
+            /** Rubric Version */
+            rubric_version: number;
+            /** Run Id */
+            run_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** SummarySaveRequest */
+        SummarySaveRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Content */
+            content: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** SummarySaveView */
+        SummarySaveView: {
+            thread: components["schemas"]["SummaryThreadView"];
+            attempt: components["schemas"]["SummaryAttemptView"];
+            /** Replayed */
+            replayed: boolean;
+        };
+        /** SummaryThreadView */
+        SummaryThreadView: {
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Version */
+            version: number;
+            /** Questions */
+            questions: string[];
+            /** Attempts */
+            attempts: components["schemas"]["SummaryAttemptView"][];
+            /**
+             * History Truncated
+             * @default false
+             */
+            history_truncated: boolean;
+        };
         /** TaskLinkView */
         TaskLinkView: {
             /** Stage Id */
@@ -2634,6 +2875,221 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ResourceChangeResultView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_summary_thread: {
+        parameters: {
+            query: {
+                plan_id: string;
+                stage_id: string;
+                unit_id: string;
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryThreadView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_summary_original: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SummarySaveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummarySaveView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_summary_history: {
+        parameters: {
+            query: {
+                cursor?: string | null;
+                limit?: number;
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryHistoryView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_summary_attempt: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryAttemptView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    request_summary_review: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SummaryReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryReviewRunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_summary_review: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SummaryCancelRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryReviewRunView"];
                 };
             };
             /** @description Validation Error */

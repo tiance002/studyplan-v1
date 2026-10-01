@@ -17,7 +17,7 @@ from app.core.errors import ConflictError, ValidationAppError
 from app.core.ids import content_hash, new_id
 from app.domain.enums import ReviewerKind, SummaryReviewConclusion
 
-MIN_SUMMARY_CHARS = 50
+MIN_SUMMARY_CHARS = 1
 MAX_SUMMARY_CHARS = 20_000
 
 
@@ -216,9 +216,11 @@ def _normalize_summary(content: str) -> str:
     stripped = content.strip()
     if len(stripped) < MIN_SUMMARY_CHARS:
         raise ValidationAppError(f"总结至少需要 {MIN_SUMMARY_CHARS} 个字符")
-    if len(stripped) > MAX_SUMMARY_CHARS:
+    if len(content) > MAX_SUMMARY_CHARS:
         raise ValidationAppError(f"总结不得超过 {MAX_SUMMARY_CHARS} 个字符")
-    return stripped
+    if "\x00" in content or any(0xD800 <= ord(char) <= 0xDFFF for char in content):
+        raise ValidationAppError("总结含无法保存的字符，请检查后重新保存")
+    return content
 
 
 def _clean(items: list[str] | tuple[str, ...]) -> tuple[str, ...]:

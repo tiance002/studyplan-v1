@@ -15,6 +15,7 @@ from collections.abc import Callable
 
 from app.core.errors import ForbiddenError, ValidationAppError
 from app.ports.planning_jobs import JobClaim, PlanningJobsPort, PlanningLeaseLostError
+from app.ports.summaries import ReviewPersistenceInterrupted
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +94,8 @@ class PlanningWorker:
         except PlanningLeaseLostError:
             # A replacement Worker owns the run. The old claim cannot finish it.
             logger.warning("planning Worker stopped after losing lease for run %s", claim.run_id)
+        except ReviewPersistenceInterrupted:
+            logger.exception("summary review persistence interrupted; retain job for fenced recovery")
         except Exception:
             logger.exception("planning Worker execution failed for run %s", claim.run_id)
             self._jobs.finish(claim, "failed")

@@ -22,6 +22,18 @@
   --space: 8px;
   --assistant-default: 430px;
 }
+
+/* Summary writing keeps the editor dominant and saved evidence beside it. */
+.summary-targets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 22px 0; }
+.summary-targets label, .summary-editor label, .summary-history > label { display: grid; gap: 7px; }
+.summary-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(290px, 1fr); gap: 24px; align-items: start; }
+.summary-page textarea { width: 100%; box-sizing: border-box; resize: vertical; min-height: 280px; line-height: 1.75; padding: 16px; }
+.summary-original { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; font: inherit; line-height: 1.75; max-height: 420px; overflow: auto; padding: 12px; background: #f3f6fa; }
+.summary-questions { padding-left: 22px; line-height: 1.75; }
+.summary-consent { display: flex; gap: 10px; align-items: start; line-height: 1.6; margin: 16px 0; }
+.summary-consent input { flex: 0 0 auto; width: auto; margin-top: 5px; }
+.summary-history .text-button { display: block; margin-top: 12px; }
+@media (max-width: 900px) { .summary-layout, .summary-targets { grid-template-columns: 1fr; } }
 * {
   box-sizing: border-box;
 }

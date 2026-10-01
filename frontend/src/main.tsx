@@ -192,7 +192,8 @@ function App() {
           create={() => navigate("planning")}
         />
       )}
-      {page === "summary" && <SummaryDetail />}
+      <div hidden={page !== 'summary'}><SummaryDetail key={project} project={project}
+        workspace={workspace} initialStage={stageId} active={page === 'summary'}/></div>
       {page === "practice" && <PracticeDetail stage={stage} />}
       {page === "conversations" && <ConversationList />}
       {page === "settings" && (

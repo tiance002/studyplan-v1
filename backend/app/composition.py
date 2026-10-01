@@ -135,9 +135,40 @@ def build_container(settings: Settings) -> AppContainer:
         binding_resolver=binding_resolver,
         preference_resolver=preference_service.project_default,
     )
+    from app.application.summaries import SummaryService
+    from app.infrastructure.db.summaries import PgSummaries
+
+    def summary_provider(scope, project_id, run_id, model_ref, manifest):
+        from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
+
+        provider = runtime_factory.for_bound_run(scope, project_id, run_id, model_ref)
+        # Summary identities are independent of retained planning prompt identities.
+        provider.prompt_version = "summary-review-v1"
+        return PgAttemptLLM(dsn, provider, manifest=manifest)
+
+    summary_service = SummaryService(
+        PgSummaries(dsn),
+        bind_submission=runtime_factory.bind_submission if runtime_factory is not None else None,
+        provider_resolver=summary_provider if runtime_factory is not None else None,
+        admission_mode=settings.planning_worker_admission_mode,
+        actor_ids=settings.planning_worker_actor_ids,
+    )
+
+    def execute_job(project_id, run_id, *, guard, claim):
+        from app.core.errors import ValidationAppError
+
+        guard()
+        submission = planning_jobs.read_claim_submission(claim)
+        kind = submission.get("kind")
+        if kind == "planning_submission":
+            return plan_service.execute_generation(project_id, run_id, guard=guard, claim=claim)
+        if kind == "summary_review_submission":
+            return summary_service.execute_review(project_id, run_id, guard=guard, claim=claim)
+        raise ValidationAppError("后台任务提交协议不可识别")
+
     planning_worker = PlanningWorker(
         jobs=planning_jobs,
-        execute=plan_service.execute_generation,
+        execute=execute_job,
         actor_ids=settings.planning_worker_actor_ids,
         poll_interval_seconds=settings.worker_poll_interval_seconds,
         lease_seconds=settings.worker_lease_seconds,
@@ -148,4 +179,5 @@ def build_container(settings: Settings) -> AppContainer:
                         model_settings_service=model_service, browser_auth=browser_auth,
                         workspace_reader=workspace_reader, planning_worker=planning_worker,
                         resource_service=resource_service, exposure_service=exposure_service,
-                        preference_service=preference_service, resource_change_service=resource_change_service)
+                        preference_service=preference_service, resource_change_service=resource_change_service,
+                        summary_service=summary_service)
