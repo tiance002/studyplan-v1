@@ -16,7 +16,6 @@ htmlcov/
 .coverage
 .coverage.*
 coverage.xml
-.mypy_cache/
 *.log
 
 # ---- node ----
@@ -51,3 +50,10 @@ Thumbs.db
 
 # ---- local legacy audit output ----
 docs/migration/legacy-raw/
+
+# ---- local test outputs (accepted evidence stays tracked) ----
+/output/local-archive/
+/output/local/
+/output.json
+/pytest_html_report.html
+/archive/output_*.json
