@@ -14,7 +14,7 @@ TAVILY_API_KEY=填入本机密钥
 SEARCH_REQUEST_LIMIT=1000
 ```
 
-Tavily 请求入口为 `POST https://api.tavily.com/search`，使用 Bearer key。适配器计划固定 `search_depth=basic`、`auto_parameters=false`，不自动升级搜索深度；依据 [官方 Search API](https://docs.tavily.com/documentation/api-reference/endpoint/search)。**当前 G1 尚未接入搜索适配器，这三项是已选定的 G2 配置契约；填写密钥不等于功能已验收。** 不新增平台 MCP 或运行外部代码。
+Tavily 请求入口为 `POST https://api.tavily.com/search`，使用 Bearer key。适配器固定 `search_depth=basic`、`auto_parameters=false`，不自动升级搜索深度；依据 [官方 Search API](https://docs.tavily.com/documentation/api-reference/endpoint/search)。**G2已接通显式用户搜索、最多5候选、私有单元选取与刷新回读，并完成真实Tavily+HTTP+PG+Chrome验证。** 结果仍为未核验候选，不新增平台 MCP 或运行外部代码。
 
 模型配置继续使用现有 `LLM_PROVIDER`、`LLM_BASE_URL`、`LLM_API_KEY`、`LLM_MODEL_ID`；账号个人模型设置优先，未配置个人模型时冻结已配置的部署模型。冻结后配置轮换须明确失败，不能悄悄替换队列中 Run 的模型。
 
@@ -31,7 +31,9 @@ LLM_REPAIR_OUTPUT_TOKENS=8000
 
 ## 已运行证据与余额
 
-专用隔离G1验收实际执行模型20次（含1repair），有结果20、未知0；累计 **20/50**。Tavily预检HTTP200，request_id `94d2c6ec-e063-4bbb-894b-70068548402b`，usage `credits=1`；累计 **1/1000**，与用户官网观察一致。三项搜索配置足够连接Tavily，不需另装SDK或配置搜索模型；产品适配器/API/界面仍待G2。后续切片不重置额度。详情见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)。
+专用隔离G1验收实际执行模型20次（含1repair），有结果20、未知0；累计 **20/50**。Tavily预检和G2实际页面各一次HTTP200、各1credit，累计 **2/1000**。G2 request_id `6cbd7349-21f3-43a4-91a5-aaf32207d55c`。三项搜索配置足够，不需另装SDK或搜索模型。后续切片不重置额度。详情见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)与[G2资源报告](../acceptance/G2-resources-2026-10-01.md)。
+
+产品0013的计数器按单部署数据库持久累计，所有账号共用，不因请求失败退还；0禁用派发，最高1000。验收另沿用.git/v2-search-quota-20261001，在每个真实HTTP前独占预约，跨隔离库累计已有2次，不能用新库计数0重置本轮授权。重复同键只读已有状态，结果未知保留记录，不自动重派；正常只读恢复可按幂等键GET查询。
 
 ## GitHub连接体验与待配置入口
 

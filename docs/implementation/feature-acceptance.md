@@ -11,7 +11,7 @@
 | F05 | 主线/章节/资源角色 | IMPLEMENTED | 公共source/section/映射已有；连续区间及全部角色待验收 |
 | F06 | Exposure/进度/跳过/返回/历史 | NOT_STARTED | 有UnitProgress基础，但无Exposure实际学习链路；不将读取进度当实现 |
 | F07 | 项目/单元/节点资料偏好覆盖 | IMPLEMENTED | prefs基础与优先级模型已有；局部写入与不污染默认值待实现 |
-| F08 | 真搜索/资源替换/GitHub/手动接入 | IMPLEMENTED | Tavily凭证已配置、真预检HTTP200/1credit PASS；产品搜索/资源选择/手动接入尚未接线，GitHub浏览器授权需求已记录，不冒称集成 |
+| F08 | 真搜索/资源替换/GitHub/手动接入 | IMPLEMENTED | Tavily实际API+Chrome+PG候选选取/手动GitHub URL/刷新回读PASS，累计2/1000；单元资料私有快照/幂等/预算/fence已接；已确认主线替换及GitHub账号OAuth仍未交付 |
 | F09 | 总结/反馈/修订/历史 | NOT_STARTED | SummaryAttempt/Review与评审节点已有基础；用户保存/真实反馈API及界面未接 |
 | F10 | 主项目/阶段任务/知识/标准 | IMPLEMENTED | 规划可产生practice基础；用户自选项目及任务完整业务链待接 |
 | F11 | 方案/Prompt评审/修订/指定导出 | NOT_STARTED | 领域基础存在，Prompt工作台未接；超时/冲突原文保全和绑定导出待实证 |
@@ -25,7 +25,7 @@
 
 ## 四层证据
 
-规则/Fake与真实PG分别记录；G1真模型20/50、Tavily预检1/1000、Chrome+真实HTTP+PG已PASS，详见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)。预检不是产品搜索集成。RAG契约仍缺，仅阻塞相关真实调用；负责人最终体验单独确认。
+规则/Fake与真实PG分别记录；G1真模型20/50，G2产品Tavily累计2/1000、Chrome+真实HTTP+PG已PASS，详见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)和[G2资源报告](../acceptance/G2-resources-2026-10-01.md)。RAG契约仍缺，仅阻塞相关真实调用；负责人最终体验单独确认。
 
 本轮最新测试证据、退出码、输入版本和切片报告链接由 [progress](progress.md) 维护。状态为BLOCKED只暂停对应真实调用，不移除功能或终止其它独立实现。
 
@@ -40,7 +40,7 @@
 | Q05 | 三个退出点恢复不盲目重复付费 | NOT RUN：已有实际PG短图保存后崩溃复用/unknown拒绝证据，完整真实服务退出点验收尚缺 |
 | Q06 | Seed历史稳定、异体导入不半发布 | PASS：0011完整payload实际PG幂等/冲突/旧版本稳定；三Blueprint内容独立验收 |
 | Q07 | 重规划历史、Exposure独立记录 | NOT RUN：G2/G4完整链待接 |
-| Q08 | 搜索/资源/RAG故障显式降级 | NOT RUN：Tavily真预检PASS但产品故障路径未接，RAG契约缺 |
+| Q08 | 搜索/资源/RAG故障显式降级 | NOT RUN：Tavily真实成功及离线故障/未知/单元资源隔离PASS；完整真实故障矩阵和RAG契约仍缺 |
 | Q09 | 合法JSON非法引用阻断 | NOT RUN：现有校验基础与新Seed目录绑定须实测 |
 | Q10 | Summary/Prompt失败原文不丢、正确导出 | NOT RUN：G3用户写入链待接 |
 | Q11 | 可查询status_url、终态停轮询、错误可操作 | PASS：G1实际PG status_url直接200，浏览器终态停止轮询、刷新/409保留编辑 |
