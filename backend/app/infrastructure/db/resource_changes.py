@@ -144,10 +144,7 @@ class PgResourceChanges:
 
     @staticmethod
     def _private_bindings_digest(conn, project_id, plan_id):
-        rows = conn.execute("""SELECT selection_id,stage_id,unit_id,resource_id,resource_snapshot
-            FROM learning_resource_selections WHERE project_id=%s AND plan_id=%s AND removed_at IS NULL
-            ORDER BY selection_id""", (project_id, plan_id)).fetchall()
-        return content_hash(_json(rows))
+        return private_bindings_digest(conn, project_id, plan_id)
 
     @staticmethod
     def _current(repo, command):
@@ -326,23 +323,34 @@ class PgResourceChanges:
 
     @staticmethod
     def _copy_selections(conn, current, plan_id, policy):
-        if policy != "copy_active":
-            return 0
-        copied = 0
-        rows = conn.execute("""SELECT old.*,n.stage_id AS new_stage_id FROM learning_resource_selections old
-            JOIN plan_stages s ON s.project_id=old.project_id AND s.plan_id=old.plan_id AND s.stage_id=old.stage_id
-            JOIN plan_stages n ON n.project_id=s.project_id AND n.plan_id=%s AND n.stable_key=s.stable_key
-            JOIN plan_unit_links l ON l.project_id=n.project_id AND l.plan_id=n.plan_id AND l.stage_id=n.stage_id AND l.unit_id=old.unit_id
-            WHERE old.project_id=%s AND old.plan_id=%s AND old.removed_at IS NULL ORDER BY old.selection_id""",
-            (plan_id, current.project_id, current.plan_id)).fetchall()
-        for old in rows:
-            lineage = {"original_selection_id": old["selection_id"], "original_plan_id": current.plan_id,
-                       "original_stage_id": old["stage_id"], "original_source_version": old["resource_snapshot"].get("source_version")}
-            snapshot = dict(old["resource_snapshot"], selection_copy_lineage=lineage)
-            snapshot["source_note"] = (snapshot.get("source_note", "") + "\n按用户明确策略沿用旧路线私人资料；原选择记录 " + old["selection_id"]).strip()
-            conn.execute("""INSERT INTO learning_resource_selections(selection_id,project_id,plan_id,stage_id,unit_id,
-                resource_id,resource_snapshot) VALUES(%s,%s,%s,%s,%s,%s,%s)""",
-                (new_id("selection"), current.project_id, plan_id, old["new_stage_id"], old["unit_id"],
-                 old["resource_id"], Jsonb(snapshot)))
-            copied += 1
-        return copied
+        return copy_private_selections(conn, current, plan_id, policy)
+
+
+def private_bindings_digest(conn, project_id, plan_id):
+    rows = conn.execute("""SELECT selection_id,stage_id,unit_id,resource_id,resource_snapshot
+        FROM learning_resource_selections WHERE project_id=%s AND plan_id=%s AND removed_at IS NULL
+        ORDER BY selection_id""", (project_id, plan_id)).fetchall()
+    return content_hash(_json(rows))
+
+
+def copy_private_selections(conn, current, plan_id, policy):
+    if policy != "copy_active":
+        return 0
+    copied = 0
+    rows = conn.execute("""SELECT old.*,n.stage_id AS new_stage_id FROM learning_resource_selections old
+        JOIN plan_stages s ON s.project_id=old.project_id AND s.plan_id=old.plan_id AND s.stage_id=old.stage_id
+        JOIN plan_stages n ON n.project_id=s.project_id AND n.plan_id=%s AND n.stable_key=s.stable_key
+        JOIN plan_unit_links l ON l.project_id=n.project_id AND l.plan_id=n.plan_id AND l.stage_id=n.stage_id AND l.unit_id=old.unit_id
+        WHERE old.project_id=%s AND old.plan_id=%s AND old.removed_at IS NULL ORDER BY old.selection_id""",
+        (plan_id, current.project_id, current.plan_id)).fetchall()
+    for old in rows:
+        lineage = {"original_selection_id": old["selection_id"], "original_plan_id": current.plan_id,
+                   "original_stage_id": old["stage_id"], "original_source_version": old["resource_snapshot"].get("source_version")}
+        snapshot = dict(old["resource_snapshot"], selection_copy_lineage=lineage)
+        snapshot["source_note"] = (snapshot.get("source_note", "") + "\n按用户明确策略沿用旧路线私人资料；原选择记录 " + old["selection_id"]).strip()
+        conn.execute("""INSERT INTO learning_resource_selections(selection_id,project_id,plan_id,stage_id,unit_id,
+            resource_id,resource_snapshot) VALUES(%s,%s,%s,%s,%s,%s,%s)""",
+            (new_id("selection"), current.project_id, plan_id, old["new_stage_id"], old["unit_id"],
+             old["resource_id"], Jsonb(snapshot)))
+        copied += 1
+    return copied

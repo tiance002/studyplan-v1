@@ -452,6 +452,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/practice-changes/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Context */
+        get: operations["get_practice_change_context"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/practice-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview */
+        post: operations["preview_practice_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/practice-changes/{proposal_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Preview */
+        get: operations["get_practice_change_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/practice-changes/{proposal_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm */
+        post: operations["confirm_practice_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/practice-changes/{proposal_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel */
+        post: operations["cancel_practice_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -1172,6 +1257,280 @@ export interface components {
              * @description UTC ISO8601
              */
             approved_at?: string | null;
+        };
+        /** PracticeChangeContextView */
+        PracticeChangeContextView: {
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string;
+            /** Revision */
+            revision: number;
+            /** Version */
+            version: number;
+            /** Practice Projects */
+            practice_projects: components["schemas"]["PracticeChangeProjectView"][];
+            /** Stages */
+            stages: components["schemas"]["PracticeChangeStageView"][];
+            /** Tasks */
+            tasks: components["schemas"]["PracticeChangeTaskView"][];
+            /** Knowledge Options */
+            knowledge_options: components["schemas"]["PracticeChangeKnowledgeView"][];
+        };
+        /** PracticeChangeDecisionRequest */
+        PracticeChangeDecisionRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Preview Hash */
+            preview_hash: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /**
+             * Acknowledge Warnings
+             * @default false
+             */
+            acknowledge_warnings: boolean;
+        };
+        /** PracticeChangeImpactView */
+        PracticeChangeImpactView: {
+            /** Changed Task Ids */
+            changed_task_ids: string[];
+            /** Added Task Ids */
+            added_task_ids: string[];
+            /** Cloned Task Count */
+            cloned_task_count: number;
+            /** Started Task Count */
+            started_task_count: number;
+            /** Prompt Revision Count */
+            prompt_revision_count: number;
+            /** Summary Count */
+            summary_count: number;
+            /** Exposure Count */
+            exposure_count: number;
+            /** Private Binding Count */
+            private_binding_count: number;
+            /** New Exposures Reset */
+            new_exposures_reset: boolean;
+            /** Preserve History */
+            preserve_history: boolean;
+        };
+        /** PracticeChangeKnowledgeLink */
+        PracticeChangeKnowledgeLink: {
+            /** Node Id */
+            node_id: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "core" | "supporting" | "extension";
+        };
+        /** PracticeChangeKnowledgeView */
+        PracticeChangeKnowledgeView: {
+            /** Node Id */
+            node_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Content Version */
+            content_version: number;
+        };
+        /** PracticeChangePreviewView */
+        PracticeChangePreviewView: {
+            /** Proposal Id */
+            proposal_id: string;
+            /** Draft Id */
+            draft_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Base Plan Id */
+            base_plan_id: string;
+            /** Base Revision */
+            base_revision: number;
+            /** Base Version */
+            base_version: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "confirmed" | "cancelled";
+            /** Preview Hash */
+            preview_hash: string;
+            /** Draft Hash */
+            draft_hash: string;
+            /**
+             * Copy Policy
+             * @enum {string}
+             */
+            copy_policy: "copy_active" | "keep_history_only";
+            before: components["schemas"]["PracticeChangeProjectView"];
+            after: components["schemas"]["PracticeChangeProjectView"];
+            /** Task Changes */
+            task_changes: components["schemas"]["PracticeChangeTaskDeltaView"][];
+            impact: components["schemas"]["PracticeChangeImpactView"];
+            /** Warnings */
+            warnings: string[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** PracticeChangeProjectView */
+        PracticeChangeProjectView: {
+            /** Practice Project Id */
+            practice_project_id: string;
+            /** Title */
+            title: string;
+            /** Idea */
+            idea: string;
+            /** Repo Url */
+            repo_url: string | null;
+            /** Status */
+            status: string;
+            /** Version */
+            version: number;
+        };
+        /** PracticeChangeRequest */
+        PracticeChangeRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Practice Project Id */
+            practice_project_id: string;
+            /** Title */
+            title: string;
+            /** Idea */
+            idea: string;
+            /** Repo Url */
+            repo_url: string | null;
+            /** Task Changes */
+            task_changes: components["schemas"]["PracticeChangeTaskRequest"][];
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Copy Policy
+             * @enum {string}
+             */
+            copy_policy: "copy_active" | "keep_history_only";
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** PracticeChangeResultView */
+        PracticeChangeResultView: {
+            /** Proposal Id */
+            proposal_id: string;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "confirm" | "cancel";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "confirmed" | "cancelled";
+            /** Plan Id */
+            plan_id: string | null;
+            /** Revision */
+            revision: number | null;
+            /** Created */
+            created: boolean;
+            /** Copied Selections */
+            copied_selections: number;
+        };
+        /** PracticeChangeStageView */
+        PracticeChangeStageView: {
+            /** Stage Id */
+            stage_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Order Index */
+            order_index: number;
+        };
+        /** PracticeChangeTaskDeltaView */
+        PracticeChangeTaskDeltaView: {
+            /**
+             * Operation
+             * @enum {string}
+             */
+            operation: "update" | "add" | "rebind";
+            before: components["schemas"]["PracticeChangeTaskView"] | null;
+            after: components["schemas"]["PracticeChangeTaskView"];
+        };
+        /** PracticeChangeTaskKnowledgeView */
+        PracticeChangeTaskKnowledgeView: {
+            /** Node Id */
+            node_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "core" | "supporting" | "extension";
+            /** Content Version */
+            content_version: number;
+        };
+        /** PracticeChangeTaskRequest */
+        PracticeChangeTaskRequest: {
+            /**
+             * Operation
+             * @enum {string}
+             */
+            operation: "update" | "add";
+            /** Client Key */
+            client_key: string;
+            /** Task Id */
+            task_id: string | null;
+            /** Stage Id */
+            stage_id: string;
+            /** Title */
+            title: string;
+            /** Goal */
+            goal: string;
+            /** In Scope */
+            in_scope: string[];
+            /** Out Scope */
+            out_scope: string[];
+            /** Acceptance */
+            acceptance: string[];
+            /** Knowledge Links */
+            knowledge_links: components["schemas"]["PracticeChangeKnowledgeLink"][];
+        };
+        /** PracticeChangeTaskView */
+        PracticeChangeTaskView: {
+            /** Task Id */
+            task_id: string;
+            /** Title */
+            title: string;
+            /** Goal */
+            goal: string;
+            /** In Scope */
+            in_scope: string[];
+            /** Out Scope */
+            out_scope: string[];
+            /** Acceptance */
+            acceptance: string[];
+            /** Status */
+            status: string;
+            /** Knowledge Links */
+            knowledge_links: components["schemas"]["PracticeChangeTaskKnowledgeView"][];
+            /** Practice Project Id */
+            practice_project_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Version */
+            version: number;
+            /** Stage Id */
+            stage_id: string;
+            /** Stage Key */
+            stage_key: string;
+            /** Order Index */
+            order_index: number;
         };
         /**
          * PracticeTaskStatus
@@ -3729,6 +4088,184 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PromptExportView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_practice_change_context: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeChangeContextView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_practice_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PracticeChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeChangePreviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_practice_change_preview: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeChangePreviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_practice_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PracticeChangeDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeChangeResultView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_practice_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PracticeChangeDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeChangeResultView"];
                 };
             };
             /** @description Validation Error */

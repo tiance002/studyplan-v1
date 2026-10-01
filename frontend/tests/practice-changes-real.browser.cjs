@@ -1,0 +1,94 @@
+// Manual decisions on the owned PostgreSQL project; zero model/search dispatches.
+const {chromium}=require('playwright-core');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'../..'),dir=path.join(root,'var/v2-g3'),acceptance='v2-g3-20261002-01';
+assert.equal(process.env.V2_PRACTICE_ACCEPTANCE,acceptance);
+const exists=name=>fs.existsSync(path.join(dir,name));
+const readFile=name=>JSON.parse(fs.readFileSync(path.join(dir,name),'utf8'));
+const write=(name,value)=>fs.writeFileSync(path.join(dir,name),JSON.stringify(value,null,2),{flag:'wx'});
+assert.ok(!exists('practice-real.json'),'Completed acceptance must not be replayed');
+assert.ok(!exists('practice-real-preview-intent.json'),'Inspect any prior preview intent before continuing');
+const credentials=JSON.parse(fs.readFileSync(path.join(root,'var/v2-g1/v2-g1-20261001-01-browser-private.json'),'utf8'));
+const context=readFile('practice-real-context.json');assert.equal(context.acceptance_id,acceptance);
+const previousPrompt=readFile('prompt-confirmed-real.json'),previousSummary=readFile('summary-real.json');
+const quota=folder=>fs.readdirSync(path.join(root,'.git',folder)).filter(n=>/^request-\d+\.json$/.test(n)).length;
+(async()=>{const browser=await chromium.launch({channel:'chrome',headless:true});try{
+ const page=await browser.newPage({viewport:{width:1450,height:1100},permissions:['clipboard-read','clipboard-write']});
+ const errors=[],forbidden=[];page.on('pageerror',()=>errors.push('pageerror'));page.on('dialog',d=>d.accept());
+ await page.route('**/api/v1/**',route=>{const request=route.request(),url=new URL(request.url());
+  if(!['GET','HEAD','OPTIONS'].includes(request.method())&&!url.pathname.startsWith('/api/v1/auth/')&&!url.pathname.startsWith('/api/v1/practice-changes')){
+   forbidden.push(url.pathname);return route.abort();}
+  if(request.method()==='POST'&&url.pathname==='/api/v1/practice-changes')write('practice-real-preview-intent.json',{acceptance_id:acceptance,body:request.postDataJSON()});
+  if(request.method()==='POST'&&url.pathname.endsWith('/confirm'))write('practice-real-confirm-intent.json',{acceptance_id:acceptance,proposal_id:url.pathname.split('/')[4],body:request.postDataJSON()});
+  return route.continue();});
+ await page.goto((process.env.STUDYPLAN_URL||'http://127.0.0.1:5175')+'/#practice');
+ await page.getByLabel('用户名',{exact:true}).fill(credentials.username);await page.getByLabel('密码',{exact:true}).fill(credentials.password);
+ await page.getByRole('button',{name:'登录学习空间',exact:true}).click();
+ const editor=page.getByRole('textbox',{name:'方案与 Prompt 原文',exact:true});await editor.waitFor();
+ const read=async url=>page.evaluate(async u=>{const r=await fetch(u,{credentials:'include'});if(!r.ok)throw new Error('Owned GET failed: '+r.status);return r.json();},url);
+ const scope='?project_id='+encodeURIComponent(context.project_id);
+ const workspace=await read('/api/v1/workspace'+scope);assert.equal(workspace.plan.revision,2);
+ const current=await read('/api/v1/practice-changes/context'+scope);assert.equal(current.plan_id,workspace.plan.plan_id);
+ const retainedPrompt=await read('/api/v1/prompts/revisions/'+previousPrompt.original_revision_id+scope);
+ const task=current.tasks.find(t=>t.task_id===retainedPrompt.task_id);assert.ok(task&&task.knowledge_links.some(n=>n.role==='core'));
+ const oldExposuresUrl='/api/v1/exposures'+scope+'&plan_id='+encodeURIComponent(current.plan_id);
+ const promptUrls=[previousPrompt.original_revision_id,previousPrompt.newer_revision_id].map(id=>'/api/v1/prompts/revisions/'+id+scope);
+ const summaryUrls=[previousSummary.original_attempt_id,previousSummary.newer_attempt_id].map(id=>'/api/v1/summaries/attempts/'+id+scope);
+ const exportUrls=[previousPrompt.raw_export_id,previousPrompt.implementation_export_id].map(id=>'/api/v1/prompts/exports/'+id+scope);
+ const historyUrls=[...promptUrls,...summaryUrls,...exportUrls,oldExposuresUrl];
+ const before={workspace,context:current,history:await Promise.all(historyUrls.map(read))};write('practice-real-before.json',before);
+ assert.equal(quota('v2-paid-quota-20261001'),23);assert.equal(quota('v2-search-quota-20261001'),2);
+ await page.getByLabel('实践所属阶段').selectOption(task.stage_id);await page.getByLabel('实践任务',{exact:true}).selectOption(task.task_id);
+ const local='  旧路线任务的未保存设计：先保留失败观察，再补可检查的交付物。\n调整路线期间不得改写这一段。\n\t';await editor.fill(local);
+ await page.getByText('调整主项目与阶段任务',{exact:true}).click();await page.getByLabel('主项目标题',{exact:true}).waitFor();
+ await page.getByLabel('选择主项目',{exact:true}).selectOption(task.practice_project_id);
+ const title='我自己的 Agent 调试学习工具',idea='按自己的学习目标，记录 Agent 工具调用的输入输出与失败边界，交付可检查的调试记录和复现说明。';
+ await page.getByLabel('主项目标题',{exact:true}).fill(title);await page.getByLabel('主项目设想',{exact:true}).fill(idea);
+ await page.getByLabel('仓库地址（可选）').fill('');await page.getByLabel('调整所属阶段').selectOption(task.stage_id);
+ await page.getByRole('button',{name:'编辑任务：'+task.title,exact:true}).click();const edited=page.getByRole('group',{name:'编辑任务 1',exact:true});
+ const taskTitle='自选交付：可检查的 Agent 调试记录',goal='交付一个最小工具调用的输入输出记录、一个失败示例及其复现命令；当前仅保存设计，实际执行后再提交证据。';
+ await edited.getByLabel('任务标题',{exact:true}).fill(taskTitle);await edited.getByLabel('交付物与任务目标',{exact:true}).fill(goal);
+ await edited.getByLabel('实施范围',{exact:true}).fill('一个最小工具调用的输入输出\n失败观察与复现说明');
+ await edited.getByLabel('范围之外',{exact:true}).fill('公网部署\n自动执行外部仓库');
+ await edited.getByLabel('验收要求',{exact:true}).fill('记录可检查的输入输出与失败结果\n未执行步骤明确标为待实施');
+ await page.getByLabel('私人资料沿用策略').selectOption('keep_history_only');
+ const previewResponse=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/v1/practice-changes'&&r.request().method()==='POST');
+ await page.getByRole('button',{name:'生成实践调整预览',exact:true}).click();const pr=await previewResponse;assert.equal(pr.status(),200);
+ const preview=await pr.json();write('practice-real-preview.json',preview);assert.equal(preview.after.title,title);assert.equal(preview.after.idea,idea);
+ assert.notEqual(preview.before.practice_project_id,preview.after.practice_project_id);
+ assert.equal(preview.impact.cloned_task_count,current.tasks.filter(t=>t.practice_project_id===task.practice_project_id).length);
+ const change=preview.task_changes.find(c=>c.before?.task_id===task.task_id);assert.equal(change.after.title,taskTitle);assert.equal(change.after.goal,goal);
+ assert.equal(change.after.status,'pending');assert.notEqual(change.after.task_id,task.task_id);
+ assert.equal((await read('/api/v1/workspace'+scope)).plan.plan_id,current.plan_id);
+ assert.equal(await editor.inputValue(),local);const region=page.getByRole('region',{name:'实践调整预览',exact:true});await region.getByText(goal,{exact:true}).waitFor();
+ assert.equal(await region.getByRole('button',{name:'确认并发布实践调整',exact:true}).isEnabled(),false);
+ await region.getByRole('checkbox',{name:'我已阅读差异和全部提示，同意发布这次调整',exact:true}).check();
+ const confirmResponse=page.waitForResponse(r=>new URL(r.url()).pathname.endsWith('/'+preview.proposal_id+'/confirm'));
+ await region.getByRole('button',{name:'确认并发布实践调整',exact:true}).click();const cr=await confirmResponse;assert.equal(cr.status(),200);
+ const result=await cr.json();write('practice-real-confirm.json',result);assert.equal(result.revision,3);assert.equal(result.created,true);
+ await page.getByText(/已发布路线第 3 版/).waitFor();const recovery=page.getByRole('region',{name:'旧路线未保存的原文',exact:true});await recovery.waitFor();
+ assert.equal(await recovery.getByRole('textbox').inputValue(),local);assert.equal(await recovery.getByRole('textbox').getAttribute('readonly'),'');
+ await recovery.getByRole('button',{name:'复制旧路线原文',exact:true}).click();await recovery.getByRole('status').filter({hasText:'旧原文已复制'}).waitFor();
+ const clipboard=await page.evaluate(()=>navigator.clipboard.readText());assert.equal(process.platform==='win32'?clipboard.replace(/\r\n/g,'\n'):clipboard,local);
+ assert.equal(await editor.inputValue(),'');const after=await read('/api/v1/practice-changes/context'+scope);assert.equal(after.plan_id,result.plan_id);
+ const fresh=after.tasks.find(t=>t.task_id===change.after.task_id);assert.equal(fresh.title,taskTitle);assert.equal(fresh.goal,goal);assert.equal(fresh.status,'pending');
+ assert.deepEqual(await Promise.all(historyUrls.map(read)),before.history);
+ const oldThread=await read('/api/v1/prompts'+scope+'&'+new URLSearchParams({plan_id:current.plan_id,stage_id:task.stage_id,task_id:task.task_id}));
+ assert.equal(oldThread.task.title,task.title);assert.ok(oldThread.revisions.some(r=>r.revision_id===previousPrompt.original_revision_id));
+ const newThread=await read('/api/v1/prompts'+scope+'&'+new URLSearchParams({plan_id:after.plan_id,stage_id:fresh.stage_id,task_id:fresh.task_id}));assert.deepEqual(newThread.revisions,[]);
+ const exposures=await read('/api/v1/exposures'+scope+'&plan_id='+encodeURIComponent(after.plan_id));
+ assert.ok(exposures.every(e=>e.version===0&&!e.recorded&&e.status==='not_started'));
+ await recovery.scrollIntoViewIfNeeded();await page.screenshot({path:path.join(dir,'practice-real-recovery.png'),fullPage:true});
+ await page.reload();await page.getByText('调整主项目与阶段任务',{exact:true}).click();await page.getByLabel('主项目标题',{exact:true}).waitFor();
+ await page.getByLabel('选择主项目').selectOption(preview.after.practice_project_id);assert.equal(await page.getByLabel('主项目标题',{exact:true}).inputValue(),title);
+ assert.equal(await page.getByRole('region',{name:'旧路线未保存的原文',exact:true}).count(),0);
+ await page.getByRole('button',{name:'读取项目方案历史',exact:true}).click();await page.getByRole('button',{name:new RegExp(task.title)}).first().waitFor();
+ assert.deepEqual(await Promise.all(historyUrls.map(read)),before.history);assert.equal(quota('v2-paid-quota-20261001'),23);assert.equal(quota('v2-search-quota-20261001'),2);
+ assert.deepEqual(errors,[]);assert.deepEqual(forbidden,[]);await page.screenshot({path:path.join(dir,'practice-real.png'),fullPage:true});
+ const evidence={status:'PASS',acceptance_id:acceptance,source:'Chrome + real loopback HTTP + owned PostgreSQL; manual decisions only',
+  project_id:context.project_id,proposal_id:preview.proposal_id,old_plan_id:current.plan_id,new_plan_id:after.plan_id,revision:3,
+  old_task_id:task.task_id,new_task_id:fresh.task_id,custom_project_and_task:true,preview_before_explicit_confirm:true,immutable_old_histories:true,
+  new_task_pending:true,new_prompt_empty:true,new_exposures_reset:true,visible_old_dirty_original:true,clipboard_exact:clipboard===local,clipboard_lf_equivalent:true,
+  reload_current_and_history:true,model_requests:23,search_requests:2,new_model_requests:0,new_search_requests:0};
+ write('practice-real.json',evidence);console.log(JSON.stringify(evidence));
+ }finally{await browser.close();}})().catch(()=>{console.error('FAIL: owned manual practice observation. Preserve preview/confirmation intent; inspect known proposal/current plan before any further action.');process.exitCode=1;});

@@ -73,6 +73,9 @@ def build_container(settings: Settings) -> AppContainer:
     from app.application.resource_changes import ResourceChangeService
     from app.infrastructure.db.resource_changes import PgResourceChanges
     resource_change_service = ResourceChangeService(PgResourceChanges(dsn))
+    from app.application.practice_changes import PracticeChangeService
+    from app.infrastructure.db.practice_changes import PgPracticeChanges
+    practice_change_service = PracticeChangeService(PgPracticeChanges(dsn))
     from app.application.learning_resources import LearningResourceService
     from app.infrastructure.db.learning_resources import PgLearningResources
     from app.infrastructure.resources.tavily import TavilyResourceIndex
@@ -200,4 +203,5 @@ def build_container(settings: Settings) -> AppContainer:
                         workspace_reader=workspace_reader, planning_worker=planning_worker,
                         resource_service=resource_service, exposure_service=exposure_service,
                         preference_service=preference_service, resource_change_service=resource_change_service,
-                        summary_service=summary_service, prompt_service=prompt_service)
+                        summary_service=summary_service, prompt_service=prompt_service,
+                        practice_change_service=practice_change_service)

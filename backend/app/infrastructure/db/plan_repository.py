@@ -286,10 +286,11 @@ class PgPlanRepository:
     单个事务内。构造只接收 DSN，便于在测试里指向临时库。
     """
 
-    def __init__(self, dsn: str, *, connection=None, resource_proposal_id=None) -> None:
+    def __init__(self, dsn: str, *, connection=None, resource_proposal_id=None, practice_proposal_id=None) -> None:
         self._dsn = to_psycopg_dsn(dsn)
         self._connection = connection
         self._resource_proposal_id = resource_proposal_id
+        self._practice_proposal_id = practice_proposal_id
 
     @contextmanager
     def _tx(self, project_id: str) -> Iterator[psycopg.Connection[dict[str, Any]]]:
@@ -311,11 +312,13 @@ class PgPlanRepository:
     # ------------------------------------------------------------- 草案
 
     def _guard_resource_proposal(self, conn, project_id, draft_id):
-        linked = conn.execute("SELECT resource_change_proposal_id AS proposal_id FROM plan_drafts "
-                              "WHERE project_id=%s AND draft_id=%s AND resource_change_proposal_id IS NOT NULL",
+        linked = conn.execute("SELECT resource_change_proposal_id AS proposal_id,practice_change_proposal_id FROM plan_drafts "
+                              "WHERE project_id=%s AND draft_id=%s FOR UPDATE",
                               (project_id, draft_id)).fetchone()
-        if linked is not None and linked["proposal_id"] != self._resource_proposal_id:
+        if linked is not None and linked["proposal_id"] is not None and linked["proposal_id"] != self._resource_proposal_id:
             raise ConflictError("资源变更草案必须通过其预览确认入口处理", reason="resource_proposal_required")
+        if linked is not None and linked["practice_change_proposal_id"] is not None and linked["practice_change_proposal_id"] != self._practice_proposal_id:
+            raise ConflictError("实践变更草案必须通过其预览确认入口处理", reason="practice_proposal_required")
 
     @staticmethod
     def _lock_plan_version(conn: Any, project_id: str, expected_version: int | None) -> None:
@@ -331,9 +334,8 @@ class PgPlanRepository:
         - 被条件挡下时**抛** :class:`ConflictError`，不静默忽略。
         """
         with self._tx(draft.project_id) as conn:
+            self._lock_plan_version(conn, draft.project_id, expected_version)
             self._guard_resource_proposal(conn, draft.project_id, draft.draft_id)
-            if expected_version is not None:
-                self._lock_plan_version(conn, draft.project_id, expected_version)
             if write_fence is not None:
                 lock_planning_write(conn, project_id=draft.project_id, run_id=draft.run_id, fence=write_fence)
             if draft.stage_resources and not draft.resource_snapshots:
@@ -609,7 +611,6 @@ class PgPlanRepository:
         """
         project_id = revision.project_id
         with self._tx(project_id) as conn:
-            self._guard_resource_proposal(conn, project_id, draft.draft_id)
             expected_version = superseded.version if superseded is not None else (0 if created else revision.version)
             try:
                 self._lock_plan_version(conn, project_id, expected_version)
@@ -618,6 +619,7 @@ class PgPlanRepository:
                 # publication losers; preserve that surface while moving the
                 # version check inside the publication transaction.
                 raise ConflictError("计划版本已变化，发布已中止", reason="plan_version_mismatch") from exc
+            self._guard_resource_proposal(conn, project_id, draft.draft_id)
             # 0) **事务内复核草案最新状态**（不信任调用方持有的旧对象）。
             row = conn.execute(
                 "SELECT status, content_hash FROM plan_drafts "

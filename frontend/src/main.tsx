@@ -195,7 +195,7 @@ function App() {
       <div hidden={page !== 'summary'}><SummaryDetail key={project} project={project}
         workspace={workspace} initialStage={stageId} active={page === 'summary'}/></div>
       <div hidden={page !== 'practice'}><PracticeDetail key={project} project={project}
-        workspace={workspace} initialStage={stageId} active={page === 'practice'}/></div>
+        workspace={workspace} initialStage={stageId} active={page === 'practice'} onPublished={refresh}/></div>
       {page === "conversations" && <ConversationList />}
       {page === "settings" && (
         <div className="content">

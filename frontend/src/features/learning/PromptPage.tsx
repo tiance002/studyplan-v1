@@ -3,11 +3,12 @@ import { api, ApiError } from '../../api/client';
 import { promptApi } from '../../api/promptClient';
 import type { PromptCancelBody, PromptExport, PromptExportBody, PromptReviewBody, PromptRevision, PromptSaveBody, PromptTarget, PromptTask, PromptThread } from '../../api/promptClient';
 import type { DTO } from '../../api/types';
+import { PracticeChangePanel } from './PracticeChangePanel';
 
 const terminal = new Set(['succeeded','failed','cancelled','canceled','unknown','reconciliation_required']);
 const errorText = (e: unknown) => e instanceof Error ? e.message : '操作未完成，请核对保存记录。';
 const targetKey = (t: PromptTarget) => `${t.plan_id}/${t.stage_id}/${t.task_id}`;
-type Buffer = {text: string; baseline: string; edit: number; initialized: boolean; thread?: PromptThread; pending?: PromptSaveBody; busy?: boolean; conflict?: boolean; error?: string};
+type Buffer = {text: string; baseline: string; edit: number; initialized: boolean; thread?: PromptThread; pending?: PromptSaveBody; busy?: boolean; conflict?: boolean; error?: string; position?:{planId:string;revision:number;taskTitle:string}};
 const fresh = (): Buffer => ({text:'',baseline:'',edit:0,initialized:false});
 function keepRevision(old: PromptRevision|undefined, next: PromptRevision): PromptRevision {
   if (!old) return next;
@@ -43,7 +44,7 @@ function LegacyReview({revision}: {revision: PromptRevision}) {
   return <section><h4>历史反馈原文</h4><p>以下按旧格式保留，没有补写新的结论。</p>{[...new Set(collect(revision.legacy_review))].map((v,i)=><p className="prompt-original" key={i}>{v}</p>)}</section>;
 }
 
-export function PromptPage({project,workspace,initialStage,active=true}: {project:string;workspace:DTO['LearningWorkspaceView']|null;initialStage:string;active?:boolean}) {
+export function PromptPage({project,workspace,initialStage,active=true,onPublished}: {project:string;workspace:DTO['LearningWorkspaceView']|null;initialStage:string;active?:boolean;onPublished?:()=>Promise<void>|void}) {
   const [stageChoice,setStageChoice]=useState(initialStage), [taskChoice,setTaskChoice]=useState('');
   const stage=workspace?.stages.find(s=>s.stage.stage_id===stageChoice)||workspace?.stages[0];
   const task=stage?.tasks.find(t=>t.task_id===taskChoice)||stage?.tasks[0];
@@ -90,13 +91,16 @@ export function PromptPage({project,workspace,initialStage,active=true}: {projec
   }
   if(!workspace)return <div className="content"><h1>项目实践</h1><p>先确认学习路线，再查看其中的主项目和实践任务。</p></div>;
   const chars=Array.from(b.text).length;
+  const oldDirty=Object.entries(buffers).filter(([,value])=>value.position&&value.position.planId!==workspace.plan.plan_id&&value.text!==value.baseline);
   return <div className="content prompt-page"><h1>项目实践与 Prompt</h1><p className="lede">结合路线中的任务，把实现方案与 Prompt 一起保存。反馈与导出都使用你明确选择的已保存版本。</p><p aria-label="当前实践路线">路线第 {workspace.plan.revision} 版：{workspace.plan.goal_snapshot}</p>
+    <PracticeChangePanel project={project} onPublished={onPublished}/>
+    {oldDirty.length>0&&<section className="panel prompt-recovery" aria-label="旧路线未保存的原文"><h2>旧路线未保存的原文</h2><p>这些文字仍属于旧路线任务，仅保留在本次页面中。新任务不会自动继承；刷新或退出前请复制保管。</p>{oldDirty.map(([bufferKey,value])=><article key={bufferKey}><h3>路线第 {value.position!.revision} 版 · {value.position!.taskTitle}</h3><textarea aria-label={`旧路线原文：${value.position!.taskTitle}`} rows={6} readOnly value={value.text}/><button className="btn" onClick={()=>void navigator.clipboard.writeText(value.text).then(()=>update(bufferKey,old=>({...old,error:'旧原文已复制，请在本机保管。'}))).catch(()=>update(bufferKey,old=>({...old,error:'复制未完成，请选择旧原文手动复制。'})))}>复制旧路线原文</button>{value.error&&<p role="status">{value.error}</p>}</article>)}</section>}
     <div className="prompt-targets"><label>实践所属阶段<select aria-label="实践所属阶段" value={stage?.stage.stage_id||''} onChange={e=>{setStageChoice(e.target.value);setTaskChoice('');}}>{workspace.stages.map(s=><option key={s.stage.stage_id} value={s.stage.stage_id}>{s.stage.title}</option>)}</select></label>
       <label>实践任务<select aria-label="实践任务" value={task?.task_id||''} onChange={e=>setTaskChoice(e.target.value)}>{stage?.tasks.map(t=><option key={t.task_id} value={t.task_id}>{t.title}</option>)}</select></label></div>
     {!target||!task ? <p>当前阶段没有正式计划关联的实践任务。请选择其他阶段。</p> : <>
       <section className="panel prompt-context" aria-label="当前实践要求"><h2>路线中的主项目</h2>{b.thread ? <><h3>{b.thread.practice_project.title}</h3><p>{b.thread.practice_project.idea}</p><Requirements task={b.thread.task}/></> : <><h3>{task.title}</h3><p>{task.goal}</p><p>正在读取主项目与完整任务要求。</p></>}
         <p className="form-note">这些要求来自当前批准路线。保存与模型建议不会改变任务、学习进度或验收结果。</p></section>
-      <section className="panel prompt-editor" aria-label="方案编辑"><h2>我的方案与 Prompt</h2><label>方案与 Prompt 原文<textarea aria-label="方案与 Prompt 原文" rows={12} value={b.text} onChange={e=>update(key,old=>({...old,text:e.target.value,edit:old.edit+1}))}/></label>
+      <section className="panel prompt-editor" aria-label="方案编辑"><h2>我的方案与 Prompt</h2><label>方案与 Prompt 原文<textarea aria-label="方案与 Prompt 原文" rows={12} value={b.text} onChange={e=>update(key,old=>({...old,text:e.target.value,edit:old.edit+1,position:{planId:workspace.plan.plan_id,revision:workspace.plan.revision,taskTitle:task.title}}))}/></label>
         <p className="form-note">{chars} / 40000 字符。保留空白行与原格式；短方案也能保存。</p><p aria-live="polite">{b.text!==b.baseline?'有未保存文字，请保存或复制后再刷新。':'编辑文字与保存记录同步。'} 未保存文字仅保留在本次打开的页面，切换阶段、任务和栏目仍会保留；刷新或退出后不会恢复。</p>
         <div className="chips"><button className="btn primary" disabled={!b.thread||b.busy||!!b.pending||!b.text.trim()||chars>40000} onClick={()=>void save(key,{...target,user_draft:b.text,expected_version:b.thread!.version,idempotency_key:crypto.randomUUID()})}>保存方案与 Prompt</button>
           {b.pending&&!b.conflict&&<button className="btn" disabled={b.busy} onClick={()=>void save(key,b.pending!)}>重试原保存</button>}

@@ -2041,6 +2041,278 @@
         }
       }
     },
+    "/api/v1/practice-changes/context": {
+      "get": {
+        "summary": "Context",
+        "operationId": "get_practice_change_context",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeChangeContextView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/practice-changes": {
+      "post": {
+        "summary": "Preview",
+        "operationId": "preview_practice_change",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticeChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeChangePreviewView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/practice-changes/{proposal_id}": {
+      "get": {
+        "summary": "Get Preview",
+        "operationId": "get_practice_change_preview",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proposal Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeChangePreviewView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/practice-changes/{proposal_id}/confirm": {
+      "post": {
+        "summary": "Confirm",
+        "operationId": "confirm_practice_change",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proposal Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticeChangeDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeChangeResultView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/practice-changes/{proposal_id}/cancel": {
+      "post": {
+        "summary": "Cancel",
+        "operationId": "cancel_practice_change",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proposal Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticeChangeDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeChangeResultView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "tags": [
@@ -3738,6 +4010,805 @@
         ],
         "title": "PlanView",
         "description": "已确认路线视图（当前版本或历史版本）。"
+      },
+      "PracticeChangeContextView": {
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "title": "Project Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "title": "Plan Id"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "practice_projects": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeChangeProjectView"
+            },
+            "type": "array",
+            "title": "Practice Projects"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeChangeStageView"
+            },
+            "type": "array",
+            "title": "Stages"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeChangeTaskView"
+            },
+            "type": "array",
+            "title": "Tasks"
+          },
+          "knowledge_options": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeChangeKnowledgeView"
+            },
+            "type": "array",
+            "title": "Knowledge Options"
+          }
+        },
+        "type": "object",
+        "required": [
+          "project_id",
+          "plan_id",
+          "revision",
+          "version",
+          "practice_projects",
+          "stages",
+          "tasks",
+          "knowledge_options"
+        ],
+        "title": "PracticeChangeContextView"
+      },
+      "PracticeChangeDecisionRequest": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "preview_hash": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Preview Hash"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          },
+          "acknowledge_warnings": {
+            "type": "boolean",
+            "title": "Acknowledge Warnings",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "preview_hash",
+          "idempotency_key"
+        ],
+        "title": "PracticeChangeDecisionRequest"
+      },
+      "PracticeChangeImpactView": {
+        "properties": {
+          "changed_task_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Changed Task Ids"
+          },
+          "added_task_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Added Task Ids"
+          },
+          "cloned_task_count": {
+            "type": "integer",
+            "title": "Cloned Task Count"
+          },
+          "started_task_count": {
+            "type": "integer",
+            "title": "Started Task Count"
+          },
+          "prompt_revision_count": {
+            "type": "integer",
+            "title": "Prompt Revision Count"
+          },
+          "summary_count": {
+            "type": "integer",
+            "title": "Summary Count"
+          },
+          "exposure_count": {
+            "type": "integer",
+            "title": "Exposure Count"
+          },
+          "private_binding_count": {
+            "type": "integer",
+            "title": "Private Binding Count"
+          },
+          "new_exposures_reset": {
+            "type": "boolean",
+            "title": "New Exposures Reset"
+          },
+          "preserve_history": {
+            "type": "boolean",
+            "title": "Preserve History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "changed_task_ids",
+          "added_task_ids",
+          "cloned_task_count",
+          "started_task_count",
+          "prompt_revision_count",
+          "summary_count",
+          "exposure_count",
+          "private_binding_count",
+          "new_exposures_reset",
+          "preserve_history"
+        ],
+        "title": "PracticeChangeImpactView"
+      },
+      "PracticeChangeKnowledgeLink": {
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Node Id"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "core",
+              "supporting",
+              "extension"
+            ],
+            "title": "Role"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "node_id",
+          "role"
+        ],
+        "title": "PracticeChangeKnowledgeLink"
+      },
+      "PracticeChangeKnowledgeView": {
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "stable_key": {
+            "type": "string",
+            "title": "Stable Key"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "content_version": {
+            "type": "integer",
+            "title": "Content Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node_id",
+          "stable_key",
+          "title",
+          "content_version"
+        ],
+        "title": "PracticeChangeKnowledgeView"
+      },
+      "PracticeChangePreviewView": {
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "title": "Proposal Id"
+          },
+          "draft_id": {
+            "type": "string",
+            "title": "Draft Id"
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id"
+          },
+          "base_plan_id": {
+            "type": "string",
+            "title": "Base Plan Id"
+          },
+          "base_revision": {
+            "type": "integer",
+            "title": "Base Revision"
+          },
+          "base_version": {
+            "type": "integer",
+            "title": "Base Version"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "confirmed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "preview_hash": {
+            "type": "string",
+            "title": "Preview Hash"
+          },
+          "draft_hash": {
+            "type": "string",
+            "title": "Draft Hash"
+          },
+          "copy_policy": {
+            "type": "string",
+            "enum": [
+              "copy_active",
+              "keep_history_only"
+            ],
+            "title": "Copy Policy"
+          },
+          "before": {
+            "$ref": "#/components/schemas/PracticeChangeProjectView"
+          },
+          "after": {
+            "$ref": "#/components/schemas/PracticeChangeProjectView"
+          },
+          "task_changes": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeChangeTaskDeltaView"
+            },
+            "type": "array",
+            "title": "Task Changes"
+          },
+          "impact": {
+            "$ref": "#/components/schemas/PracticeChangeImpactView"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "proposal_id",
+          "draft_id",
+          "project_id",
+          "base_plan_id",
+          "base_revision",
+          "base_version",
+          "status",
+          "preview_hash",
+          "draft_hash",
+          "copy_policy",
+          "before",
+          "after",
+          "task_changes",
+          "impact",
+          "warnings",
+          "created_at"
+        ],
+        "title": "PracticeChangePreviewView"
+      },
+      "PracticeChangeProjectView": {
+        "properties": {
+          "practice_project_id": {
+            "type": "string",
+            "title": "Practice Project Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "idea": {
+            "type": "string",
+            "title": "Idea"
+          },
+          "repo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repo Url"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "practice_project_id",
+          "title",
+          "idea",
+          "repo_url",
+          "status",
+          "version"
+        ],
+        "title": "PracticeChangeProjectView"
+      },
+      "PracticeChangeRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "practice_project_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Practice Project Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "idea": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 10,
+            "title": "Idea"
+          },
+          "repo_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repo Url"
+          },
+          "task_changes": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeChangeTaskRequest"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Task Changes"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "copy_policy": {
+            "type": "string",
+            "enum": [
+              "copy_active",
+              "keep_history_only"
+            ],
+            "title": "Copy Policy"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "practice_project_id",
+          "title",
+          "idea",
+          "repo_url",
+          "task_changes",
+          "expected_version",
+          "copy_policy",
+          "idempotency_key"
+        ],
+        "title": "PracticeChangeRequest"
+      },
+      "PracticeChangeResultView": {
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "title": "Proposal Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "confirm",
+              "cancel"
+            ],
+            "title": "Action"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created"
+          },
+          "copied_selections": {
+            "type": "integer",
+            "title": "Copied Selections"
+          }
+        },
+        "type": "object",
+        "required": [
+          "proposal_id",
+          "action",
+          "status",
+          "plan_id",
+          "revision",
+          "created",
+          "copied_selections"
+        ],
+        "title": "PracticeChangeResultView"
+      },
+      "PracticeChangeStageView": {
+        "properties": {
+          "stage_id": {
+            "type": "string",
+            "title": "Stage Id"
+          },
+          "stable_key": {
+            "type": "string",
+            "title": "Stable Key"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stage_id",
+          "stable_key",
+          "title",
+          "order_index"
+        ],
+        "title": "PracticeChangeStageView"
+      },
+      "PracticeChangeTaskDeltaView": {
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "update",
+              "add",
+              "rebind"
+            ],
+            "title": "Operation"
+          },
+          "before": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PracticeChangeTaskView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "after": {
+            "$ref": "#/components/schemas/PracticeChangeTaskView"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operation",
+          "before",
+          "after"
+        ],
+        "title": "PracticeChangeTaskDeltaView"
+      },
+      "PracticeChangeTaskKnowledgeView": {
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "stable_key": {
+            "type": "string",
+            "title": "Stable Key"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "core",
+              "supporting",
+              "extension"
+            ],
+            "title": "Role"
+          },
+          "content_version": {
+            "type": "integer",
+            "title": "Content Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node_id",
+          "stable_key",
+          "title",
+          "role",
+          "content_version"
+        ],
+        "title": "PracticeChangeTaskKnowledgeView"
+      },
+      "PracticeChangeTaskRequest": {
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "update",
+              "add"
+            ],
+            "title": "Operation"
+          },
+          "client_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Client Key"
+          },
+          "task_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Goal"
+          },
+          "in_scope": {
+            "items": {
+              "type": "string",
+              "maxLength": 2000,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "In Scope"
+          },
+          "out_scope": {
+            "items": {
+              "type": "string",
+              "maxLength": 2000,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Out Scope"
+          },
+          "acceptance": {
+            "items": {
+              "type": "string",
+              "maxLength": 2000,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Acceptance"
+          },
+          "knowledge_links": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeChangeKnowledgeLink"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Knowledge Links"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "operation",
+          "client_key",
+          "task_id",
+          "stage_id",
+          "title",
+          "goal",
+          "in_scope",
+          "out_scope",
+          "acceptance",
+          "knowledge_links"
+        ],
+        "title": "PracticeChangeTaskRequest"
+      },
+      "PracticeChangeTaskView": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "goal": {
+            "type": "string",
+            "title": "Goal"
+          },
+          "in_scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "In Scope"
+          },
+          "out_scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Out Scope"
+          },
+          "acceptance": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Acceptance"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "knowledge_links": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeChangeTaskKnowledgeView"
+            },
+            "type": "array",
+            "title": "Knowledge Links"
+          },
+          "practice_project_id": {
+            "type": "string",
+            "title": "Practice Project Id"
+          },
+          "stable_key": {
+            "type": "string",
+            "title": "Stable Key"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "stage_id": {
+            "type": "string",
+            "title": "Stage Id"
+          },
+          "stage_key": {
+            "type": "string",
+            "title": "Stage Key"
+          },
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "title",
+          "goal",
+          "in_scope",
+          "out_scope",
+          "acceptance",
+          "status",
+          "knowledge_links",
+          "practice_project_id",
+          "stable_key",
+          "version",
+          "stage_id",
+          "stage_key",
+          "order_index"
+        ],
+        "title": "PracticeChangeTaskView"
       },
       "PracticeTaskStatus": {
         "type": "string",
