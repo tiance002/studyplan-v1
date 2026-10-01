@@ -6,7 +6,7 @@
 
 | 工具 | 用途 | 操作范围 |
 |---|---|---|
-| [b3f1-dev.ps1](b3f1-dev.ps1) `-Demo` / `-Frontend` | 当前 develop 的 Fake 后端 / 前端启动 | 读取本机 .env；启动进程；页面业务操作仍可能写库 |
+| [b3f1-dev.ps1](b3f1-dev.ps1) / `-Frontend` / `-Demo` | 正常API / 前端 / 显式Fake启动 | 读取本机.env，默认API8022/前端5175；前端代理到指定API，不接验收wrapper；页面业务操作仍可能写库 |
 | [b3f1-dev.ps1](b3f1-dev.ps1) `-Worker` | 启动现有规划 worker | 根据配置消费任务；真实 provider 模式可能产生付费调用 |
 | [b3f1-dev.ps1](b3f1-dev.ps1) `-Migrate` | Alembic 增量迁移 | 数据库写入，按 Goal 授权执行 |
 | [test.sh](test.sh) | unit / contract / integration 定向测试 | 缺虚拟环境时会创建并安装 pytest；不包含 e2e |
@@ -16,6 +16,9 @@
 已有依赖时，常用定向命令：
 
 ```powershell
+.\scripts\b3f1-dev.ps1 -ApiPort 8022 -FrontendPort 5175
+# 另一个终端；默认不启动Worker或派发模型。
+.\scripts\b3f1-dev.ps1 -Frontend -ApiPort 8022 -FrontendPort 5175
 .venv/Scripts/python -m pytest backend/tests/unit -o addopts= -q
 .venv/Scripts/python -m ruff check backend
 .venv/Scripts/python -m mypy backend/app

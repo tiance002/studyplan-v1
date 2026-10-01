@@ -202,3 +202,19 @@ F12人工存档/决定与F14首批实际分类档案Implemented/Integrated，负
 只读本机定位发现独立RAG工程 `E:\RAG quention`，三个现有Docker API在8000/18086/18087；在线Personal RAG OpenAPI与healthz均HTTP200，已有契约文件contracts/openapi.json。D:\codex-rag-tools仅工具/实验目录。外部调用为健康/文档GET，无检索/问答/模型/私有资料读取，无服务改动；费用累计模型23/50、搜索2/1000不变。先前“无接口条件”表述补充为已找到接口/服务，但StudyPlan接线、实例选择、纯检索与跨账号授权契约未解决；当前OpenAPI无独立检索endpoint及securitySchemes，不要求用户发送模型密钥或猜填RAG_API_KEY。具体实例/前端对应见external-services.md，F17仍BLOCKED。用户只需确认哪套是常用且资料正常的实例。
 
 本轮再次从JSONL元数据核实：Gauss/g1_credentials Sol Medium；Kuhn/g1_short_generation Sol High；Helmholtz/g1_seed Sol Medium；Lovelace/g1_binding_review Sol High；Rawls/g4_submission_review Luna Max。界面省略模型的具体原因无法由此证明，后续派发说明显式展示实际模型/effort，复用不冒称切换。
+
+## 2026-10-02用户注册故障优先修复
+
+F01项目管理尚未开始业务写入时，用户报告注册范围应为6–12、15位以上仍被owned acceptance403拒绝及旧账号登录失败，优先切换到真实故障修复。Gauss实际SolMedium仅AuthPage与Auth Mock，root SolHigh负责Domain/DTO/旧密码兼容、数据库和运行入口。原F01只读包已完成，按项目保留组件内存+归档/退出guard建议留后续，不冒称实现。
+
+已真实重现5175→8021 register403。用户给出旧用户名后，正常.env库账号存在/1学习项目/无已批准路线，验收库不存在该账号；未获取/重置密码或迁移账号。最新注册规则6–12码点，登录继续1–128，权威替代见[ADR-0011](../adr/ADR-0011-registration-and-user-entry.md)，两原指导hash保持。Domain/DTO/UI及生成OpenAPI同步，只两个注册边界改变；认证/RLS/散列/限流/CSRF保留。
+
+先备份正常本地开发库studyplan_b3_local_48fb59cc，再应用既有0011–0022，原41表/1,513行原字段逐行哈希完全保持。备份及元数据在ignored var/auth-fix，不提交私有数据；归档可读不等于恢复演练，Q12仍NOT RUN。当前正常API8022/PID59912 exec77291读取.env正常库；5175/PID37636 exec25717已通过新脚本代理到8022。旧owned Vite41308身份核对后停止；原8000/RAG和8021/PID55044验收wrapper均保留，不移除原保护。没有Worker/模型/搜索派发，累计23/50、2/1000、unknown0。
+
+密码规则RED7 FAIL/21 PASS后Domain定向53 PASS；全部unit+contract591 PASS/2 skipped NOT RUN；真实PG认证9 PASS，受影响Worker/资源PG45 PASS。Gauss Auth Chrome Mock、前端4单元与生成类型后build55模块 PASS；新隔离PG+HTTP/Vite/Chrome真实6位及12码点注册/刷新/退出/登录PASS，PNG已看。初次实际Chrome文案末尾匹配遗漏FAIL、HTTP探测错OpenAPI路径组合FAIL、备份native工具缺失FAIL（未迁移）及Ruff import FAIL均保留；定位最小修复后相关最终PASS，详见[注册入口报告](../acceptance/F01-registration-entry-2026-10-02.md)。
+
+已请用户刷新5175用原密码确认旧账号；用户真实登录仍NOT RUN，不能用账号存在替代。完整项目管理/F02/F03等Goal继续active/NOT_READY。正常API启动未启动Worker，完整日常生成入口需后续额度/发布Seed及运行条件收口，不能自动恢复旧Run。下一安全动作：收口本修复、保留正常入口并接收用户反馈，继续F01冻结/实现；不重跑已完成收费验收。
+
+代码`b0e342fa9cdd948a7b4d882de8c4aa0458416afc`正常commit/push，GitHub SHA一致。实际Auth临时8023/5176精确停止并核对唯一自有studyplan_test_authfix_0ffbc5ce的schema/4合成账号/无Run/Draft/无活动连接后清理；正常8022/5175及保留8021不停止。最终新文档24链接、原文hash/额度检查PASS；当前仅文档收口，随后承接提交。
+
+收口时重新轮询实际77291服务，观察一次login401后正常login200；随后仅只读auth owner scope，确认用户旧账号在本轮库升级/启动后有一个新有效会话，未调用issue/login或获取秘密。正常旧账号认证技术证据PASS，用户主观体验反馈仍NOT RUN；workspace404对应该账号此前没有已批准路线，不标为登录失败。metadata留var/auth-fix/owner-login-observation.json。此前“实际登录NOT RUN”是观察前的时间点，以本条新增证据为准。

@@ -4,7 +4,7 @@
 
 | ID | 功能 | 状态 | 已有事实 / 仍须交付与实证 |
 |---|---|---|---|
-| F01 | 注册/登录/退出/持久会话/项目管理 | IMPLEMENTED | 7项真实隔离PG认证PASS，Chrome+真实HTTP+PG退出重登录PASS；完整项目管理仍待补 |
+| F01 | 注册/登录/退出/持久会话/项目管理 | IMPLEMENTED | 已有认证证据保留；2026-10-02按用户最新要求新注册6–12、旧密码1–128登录兼容，9项真实PG与6/12真实Chrome注册/刷新/退出/登录PASS；正常5175入口修正为.env产品库8022，已观察旧账号正常login200及新有效会话，主观使用反馈仍NOT RUN。完整项目管理仍待补，见[注册入口报告](../acceptance/F01-registration-entry-2026-10-02.md) |
 | F02 | 目标/必要澄清/时间偏好/Outcome | IMPLEMENTED | 已有目标及prefs DTO；澄清默认值确认、Outcome还未接成品链路 |
 | F03 | Blueprint/Module/依赖 | IMPLEMENTED | 有Agent/Python领域包及模型结构校验；DB运行发布版与三Blueprint完整内容待补 |
 | F04 | 全阶段纲要/草案编辑/业务确认 | VERIFIED | G1真模型9阶段草案、浏览器编辑保存/独立业务发布revision1/刷新重登录PASS；仅G1已有Agent v2内容范围，三Blueprint内容由F03继续验收 |

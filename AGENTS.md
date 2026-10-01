@@ -32,7 +32,7 @@
 
 执行前读取 [V2.0成品指导](docs/implementation/CODEX_GUIDANCE_V2.0.md)、[连续实施Goal](docs/implementation/STUDYPLAN_CODEX_GOAL_V2.0.md)、[功能验收矩阵](docs/implementation/feature-acceptance.md) 和唯一当前进度 [progress](docs/implementation/progress.md)。替代关系见 [ADR-0010](docs/adr/ADR-0010-v2-complete-product-slices.md)。用户最新决定 > V2.0明确替换项 > 未被替换的有效规格/ADR；下文S0定位及旧开发路由是历史对照，冲突项按V2.0执行。
 
-- 成品范围恢复注册/登录、完整学习、Prompt工作台、成果验收与历史，覆盖F01–F18、Q01–Q12。取消S0“无注册登录”为当前产品要求；不集成已不符合本Goal的M1.1无登录入口。新设密码15–128个Unicode码点，旧密码验证兼容。
+- 成品范围恢复注册/登录、完整学习、Prompt工作台、成果验收与历史，覆盖F01–F18、Q01–Q12。取消S0“无注册登录”为当前产品要求；不集成已不符合本Goal的M1.1无登录入口。按2026-10-02用户最新明确决定，新注册密码6–12个Unicode码点；旧密码登录继续1–128兼容，不改原散列。此项替代V2原文15–128默认值，见[ADR-0011](docs/adr/ADR-0011-registration-and-user-entry.md)，原指导文档保留溯源。
 - 新生成任务持久化草案后以 `succeeded + none` 结束，由草案状态提供编辑/确认；普通确认走现有业务事务。盘点保留旧waiting_user及checkpoint，不通过旧Graph执行普通批准，不重派unknown。
 - 受控Seed文件版本化导入，运行读取数据库发布版本；既有计划保存当时来源和版本。依赖/章节/模块/归属/发布由代码校验，模型只引用允许的键；Exposure、进度、自述掌握分开。
 - 保留RLS、服务端身份/项目范围、原子发布、幂等、lease/claim token、取消/迟到结果防护及原文/成果历史。不改已发布迁移，不复制旧库/密钥，不重搭服务，不操作.workbuddy/及design-preview/。
