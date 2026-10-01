@@ -61,3 +61,16 @@
 - 真实provider测试须每次新明确授权，先免费preflight，再ConfirmPaidRun/新AcceptanceId/专用Project。禁止消费旧ID、修改/删除live journal/evidence、历史Attempt/unknown重派。
 - 本计划不授权模型调用、生产数据库写入、历史Run恢复或Draft批准。已有用户明确授权无需重复询问；遇到缺秘密只给用户本机命令，不要求贴聊天。
 - milestone tag与master合并仅在负责人明确接受对应里程碑后；保留本文件已有Git/迁移历史规则。
+
+# 项目长期执行约束：开发模型路由与子代理
+
+后续所有开发任务默认遵守 [模型路由与子代理规则原文](docs/execution/model-routing-policy.md)，除非用户之后明确修改。执行前读取全文；本节是长期入口，不能代替原文。
+
+- 固定顺序：先工具 → 判断任务边界和风险 → 选择模型。确定性工具能直接判断的任务不额外调用模型。
+- 动态三级路由：FAST = GPT-6 Luna Max；NORMAL = GPT-6.1 Sol Medium；HARD = GPT-6.1 Sol High。主协调者默认 Sol High，承担规划、风险、路由、升级、证据汇总和最终交付核查；可安全分离的工作按原文下放，不为形式上的协作创建代理。
+- 子代理派发显式指定模型和推理等级：FAST `gpt-6-luna` / `max`，NORMAL `gpt-6.1-sol` / `medium`，HARD `gpt-6.1-sol` / `high`。这些是每个任务的动态参数，不额外创建三套静态角色配置。
+- 当前会话或工具不能切换到所需模型/等级，或模型不可用时，明确报告限制；不得声称已切换，不得静默替换模型或提高推理等级。风险边界和关键判断职责继续按原文执行。
+- 只有能独立描述、独立验收的子任务才派发。并行任务必须相互独立；禁止同文件/同领域对象并行修改、重复全仓扫描或重复 investigation。先形成共享 Evidence Packet，后续复用。
+- 架构、身份/权限、数据一致性、事务/并发、Graph恢复、公共契约、外部副作用和困难根因由 HARD 主导；模型自评不能替代真实测试。失败按原文定向重试或升级，禁止无新证据无限试错或扩大范围。
+- 原文中的 B2–B6、登录注册、多用户和三张 StateGraph 等是任务风险示例，不恢复旧产品范围或已被取代的架构要求；产品设计仍按本文件“权威文档”顺序执行。开发子代理规则不授权建设产品多Agent自组织，也不授权付费调用、发布、数据库写入或历史Run操作。
+- 原文 IMPLEMENTED / TESTED / ACCEPTED 与当前 Implemented / Tested / Integrated / Verified 均须依实际证据分别记录；ACCEPTED 不自动等于负责人接受里程碑，不授权 master 合并或 milestone tag。测试结果统一使用 PASS / FAIL / NOT RUN。
