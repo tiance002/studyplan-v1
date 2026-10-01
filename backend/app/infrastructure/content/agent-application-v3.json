@@ -1,0 +1,1015 @@
+{
+  "pack_key": "agent.application",
+  "version": 3,
+  "status": "published",
+  "title": "Agent 应用开发：从环境到可验收知识助手",
+  "supported_scope": "具备基础编程认知，使用 Python 学习 LLM API、工具、LangGraph、RAG、MCP、上下文管理和应用评价",
+  "resource_support": "reviewed_index",
+  "provenance": "Repository content/index review 2026-09-29: official titles, topic fit and URLs inspected. Not a ranking or guarantee of teaching quality. Resources are English; cloud APIs may charge; no paid calls were made.",
+  "stage_blueprints": [
+    {
+      "stable_key": "stage.environment",
+      "title": "开发环境与必要语言基础",
+      "section_kind": "foundation",
+      "objective": "建立可复现环境，编写可测试的工具函数",
+      "node_keys": [
+        "node.environment",
+        "node.environment.1",
+        "node.environment.2"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_python_v1",
+          "section_refs": [
+            "sec_agent_venv_v1",
+            "sec_agent_functions_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.environment",
+            "node.environment.1",
+            "node.environment.2"
+          ]
+        }
+      ],
+      "extensions": []
+    },
+    {
+      "stable_key": "stage.model_api",
+      "title": "LLM API 与 Prompt",
+      "section_kind": "core",
+      "objective": "调用模型并明确输入、输出、token 与错误边界",
+      "node_keys": [
+        "node.model_api",
+        "node.model_api.1",
+        "node.model_api.2"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_langchain_v1",
+          "section_refs": [
+            "sec_agent_models_v1",
+            "sec_agent_messages_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.model_api",
+            "node.model_api.1",
+            "node.model_api.2"
+          ]
+        }
+      ],
+      "extensions": []
+    },
+    {
+      "stable_key": "stage.tools",
+      "title": "工具调用与结构化输出",
+      "section_kind": "core",
+      "objective": "把模型决策转为受校验的工具请求",
+      "node_keys": [
+        "node.tools",
+        "node.tools.1",
+        "node.tools.2"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_langchain_v1",
+          "section_refs": [
+            "sec_agent_tools_v1",
+            "sec_agent_structured_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.tools",
+            "node.tools.1",
+            "node.tools.2"
+          ]
+        }
+      ],
+      "extensions": []
+    },
+    {
+      "stable_key": "stage.langgraph",
+      "title": "LangGraph 编排基础",
+      "section_kind": "core",
+      "objective": "用状态、节点与路由组织可恢复的 Agent 流程",
+      "node_keys": [
+        "node.langgraph",
+        "node.langgraph.1",
+        "node.langgraph.2"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_langchain_v1",
+          "section_refs": [
+            "sec_agent_graph_v1",
+            "sec_agent_persistence_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.langgraph",
+            "node.langgraph.1",
+            "node.langgraph.2"
+          ]
+        }
+      ],
+      "extensions": []
+    },
+    {
+      "stable_key": "stage.rag",
+      "title": "RAG 检索与知识库",
+      "section_kind": "core",
+      "objective": "构建有来源依据的检索生成链路",
+      "node_keys": [
+        "node.rag",
+        "node.rag.1",
+        "node.rag.2"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_langchain_v1",
+          "section_refs": [
+            "sec_agent_retrieval_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.rag",
+            "node.rag.1",
+            "node.rag.2"
+          ]
+        }
+      ],
+      "extensions": []
+    },
+    {
+      "stable_key": "stage.mcp",
+      "title": "MCP 协议与工具接入",
+      "section_kind": "core",
+      "objective": "理解客户端、服务端及工具上下文边界",
+      "node_keys": [
+        "node.mcp",
+        "node.mcp.1",
+        "node.mcp.2"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_mcp_v1",
+          "section_refs": [
+            "sec_agent_mcp_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.mcp",
+            "node.mcp.1",
+            "node.mcp.2"
+          ]
+        }
+      ],
+      "extensions": []
+    },
+    {
+      "stable_key": "stage.context",
+      "title": "记忆与上下文管理基础",
+      "section_kind": "core",
+      "objective": "保持有限会话状态并控制上下文长度",
+      "node_keys": [
+        "node.context",
+        "node.context.1",
+        "node.context.2"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_langchain_v1",
+          "section_refs": [
+            "sec_agent_persistence_v1",
+            "sec_agent_retrieval_v1",
+            "sec_agent_memory_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.context",
+            "node.context.1",
+            "node.context.2"
+          ]
+        }
+      ],
+      "extensions": []
+    },
+    {
+      "stable_key": "stage.reliability",
+      "title": "Agent 评价与可靠性",
+      "section_kind": "core",
+      "objective": "用固定评价集检验正确性、失败处理和成本边界",
+      "node_keys": [
+        "node.reliability",
+        "node.reliability.1",
+        "node.reliability.2"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_evaluation_v1",
+          "section_refs": [
+            "sec_agent_evaluation_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.reliability",
+            "node.reliability.1",
+            "node.reliability.2"
+          ]
+        }
+      ],
+      "extensions": []
+    },
+    {
+      "stable_key": "stage.capstone",
+      "title": "综合实践：可验收的知识助手",
+      "section_kind": "practice",
+      "objective": "集成工具、检索、编排与评价，交付可复现应用",
+      "node_keys": [
+        "node.capstone",
+        "node.capstone.1",
+        "node.capstone.2"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_langchain_v1",
+          "section_refs": [
+            "sec_agent_testing_v1",
+            "sec_agent_agents_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.capstone",
+            "node.capstone.1",
+            "node.capstone.2"
+          ]
+        }
+      ],
+      "extensions": []
+    }
+  ],
+  "knowledge_blueprints": [
+    {
+      "stable_key": "node.environment",
+      "title": "开发环境与必要语言基础",
+      "node_type": "skill",
+      "objectives": [
+        "建立可复现环境，编写可测试的工具函数"
+      ],
+      "prerequisite_keys": []
+    },
+    {
+      "stable_key": "node.environment.1",
+      "title": "虚拟环境与依赖",
+      "node_type": "concept",
+      "objectives": [
+        "在独立环境安装并记录依赖"
+      ],
+      "parent_key": "node.environment"
+    },
+    {
+      "stable_key": "node.environment.2",
+      "title": "函数、类型与输入校验",
+      "node_type": "concept",
+      "objectives": [
+        "用函数处理合法与非法输入"
+      ],
+      "parent_key": "node.environment"
+    },
+    {
+      "stable_key": "node.model_api",
+      "title": "LLM API 与 Prompt",
+      "node_type": "skill",
+      "objectives": [
+        "调用模型并明确输入、输出、token 与错误边界"
+      ],
+      "prerequisite_keys": [
+        "node.environment"
+      ]
+    },
+    {
+      "stable_key": "node.model_api.1",
+      "title": "模型请求与响应",
+      "node_type": "concept",
+      "objectives": [
+        "记录一次请求的模型、token 与失败状态"
+      ],
+      "parent_key": "node.model_api"
+    },
+    {
+      "stable_key": "node.model_api.2",
+      "title": "消息角色与提示词边界",
+      "node_type": "concept",
+      "objectives": [
+        "区分系统规则和不可信用户资料"
+      ],
+      "parent_key": "node.model_api"
+    },
+    {
+      "stable_key": "node.tools",
+      "title": "工具调用与结构化输出",
+      "node_type": "skill",
+      "objectives": [
+        "把模型决策转为受校验的工具请求"
+      ],
+      "prerequisite_keys": [
+        "node.model_api"
+      ]
+    },
+    {
+      "stable_key": "node.tools.1",
+      "title": "工具 schema 与权限边界",
+      "node_type": "concept",
+      "objectives": [
+        "拒绝非法参数并限制工具能力"
+      ],
+      "parent_key": "node.tools"
+    },
+    {
+      "stable_key": "node.tools.2",
+      "title": "结构化结果与错误处理",
+      "node_type": "concept",
+      "objectives": [
+        "用 schema 校验结果且不把失败当成功"
+      ],
+      "parent_key": "node.tools"
+    },
+    {
+      "stable_key": "node.langgraph",
+      "title": "LangGraph 编排基础",
+      "node_type": "skill",
+      "objectives": [
+        "用状态、节点与路由组织可恢复的 Agent 流程"
+      ],
+      "prerequisite_keys": [
+        "node.tools"
+      ]
+    },
+    {
+      "stable_key": "node.langgraph.1",
+      "title": "StateGraph、状态与条件路由",
+      "node_type": "concept",
+      "objectives": [
+        "实现明确的状态更新与分支"
+      ],
+      "parent_key": "node.langgraph"
+    },
+    {
+      "stable_key": "node.langgraph.2",
+      "title": "检查点与运行标识",
+      "node_type": "concept",
+      "objectives": [
+        "用 thread_id 恢复运行并说明重复执行边界"
+      ],
+      "parent_key": "node.langgraph"
+    },
+    {
+      "stable_key": "node.rag",
+      "title": "RAG 检索与知识库",
+      "node_type": "skill",
+      "objectives": [
+        "构建有来源依据的检索生成链路"
+      ],
+      "prerequisite_keys": [
+        "node.model_api",
+        "node.tools"
+      ]
+    },
+    {
+      "stable_key": "node.rag.1",
+      "title": "文档切分、嵌入与检索",
+      "node_type": "concept",
+      "objectives": [
+        "把小型文档集转换为可检索片段"
+      ],
+      "parent_key": "node.rag"
+    },
+    {
+      "stable_key": "node.rag.2",
+      "title": "上下文引用与无结果处理",
+      "node_type": "concept",
+      "objectives": [
+        "为回答绑定来源并处理检索为空"
+      ],
+      "parent_key": "node.rag"
+    },
+    {
+      "stable_key": "node.mcp",
+      "title": "MCP 协议与工具接入",
+      "node_type": "skill",
+      "objectives": [
+        "理解客户端、服务端及工具上下文边界"
+      ],
+      "prerequisite_keys": [
+        "node.tools"
+      ]
+    },
+    {
+      "stable_key": "node.mcp.1",
+      "title": "MCP 角色、协议与传输",
+      "node_type": "concept",
+      "objectives": [
+        "解释 host/client/server 与两类传输"
+      ],
+      "parent_key": "node.mcp"
+    },
+    {
+      "stable_key": "node.mcp.2",
+      "title": "工具发现与安全边界",
+      "node_type": "concept",
+      "objectives": [
+        "检查能力声明并拒绝越权工具请求"
+      ],
+      "parent_key": "node.mcp"
+    },
+    {
+      "stable_key": "node.context",
+      "title": "记忆与上下文管理基础",
+      "node_type": "skill",
+      "objectives": [
+        "保持有限会话状态并控制上下文长度"
+      ],
+      "prerequisite_keys": [
+        "node.langgraph"
+      ]
+    },
+    {
+      "stable_key": "node.context.1",
+      "title": "会话状态与检查点",
+      "node_type": "concept",
+      "objectives": [
+        "区分会话状态和跨会话长期存储"
+      ],
+      "parent_key": "node.context"
+    },
+    {
+      "stable_key": "node.context.2",
+      "title": "裁剪、摘要及上下文预算",
+      "node_type": "concept",
+      "objectives": [
+        "比较裁剪与摘要，保留任务必要信息"
+      ],
+      "parent_key": "node.context"
+    },
+    {
+      "stable_key": "node.reliability",
+      "title": "Agent 评价与可靠性",
+      "node_type": "skill",
+      "objectives": [
+        "用固定评价集检验正确性、失败处理和成本边界"
+      ],
+      "prerequisite_keys": [
+        "node.langgraph",
+        "node.rag",
+        "node.mcp",
+        "node.context"
+      ]
+    },
+    {
+      "stable_key": "node.reliability.1",
+      "title": "离线测试集与评价标准",
+      "node_type": "concept",
+      "objectives": [
+        "建立正常、边界和失败问题集"
+      ],
+      "parent_key": "node.reliability"
+    },
+    {
+      "stable_key": "node.reliability.2",
+      "title": "失败分支、重复执行与可观测性",
+      "node_type": "concept",
+      "objectives": [
+        "追踪失败并确认未知结果不会重复付费"
+      ],
+      "parent_key": "node.reliability"
+    },
+    {
+      "stable_key": "node.capstone",
+      "title": "综合实践：可验收的知识助手",
+      "node_type": "skill",
+      "objectives": [
+        "集成工具、检索、编排与评价，交付可复现应用"
+      ],
+      "prerequisite_keys": [
+        "node.reliability"
+      ]
+    },
+    {
+      "stable_key": "node.capstone.1",
+      "title": "集成流程与资料来源",
+      "node_type": "concept",
+      "objectives": [
+        "让回答、工具结果和检索片段具有可追踪来源"
+      ],
+      "parent_key": "node.capstone"
+    },
+    {
+      "stable_key": "node.capstone.2",
+      "title": "验收、运行说明与已知限制",
+      "node_type": "concept",
+      "objectives": [
+        "用评价集证明成功与失败边界并编写运行说明"
+      ],
+      "parent_key": "node.capstone"
+    }
+  ],
+  "required_node_keys": [
+    "node.environment",
+    "node.environment.1",
+    "node.environment.2",
+    "node.model_api",
+    "node.model_api.1",
+    "node.model_api.2",
+    "node.tools",
+    "node.tools.1",
+    "node.tools.2",
+    "node.langgraph",
+    "node.langgraph.1",
+    "node.langgraph.2",
+    "node.rag",
+    "node.rag.1",
+    "node.rag.2",
+    "node.mcp",
+    "node.mcp.1",
+    "node.mcp.2",
+    "node.context",
+    "node.context.1",
+    "node.context.2",
+    "node.reliability",
+    "node.reliability.1",
+    "node.reliability.2",
+    "node.capstone",
+    "node.capstone.1",
+    "node.capstone.2"
+  ],
+  "resource_refs": [
+    "src_agent_python_v1",
+    "src_agent_langchain_v1",
+    "src_agent_mcp_v1",
+    "src_agent_evaluation_v1"
+  ],
+  "practice_blueprints": [
+    {
+      "stable_key": "task.environment",
+      "title": "搭建并验证独立实验环境",
+      "section_key": "stage.environment",
+      "goal": "建立可复现环境，编写可测试的工具函数",
+      "acceptance": [
+        "从干净环境复现依赖安装并运行输入校验测试"
+      ],
+      "node_keys": [
+        "node.environment"
+      ],
+      "in_scope": [
+        "虚拟环境与依赖",
+        "函数、类型与输入校验"
+      ],
+      "out_scope": [
+        "生产级高并发",
+        "完整长期记忆系统"
+      ]
+    },
+    {
+      "stable_key": "task.model_api",
+      "title": "实现可观测的模型调用",
+      "section_key": "stage.model_api",
+      "goal": "调用模型并明确输入、输出、token 与错误边界",
+      "acceptance": [
+        "验证成功、超时及错误输入，输出 schema 与用量记录"
+      ],
+      "node_keys": [
+        "node.model_api"
+      ],
+      "in_scope": [
+        "模型请求与响应",
+        "消息角色与提示词边界"
+      ],
+      "out_scope": [
+        "生产级高并发",
+        "完整长期记忆系统"
+      ]
+    },
+    {
+      "stable_key": "task.tools",
+      "title": "实现受控工具调用",
+      "section_key": "stage.tools",
+      "goal": "把模型决策转为受校验的工具请求",
+      "acceptance": [
+        "合法请求返回结构化结果，非法请求被明确拒绝"
+      ],
+      "node_keys": [
+        "node.tools"
+      ],
+      "in_scope": [
+        "工具 schema 与权限边界",
+        "结构化结果与错误处理"
+      ],
+      "out_scope": [
+        "生产级高并发",
+        "完整长期记忆系统"
+      ]
+    },
+    {
+      "stable_key": "task.langgraph",
+      "title": "构建有失败分支的工作流",
+      "section_key": "stage.langgraph",
+      "goal": "用状态、节点与路由组织可恢复的 Agent 流程",
+      "acceptance": [
+        "演示条件路由、恢复和重复执行保护"
+      ],
+      "node_keys": [
+        "node.langgraph"
+      ],
+      "in_scope": [
+        "StateGraph、状态与条件路由",
+        "检查点与运行标识"
+      ],
+      "out_scope": [
+        "生产级高并发",
+        "完整长期记忆系统"
+      ]
+    },
+    {
+      "stable_key": "task.rag",
+      "title": "完成小型资料检索实验",
+      "section_key": "stage.rag",
+      "goal": "构建有来源依据的检索生成链路",
+      "acceptance": [
+        "固定问题命中正确片段；无依据时明确说明"
+      ],
+      "node_keys": [
+        "node.rag"
+      ],
+      "in_scope": [
+        "文档切分、嵌入与检索",
+        "上下文引用与无结果处理"
+      ],
+      "out_scope": [
+        "生产级高并发",
+        "完整长期记忆系统"
+      ]
+    },
+    {
+      "stable_key": "task.mcp",
+      "title": "演示 MCP 工具边界",
+      "section_key": "stage.mcp",
+      "goal": "理解客户端、服务端及工具上下文边界",
+      "acceptance": [
+        "记录工具发现/调用流程及拒绝非法请求的结果"
+      ],
+      "node_keys": [
+        "node.mcp"
+      ],
+      "in_scope": [
+        "MCP 角色、协议与传输",
+        "工具发现与安全边界"
+      ],
+      "out_scope": [
+        "生产级高并发",
+        "完整长期记忆系统"
+      ]
+    },
+    {
+      "stable_key": "task.context",
+      "title": "验证上下文管理策略",
+      "section_key": "stage.context",
+      "goal": "保持有限会话状态并控制上下文长度",
+      "acceptance": [
+        "长输入仍保留必要约束，两个会话状态不串用"
+      ],
+      "node_keys": [
+        "node.context"
+      ],
+      "in_scope": [
+        "会话状态与检查点",
+        "裁剪、摘要及上下文预算"
+      ],
+      "out_scope": [
+        "生产级高并发",
+        "完整长期记忆系统"
+      ]
+    },
+    {
+      "stable_key": "task.reliability",
+      "title": "建立可复现的 Agent 评价集",
+      "section_key": "stage.reliability",
+      "goal": "用固定评价集检验正确性、失败处理和成本边界",
+      "acceptance": [
+        "记录每个案例结果、引用、错误路径和成本指标"
+      ],
+      "node_keys": [
+        "node.reliability"
+      ],
+      "in_scope": [
+        "离线测试集与评价标准",
+        "失败分支、重复执行与可观测性"
+      ],
+      "out_scope": [
+        "生产级高并发",
+        "完整长期记忆系统"
+      ]
+    },
+    {
+      "stable_key": "task.capstone",
+      "title": "交付并验收知识助手",
+      "section_key": "stage.capstone",
+      "goal": "集成工具、检索、编排与评价，交付可复现应用",
+      "acceptance": [
+        "至少覆盖成功回答、无依据、工具失败、状态隔离和可复现启动"
+      ],
+      "node_keys": [
+        "node.capstone"
+      ],
+      "in_scope": [
+        "集成流程与资料来源",
+        "验收、运行说明与已知限制"
+      ],
+      "out_scope": [
+        "生产级高并发",
+        "完整长期记忆系统"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "source_id": "src_agent_python_v1",
+      "canonical_url": "https://docs.python.org/3.14/tutorial/",
+      "title": "The Python Tutorial",
+      "creator": "Python Software Foundation",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "documentation_version": "Python 3.14",
+      "verification_status": "reviewed",
+      "checked_at": "2026-09-29T00:00:00Z",
+      "sections": [
+        {
+          "section_id": "sec_agent_venv_v1",
+          "title": "12. Virtual Environments and Packages",
+          "url": "https://docs.python.org/3.14/tutorial/venv.html",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对虚拟环境创建、激活及包管理；适用于独立实验环境。",
+          "applicable_node_keys": [
+            "node.environment",
+            "node.environment.1",
+            "node.environment.2"
+          ]
+        },
+        {
+          "section_id": "sec_agent_functions_v1",
+          "title": "4. More Control Flow Tools",
+          "url": "https://docs.python.org/3.14/tutorial/controlflow.html",
+          "order_index": 1,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对函数定义与控制流；适用于工具函数和基本输入处理。",
+          "applicable_node_keys": [
+            "node.environment",
+            "node.environment.1",
+            "node.environment.2"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_agent_langchain_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/overview",
+      "title": "LangChain / LangGraph Python documentation",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "documentation_version": "v1 living documentation; reviewed 2026-09-29",
+      "verification_status": "reviewed",
+      "checked_at": "2026-09-29T00:00:00Z",
+      "sections": [
+        {
+          "section_id": "sec_agent_models_v1",
+          "title": "Models",
+          "url": "https://docs.langchain.com/oss/python/langchain/models",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对模型初始化、调用、参数和工具调用入口。",
+          "applicable_node_keys": [
+            "node.model_api",
+            "node.model_api.1",
+            "node.model_api.2"
+          ]
+        },
+        {
+          "section_id": "sec_agent_messages_v1",
+          "title": "Messages",
+          "url": "https://docs.langchain.com/oss/python/langchain/messages",
+          "order_index": 1,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对 system/user/tool 消息、文本提示及上下文角色。",
+          "applicable_node_keys": [
+            "node.model_api",
+            "node.model_api.1",
+            "node.model_api.2"
+          ]
+        },
+        {
+          "section_id": "sec_agent_tools_v1",
+          "title": "Tools",
+          "url": "https://docs.langchain.com/oss/python/langchain/tools",
+          "order_index": 2,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对工具定义、schema、返回值和错误处理；与结构化工具节点匹配。",
+          "applicable_node_keys": [
+            "node.tools",
+            "node.tools.1",
+            "node.tools.2"
+          ]
+        },
+        {
+          "section_id": "sec_agent_structured_v1",
+          "title": "Structured output",
+          "url": "https://docs.langchain.com/oss/python/langchain/structured-output",
+          "order_index": 3,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对 JSON/Pydantic schema 与工具/供应商策略；适用于可校验输出。",
+          "applicable_node_keys": [
+            "node.tools",
+            "node.tools.1",
+            "node.tools.2"
+          ]
+        },
+        {
+          "section_id": "sec_agent_graph_v1",
+          "title": "Graph API overview",
+          "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+          "order_index": 4,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对 StateGraph、state/reducer、nodes、edges 和条件路由目录与说明。",
+          "applicable_node_keys": [
+            "node.langgraph",
+            "node.langgraph.1",
+            "node.langgraph.2"
+          ]
+        },
+        {
+          "section_id": "sec_agent_persistence_v1",
+          "title": "Persistence",
+          "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+          "order_index": 5,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对 checkpointer/store 区别与 thread_id；仅学习基本持久化边界。",
+          "applicable_node_keys": [
+            "node.langgraph",
+            "node.langgraph.1",
+            "node.langgraph.2",
+            "node.context",
+            "node.context.1",
+            "node.context.2"
+          ]
+        },
+        {
+          "section_id": "sec_agent_retrieval_v1",
+          "title": "Retrieval",
+          "url": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+          "order_index": 6,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对 loaders、splitters、embeddings、vector stores 及 2-step/agentic RAG；只用检索基础部分。",
+          "applicable_node_keys": [
+            "node.rag",
+            "node.rag.1",
+            "node.rag.2"
+          ]
+        },
+        {
+          "section_id": "sec_agent_memory_v1",
+          "title": "Short-term memory",
+          "url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+          "order_index": 7,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对会话状态、上下文窗口及 trim/summarize 基础；不扩展长期记忆实现。",
+          "applicable_node_keys": [
+            "node.context",
+            "node.context.1",
+            "node.context.2"
+          ]
+        },
+        {
+          "section_id": "sec_agent_testing_v1",
+          "title": "Test",
+          "url": "https://docs.langchain.com/oss/python/langchain/test",
+          "order_index": 8,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对 unit/integration/trajectory evaluation 区分；与失败分支验证匹配。",
+          "applicable_node_keys": [
+            "node.capstone",
+            "node.capstone.1",
+            "node.capstone.2"
+          ]
+        },
+        {
+          "section_id": "sec_agent_agents_v1",
+          "title": "Agents",
+          "url": "https://docs.langchain.com/oss/python/langchain/agents",
+          "order_index": 9,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对模型与工具循环及 harness 构成；作为综合知识助手参考。",
+          "applicable_node_keys": [
+            "node.capstone",
+            "node.capstone.1",
+            "node.capstone.2"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_agent_mcp_v1",
+      "canonical_url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+      "title": "Model Context Protocol documentation",
+      "creator": "Model Context Protocol maintainers",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "documentation_version": "Protocol 2026-07-28",
+      "verification_status": "reviewed",
+      "checked_at": "2026-09-29T00:00:00Z",
+      "sections": [
+        {
+          "section_id": "sec_agent_mcp_v1",
+          "title": "Architecture overview",
+          "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对 host/client/server、tools/resources/prompts 和 stdio/Streamable HTTP；页面标明 2026-07-28 协议。",
+          "applicable_node_keys": [
+            "node.mcp",
+            "node.mcp.1",
+            "node.mcp.2"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_agent_evaluation_v1",
+      "canonical_url": "https://docs.langchain.com/langsmith/evaluation",
+      "title": "LangSmith Evaluation documentation",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "documentation_version": "living documentation; reviewed 2026-09-29",
+      "verification_status": "reviewed",
+      "checked_at": "2026-09-29T00:00:00Z",
+      "sections": [
+        {
+          "section_id": "sec_agent_evaluation_v1",
+          "title": "LangSmith Evaluation",
+          "url": "https://docs.langchain.com/langsmith/evaluation",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-09-29T00:00:00Z",
+          "review_note": "已核对数据集、评价标准及 offline/online evaluation；首版只学习离线验证思想，不要求云账号。",
+          "applicable_node_keys": [
+            "node.reliability",
+            "node.reliability.1",
+            "node.reliability.2"
+          ]
+        }
+      ]
+    }
+  ],
+  "publication_lineage": {
+    "base_pack_key": "agent.application",
+    "base_version": 2,
+    "correction_date": "2026-10-01",
+    "correction": "Context primary interval now includes retrieval between persistence and memory, preserving author catalog order [5,6,7]; no new webpage review; original reviewed source metadata and published v1/v2 retained."
+  }
+}

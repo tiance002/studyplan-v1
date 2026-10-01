@@ -21,6 +21,7 @@ from app.api.v1.deps import CONTAINER_STATE_KEY
 from app.api.v1.exposure_routes import router as exposure_router
 from app.api.v1.model_settings_routes import router as model_settings_router
 from app.api.v1.preference_routes import router as preference_router
+from app.api.v1.resource_change_routes import router as resource_change_router
 from app.api.v1.resource_routes import router as resource_router
 from app.api.v1.routes import router as v1_router
 from app.api.v1.schemas import V1_SCHEMAS
@@ -154,6 +155,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
     application.include_router(resource_router)
     application.include_router(exposure_router)
     application.include_router(preference_router)
+    application.include_router(resource_change_router)
 
     _install_request_id(application)
     _install_error_handling(application)

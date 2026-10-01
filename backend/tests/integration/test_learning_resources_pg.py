@@ -44,7 +44,7 @@ class CountingSearch:
 @pytest.fixture(scope="module")
 def scenario(migrated_db):
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
-        seed_reviewed_pack(conn, load_pack("agent-application-v2.json"))
+        seed_reviewed_pack(conn, load_pack("agent-application-v3.json"))
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake",
                        local_session_token="", planning_worker_admission_mode="trusted_server")
     container = build_container(settings)

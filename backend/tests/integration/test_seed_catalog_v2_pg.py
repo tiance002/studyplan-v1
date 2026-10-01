@@ -39,7 +39,7 @@ def test_catalog_missing_and_unknown_scope(db):
 
 
 def test_publication_idempotency_conflict_atomic_and_version_snapshot(db):
-    pack = load_pack('agent-application-v2.json')
+    pack = load_pack('agent-application-v3.json')
     with psycopg.connect(db.migrator_dsn) as conn:
         seed_reviewed_pack(conn, pack)
         seed_reviewed_pack(conn, pack)
@@ -49,7 +49,7 @@ def test_publication_idempotency_conflict_atomic_and_version_snapshot(db):
         with pytest.raises(ValueError):
             seed_reviewed_pack(conn, conflicting)
         newer = deepcopy(pack)
-        newer['version'] = 3
+        newer['version'] = 4
         # A new pack row inserted before resource conflict must also roll back.
         newer['resources'][-1]['title'] = 'Changed same source'
         with pytest.raises(ValueError):
@@ -59,11 +59,11 @@ def test_publication_idempotency_conflict_atomic_and_version_snapshot(db):
     catalog = PgDomainPackCatalog(db.app_dsn)
     assert catalog.select('Agent') == pack
     newer = deepcopy(pack)
-    newer['version'] = 3
+    newer['version'] = 4
     newer['title'] = 'New immutable version'
     with psycopg.connect(db.migrator_dsn) as conn:
         seed_reviewed_pack(conn, newer)
-        assert conn.execute('SELECT published_payload FROM domain_packs WHERE version=2').fetchone()[0] == pack
+        assert conn.execute('SELECT published_payload FROM domain_packs WHERE version=3').fetchone()[0] == pack
     assert catalog.select('Agent') == newer
 
 
@@ -100,7 +100,7 @@ def test_invalid_payload_is_rejected_before_any_sql():
     class NoDatabase:
         def transaction(self):
             pytest.fail('Validation must precede DB transaction')
-    invalid = load_pack('agent-application-v2.json')
+    invalid = load_pack('agent-application-v3.json')
     invalid['resources'][-1]['sections'][-1]['url'] = 'http://localhost/internal'
     with pytest.raises(ValueError):
         seed_reviewed_pack(NoDatabase(), invalid)

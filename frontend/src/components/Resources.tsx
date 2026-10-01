@@ -1,4 +1,8 @@
 import type { DTO } from "../api/types";
+const roleLabels: Record<string, string> = {
+  primary: "主线", supplement: "补充", comparison: "可选对照",
+  reference: "参考", case_study: "案例", practice: "实践",
+};
 export function Resources({
   items,
 }: {
@@ -9,7 +13,8 @@ export function Resources({
     <div>
       {items.map((item) => (
         <div className="resource-group" key={item.assignment_id}>
-          {(item.verification_status === "unverified" || item.warnings?.length ? [] : item.ordered_sections ?? []).map((section) => (
+          {!!item.warnings?.length && <p className="muted">{item.warnings.join("；")}</p>}
+          {(item.verification_status === "unverified" ? [] : item.ordered_sections ?? []).map((section) => (
             <a
               className="resource-row"
               key={section.section_id}
@@ -23,10 +28,10 @@ export function Resources({
                 <strong>{section.title}</strong>
                 <small>{item.creator || "公共资源"} · {item.verification_status === "reviewed" ? "章节内容与索引已核对" : "旧版目录索引"}</small>
               </span>
-              <span className="pill">{item.role === "primary" ? "主线" : item.role === "supplement" ? "补充" : "对照"}</span>
+              <span className="pill">{roleLabels[item.role] ?? "未知资料角色"}</span>
             </a>
           ))}
-          {(!item.ordered_sections?.length || item.verification_status === "unverified" || !!item.warnings?.length) && (
+          {(!item.ordered_sections?.length || item.verification_status === "unverified") && (
             <div className="resource-row">
               <span className="resource-icon">⌕</span>
               <span>

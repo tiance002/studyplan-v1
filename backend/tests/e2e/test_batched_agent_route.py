@@ -56,7 +56,7 @@ from tests.helpers.planning_worker import configure_test_worker  # noqa: E402
 from tests.pg_harness import PgTestDatabase, create_test_database  # noqa: E402
 
 AGENT_GOAL = "从 Python 基础学习 Agent 应用开发"
-AGENT_PACK = "agent-application-v2.json"
+AGENT_PACK = "agent-application-v3.json"
 #: 9 stages -> 1 outline + 9 structure + 9 practice = 19 requests; max 21 with 2 repairs.
 EXPECTED_REQUESTS = 19
 MAX_REQUESTS = 21

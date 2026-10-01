@@ -20,7 +20,7 @@ pytestmark = pytest.mark.postgres
 
 def test_new_user_requires_no_actor_whitelist_and_status_url_survives_relogin(migrated_db):
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
-        seed_reviewed_pack(conn, load_pack("agent-application-v2.json"))
+        seed_reviewed_pack(conn, load_pack("agent-application-v3.json"))
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake",
                        local_session_token="", planning_worker_admission_mode="trusted_server",
                        planning_worker_actor_ids=())
@@ -47,7 +47,7 @@ def test_new_user_requires_no_actor_whitelist_and_status_url_survives_relogin(mi
         assert run["status"] == "succeeded" and run["next_action"] == "none", run
         draft_url = f"/api/v1/plans/drafts/{run['result_ref']}?project_id={project}"
         draft = client.get(draft_url).json()
-        assert draft["status"] == "awaiting_approval" and draft["source_pack_version"] == 2
+        assert draft["status"] == "awaiting_approval" and draft["source_pack_version"] == 3
         stages = [dict(stage) for stage in draft["stages"]]
         stages[0]["title"] = "我保存的基础阶段"
         edited = client.post(draft_url.replace("?", "/decision?"), headers=headers, json={

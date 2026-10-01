@@ -170,6 +170,7 @@ def _structure_payload(revision: PlanRevision) -> dict[str, Any]:
         ],
         "stage_resources": [_assignment_payload(x) for x in revision.stage_resources],
         "extensions": [_extension_payload(x) for x in revision.extensions],
+        **({"resource_snapshots": list(revision.resource_snapshots)} if revision.resource_snapshots else {}),
         "approved_at": revision.approved_at.isoformat() if revision.approved_at else None,
     }
 
@@ -189,6 +190,7 @@ def _draft_payload(draft: PlanDraft) -> dict[str, Any]:
         ],
         "stage_resources": [_assignment_payload(x) for x in draft.stage_resources],
         "extensions": [_extension_payload(x) for x in draft.extensions],
+        **({"resource_snapshots": list(draft.resource_snapshots)} if draft.resource_snapshots else {}),
         "source_pack_key": draft.source_pack_key,
         "source_pack_version": draft.source_pack_version,
         "practice_project_idea": draft.practice_project_idea,
@@ -284,8 +286,10 @@ class PgPlanRepository:
     单个事务内。构造只接收 DSN，便于在测试里指向临时库。
     """
 
-    def __init__(self, dsn: str) -> None:
+    def __init__(self, dsn: str, *, connection=None, resource_proposal_id=None) -> None:
         self._dsn = to_psycopg_dsn(dsn)
+        self._connection = connection
+        self._resource_proposal_id = resource_proposal_id
 
     @contextmanager
     def _tx(self, project_id: str) -> Iterator[psycopg.Connection[dict[str, Any]]]:
@@ -293,6 +297,10 @@ class PgPlanRepository:
 
         退出时正常提交、异常回滚——这正是 ``publish_revision`` 原子性的来源。
         """
+        if self._connection is not None:
+            self._connection.execute("SELECT set_config('app.project_id', %s, true)", (project_id,))
+            yield self._connection
+            return
         with psycopg.connect(
             self._dsn, row_factory=dict_row
         ) as conn:  # type: psycopg.Connection[dict[str, Any]]
@@ -301,6 +309,13 @@ class PgPlanRepository:
             yield conn
 
     # ------------------------------------------------------------- 草案
+
+    def _guard_resource_proposal(self, conn, project_id, draft_id):
+        linked = conn.execute("SELECT resource_change_proposal_id AS proposal_id FROM plan_drafts "
+                              "WHERE project_id=%s AND draft_id=%s AND resource_change_proposal_id IS NOT NULL",
+                              (project_id, draft_id)).fetchone()
+        if linked is not None and linked["proposal_id"] != self._resource_proposal_id:
+            raise ConflictError("资源变更草案必须通过其预览确认入口处理", reason="resource_proposal_required")
 
     @staticmethod
     def _lock_plan_version(conn: Any, project_id: str, expected_version: int | None) -> None:
@@ -316,9 +331,20 @@ class PgPlanRepository:
         - 被条件挡下时**抛** :class:`ConflictError`，不静默忽略。
         """
         with self._tx(draft.project_id) as conn:
+            self._guard_resource_proposal(conn, draft.project_id, draft.draft_id)
             if expected_version is not None:
                 self._lock_plan_version(conn, draft.project_id, expected_version)
             if write_fence is not None:
+                lock_planning_write(conn, project_id=draft.project_id, run_id=draft.run_id, fence=write_fence)
+            if draft.stage_resources and not draft.resource_snapshots:
+                from app.infrastructure.db.resource_changes import capture_resource_snapshots
+                draft.resource_snapshots = capture_resource_snapshots(conn, draft.stage_resources, draft.stages)
+            if draft.resource_snapshots:
+                from app.infrastructure.db.resource_changes import require_snapshot_bindings
+                require_snapshot_bindings(draft.stage_resources, draft.resource_snapshots)
+            if write_fence is not None:
+                # Snapshot catalog locks can wait beyond expiry after the first
+                # live check. Recheck the original claim immediately before SQL.
                 lock_planning_write(conn, project_id=draft.project_id, run_id=draft.run_id, fence=write_fence)
             cursor = conn.execute(
                 """
@@ -368,6 +394,7 @@ class PgPlanRepository:
         """
         with self._tx(project_id) as conn:
             self._lock_plan_version(conn, project_id, expected_version)
+            self._guard_resource_proposal(conn, project_id, draft_id)
             cursor = conn.execute(
                 "UPDATE plan_drafts SET status = %s, updated_at = now() "
                 "WHERE project_id = %s AND draft_id = %s AND status = ANY(%s) "
@@ -406,6 +433,7 @@ class PgPlanRepository:
             goal_snapshot=str(payload.get("goal_snapshot") or ""),
             revision_candidate=int(row.get("revision_candidate") or 1),
             stages=tuple(_stage_from(s) for s in _as_list(payload.get("stages"))),  # type: ignore[arg-type]
+            resource_snapshots=tuple(_as_list(payload.get("resource_snapshots"))),
             unit_refs=tuple(str(s) for s in _as_list(payload.get("unit_refs"))),
             task_refs=tuple(str(s) for s in _as_list(payload.get("task_refs"))),
             node_stable_keys=tuple(str(s) for s in _as_list(payload.get("node_stable_keys"))),
@@ -510,6 +538,7 @@ class PgPlanRepository:
             revision=int(row["revision"]),  # type: ignore[arg-type]
             goal_snapshot=str(row["goal_snapshot"]),
             stages=tuple(_stage_from(s) for s in stages),  # type: ignore[arg-type]
+            resource_snapshots=tuple(_as_list(structure.get("resource_snapshots"))) if isinstance(structure, dict) else (),
             unit_links=tuple(_unit_link_from(x) for x in unit_links),  # type: ignore[arg-type]
             task_links=tuple(_task_link_from(x) for x in task_links),  # type: ignore[arg-type]
             task_knowledge_links=tuple(
@@ -580,6 +609,7 @@ class PgPlanRepository:
         """
         project_id = revision.project_id
         with self._tx(project_id) as conn:
+            self._guard_resource_proposal(conn, project_id, draft.draft_id)
             expected_version = superseded.version if superseded is not None else (0 if created else revision.version)
             try:
                 self._lock_plan_version(conn, project_id, expected_version)
@@ -615,6 +645,9 @@ class PgPlanRepository:
                 )
 
             if created:
+                if revision.stage_resources and not revision.resource_snapshots:
+                    from app.infrastructure.db.resource_changes import capture_resource_snapshots
+                    revision.resource_snapshots = capture_resource_snapshots(conn, revision.stage_resources, revision.stages)
                 # 1) 先把旧的当前版本置为 superseded，避免与
                 #    plan_revisions_current_unique(project_id WHERE approved) 冲突。
                 if superseded is not None:

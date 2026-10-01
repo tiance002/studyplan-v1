@@ -183,6 +183,8 @@ function App() {
         <MainWorkspace
           projectId={project}
           planId={workspace?.plan.plan_id || ''}
+          planRevision={workspace?.plan.revision || 0}
+          onPublished={refresh}
           stage={stage}
           nodeId={nodeId}
           allNodes={workspace?.stages.flatMap((s) => s.nodes) || []}

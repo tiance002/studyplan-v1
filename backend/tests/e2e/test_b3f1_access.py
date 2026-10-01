@@ -21,7 +21,7 @@ def migrated_db(request):
 
     for database in b2v_database_fixture.__wrapped__():
         with psycopg.connect(database.migrator_dsn) as conn:
-            seed_reviewed_pack(conn, load_pack("agent-application-v2.json"))
+            seed_reviewed_pack(conn, load_pack("agent-application-v3.json"))
         yield database
 
 

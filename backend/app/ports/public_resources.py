@@ -24,5 +24,11 @@ class PublicResourceCatalogPort(Protocol):
         self, *, section_ids: Sequence[str]
     ) -> dict[str, PublicResourceSection]: ...
 
+    def load_source_sections(
+        self, *, source_ids: Sequence[str]
+    ) -> dict[str, PublicResourceSection]:
+        """Read complete author catalogs for these sources, not selected IDs."""
+        ...
+
 
 __all__ = ["PublicResourceCatalogPort"]

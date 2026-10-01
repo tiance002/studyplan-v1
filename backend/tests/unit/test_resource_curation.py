@@ -401,14 +401,15 @@ def _ids(catalog: dict[str, PublicResourceSection], *titles: str) -> tuple[str, 
     return tuple(by_title[t] for t in titles)
 
 
-def test_resolve_assignment_keeps_verified_sections_in_order() -> None:
+def test_resolve_secondary_keeps_verified_sections_in_submitted_order() -> None:
     source = _source()
     catalog = _catalog(source.source_id)
     first, second = _ids(catalog, "第一章", "第二章")
     assignment = StageResourceAssignment.create(
         project_id="p1",
         stage_id="stg_1",
-        role=StageResourceRole.PRIMARY,
+        # Approved G2: reversed selections are allowed only for secondary roles.
+        role=StageResourceRole.REFERENCE,
         source_ref=source.source_id,
         section_refs=(second, first),
     )
@@ -457,7 +458,8 @@ def test_resolve_assignment_drops_sections_belonging_to_another_source() -> None
     resolved = resolve_assignment_output(
         assignment, known_sources={source.source_id: source}, known_sections=catalog
     )
-    assert [s.title for s in resolved.sections] == ["第一章"]
+    # Approved G2: do not manufacture a partial PRIMARY author interval.
+    assert resolved.sections == ()
     assert any("不属于来源" in w for w in resolved.warnings)
 
 
@@ -475,7 +477,7 @@ def test_resolve_assignment_drops_unknown_sections() -> None:
     resolved = resolve_assignment_output(
         assignment, known_sources={source.source_id: source}, known_sections=catalog
     )
-    assert [s.title for s in resolved.sections] == ["第一章"]
+    assert resolved.sections == ()
     assert any("不存在" in w for w in resolved.warnings)
 
 
@@ -508,5 +510,4 @@ def test_resolve_assignment_never_fabricates_sections() -> None:
     resolved = resolve_assignment_output(
         assignment, known_sources={source.source_id: source}, known_sections=catalog
     )
-    assert len(resolved.sections) == 1
-    assert resolved.sections[0].section_id == first
+    assert resolved.sections == ()

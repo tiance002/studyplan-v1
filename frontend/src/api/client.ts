@@ -51,6 +51,10 @@ const scope = (project: string) => `?project_id=${encodeURIComponent(project)}`;
 const resourceScope = (project: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
   `${scope(project)}&${new URLSearchParams({plan_id:target.plan_id,stage_id:target.stage_id,unit_id:target.unit_id})}`;
 export const api = {
+  resourceChangeCatalog: (project: string) => request<DTO['ResourceCatalogView'][]>(`/resource-changes/catalog${scope(project)}`),
+  previewResourceChange: (project: string, body: DTO['ResourceChangeRequest']) => request<DTO['ResourceChangePreviewView']>(`/resource-changes${scope(project)}`, body),
+  resourceChange: (project: string, id: string) => request<DTO['ResourceChangePreviewView']>(`/resource-changes/${encodeURIComponent(id)}${scope(project)}`),
+  decideResourceChange: (project: string, id: string, action: 'confirm' | 'cancel', body: DTO['ResourceChangeDecisionRequest']) => request<DTO['ResourceChangeResultView']>(`/resource-changes/${encodeURIComponent(id)}/${action}${scope(project)}`, body),
   listExposures: (project: string, plan: string, stage: string) =>
     request<DTO['ExposureView'][]>(`/exposures${scope(project)}&${new URLSearchParams({plan_id: plan, stage_id: stage})}`),
   changeExposure: (project: string, body: DTO['ExposureChangeRequest']) =>

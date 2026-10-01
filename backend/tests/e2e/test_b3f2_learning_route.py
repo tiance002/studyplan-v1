@@ -41,7 +41,7 @@ def route(client, session, goal):
 def test_agent_pack_chapters_nodes_publish_readback_and_history(migrated_db):
     from app.tools.seed_b3 import seed_reviewed_pack
 
-    pack = load_pack("agent-application-v2.json")
+    pack = load_pack("agent-application-v3.json")
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
         seed_reviewed_pack(conn, pack)
         seed_reviewed_pack(conn, load_python_pack())
@@ -49,7 +49,7 @@ def test_agent_pack_chapters_nodes_publish_readback_and_history(migrated_db):
     client = TestClient(create_app(build_container(settings)))
     session = client.post("/api/v1/auth/register", json={"username": "完整路线甲", "password": "Controlled-test-password-2026!"}).json()
     draft, url, suffix, headers = route(client, session, "从 Python 基础学习 Agent 应用开发")
-    assert draft["source_pack_key"] == "agent.application" and draft["source_pack_version"] == 2
+    assert draft["source_pack_key"] == "agent.application" and draft["source_pack_version"] == 3
     assert len(draft["stages"]) > 2
     expected_chapters = {c["section_id"]: c["url"] for r in pack["resources"] for c in r["sections"]}
     assert draft["stage_resources"] and all(r["node_ids"] and r["ordered_sections"] for r in draft["stage_resources"])
@@ -128,7 +128,7 @@ def test_mock_http_provider_full_pg_graph_and_ledger(migrated_db, checkpoint_db)
     from app.tools.seed_b3 import seed_reviewed_pack
 
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
-        seed_reviewed_pack(conn, load_pack("agent-application-v2.json"))
+        seed_reviewed_pack(conn, load_pack("agent-application-v3.json"))
     calls = []
     def reply(request):
         body = json.loads(request.content)

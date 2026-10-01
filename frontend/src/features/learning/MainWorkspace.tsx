@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ResourcePicker } from './ResourcePicker';
 import { ExposurePanel, progressLabels } from './ExposurePanel';
 import { PreferencePanel } from './PreferencePanel';
+import { ResourceChangePanel } from './ResourceChangePanel';
 export function KnowledgeNodeView({
   node,
   allNodes,
@@ -70,6 +71,8 @@ export function MainWorkspace({
   create,
   projectId,
   planId,
+  planRevision,
+  onPublished,
 }: {
   stage: StageWorkspace | undefined;
   nodeId: string;
@@ -78,6 +81,8 @@ export function MainWorkspace({
   create: () => void;
   projectId: string;
   planId: string;
+  planRevision: number;
+  onPublished: () => Promise<void>;
 }) {
   const [unitChoice, setUnitChoice] = useState('');
   const [localProgress, setLocalProgress] = useState<Record<string, DTO['ExposureView']>>({});
@@ -130,6 +135,9 @@ export function MainWorkspace({
           <section className="panel">
             <Resources items={stage.resources.filter((r) => !r.node_ids?.length || r.node_ids.includes(node?.node_id || ""))} />
           </section>
+          <ResourceChangePanel key={`mainline:${projectId}:${planId}:${stage.stage.stage_id}`} projectId={projectId}
+            planId={planId} revision={planRevision} stageId={stage.stage.stage_id}
+            primary={stage.resources.find(r => r.role === 'primary')} onPublished={onPublished} />
           {unitId && stage && <>
             <label>资料所属学习单元<select aria-label="资料所属学习单元" value={unitId} onChange={e => setUnitChoice(e.target.value)}>
               {stage.units.map(u => <option key={u.unit_id} value={u.unit_id}>{u.title}</option>)}

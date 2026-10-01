@@ -183,7 +183,9 @@ class StageResourceAssignment:
                 raise ValidationAppError(f"阶段资源分配缺少 {name}")
         if order_index < 0:
             raise ValidationAppError("阶段资源分配顺序索引不能为负")
-        sections = tuple(s for s in section_refs if s)
+        sections = tuple(section_refs)
+        if any(not isinstance(s, str) or not s for s in sections):
+            raise ValidationAppError("阶段资源分配存在空的章节引用")
         fallback = tuple(t.strip() for t in fallback_search_terms if t and t.strip())
         if role is StageResourceRole.PRIMARY and not sections and not fallback:
             # 主线必须至少给出有序章节，或（索引不可用时）明确的搜索建议。
@@ -284,8 +286,48 @@ class KnowledgeExtension:
 # --------------------------------------------------------------------------- 确定性校验
 
 
+def validate_section_selection(
+    *,
+    source_ref: str,
+    section_refs: tuple[str, ...],
+    role: StageResourceRole,
+    catalog_order: Mapping[str, tuple[str, int]],
+) -> list[str]:
+    """Validate against the complete author catalog; never reorder selected IDs.
+
+    Author indices may be sparse. PRIMARY is an increasing contiguous interval
+    in catalog rank. Other roles retain the user's order and may skip chapters.
+    Role alone does not imply required knowledge coverage.
+    """
+    errors: list[str] = []
+    if any(not ref for ref in section_refs):
+        errors.append("存在空的章节引用")
+    if len(set(section_refs)) != len(section_refs):
+        errors.append("章节存在重复引用")
+    own = [(key, index) for key, (source, index) in catalog_order.items() if source == source_ref]
+    indices = [index for _, index in own]
+    if any(type(i) is not int or i < 0 for i in indices) or len(set(indices)) != len(indices):
+        errors.append("来源目录章节顺序索引非法或重复")
+        return errors
+    rank = {key: i for i, (key, _) in enumerate(sorted(own, key=lambda row: row[1]))}
+    for ref in section_refs:
+        if ref not in catalog_order:
+            errors.append(f"章节引用不存在：{ref}")
+        elif catalog_order[ref][0] != source_ref:
+            errors.append(f"章节 {ref} 不属于来源 {source_ref}")
+    if errors:
+        return errors
+    if role is StageResourceRole.PRIMARY and section_refs:
+        selected = [rank[ref] for ref in section_refs]
+        if any(right != left + 1 for left, right in zip(selected, selected[1:], strict=False)):
+            errors.append("主线章节必须按作者目录顺序连续选择 (source order)")
+    return errors
+
+
 def validate_mainline_continuity(
     assignments: "list[StageResourceAssignment] | tuple[StageResourceAssignment, ...]",
+    *,
+    known_sections: Mapping[str, PublicResourceSection] | None = None,
 ) -> list[str]:
     """校验**连续章节顺序**（确定性，不做重复度计算）。
 
@@ -300,6 +342,12 @@ def validate_mainline_continuity(
     errors: list[str] = []
     by_stage: dict[str, list[StageResourceAssignment]] = {}
     for assignment in assignments:
+        if known_sections is not None and assignment.source_ref:
+            errors.extend(validate_section_selection(
+                source_ref=assignment.source_ref, section_refs=assignment.section_refs,
+                role=assignment.role,
+                catalog_order={key: (s.source_id, s.order_index) for key, s in known_sections.items()},
+            ))
         by_stage.setdefault(assignment.stage_id, []).append(assignment)
 
     for stage_id, items in by_stage.items():
@@ -437,6 +485,11 @@ def resolve_assignment_output(
     elif assignment.source_version and assignment.source_version != source.source_version:
         warnings.append("资源版本与已确认索引不一致；已降级为搜索建议")
     else:
+        if assignment.role is StageResourceRole.PRIMARY:
+            warnings.extend(validate_section_selection(
+                source_ref=source_ref, section_refs=assignment.section_refs, role=assignment.role,
+                catalog_order={key: (s.source_id, s.order_index) for key, s in known_sections.items()},
+            ))
         for ref in assignment.section_refs:
             section = known_sections.get(ref)
             if section is None:
@@ -464,6 +517,10 @@ def resolve_assignment_output(
     if warnings and not fallback:
         warnings.append("缺少可用搜索建议，请人工确认资源")
 
+    # A truncated PRIMARY would fabricate a different author interval. Keep
+    # honest fallback warnings instead of silently repairing the selected IDs.
+    if assignment.role is StageResourceRole.PRIMARY and warnings:
+        sections.clear()
     return ResolvedAssignment(
         assignment_id=assignment.assignment_id,
         stage_id=assignment.stage_id,
@@ -489,4 +546,5 @@ __all__ = [
     "validate_extension_soft_limit",
     "validate_extensions",
     "validate_mainline_continuity",
+    "validate_section_selection",
 ]

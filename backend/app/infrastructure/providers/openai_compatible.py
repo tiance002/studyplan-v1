@@ -22,6 +22,16 @@ SHAPES["planning.repair"] = {
     "practice_proposal": SHAPES["planning.practice"],
 }
 
+RESOURCE_ROLE_CONTRACT = (
+    "Resource role must be exactly primary (主线), supplement (补充/补缺), "
+    "comparison (可选对照), reference (参考), case_study (案例), or practice (实践). "
+    "Do not relabel existing resource roles. Role alone does not make a supplement required; "
+    "required knowledge coverage must follow explicit supplied requirements. "
+    "A primary selection must follow a contiguous interval in the complete author's catalog; "
+    "do not skip, repeat, reverse or sort selected chapters to repair a corrupt selection. "
+    "Other roles may select noncontiguous chapters and must preserve the submitted order."
+)
+
 STRUCTURE_RELATION_CONTRACT = (
     "Structure relation contract: relation_type must be exactly one of 'prerequisite' or 'contains'; "
     "'part_of' is forbidden. For every node_blueprint with a non-empty parent_key, emit "
@@ -58,7 +68,7 @@ class OpenAICompatibleLLM:
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
-        self.prompt_version = "b3f2-v7-practice-repair"
+        self.prompt_version = "v2-g2-v8-resource-roles"
         self.timeout = timeout
         host = (urlsplit(self.base_url).hostname or "").lower()
         self.budget_policy = budget_policy or BudgetPolicy(
@@ -114,6 +124,8 @@ class OpenAICompatibleLLM:
             purpose == "planning.repair" and schema_name == "KnowledgeStructureV1"
         ):
             system += " " + STRUCTURE_RELATION_CONTRACT
+        if purpose == "planning.outline":
+            system += " " + RESOURCE_ROLE_CONTRACT
         if purpose == "planning.practice" or (
             purpose == "planning.repair" and schema_name == "PracticeProposalV1"
         ):

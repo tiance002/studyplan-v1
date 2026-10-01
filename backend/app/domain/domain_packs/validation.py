@@ -6,7 +6,8 @@ from urllib.parse import urlsplit
 
 from app.core.ids import require_stable_key
 from app.domain.domain_packs.models import DomainPack
-from app.domain.enums import DomainPackStatus
+from app.domain.enums import DomainPackStatus, StageResourceRole
+from app.domain.resources.curation import validate_section_selection
 
 
 def seed_digest(data):
@@ -139,16 +140,21 @@ def validate_seed(raw):
             if sum(r['role'] == 'primary' for r in roles) > 1:
                 raise ValueError('Stage must have at most one primary source')
             for assignment in roles:
-                if assignment['role'] not in {'primary', 'supplement', 'reference'}:
+                if assignment['role'] not in {role.value for role in StageResourceRole}:
                     raise ValueError('Invalid resource role')
                 source = sources[assignment['source_ref']]
                 if assignment['source_ref'] not in data['resource_refs'] or assignment['source_version'] != source['source_version']:
                     raise ValueError('Invalid source reference/version')
                 sections = _keys(source['sections'], 'section_id')
                 _refs(assignment['section_refs'], sections)
-                orders = [sections[key]['order_index'] for key in assignment['section_refs']]
-                if orders != sorted(orders):
-                    raise ValueError('Chapter selection must preserve source order')
+                selection_errors = validate_section_selection(
+                    source_ref=assignment['source_ref'], section_refs=tuple(assignment['section_refs']),
+                    role=StageResourceRole(assignment['role']),
+                    catalog_order={key: (assignment['source_ref'], section['order_index'])
+                                   for key, section in sections.items()},
+                )
+                if selection_errors:
+                    raise ValueError('; '.join(selection_errors))
                 _refs(assignment.get('node_keys', []), stage.get('node_keys', []))
         seed_digest(data)
         return data

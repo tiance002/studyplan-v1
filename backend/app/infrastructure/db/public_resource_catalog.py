@@ -91,3 +91,16 @@ class PgPublicResourceCatalog:
                 (wanted,),
             ).fetchall()
         return {str(r["section_id"]): _section_from(r) for r in rows}
+
+    def load_source_sections(
+        self, *, source_ids: Sequence[str]
+    ) -> dict[str, PublicResourceSection]:
+        wanted = list(dict.fromkeys(s for s in source_ids if s))
+        if not wanted:
+            return {}
+        with self._conn() as conn:
+            rows = conn.execute(
+                "SELECT * FROM public.public_resource_sections WHERE source_id = ANY(%s) "
+                "ORDER BY source_id, order_index, section_id", (wanted,),
+            ).fetchall()
+        return {str(r["section_id"]): _section_from(r) for r in rows}

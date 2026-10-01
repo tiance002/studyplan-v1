@@ -107,9 +107,8 @@ def _load_catalog(
 ) -> tuple[dict[str, PublicResourceSource], dict[str, PublicResourceSection]]:
     """一次取回所有被引用的来源与章节（避免 N 次往返）。"""
     source_ids = sorted({a.source_ref for a in assignments if a.source_ref})
-    section_ids = sorted({s for a in assignments for s in a.section_refs if s})
-    return catalog.load_sources(source_ids=source_ids), catalog.load_sections(
-        section_ids=section_ids
+    return catalog.load_sources(source_ids=source_ids), catalog.load_source_sections(
+        source_ids=source_ids
     )
 
 

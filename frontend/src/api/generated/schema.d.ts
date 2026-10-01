@@ -161,6 +161,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/resource-changes/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catalog */
+        get: operations["list_reviewed_resource_indexes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resource-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview */
+        post: operations["preview_resource_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resource-changes/{proposal_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Preview */
+        get: operations["get_resource_change_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resource-changes/{proposal_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm */
+        post: operations["confirm_resource_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resource-changes/{proposal_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel */
+        post: operations["cancel_resource_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -1050,6 +1135,42 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** ResourceBindingSnapshotView */
+        ResourceBindingSnapshotView: {
+            /** Assignment Id */
+            assignment_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Stage Key */
+            stage_key: string;
+            /** Role */
+            role: string;
+            /**
+             * Order Index
+             * @default 0
+             */
+            order_index: number;
+            /** Source Ref */
+            source_ref: string;
+            /** Source Version */
+            source_version: number;
+            /** Section Refs */
+            section_refs: string[];
+            /**
+             * Snapshot Status
+             * @enum {string}
+             */
+            snapshot_status: "frozen" | "unresolved_reference" | "legacy_unfrozen";
+            /** Snapshot Origin */
+            snapshot_origin?: string | null;
+            source: components["schemas"]["ResourceCatalogSourceView"] | null;
+            /** Sections */
+            sections: components["schemas"]["ResourceCatalogSectionView"][];
+            /** View */
+            view: {
+                [key: string]: unknown;
+            } | null;
+        };
         /** ResourceCandidateView */
         ResourceCandidateView: {
             /** Resource Id */
@@ -1079,6 +1200,291 @@ export interface components {
              * @default
              */
             source_note: string;
+        };
+        /** ResourceCatalogSectionView */
+        ResourceCatalogSectionView: {
+            /** Section Id */
+            section_id: string;
+            /** Source Id */
+            source_id: string;
+            /** Order Index */
+            order_index: number;
+            /** Title */
+            title: string;
+            /** Url */
+            url: string;
+            /**
+             * Anchor
+             * @default
+             */
+            anchor: string;
+            /** Verification Status */
+            verification_status: string;
+            /** Checked At */
+            checked_at?: string | null;
+            /**
+             * Review Note
+             * @default
+             */
+            review_note: string;
+        };
+        /** ResourceCatalogSourceView */
+        ResourceCatalogSourceView: {
+            /** Source Id */
+            source_id: string;
+            /** Canonical Url */
+            canonical_url: string;
+            /** Title */
+            title: string;
+            /** Creator */
+            creator: string;
+            /** Media Type */
+            media_type: string;
+            /** Language */
+            language: string;
+            /** Source Version */
+            source_version: number;
+            /** Verification Status */
+            verification_status: string;
+            /**
+             * Documentation Version
+             * @default
+             */
+            documentation_version: string;
+            /**
+             * Provenance
+             * @default
+             */
+            provenance: string;
+            /** Checked At */
+            checked_at?: string | null;
+        };
+        /** ResourceCatalogView */
+        ResourceCatalogView: {
+            source: components["schemas"]["ResourceCatalogSourceView"];
+            /** Sections */
+            sections: components["schemas"]["ResourceCatalogSectionView"][];
+            /**
+             * Index Truncated
+             * @default false
+             */
+            index_truncated: boolean;
+        };
+        /** ResourceChangeCoverageView */
+        ResourceChangeCoverageView: {
+            /**
+             * Mapping Status
+             * @enum {string}
+             */
+            mapping_status: "available" | "missing";
+            /** Mapped Node Keys */
+            mapped_node_keys: string[];
+            /** Unmatched Node Ids */
+            unmatched_node_ids: string[];
+            /** Required Extension Topics */
+            required_extension_topics: string[];
+        };
+        /** ResourceChangeDecisionRequest */
+        ResourceChangeDecisionRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Preview Hash */
+            preview_hash: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /**
+             * Acknowledge Warnings
+             * @default false
+             */
+            acknowledge_warnings: boolean;
+        };
+        /** ResourceChangeImpactView */
+        ResourceChangeImpactView: {
+            /** Unit Ids */
+            unit_ids: string[];
+            /** Nodes */
+            nodes: components["schemas"]["ResourceChangeNodeView"][];
+            /** Prerequisites */
+            prerequisites: components["schemas"]["ResourceChangePrerequisiteView"][];
+            /**
+             * Prerequisite Status
+             * @enum {string}
+             */
+            prerequisite_status: "recorded_relations_only" | "unknown";
+            coverage: components["schemas"]["ResourceChangeCoverageView"];
+            workload: components["schemas"]["ResourceChangeWorkloadView"];
+            progress: components["schemas"]["ResourceChangeProgressView"];
+            environment: components["schemas"]["ResourceChangeUnknownConstraintView"];
+            pace: components["schemas"]["ResourceChangeUnknownConstraintView"];
+            private_bindings: components["schemas"]["ResourceChangePrivateBindingsView"];
+            /** Warnings */
+            warnings: string[];
+        };
+        /** ResourceChangeNodeView */
+        ResourceChangeNodeView: {
+            /** Node Id */
+            node_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Content Version */
+            content_version: number;
+        };
+        /** ResourceChangePrerequisiteView */
+        ResourceChangePrerequisiteView: {
+            /** From Node Id */
+            from_node_id: string;
+            /** To Node Id */
+            to_node_id: string;
+            /** Relation Type */
+            relation_type: string;
+        };
+        /** ResourceChangePreviewView */
+        ResourceChangePreviewView: {
+            /** Proposal Id */
+            proposal_id: string;
+            /** Draft Id */
+            draft_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Actor Id */
+            actor_id: string;
+            /** Base Plan Id */
+            base_plan_id: string;
+            /** Base Revision */
+            base_revision: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "confirmed" | "cancelled";
+            /** Preview Hash */
+            preview_hash: string;
+            /**
+             * Copy Policy
+             * @enum {string}
+             */
+            copy_policy: "copy_active" | "keep_history_only";
+            before: components["schemas"]["ResourceBindingSnapshotView"];
+            after: components["schemas"]["ResourceBindingSnapshotView"];
+            impact: components["schemas"]["ResourceChangeImpactView"];
+            /** Warnings */
+            warnings: string[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Draft Hash */
+            draft_hash: string;
+            /** Catalog Digest */
+            catalog_digest: string;
+        };
+        /** ResourceChangePrivateBindingsView */
+        ResourceChangePrivateBindingsView: {
+            /**
+             * Policy
+             * @enum {string}
+             */
+            policy: "copy_active" | "keep_history_only";
+            /** Active Count */
+            active_count: number;
+            /** Copy Count */
+            copy_count: number;
+            /** History Retained */
+            history_retained: boolean;
+        };
+        /** ResourceChangeProgressObservation */
+        ResourceChangeProgressObservation: {
+            /** Unit Id */
+            unit_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "not_started" | "in_progress" | "completed" | "skipped";
+            /** Version */
+            version: number;
+        };
+        /** ResourceChangeProgressView */
+        ResourceChangeProgressView: {
+            /** Started Units */
+            started_units: number;
+            /** Completed Units */
+            completed_units: number;
+            /** Skipped Units */
+            skipped_units: number;
+            /** Observations */
+            observations: components["schemas"]["ResourceChangeProgressObservation"][];
+        };
+        /** ResourceChangeRequest */
+        ResourceChangeRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Assignment Id */
+            assignment_id: string;
+            /** Source Ref */
+            source_ref: string;
+            /** Source Version */
+            source_version: number;
+            /** Section Refs */
+            section_refs: string[];
+            /** Expected Version */
+            expected_version: number;
+            /**
+             * Copy Policy
+             * @enum {string}
+             */
+            copy_policy: "copy_active" | "keep_history_only";
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** ResourceChangeResultView */
+        ResourceChangeResultView: {
+            /** Proposal Id */
+            proposal_id: string;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "confirm" | "cancel";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "confirmed" | "cancelled";
+            /** Plan Id */
+            plan_id: string | null;
+            /** Revision */
+            revision: number | null;
+            /** Created */
+            created: boolean;
+            /** Copied Selections */
+            copied_selections: number;
+        };
+        /** ResourceChangeUnknownConstraintView */
+        ResourceChangeUnknownConstraintView: {
+            /**
+             * Status
+             * @constant
+             */
+            status: "unknown";
+        };
+        /** ResourceChangeWorkloadView */
+        ResourceChangeWorkloadView: {
+            /** Before Section Count */
+            before_section_count: number;
+            /** After Section Count */
+            after_section_count: number;
+            /** Delta Sections */
+            delta_sections: number;
+            /** Unit Count */
+            unit_count: number;
+            /** Estimated Minutes */
+            estimated_minutes: number | null;
         };
         /**
          * ResourceProvenance
@@ -1366,11 +1772,12 @@ export interface components {
          * StageResourceRole
          * @description 阶段与资源的关系角色（设计 §2.2）。
          *
-         *     每阶段默认一条 ``PRIMARY`` 主线；``SUPPLEMENT`` 补充前置，
-         *     ``REFERENCE`` 为对照/延伸。**不计算章节重叠率或覆盖率。**
+         *     PRIMARY 主线，SUPPLEMENT 补充/补缺，COMPARISON 可选对照，
+         *     REFERENCE 参考，CASE_STUDY 案例，PRACTICE 实践。
+         *     角色本身不声明补充必修；必需覆盖须由明确知识要求单独判定。
          * @enum {string}
          */
-        StageResourceRole: "primary" | "supplement" | "reference";
+        StageResourceRole: "primary" | "supplement" | "comparison" | "reference" | "case_study" | "practice";
         /** StageWorkspaceView */
         StageWorkspaceView: {
             stage: components["schemas"]["StageDetail"];
@@ -2049,6 +2456,184 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PreferenceContextView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_reviewed_resource_indexes: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceCatalogView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_resource_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourceChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceChangePreviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_resource_change_preview: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceChangePreviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_resource_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourceChangeDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceChangeResultView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_resource_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourceChangeDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceChangeResultView"];
                 };
             };
             /** @description Validation Error */

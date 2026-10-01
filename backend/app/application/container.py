@@ -22,6 +22,7 @@ from app.application.learning_exposures import LearningExposureService
 from app.application.learning_resources import LearningResourceService
 from app.application.model_settings import ModelSettingsService
 from app.application.plan_service import PlanService
+from app.application.resource_changes import ResourceChangeService
 from app.application.resource_preferences import ResourcePreferenceService
 from app.core.config import Settings
 from app.ports.browser_auth import BrowserAuthPort
@@ -51,3 +52,4 @@ class AppContainer:
     resource_service: LearningResourceService | None = None
     exposure_service: LearningExposureService | None = None
     preference_service: ResourcePreferenceService | None = None
+    resource_change_service: ResourceChangeService | None = None

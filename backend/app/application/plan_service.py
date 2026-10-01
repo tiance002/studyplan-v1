@@ -37,7 +37,7 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from typing import Any, Callable, Mapping, Sequence, cast
 from uuid import NAMESPACE_URL, uuid5
@@ -70,6 +70,7 @@ from app.domain.enums import (
     DraftDecision,
     GraphName,
     PlanDraftStatus,
+    StageResourceRole,
 )
 from app.domain.planning.models import (
     PlanDraft,
@@ -79,7 +80,7 @@ from app.domain.planning.models import (
     PlanStage,
     revision_from_draft,
 )
-from app.domain.resources.curation import StageResourceAssignment
+from app.domain.resources.curation import ResolvedSection, StageResourceAssignment
 from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
 from app.domain.workspace.models import AuthContext
@@ -527,7 +528,7 @@ class PlanService:
         draft = self._repo.get_draft(project_id=project_id, draft_id=draft_id)
         if draft is None:
             raise NotFoundError("草案不存在")
-        return DraftBundle(draft=draft, resources=self._resolve(draft.stage_resources, draft.stages))
+        return DraftBundle(draft=draft, resources=self._resolve(draft.stage_resources, draft.stages, draft.resource_snapshots))
 
     def get_current(self, *, scope: AuthContext, project_id: str) -> PlanBundle | None:
         scope.require_project(project_id)
@@ -536,7 +537,8 @@ class PlanService:
             return None
         return PlanBundle(
             revision=revision,
-            resources=self._resolve(revision.stage_resources, revision.stages),
+            resources=self._resolve(revision.stage_resources, revision.stages, revision.resource_snapshots,
+                                    legacy=not revision.resource_snapshots),
         )
 
     # ------------------------------------------------------------------ 决定
@@ -603,7 +605,7 @@ class PlanService:
             raise ConflictError("Published revision missing", reason="publication_inconsistent")
         plan_resources: tuple[StageResourceView, ...] = ()
         if plan is not None:
-            plan_resources = self._resolve(plan.stage_resources, plan.stages)
+            plan_resources = self._resolve(plan.stage_resources, plan.stages, plan.resource_snapshots)
         self._finalize_run(draft=final_draft, decision="approve", result_ref=result.plan_id)
         return DecisionOutcome(
             run_id=final_draft.run_id,
@@ -774,15 +776,27 @@ class PlanService:
         return {"draft_ref": draft.draft_id, "draft_hash": draft.content_hash}
 
     def _resolve(
-        self, assignments: Sequence[StageResourceAssignment], stages: Sequence[PlanStage]
+        self, assignments: Sequence[StageResourceAssignment], stages: Sequence[PlanStage], snapshots=(), *, legacy=False
     ) -> tuple[StageResourceView, ...]:
         if not assignments:
             return ()
-        return resolve_stage_resources(
-            assignments,
+        frozen = {item.get("assignment_id"): item.get("view") for item in snapshots if item.get("view")}
+        unresolved = [a for a in assignments if a.assignment_id not in frozen]
+        dynamic = resolve_stage_resources(
+            unresolved,
             catalog=self._resources,
             stage_titles={s.stage_id: s.title for s in stages},
         )
+        by_id = {view.assignment_id: replace(view, warnings=(*view.warnings,
+            "此旧记录未保存当时来源元数据；当前目录值仅供参考")) if legacy else view for view in dynamic}
+        for identifier, value in frozen.items():
+            data = dict(value)
+            data["role"] = StageResourceRole(data["role"])
+            data["ordered_sections"] = tuple(ResolvedSection(**item) for item in data["ordered_sections"])
+            for field in ("fallback_search_terms", "warnings", "node_ids"):
+                data[field] = tuple(data.get(field, ()))
+            by_id[identifier] = StageResourceView(**data)
+        return tuple(by_id[a.assignment_id] for a in assignments)
 
     def _finalize_run(self, *, draft: PlanDraft, decision: str, result_ref: str = "") -> None:
         """Acknowledge legacy business decisions without altering checkpoints.

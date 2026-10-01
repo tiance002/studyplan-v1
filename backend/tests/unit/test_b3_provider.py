@@ -66,7 +66,7 @@ def test_structure_and_repair_prompt_define_valid_relation_contract():
     for purpose in ("planning.structure", "planning.repair"):
         llm.generate_structured(purpose=purpose,payload={},schema_name="KnowledgeStructureV1",run_id="r",attempt_id=purpose)
 
-    assert llm.prompt_version == "b3f2-v7-practice-repair"
+    assert llm.prompt_version == "v2-g2-v8-resource-roles"
     assert len(requests) == 2
     for request in requests:
         system = request["messages"][0]["content"]
@@ -223,7 +223,7 @@ def test_stage_environment_practice_prompt_defines_json_and_required_fields():
             llm.generate_structured(purpose=purpose, payload=payload, schema_name=schema,
                                     run_id="fake", attempt_id=purpose)
 
-    assert llm.prompt_version == "b3f2-v7-practice-repair"
+    assert llm.prompt_version == "v2-g2-v8-resource-roles"
     assert len(requests) == 2
     for body in requests:
         system = body["messages"][0]["content"]

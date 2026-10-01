@@ -70,6 +70,9 @@ def build_container(settings: Settings) -> AppContainer:
     from app.infrastructure.db.resource_preferences import PgResourcePreferences
     exposure_service = LearningExposureService(PgLearningExposures(dsn))
     preference_service = ResourcePreferenceService(PgResourcePreferences(dsn))
+    from app.application.resource_changes import ResourceChangeService
+    from app.infrastructure.db.resource_changes import PgResourceChanges
+    resource_change_service = ResourceChangeService(PgResourceChanges(dsn))
     from app.application.learning_resources import LearningResourceService
     from app.infrastructure.db.learning_resources import PgLearningResources
     from app.infrastructure.resources.tavily import TavilyResourceIndex
@@ -145,4 +148,4 @@ def build_container(settings: Settings) -> AppContainer:
                         model_settings_service=model_service, browser_auth=browser_auth,
                         workspace_reader=workspace_reader, planning_worker=planning_worker,
                         resource_service=resource_service, exposure_service=exposure_service,
-                        preference_service=preference_service)
+                        preference_service=preference_service, resource_change_service=resource_change_service)

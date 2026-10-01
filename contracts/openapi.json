@@ -901,6 +901,282 @@
         }
       }
     },
+    "/api/v1/resource-changes/catalog": {
+      "get": {
+        "summary": "Catalog",
+        "operationId": "list_reviewed_resource_indexes",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResourceCatalogView"
+                  },
+                  "title": "Response List Reviewed Resource Indexes"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resource-changes": {
+      "post": {
+        "summary": "Preview",
+        "operationId": "preview_resource_change",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceChangePreviewView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resource-changes/{proposal_id}": {
+      "get": {
+        "summary": "Get Preview",
+        "operationId": "get_resource_change_preview",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proposal Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceChangePreviewView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resource-changes/{proposal_id}/confirm": {
+      "post": {
+        "summary": "Confirm",
+        "operationId": "confirm_resource_change",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proposal Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceChangeDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceChangeResultView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resource-changes/{proposal_id}/cancel": {
+      "post": {
+        "summary": "Cancel",
+        "operationId": "cancel_resource_change",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Proposal Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceChangeDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceChangeResultView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "tags": [
@@ -3049,6 +3325,110 @@
         ],
         "title": "RegistrationRequest"
       },
+      "ResourceBindingSnapshotView": {
+        "properties": {
+          "assignment_id": {
+            "type": "string",
+            "title": "Assignment Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "title": "Stage Id"
+          },
+          "stage_key": {
+            "type": "string",
+            "title": "Stage Key"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index",
+            "default": 0
+          },
+          "source_ref": {
+            "type": "string",
+            "title": "Source Ref"
+          },
+          "source_version": {
+            "type": "integer",
+            "title": "Source Version"
+          },
+          "section_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Section Refs"
+          },
+          "snapshot_status": {
+            "type": "string",
+            "enum": [
+              "frozen",
+              "unresolved_reference",
+              "legacy_unfrozen"
+            ],
+            "title": "Snapshot Status"
+          },
+          "snapshot_origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Origin"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResourceCatalogSourceView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceCatalogSectionView"
+            },
+            "type": "array",
+            "title": "Sections"
+          },
+          "view": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "View"
+          }
+        },
+        "type": "object",
+        "required": [
+          "assignment_id",
+          "stage_id",
+          "stage_key",
+          "role",
+          "source_ref",
+          "source_version",
+          "section_refs",
+          "snapshot_status",
+          "source",
+          "sections",
+          "view"
+        ],
+        "title": "ResourceBindingSnapshotView"
+      },
       "ResourceCandidateView": {
         "properties": {
           "resource_id": {
@@ -3123,6 +3503,744 @@
           "provenance"
         ],
         "title": "ResourceCandidateView"
+      },
+      "ResourceCatalogSectionView": {
+        "properties": {
+          "section_id": {
+            "type": "string",
+            "title": "Section Id"
+          },
+          "source_id": {
+            "type": "string",
+            "title": "Source Id"
+          },
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "anchor": {
+            "type": "string",
+            "title": "Anchor",
+            "default": ""
+          },
+          "verification_status": {
+            "type": "string",
+            "title": "Verification Status"
+          },
+          "checked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked At"
+          },
+          "review_note": {
+            "type": "string",
+            "title": "Review Note",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "section_id",
+          "source_id",
+          "order_index",
+          "title",
+          "url",
+          "verification_status"
+        ],
+        "title": "ResourceCatalogSectionView"
+      },
+      "ResourceCatalogSourceView": {
+        "properties": {
+          "source_id": {
+            "type": "string",
+            "title": "Source Id"
+          },
+          "canonical_url": {
+            "type": "string",
+            "title": "Canonical Url"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "creator": {
+            "type": "string",
+            "title": "Creator"
+          },
+          "media_type": {
+            "type": "string",
+            "title": "Media Type"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          },
+          "source_version": {
+            "type": "integer",
+            "title": "Source Version"
+          },
+          "verification_status": {
+            "type": "string",
+            "title": "Verification Status"
+          },
+          "documentation_version": {
+            "type": "string",
+            "title": "Documentation Version",
+            "default": ""
+          },
+          "provenance": {
+            "type": "string",
+            "title": "Provenance",
+            "default": ""
+          },
+          "checked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_id",
+          "canonical_url",
+          "title",
+          "creator",
+          "media_type",
+          "language",
+          "source_version",
+          "verification_status"
+        ],
+        "title": "ResourceCatalogSourceView"
+      },
+      "ResourceCatalogView": {
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/ResourceCatalogSourceView"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceCatalogSectionView"
+            },
+            "type": "array",
+            "title": "Sections"
+          },
+          "index_truncated": {
+            "type": "boolean",
+            "title": "Index Truncated",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "sections"
+        ],
+        "title": "ResourceCatalogView"
+      },
+      "ResourceChangeCoverageView": {
+        "properties": {
+          "mapping_status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "missing"
+            ],
+            "title": "Mapping Status"
+          },
+          "mapped_node_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Mapped Node Keys"
+          },
+          "unmatched_node_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unmatched Node Ids"
+          },
+          "required_extension_topics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Required Extension Topics"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mapping_status",
+          "mapped_node_keys",
+          "unmatched_node_ids",
+          "required_extension_topics"
+        ],
+        "title": "ResourceChangeCoverageView"
+      },
+      "ResourceChangeDecisionRequest": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version"
+          },
+          "preview_hash": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Preview Hash"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          },
+          "acknowledge_warnings": {
+            "type": "boolean",
+            "title": "Acknowledge Warnings",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "preview_hash",
+          "idempotency_key"
+        ],
+        "title": "ResourceChangeDecisionRequest"
+      },
+      "ResourceChangeImpactView": {
+        "properties": {
+          "unit_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unit Ids"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceChangeNodeView"
+            },
+            "type": "array",
+            "title": "Nodes"
+          },
+          "prerequisites": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceChangePrerequisiteView"
+            },
+            "type": "array",
+            "title": "Prerequisites"
+          },
+          "prerequisite_status": {
+            "type": "string",
+            "enum": [
+              "recorded_relations_only",
+              "unknown"
+            ],
+            "title": "Prerequisite Status"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/ResourceChangeCoverageView"
+          },
+          "workload": {
+            "$ref": "#/components/schemas/ResourceChangeWorkloadView"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/ResourceChangeProgressView"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/ResourceChangeUnknownConstraintView"
+          },
+          "pace": {
+            "$ref": "#/components/schemas/ResourceChangeUnknownConstraintView"
+          },
+          "private_bindings": {
+            "$ref": "#/components/schemas/ResourceChangePrivateBindingsView"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "unit_ids",
+          "nodes",
+          "prerequisites",
+          "prerequisite_status",
+          "coverage",
+          "workload",
+          "progress",
+          "environment",
+          "pace",
+          "private_bindings",
+          "warnings"
+        ],
+        "title": "ResourceChangeImpactView"
+      },
+      "ResourceChangeNodeView": {
+        "properties": {
+          "node_id": {
+            "type": "string",
+            "title": "Node Id"
+          },
+          "stable_key": {
+            "type": "string",
+            "title": "Stable Key"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "content_version": {
+            "type": "integer",
+            "title": "Content Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "node_id",
+          "stable_key",
+          "title",
+          "content_version"
+        ],
+        "title": "ResourceChangeNodeView"
+      },
+      "ResourceChangePrerequisiteView": {
+        "properties": {
+          "from_node_id": {
+            "type": "string",
+            "title": "From Node Id"
+          },
+          "to_node_id": {
+            "type": "string",
+            "title": "To Node Id"
+          },
+          "relation_type": {
+            "type": "string",
+            "title": "Relation Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "from_node_id",
+          "to_node_id",
+          "relation_type"
+        ],
+        "title": "ResourceChangePrerequisiteView"
+      },
+      "ResourceChangePreviewView": {
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "title": "Proposal Id"
+          },
+          "draft_id": {
+            "type": "string",
+            "title": "Draft Id"
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id"
+          },
+          "actor_id": {
+            "type": "string",
+            "title": "Actor Id"
+          },
+          "base_plan_id": {
+            "type": "string",
+            "title": "Base Plan Id"
+          },
+          "base_revision": {
+            "type": "integer",
+            "title": "Base Revision"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "confirmed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "preview_hash": {
+            "type": "string",
+            "title": "Preview Hash"
+          },
+          "copy_policy": {
+            "type": "string",
+            "enum": [
+              "copy_active",
+              "keep_history_only"
+            ],
+            "title": "Copy Policy"
+          },
+          "before": {
+            "$ref": "#/components/schemas/ResourceBindingSnapshotView"
+          },
+          "after": {
+            "$ref": "#/components/schemas/ResourceBindingSnapshotView"
+          },
+          "impact": {
+            "$ref": "#/components/schemas/ResourceChangeImpactView"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "draft_hash": {
+            "type": "string",
+            "title": "Draft Hash"
+          },
+          "catalog_digest": {
+            "type": "string",
+            "title": "Catalog Digest"
+          }
+        },
+        "type": "object",
+        "required": [
+          "proposal_id",
+          "draft_id",
+          "project_id",
+          "actor_id",
+          "base_plan_id",
+          "base_revision",
+          "status",
+          "preview_hash",
+          "copy_policy",
+          "before",
+          "after",
+          "impact",
+          "warnings",
+          "created_at",
+          "draft_hash",
+          "catalog_digest"
+        ],
+        "title": "ResourceChangePreviewView"
+      },
+      "ResourceChangePrivateBindingsView": {
+        "properties": {
+          "policy": {
+            "type": "string",
+            "enum": [
+              "copy_active",
+              "keep_history_only"
+            ],
+            "title": "Policy"
+          },
+          "active_count": {
+            "type": "integer",
+            "title": "Active Count"
+          },
+          "copy_count": {
+            "type": "integer",
+            "title": "Copy Count"
+          },
+          "history_retained": {
+            "type": "boolean",
+            "title": "History Retained"
+          }
+        },
+        "type": "object",
+        "required": [
+          "policy",
+          "active_count",
+          "copy_count",
+          "history_retained"
+        ],
+        "title": "ResourceChangePrivateBindingsView"
+      },
+      "ResourceChangeProgressObservation": {
+        "properties": {
+          "unit_id": {
+            "type": "string",
+            "title": "Unit Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "in_progress",
+              "completed",
+              "skipped"
+            ],
+            "title": "Status"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "unit_id",
+          "status",
+          "version"
+        ],
+        "title": "ResourceChangeProgressObservation"
+      },
+      "ResourceChangeProgressView": {
+        "properties": {
+          "started_units": {
+            "type": "integer",
+            "title": "Started Units"
+          },
+          "completed_units": {
+            "type": "integer",
+            "title": "Completed Units"
+          },
+          "skipped_units": {
+            "type": "integer",
+            "title": "Skipped Units"
+          },
+          "observations": {
+            "items": {
+              "$ref": "#/components/schemas/ResourceChangeProgressObservation"
+            },
+            "type": "array",
+            "title": "Observations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "started_units",
+          "completed_units",
+          "skipped_units",
+          "observations"
+        ],
+        "title": "ResourceChangeProgressView"
+      },
+      "ResourceChangeRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "assignment_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Assignment Id"
+          },
+          "source_ref": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Source Ref"
+          },
+          "source_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Source Version"
+          },
+          "section_refs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 300,
+            "minItems": 1,
+            "title": "Section Refs"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version"
+          },
+          "copy_policy": {
+            "type": "string",
+            "enum": [
+              "copy_active",
+              "keep_history_only"
+            ],
+            "title": "Copy Policy"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "stage_id",
+          "assignment_id",
+          "source_ref",
+          "source_version",
+          "section_refs",
+          "expected_version",
+          "copy_policy",
+          "idempotency_key"
+        ],
+        "title": "ResourceChangeRequest"
+      },
+      "ResourceChangeResultView": {
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "title": "Proposal Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "confirm",
+              "cancel"
+            ],
+            "title": "Action"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "cancelled"
+            ],
+            "title": "Status"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created"
+          },
+          "copied_selections": {
+            "type": "integer",
+            "title": "Copied Selections"
+          }
+        },
+        "type": "object",
+        "required": [
+          "proposal_id",
+          "action",
+          "status",
+          "plan_id",
+          "revision",
+          "created",
+          "copied_selections"
+        ],
+        "title": "ResourceChangeResultView"
+      },
+      "ResourceChangeUnknownConstraintView": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "unknown",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ResourceChangeUnknownConstraintView"
+      },
+      "ResourceChangeWorkloadView": {
+        "properties": {
+          "before_section_count": {
+            "type": "integer",
+            "title": "Before Section Count"
+          },
+          "after_section_count": {
+            "type": "integer",
+            "title": "After Section Count"
+          },
+          "delta_sections": {
+            "type": "integer",
+            "title": "Delta Sections"
+          },
+          "unit_count": {
+            "type": "integer",
+            "title": "Unit Count"
+          },
+          "estimated_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Minutes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "before_section_count",
+          "after_section_count",
+          "delta_sections",
+          "unit_count",
+          "estimated_minutes"
+        ],
+        "title": "ResourceChangeWorkloadView"
       },
       "ResourceProvenance": {
         "type": "string",
@@ -3708,10 +4826,13 @@
         "enum": [
           "primary",
           "supplement",
-          "reference"
+          "comparison",
+          "reference",
+          "case_study",
+          "practice"
         ],
         "title": "StageResourceRole",
-        "description": "阶段与资源的关系角色（设计 §2.2）。\n\n每阶段默认一条 ``PRIMARY`` 主线；``SUPPLEMENT`` 补充前置，\n``REFERENCE`` 为对照/延伸。**不计算章节重叠率或覆盖率。**"
+        "description": "阶段与资源的关系角色（设计 §2.2）。\n\nPRIMARY 主线，SUPPLEMENT 补充/补缺，COMPARISON 可选对照，\nREFERENCE 参考，CASE_STUDY 案例，PRACTICE 实践。\n角色本身不声明补充必修；必需覆盖须由明确知识要求单独判定。"
       },
       "StageWorkspaceView": {
         "properties": {

@@ -28,6 +28,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Protocol, Sequence
@@ -158,6 +159,7 @@ def _structure_payload(
     task_knowledge_links: Sequence[PlanTaskKnowledgeLink],
     stage_resources: Sequence[StageResourceAssignment],
     extensions: Sequence[KnowledgeExtension],
+    resource_snapshots: Sequence[dict[str, object]] = (),
 ) -> dict[str, object]:
     """**共享**的发布结构语义快照（B2-V §四：两处指纹必须语义一致）。
 
@@ -169,7 +171,16 @@ def _structure_payload(
     def _k(stage_id: str) -> str:
         return key.get(stage_id, stage_id)
 
+    def stable_snapshot(value):
+        if isinstance(value, dict):
+            return {k: stable_snapshot(v) for k, v in value.items()
+                    if k not in {"assignment_id", "stage_id", "captured_at"}}
+        if isinstance(value, (list, tuple)):
+            return [stable_snapshot(v) for v in value]
+        return value
+
     return {
+        **({"resource_snapshots": stable_snapshot(resource_snapshots)} if resource_snapshots else {}),
         "unit_links": [
             {"stage": _k(x.stage_id), "unit_id": x.unit_id, "order_index": x.order_index}
             for x in unit_links
@@ -237,6 +248,7 @@ class PlanRevision:
     stage_resources: tuple[StageResourceAssignment, ...] = ()
     #: 规划阶段预置的扩展知识与思考提示（V1.2 §2.1）。
     extensions: tuple[KnowledgeExtension, ...] = ()
+    resource_snapshots: tuple[dict[str, object], ...] = ()
     #: 来源领域包/模板版本（共享模板预留，V1 只记录）。
     source_pack_key: str = ""
     source_pack_version: int = 0
@@ -256,6 +268,7 @@ class PlanRevision:
         task_knowledge_links: Sequence[PlanTaskKnowledgeLink] = (),
         stage_resources: Sequence[StageResourceAssignment] = (),
         extensions: Sequence[KnowledgeExtension] = (),
+        resource_snapshots: Sequence[dict[str, object]] = (),
         source_pack_key: str = "",
         source_pack_version: int = 0,
         now: datetime | None = None,
@@ -273,6 +286,7 @@ class PlanRevision:
             task_knowledge_links=tuple(task_knowledge_links),
             stage_resources=tuple(stage_resources),
             extensions=tuple(extensions),
+            resource_snapshots=tuple(deepcopy(resource_snapshots)),
             source_pack_key=source_pack_key.strip(),
             source_pack_version=source_pack_version,
             created_at=now or datetime.now(timezone.utc),
@@ -331,6 +345,7 @@ class PlanRevision:
                     task_knowledge_links=self.task_knowledge_links,
                     stage_resources=self.stage_resources,
                     extensions=self.extensions,
+                    resource_snapshots=self.resource_snapshots,
                 ),
                 "source_pack_key": self.source_pack_key,
                 "source_pack_version": self.source_pack_version,
@@ -429,6 +444,7 @@ class PlanDraft:
     task_knowledge_links: tuple[PlanTaskKnowledgeLink, ...] = ()
     stage_resources: tuple[StageResourceAssignment, ...] = ()
     extensions: tuple[KnowledgeExtension, ...] = ()
+    resource_snapshots: tuple[dict[str, object], ...] = ()
     source_pack_key: str = ""
     source_pack_version: int = 0
     practice_project_idea: str = ""
@@ -464,6 +480,7 @@ class PlanDraft:
                     task_knowledge_links=self.task_knowledge_links,
                     stage_resources=self.stage_resources,
                     extensions=self.extensions,
+                    resource_snapshots=self.resource_snapshots,
                 ),
                 "source_pack_key": self.source_pack_key,
                 "source_pack_version": self.source_pack_version,
@@ -519,6 +536,7 @@ def build_revision_snapshot(
     task_knowledge_links: Sequence[PlanTaskKnowledgeLink] = (),
     stage_resources: Sequence[StageResourceAssignment] = (),
     extensions: Sequence[KnowledgeExtension] = (),
+    resource_snapshots: Sequence[dict[str, object]] = (),
     source_pack_key: str = "",
     source_pack_version: int = 0,
     now: datetime | None = None,
@@ -555,6 +573,22 @@ def build_revision_snapshot(
     def _sid(stage_id: str) -> str:
         return remap.get(stage_id, stage_id)
 
+    new_assignments = tuple(
+        StageResourceAssignment.create(project_id=project_id, stage_id=_sid(a.stage_id), role=a.role,
+            source_ref=a.source_ref, section_refs=a.section_refs, order_index=a.order_index,
+            source_version=a.source_version, fallback_search_terms=a.fallback_search_terms, node_ids=a.node_ids)
+        for a in stage_resources)
+    assignment_remap = {old.assignment_id: new.assignment_id
+                        for old, new in zip(stage_resources, new_assignments, strict=True)}
+    frozen_resources = deepcopy(list(resource_snapshots))
+    for snapshot in frozen_resources:
+        snapshot["stage_id"] = _sid(str(snapshot.get("stage_id", "")))
+        snapshot["assignment_id"] = assignment_remap.get(str(snapshot.get("assignment_id", "")),
+                                                        snapshot.get("assignment_id", ""))
+        if isinstance(snapshot.get("view"), dict):
+            snapshot["view"]["stage_id"] = snapshot["stage_id"]
+            snapshot["view"]["assignment_id"] = snapshot["assignment_id"]
+
     return PlanRevision.create(
         project_id=project_id,
         revision=revision,
@@ -572,20 +606,8 @@ def build_revision_snapshot(
             PlanTaskKnowledgeLink(task_id=x.task_id, node_id=x.node_id, role=x.role)
             for x in task_knowledge_links
         ),
-        stage_resources=tuple(
-            StageResourceAssignment.create(
-                project_id=project_id,
-                stage_id=_sid(a.stage_id),
-                role=a.role,
-                source_ref=a.source_ref,
-                section_refs=a.section_refs,
-                order_index=a.order_index,
-                source_version=a.source_version,
-                fallback_search_terms=a.fallback_search_terms,
-                node_ids=a.node_ids,
-            )
-            for a in stage_resources
-        ),
+        stage_resources=new_assignments,
+        resource_snapshots=tuple(frozen_resources),
         extensions=tuple(
             KnowledgeExtension.create(
                 project_id=project_id,
@@ -622,6 +644,7 @@ def revision_from_draft(
         task_knowledge_links=draft.task_knowledge_links,
         stage_resources=draft.stage_resources,
         extensions=draft.extensions,
+        resource_snapshots=draft.resource_snapshots,
         source_pack_key=draft.source_pack_key,
         source_pack_version=draft.source_pack_version,
         now=now,

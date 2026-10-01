@@ -288,13 +288,17 @@ class DomainPackStatus(StrEnum):
 class StageResourceRole(StrEnum):
     """阶段与资源的关系角色（设计 §2.2）。
 
-    每阶段默认一条 ``PRIMARY`` 主线；``SUPPLEMENT`` 补充前置，
-    ``REFERENCE`` 为对照/延伸。**不计算章节重叠率或覆盖率。**
+    PRIMARY 主线，SUPPLEMENT 补充/补缺，COMPARISON 可选对照，
+    REFERENCE 参考，CASE_STUDY 案例，PRACTICE 实践。
+    角色本身不声明补充必修；必需覆盖须由明确知识要求单独判定。
     """
 
     PRIMARY = "primary"
     SUPPLEMENT = "supplement"
+    COMPARISON = "comparison"
     REFERENCE = "reference"
+    CASE_STUDY = "case_study"
+    PRACTICE = "practice"
 
 
 class ResourceSourceVisibility(StrEnum):
