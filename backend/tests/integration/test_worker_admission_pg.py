@@ -43,7 +43,7 @@ def fresh(admission_db):
     with psycopg.connect(admission_db.migrator_dsn) as conn:
         conn.execute("TRUNCATE public.ai_jobs, public.ai_runs, public.ai_provider_attempts, public.auth_sessions, public.auth_users, public.auth_throttle, public.learning_projects CASCADE")
     auth = PgBrowserAuth(admission_db.app_dsn, 3600)
-    token = auth.register("新学习者", "long passphrase for admission", "new-peer")
+    token = auth.register("新学习者", "Test-pass1!", "new-peer")
     row, projects = auth.detail(token)
     run = RunRecord(
         run_id="admission_run", actor_id=row["actor_id"], project_id=projects[0],

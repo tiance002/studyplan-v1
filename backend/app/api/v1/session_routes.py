@@ -5,6 +5,7 @@ import secrets
 from app.api.v1.deps import get_auth_context, get_container
 from app.application.container import AppContainer
 from app.core.errors import DependencyUnavailableError, ForbiddenError, UnauthenticatedError
+from app.domain.workspace.models import MAX_LOGIN_PASSWORD_LEN, MAX_PASSWORD_LEN, MIN_PASSWORD_LEN
 from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,13 +15,13 @@ router = APIRouter(prefix="/api/v1")
 class RegistrationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     username: str = Field(min_length=2, max_length=32)
-    password: str = Field(min_length=15, max_length=128)
+    password: str = Field(min_length=MIN_PASSWORD_LEN, max_length=MAX_PASSWORD_LEN)
 
 
 class LoginRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     username: str = Field(min_length=2, max_length=32)
-    password: str = Field(min_length=1, max_length=128)
+    password: str = Field(min_length=1, max_length=MAX_LOGIN_PASSWORD_LEN)
 
 
 class SessionView(BaseModel):

@@ -7362,8 +7362,8 @@
           },
           "password": {
             "type": "string",
-            "maxLength": 128,
-            "minLength": 15,
+            "maxLength": 12,
+            "minLength": 6,
             "title": "Password"
           }
         },

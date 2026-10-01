@@ -47,7 +47,7 @@ def test_agent_pack_chapters_nodes_publish_readback_and_history(migrated_db):
         seed_reviewed_pack(conn, load_python_pack())
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
     client = TestClient(create_app(build_container(settings)))
-    session = client.post("/api/v1/auth/register", json={"username": "完整路线甲", "password": "Controlled-test-password-2026!"}).json()
+    session = client.post("/api/v1/auth/register", json={"username": "完整路线甲", "password": "Test-pass1!"}).json()
     draft, url, suffix, headers = route(client, session, "从 Python 基础学习 Agent 应用开发")
     assert draft["source_pack_key"] == "agent.application" and draft["source_pack_version"] == 3
     assert len(draft["stages"]) > 2
@@ -94,7 +94,7 @@ def test_agent_pack_chapters_nodes_publish_readback_and_history(migrated_db):
         assert conn.execute("SELECT status FROM unit_progress WHERE unit_id=%s", (old_unit,)).fetchone()[0] == "completed"
         assert conn.execute("SELECT count(*) FROM plan_revisions WHERE project_id=%s", (session["project_ids"][0],)).fetchone()[0] == 2
     other = TestClient(create_app(build_container(settings)))
-    other.post("/api/v1/auth/register", json={"username": "完整路线乙", "password": "Controlled-test-password-2026!"})
+    other.post("/api/v1/auth/register", json={"username": "完整路线乙", "password": "Test-pass1!"})
     assert other.get("/api/v1/workspace" + suffix).status_code == 403
     assert other.get(url + suffix).status_code == 403
     # The same actor's second space has its own plan and entity references.
@@ -111,7 +111,7 @@ def test_agent_pack_chapters_nodes_publish_readback_and_history(migrated_db):
 def test_unsupported_direction_never_binds_known_python_resources(migrated_db):
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
     client = TestClient(create_app(build_container(settings)))
-    session = client.post("/api/v1/auth/register", json={"username": "通用路线", "password": "Controlled-test-password-2026!"}).json()
+    session = client.post("/api/v1/auth/register", json={"username": "通用路线", "password": "Test-pass1!"}).json()
     draft, _, _, _ = route(client, session, "水彩构图入门")
     assert draft["source_pack_key"] == "" and draft["source_pack_version"] == 0
     assert all(not r["source_ref"] and not r["ordered_sections"] and r["fallback_search_terms"] for r in draft["stage_resources"])
@@ -148,7 +148,7 @@ def test_mock_http_provider_full_pg_graph_and_ledger(migrated_db, checkpoint_db)
         container.plan_service._llm = ledger
         container.plan_service._executor = PgPlanningExecutor(checkpoint_db.migrator_dsn, llm=ledger)
         with TestClient(create_app(container)) as client:
-            session = client.post("/api/v1/auth/register", json={"username": "适配器完整路线", "password": "Controlled-test-password-2026!"}).json()
+            session = client.post("/api/v1/auth/register", json={"username": "适配器完整路线", "password": "Test-pass1!"}).json()
             draft, url, suffix, headers = route(client, session, "Agent应用开发与知识助手")
             assert len(draft["stages"]) == 9 and draft["source_pack_key"] == "agent.application"
             # b3f2-batch-v1: one request per node — 1 skeleton + 9 structure + 9 practice.
@@ -178,7 +178,7 @@ def test_failed_provider_usage_is_retained_and_replayed_without_dispatch(migrate
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake", local_session_token="")
     container = build_container(settings)
     client = TestClient(create_app(container))
-    session = client.post("/api/v1/auth/register", json={"username": "失败用量留存", "password": "Controlled-test-password-2026!"}).json()
+    session = client.post("/api/v1/auth/register", json={"username": "失败用量留存", "password": "Test-pass1!"}).json()
     draft, _, _, _ = route(client, session, "Agent开发")
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
         run_id = conn.execute("SELECT run_id FROM plan_drafts WHERE draft_id=%s", (draft["draft_id"],)).fetchone()[0]

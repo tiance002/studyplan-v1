@@ -132,7 +132,7 @@ def _client(agent_db: PgTestDatabase, checkpoint_db: PgTestDatabase):
 
 def _register(client, username: str) -> dict:
     response = client.post(
-        "/api/v1/auth/register", json={"username": username, "password": "Controlled-test-password-2026!"}
+        "/api/v1/auth/register", json={"username": username, "password": "Test-pass1!"}
     )
     assert response.status_code == 200, response.text
     return response.json()

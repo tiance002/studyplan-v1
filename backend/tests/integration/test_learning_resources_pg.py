@@ -48,7 +48,7 @@ def scenario(migrated_db):
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake",
                        local_session_token="", planning_worker_admission_mode="trusted_server")
     container = build_container(settings)
-    token = container.browser_auth.register("资源选择用户", "long isolated resource passphrase", "isolated-peer")
+    token = container.browser_auth.register("资源选择用户", "Test-pass1!", "isolated-peer")
     # BrowserAuth exposes its server-side context through the actual persisted session.
     scope = container.browser_auth.resolve(token)
     project = scope.learning_project_scope[0]

@@ -278,9 +278,11 @@ def test_soft_limits_warn_but_do_not_block() -> None:
 
 
 def test_credential_policy_matches_product_constraint() -> None:
-    """V2 guidance explicitly replaces 6–12 with 15–128 for new secrets."""
+    """Latest user decision restores 6–12 for registration, preserving login."""
     policy = DEFAULT_CREDENTIAL_POLICY
-    assert (policy.password_min, policy.password_max) == (15, 128)
+    assert policy.validate_password("123456") == "123456"
+    assert policy.validate_password("123456789012") == "123456789012"
+    assert policy.validate_login_password("a" * 128) == "a" * 128
     assert policy.require_invite_code is False
 
 
@@ -294,9 +296,9 @@ def test_credential_policy_accepts_short_chinese_username() -> None:
 
 def test_credential_policy_rejects_bad_password_length() -> None:
     with pytest.raises(ValidationAppError):
-        DEFAULT_CREDENTIAL_POLICY.validate_password("a" * 14)
+        DEFAULT_CREDENTIAL_POLICY.validate_password("a" * 5)
     with pytest.raises(ValidationAppError):
-        DEFAULT_CREDENTIAL_POLICY.validate_password("a" * 129)
+        DEFAULT_CREDENTIAL_POLICY.validate_password("a" * 13)
 
 
 def test_credential_policy_rejects_whitespace_username() -> None:
