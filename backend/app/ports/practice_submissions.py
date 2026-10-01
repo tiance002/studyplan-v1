@@ -1,0 +1,19 @@
+from typing import Protocol
+
+from app.domain.practice_submissions import SubmissionDecisionCommand, SubmissionSaveCommand
+from app.domain.workspace.models import AuthContext
+
+
+class PracticeSubmissionsPort(Protocol):
+    def thread(
+        self, scope: AuthContext, project_id: str, plan_id: str, stage_id: str, task_id: str
+    ) -> dict: ...
+    def save(self, scope: AuthContext, command: SubmissionSaveCommand) -> dict: ...
+    def get(self, scope: AuthContext, project_id: str, submission_id: str) -> dict: ...
+    def decide(self, scope: AuthContext, command: SubmissionDecisionCommand) -> dict: ...
+    def history(
+        self, scope: AuthContext, project_id: str, cursor: str | None = None, limit: int = 20
+    ) -> dict: ...
+    def outcomes(
+        self, scope: AuthContext, project_id: str, cursor: str | None = None, limit: int = 20
+    ) -> dict: ...

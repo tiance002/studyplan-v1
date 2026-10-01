@@ -4,6 +4,8 @@ import { promptApi } from '../../api/promptClient';
 import type { PromptCancelBody, PromptExport, PromptExportBody, PromptReviewBody, PromptRevision, PromptSaveBody, PromptTarget, PromptTask, PromptThread } from '../../api/promptClient';
 import type { DTO } from '../../api/types';
 import { PracticeChangePanel } from './PracticeChangePanel';
+import { SubmissionPanel } from './SubmissionPanel';
+import { OutcomeArchive } from './OutcomeArchive';
 
 const terminal = new Set(['succeeded','failed','cancelled','canceled','unknown','reconciliation_required']);
 const errorText = (e: unknown) => e instanceof Error ? e.message : '操作未完成，请核对保存记录。';
@@ -109,6 +111,8 @@ export function PromptPage({project,workspace,initialStage,active=true,onPublish
         {b.error&&<p role="alert">{b.error} {b.conflict?'请读取最新保存版本；编辑文字会保留。':b.pending?'结果尚未确认，请用原保存重试。':''}</p>}
       </section>
     </>}
+      <SubmissionPanel project={project} target={target} currentPlanId={workspace.plan.plan_id} active={active} onChanged={onPublished}/>
+      <OutcomeArchive project={project}/>
       <section className="panel prompt-saved"><h2>已保存版本、反馈与导出</h2>{b.thread?.history_truncated&&<p>这里显示最近 20 次保存；更早的版本可在项目历史中读取。</p>}
         <label>选择已保存版本<select aria-label="选择已保存版本" value={selected} onChange={e=>choose(e.target.value)}><option value="">选择版本</option>{b.thread?.revisions.map(r=><option key={r.revision_id} value={r.revision_id}>第 {r.revision_no} 版 · {new Date(r.created_at).toLocaleString()}</option>)}
           {selected&&!b.thread?.revisions.some(r=>r.revision_id===selected)&&revisions[selected]&&<option value={selected}>历史第 {revisions[selected].revision_no} 版</option>}</select></label>

@@ -537,6 +537,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Thread */
+        get: operations["get_practice_submission_thread"];
+        put?: never;
+        /** Save */
+        post: operations["save_practice_submission"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/submissions/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** History */
+        get: operations["get_practice_submission_history"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/submissions/{submission_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Submission */
+        get: operations["get_practice_submission"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/submissions/{submission_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide */
+        post: operations["decide_practice_submission"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/outcomes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Outcomes */
+        get: operations["get_practice_outcomes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -1531,6 +1617,338 @@ export interface components {
             stage_key: string;
             /** Order Index */
             order_index: number;
+        };
+        /** PracticeOutcomeGroupView */
+        PracticeOutcomeGroupView: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_description" | "evaluation" | "architecture" | "design_decision" | "failure_review" | "explanation" | "other";
+            /** Title */
+            title: string;
+            /** Total Records */
+            total_records: number;
+            /** Items */
+            items: components["schemas"]["PracticeOutcomeItemView"][];
+        };
+        /** PracticeOutcomeItemView */
+        PracticeOutcomeItemView: {
+            /** Submission Id */
+            submission_id: string;
+            /**
+             * Artifact Kind
+             * @enum {string}
+             */
+            artifact_kind: "project_description" | "evaluation" | "architecture" | "design_decision" | "failure_review" | "explanation" | "other";
+            /** Plan Revision */
+            plan_revision: number | null;
+            /** Stage Title */
+            stage_title: string | null;
+            /** Task Title */
+            task_title: string | null;
+            /** Project Title */
+            project_title: string | null;
+            /**
+             * Evidence Grade
+             * @enum {string}
+             */
+            evidence_grade: "verified" | "reported" | "insufficient";
+            /** Conclusion */
+            conclusion: ("accepted" | "needs_more_evidence" | "not_passed") | null;
+            /** Manual Confirmation */
+            manual_confirmation: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** PracticeOutcomeView */
+        PracticeOutcomeView: {
+            /** Project Id */
+            project_id: string;
+            /** Groups */
+            groups: components["schemas"]["PracticeOutcomeGroupView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** PracticeSubmissionCoverageRequest */
+        PracticeSubmissionCoverageRequest: {
+            /** Criterion Index */
+            criterion_index: number;
+            /** Evidence Indices */
+            evidence_indices: number[];
+            /** Observation */
+            observation: string;
+        };
+        /** PracticeSubmissionCoverageView */
+        PracticeSubmissionCoverageView: {
+            /** Criterion Index */
+            criterion_index: number;
+            /** Evidence Indices */
+            evidence_indices: number[];
+            /** Observation */
+            observation: string;
+        };
+        /** PracticeSubmissionDecisionRequest */
+        PracticeSubmissionDecisionRequest: {
+            /**
+             * Conclusion
+             * @enum {string}
+             */
+            conclusion: "accepted" | "needs_more_evidence" | "not_passed";
+            /** Rationale */
+            rationale: string;
+            /** Coverage */
+            coverage: components["schemas"]["PracticeSubmissionCoverageRequest"][];
+            /**
+             * Acknowledge Verification Limit
+             * @default false
+             */
+            acknowledge_verification_limit: boolean;
+            /** Expected Plan Version */
+            expected_plan_version: number;
+            /** Expected Task Version */
+            expected_task_version: number;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** PracticeSubmissionDecisionView */
+        PracticeSubmissionDecisionView: {
+            submission: components["schemas"]["PracticeSubmissionView"];
+            /** Task Status */
+            task_status: string;
+            /** Task Version */
+            task_version: number;
+            /** Created */
+            created: boolean;
+            /** Manual Confirmation */
+            manual_confirmation: boolean;
+        };
+        /** PracticeSubmissionEvidenceRequest */
+        PracticeSubmissionEvidenceRequest: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "user_statement" | "external_report" | "source_reference";
+            /** Label */
+            label: string;
+            /** Content */
+            content: string;
+            /** Source Url */
+            source_url: string | null;
+        };
+        /** PracticeSubmissionEvidenceView */
+        PracticeSubmissionEvidenceView: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "user_statement" | "external_report" | "source_reference";
+            /** Label */
+            label: string;
+            /** Content */
+            content: string;
+            /** Source Url */
+            source_url: string | null;
+        };
+        /** PracticeSubmissionHistoryView */
+        PracticeSubmissionHistoryView: {
+            /** Items */
+            items: components["schemas"]["PracticeSubmissionView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** PracticeSubmissionRequest */
+        PracticeSubmissionRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Task Id */
+            task_id: string;
+            /** Note */
+            note: string;
+            /** Repo Url */
+            repo_url: string | null;
+            /** Evidence */
+            evidence: components["schemas"]["PracticeSubmissionEvidenceRequest"][];
+            /**
+             * Artifact Kind
+             * @enum {string}
+             */
+            artifact_kind: "project_description" | "evaluation" | "architecture" | "design_decision" | "failure_review" | "explanation" | "other";
+            /** Parent Submission Id */
+            parent_submission_id: string | null;
+            /** Expected Plan Version */
+            expected_plan_version: number;
+            /** Expected Task Version */
+            expected_task_version: number;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** PracticeSubmissionReviewView */
+        PracticeSubmissionReviewView: {
+            /** Review Id */
+            review_id: string;
+            /** Submission Id */
+            submission_id: string;
+            /**
+             * Conclusion
+             * @enum {string}
+             */
+            conclusion: "accepted" | "needs_more_evidence" | "not_passed";
+            /**
+             * Reviewer Kind
+             * @enum {string}
+             */
+            reviewer_kind: "user" | "model" | "system";
+            /** Rationale */
+            rationale: string;
+            /** Coverage */
+            coverage: components["schemas"]["PracticeSubmissionCoverageView"][];
+            /** Acknowledge Verification Limit */
+            acknowledge_verification_limit: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Manual Confirmation */
+            manual_confirmation: boolean;
+        };
+        /** PracticeSubmissionSaveView */
+        PracticeSubmissionSaveView: {
+            thread: components["schemas"]["PracticeSubmissionThreadView"];
+            submission: components["schemas"]["PracticeSubmissionView"];
+            /** Replayed */
+            replayed: boolean;
+        };
+        /** PracticeSubmissionSnapshotView */
+        PracticeSubmissionSnapshotView: {
+            /**
+             * Snapshot Status
+             * @enum {string}
+             */
+            snapshot_status: "frozen" | "legacy_unfrozen";
+            /** Plan Id */
+            plan_id: string | null;
+            /** Plan Revision */
+            plan_revision: number | null;
+            /** Stage Id */
+            stage_id: string | null;
+            /** Stage Title */
+            stage_title: string | null;
+            practice_project: components["schemas"]["PromptPracticeProjectView"] | null;
+            task: components["schemas"]["PracticeSubmissionTaskView"] | null;
+            /** Warning */
+            warning: string | null;
+        };
+        /** PracticeSubmissionTaskView */
+        PracticeSubmissionTaskView: {
+            /** Task Id */
+            task_id: string;
+            /** Title */
+            title: string;
+            /** Goal */
+            goal: string;
+            /** In Scope */
+            in_scope: string[];
+            /** Out Scope */
+            out_scope: string[];
+            /** Acceptance */
+            acceptance: string[];
+            /** Status */
+            status: string;
+            /** Knowledge Links */
+            knowledge_links: components["schemas"]["PromptKnowledgeView"][];
+            /** Stable Key */
+            stable_key: string;
+            /** Version */
+            version: number;
+        };
+        /** PracticeSubmissionThreadView */
+        PracticeSubmissionThreadView: {
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Task Id */
+            task_id: string;
+            /** Plan Version */
+            plan_version: number;
+            /** Version */
+            version: number;
+            /** Task Version */
+            task_version: number;
+            practice_project: components["schemas"]["PromptPracticeProjectView"];
+            task: components["schemas"]["PracticeSubmissionTaskView"];
+            /** Submissions */
+            submissions: components["schemas"]["PracticeSubmissionView"][];
+            /** History Truncated */
+            history_truncated: boolean;
+            /** Platform Execution Available */
+            platform_execution_available: boolean;
+            /** Source Check Available */
+            source_check_available: boolean;
+        };
+        /** PracticeSubmissionView */
+        PracticeSubmissionView: {
+            /** Submission Id */
+            submission_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string | null;
+            /** Stage Id */
+            stage_id: string | null;
+            /** Task Id */
+            task_id: string;
+            /** Submission No */
+            submission_no: number;
+            /** Version */
+            version: number;
+            /** Note */
+            note: string;
+            /** Repo Url */
+            repo_url: string | null;
+            /** Evidence */
+            evidence: components["schemas"]["PracticeSubmissionEvidenceView"][];
+            /** Legacy Evidence */
+            legacy_evidence: string[];
+            /**
+             * Artifact Kind
+             * @enum {string}
+             */
+            artifact_kind: "project_description" | "evaluation" | "architecture" | "design_decision" | "failure_review" | "explanation" | "other";
+            /** Parent Submission Id */
+            parent_submission_id: string | null;
+            /** Content Hash */
+            content_hash: string;
+            task_snapshot: components["schemas"]["PracticeSubmissionSnapshotView"];
+            /**
+             * Evidence Grade
+             * @enum {string}
+             */
+            evidence_grade: "verified" | "reported" | "insufficient";
+            /** Verification Available */
+            verification_available: boolean;
+            /** Source Check Available */
+            source_check_available: boolean;
+            review: components["schemas"]["PracticeSubmissionReviewView"] | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /**
          * PracticeTaskStatus
@@ -4266,6 +4684,217 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PracticeChangeResultView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_practice_submission_thread: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                plan_id: string;
+                stage_id: string;
+                task_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSubmissionThreadView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_practice_submission: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PracticeSubmissionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSubmissionSaveView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_practice_submission_history: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSubmissionHistoryView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_practice_submission: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSubmissionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_practice_submission: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                submission_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PracticeSubmissionDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeSubmissionDecisionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_practice_outcomes: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PracticeOutcomeView"];
                 };
             };
             /** @description Validation Error */

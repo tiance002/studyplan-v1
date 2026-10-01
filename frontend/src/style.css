@@ -1154,3 +1154,16 @@ p {
 .prompt-recovery {border-left:4px solid #a97937;}
 .prompt-recovery textarea {white-space:pre-wrap;font-family:inherit;resize:vertical;background:#fffdf7;}
 @media (max-width:680px) {.practice-diff {grid-template-columns:1fr;}.practice-knowledge {align-items:flex-start;}}
+.submission-editor,.submission-decision {display:grid;gap:14px;margin:18px 0;}
+.submission-panel label {display:grid;gap:6px;margin-bottom:8px;}
+.submission-panel fieldset {border:1px solid var(--line2);padding:16px;border-radius:10px;min-width:0;}
+.submission-panel legend {font-weight:700;padding:0 6px;}
+.submission-raw {white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;background:#f8faf6;padding:14px;border-radius:8px;}
+.submission-detail {margin-top:20px;border-top:1px solid var(--line2);padding-top:16px;}
+.submission-detail h5 {font-size:14px;margin:10px 0;white-space:pre-wrap;}
+.submission-panel label.submission-check {display:flex;align-items:flex-start;gap:8px;}
+.submission-check input[type=checkbox] {width:auto;flex:0 0 auto;margin:3px 0 0;padding:0;}
+.outcome-groups {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px;}
+.outcome-groups>section {border:1px solid var(--line2);border-radius:10px;padding:16px;}
+.outcome-archive .resource-row {width:100%;text-align:left;overflow-wrap:anywhere;}
+@media(max-width:680px) {.outcome-groups {grid-template-columns:1fr;}}

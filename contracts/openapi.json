@@ -2313,6 +2313,391 @@
         }
       }
     },
+    "/api/v1/submissions": {
+      "get": {
+        "summary": "Thread",
+        "operationId": "get_practice_submission_thread",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Stage Id"
+            }
+          },
+          {
+            "name": "task_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSubmissionThreadView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Save",
+        "operationId": "save_practice_submission",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticeSubmissionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSubmissionSaveView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/history": {
+      "get": {
+        "summary": "History",
+        "operationId": "get_practice_submission_history",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSubmissionHistoryView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/{submission_id}": {
+      "get": {
+        "summary": "Get Submission",
+        "operationId": "get_practice_submission",
+        "parameters": [
+          {
+            "name": "submission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Submission Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSubmissionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/submissions/{submission_id}/decision": {
+      "post": {
+        "summary": "Decide",
+        "operationId": "decide_practice_submission",
+        "parameters": [
+          {
+            "name": "submission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Submission Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticeSubmissionDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSubmissionDecisionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/outcomes": {
+      "get": {
+        "summary": "Outcomes",
+        "operationId": "get_practice_outcomes",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 1024
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeOutcomeView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "tags": [
@@ -4809,6 +5194,1073 @@
           "order_index"
         ],
         "title": "PracticeChangeTaskView"
+      },
+      "PracticeOutcomeGroupView": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "project_description",
+              "evaluation",
+              "architecture",
+              "design_decision",
+              "failure_review",
+              "explanation",
+              "other"
+            ],
+            "title": "Kind"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "total_records": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Records"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeOutcomeItemView"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "title",
+          "total_records",
+          "items"
+        ],
+        "title": "PracticeOutcomeGroupView"
+      },
+      "PracticeOutcomeItemView": {
+        "properties": {
+          "submission_id": {
+            "type": "string",
+            "title": "Submission Id"
+          },
+          "artifact_kind": {
+            "type": "string",
+            "enum": [
+              "project_description",
+              "evaluation",
+              "architecture",
+              "design_decision",
+              "failure_review",
+              "explanation",
+              "other"
+            ],
+            "title": "Artifact Kind"
+          },
+          "plan_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Revision"
+          },
+          "stage_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Title"
+          },
+          "task_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Title"
+          },
+          "project_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Title"
+          },
+          "evidence_grade": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "reported",
+              "insufficient"
+            ],
+            "title": "Evidence Grade"
+          },
+          "conclusion": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "accepted",
+                  "needs_more_evidence",
+                  "not_passed"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conclusion"
+          },
+          "manual_confirmation": {
+            "type": "boolean",
+            "title": "Manual Confirmation"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "submission_id",
+          "artifact_kind",
+          "plan_revision",
+          "stage_title",
+          "task_title",
+          "project_title",
+          "evidence_grade",
+          "conclusion",
+          "manual_confirmation",
+          "created_at"
+        ],
+        "title": "PracticeOutcomeItemView"
+      },
+      "PracticeOutcomeView": {
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "title": "Project Id"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeOutcomeGroupView"
+            },
+            "type": "array",
+            "title": "Groups"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "project_id",
+          "groups",
+          "next_cursor"
+        ],
+        "title": "PracticeOutcomeView"
+      },
+      "PracticeSubmissionCoverageRequest": {
+        "properties": {
+          "criterion_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Criterion Index"
+          },
+          "evidence_indices": {
+            "items": {
+              "type": "integer",
+              "minimum": 0.0
+            },
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Evidence Indices"
+          },
+          "observation": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Observation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "criterion_index",
+          "evidence_indices",
+          "observation"
+        ],
+        "title": "PracticeSubmissionCoverageRequest"
+      },
+      "PracticeSubmissionCoverageView": {
+        "properties": {
+          "criterion_index": {
+            "type": "integer",
+            "title": "Criterion Index"
+          },
+          "evidence_indices": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Evidence Indices"
+          },
+          "observation": {
+            "type": "string",
+            "title": "Observation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "criterion_index",
+          "evidence_indices",
+          "observation"
+        ],
+        "title": "PracticeSubmissionCoverageView"
+      },
+      "PracticeSubmissionDecisionRequest": {
+        "properties": {
+          "conclusion": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "needs_more_evidence",
+              "not_passed"
+            ],
+            "title": "Conclusion"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Rationale"
+          },
+          "coverage": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeSubmissionCoverageRequest"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Coverage"
+          },
+          "acknowledge_verification_limit": {
+            "type": "boolean",
+            "title": "Acknowledge Verification Limit",
+            "default": false
+          },
+          "expected_plan_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Plan Version"
+          },
+          "expected_task_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Task Version"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "conclusion",
+          "rationale",
+          "coverage",
+          "expected_plan_version",
+          "expected_task_version",
+          "expected_version",
+          "idempotency_key"
+        ],
+        "title": "PracticeSubmissionDecisionRequest"
+      },
+      "PracticeSubmissionDecisionView": {
+        "properties": {
+          "submission": {
+            "$ref": "#/components/schemas/PracticeSubmissionView"
+          },
+          "task_status": {
+            "type": "string",
+            "title": "Task Status"
+          },
+          "task_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Task Version"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created"
+          },
+          "manual_confirmation": {
+            "type": "boolean",
+            "title": "Manual Confirmation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "submission",
+          "task_status",
+          "task_version",
+          "created",
+          "manual_confirmation"
+        ],
+        "title": "PracticeSubmissionDecisionView"
+      },
+      "PracticeSubmissionEvidenceRequest": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "user_statement",
+              "external_report",
+              "source_reference"
+            ],
+            "title": "Kind"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Content"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "label",
+          "content",
+          "source_url"
+        ],
+        "title": "PracticeSubmissionEvidenceRequest"
+      },
+      "PracticeSubmissionEvidenceView": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "user_statement",
+              "external_report",
+              "source_reference"
+            ],
+            "title": "Kind"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "label",
+          "content",
+          "source_url"
+        ],
+        "title": "PracticeSubmissionEvidenceView"
+      },
+      "PracticeSubmissionHistoryView": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeSubmissionView"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "PracticeSubmissionHistoryView"
+      },
+      "PracticeSubmissionRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "task_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Task Id"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 20000,
+            "title": "Note"
+          },
+          "repo_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repo Url"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeSubmissionEvidenceRequest"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Evidence"
+          },
+          "artifact_kind": {
+            "type": "string",
+            "enum": [
+              "project_description",
+              "evaluation",
+              "architecture",
+              "design_decision",
+              "failure_review",
+              "explanation",
+              "other"
+            ],
+            "title": "Artifact Kind"
+          },
+          "parent_submission_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Submission Id"
+          },
+          "expected_plan_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Plan Version"
+          },
+          "expected_task_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Task Version"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "stage_id",
+          "task_id",
+          "note",
+          "repo_url",
+          "evidence",
+          "artifact_kind",
+          "parent_submission_id",
+          "expected_plan_version",
+          "expected_task_version",
+          "expected_version",
+          "idempotency_key"
+        ],
+        "title": "PracticeSubmissionRequest"
+      },
+      "PracticeSubmissionReviewView": {
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "title": "Review Id"
+          },
+          "submission_id": {
+            "type": "string",
+            "title": "Submission Id"
+          },
+          "conclusion": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "needs_more_evidence",
+              "not_passed"
+            ],
+            "title": "Conclusion"
+          },
+          "reviewer_kind": {
+            "type": "string",
+            "enum": [
+              "user",
+              "model",
+              "system"
+            ],
+            "title": "Reviewer Kind"
+          },
+          "rationale": {
+            "type": "string",
+            "title": "Rationale"
+          },
+          "coverage": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeSubmissionCoverageView"
+            },
+            "type": "array",
+            "title": "Coverage"
+          },
+          "acknowledge_verification_limit": {
+            "type": "boolean",
+            "title": "Acknowledge Verification Limit"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "manual_confirmation": {
+            "type": "boolean",
+            "title": "Manual Confirmation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "review_id",
+          "submission_id",
+          "conclusion",
+          "reviewer_kind",
+          "rationale",
+          "coverage",
+          "acknowledge_verification_limit",
+          "created_at",
+          "manual_confirmation"
+        ],
+        "title": "PracticeSubmissionReviewView"
+      },
+      "PracticeSubmissionSaveView": {
+        "properties": {
+          "thread": {
+            "$ref": "#/components/schemas/PracticeSubmissionThreadView"
+          },
+          "submission": {
+            "$ref": "#/components/schemas/PracticeSubmissionView"
+          },
+          "replayed": {
+            "type": "boolean",
+            "title": "Replayed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "thread",
+          "submission",
+          "replayed"
+        ],
+        "title": "PracticeSubmissionSaveView"
+      },
+      "PracticeSubmissionSnapshotView": {
+        "properties": {
+          "snapshot_status": {
+            "type": "string",
+            "enum": [
+              "frozen",
+              "legacy_unfrozen"
+            ],
+            "title": "Snapshot Status"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "plan_revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Revision"
+          },
+          "stage_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Id"
+          },
+          "stage_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Title"
+          },
+          "practice_project": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PromptPracticeProjectView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "task": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PracticeSubmissionTaskView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "snapshot_status",
+          "plan_id",
+          "plan_revision",
+          "stage_id",
+          "stage_title",
+          "practice_project",
+          "task",
+          "warning"
+        ],
+        "title": "PracticeSubmissionSnapshotView"
+      },
+      "PracticeSubmissionTaskView": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "goal": {
+            "type": "string",
+            "title": "Goal"
+          },
+          "in_scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "In Scope"
+          },
+          "out_scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Out Scope"
+          },
+          "acceptance": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Acceptance"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "knowledge_links": {
+            "items": {
+              "$ref": "#/components/schemas/PromptKnowledgeView"
+            },
+            "type": "array",
+            "title": "Knowledge Links"
+          },
+          "stable_key": {
+            "type": "string",
+            "title": "Stable Key"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "title",
+          "goal",
+          "in_scope",
+          "out_scope",
+          "acceptance",
+          "status",
+          "knowledge_links",
+          "stable_key",
+          "version"
+        ],
+        "title": "PracticeSubmissionTaskView"
+      },
+      "PracticeSubmissionThreadView": {
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "title": "Project Id"
+          },
+          "plan_id": {
+            "type": "string",
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "title": "Stage Id"
+          },
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "plan_version": {
+            "type": "integer",
+            "title": "Plan Version"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Version"
+          },
+          "task_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Task Version"
+          },
+          "practice_project": {
+            "$ref": "#/components/schemas/PromptPracticeProjectView"
+          },
+          "task": {
+            "$ref": "#/components/schemas/PracticeSubmissionTaskView"
+          },
+          "submissions": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeSubmissionView"
+            },
+            "type": "array",
+            "title": "Submissions"
+          },
+          "history_truncated": {
+            "type": "boolean",
+            "title": "History Truncated"
+          },
+          "platform_execution_available": {
+            "type": "boolean",
+            "title": "Platform Execution Available"
+          },
+          "source_check_available": {
+            "type": "boolean",
+            "title": "Source Check Available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "project_id",
+          "plan_id",
+          "stage_id",
+          "task_id",
+          "plan_version",
+          "version",
+          "task_version",
+          "practice_project",
+          "task",
+          "submissions",
+          "history_truncated",
+          "platform_execution_available",
+          "source_check_available"
+        ],
+        "title": "PracticeSubmissionThreadView"
+      },
+      "PracticeSubmissionView": {
+        "properties": {
+          "submission_id": {
+            "type": "string",
+            "title": "Submission Id"
+          },
+          "project_id": {
+            "type": "string",
+            "title": "Project Id"
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Id"
+          },
+          "task_id": {
+            "type": "string",
+            "title": "Task Id"
+          },
+          "submission_no": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Submission No"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Version"
+          },
+          "note": {
+            "type": "string",
+            "title": "Note"
+          },
+          "repo_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repo Url"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeSubmissionEvidenceView"
+            },
+            "type": "array",
+            "title": "Evidence"
+          },
+          "legacy_evidence": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Legacy Evidence"
+          },
+          "artifact_kind": {
+            "type": "string",
+            "enum": [
+              "project_description",
+              "evaluation",
+              "architecture",
+              "design_decision",
+              "failure_review",
+              "explanation",
+              "other"
+            ],
+            "title": "Artifact Kind"
+          },
+          "parent_submission_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Submission Id"
+          },
+          "content_hash": {
+            "type": "string",
+            "title": "Content Hash"
+          },
+          "task_snapshot": {
+            "$ref": "#/components/schemas/PracticeSubmissionSnapshotView"
+          },
+          "evidence_grade": {
+            "type": "string",
+            "enum": [
+              "verified",
+              "reported",
+              "insufficient"
+            ],
+            "title": "Evidence Grade"
+          },
+          "verification_available": {
+            "type": "boolean",
+            "title": "Verification Available"
+          },
+          "source_check_available": {
+            "type": "boolean",
+            "title": "Source Check Available"
+          },
+          "review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PracticeSubmissionReviewView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "submission_id",
+          "project_id",
+          "plan_id",
+          "stage_id",
+          "task_id",
+          "submission_no",
+          "version",
+          "note",
+          "repo_url",
+          "evidence",
+          "legacy_evidence",
+          "artifact_kind",
+          "parent_submission_id",
+          "content_hash",
+          "task_snapshot",
+          "evidence_grade",
+          "verification_available",
+          "source_check_available",
+          "review",
+          "created_at"
+        ],
+        "title": "PracticeSubmissionView"
       },
       "PracticeTaskStatus": {
         "type": "string",
