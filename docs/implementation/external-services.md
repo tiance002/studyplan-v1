@@ -27,4 +27,16 @@ LLM_REPAIR_OUTPUT_TOKENS=8000
 
 真实调用使用新 AcceptanceId、专用隔离 Project 和持久派发记录。结果未知时保留证据并暂停核对，既有 Acceptance09、历史 Attempt、Run、Draft 和 journal 不恢复、不批准、不删除。
 
-独立 RAG 的现有配置名为 `RAG_BASE_URL`、`RAG_API_KEY`、`RAG_TIMEOUT_SECONDS`，具体服务契约仍待确认。GitHub 候选查询的配置入口是 `GITHUB_TOKEN`，不属于 Tavily key。
+独立 RAG 的现有配置名为 `RAG_BASE_URL`、`RAG_API_KEY`、`RAG_TIMEOUT_SECONDS`，具体服务契约仍待确认。
+
+## 已运行证据与余额
+
+专用隔离G1验收实际执行模型20次（含1repair），有结果20、未知0；累计 **20/50**。Tavily预检HTTP200，request_id `94d2c6ec-e063-4bbb-894b-70068548402b`，usage `credits=1`；累计 **1/1000**，与用户官网观察一致。三项搜索配置足够连接Tavily，不需另装SDK或配置搜索模型；产品适配器/API/界面仍待G2。后续切片不重置额度。详情见[G1报告](../acceptance/G1-v2-user-slice-2026-10-01.md)。
+
+## GitHub连接体验与待配置入口
+
+连接需求：用户点击连接，浏览器进入GitHub登录/授权页，回调后软件显示已连接账号，可断开。推荐现有应用实现有界GitHub App授权及只读资源适配，按账号加密保存token、只取用户允许的仓库。账号连接不等于允许私有内容发给云模型，仍需对应许可。
+
+GitHub提供[远程MCP与宿主集成说明](https://github.com/github/github-mcp-server/blob/main/docs/host-integration.md)：宿主仍须处理OAuth/回调/token及工具范围。使用远程服务无需本地安装完整GitHub服务，但仅增加MCP配置不代表软件已有连接功能。当前Goal不新增通用平台MCP Runtime；浏览器授权可用GitHub App+API完成。官方[GitHub App用户授权流程](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app)说明client ID、client secret和callback。
+
+后续应用维护者注册App并配置client ID/client secret/固定callback URL，普通用户只做浏览器授权。具体环境变量和回调路径在实现契约确定后写入.env.example，当前尚未接线。现有`GITHUB_TOKEN`仅为历史服务端字段，不作为所有用户共享账号连接；公开候选和手动URL接入可先独立实现。
