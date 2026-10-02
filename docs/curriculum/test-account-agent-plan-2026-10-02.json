@@ -1,0 +1,1371 @@
+{
+  "version": 1,
+  "title": "知识库 Agent：测试账号课程审阅计划",
+  "stages": [
+    {
+      "key": "python",
+      "title": "Python 与开发环境",
+      "objective": "建立可运行、可调试和可复现的 Python 环境，为知识库 Agent 准备文档读取工具。",
+      "prerequisites": [],
+      "optional": false,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "python.environment",
+          "title": "环境与依赖",
+          "objectives": [
+            "创建独立虚拟环境，记录解释器版本与依赖安装命令。",
+            "能按说明在新环境运行同一个脚本。"
+          ]
+        },
+        {
+          "key": "python.data",
+          "title": "文件与数据结构",
+          "objectives": [
+            "用列表、字典和函数处理文档内容。",
+            "读取 UTF-8 文件并将文件名、正文和错误分开记录。"
+          ]
+        },
+        {
+          "key": "python.errors",
+          "title": "异常与基础测试",
+          "objectives": [
+            "区分正常返回、文件不存在和编码错误。",
+            "使用 assert 或标准库 unittest 检查可确定结果。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "python.unit",
+          "title": "Python 与开发环境：学习与应用",
+          "node_keys": [
+            "python.environment",
+            "python.data",
+            "python.errors"
+          ],
+          "objectives": [
+            "建立可运行、可调试和可复现的 Python 环境，为知识库 Agent 准备文档读取工具。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交读取脚本、三份无敏感信息的示例文档和启动说明。",
+              "输出能将每条正文对应回来源路径，不混入异常报错。",
+              "测试覆盖正常文本、空文件与缺失路径；保留实际命令和结果。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "python.practice",
+          "title": "编写知识库文档读取器",
+          "goal": "把几份本地示例文档转换为可追溯的文本记录。",
+          "in_scope": [
+            "读取一个指定目录的文本文件；为每个结果保留相对路径。",
+            "建立 requirements.txt 或等价依赖清单和运行说明。",
+            "用标准库测试空文件、缺失路径和正常文本。"
+          ],
+          "out_scope": [
+            "云端模型调用",
+            "复杂包管理或容器部署"
+          ],
+          "acceptance": [
+            "提交读取脚本、三份无敏感信息的示例文档和启动说明。",
+            "输出能将每条正文对应回来源路径，不混入异常报错。",
+            "测试覆盖正常文本、空文件与缺失路径；保留实际命令和结果。"
+          ],
+          "node_keys": [
+            "python.environment",
+            "python.data",
+            "python.errors"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Python Tutorial",
+          "url": "https://docs.python.org/3/tutorial/",
+          "role": "primary",
+          "reading": "无编程基础先照做第3章交互示例与第4章函数/控制流，再读第5章数据结构、第7章文件读写、第8章异常和第12章虚拟环境；无需从头通读。",
+          "why": "官方教程以已有编程经验者为主要读者；初学者结合本阶段小脚本逐步照做，不要求独立读完整手册。"
+        }
+      ]
+    },
+    {
+      "key": "llm",
+      "title": "LLM 与 Prompt 基础",
+      "objective": "理解消息、上下文、结构化输出和调用限制，能对知识库问题提出可检查的回答要求。",
+      "prerequisites": [
+        "python"
+      ],
+      "optional": false,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "llm.messages",
+          "title": "消息与上下文",
+          "objectives": [
+            "区分指令、用户问题与提供的参考资料。",
+            "解释上下文长度限制与模型输出不确定性。"
+          ]
+        },
+        {
+          "key": "llm.prompt",
+          "title": "Prompt 与依据",
+          "objectives": [
+            "用明确任务、输入和输出要求组织 Prompt。",
+            "要求回答引用输入材料，材料不足时说明无法确定。"
+          ]
+        },
+        {
+          "key": "llm.structured",
+          "title": "结构化输出与调用记录",
+          "objectives": [
+            "定义答案、引用与无答案标记的结构。",
+            "记录模型/Prompt 版本、调用状态、耗时和可获得的 token 用量。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "llm.unit",
+          "title": "LLM 与 Prompt 基础：学习与应用",
+          "node_keys": [
+            "llm.messages",
+            "llm.prompt",
+            "llm.structured"
+          ],
+          "objectives": [
+            "理解消息、上下文、结构化输出和调用限制，能对知识库问题提出可检查的回答要求。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交两版 Prompt、固定问题和逐项预期行为。",
+              "记录每个输出的格式、引用是否存在及无答案处理；错误不能只写“效果不好”。",
+              "如使用真实模型，结果说明包含模型标识、耗时与可获得的用量；未调用时明确标为样例验证。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "llm.practice",
+          "title": "比较两版知识问答 Prompt",
+          "goal": "用同一组示例问题检查 Prompt 如何影响答案与引用。",
+          "in_scope": [
+            "准备五个有答案和无答案问题及其参考材料。",
+            "编写两版 Prompt，保存输入和原始输出；可先用人工或固定样例输出验证结构。",
+            "记录输出是否遵守格式、引用和无答案要求。"
+          ],
+          "out_scope": [
+            "自动证明模型可靠",
+            "默认付费调用或外发私人材料"
+          ],
+          "acceptance": [
+            "提交两版 Prompt、固定问题和逐项预期行为。",
+            "记录每个输出的格式、引用是否存在及无答案处理；错误不能只写“效果不好”。",
+            "如使用真实模型，结果说明包含模型标识、耗时与可获得的用量；未调用时明确标为样例验证。"
+          ],
+          "node_keys": [
+            "llm.messages",
+            "llm.prompt",
+            "llm.structured"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "OpenAI · Text generation",
+          "url": "https://developers.openai.com/api/docs/guides/text",
+          "role": "primary",
+          "reading": "消息/指令组织、Prompt 编写与上下文限制相关段落。",
+          "why": "帮助明确问答输入与输出要求；API 示例不是费用授权。"
+        },
+        {
+          "title": "OpenAI · Structured outputs",
+          "url": "https://developers.openai.com/api/docs/guides/structured-outputs",
+          "role": "supplemental",
+          "reading": "结构化输出的 schema、拒绝响应与错误处理相关段落。",
+          "why": "检查输出结构和异常分支。"
+        }
+      ]
+    },
+    {
+      "key": "tools",
+      "title": "工具调用与结构化输出",
+      "objective": "让 Agent 通过受控工具读取知识库，校验参数、返回结果并处理失败。",
+      "prerequisites": [
+        "llm"
+      ],
+      "optional": false,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "tools.schema",
+          "title": "工具 schema 与参数校验",
+          "objectives": [
+            "定义 list_documents、read_document 工具的输入与输出。",
+            "拒绝不存在的文档 ID 和不允许的路径。"
+          ]
+        },
+        {
+          "key": "tools.loop",
+          "title": "工具调用循环",
+          "objectives": [
+            "区分模型提出工具调用与程序实际执行工具。",
+            "把成功和失败结果明确反馈到后续决策。"
+          ]
+        },
+        {
+          "key": "tools.permissions",
+          "title": "工具权限与边界",
+          "objectives": [
+            "将工具限制为指定目录的只读操作。",
+            "记录工具名称、参数、结果和异常，避免执行输入中的指令。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "tools.unit",
+          "title": "工具调用与结构化输出：学习与应用",
+          "node_keys": [
+            "tools.schema",
+            "tools.loop",
+            "tools.permissions"
+          ],
+          "objectives": [
+            "让 Agent 通过受控工具读取知识库，校验参数、返回结果并处理失败。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交工具定义、执行函数和测试记录。",
+              "合法文档 ID 返回对应正文；缺失 ID、越界路径被拒绝并提供可识别错误。",
+              "日志区分请求、实际执行和结果；失败不会伪装为成功。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "tools.practice",
+          "title": "实现只读知识库工具",
+          "goal": "将第一阶段的读取器包装为可以检查输入与结果的工具。",
+          "in_scope": [
+            "定义列目录、读文档的 schema；先用固定调用序列代替模型。",
+            "校验工具参数并阻止越界路径。",
+            "记录一次正常调用和两次失败调用。"
+          ],
+          "out_scope": [
+            "任意 shell 执行",
+            "写入外部服务",
+            "动态开放所有工具"
+          ],
+          "acceptance": [
+            "提交工具定义、执行函数和测试记录。",
+            "合法文档 ID 返回对应正文；缺失 ID、越界路径被拒绝并提供可识别错误。",
+            "日志区分请求、实际执行和结果；失败不会伪装为成功。"
+          ],
+          "node_keys": [
+            "tools.schema",
+            "tools.loop",
+            "tools.permissions"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "OpenAI · Function calling",
+          "url": "https://developers.openai.com/api/docs/guides/function-calling",
+          "role": "primary",
+          "reading": "工具定义、工具调用处理循环、参数 schema 与严格模式相关段落。",
+          "why": "落实工具提议、程序执行与结果回传的边界。"
+        }
+      ]
+    },
+    {
+      "key": "minAgent",
+      "title": "最小可运行 Agent 与 Eval-Lite",
+      "objective": "跑通知识库问题→工具读取→基于资料回答的最小循环，同时形成固定案例、trace、简单 grader 与成本基线。",
+      "prerequisites": [
+        "tools"
+      ],
+      "optional": false,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "minAgent.agentLoop",
+          "title": "Agent 循环与停止条件",
+          "objectives": [
+            "把观察、动作和工具结果写成显式记录。",
+            "限制动作次数并区分回答、无答案、错误和超时终止。"
+          ]
+        },
+        {
+          "key": "minAgent.evalLite",
+          "title": "固定案例与预期行为",
+          "objectives": [
+            "准备 10–20 个固定案例，标注文档来源和可检查预期。",
+            "包含有答案、无答案、工具失败和越界请求。"
+          ]
+        },
+        {
+          "key": "minAgent.traceBaseline",
+          "title": "Trace、简单 grader 与基线",
+          "objectives": [
+            "保存每次工具名称、参数、输出和最终结果。",
+            "用规则检查引用与答案标记，记录耗时、调用次数和可获得的费用。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "minAgent.unit",
+          "title": "最小可运行 Agent 与 Eval-Lite：学习与应用",
+          "node_keys": [
+            "minAgent.agentLoop",
+            "minAgent.evalLite",
+            "minAgent.traceBaseline"
+          ],
+          "objectives": [
+            "跑通知识库问题→工具读取→基于资料回答的最小循环，同时形成固定案例、trace、简单 grader 与成本基线。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交最小循环、10–20 个案例及预期行为、grader 和运行说明。",
+              "每个运行都有可回溯 trace、终止原因；不能只保存最终回答。",
+              "基线表记录每案例结果、耗时与调用数；无实际费用数据时明确记录不可用。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "minAgent.practice",
+          "title": "跑通最小知识库 Agent 并留下评测基线",
+          "goal": "交付可复现的最小问答循环和早期评测记录。",
+          "in_scope": [
+            "先用固定策略验证环境和 grader，再按已有调用许可选择是否接入模型。",
+            "运行固定案例并保存 trace 与终止原因。",
+            "输出每案例规则评分、耗时、调用数和失败描述。"
+          ],
+          "out_scope": [
+            "新增通关分数门槛",
+            "复杂自主规划",
+            "默认使用付费模型"
+          ],
+          "acceptance": [
+            "提交最小循环、10–20 个案例及预期行为、grader 和运行说明。",
+            "每个运行都有可回溯 trace、终止原因；不能只保存最终回答。",
+            "基线表记录每案例结果、耗时与调用数；无实际费用数据时明确记录不可用。"
+          ],
+          "node_keys": [
+            "minAgent.agentLoop",
+            "minAgent.evalLite",
+            "minAgent.traceBaseline"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Anthropic · Building effective agents",
+          "url": "https://www.anthropic.com/engineering/building-effective-agents",
+          "role": "primary",
+          "reading": "Augmented LLM 与 Agents 相关部分；重点阅读工具交互、反馈与停止条件。",
+          "why": "把最小 Agent 控制在可观察、可调试的循环内。"
+        },
+        {
+          "title": "Anthropic · Demystifying evals for AI agents",
+          "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+          "role": "supplemental",
+          "reading": "Task、trial、grader、trajectory/transcript 与 outcome 的定义及简单评测起步相关部分。",
+          "why": "从早期案例开始区分轨迹和真实结果。"
+        }
+      ]
+    },
+    {
+      "key": "rag",
+      "title": "RAG 与检索质量",
+      "objective": "为知识库 Agent 增加来源可追溯的检索，分别检查检索覆盖与回答依据。知识应用目标优先选择此分支。",
+      "prerequisites": [
+        "tools",
+        "minAgent"
+      ],
+      "optional": false,
+      "branch": true,
+      "nodes": [
+        {
+          "key": "rag.index",
+          "title": "文档、切分与索引",
+          "objectives": [
+            "为文档和片段保留稳定来源标识。",
+            "解释切分长度对上下文和检索结果的影响。"
+          ]
+        },
+        {
+          "key": "rag.retrieval",
+          "title": "检索结果与覆盖",
+          "objectives": [
+            "为固定问题标注应检索的相关片段。",
+            "区分未检到证据与检到证据后回答错误。"
+          ]
+        },
+        {
+          "key": "rag.grounding",
+          "title": "引用与无答案处理",
+          "objectives": [
+            "使引用对应实际检索片段。",
+            "检索结果不足时返回明确的无答案行为。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "rag.unit",
+          "title": "RAG 与检索质量：学习与应用",
+          "node_keys": [
+            "rag.index",
+            "rag.retrieval",
+            "rag.grounding"
+          ],
+          "objectives": [
+            "为知识库 Agent 增加来源可追溯的检索，分别检查检索覆盖与回答依据。知识应用目标优先选择此分支。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交文档片段清单、检索函数与固定问题的相关片段标注。",
+              "至少展示一次检索错误和一次回答依据错误，指出错误发生的环节。",
+              "有答案结果引用能回到实际片段；无答案案例不会编造来源。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "rag.practice",
+          "title": "为知识库 Agent 增加可检查的检索",
+          "goal": "用小型示例知识库比较检索结果与最终回答。",
+          "in_scope": [
+            "以本地无敏感示例文档建立简单关键词或现有检索适配。",
+            "对固定案例记录返回片段、来源与答案引用。",
+            "增加一个相似但不相关片段和一个无答案问题。"
+          ],
+          "out_scope": [
+            "必须使用复杂向量框架",
+            "全文自动理解所有资料",
+            "自动连接私人检索服务"
+          ],
+          "acceptance": [
+            "提交文档片段清单、检索函数与固定问题的相关片段标注。",
+            "至少展示一次检索错误和一次回答依据错误，指出错误发生的环节。",
+            "有答案结果引用能回到实际片段；无答案案例不会编造来源。"
+          ],
+          "node_keys": [
+            "rag.index",
+            "rag.retrieval",
+            "rag.grounding"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "LangChain · Retrieval",
+          "url": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+          "role": "primary",
+          "reading": "Knowledge bases、2-step RAG 与 Agentic RAG 相关部分；阅读索引、检索和生成的职责。",
+          "why": "理解检索与回答应分别检查；框架示例可用薄适配实现。"
+        }
+      ]
+    },
+    {
+      "key": "workflow",
+      "title": "Workflow、状态与恢复",
+      "objective": "把知识库问答的多步状态、停止条件和失败恢复显式化。调试与自动化目标优先选择此分支，与 RAG 无相互先修。",
+      "prerequisites": [
+        "tools",
+        "minAgent"
+      ],
+      "optional": false,
+      "branch": true,
+      "nodes": [
+        {
+          "key": "workflow.states",
+          "title": "状态与确定性流程",
+          "objectives": [
+            "定义准备、检索/读取、回答、失败与结束状态。",
+            "将条件分支和最大步数写在代码中。"
+          ]
+        },
+        {
+          "key": "workflow.recovery",
+          "title": "失败与恢复",
+          "objectives": [
+            "区分可重试读取、不可盲重试副作用和未知结果。",
+            "保存恢复位置和失败信息，避免重复提交同一结果。"
+          ]
+        },
+        {
+          "key": "workflow.trace",
+          "title": "状态迁移证据",
+          "objectives": [
+            "记录每次状态迁移的前后状态及触发原因。",
+            "通过故障注入复现恢复行为。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "workflow.unit",
+          "title": "Workflow、状态与恢复：学习与应用",
+          "node_keys": [
+            "workflow.states",
+            "workflow.recovery",
+            "workflow.trace"
+          ],
+          "objectives": [
+            "把知识库问答的多步状态、停止条件和失败恢复显式化。调试与自动化目标优先选择此分支，与 RAG 无相互先修。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交状态图或状态表、实现和故障测试命令。",
+              "失败 trace 包含状态、工具、原因、重试次数和最终终止状态。",
+              "重复执行同一案例不会重复新增回答记录；达到动作上限时明确结束。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "workflow.practice",
+          "title": "给知识库 Agent 增加可复现的恢复流程",
+          "goal": "让一次工具失败能被定位，并按明确策略继续或结束。",
+          "in_scope": [
+            "用简单状态机实现问答流程，不要求引入编排框架。",
+            "注入一次读取超时、一次非法参数和一次最大步数终止。",
+            "为只读失败给出限定重试策略并记录恢复位置。"
+          ],
+          "out_scope": [
+            "自动重复未知副作用",
+            "无限重试",
+            "建设多 Agent 自组织系统"
+          ],
+          "acceptance": [
+            "提交状态图或状态表、实现和故障测试命令。",
+            "失败 trace 包含状态、工具、原因、重试次数和最终终止状态。",
+            "重复执行同一案例不会重复新增回答记录；达到动作上限时明确结束。"
+          ],
+          "node_keys": [
+            "workflow.states",
+            "workflow.recovery",
+            "workflow.trace"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "LangGraph · Workflows and agents",
+          "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
+          "role": "primary",
+          "reading": "Workflows 与 agents 的区别、Prompt chaining、Routing 相关部分。",
+          "why": "作为显式流程与条件分支参考；可先用普通函数实现。"
+        },
+        {
+          "title": "LangGraph · Persistence",
+          "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+          "role": "supplemental",
+          "reading": "checkpoint 与 thread_id、内存 checkpointer 重启局限、持久 checkpointer 的选择和恢复说明。",
+          "why": "帮助区分内存状态与持久恢复；本单元的普通函数练习另行验证幂等与重复副作用。"
+        }
+      ]
+    },
+    {
+      "key": "memory",
+      "title": "记忆与上下文管理",
+      "objective": "为知识库 Agent 制定原文、摘要和长期信息的保留规则，检查压缩和检索是否遗漏关键信息。",
+      "prerequisites": [
+        "minAgent"
+      ],
+      "optional": false,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "memory.conversation",
+          "title": "会话状态与上下文预算",
+          "objectives": [
+            "区分本轮问题、跨轮会话状态与长期信息。",
+            "记录上下文组成和截断策略。"
+          ]
+        },
+        {
+          "key": "memory.summary",
+          "title": "摘要与原文保留",
+          "objectives": [
+            "保留原始会话并建立摘要到原文的引用。",
+            "用固定问题检查摘要的遗漏、误记和混淆。"
+          ]
+        },
+        {
+          "key": "memory.memoryBoundary",
+          "title": "长期记忆的来源与读写边界",
+          "objectives": [
+            "明确哪些信息可以持久化、来源和更新规则。",
+            "不因模型建议自动写入长期事实。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "memory.unit",
+          "title": "记忆与上下文管理：学习与应用",
+          "node_keys": [
+            "memory.conversation",
+            "memory.summary",
+            "memory.memoryBoundary"
+          ],
+          "objectives": [
+            "为知识库 Agent 制定原文、摘要和长期信息的保留规则，检查压缩和检索是否遗漏关键信息。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交原始会话、摘要、保留策略和对照问题。",
+              "每条摘要事实能指出来源消息；用户更正不会被旧内容覆盖。",
+              "对照表列出保留、遗漏或误记的信息，并说明修正策略。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "memory.practice",
+          "title": "为连续问答增加可检查的上下文管理",
+          "goal": "用同一段会话比较完整上下文与摘要后的信息保留。",
+          "in_scope": [
+            "准备一段有更正、约束和来源引用的长会话。",
+            "生成或手写摘要，保留原文与消息顺序。",
+            "用固定问题对照两种上下文的答案和遗漏。"
+          ],
+          "out_scope": [
+            "删除原会话",
+            "自动将模型猜测写入长期记忆",
+            "复杂记忆评分系统"
+          ],
+          "acceptance": [
+            "提交原始会话、摘要、保留策略和对照问题。",
+            "每条摘要事实能指出来源消息；用户更正不会被旧内容覆盖。",
+            "对照表列出保留、遗漏或误记的信息，并说明修正策略。"
+          ],
+          "node_keys": [
+            "memory.conversation",
+            "memory.summary",
+            "memory.memoryBoundary"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "LangChain · Messages",
+          "url": "https://docs.langchain.com/oss/python/langchain/messages",
+          "role": "primary",
+          "reading": "Message types 与消息内容/消息历史相关部分。",
+          "why": "区分不同消息角色与会话记录。"
+        },
+        {
+          "title": "LangChain · Short-term memory",
+          "url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+          "role": "supplemental",
+          "reading": "消息裁剪、删除与总结相关部分；重点对照原文保留和上下文长度策略。",
+          "why": "比较压缩策略的适用条件与信息损失。"
+        }
+      ]
+    },
+    {
+      "key": "mcp",
+      "title": "MCP 工具接入",
+      "objective": "按知识库项目需要理解 MCP client/server、工具发现与传输；本阶段按目标选修，先对接只读文档工具。",
+      "prerequisites": [
+        "tools"
+      ],
+      "optional": true,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "mcp.architecture",
+          "title": "Client、server 与能力发现",
+          "objectives": [
+            "画出 host、client、server 与工具请求的关系。",
+            "区分 MCP 协议接入与 Agent 的动作选择。"
+          ]
+        },
+        {
+          "key": "mcp.transports",
+          "title": "stdio 与 Streamable HTTP",
+          "objectives": [
+            "解释本地 stdio 与 HTTP 请求/响应路径。",
+            "理解 Streamable HTTP 响应可为 JSON 或请求范围内 SSE，不把全部 SSE 称为废弃。"
+          ]
+        },
+        {
+          "key": "mcp.toolBoundary",
+          "title": "只读工具 schema 与断连处理",
+          "objectives": [
+            "只暴露允许的文档读取能力。",
+            "对断连、未知工具和非法参数给出明确错误。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "mcp.unit",
+          "title": "MCP 工具接入：学习与应用",
+          "node_keys": [
+            "mcp.architecture",
+            "mcp.transports",
+            "mcp.toolBoundary"
+          ],
+          "objectives": [
+            "按知识库项目需要理解 MCP client/server、工具发现与传输；本阶段按目标选修，先对接只读文档工具。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交组件关系图、工具列表和调用记录。",
+              "合法调用返回指定文档；非法参数、未知工具、断连分别可识别。",
+              "说明采用的传输及错误传播路径，列清允许工具和读取范围。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "mcp.practice",
+          "title": "通过 MCP 调用一个只读文档工具",
+          "goal": "保留一次工具发现、合法调用和错误处理记录。",
+          "in_scope": [
+            "在已有安全环境或本地示例 server 中公开读取工具。",
+            "列出工具 schema，执行一次合法只读请求。",
+            "执行未知工具或非法参数，并模拟断连。"
+          ],
+          "out_scope": [
+            "任意外部执行能力",
+            "不经授权连接私有服务",
+            "MCP 平台管理系统"
+          ],
+          "acceptance": [
+            "提交组件关系图、工具列表和调用记录。",
+            "合法调用返回指定文档；非法参数、未知工具、断连分别可识别。",
+            "说明采用的传输及错误传播路径，列清允许工具和读取范围。"
+          ],
+          "node_keys": [
+            "mcp.architecture",
+            "mcp.transports",
+            "mcp.toolBoundary"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "MCP · Architecture",
+          "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+          "role": "primary",
+          "reading": "Participants、Layers、Primitives、工具发现与调用示例；留意2026-07-28的请求元数据。",
+          "why": "建立组件与能力发现的边界。"
+        },
+        {
+          "title": "MCP · Transports",
+          "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports",
+          "role": "supplemental",
+          "reading": "stdio、Streamable HTTP、Message Boundaries、Cancellation；区分 JSON 与请求范围内 SSE 响应。",
+          "why": "按实际传输解释 JSON/SSE 与断连行为。"
+        }
+      ]
+    },
+    {
+      "key": "eval",
+      "title": "Eval 基础与 Reward 设计",
+      "objective": "先定义知识库任务成功/失败，再构造测试集、grader、trace 和成本基线；区分真实任务验收与训练 reward。",
+      "prerequisites": [
+        "minAgent"
+      ],
+      "optional": false,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "eval.successDataset",
+          "title": "成功定义与测试集",
+          "objectives": [
+            "逐案例写出可检查的成功与失败条件。",
+            "区分开发集和保留测试集，事先声明错误、超时与重复 trial 的计数规则。"
+          ]
+        },
+        {
+          "key": "eval.graders",
+          "title": "确定性 grader 与 LLM judge",
+          "objectives": [
+            "用确定性规则检查引用、结构和工具结果。",
+            "对难以机械判断的质量写人工标注准则；使用 judge 时与人工样本比较偏差。"
+          ]
+        },
+        {
+          "key": "eval.baseline",
+          "title": "Trace 与成功率、成本基线",
+          "objectives": [
+            "保存观察、动作、参数、工具输出、错误与最终 outcome。",
+            "计算成功任务数/有效任务数，记录重复运行差异、耗时和费用。"
+          ]
+        },
+        {
+          "key": "eval.reward",
+          "title": "奖励、稀疏反馈与 reward hacking",
+          "objectives": [
+            "区分验收指标与可优化奖励代理。",
+            "构造高 reward 但引用错误或任务失败的反例，解释稀疏奖励的局限。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "eval.unit",
+          "title": "Eval 基础与 Reward 设计：学习与应用",
+          "node_keys": [
+            "eval.successDataset",
+            "eval.graders",
+            "eval.baseline",
+            "eval.reward"
+          ],
+          "objectives": [
+            "先定义知识库任务成功/失败，再构造测试集、grader、trace 和成本基线；区分真实任务验收与训练 reward。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交带 expected outcome 的测试数据、划分规则与 grader 脚本。",
+              "报告给出成功率分子/分母及错误、超时、重复 trial 计数规则，数字可从逐条结果复算。",
+              "至少一个判定能直接检查环境或工具结果；人工复核结果与评分偏差说明可查。",
+              "保留完整 baseline trace 和 cost/latency 表；reward v1/v2 反例明确指出为何高分不等于任务成功。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "eval.practice",
+          "title": "建立可复现的知识库评测与奖励对照",
+          "goal": "为贯穿项目输出独立成功判定、固定 baseline 和 reward hacking 反例。",
+          "in_scope": [
+            "复用早期案例并增加开发/保留划分与明确成功条件。",
+            "写确定性 grader，人工复核一个小样本；judge 为有许可时的可选对照。",
+            "运行 baseline，输出成功率、失败 trace、耗时、调用数和可获得的成本。",
+            "为同一案例设计 reward v1/v2，展示奖励高但任务失败的轨迹。"
+          ],
+          "out_scope": [
+            "新增通过分数门槛",
+            "把模型自述作为唯一成功证据",
+            "用保留测试集反复调 grader"
+          ],
+          "acceptance": [
+            "提交带 expected outcome 的测试数据、划分规则与 grader 脚本。",
+            "报告给出成功率分子/分母及错误、超时、重复 trial 计数规则，数字可从逐条结果复算。",
+            "至少一个判定能直接检查环境或工具结果；人工复核结果与评分偏差说明可查。",
+            "保留完整 baseline trace 和 cost/latency 表；reward v1/v2 反例明确指出为何高分不等于任务成功。"
+          ],
+          "node_keys": [
+            "eval.successDataset",
+            "eval.graders",
+            "eval.baseline",
+            "eval.reward"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "OpenAI · Evals",
+          "url": "https://developers.openai.com/api/docs/guides/evals",
+          "role": "primary",
+          "reading": "定义 eval、测试数据与 grading criteria、运行 eval 和分析结果相关部分。",
+          "why": "组织测试集、评分标准和可复现结果。"
+        },
+        {
+          "title": "Anthropic · Demystifying evals for AI agents",
+          "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+          "role": "supplemental",
+          "reading": "Task/trial/grader/transcript/outcome；code-based、model-based 和 human graders；评测迭代与多次运行相关部分。",
+          "why": "区分环境结果与文本评分，检查 trial 差异与 grader 盲区。"
+        },
+        {
+          "title": "OpenAI · Reinforcement fine-tuning",
+          "url": "https://developers.openai.com/api/docs/guides/reinforcement-fine-tuning",
+          "role": "reference",
+          "reading": "适用条件、grader 与结果评估相关部分；本阶段只阅读奖励设计和评估原则。",
+          "why": "理解可评分任务与 reward 代理，不执行训练。"
+        }
+      ]
+    },
+    {
+      "key": "rlBasics",
+      "title": "Agentic RL 基础与受控实验",
+      "objective": "在无需云模型的工具环境中理解 policy、environment、rollout、trajectory reward、RLVR、PPO/GRPO 直觉及长轨迹 credit assignment。",
+      "prerequisites": [
+        "eval"
+      ],
+      "optional": false,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "rlBasics.policyEnvironment",
+          "title": "Policy、environment 与 rollout",
+          "objectives": [
+            "标注 observation、action、policy、episode、return 与终止条件。",
+            "把工具调用结果作为环境观察，区分 Agent 自述与环境事实。"
+          ]
+        },
+        {
+          "key": "rlBasics.trajectoryReward",
+          "title": "Trajectory reward、RLVR 与稀疏奖励",
+          "objectives": [
+            "根据可验证最终结果给 trajectory reward。",
+            "指出长轨迹中关键动作和无效动作，分析 sparse reward 与 credit assignment。"
+          ]
+        },
+        {
+          "key": "rlBasics.ppoGrpo",
+          "title": "PPO/GRPO 直觉与稳定性",
+          "objectives": [
+            "用例子说明 PPO 限制 policy 更新幅度的目的。",
+            "解释 GRPO 同组轨迹的相对比较；讨论奖励尺度、组内差异与训练稳定性，不要求完整公式推导。"
+          ]
+        },
+        {
+          "key": "rlBasics.toolUse",
+          "title": "Tool-use RL 与投机行为",
+          "objectives": [
+            "分析错误工具、参数失败、冗余调用如何影响奖励和最终结果。",
+            "构造无效调用刷奖励或只复述答案的投机轨迹，并提出可检查修正。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "rlBasics.unit",
+          "title": "Agentic RL 基础与受控实验：学习与应用",
+          "node_keys": [
+            "rlBasics.policyEnvironment",
+            "rlBasics.trajectoryReward",
+            "rlBasics.ppoGrpo",
+            "rlBasics.toolUse"
+          ],
+          "objectives": [
+            "在无需云模型的工具环境中理解 policy、environment、rollout、trajectory reward、RLVR、PPO/GRPO 直觉及长轨迹 credit assignment。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交 environment.py、rollouts.jsonl、reward_v1_v2.py 与实验说明。",
+              "轨迹包含每步 observation/action/result、终止原因与最终 reward，能按记录回放。",
+              "至少一个高 reward 但失败的反例及修正前后评分可复算；成功由环境检查决定。",
+              "长轨迹分析指出关键动作、无效动作、稀疏反馈和归因困难；PPO/GRPO 稳定性说明包含具体直觉例子。",
+              "报告明确是否发生参数训练；规则/随机对照使用独立保留案例。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "rlBasics.practice",
+          "title": "在受控知识库工具环境中比较策略与奖励",
+          "goal": "用规则策略和随机策略产生可回放轨迹，解释奖励与任务成功的差异。",
+          "in_scope": [
+            "用本地示例文档构造查找、读取、提交答案三类动作，限定最大动作数。",
+            "实现固定规则策略和有固定随机种子的随机策略；保存 rollout。",
+            "构造一条较长轨迹，标注每步是否有助于最终答案及 reward v1/v2。",
+            "比较保留案例上任务成功率、奖励与工具调用数；明确是否更新过 policy 参数。"
+          ],
+          "out_scope": [
+            "把轨迹模拟称为完成 RL 训练",
+            "默认购买算力或付费模型",
+            "完整 PPO/GRPO 模型训练"
+          ],
+          "acceptance": [
+            "提交 environment.py、rollouts.jsonl、reward_v1_v2.py 与实验说明。",
+            "轨迹包含每步 observation/action/result、终止原因与最终 reward，能按记录回放。",
+            "至少一个高 reward 但失败的反例及修正前后评分可复算；成功由环境检查决定。",
+            "长轨迹分析指出关键动作、无效动作、稀疏反馈和归因困难；PPO/GRPO 稳定性说明包含具体直觉例子。",
+            "报告明确是否发生参数训练；规则/随机对照使用独立保留案例。"
+          ],
+          "node_keys": [
+            "rlBasics.policyEnvironment",
+            "rlBasics.trajectoryReward",
+            "rlBasics.ppoGrpo",
+            "rlBasics.toolUse"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Hugging Face TRL · GRPO Trainer",
+          "url": "https://huggingface.co/docs/trl/grpo_trainer",
+          "role": "primary",
+          "reading": "GRPO 概述、组内相对优势、reward functions 及训练稳定性相关说明。",
+          "why": "理解组内比较和奖励函数的作用。"
+        },
+        {
+          "title": "OpenAI · Reinforcement fine-tuning",
+          "url": "https://developers.openai.com/api/docs/guides/reinforcement-fine-tuning",
+          "role": "reference",
+          "reading": "适用条件、grader、training/evaluation 的奖励与任务评估相关部分。",
+          "why": "建立可验证结果与奖励来源的概念，不在此运行训练。"
+        },
+        {
+          "title": "OpenAI Spinning Up · PPO",
+          "url": "https://spinningup.openai.com/en/latest/algorithms/ppo.html",
+          "role": "supplemental",
+          "reading": "Background、Quick Facts 与 PPO-Clip 的直觉说明；公式只作参考。",
+          "why": "说明为何控制策略更新幅度。"
+        }
+      ]
+    },
+    {
+      "key": "advancedEval",
+      "title": "高级评估、诊断与优化",
+      "objective": "直接依赖 Eval 基础，对知识库 Agent 做 trace 诊断、鲁棒性/泛化/回归、消融、成本质量与安全评估；推荐排在 RL 基础后但不要求 RL 训练。",
+      "prerequisites": [
+        "eval"
+      ],
+      "optional": false,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "advancedEval.failureTaxonomy",
+          "title": "Trace grading 与失败分类",
+          "objectives": [
+            "按检索、工具选择/参数、状态/恢复、输出与 grader 分类失败。",
+            "用具体 trace 说明失败原因，区分症状与根因。"
+          ]
+        },
+        {
+          "key": "advancedEval.robustness",
+          "title": "鲁棒性、泛化与回归",
+          "objectives": [
+            "加入措辞变化、无答案、工具故障和未见文档案例。",
+            "冻结保留测试集，检查修复是否破坏已能完成的任务。"
+          ]
+        },
+        {
+          "key": "advancedEval.ablation",
+          "title": "消融与成本质量权衡",
+          "objectives": [
+            "一次只改一个关键变量，用 baseline/改进/去除改进的对照检查收益来源。",
+            "同时报告成功率、耗时、调用数与可获得成本。"
+          ]
+        },
+        {
+          "key": "advancedEval.safetyReward",
+          "title": "安全评估与 reward hacking 检测",
+          "objectives": [
+            "检查越界读取、资料内提示注入和无授权副作用。",
+            "若发生过 RL，使用同一保留集比较训练前后 reward 和真实成功，检查奖励投机。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "advancedEval.unit",
+          "title": "高级评估、诊断与优化：学习与应用",
+          "node_keys": [
+            "advancedEval.failureTaxonomy",
+            "advancedEval.robustness",
+            "advancedEval.ablation",
+            "advancedEval.safetyReward"
+          ],
+          "objectives": [
+            "直接依赖 Eval 基础，对知识库 Agent 做 trace 诊断、鲁棒性/泛化/回归、消融、成本质量与安全评估；推荐排在 RL 基础后但不要求 RL 训练。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交失败分类表、对应 trace、固定评测版本、改进代码与消融报告。",
+              "对照逐项列出改动，baseline/改进/消融使用同一冻结案例与运行条件。",
+              "报告分别覆盖扰动、未见、回归和安全结果；失败记录不能删除。",
+              "成功率、费用/调用数和耗时能从逐案例结果复算；结论说明收益与代价。",
+              "明确检测一个 reward hacking 反例；如有 RL，训练前后比较包含同一保留集和真实任务成功检查。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "advancedEval.practice",
+          "title": "完成一次有证据的 Agent 优化",
+          "goal": "提交失败定位、单变量改进、消融及独立保留集的回归报告。",
+          "in_scope": [
+            "选三条真实或可复现失败 trace，建立 failure taxonomy。",
+            "修复一种原因，保持数据、运行条件与其它变量一致。",
+            "加入未见、扰动、工具故障、越界/提示注入案例，做 baseline/改进/消融对照。",
+            "如果做过 RL，补充训练前后同集评测；否则标明未训练并用奖励投机样例检查 grader。"
+          ],
+          "out_scope": [
+            "只展示成功演示",
+            "同时更改多项条件后归因到一个方法",
+            "把 reward 上升当成质量已提升"
+          ],
+          "acceptance": [
+            "提交失败分类表、对应 trace、固定评测版本、改进代码与消融报告。",
+            "对照逐项列出改动，baseline/改进/消融使用同一冻结案例与运行条件。",
+            "报告分别覆盖扰动、未见、回归和安全结果；失败记录不能删除。",
+            "成功率、费用/调用数和耗时能从逐案例结果复算；结论说明收益与代价。",
+            "明确检测一个 reward hacking 反例；如有 RL，训练前后比较包含同一保留集和真实任务成功检查。"
+          ],
+          "node_keys": [
+            "advancedEval.failureTaxonomy",
+            "advancedEval.robustness",
+            "advancedEval.ablation",
+            "advancedEval.safetyReward"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Anthropic · Demystifying evals for AI agents",
+          "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+          "role": "primary",
+          "reading": "grader 组合、评测运行与 trace/outcome 分析、多次 trial 和迭代评测相关部分。",
+          "why": "把诊断、回归和评分器检查连成证据链。"
+        },
+        {
+          "title": "OpenAI · Evals",
+          "url": "https://developers.openai.com/api/docs/guides/evals",
+          "role": "supplemental",
+          "reading": "运行测试、查看结果与迭代评测相关部分。",
+          "why": "保持可复现测试与改进前后对比。"
+        },
+        {
+          "title": "OpenAI · Reinforcement fine-tuning",
+          "url": "https://developers.openai.com/api/docs/guides/reinforcement-fine-tuning",
+          "role": "reference",
+          "reading": "Evaluate the results 及 grader/奖励检查相关部分。",
+          "why": "训练前后比较与过拟合/奖励投机检查的参考。"
+        }
+      ]
+    },
+    {
+      "key": "capstone",
+      "title": "综合实践：可验收的知识库 Agent",
+      "objective": "整理贯穿各阶段的知识库 Agent，交付可复现运行、固定评测、资料引用、架构说明和失败复盘。完整 RL 训练不是项目交付先修。",
+      "prerequisites": [
+        "rag",
+        "advancedEval"
+      ],
+      "optional": false,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "capstone.reproduce",
+          "title": "项目运行与配置说明",
+          "objectives": [
+            "整理独立启动步骤和无密钥配置模板。",
+            "说明演示资料、工具范围和依赖版本。"
+          ]
+        },
+        {
+          "key": "capstone.evidence",
+          "title": "评测与成果证据",
+          "objectives": [
+            "保留 baseline、改进与回归结果及失败案例。",
+            "把每项质量结论指向可检查的运行或 trace。"
+          ]
+        },
+        {
+          "key": "capstone.tradeoffs",
+          "title": "架构、取舍与失败复盘",
+          "objectives": [
+            "说明检索、工具、状态与记忆的职责和取舍。",
+            "按项目需要采用 Workflow/memory/MCP，记录未采用能力和原因。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "capstone.unit",
+          "title": "综合实践：可验收的知识库 Agent：学习与应用",
+          "node_keys": [
+            "capstone.reproduce",
+            "capstone.evidence",
+            "capstone.tradeoffs"
+          ],
+          "objectives": [
+            "整理贯穿各阶段的知识库 Agent，交付可复现运行、固定评测、资料引用、架构说明和失败复盘。完整 RL 训练不是项目交付先修。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交 README、配置模板、架构说明、评测脚本/数据、结果表和失败复盘。",
+              "按说明可以用示例资料运行 Agent 与固定评测；不依赖未写出的本机路径或秘密。",
+              "引用能追溯到文档片段；关键质量结论有对应 trace/结果记录。",
+              "说明允许工具、已知限制、耗时与费用数据来源；未采用的可选能力有原因。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "capstone.practice",
+          "title": "交付可复现的知识库 Agent 成果包",
+          "goal": "让他人可以按说明重现知识问答与评测，理解边界和已知失败。",
+          "in_scope": [
+            "整合所需能力，整理运行说明、示例文档和配置模板。",
+            "提供固定演示问题、评测数据和一键或明确命令运行的评分脚本。",
+            "整理架构、权限、费用、失败与改进说明。"
+          ],
+          "out_scope": [
+            "要求所有项目必须接入 MCP 或训练 RL",
+            "公网部署",
+            "将个人资料和密钥打包提交"
+          ],
+          "acceptance": [
+            "提交 README、配置模板、架构说明、评测脚本/数据、结果表和失败复盘。",
+            "按说明可以用示例资料运行 Agent 与固定评测；不依赖未写出的本机路径或秘密。",
+            "引用能追溯到文档片段；关键质量结论有对应 trace/结果记录。",
+            "说明允许工具、已知限制、耗时与费用数据来源；未采用的可选能力有原因。"
+          ],
+          "node_keys": [
+            "capstone.reproduce",
+            "capstone.evidence",
+            "capstone.tradeoffs"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "Anthropic · Building effective agents",
+          "url": "https://www.anthropic.com/engineering/building-effective-agents",
+          "role": "primary",
+          "reading": "总结、工具设计与实际 Agent 使用建议相关部分。",
+          "why": "复核项目是否保持简单、可观察和职责清楚。"
+        },
+        {
+          "title": "Anthropic · Demystifying evals for AI agents",
+          "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+          "role": "reference",
+          "reading": "构建与维护 Agent 评测的实践相关部分。",
+          "why": "复核固定评测、失败保留与成果结论。"
+        }
+      ]
+    },
+    {
+      "key": "rlTraining",
+      "title": "可选进阶：完整 RL 训练",
+      "objective": "综合项目交付后按条件选修：先补概率、期望、梯度与 PyTorch/autograd，理解 SFT、LoRA、TRL 与数据/算力预算，再考虑真实参数训练。",
+      "prerequisites": [
+        "rlBasics",
+        "capstone"
+      ],
+      "optional": true,
+      "branch": false,
+      "nodes": [
+        {
+          "key": "rlTraining.math",
+          "title": "概率、期望、优势与梯度基础",
+          "objectives": [
+            "解释采样、期望回报与相对优势。",
+            "用小数组或手算例子理解梯度更新，不先要求大模型训练。"
+          ]
+        },
+        {
+          "key": "rlTraining.pytorch",
+          "title": "PyTorch 与 autograd",
+          "objectives": [
+            "用小型模型验证 forward、loss、backward 与参数更新。",
+            "记录随机种子、数据划分和可复现配置。"
+          ]
+        },
+        {
+          "key": "rlTraining.trainingStack",
+          "title": "SFT、LoRA 与 TRL",
+          "objectives": [
+            "区分监督微调、低秩适配与 RL 更新的目的。",
+            "说明 PPO/GRPO 的适用条件、reward function 和稳定性诊断。"
+          ]
+        },
+        {
+          "key": "rlTraining.budgetEvaluate",
+          "title": "训练预算与独立评估",
+          "objectives": [
+            "制定数据、硬件、费用、停止条件与回滚计划。",
+            "保留训练前后、未见案例及 reward hacking 检查，不能只报告训练奖励。"
+          ]
+        }
+      ],
+      "units": [
+        {
+          "key": "rlTraining.unit",
+          "title": "可选进阶：完整 RL 训练：学习与应用",
+          "node_keys": [
+            "rlTraining.math",
+            "rlTraining.pytorch",
+            "rlTraining.trainingStack",
+            "rlTraining.budgetEvaluate"
+          ],
+          "objectives": [
+            "综合项目交付后按条件选修：先补概率、期望、梯度与 PyTorch/autograd，理解 SFT、LoRA、TRL 与数据/算力预算，再考虑真实参数训练。"
+          ],
+          "rubric": {
+            "criteria": [
+              "提交 autograd 脚本与更新前后参数/损失记录；能指出实际更新的参数。",
+              "训练方案包含概率/梯度先修、数据划分、baseline、reward、工具/框架和预算。",
+              "尚未实施完整 RL 时明确标注“训练方案”，不声称模型训练已完成。",
+              "若完成 RL，提交可复现配置与同一保留集的前后质量、成本/耗时及奖励投机检查，说明稳定性与失败。"
+            ]
+          }
+        }
+      ],
+      "tasks": [
+        {
+          "key": "rlTraining.practice",
+          "title": "制定训练方案并验证一次真实参数更新",
+          "goal": "先完成无需云模型的小型 autograd 实验，再按可用授权选择是否开展模型 RL 训练。",
+          "in_scope": [
+            "提交数学/PyTorch 基础自检；用小型本地模型或张量完成一次实际参数更新。",
+            "写明拟训练任务、baseline、reward、训练/验证/保留数据与 SFT/LoRA/TRL 选择。",
+            "估计硬件、内存、时长与预算，设置停止和回滚条件。",
+            "如另行获准并实际训练，保留配置、参数更新证据、训练曲线和独立前后评估。"
+          ],
+          "out_scope": [
+            "把模拟 rollout 当成参数训练",
+            "未明确条件即购买算力或调用收费服务",
+            "把训练奖励直接作为学习成果验收"
+          ],
+          "acceptance": [
+            "提交 autograd 脚本与更新前后参数/损失记录；能指出实际更新的参数。",
+            "训练方案包含概率/梯度先修、数据划分、baseline、reward、工具/框架和预算。",
+            "尚未实施完整 RL 时明确标注“训练方案”，不声称模型训练已完成。",
+            "若完成 RL，提交可复现配置与同一保留集的前后质量、成本/耗时及奖励投机检查，说明稳定性与失败。"
+          ],
+          "node_keys": [
+            "rlTraining.math",
+            "rlTraining.pytorch",
+            "rlTraining.trainingStack",
+            "rlTraining.budgetEvaluate"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "title": "PyTorch · Autograd",
+          "url": "https://docs.pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html",
+          "role": "primary",
+          "reading": "计算图、梯度计算与梯度累积相关部分。",
+          "why": "验证反向传播和实际参数更新的基础。"
+        },
+        {
+          "title": "Hugging Face TRL · GRPO Trainer",
+          "url": "https://huggingface.co/docs/trl/grpo_trainer",
+          "role": "supplemental",
+          "reading": "训练配置、reward function、关键指标与稳定性建议相关部分。",
+          "why": "制定训练与诊断方案；实施前核对版本和算力。"
+        },
+        {
+          "title": "Hugging Face PEFT · LoRA",
+          "url": "https://huggingface.co/docs/peft/main/en/conceptual_guides/lora",
+          "role": "reference",
+          "reading": "LoRA 原理与适配参数的概念说明。",
+          "why": "区分低秩适配和完整模型更新。"
+        }
+      ]
+    }
+  ]
+}

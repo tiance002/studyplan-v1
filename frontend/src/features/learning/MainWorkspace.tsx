@@ -91,6 +91,9 @@ export function MainWorkspace({
     stage?.nodes.find((n) => n.node_id === nodeId) || stage?.nodes[0];
   const validNodeId = stage?.units.find(u=>u.unit_id === unitId)?.node_ids?.includes(node?.node_id || '') ? node?.node_id : undefined;
   const positionKey = `${projectId}:${planId}:${stage?.stage.stage_id}:${unitId}:${validNodeId || ''}`;
+  const stageNodeIds = new Set(stage?.nodes.map(n => n.node_id));
+  const entryPrerequisites = [...new Set(stage?.nodes.flatMap(n => n.prerequisite_ids || []))]
+    .filter(id => !stageNodeIds.has(id));
   return (
     <div className="content">
       <p className="eyebrow">阶段学习 · {stage ? String(stage.stage.order_index + 1).padStart(2,"0") : ""}</p>
@@ -107,7 +110,7 @@ export function MainWorkspace({
         </div>
       ) : (
         <>
-          <dl className="learning-meta"><div><dt>进入本阶段之前</dt><dd>{[...new Set(stage.nodes.flatMap(n => n.prerequisite_ids || []))].length ? [...new Set(stage.nodes.flatMap(n => n.prerequisite_ids || []))].map(id => {const prerequisite=allNodes.find(n=>n.node_id===id);return prerequisite ? <button key={id} className="prereq-link" onClick={()=>selectNode(id)}>{prerequisite.title}</button> : <span key={id}>关联前置知识暂不可用</span>;}) : '正式计划未声明前置知识。'}</dd></div><div><dt>本阶段实践</dt><dd>{stage.tasks.map(t=>t.title).join('、') || '本阶段尚无正式实践任务。'}</dd></div></dl>
+          <dl className="learning-meta"><div><dt>进入本阶段之前</dt><dd>{entryPrerequisites.length ? entryPrerequisites.map(id => {const prerequisite=allNodes.find(n=>n.node_id===id);return prerequisite ? <button key={id} className="prereq-link" onClick={()=>selectNode(id)}>{prerequisite.title}</button> : <span key={id}>关联前置知识暂不可用</span>;}) : '正式计划未声明前置知识。'}</dd></div><div><dt>本阶段实践</dt><dd>{stage.tasks.map(t=>t.title).join('、') || '本阶段尚无正式实践任务。'}</dd></div></dl>
           <div className="section-heading">
             <h2>知识结构</h2>
             <span className="muted">{stage.nodes.length} 个知识节点</span>

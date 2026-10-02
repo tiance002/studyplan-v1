@@ -234,3 +234,11 @@ React浅色重排、阶段折叠/嵌套小字号、资料章节范围、三浮�
 前端及阶段总结/进度两个worker均STOP，实际SolMedium已从JSONL核实；独立只读进度/浮窗review实际LunaMax亦核实，无可复现实质缺陷。契约由root整合，最多两业务writer。继续既有feat/v2-g1-user-slice，普通代码/文档提交留后续SHA；没有develop/master合并或milestone接受，完整V2 Goal保持active/NOT_READY。
 
 本轮代码本地提交 `63689bc61f42e50b357e53f5d64fd34dd94a718f`，47个白名单文件，未推送，不声明GitHub已存在。文档提交随后承接；不处理两原禁目录。
+
+## 2026-10-02测试账号课程实际第4版
+
+用户新增明确授权“按之前讨论的对目前测试账号里的计划做对应修改”，现已通过现有owner/RLS/CAS/幂等发布事务将保留的测试账号私人路线3→4。13阶段、43节点、13单元、13具体实践、27资料安排；19官方URL及阅读范围由root在线核对。最小Agent/Eval-Lite提前，Eval/Reward→Agentic RL基础→高级评估顺序落地；RAG/Workflow为兄弟分支、MCP可选、完整RL训练在综合实践之后可选，没有4/5退出门槛或每日总结。新位置阶段进度0/13不继承旧位置，旧原文/成果/Run/发布记录逐行保全PASS。详情见[本轮验收](../acceptance/test-account-curriculum-review-2026-10-02.md)。这替代此前“只提供课程建议、未更改私人计划”的时间点记录；仍未发布新的公共Seed或改生成器课程，未更改正常账号路线。
+
+新专用维护脚本限定原合成账号及隔离数据库，fresh备份归档可读PASS，prepare全流程ROLLBACK及独立回滚检查PASS，publish实际4版PASS，verify只读当前/历史核对PASS。入口先修排除当前阶段内部节点的小修正后前端11测试/build57模块PASS；CUA真实5177版本4及Eval/RL/高级评估的先修、资料、任务PASS。Ruff/diff收口PASS。初次ID前缀/ai_jobs范围/资料角色映射FAIL均有最小修正及事务回滚，未覆盖历史。CLI浏览器、付费模型、真实RL训练、恢复演练及ignored启动新分支运行NOT RUN。
+
+5177/8024继续只读审阅，当前服务已实际显示第4版，无Worker/历史Run恢复/收费派发；5175/8022与原RAG不操作。复用课程worker实际SolMedium只写数据，root整合目录/共享发布事务及核验，无并行同文件修改。继续既有feat/v2-g1-user-slice，禁止目录不处理，无develop/master合并/里程碑/公网发布。完整V2 Goal保持active/NOT_READY。
