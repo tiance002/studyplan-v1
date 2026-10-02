@@ -32,6 +32,7 @@ from typing import Any, Mapping, Sequence
 from app.core.ids import new_id
 from app.domain.enums import OutlineSectionKind, StageResourceRole, TaskKnowledgeRole
 from app.domain.planning.guidance import guidance_from_payload
+from app.domain.planning.intent import goal_spec_from_payload
 from app.domain.planning.models import (
     PlanDraft,
     PlanStage,
@@ -236,6 +237,7 @@ def project_draft(
         project_id=project_id,
         run_id=run_id,
         goal_snapshot=goal_snapshot,
+        goal_spec=goal_spec_from_payload((state.get("manifest") or {}).get("goal_spec")),
         revision_candidate=revision_candidate,
         stages=tuple(stages),
         unit_refs=tuple(unit_ids_sorted(unit_links, catalog)),

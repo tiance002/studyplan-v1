@@ -55,7 +55,7 @@ const BASE = process.env.STUDYPLAN_URL || "http://127.0.0.1:5173";
     assert.equal(await page.getByRole("button", { name: "保存修改", exact: true }).isDisabled(), true);
     draft = { ...draft, draft_hash: "hash-new", stages: [{ ...draft.stages[0], title: "另一窗口已保存" }] };
     await page.getByRole("button", { name: "重新加载草案", exact: true }).click();
-    await page.waitForLoadState("networkidle");
+    await page.waitForFunction(() => document.querySelector('input[aria-label="阶段 1 标题"]')?.value === "另一窗口已保存");
     assert.equal(await title.inputValue(), "另一窗口已保存");
     await page.reload();
     await page.waitForLoadState("networkidle");

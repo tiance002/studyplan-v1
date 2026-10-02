@@ -240,6 +240,7 @@ class PgResourceChanges:
                 raise ValidationAppError("请选择与当前主线不同的明确资源或章节")
             impact = self._impact(conn, current, target, command)
             draft = PlanDraft(new_id("drf"), command.project_id, "", current.goal_snapshot, current.revision+1,
+                goal_spec=current.goal_spec,
                 stages=tuple(replace(s, learning_guidance=changed_resource_guidance(s.learning_guidance))
                              if s.stage_id == target.stage_id else s for s in current.stages),
                 unit_links=current.unit_links, task_links=current.task_links,

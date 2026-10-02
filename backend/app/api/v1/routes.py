@@ -40,6 +40,7 @@ from app.api.v1.views import (
 )
 from app.application.plan_service import DecisionCommand, DraftBundle, PlanBundle, PlanService
 from app.core.errors import NotFoundError
+from app.domain.planning.intent import goal_spec_from_payload
 from app.domain.workspace.models import AuthContext
 from fastapi import APIRouter, Depends, Query, status
 
@@ -77,6 +78,7 @@ def generate_plan(
         scope=scope,
         project_id=project_id,
         goal=payload.goal,
+        goal_spec=goal_spec_from_payload(payload.goal_spec.model_dump(mode="json")) if payload.goal_spec else None,
         prefs_snapshot=(payload.prefs_snapshot.model_dump(mode="json")
                         if "prefs_snapshot" in payload.model_fields_set else None),
     )

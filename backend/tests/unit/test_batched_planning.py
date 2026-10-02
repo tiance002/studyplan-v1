@@ -83,6 +83,8 @@ def test_agent_pack_keeps_nine_stages_and_twenty_seven_keys():
     # A manifest must survive more reviewed nodes than today's pack.
     extended = dict(pack)
     extended["required_node_keys"] = list(pack["required_node_keys"]) + ["node.future"]
+    extended["knowledge_blueprints"] = list(pack["knowledge_blueprints"]) + [
+        {"stable_key": "node.future", "title": "Future module", "node_type": "concept", "prerequisite_keys": []}]
     assert "node.future" in freeze_manifest(extended, POLICY, "mock:1")["required_node_keys"]
 
 

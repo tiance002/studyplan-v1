@@ -39,6 +39,8 @@ export function LearningGuidance({ guidance }: { guidance: DTO['StageDetail']['l
           <div className="learning-guidance-columns">
             <GuidanceList title="本次重点" items={guidance.learning_focus} />
             <GuidanceList title="对比问题" items={guidance.comparison_focus} />
+            <GuidanceList title="阅读前置" items={guidance.reading_prerequisites ?? []} />
+            <GuidanceList title="实践前置" items={guidance.practice_prerequisites ?? []} />
           </div>
           <section className="learning-guidance-practice">
             <h3>本次实践增量</h3>

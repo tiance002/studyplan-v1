@@ -1242,6 +1242,32 @@ export interface components {
             /** Stars */
             stars?: number | null;
         };
+        /** GoalSpec */
+        GoalSpec: {
+            /** Target */
+            target: string;
+            /** Scope */
+            scope?: string[];
+            /**
+             * Desired Depth
+             * @default unspecified
+             * @enum {string}
+             */
+            desired_depth: "unspecified" | "foundation" | "applied" | "deep";
+            /**
+             * Starting Point
+             * @default
+             */
+            starting_point: string;
+            /**
+             * Outcome Purpose
+             * @default learn
+             * @enum {string}
+             */
+            outcome_purpose: "learn" | "interview" | "portfolio" | "internship" | "production";
+            /** Constraints */
+            constraints?: string[];
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -1322,6 +1348,16 @@ export interface components {
              * @default []
              */
             knowledge_keys: string[];
+            /**
+             * Reading Prerequisites
+             * @default []
+             */
+            reading_prerequisites: string[];
+            /**
+             * Practice Prerequisites
+             * @default []
+             */
+            practice_prerequisites: string[];
         };
         /** LearningWorkspaceView */
         LearningWorkspaceView: {
@@ -1474,6 +1510,7 @@ export interface components {
             revision: number;
             /** Goal Snapshot */
             goal_snapshot: string;
+            goal_spec?: components["schemas"]["GoalSpec"] | null;
             /** Stages */
             stages?: components["schemas"]["StageDetail"][];
             /** Unit Links */
@@ -1511,6 +1548,7 @@ export interface components {
         PlanGenerateRequest: {
             /** Goal */
             goal: string;
+            goal_spec?: components["schemas"]["GoalSpec"] | null;
             prefs_snapshot?: components["schemas"]["PrefsSnapshot"];
         };
         /**
@@ -1540,6 +1578,7 @@ export interface components {
             revision: number;
             /** Goal Snapshot */
             goal_snapshot: string;
+            goal_spec?: components["schemas"]["GoalSpec"] | null;
             /** Stages */
             stages?: components["schemas"]["StageDetail"][];
             /** Unit Links */
@@ -3637,6 +3676,8 @@ export interface components {
             revision: number;
             /** Goal Snapshot */
             goal_snapshot: string;
+            /** @default null */
+            goal_spec: components["schemas"]["GoalSpec"] | null;
             /** Stages */
             stages?: components["schemas"]["StageDetail"][];
             /** Unit Links */

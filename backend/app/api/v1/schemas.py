@@ -17,7 +17,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from app.domain.enums import (
     AiRunNextAction,
@@ -34,6 +34,7 @@ from app.domain.enums import (
     UnitProgress,
 )
 from app.domain.planning.guidance import LearningGuidance
+from app.domain.planning.intent import Depth, Purpose
 from pydantic import BaseModel, ConfigDict, Field
 
 # --------------------------------------------------------------------- 通用信封
@@ -118,10 +119,22 @@ class RunView(BaseModel):
     )
 
 
+class GoalSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+
+    target: str = Field(min_length=1, max_length=2000)
+    scope: list[Annotated[str, Field(min_length=1, max_length=300)]] = Field(default_factory=list, max_length=20)
+    desired_depth: Depth = "unspecified"
+    starting_point: str = Field(default="", max_length=1000)
+    outcome_purpose: Purpose = "learn"
+    constraints: list[Annotated[str, Field(min_length=1, max_length=300)]] = Field(default_factory=list, max_length=20)
+
+
 class PlanGenerateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     goal: str = Field(..., min_length=1, max_length=2000)
+    goal_spec: GoalSpec | None = None
     prefs_snapshot: PrefsSnapshot = Field(default_factory=PrefsSnapshot)
 
 
@@ -218,6 +231,7 @@ class PlanSnapshot(BaseModel):
     project_id: str = Field(..., max_length=64)
     revision: int = Field(..., ge=1)
     goal_snapshot: str = Field(..., max_length=2000)
+    goal_spec: GoalSpec | None = None
     stages: list[StageDetail] = Field(default_factory=list)
     unit_links: list[UnitLinkView] = Field(default_factory=list)
     task_links: list[TaskLinkView] = Field(default_factory=list)

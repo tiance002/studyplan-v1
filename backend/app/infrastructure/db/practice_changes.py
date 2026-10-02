@@ -12,6 +12,7 @@ from app.core.errors import (
 from app.core.ids import content_hash, new_id
 from app.domain.enums import TaskKnowledgeRole
 from app.domain.planning.guidance import changed_practice_guidance
+from app.domain.planning.intent import purpose_requirements
 from app.domain.planning.models import PlanDraft, PlanPublicationService, PlanTaskKnowledgeLink, PlanTaskLink
 from app.infrastructure.db.learning_exposures import _json
 from app.infrastructure.db.plan_repository import PgPlanRepository
@@ -285,6 +286,10 @@ class PgPracticeChanges(PgResourceChanges):
             replacements = {}
             new_links = []
             new_knowledge = []
+            final_stage = max(current.stages, key=lambda s: s.order_index)
+            purpose_task_id = next((t["task_id"] for t in context["tasks"]
+                                    if t["stage_id"] == final_stage.stage_id), None)
+            purpose_outputs = purpose_requirements(current.goal_spec)
 
             def insert_task(old, edit, operation, order_index):
                 data = (
@@ -308,6 +313,8 @@ class PgPracticeChanges(PgResourceChanges):
                     data["knowledge_links"] = [
                         dict(nodes[link.node_id], role=link.role) for link in edit.knowledge_links
                     ]
+                if old and old["task_id"] == purpose_task_id and purpose_outputs:
+                    data["acceptance"] = list(dict.fromkeys([*data["acceptance"], *purpose_outputs]))
                 data.update(
                     task_id=new_id("tsk"),
                     practice_project_id=after["practice_project_id"],
@@ -390,6 +397,7 @@ class PgPracticeChanges(PgResourceChanges):
                 "",
                 current.goal_snapshot,
                 current.revision + 1,
+                goal_spec=current.goal_spec,
                 stages=stages,
                 unit_links=current.unit_links,
                 task_links=tuple(t for t in current.task_links if t.task_id not in replacements)

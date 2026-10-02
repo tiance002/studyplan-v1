@@ -83,6 +83,8 @@ class LearningGuidance:
     source_slice: SourceSlice | None = None
     exposure_relation: Literal["review", "compare", "deepen", "version_context", "unknown"] = "unknown"
     knowledge_keys: tuple[str, ...] = ()
+    reading_prerequisites: tuple[str, ...] = ()
+    practice_prerequisites: tuple[str, ...] = ()
 
     def __post_init__(self):
         _text(self.why_now, "why_now")
@@ -90,6 +92,8 @@ class LearningGuidance:
         _items(self.learning_focus, "learning_focus", required=True)
         _items(self.comparison_focus, "comparison_focus")
         _items(self.knowledge_keys, "knowledge_keys")
+        _items(self.reading_prerequisites, "reading_prerequisites")
+        _items(self.practice_prerequisites, "practice_prerequisites")
         if self.exposure_relation not in {"review", "compare", "deepen", "version_context", "unknown"}:
             raise ValidationAppError("学习指导关系不合法")
         if self.exposure_relation == "compare" and not self.comparison_focus:
@@ -109,13 +113,20 @@ def guidance_from_payload(raw) -> LearningGuidance | None:
         if source is not None:
             source = SourceSlice(**{**source, **{k: _sequence(source[k]) for k in ("files", "call_chain", "questions")}})
         return LearningGuidance(**{**data, "practice_delta": practice, "source_slice": source,
-                                   **{k: _sequence(data.get(k, ())) for k in ("learning_focus", "comparison_focus", "knowledge_keys")}})
+                                   **{k: _sequence(data.get(k, ())) for k in ("learning_focus", "comparison_focus", "knowledge_keys", "reading_prerequisites", "practice_prerequisites")}})
     except (KeyError, TypeError, ValueError) as exc:
         raise ValidationAppError("学习指导结构不合法") from exc
 
 
 def guidance_payload(guide: LearningGuidance | None):
-    return asdict(guide) if guide is not None else None
+    if guide is None:
+        return None
+    payload = asdict(guide)
+    # Empty new hints must not alter a previously saved confirmation hash.
+    for key in ("reading_prerequisites", "practice_prerequisites"):
+        if not payload[key]:
+            payload.pop(key)
+    return payload
 
 
 def changed_practice_guidance(guide, tasks):
@@ -127,7 +138,7 @@ def changed_practice_guidance(guide, tasks):
         items = [v if len(v) <= 1000 else v[:970] + "…（完整要求见任务）" for v in values]
         return tuple(items if len(items) <= 20 else items[:19] + ["其余要求请查看本阶段当前版本的实践任务"])
 
-    return replace(guide, exposure_relation="unknown", comparison_focus=(), source_slice=None,
+    return replace(guide, exposure_relation="unknown", comparison_focus=(), source_slice=None, practice_prerequisites=(),
                    practice_delta=PracticeDelta(
                        baseline="沿用当前项目基线；本版本已调整实践设计，旧成果保留为历史资料",
                        increment=bounded([f"{t['title']}：{t['goal']}" for t in tasks]) or ("核对当前版本的实践方向",),
@@ -139,7 +150,7 @@ def changed_practice_guidance(guide, tasks):
 def changed_resource_guidance(guide):
     if guide is None:
         return None
-    return replace(guide, exposure_relation="unknown", comparison_focus=(), source_slice=None,
+    return replace(guide, exposure_relation="unknown", comparison_focus=(), source_slice=None, reading_prerequisites=(),
                    previous_relation="本版本主线已更换，旧教程的复习、对比与深入关系需要重新核对；旧历史继续保留。")
 
 

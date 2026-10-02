@@ -3,6 +3,26 @@ import { api, ApiError } from "../../api/client";
 import type { DTO } from "../../api/types";
 import { Resources } from "../../components/Resources";
 
+const DEPTH_LABELS: Record<DTO['GoalSpec']['desired_depth'], string> = {
+  unspecified: '暂不指定', foundation: '建立基础', applied: '能够应用', deep: '深入理解',
+};
+const PURPOSE_LABELS: Record<DTO['GoalSpec']['outcome_purpose'], string> = {
+  learn: '学习理解', interview: '面试准备', portfolio: '作品集', internship: '实习准备', production: '实际项目应用',
+};
+
+function GoalSpecSnapshot({ value }: { value: DTO['PlanDraftView']['goal_spec'] }) {
+  if (!value) return null;
+  return <section className="panel" aria-label="草案目标快照">
+    <h3>本草案的目标与起点</h3>
+    <p><strong>目标：</strong>{value.target}</p>
+    <p><strong>期望深度：</strong>{DEPTH_LABELS[value.desired_depth ?? 'unspecified']}</p>
+    <p><strong>成果用途：</strong>{PURPOSE_LABELS[value.outcome_purpose ?? 'learn']}</p>
+    <p><strong>当前起点（自述）：</strong>{value.starting_point || '未补充'}</p>
+    {!!value.scope?.length && <><strong>学习范围</strong><ul>{value.scope.map((item, index) => <li key={index}>{item}</li>)}</ul></>}
+    {!!value.constraints?.length && <><strong>限制条件</strong><ul>{value.constraints.map((item, index) => <li key={index}>{item}</li>)}</ul></>}
+  </section>;
+}
+
 //: 分批生成阶段 → 面向用户的说明。只使用后端业务 DTO 的闭集枚举，不映射任何图内部名称。
 const PROGRESS_PHASE_LABELS: Record<DTO["RunProgress"]["phase"], string> = {
   outline: "正在生成路线骨架",
@@ -82,6 +102,11 @@ export function PlanningPage({
   fake: boolean | null;
 }) {
   const [goal, setGoal] = useState("学习 Agent 开发，完成一个可验收的知识助手");
+  const [depth, setDepth] = useState<DTO['GoalSpec']['desired_depth']>('unspecified');
+  const [purpose, setPurpose] = useState<DTO['GoalSpec']['outcome_purpose']>('learn');
+  const [startingPoint, setStartingPoint] = useState('');
+  const [scopeInput, setScopeInput] = useState('');
+  const [constraintsInput, setConstraintsInput] = useState('');
   const [run, setRun] = useState<DTO["RunView"] | null>(null),
     [draft, setDraft] = useState<DTO["PlanDraftView"] | null>(null);
   const [stages, setStages] = useState<DTO["StageDetail"][]>([]),
@@ -150,6 +175,19 @@ export function PlanningPage({
   const dirty =
       !!draft && JSON.stringify(stages) !== JSON.stringify(draft.stages ?? []),
     editable = draft?.status === "awaiting_approval";
+  function goalSpec(): DTO['GoalSpec'] | undefined {
+    const scope = scopeInput.split(/\r?\n/).map(item => item.trim()).filter(Boolean);
+    const constraints = constraintsInput.split(/\r?\n/).map(item => item.trim()).filter(Boolean);
+    for (const [label, items] of [['学习范围', scope], ['限制条件', constraints]] as const) {
+      if (items.length > 20 || items.some(item => Array.from(item).length > 300)) {
+        throw new Error(`${label}最多填写 20 项，每项最多 300 个字符。`);
+      }
+    }
+    const starting_point = startingPoint.trim();
+    if (Array.from(starting_point).length > 1000) throw new Error('当前起点最多填写 1000 个字符。');
+    if (depth === 'unspecified' && purpose === 'learn' && !starting_point && !scope.length && !constraints.length) return undefined;
+    return { target: goal, scope, desired_depth: depth, starting_point, outcome_purpose: purpose, constraints };
+  }
   async function decide(decision: DTO["DraftDecisionRequest"]["decision"]) {
     if (!draft) return;
     const storage = `studyplan-confirm:${draft.draft_id}:${draft.draft_hash}`;
@@ -211,7 +249,7 @@ export function PlanningPage({
             if (generationBlocked || generating.current) return;
             generating.current = true;
             act(async () => {
-              const result = await api.generate(project, goal);
+              const result = await api.generate(project, goal, goalSpec());
               localStorage.setItem(`studyplan-run:${project}`, result.run_id);
               // A failed first GET is shown as an error, never another POST.
               setAcceptedRun(true);
@@ -234,6 +272,20 @@ export function PlanningPage({
               required
             />
           </label>
+          <details>
+            <summary>补充目标与起点（可选）</summary>
+            <p className="form-note">这些信息用于调整路线与实践；当前起点按你的自述保存。未填写时继续按学习目标生成。</p>
+            <label>期望深度<select value={depth} onChange={e => setDepth(e.target.value as DTO['GoalSpec']['desired_depth'])}>
+              {Object.entries(DEPTH_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select></label>
+            <label>成果用途<select value={purpose} onChange={e => setPurpose(e.target.value as DTO['GoalSpec']['outcome_purpose'])}>
+              {Object.entries(PURPOSE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select></label>
+            <label>当前起点<textarea rows={3} maxLength={1000} value={startingPoint} onChange={e => setStartingPoint(e.target.value)} placeholder="例如：有基础 Python，见过 Tool 概念，还未实现 dispatch。" /></label>
+            <label>学习范围（每行一项）<textarea rows={3} value={scopeInput} onChange={e => setScopeInput(e.target.value)} placeholder="例如：Tool schema、Dispatch，分别写在一行。" /></label>
+            <label>限制条件（每行一项）<textarea rows={3} value={constraintsInput} onChange={e => setConstraintsInput(e.target.value)} placeholder="例如：教程正文免费、每周三小时，分别写在一行。" /></label>
+            <p className="form-note">学习范围与限制条件各最多 20 项，每项最多 300 个字符。</p>
+          </details>
           <div className="section-heading">
             <p className="form-note">
               {fake === true
@@ -325,6 +377,7 @@ export function PlanningPage({
               候选版本 {draft.revision} · {stages.length} 个阶段
             </span>
           </div>
+          <GoalSpecSnapshot value={draft.goal_spec} />
           {draft.validation_warnings?.map((w) => (
             <p className="form-note" key={w}>
               {w}

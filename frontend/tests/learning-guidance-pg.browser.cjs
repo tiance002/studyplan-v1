@@ -44,7 +44,7 @@ const path = require('node:path');
     await page.locator('.stage-trigger').filter({hasText:tools.stage.title}).click();
     const guide = page.getByRole('region', {name:'学习指导', exact:true});
     await guide.locator('summary').click();
-    for (const expected of ['已有最小聊天 Agent', 'read_file', 'search_note', '未知 Tool', '错误参数', 'Tool 抛错', '第三个 Tool']) {
+    for (const expected of ['已有最小聊天 Agent', 'read_file', 'search_note', '未知 Tool', '错误参数', 'Tool 抛错', '第三个 Tool', '最多1节', '普通聊天基线']) {
       assert.ok((await guide.innerText()).includes(expected), expected);
     }
     await page.reload();
@@ -64,6 +64,19 @@ const path = require('node:path');
     const dir = path.resolve(__dirname, '../../var/oct6-guidance');
     fs.mkdirSync(dir, {recursive:true});
     await page.screenshot({path:path.join(dir,'learning-guidance-real-pg.png'),fullPage:true});
+    if (process.env.STUDYPLAN_GUIDANCE_RUN) {
+      await page.evaluate(({project, run}) => localStorage.setItem(`studyplan-run:${project}`, run),
+        {project, run:process.env.STUDYPLAN_GUIDANCE_RUN});
+      await page.goto(ui + '/#planning');
+      const snapshot = page.getByRole('region', {name:'草案目标快照', exact:true});
+      await snapshot.waitFor();
+      assert.ok((await snapshot.innerText()).includes('面试'));
+      assert.ok((await snapshot.innerText()).includes('会Python，见过Tool概念'));
+      await page.reload();
+      await snapshot.waitFor();
+      assert.ok((await snapshot.innerText()).includes('课程正文免费'));
+      await page.screenshot({path:path.join(dir,'planning-intent-real-pg.png'),fullPage:true});
+    }
     fs.writeFileSync(path.join(dir,'browser-pg.json'), JSON.stringify({status:'PASS',model:'Fake',database:'real isolated PG',forwarded},null,2));
     console.log('PASS: real auth/HTTP/PG guidance, refresh, logout/relogin and narrow viewport; model explicitly Fake');
   } finally { await browser.close(); }

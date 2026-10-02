@@ -26,12 +26,20 @@ from __future__ import annotations
 import hashlib
 import json
 from copy import deepcopy
+from dataclasses import replace
 from typing import Any
 
 from app.agent_workflows.state import PlanningState
 from app.application.planning_budget import BudgetPolicy
 from app.domain.enums import TaskKnowledgeRole
 from app.domain.planning.guidance import guidance_payload, stage_guidance
+from app.domain.planning.intent import (
+    GoalSpec,
+    goal_spec_from_payload,
+    goal_spec_payload,
+    purpose_requirements,
+    required_module_closure,
+)
 
 PROTOCOL_VERSION = "b3f2-batch-v1"
 SHORT_GENERATION_VERSION = "b3f2-short-v2"
@@ -79,6 +87,7 @@ def freeze_manifest(
     policy: BudgetPolicy,
     model_ref: str,
     generic_stage_count: int = DEFAULT_GENERIC_STAGE_COUNT,
+    goal_spec: GoalSpec | None = None,
 ) -> dict[str, Any]:
     """Freeze the reviewed pack + budget into an immutable execution manifest.
 
@@ -98,10 +107,17 @@ def freeze_manifest(
             "objective": stage.get("objective", ""),
             "node_keys": list(stage.get("node_keys") or []),
         } for stage in stages]
-        required_node_keys = list(pack.get("required_node_keys") or [])
+        required_node_keys = list(required_module_closure(
+            pack.get("knowledge_blueprints") or [], pack.get("required_node_keys") or []))
         resource_support = pack.get("resource_support", "reviewed_index")
         for index, spec in enumerate(stage_specs):
             spec["learning_guidance"] = guidance_payload(stage_guidance(pack, stages[index], stages[index - 1] if index else None))
+        outputs = purpose_requirements(goal_spec)
+        if outputs:
+            guide = stage_guidance(pack, stages[-1], stages[-2] if len(stages) > 1 else None)
+            guide = replace(guide, practice_delta=replace(guide.practice_delta,
+                validation=tuple(dict.fromkeys((*guide.practice_delta.validation[:17], *outputs)))))
+            stage_specs[-1]["learning_guidance"] = guidance_payload(guide)
     else:
         stage_specs = [{
             "stage_key": f"stage.general.{index}",
@@ -122,6 +138,8 @@ def freeze_manifest(
             for dependency in blueprint.get("prerequisite_keys") or []:
                 if dependency not in stage_nodes:
                     external.add(str(dependency))
+            if blueprint.get("parent_key") and blueprint["parent_key"] not in stage_nodes:
+                external.add(blueprint["parent_key"])
         structure_batches.append({
             "batch_index": index,
             "stage_key": spec["stage_key"],
@@ -152,6 +170,8 @@ def freeze_manifest(
         "reviewed": reviewed,
         "stages": stage_specs,
         "required_node_keys": required_node_keys,
+        **({"goal_spec": goal_spec_payload(goal_spec)} if goal_spec else {}),
+        "required_root_keys": list(pack.get("required_node_keys") or []) if reviewed else [],
         "structure_batches": structure_batches,
         "practice_batches": practice_batches,
         "structure_batches_count": len(structure_batches),
@@ -219,6 +239,7 @@ def structure_payload(state: PlanningState, batch: dict[str, Any]) -> dict[str, 
     )
     return {
         "goal": state.get("goal"),
+        "goal_spec": deepcopy(manifest.get("goal_spec")),
         "learning_guidance": deepcopy(spec.get("learning_guidance")),
         "stage": {
             "stable_key": spec["stage_key"],
@@ -249,6 +270,9 @@ def practice_payload(state: PlanningState, stage_key: str) -> dict[str, Any]:
     )
     return {
         "goal": state.get("goal"),
+        "goal_spec": deepcopy(manifest.get("goal_spec")),
+        "required_outputs": list(purpose_requirements(goal_spec_from_payload(manifest.get("goal_spec"))))
+            if stage_key == manifest["stages"][-1]["stage_key"] else [],
         "stage": {
             "stable_key": spec["stage_key"],
             "title": spec.get("title", ""),
@@ -463,7 +487,9 @@ def merge_batches(
         section.pop("learning_guidance", None)
         if blueprint is not None:
             previous = blueprints.get(sections[index - 1].get("stable_key")) if index else None
-            section["learning_guidance"] = guidance_payload(stage_guidance(pack, blueprint, previous))
+            frozen = next((s for s in (manifest or {}).get("stages", [])
+                           if s["stage_key"] == section.get("stable_key")), {})
+            section["learning_guidance"] = deepcopy(frozen.get("learning_guidance")) or guidance_payload(stage_guidance(pack, blueprint, previous))
     stage_order = [section.get("stable_key") for section in sections]
 
     by_stage_structure = {b.get("stage_key"): b for b in structure_batches}
@@ -535,13 +561,18 @@ def merge_batches(
             errors.append(f"缺少实践批次：{stage_key}")
             continue
         payload = practice.get("payload") or {}
-        for task in payload.get("tasks") or []:
+        for task_index, task in enumerate(payload.get("tasks") or []):
             key = str(task.get("stable_key", ""))
             if key in seen_task:
                 errors.append(f"实践任务重复：{key}")
                 continue
             seen_task.add(key)
-            tasks.append(deepcopy(task))
+            saved_task = deepcopy(task)
+            if manifest and stage_key == stage_order[-1] and task_index == 0:
+                outputs = purpose_requirements(goal_spec_from_payload(manifest.get("goal_spec")))
+                if outputs:
+                    saved_task["acceptance"] = list(dict.fromkeys([*(saved_task.get("acceptance") or []), *outputs]))
+            tasks.append(saved_task)
         task_links.extend(deepcopy(payload.get("task_knowledge_links") or []))
 
     # Re-order units and tasks deterministically by skeleton order.

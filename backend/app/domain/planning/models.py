@@ -49,6 +49,7 @@ from app.domain.enums import (
     TaskKnowledgeRole,
 )
 from app.domain.planning.guidance import LearningGuidance, guidance_payload
+from app.domain.planning.intent import GoalSpec, goal_spec_payload
 from app.domain.resources.curation import (
     KnowledgeExtension,
     StageResourceAssignment,
@@ -260,6 +261,7 @@ class PlanRevision:
     status: PlanRevisionStatus = PlanRevisionStatus.DRAFT
     approved_at: datetime | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    goal_spec: GoalSpec | None = None
 
     @staticmethod
     def create(
@@ -277,6 +279,7 @@ class PlanRevision:
         source_pack_key: str = "",
         source_pack_version: int = 0,
         now: datetime | None = None,
+        goal_spec: GoalSpec | None = None,
     ) -> "PlanRevision":
         if revision < 1:
             raise ValidationAppError("revision 必须从 1 开始")
@@ -285,6 +288,7 @@ class PlanRevision:
             project_id=project_id,
             revision=revision,
             goal_snapshot=goal_snapshot.strip(),
+            goal_spec=goal_spec,
             stages=tuple(stages),
             unit_links=tuple(unit_links),
             task_links=tuple(task_links),
@@ -342,6 +346,7 @@ class PlanRevision:
             {
                 "project_id": self.project_id,
                 "goal_snapshot": self.goal_snapshot,
+                **({"goal_spec": goal_spec_payload(self.goal_spec)} if self.goal_spec else {}),
                 "stages": _stages_payload(self.stages),
                 **_structure_payload(
                     stages=self.stages,
@@ -456,6 +461,7 @@ class PlanDraft:
     status: PlanDraftStatus = PlanDraftStatus.AWAITING_APPROVAL
     validation_warnings: tuple[str, ...] = ()
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    goal_spec: GoalSpec | None = None
 
     @property
     def content_hash(self) -> str:
@@ -473,6 +479,7 @@ class PlanDraft:
             {
                 "project_id": self.project_id,
                 "goal_snapshot": self.goal_snapshot,
+                **({"goal_spec": goal_spec_payload(self.goal_spec)} if self.goal_spec else {}),
                 "revision_candidate": self.revision_candidate,
                 "stages": _stages_payload(self.stages),
                 "unit_refs": list(self.unit_refs),
@@ -545,6 +552,7 @@ def build_revision_snapshot(
     source_pack_key: str = "",
     source_pack_version: int = 0,
     now: datetime | None = None,
+    goal_spec: GoalSpec | None = None,
 ) -> PlanRevision:
     """把「阶段 + 引用」构造为一个**独立**的新版本快照（B2-V §三）。
 
@@ -600,6 +608,7 @@ def build_revision_snapshot(
         project_id=project_id,
         revision=revision,
         goal_snapshot=goal_snapshot,
+        goal_spec=goal_spec,
         stages=new_stages,
         unit_links=tuple(
             PlanUnitLink(stage_id=_sid(x.stage_id), unit_id=x.unit_id, order_index=x.order_index)
@@ -645,6 +654,7 @@ def revision_from_draft(
         project_id=draft.project_id,
         revision=revision,
         goal_snapshot=draft.goal_snapshot,
+        goal_spec=draft.goal_spec,
         stages=draft.stages,
         unit_links=draft.unit_links,
         task_links=draft.task_links,

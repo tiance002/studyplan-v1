@@ -556,6 +556,7 @@ class PlanningNodes:
                 "goal": state.get("goal"),
                 "prefs": state.get("prefs_snapshot"),
                 "manifest": manifest,
+                "goal_spec": manifest.get("goal_spec"),
                 **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {}),
             },
             schema_name="OutlineV1",

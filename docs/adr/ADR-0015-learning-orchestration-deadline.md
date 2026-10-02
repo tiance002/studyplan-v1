@@ -18,6 +18,10 @@ Tool Calling fixture 的起点仅属于明确给定的合成输入；它不是�
 
 Practice Change 根据新草案的实际任务目标与验收要求重建受影响阶段的实践指导，清除过时对比和源码建议；Primary替换将旧教程关系恢复为 unknown，要求重新核对。两者均创建新版本，旧指导和旧历史保留，不继承旧 accepted 状态。
 
+目标解析首版是用户显式补充，不用收费模型猜画像。可选GoalSpec记录 target/scope/desired_depth/starting_point/outcome_purpose/constraints，未填写沿用旧goal请求。API和领域分别验证长度、数量及枚举；起点明确属于自述，不写掌握状态。经规范化值进入提交事件、带哈希manifest、各模型批次、草案payload和已确认版本structure，哈希保护该快照；资源/实践新版本沿用，恢复不从当前表单或新Seed重解析。
+
+required module closure从受控Seed的required roots沿parent/prerequisite递归展开，稳定排序、去重并限制最多200个受控模块，unknown/cycle在派发前拒绝；未reachable的optional模块不因此变成必修。GoalSpec.scope目前只作模型条件，不能宣称已经实现任意主题裁剪。用途叠加仅给收尾实践增加少量可检查输出；最终指导与实际任务验收同步，实践更改时保留当前用途要求。阅读/实践前置先用有界指导字符串，空新字段不改变旧哈希，不另建图或迁移。
+
 10月3日不批量扩内容；后续三个正式 Blueprint、有限操作重规划、常态 Worker 恢复与最终E2E继续属于交付门禁。GitHub OAuth/私有仓库列为非核心增强；独立 RAG 到10月4日中午按新 Goal 判定，缺契约不阻塞其它工作，不猜接口。整体保持 NOT_READY。
 
 回滚采用普通 revert 新增代码，保留既有数据库历史及账本。指导元数据在原 JSONB 中可由新代码再次读回，无需破坏性降级。不得重写已发布 Seed、迁移或旧 unknown 记录。当前未提供的《规划算法思想校正版 v1.0》全文已请求路径；已按最终 Goal 中明确列出的校正规则实施，收到全文后只审计新增差异。

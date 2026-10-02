@@ -50,6 +50,7 @@ from app.domain.enums import (
     TaskKnowledgeRole,
 )
 from app.domain.planning.guidance import guidance_from_payload, guidance_payload
+from app.domain.planning.intent import goal_spec_from_payload, goal_spec_payload
 from app.domain.planning.models import (
     PlanDraft,
     PlanRevision,
@@ -164,6 +165,7 @@ def _extension_payload(e: KnowledgeExtension) -> dict[str, Any]:
 def _structure_payload(revision: PlanRevision) -> dict[str, Any]:
     """``plan_revisions.structure`` 的等价快照（审计用，非读回依据）。"""
     return {
+        **({"goal_spec": goal_spec_payload(revision.goal_spec)} if revision.goal_spec else {}),
         "stages": [_stage_payload(s) for s in revision.stages],
         "unit_links": [_unit_link_payload(x) for x in revision.unit_links],
         "task_links": [_task_link_payload(x) for x in revision.task_links],
@@ -180,6 +182,7 @@ def _structure_payload(revision: PlanRevision) -> dict[str, Any]:
 def _draft_payload(draft: PlanDraft) -> dict[str, Any]:
     return {
         "goal_snapshot": draft.goal_snapshot,
+        **({"goal_spec": goal_spec_payload(draft.goal_spec)} if draft.goal_spec else {}),
         "revision_candidate": draft.revision_candidate,
         "stages": [_stage_payload(s) for s in draft.stages],
         "unit_refs": list(draft.unit_refs),
@@ -436,6 +439,7 @@ class PgPlanRepository:
             project_id=str(row["project_id"]),
             run_id=str(row.get("run_id") or ""),
             goal_snapshot=str(payload.get("goal_snapshot") or ""),
+            goal_spec=goal_spec_from_payload(payload.get("goal_spec")),
             revision_candidate=int(row.get("revision_candidate") or 1),
             stages=tuple(_stage_from(s) for s in _as_list(payload.get("stages"))),  # type: ignore[arg-type]
             resource_snapshots=tuple(_as_list(payload.get("resource_snapshots"))),
@@ -546,6 +550,7 @@ class PgPlanRepository:
             project_id=project_id,
             revision=int(row["revision"]),  # type: ignore[arg-type]
             goal_snapshot=str(row["goal_snapshot"]),
+            goal_spec=goal_spec_from_payload(structure.get("goal_spec")) if isinstance(structure, dict) else None,
             stages=tuple(_stage_from({**s, "learning_guidance": guidance_by_key.get(s["stable_key"])}) for s in stages),
             resource_snapshots=tuple(_as_list(structure.get("resource_snapshots"))) if isinstance(structure, dict) else (),
             unit_links=tuple(_unit_link_from(x) for x in unit_links),  # type: ignore[arg-type]

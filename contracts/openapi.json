@@ -4423,6 +4423,71 @@
         ],
         "title": "GitHubRepository"
       },
+      "GoalSpec": {
+        "properties": {
+          "target": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Target"
+          },
+          "scope": {
+            "items": {
+              "type": "string",
+              "maxLength": 300,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Scope"
+          },
+          "desired_depth": {
+            "type": "string",
+            "enum": [
+              "unspecified",
+              "foundation",
+              "applied",
+              "deep"
+            ],
+            "title": "Desired Depth",
+            "default": "unspecified"
+          },
+          "starting_point": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Starting Point",
+            "default": ""
+          },
+          "outcome_purpose": {
+            "type": "string",
+            "enum": [
+              "learn",
+              "interview",
+              "portfolio",
+              "internship",
+              "production"
+            ],
+            "title": "Outcome Purpose",
+            "default": "learn"
+          },
+          "constraints": {
+            "items": {
+              "type": "string",
+              "maxLength": 300,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Constraints"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "title": "GoalSpec"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -4580,6 +4645,22 @@
             },
             "type": "array",
             "title": "Knowledge Keys",
+            "default": []
+          },
+          "reading_prerequisites": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reading Prerequisites",
+            "default": []
+          },
+          "practice_prerequisites": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Practice Prerequisites",
             "default": []
           }
         },
@@ -4950,6 +5031,16 @@
             "maxLength": 2000,
             "title": "Goal Snapshot"
           },
+          "goal_spec": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoalSpec"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "stages": {
             "items": {
               "$ref": "#/components/schemas/StageDetail"
@@ -5045,6 +5136,16 @@
             "minLength": 1,
             "title": "Goal"
           },
+          "goal_spec": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoalSpec"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "prefs_snapshot": {
             "$ref": "#/components/schemas/PrefsSnapshot"
           }
@@ -5104,6 +5205,16 @@
             "type": "string",
             "maxLength": 2000,
             "title": "Goal Snapshot"
+          },
+          "goal_spec": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoalSpec"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "stages": {
             "items": {
@@ -10856,6 +10967,17 @@
             "maxLength": 2000,
             "title": "Goal Snapshot",
             "type": "string"
+          },
+          "goal_spec": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GoalSpec"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
           },
           "stages": {
             "items": {

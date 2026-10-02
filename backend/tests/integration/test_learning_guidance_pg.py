@@ -25,6 +25,9 @@ pytestmark = pytest.mark.postgres
 def test_worker_edit_publish_reload_and_relogin_preserve_guidance(migrated_db):
     db = migrated_db
     pack = guided_pack()
+    tool_stage = next(s for s in pack["stage_blueprints"] if s["stable_key"] == "stage.tools")
+    tool_stage["learning_guidance"].update(reading_prerequisites=["快速回顾Tool基础，最多1节"],
+                                         practice_prerequisites=["普通聊天基线测试通过"])
     pack["version"] = 4  # Isolated acceptance input, never imported into a product DB.
     with psycopg.connect(db.migrator_dsn) as conn:
         seed_reviewed_pack(conn, pack)
@@ -38,8 +41,17 @@ def test_worker_edit_publish_reload_and_relogin_preserve_guidance(migrated_db):
         project = registered.json()["project_ids"][0]
         params = {"project_id": project}
         headers = {"X-CSRF-Token": registered.json()["csrf_token"]}
+        for bad in ({"target": "Agent", "constraints": ["x" * 301]},
+                    {"target": "Agent", "scope": [" "]},
+                    {"target": "Agent", "actor_id": "other-actor"}):
+            invalid = client.post("/api/v1/plans/generate", params=params, headers=headers,
+                                  json={"goal": "Agent", "goal_spec": bad})
+            assert invalid.status_code in {400, 422}, invalid.text
         response = client.post("/api/v1/plans/generate", params=params, headers=headers,
-                               json={"goal": "Agent 应用开发：深入 Tool Calling"})
+                               json={"goal": "Agent 应用开发：深入 Tool Calling", "goal_spec": {
+                                   "target": "Agent Tool Calling", "scope": ["dispatch/result"],
+                                   "starting_point": "会Python，见过Tool概念", "desired_depth": "applied",
+                                   "outcome_purpose": "interview", "constraints": ["课程正文免费"]}})
         assert response.status_code == 202, response.text
         assert container.planning_worker.tick()
         result = client.get(response.json()["status_url"]).json()
@@ -49,10 +61,14 @@ def test_worker_edit_publish_reload_and_relogin_preserve_guidance(migrated_db):
         loaded = client.get(url, params=params)
         assert loaded.status_code == 200, loaded.text
         draft = loaded.json()
+        goal_spec = draft["goal_spec"]
+        assert goal_spec["outcome_purpose"] == "interview" and goal_spec["starting_point"] == "会Python，见过Tool概念"
         guide = next(s["learning_guidance"] for s in draft["stages"] if s["stable_key"] == "stage.tools")
         assert guide["practice_delta"]["validation"] == ["正常工具调用", "未知 Tool", "错误参数", "Tool 抛错"]
         assert guide["exposure_relation"] == "deepen"
         assert guide["source_slice"]["verification_status"] == "suggested"
+        assert guide["reading_prerequisites"] == ["快速回顾Tool基础，最多1节"]
+        assert guide["practice_prerequisites"] == ["普通聊天基线测试通过"]
         # An old client sends only the original stage fields. Its edit cannot erase guidance.
         stages = [{k: v for k, v in s.items() if k != "learning_guidance"} for s in draft["stages"]]
         stages[0]["title"] = "我的必要环境准备"
@@ -61,6 +77,7 @@ def test_worker_edit_publish_reload_and_relogin_preserve_guidance(migrated_db):
                                    "draft_hash": draft["draft_hash"], "edited_stages": stages})
         assert edited.status_code == 200, edited.text
         edited_draft = edited.json()["draft"]
+        assert edited_draft["goal_spec"] == goal_spec
         assert next(s["learning_guidance"] for s in edited_draft["stages"] if s["stable_key"] == "stage.tools") == guide
         assert edited_draft["draft_hash"] != draft["draft_hash"]
         approved = client.post(url + "/decision", params=params, headers=headers,
@@ -68,10 +85,14 @@ def test_worker_edit_publish_reload_and_relogin_preserve_guidance(migrated_db):
                                      "draft_hash": edited_draft["draft_hash"], "idempotency_key": "new-guide-acceptance"})
         assert approved.status_code == 200, approved.text
         plan = approved.json()["plan"]
+        assert plan["goal_spec"] == goal_spec
         plan_id = plan["plan_id"]
         workspace = client.get("/api/v1/workspace", params=params)
         assert workspace.status_code == 200, workspace.text
         tools = next(s for s in workspace.json()["stages"] if s["stage"]["stable_key"] == "stage.tools")
+        final_stage = workspace.json()["stages"][-1]
+        assert any("2分钟" in " ".join(t["acceptance"]) for t in final_stage["tasks"])
+        assert "2分钟" in " ".join(final_stage["stage"]["learning_guidance"]["practice_delta"]["validation"])
         assert tools["stage"]["learning_guidance"] == guide
         assert tools["completion"]["status"] == "incomplete"
         assert "read_file" in tools["tasks"][0]["goal"] and "search_note" in tools["tasks"][0]["goal"]
@@ -86,6 +107,7 @@ def test_worker_edit_publish_reload_and_relogin_preserve_guidance(migrated_db):
         restored = client.get("/api/v1/workspace", params=params)
         assert restored.status_code == 200, restored.text
         assert restored.json()["plan"]["plan_id"] == plan_id
+        assert restored.json()["plan"]["goal_spec"] == goal_spec
         assert next(s["stage"]["learning_guidance"] for s in restored.json()["stages"] if s["stage"]["stable_key"] == "stage.tools") == guide
         if os.environ.get("STUDYPLAN_GUIDANCE_BROWSER") == "1":
             sock = socket.socket()
@@ -99,7 +121,8 @@ def test_worker_edit_publish_reload_and_relogin_preserve_guidance(migrated_db):
                     time.sleep(0.05)
                 assert server.started
                 root = Path(__file__).resolve().parents[3]
-                env = dict(os.environ, STUDYPLAN_GUIDANCE_API=f"http://127.0.0.1:{sock.getsockname()[1]}")
+                env = dict(os.environ, STUDYPLAN_GUIDANCE_API=f"http://127.0.0.1:{sock.getsockname()[1]}",
+                           STUDYPLAN_GUIDANCE_RUN=response.json()["run_id"])
                 browser = subprocess.run(["node", "frontend/tests/learning-guidance-pg.browser.cjs"],
                                          cwd=root, env=env, capture_output=True, text=True,
                                          encoding="utf-8", errors="replace", timeout=90)
@@ -113,6 +136,7 @@ def test_worker_edit_publish_reload_and_relogin_preserve_guidance(migrated_db):
         assert client.get("/api/v1/workspace", params=params).status_code == 403
     with psycopg.connect(db.migrator_dsn) as conn:
         saved = conn.execute("SELECT structure FROM plan_revisions WHERE plan_id=%s", (plan_id,)).fetchone()[0]
+        assert saved["goal_spec"]["outcome_purpose"] == "interview"
         assert next(s["learning_guidance"] for s in saved["stages"] if s["stable_key"] == "stage.tools") == guide
 
 

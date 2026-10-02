@@ -187,6 +187,7 @@ def draft_view(bundle: DraftBundle) -> PlanDraftView:
         project_id=draft.project_id,
         revision=draft.revision_candidate,
         goal_snapshot=draft.goal_snapshot,
+        goal_spec=draft.goal_spec,
         stages=[stage_detail(s) for s in draft.stages],
         unit_links=[
             UnitLinkView(
@@ -219,6 +220,7 @@ def plan_view(bundle: PlanBundle) -> PlanView:
         project_id=revision.project_id,
         revision=revision.revision,
         goal_snapshot=revision.goal_snapshot,
+        goal_spec=revision.goal_spec,
         stages=[stage_detail(s) for s in revision.stages],
         unit_links=[
             UnitLinkView(

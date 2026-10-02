@@ -72,6 +72,7 @@ from app.domain.enums import (
     PlanDraftStatus,
     StageResourceRole,
 )
+from app.domain.planning.intent import GoalSpec, goal_spec_payload
 from app.domain.planning.models import (
     PlanDraft,
     PlanPublicationService,
@@ -219,6 +220,7 @@ class PlanService:
         project_id: str,
         goal: str,
         prefs_snapshot: Mapping[str, Any] | None = None,
+        goal_spec: GoalSpec | None = None,
     ) -> tuple[str, str, PlanningState, dict[str, Any]]:
         """Freeze protocol, model configuration and batch catalog for a new run.
 
@@ -227,11 +229,11 @@ class PlanService:
         """
         run_id = new_id("run")
         thread_id = graph_thread_id(run_id=run_id, graph_version=self._graph_version)
-        selected = self._domain_pack_selector(goal) if self._domain_pack_selector else None
+        selected = self._domain_pack_selector(goal_spec.target if goal_spec else goal) if self._domain_pack_selector else None
         pack: dict[str, Any] = dict(selected) if isinstance(selected, Mapping) else {}
         binding = self._binding_resolver(scope, project_id)
         manifest = freeze_manifest(
-            pack=pack, policy=binding.budget_policy, model_ref=binding.model_ref
+            pack=pack, policy=binding.budget_policy, model_ref=binding.model_ref, goal_spec=goal_spec
         )
         current = self._repo.get_current(project_id=project_id)
         if prefs_snapshot is None and self._preference_resolver is not None:
@@ -243,6 +245,7 @@ class PlanService:
             "project_id": project_id,
             "graph_version": self._graph_version,
             "goal": goal,
+            **({"goal_spec": goal_spec_payload(goal_spec)} if goal_spec else {}),
             "prefs_snapshot": dict(prefs_snapshot or {}),
             "manifest": manifest,
             "protocol": PROTOCOL_VERSION,
@@ -259,6 +262,7 @@ class PlanService:
         project_id: str,
         goal: str,
         prefs_snapshot: Mapping[str, Any] | None = None,
+        goal_spec: GoalSpec | None = None,
     ) -> str:
         """Validate and durably enqueue one planning run; never invoke the model."""
         scope.require_project(project_id)
@@ -275,7 +279,7 @@ class PlanService:
             raise ValidationAppError("学习目标不能为空")
 
         run_id, thread_id, initial, manifest = self._freeze_submission(
-            scope=scope, project_id=project_id, goal=cleaned_goal, prefs_snapshot=prefs_snapshot
+            scope=scope, project_id=project_id, goal=cleaned_goal, prefs_snapshot=prefs_snapshot, goal_spec=goal_spec
         )
         run = RunRecord(
             run_id=run_id,
@@ -405,6 +409,7 @@ class PlanService:
         project_id: str,
         goal: str,
         prefs_snapshot: Mapping[str, Any] | None = None,
+        goal_spec: GoalSpec | None = None,
     ) -> str:
         """发起一次规划生成，返回 ``run_id``。
 
@@ -417,7 +422,7 @@ class PlanService:
             raise ValidationAppError("学习目标不能为空")
 
         run_id, thread_id, initial, _manifest = self._freeze_submission(
-            scope=scope, project_id=project_id, goal=cleaned_goal, prefs_snapshot=prefs_snapshot
+            scope=scope, project_id=project_id, goal=cleaned_goal, prefs_snapshot=prefs_snapshot, goal_spec=goal_spec
         )
         self._runs.create_run(
             RunRecord(

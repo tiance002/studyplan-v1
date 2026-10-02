@@ -211,13 +211,16 @@ def edit(task, **changes):
     return TaskChange(**values)
 
 
-def test_new_task_design_updates_guidance_without_rewriting_old_plan(practice_scenario):
+@pytest.mark.parametrize("purpose", ["learn", "interview"])
+def test_new_task_design_updates_guidance_without_rewriting_old_plan(practice_scenario, purpose):
     from app.domain.planning.guidance import LearningGuidance, PracticeDelta
+    from app.domain.planning.intent import GoalSpec, purpose_requirements
     db, scope, cmd, _, current = practice_scenario
     plans = PgPlanRepository(db.app_dsn)
     guide = LearningGuidance("将本阶段知识用于当前任务", "旧教程关系未确认", ("本阶段实践",), (),
                              PracticeDelta("当前项目", ("原增量",), ("保留原行为",), ("旧验证要求",), ("后续复用",)))
     guided = PlanDraft(new_id("drf"), cmd.project_id, "", current.goal_snapshot, current.revision + 1,
+                       goal_spec=GoalSpec(target=current.goal_snapshot, outcome_purpose=purpose),
                        stages=tuple(replace(s, learning_guidance=guide) for s in current.stages),
                        unit_links=current.unit_links, task_links=current.task_links,
                        task_knowledge_links=current.task_knowledge_links, stage_resources=current.stage_resources,
@@ -237,7 +240,10 @@ def test_new_task_design_updates_guidance_without_rewriting_old_plan(practice_sc
     result = confirm(repo, scope, cmd, preview, key="guide-confirm")
     published = plans.get_current(project_id=cmd.project_id)
     stage = next(s for s in published.stages if s.stable_key == original.stable_key)
-    assert stage.learning_guidance.practice_delta.validation == ("New specific logging check",)
+    outputs = purpose_requirements(current.goal_spec)
+    assert stage.learning_guidance.practice_delta.validation == ("New specific logging check", *outputs)
+    assert published.goal_spec == current.goal_spec
+    assert preview["task_changes"][0]["after"]["acceptance"] == ["New specific logging check", *outputs]
     assert "Add structured logging" in stage.learning_guidance.practice_delta.increment[0]
     old = plans.get_revision(project_id=cmd.project_id, revision=current.revision)
     assert next(s for s in old.stages if s.stable_key == original.stable_key).learning_guidance == original.learning_guidance
