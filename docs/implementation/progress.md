@@ -1,5 +1,15 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-03 最新：显式目标与依赖/用途增量，整体NOT_READY
+
+用户现在新增能做什么：生成前可明确补充范围、深度、自述起点、成果用途、限制；草案快照经确认/刷新/重登录仍保留。必要模块沿parent/prerequisite递归闭包展开；阅读/实践前置可在指导展示；收尾实践按用途增加少量验收要求，更改任务后仍与新指导一致。旧请求、旧hash、阶段总结、自动完成规则保留。仅在合成账号/Fake模型/真实隔离PG/Chrome核对，未向原产品库部署。
+
+代码SHA `9b1a3ada60af22c0793c72c169eed3ac5a702a7d`，分支 `feat/n1-resource-discovery`，无新迁移。新SHA为本地，未核实远端。详细[目标与前置证据](../acceptance/planning-intent-and-prerequisites-2026-10-03.md)，[ADR-0015](../adr/ADR-0015-learning-orchestration-deadline.md)。较宽unit/contract PASS649，2 skipped NOT RUN；PG/恢复/资源/实践/Chrome PASS68；最新目标/指导/契约/PG PASS46；独立复核用途任务编辑丢要求P1实际RED后修复，定向PASS2、最终实践/HTTP PG PASS35；最终规则/provider PASS21。范围重叠不相加。Frontend11/build/Fake浏览器PASS；短生成重载夹具等待DOM后PASS。真实模型/公开GitHub NOT RUN。
+
+产品模型23/50、搜索4/1000（unknown1）不变，本次外部请求0；旧账/unknown不动。原产品库0023只读，仓库0024；本批JSONB字段无需迁移。原8022/5175、8024/5177停，临时验收API已停、Vite5178自有，无旧Worker重派。快速服务模式无工具开关，未声称切换；临时模型授权继续，代理请求Luna/high、Sol/high，实际解析NOT OBSERVABLE。
+
+scope目前仅生成条件、尚不裁剪完整模板。思想全文路径、三正式Blueprint/免费正文和章节审核、有限重规划、真实服务、恢复/完整闭环/备份恢复与用户接受仍是门禁。下一安全动作有限全路线重规划与恢复；10月3日不批量扩内容，GitHub实际需要时再提示DNS配置。普通revert保留历史/账本，不N1 no-ff/master/milestone，不因支线缺配置停止独立开发。下文为此前时点。
+
 ## 2026-10-03 当前：P0–P4学习编排增量，整体NOT_READY
 
 用户现在新增能做什么：新阶段可显示why/前次关系/重点/对比问题/贯穿实践增量/可选源码建议；普通编辑、发布、刷新和重登录保留。受控模板可以复用精确知识键，独立保存两次学习目的和Exposure；修改实践或Primary会更新新版本指导，旧历史继续可读。已用合成账号、Fake模型、真实隔离PG和Chrome核对；原产品库未部署此增量。
