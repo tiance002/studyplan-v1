@@ -1,5 +1,17 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-03 最新：受控主题追加与公开GitHub DNS，整体NOT_READY
+
+用户现在新增能做什么：可勾选同一已发布课程尚未覆盖的主题，补齐父/前置及同阶段内容，经完整差异/明确确认创建新路线；旧阶段与历史保留、刷新/重登录读回、新版完成不继承。正式Seed目前全覆盖，页面如实显示无候选；不是自由主题或跨模板语义合并。原产品库未部署。
+
+本地代码SHA `1a8b3f69820bdb3b763232a071b8c40bd1cee4c4`，分支`feat/n1-resource-discovery`，固定点祖先PASS；未推送/核实新远端SHA。[本批证据](../acceptance/add-topic-and-github-dns-2026-10-03.md)。较宽规则/contract PASS705、2skipped NOT RUN；最终定向PASS77；真实PG/HTTP/Worker模型Fake PASS7；最终PG标题+两个真实Chrome PASS3；Frontend11/build/两个Fake Chrome、Ruff/mypy/diff/凭据与原文hash PASS。早期FAIL与fixture ERROR修复保留，重复数量不相加。
+
+DNS已由用户配置，返回公网20.205.243.168；新增两次真实公开搜索均HTTP200，第二次5候选含指定教程。完整GitHub浏览器链FAIL（首查询空、第二次测试错误要求目标排第一）；修正为显式选择目标，README/章节/私人映射真实链本次NOT RUN。首批3次搜索已用完（旧unknown1+本次2），追加1次请求待用户选择；不重置/重派。模型23/50、搜索6/1000、unknown1，新增模型/Tavily/内容/metadata0，旧README2不动。
+
+无migration/依赖/全局配置变化。临时服务关闭、owned库清理，PG5432/Vite5178沿用，原产品库未写。用户最新停止6Astra；后续只选授权Luna/Sol，实际解析仍NOT OBSERVABLE，快速服务模式未声称已切换。
+
+下一安全动作：常态Worker取消和服务端运行查找/恢复；额外公开请求仅等待相关支线。三正式Blueprint/免费正文审核、真实模型、完整学习闭环、备份恢复与用户接受继续是门禁；10月3日不批量扩内容，10月5日结束Freeze。当前可普通revert代码保持历史；未来有新payload时回退前须保留读取兼容。不no-ff/master/milestone，不虚报READY。下文是此前时点。
+
 ## 2026-10-03 最新：有限生成路线变更与恢复，整体NOT_READY
 
 用户现在新增能做什么：规划页可修改目标或重新生成受控未来路线，共用现有Worker和持久运行恢复；原目标/完整阶段内容与新草案对照，保留已开始前缀，经明确确认创建新版本。未知/旧待确认运行阻止新生成、不自动重派；202后首GET失败保留新编号并支持手动读取。当前库体验未切换到新代码/模板。
