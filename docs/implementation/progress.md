@@ -1,5 +1,15 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-03 最新：有限未来路线调整，整体NOT_READY
+
+用户现在新增能做什么：规划页可预览调整未来阶段顺序或移除明确optional的未来阶段，再确认创建新路线；刷新和正常账号重登录读回。已开始前缀与最终综合实践保护，必需闭包/前置顺序校验；旧路线、学习/总结/Prompt/成果历史保留，私人资料沿用来源lineage。正式Seed无optional阶段，因此不猜可选；当前移除为阶段粒度，全部七种操作尚未完成。原产品库未部署。
+
+本地代码SHA `736f0ba5dd202ffbd413e7894a6fb68b54451476`，分支 `feat/n1-resource-discovery`，固定点祖先PASS，新SHA未推送/核实远端。[本批证据](../acceptance/finite-route-changes-2026-10-03.md)、[ADR-0015](../adr/ADR-0015-learning-orchestration-deadline.md)。规则最终PASS10；unit/contract PASS658，2 skipped NOT RUN；资源/实践/指导/有限真实PG PASS58；正常Chrome+HTTP+PG PASS1；Frontend11/build/Fake Chrome PASS，Ruff/mypy/diff/原文/秘密模式PASS。早期FAIL及修复记录保留，数量不相加。
+
+无新migration/依赖，原产品库0023只读、仓库0024，测试仅owned隔离PG并清理，临时API已停，Vite5178自有。新增外部请求0，模型23/50、搜索4/1000（unknown1），旧账/unknown不动。Sol/high UI代理capacity错误后复用部分成果改派Luna/high；只读审查Luna/high；实际解析NOT OBSERVABLE。快速模式没有工具切换证据，未声称切换/未改全局配置。
+
+下一安全动作：其余有限生成操作与常态Worker恢复UX；三正式Blueprint/免费章节审核、真实provider/GitHub、完整E2E/备份恢复/用户接受仍为门禁。按最新用户决定GitHub DNS未配置，真正需要时才提示；缺RAG支线不阻塞独立工作。10月3日不批量扩内容，10月5日结束Freeze。普通revert保留历史/账本，不no-ff/master/milestone。下文为此前时点。
+
 ## 2026-10-03 最新：显式目标与依赖/用途增量，整体NOT_READY
 
 用户现在新增能做什么：生成前可明确补充范围、深度、自述起点、成果用途、限制；草案快照经确认/刷新/重登录仍保留。必要模块沿parent/prerequisite递归闭包展开；阅读/实践前置可在指导展示；收尾实践按用途增加少量验收要求，更改任务后仍与新指导一致。旧请求、旧hash、阶段总结、自动完成规则保留。仅在合成账号/Fake模型/真实隔离PG/Chrome核对，未向原产品库部署。

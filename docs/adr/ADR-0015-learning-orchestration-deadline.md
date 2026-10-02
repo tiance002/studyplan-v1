@@ -25,3 +25,7 @@ required module closure从受控Seed的required roots沿parent/prerequisite递�
 10月3日不批量扩内容；后续三个正式 Blueprint、有限操作重规划、常态 Worker 恢复与最终E2E继续属于交付门禁。GitHub OAuth/私有仓库列为非核心增强；独立 RAG 到10月4日中午按新 Goal 判定，缺契约不阻塞其它工作，不猜接口。整体保持 NOT_READY。
 
 回滚采用普通 revert 新增代码，保留既有数据库历史及账本。指导元数据在原 JSONB 中可由新代码再次读回，无需破坏性降级。不得重写已发布 Seed、迁移或旧 unknown 记录。当前未提供的《规划算法思想校正版 v1.0》全文已请求路径；已按最终 Goal 中明确列出的校正规则实施，收到全文后只审计新增差异。
+
+有限重规划第一增量支持调整未来阶段顺序、移除受控Seed明确optional的未来阶段。固定原课程版本的 inclusion 缺省required，不能从advanced/标题猜测；正式Seed没有optional时说明无移除项。学习边界按当前计划位置的真实原文/Exposure活动保护前缀；最终综合实践保留在最后，以保持用途验收位置。必要闭包和前置顺序由代码检查。当前remove_optional_topic是阶段粒度，不能宣称任意单个知识topic移除。
+
+手动变更复用现有PlanDraft payload和唯一publisher。route_change元数据进入草案hash，专用入口负责确认，通用草案写入防绕过；决策回执存payload的独立生命周期字段，不改变原预览内容hash。确认、新版本、私人选择copy lineage、回执在同一项目锁/CAS事务，重新核对学习/任务/知识/私人basis；不派发模型/创建伪Run。新版不继承旧完成状态，历史留在旧版本。其余有限操作及最终门禁继续实施，详见[有限调整证据](../acceptance/finite-route-changes-2026-10-03.md)。
