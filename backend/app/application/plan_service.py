@@ -647,6 +647,7 @@ class PlanService:
                 section_kind=stage.section_kind,
                 order_index=index,
                 objective=stage.objective,
+                learning_guidance=by_id[stage.stage_id].learning_guidance,
             )
             for index, stage in enumerate(ordered)
         )

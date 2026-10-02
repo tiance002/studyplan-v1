@@ -1,4 +1,5 @@
 import type { components } from "./generated/schema";
+import type { ResourceInspection, ResourceInspectionRequest, ResourceTarget } from './types';
 
 type DTO = components["schemas"];
 export type SummarySaveBody = DTO['SummarySaveRequest'];
@@ -58,8 +59,8 @@ async function request<T>(
 }
 const scope = (project: string) => `?project_id=${encodeURIComponent(project)}`;
 export { request as requestApi };
-const resourceScope = (project: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
-  `${scope(project)}&${new URLSearchParams({plan_id:target.plan_id,stage_id:target.stage_id,unit_id:target.unit_id})}`;
+const resourceScope = (project: string, target: ResourceTarget) =>
+  `${scope(project)}&${new URLSearchParams({plan_id:target.plan_id,stage_id:target.stage_id,unit_id:target.unit_id})}${target.node_id ? `&node_id=${encodeURIComponent(target.node_id)}` : ''}`;
 export const api = {
   summaryThread: (project: string, target: SummaryTarget) => request<SummaryThread>(`/summaries${scope(project)}&${new URLSearchParams(Object.entries(target).filter(([,value]) => value != null) as [string,string][])}`),
   saveSummary: (project: string, body: SummarySaveBody) => request<SummarySave>(`/summaries${scope(project)}`, body),
@@ -78,24 +79,34 @@ export const api = {
   exposureHistory: (project: string, target: Pick<DTO['ExposureChangeRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
     request<DTO['ExposureEventView'][]>(`/exposures/history${resourceScope(project, target)}`),
   resourcePreferences: (project: string, target: Pick<DTO['PreferencePutRequest'], 'plan_id' | 'stage_id' | 'unit_id' | 'node_id'>) =>
-    request<DTO['PreferenceContextView']>(`/preferences${resourceScope(project, target)}${target.node_id ? `&node_id=${encodeURIComponent(target.node_id)}` : ''}`),
+    request<DTO['PreferenceContextView']>(`/preferences${resourceScope(project, target)}`),
   saveResourcePreference: (project: string, body: DTO['PreferencePutRequest']) =>
     request<DTO['PreferenceContextView']>(`/preferences${scope(project)}`, body, 'PUT'),
   restoreResourcePreference: (project: string, body: DTO['PreferenceDeleteRequest']) =>
     request<DTO['PreferenceContextView']>(`/preferences${scope(project)}`, body, 'DELETE'),
   searchResources: (project: string, body: DTO['ResourceSearchRequest']) =>
-    request<DTO['ResourceSearchView']>(`/resources/searches${scope(project)}`, body),
-  resourceSearch: (project: string, id: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
+    request<DTO['ResourceSearchView']>(`/resources/searches${scope(project)}`,
+      body.source === 'web' ? Object.fromEntries(Object.entries(body).filter(([key]) => key !== 'source')) : body),
+  resourceSearch: (project: string, id: string, target: ResourceTarget) =>
     request<DTO['ResourceSearchView']>(`/resources/searches/${encodeURIComponent(id)}${resourceScope(project, target)}`),
-  resourceSearchByKey: (project: string, key: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
+  resourceSearchByKey: (project: string, key: string, target: ResourceTarget) =>
     request<DTO['ResourceSearchView']>(`/resources/searches/by-key/${encodeURIComponent(key)}${resourceScope(project, target)}`),
-  selectedResources: (project: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
+  inspectResource: (project: string, body: ResourceInspectionRequest) =>
+    request<ResourceInspection>(`/resources/inspections${scope(project)}`, body),
+  resourceInspection: (project: string, id: string, target: ResourceTarget) =>
+    request<ResourceInspection>(`/resources/inspections/${encodeURIComponent(id)}${resourceScope(project, target)}`),
+  resourceInspectionByKey: (project: string, key: string, target: ResourceTarget) =>
+    request<ResourceInspection>(`/resources/inspections/by-key/${encodeURIComponent(key)}${resourceScope(project, target)}`),
+  selectedResources: (project: string, target: ResourceTarget) =>
     request<DTO['SelectedResourceView'][]>(`/resources/selections${resourceScope(project, target)}`),
   selectResource: (project: string, body: DTO['ResourceSelectionRequest']) =>
-    request<DTO['SelectedResourceView']>(`/resources/selections${scope(project)}`, body),
+    request<DTO['SelectedResourceView']>(`/resources/selections${scope(project)}`,
+      !body.module_keys?.length && !body.chapter_paths?.length && body.role === 'reference'
+        ? Object.fromEntries(Object.entries(body).filter(([key]) => key !== 'role')) : body),
   manualResource: (project: string, body: DTO['ManualResourceRequest']) =>
-    request<DTO['SelectedResourceView']>(`/resources/manual${scope(project)}`, body),
-  removeResource: (project: string, id: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
+    request<DTO['SelectedResourceView']>(`/resources/manual${scope(project)}`,
+      Object.fromEntries(Object.entries(body).filter(([key]) => key !== 'node_id'))),
+  removeResource: (project: string, id: string, target: ResourceTarget) =>
     request<DTO['ResourceRemovalView']>(`/resources/selections/${encodeURIComponent(id)}${resourceScope(project, target)}`, undefined, 'DELETE'),
   modelSettings: () => request<DTO["ModelSettingsResponse"]>("/model-settings"),
   saveModelSettings: (body: DTO["ModelSettingsRequest"]) =>

@@ -117,6 +117,7 @@ def stage_detail(stage: PlanStage) -> StageDetail:
         section_kind=stage.section_kind,
         order_index=stage.order_index,
         objective=stage.objective,
+        learning_guidance=stage.learning_guidance,
     )
 
 
@@ -129,6 +130,7 @@ def stage_from_dto(dto: StageDetail) -> PlanStage:
         section_kind=dto.section_kind,
         order_index=dto.order_index,
         objective=dto.objective,
+        learning_guidance=dto.learning_guidance,
     )
 
 

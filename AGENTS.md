@@ -2,6 +2,8 @@
 
 ## 当前续接入口（2026-10-02）
 
+2026-10-03 起以用户批准的 [10月6日最终交付 Goal](docs/implementation/STUDYPLAN_OCT6_FINAL_DELIVERY_GOAL_2026-10-03.md) 为最新执行入口；落实学习编排 P0–P4 后继续依赖切片，保留旧文档与已有成果。10月5日结束 Feature Freeze，10月6日只修复/回归/验收/恢复/交付。优先现有 JSONB，不新增复杂画像、PracticeThread、第二套规划器或自动实时重规划。用户请求开发快速模式直至“恢复原计划”；当前工具未提供快速/标准服务模式开关，必须如实记录可观测值，不改全局配置或产品费用额度。GitHub DNS 配置尚未完成，实际联网需要时再提示用户。
+
 执行用户批准的 [续接计划](docs/implementation/STUDYPLAN_CONTINUATION_PLAN_2026-10-02.md) 与 [续接 Goal](docs/implementation/STUDYPLAN_CONTINUATION_GOAL_2026-10-02.md)，不是重新规划或重做旧 G1。最新用户决定优先；临时模型授权及从当前成果派生切片的例外见 [ADR-0014](docs/adr/ADR-0014-continuation-slices.md)。唯一当前进度仍为 [progress](docs/implementation/progress.md)。历史模型固定档位暂由上述临时授权替代，直至用户说“恢复原计划”。
 
 ## Git Workflow

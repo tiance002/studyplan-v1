@@ -80,6 +80,10 @@ def validate_seed(raw):
             raise ValueError('Seed needs a positive integer version and provenance')
         nodes = _keys(data.get('knowledge_blueprints', []), 'stable_key')
         stages = _keys(data['stage_blueprints'], 'stable_key')
+        from app.domain.planning.guidance import stage_guidance
+        for stage in stages.values():
+            if stage.get('learning_guidance') is not None:
+                stage_guidance(data, stage)
         _keys(data['practice_blueprints'], 'stable_key')
         if not stages:
             raise ValueError('Seed needs stage blueprints')

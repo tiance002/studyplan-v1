@@ -59,6 +59,265 @@
         }
       }
     },
+    "/api/v1/resources/inspections": {
+      "post": {
+        "summary": "Inspect Resource",
+        "operationId": "inspect_learning_resource",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceInspectionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceInspectionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/inspections/{inspection_id}": {
+      "get": {
+        "summary": "Get Inspection",
+        "operationId": "get_resource_inspection",
+        "parameters": [
+          {
+            "name": "inspection_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Inspection Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Stage Id"
+            }
+          },
+          {
+            "name": "unit_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Unit Id"
+            }
+          },
+          {
+            "name": "node_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Node Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceInspectionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/resources/inspections/by-key/{key}": {
+      "get": {
+        "summary": "Get Inspection By Key",
+        "operationId": "get_resource_inspection_by_key",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          },
+          {
+            "name": "plan_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Plan Id"
+            }
+          },
+          {
+            "name": "stage_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Stage Id"
+            }
+          },
+          {
+            "name": "unit_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "title": "Unit Id"
+            }
+          },
+          {
+            "name": "node_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Node Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceInspectionView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/resources/searches/{search_id}": {
       "get": {
         "summary": "Get Search",
@@ -117,6 +376,24 @@
               "minLength": 1,
               "maxLength": 512,
               "title": "Unit Id"
+            }
+          },
+          {
+            "name": "node_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Node Id"
             }
           }
         ],
@@ -203,6 +480,24 @@
               "maxLength": 512,
               "title": "Unit Id"
             }
+          },
+          {
+            "name": "node_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Node Id"
+            }
           }
         ],
         "responses": {
@@ -278,6 +573,24 @@
               "minLength": 1,
               "maxLength": 512,
               "title": "Unit Id"
+            }
+          },
+          {
+            "name": "node_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Node Id"
             }
           }
         ],
@@ -471,6 +784,24 @@
               "minLength": 1,
               "maxLength": 512,
               "title": "Unit Id"
+            }
+          },
+          {
+            "name": "node_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Node Id"
             }
           }
         ],
@@ -3304,6 +3635,304 @@
         "title": "AiRunStatus",
         "description": "对外可授权的运行状态。\n\n图跑成功 **不自动等于**知识已学会、任务已验收。"
       },
+      "ChapterEvidence": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "maxLength": 1024,
+            "title": "Path"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Title"
+          },
+          "order": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Order"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "listed",
+              "read",
+              "unsupported"
+            ],
+            "title": "Status",
+            "default": "listed"
+          },
+          "module_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Module Keys"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "title",
+          "order"
+        ],
+        "title": "ChapterEvidence"
+      },
+      "ContentEvidence": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "maxLength": 1024,
+            "title": "Path"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 4096,
+            "title": "Url"
+          },
+          "blob_sha": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blob Sha"
+          },
+          "content_hash": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Content Hash"
+          },
+          "fetched_at": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Fetched At"
+          },
+          "line_start": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Line Start",
+            "default": 1
+          },
+          "line_end": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Line End",
+            "default": 1
+          },
+          "truncated": {
+            "type": "boolean",
+            "title": "Truncated",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "path",
+          "url",
+          "content_hash",
+          "fetched_at"
+        ],
+        "title": "ContentEvidence"
+      },
+      "DiscoveryEvidence": {
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Schema Version",
+            "default": 1
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "web",
+              "github",
+              "manual",
+              "unknown"
+            ],
+            "title": "Source",
+            "default": "unknown"
+          },
+          "provider_rank": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Rank"
+          },
+          "provider_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Score"
+          },
+          "snippet": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Snippet",
+            "default": ""
+          },
+          "repo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GitHubRepository"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inspection_status": {
+            "type": "string",
+            "enum": [
+              "metadata_only",
+              "readme_read",
+              "chapter_or_index_checked",
+              "controlled_review"
+            ],
+            "title": "Inspection Status",
+            "default": "metadata_only"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/ContentEvidence"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Files"
+          },
+          "chapters": {
+            "items": {
+              "$ref": "#/components/schemas/ChapterEvidence"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Chapters"
+          },
+          "signals": {
+            "$ref": "#/components/schemas/DiscoverySignals"
+          },
+          "recommended_role": {
+            "type": "string",
+            "enum": [
+              "candidate",
+              "mainline_candidate",
+              "reference",
+              "unsuitable"
+            ],
+            "title": "Recommended Role",
+            "default": "candidate"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Reasons"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Limitations"
+          },
+          "selection_mapping": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SelectionMapping"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "DiscoveryEvidence"
+      },
+      "DiscoverySignals": {
+        "properties": {
+          "topic_overlap": {
+            "type": "integer",
+            "maximum": 500.0,
+            "minimum": 0.0,
+            "title": "Topic Overlap",
+            "default": 0
+          },
+          "teaching_structure": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teaching Structure"
+          },
+          "prerequisites": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prerequisites"
+          },
+          "exercises": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exercises"
+          },
+          "difficulty": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Difficulty",
+            "default": "unknown"
+          },
+          "language": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Language",
+            "default": "unknown"
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Version",
+            "default": "unknown"
+          }
+        },
+        "type": "object",
+        "title": "DiscoverySignals"
+      },
       "DraftDecision": {
         "type": "string",
         "enum": [
@@ -3730,6 +4359,70 @@
         ],
         "title": "ExposureView"
       },
+      "GitHubRepository": {
+        "properties": {
+          "owner": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Owner"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "default_branch": {
+            "type": "string",
+            "maxLength": 255,
+            "title": "Default Branch",
+            "default": ""
+          },
+          "license": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "stars": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stars"
+          }
+        },
+        "type": "object",
+        "required": [
+          "owner",
+          "name"
+        ],
+        "title": "GitHubRepository"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -3743,6 +4436,7 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "JsonValue": {},
       "KnowledgeExtensionView": {
         "properties": {
           "extension_id": {
@@ -3831,6 +4525,74 @@
         "title": "KnowledgeNodeType",
         "description": "知识节点粒度。"
       },
+      "LearningGuidance": {
+        "properties": {
+          "why_now": {
+            "type": "string",
+            "title": "Why Now"
+          },
+          "previous_relation": {
+            "type": "string",
+            "title": "Previous Relation"
+          },
+          "learning_focus": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Learning Focus"
+          },
+          "comparison_focus": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Comparison Focus"
+          },
+          "practice_delta": {
+            "$ref": "#/components/schemas/PracticeDelta"
+          },
+          "source_slice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceSlice"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "exposure_relation": {
+            "type": "string",
+            "enum": [
+              "review",
+              "compare",
+              "deepen",
+              "version_context",
+              "unknown"
+            ],
+            "title": "Exposure Relation",
+            "default": "unknown"
+          },
+          "knowledge_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Knowledge Keys",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "why_now",
+          "previous_relation",
+          "learning_focus",
+          "comparison_focus",
+          "practice_delta"
+        ],
+        "title": "LearningGuidance"
+      },
       "LearningWorkspaceView": {
         "properties": {
           "plan": {
@@ -3915,6 +4677,19 @@
             "maxLength": 512,
             "minLength": 1,
             "title": "Unit Id"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
           },
           "url": {
             "type": "string",
@@ -5213,6 +5988,51 @@
           "order_index"
         ],
         "title": "PracticeChangeTaskView"
+      },
+      "PracticeDelta": {
+        "properties": {
+          "baseline": {
+            "type": "string",
+            "title": "Baseline"
+          },
+          "increment": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Increment"
+          },
+          "preserved": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Preserved"
+          },
+          "validation": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Validation"
+          },
+          "reuse": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reuse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "baseline",
+          "increment",
+          "preserved",
+          "validation",
+          "reuse"
+        ],
+        "title": "PracticeDelta"
       },
       "PracticeOutcomeGroupView": {
         "properties": {
@@ -7559,6 +8379,9 @@
             "type": "string",
             "title": "Source Note",
             "default": ""
+          },
+          "discovery": {
+            "$ref": "#/components/schemas/DiscoveryEvidence"
           }
         },
         "type": "object",
@@ -8311,6 +9134,149 @@
         ],
         "title": "ResourceChangeWorkloadView"
       },
+      "ResourceInspectionRequest": {
+        "properties": {
+          "plan_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Plan Id"
+          },
+          "stage_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "unit_id": {
+            "type": "string",
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Unit Id"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
+          },
+          "search_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Search Id"
+          },
+          "candidate_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Candidate Id"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          },
+          "paths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 2,
+            "title": "Paths"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "plan_id",
+          "stage_id",
+          "unit_id",
+          "search_id",
+          "candidate_id",
+          "idempotency_key"
+        ],
+        "title": "ResourceInspectionRequest"
+      },
+      "ResourceInspectionView": {
+        "properties": {
+          "inspection_id": {
+            "type": "string",
+            "title": "Inspection Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "dispatched",
+              "succeeded",
+              "failed",
+              "reconciliation_required"
+            ],
+            "title": "Status"
+          },
+          "search_id": {
+            "type": "string",
+            "title": "Search Id"
+          },
+          "candidate_id": {
+            "type": "string",
+            "title": "Candidate Id"
+          },
+          "candidate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResourceCandidateView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "receipts": {
+            "items": {
+              "additionalProperties": {
+                "$ref": "#/components/schemas/JsonValue"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Receipts"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "inspection_id",
+          "status",
+          "search_id",
+          "candidate_id",
+          "created_at"
+        ],
+        "title": "ResourceInspectionView"
+      },
       "ResourceProvenance": {
         "type": "string",
         "enum": [
@@ -8369,6 +9335,15 @@
               }
             ],
             "title": "Node Id"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "web",
+              "github"
+            ],
+            "title": "Source",
+            "default": "web"
           },
           "query": {
             "type": "string",
@@ -8436,6 +9411,22 @@
             "type": "string",
             "format": "date-time",
             "title": "Created At"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "web",
+              "github"
+            ],
+            "title": "Source",
+            "default": "web"
+          },
+          "context_snapshot": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/JsonValue"
+            },
+            "type": "object",
+            "title": "Context Snapshot"
           }
         },
         "type": "object",
@@ -8468,6 +9459,19 @@
             "minLength": 1,
             "title": "Unit Id"
           },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
+          },
           "search_id": {
             "type": "string",
             "maxLength": 64,
@@ -8479,6 +9483,26 @@
             "maxLength": 64,
             "minLength": 1,
             "title": "Candidate Id"
+          },
+          "module_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Module Keys"
+          },
+          "chapter_paths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Chapter Paths"
+          },
+          "role": {
+            "$ref": "#/components/schemas/StageResourceRole",
+            "default": "reference"
           }
         },
         "additionalProperties": false,
@@ -8707,6 +9731,44 @@
         ],
         "title": "SelectedResourceView"
       },
+      "SelectionMapping": {
+        "properties": {
+          "module_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Module Keys"
+          },
+          "chapter_paths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Chapter Paths"
+          },
+          "role": {
+            "$ref": "#/components/schemas/StageResourceRole",
+            "default": "reference"
+          },
+          "basis": {
+            "type": "string",
+            "const": "user_selected_read_chapters",
+            "title": "Basis",
+            "default": "user_selected_read_chapters"
+          }
+        },
+        "type": "object",
+        "required": [
+          "module_keys",
+          "chapter_paths"
+        ],
+        "title": "SelectionMapping"
+      },
       "SessionEntry": {
         "properties": {
           "token": {
@@ -8748,6 +9810,62 @@
           "project_ids"
         ],
         "title": "SessionView"
+      },
+      "SourceSlice": {
+        "properties": {
+          "repo_url": {
+            "type": "string",
+            "title": "Repo Url"
+          },
+          "ref": {
+            "type": "string",
+            "title": "Ref"
+          },
+          "files": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Files"
+          },
+          "call_chain": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Call Chain"
+          },
+          "questions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Questions"
+          },
+          "optional": {
+            "type": "boolean",
+            "title": "Optional",
+            "default": true
+          },
+          "verification_status": {
+            "type": "string",
+            "enum": [
+              "suggested",
+              "reviewed"
+            ],
+            "title": "Verification Status",
+            "default": "suggested"
+          }
+        },
+        "type": "object",
+        "required": [
+          "repo_url",
+          "ref",
+          "files",
+          "call_chain",
+          "questions"
+        ],
+        "title": "SourceSlice"
       },
       "StageCompletionView": {
         "properties": {
@@ -8811,6 +9929,16 @@
             "maxLength": 1000,
             "title": "Objective",
             "default": ""
+          },
+          "learning_guidance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LearningGuidance"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

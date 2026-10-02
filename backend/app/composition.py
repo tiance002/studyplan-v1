@@ -81,12 +81,18 @@ def build_container(settings: Settings) -> AppContainer:
     practice_submission_service = PracticeSubmissionService(PgPracticeSubmissions(dsn))
     from app.application.learning_resources import LearningResourceService
     from app.infrastructure.db.learning_resources import PgLearningResources
+    from app.infrastructure.resources.github import GitHubResourceIndex
     from app.infrastructure.resources.tavily import TavilyResourceIndex
     if settings.search_provider not in ("", "tavily"):
         raise RuntimeError("Unsupported search provider")
     search_index = TavilyResourceIndex(settings.tavily_api_key) if settings.search_provider == "tavily" and settings.tavily_api_key else None
-    resource_service = LearningResourceService(PgLearningResources(dsn), search_index, settings.search_request_limit,
-                                               preference_resolver=preference_service.resolve)
+    github_index = GitHubResourceIndex() if settings.github_discovery_enabled else None
+    resource_service = LearningResourceService(
+        PgLearningResources(dsn), search_index, settings.search_request_limit,
+        preference_resolver=preference_service.resolve, github=github_index,
+        content_limit=settings.resource_content_request_limit,
+        metadata_limit=settings.resource_metadata_request_limit,
+    )
     sessions = browser_auth
     if settings.llm_provider.strip().lower() not in SUPPORTED_PROVIDERS:
         build_llm(settings)

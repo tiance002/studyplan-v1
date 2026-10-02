@@ -14,6 +14,7 @@ from app.core.errors import (
 )
 from app.core.ids import content_hash, new_id
 from app.domain.enums import StageResourceRole
+from app.domain.planning.guidance import changed_resource_guidance
 from app.domain.planning.models import PlanDraft, PlanPublicationService
 from app.domain.resources.curation import validate_section_selection
 from app.infrastructure.db.learning_exposures import _json
@@ -239,7 +240,9 @@ class PgResourceChanges:
                 raise ValidationAppError("请选择与当前主线不同的明确资源或章节")
             impact = self._impact(conn, current, target, command)
             draft = PlanDraft(new_id("drf"), command.project_id, "", current.goal_snapshot, current.revision+1,
-                stages=current.stages, unit_links=current.unit_links, task_links=current.task_links,
+                stages=tuple(replace(s, learning_guidance=changed_resource_guidance(s.learning_guidance))
+                             if s.stage_id == target.stage_id else s for s in current.stages),
+                unit_links=current.unit_links, task_links=current.task_links,
                 task_knowledge_links=current.task_knowledge_links, stage_resources=assignments,
                 extensions=current.extensions, resource_snapshots=snapshots, source_pack_key=current.source_pack_key,
                 source_pack_version=current.source_pack_version, validation_warnings=tuple(impact["warnings"]))

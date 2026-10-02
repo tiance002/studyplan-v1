@@ -48,6 +48,7 @@ from app.domain.enums import (
     PlanRevisionStatus,
     TaskKnowledgeRole,
 )
+from app.domain.planning.guidance import LearningGuidance, guidance_payload
 from app.domain.resources.curation import (
     KnowledgeExtension,
     StageResourceAssignment,
@@ -73,6 +74,7 @@ class PlanStage:
     section_kind: OutlineSectionKind
     order_index: int
     objective: str = ""
+    learning_guidance: LearningGuidance | None = None
 
     @staticmethod
     def create(
@@ -82,6 +84,7 @@ class PlanStage:
         section_kind: OutlineSectionKind,
         order_index: int,
         objective: str = "",
+        learning_guidance: LearningGuidance | None = None,
     ) -> "PlanStage":
         return PlanStage(
             stage_id=new_id("stg"),
@@ -90,6 +93,7 @@ class PlanStage:
             section_kind=section_kind,
             order_index=order_index,
             objective=objective.strip(),
+            learning_guidance=learning_guidance,
         )
 
 
@@ -146,6 +150,7 @@ def _stages_payload(stages: Sequence[PlanStage]) -> list[dict[str, object]]:
             "section_kind": str(s.section_kind),
             "order_index": s.order_index,
             "objective": s.objective,
+            **({"learning_guidance": guidance_payload(s.learning_guidance)} if s.learning_guidance else {}),
         }
         for s in stages
     ]
@@ -565,6 +570,7 @@ def build_revision_snapshot(
             section_kind=s.section_kind,
             order_index=s.order_index,
             objective=s.objective,
+            learning_guidance=s.learning_guidance,
         )
         for s in stages
     )
@@ -585,9 +591,10 @@ def build_revision_snapshot(
         snapshot["stage_id"] = _sid(str(snapshot.get("stage_id", "")))
         snapshot["assignment_id"] = assignment_remap.get(str(snapshot.get("assignment_id", "")),
                                                         snapshot.get("assignment_id", ""))
-        if isinstance(snapshot.get("view"), dict):
-            snapshot["view"]["stage_id"] = snapshot["stage_id"]
-            snapshot["view"]["assignment_id"] = snapshot["assignment_id"]
+        view = snapshot.get("view")
+        if isinstance(view, dict):
+            view["stage_id"] = snapshot["stage_id"]
+            view["assignment_id"] = snapshot["assignment_id"]
 
     return PlanRevision.create(
         project_id=project_id,

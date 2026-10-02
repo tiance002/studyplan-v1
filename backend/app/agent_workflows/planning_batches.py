@@ -31,6 +31,7 @@ from typing import Any
 from app.agent_workflows.state import PlanningState
 from app.application.planning_budget import BudgetPolicy
 from app.domain.enums import TaskKnowledgeRole
+from app.domain.planning.guidance import guidance_payload, stage_guidance
 
 PROTOCOL_VERSION = "b3f2-batch-v1"
 SHORT_GENERATION_VERSION = "b3f2-short-v2"
@@ -99,6 +100,8 @@ def freeze_manifest(
         } for stage in stages]
         required_node_keys = list(pack.get("required_node_keys") or [])
         resource_support = pack.get("resource_support", "reviewed_index")
+        for index, spec in enumerate(stage_specs):
+            spec["learning_guidance"] = guidance_payload(stage_guidance(pack, stages[index], stages[index - 1] if index else None))
     else:
         stage_specs = [{
             "stage_key": f"stage.general.{index}",
@@ -216,6 +219,7 @@ def structure_payload(state: PlanningState, batch: dict[str, Any]) -> dict[str, 
     )
     return {
         "goal": state.get("goal"),
+        "learning_guidance": deepcopy(spec.get("learning_guidance")),
         "stage": {
             "stable_key": spec["stage_key"],
             "title": spec.get("title", ""),
@@ -255,6 +259,7 @@ def practice_payload(state: PlanningState, stage_key: str) -> dict[str, Any]:
             "units": deepcopy(stage_structure.get("units") or []),
         },
         "practice_blueprint": deepcopy(practice_blueprint),
+        "learning_guidance": deepcopy(spec.get("learning_guidance")),
         "resource_support": manifest["resource_support"],
     }
 
@@ -449,11 +454,25 @@ def merge_batches(
     The returned ``errors`` list is non-empty when the merge must fail.
     """
     errors: list[str] = []
+    outline = deepcopy(outline)
     sections = list((outline or {}).get("sections") or [])
+    blueprints = {s["stable_key"]: s for s in pack.get("stage_blueprints", [])}
+    for index, section in enumerate(sections):
+        blueprint = blueprints.get(section.get("stable_key"))
+        # The model cannot invent previously learned relationships or source proof.
+        section.pop("learning_guidance", None)
+        if blueprint is not None:
+            previous = blueprints.get(sections[index - 1].get("stable_key")) if index else None
+            section["learning_guidance"] = guidance_payload(stage_guidance(pack, blueprint, previous))
     stage_order = [section.get("stable_key") for section in sections]
 
     by_stage_structure = {b.get("stage_key"): b for b in structure_batches}
     by_stage_practice = {b.get("stage_key"): b for b in practice_batches}
+    node_blueprints = {n["stable_key"]: n for n in pack.get("knowledge_blueprints", [])}
+    occurrences: dict[str, int] = {}
+    for blueprint in blueprints.values():
+        for key in set(blueprint.get("node_keys") or []):
+            occurrences[key] = occurrences.get(key, 0) + 1
 
     nodes: list[dict[str, Any]] = []
     units: list[dict[str, Any]] = []
@@ -464,19 +483,39 @@ def merge_batches(
     seen_node: set[str] = set()
     seen_unit: set[str] = set()
     seen_task: set[str] = set()
+    node_stage: dict[str, str] = {}
+    seen_relation: set[tuple[str, str, str]] = set()
 
     for stage_key in stage_order:
         structure = by_stage_structure.get(stage_key)
         if structure is None:
             errors.append(f"缺少结构批次：{stage_key}")
             continue
+        blueprint = blueprints.get(stage_key) or {}
+        guidance = blueprint.get("learning_guidance") or {}
+        declared_repeats = set(guidance.get("knowledge_keys") or []) & set(blueprint.get("node_keys") or [])
+        repeat_keys: set[str] = set()
         for node in structure.get("nodes") or []:
             key = str(node.get("stable_key", ""))
             if key in seen_node:
+                # Exact stable-key reuse is allowed only by curated per-exposure
+                # relationships. This is not semantic deduplication of tutorials.
+                if (pack.get("resource_support") != "search_only" and key in node_blueprints
+                        and node_stage[key] != stage_key and key in declared_repeats
+                        and guidance.get("exposure_relation") in {"review", "compare", "deepen", "version_context"}):
+                    repeat_keys.add(key)
+                    continue
                 errors.append(f"知识节点重复：{key}")
                 continue
             seen_node.add(key)
-            nodes.append(deepcopy(node))
+            node_stage[key] = stage_key
+            canonical = deepcopy(node)
+            if occurrences.get(key, 0) > 1 and key in node_blueprints:
+                # Shared knowledge has one definition; each exposure owns its focus.
+                for field in ("title", "node_type", "objectives"):
+                    if field in node_blueprints[key]:
+                        canonical[field] = deepcopy(node_blueprints[key][field])
+            nodes.append(canonical)
         for unit in structure.get("units") or []:
             key = str(unit.get("stable_key", ""))
             if key in seen_unit:
@@ -484,7 +523,12 @@ def merge_batches(
                 continue
             seen_unit.add(key)
             units.append(deepcopy(unit))
-        relations.extend(deepcopy(structure.get("relations") or []))
+        for relation in structure.get("relations") or []:
+            identity = (relation.get("from_stable_key", ""), relation.get("to_stable_key", ""), relation.get("relation_type", ""))
+            if identity in seen_relation and identity[1] in repeat_keys:
+                continue
+            seen_relation.add(identity)
+            relations.append(deepcopy(relation))
 
         practice = by_stage_practice.get(stage_key)
         if practice is None:

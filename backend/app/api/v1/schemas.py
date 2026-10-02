@@ -33,6 +33,7 @@ from app.domain.enums import (
     StageResourceRole,
     UnitProgress,
 )
+from app.domain.planning.guidance import LearningGuidance
 from pydantic import BaseModel, ConfigDict, Field
 
 # --------------------------------------------------------------------- 通用信封
@@ -143,6 +144,7 @@ class StageDetail(BaseModel):
     section_kind: OutlineSectionKind
     order_index: int = Field(..., ge=0)
     objective: str = Field(default="", max_length=1000)
+    learning_guidance: LearningGuidance | None = None
 
 
 class OrderedSection(BaseModel):

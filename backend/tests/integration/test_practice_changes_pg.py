@@ -211,6 +211,39 @@ def edit(task, **changes):
     return TaskChange(**values)
 
 
+def test_new_task_design_updates_guidance_without_rewriting_old_plan(practice_scenario):
+    from app.domain.planning.guidance import LearningGuidance, PracticeDelta
+    db, scope, cmd, _, current = practice_scenario
+    plans = PgPlanRepository(db.app_dsn)
+    guide = LearningGuidance("将本阶段知识用于当前任务", "旧教程关系未确认", ("本阶段实践",), (),
+                             PracticeDelta("当前项目", ("原增量",), ("保留原行为",), ("旧验证要求",), ("后续复用",)))
+    guided = PlanDraft(new_id("drf"), cmd.project_id, "", current.goal_snapshot, current.revision + 1,
+                       stages=tuple(replace(s, learning_guidance=guide) for s in current.stages),
+                       unit_links=current.unit_links, task_links=current.task_links,
+                       task_knowledge_links=current.task_knowledge_links, stage_resources=current.stage_resources,
+                       resource_snapshots=current.resource_snapshots, extensions=current.extensions)
+    plans.save_draft(guided)
+    PlanPublicationService(plans).publish(draft=guided, presented_hash=guided.content_hash,
+                expected_version=current.version, idempotency_key="initial-guided-plan")
+    current = plans.get_current(project_id=cmd.project_id)
+    cmd = replace(cmd, plan_id=current.plan_id, expected_version=current.version)
+    repo = PgPracticeChanges(db.app_dsn)
+    task = repo.context(scope, cmd.project_id)["tasks"][0]
+    original = next(s for s in current.stages if s.stage_id == task["stage_id"])
+    assert original.learning_guidance is not None
+    cmd = replace(unchanged(repo, scope, cmd), task_changes=(edit(task, goal="Add structured logging",
+                  acceptance=("New specific logging check",)),), idempotency_key="guide-preview")
+    preview = repo.preview(scope, cmd)
+    result = confirm(repo, scope, cmd, preview, key="guide-confirm")
+    published = plans.get_current(project_id=cmd.project_id)
+    stage = next(s for s in published.stages if s.stable_key == original.stable_key)
+    assert stage.learning_guidance.practice_delta.validation == ("New specific logging check",)
+    assert "Add structured logging" in stage.learning_guidance.practice_delta.increment[0]
+    old = plans.get_revision(project_id=cmd.project_id, revision=current.revision)
+    assert next(s for s in old.stages if s.stable_key == original.stable_key).learning_guidance == original.learning_guidance
+    assert result["created"]
+
+
 def confirm(repo, scope, cmd, preview, key="confirm"):
     return repo.decide(
         scope,

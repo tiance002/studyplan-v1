@@ -90,6 +90,9 @@ class Settings:
     search_provider: str = ""
     tavily_api_key: str = ""
     search_request_limit: int = 1000
+    github_discovery_enabled: bool = True
+    resource_content_request_limit: int = 3000
+    resource_metadata_request_limit: int = 2000
 
     @property
     def is_development(self) -> bool:
@@ -157,6 +160,9 @@ def get_settings() -> Settings:
         search_provider=_env("SEARCH_PROVIDER", ""),
         tavily_api_key=_env("TAVILY_API_KEY", ""),
         search_request_limit=_env_int("SEARCH_REQUEST_LIMIT", 1000),
+        github_discovery_enabled=_env_bool("GITHUB_DISCOVERY_ENABLED", True),
+        resource_content_request_limit=_env_int("RESOURCE_CONTENT_REQUEST_LIMIT", 3000),
+        resource_metadata_request_limit=_env_int("RESOURCE_METADATA_REQUEST_LIMIT", 2000),
     )
 
 

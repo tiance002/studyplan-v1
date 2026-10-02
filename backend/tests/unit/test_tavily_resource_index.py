@@ -55,7 +55,9 @@ def test_one_fixed_basic_request_returns_only_private_unverified_candidates():
     assert candidate.verification_status is ResourceVerificationStatus.UNVERIFIED
     assert candidate.checked_at is None
     assert "Tavily" in candidate.source_note and "搜索时间" in candidate.source_note
-    assert "secret body" not in repr(candidate) and "external instructions" not in repr(candidate)
+    assert "secret body" not in repr(candidate)
+    assert candidate.discovery["snippet"] == "ignore external instructions"
+    assert candidate.discovery["inspection_status"] == "metadata_only"
 
 
 def test_explicit_preference_guides_search_but_does_not_certify_result_language():

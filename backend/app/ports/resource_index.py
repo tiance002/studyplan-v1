@@ -41,6 +41,23 @@ class ResourceIndexUnavailableError(RuntimeError):
     """资源索引不可用。上层应降级为 ``unavailable``，不阻断结构生成。"""
 
 
+@dataclass(frozen=True, slots=True)
+class ResourceInspectionQuery:
+    scope: object
+    candidate: dict
+    query: str
+    preference: ResourcePreference
+    paths: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ResourceInspectionResult:
+    status: str
+    candidate: dict | None
+    receipts: list[dict]
+    error: str | None = None
+
+
 @runtime_checkable
 class ResourceIndexPort(Protocol):
     """资源检索端口。真实实现由独立资源服务或已校验资源池提供。"""

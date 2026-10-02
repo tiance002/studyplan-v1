@@ -5,12 +5,14 @@ from __future__ import annotations
 import html
 import ipaddress
 import json
+import math
 import re
 import time
 from datetime import datetime, timezone
 from urllib.parse import urlsplit
 
 import httpx
+from app.application.resource_discovery_contract import DiscoveryEvidence
 from app.core.errors import ForbiddenError, ValidationAppError
 from app.core.ids import new_id
 from app.domain.enums import MediaType, PreferenceScope, ResourceProvenance, ResourceVerificationStatus
@@ -140,7 +142,7 @@ class TavilyResourceIndex:
             return UnavailableResult(UNKNOWN_SEARCH_REASON)
         candidates: list[ResourceRecord] = []
         seen: set[str] = set()
-        for item in decoded["results"]:
+        for provider_rank, item in enumerate(decoded["results"], 1):
             if not isinstance(item, dict):
                 continue
             url = safe_candidate_url(item.get("url"))
@@ -155,12 +157,19 @@ class TavilyResourceIndex:
             except UnicodeEncodeError:
                 continue
             seen.add(url)
+            content = item.get("content")
+            snippet = html.unescape(re.sub(r"<[^>]*>", "", content)).strip()[:2000] if isinstance(content, str) else ""
+            score = item.get("score")
+            score = score if isinstance(score, (int, float)) and not isinstance(score, bool) and math.isfinite(score) else None
             candidates.append(ResourceRecord(
                 resource_id=new_id("res"), project_id=project_id, url=url, title=title,
                 media_type=MediaType.TEXT, language="und",
                 provenance=ResourceProvenance.SEARCH_CANDIDATE,
                 verification_status=ResourceVerificationStatus.UNVERIFIED, checked_at=None,
                 source_note=f"Tavily 搜索候选；搜索时间 {searched_at}；语言未核验；未检查链接、内容覆盖或教学质量。",
+                discovery=DiscoveryEvidence(source="web", provider_rank=provider_rank,
+                    provider_score=score, snippet=snippet,
+                    limitations=["搜索摘要来自外部供应商，尚未读取正文或核验教学质量"]).model_dump(mode="json"),
             ))
             if len(candidates) == limit:
                 break

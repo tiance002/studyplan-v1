@@ -1,6 +1,8 @@
 from app.api.v1.deps import get_auth_context, get_container
 from app.api.v1.resource_schemas import (
     ManualResourceRequest,
+    ResourceInspectionRequest,
+    ResourceInspectionView,
     ResourceRemovalView,
     ResourceSearchRequest,
     ResourceSearchView,
@@ -25,7 +27,8 @@ def get_resource_service(container: AppContainer = Depends(get_container)) -> Le
 
 
 def target(project_id, body):
-    return {"project_id": project_id, **body.model_dump(include={"plan_id", "stage_id", "unit_id"})}
+    return {"project_id": project_id, **body.model_dump(
+        include={"plan_id", "stage_id", "unit_id", "node_id"}, exclude_none=True)}
 
 
 @router.post("/searches", response_model=ResourceSearchView, operation_id="search_learning_resources")
@@ -35,7 +38,31 @@ def search_resources(body: ResourceSearchRequest, project_id: str = ProjectId,
     position = target(project_id, body)
     if body.node_id is not None:
         position["node_id"] = body.node_id
-    return service.search(scope, position, body.query, body.idempotency_key)
+    return service.search(scope, position, body.query, body.idempotency_key, source=body.source)
+
+
+@router.post("/inspections", response_model=ResourceInspectionView, operation_id="inspect_learning_resource")
+def inspect_resource(body: ResourceInspectionRequest, project_id: str = ProjectId,
+                     scope: AuthContext = Depends(get_auth_context),
+                     service: LearningResourceService = Depends(get_resource_service)):
+    return service.inspect(scope, target(project_id, body), body.search_id, body.candidate_id,
+                           body.idempotency_key, paths=body.paths)
+
+
+@router.get("/inspections/{inspection_id}", response_model=ResourceInspectionView,
+            operation_id="get_resource_inspection")
+def get_inspection(inspection_id: str, position: ResourceTargetRequest = Depends(), project_id: str = ProjectId,
+                   scope: AuthContext = Depends(get_auth_context),
+                   service: LearningResourceService = Depends(get_resource_service)):
+    return service.get_inspection(scope, target(project_id, position), inspection_id)
+
+
+@router.get("/inspections/by-key/{key}", response_model=ResourceInspectionView,
+            operation_id="get_resource_inspection_by_key")
+def get_inspection_by_key(key: str, position: ResourceTargetRequest = Depends(), project_id: str = ProjectId,
+                         scope: AuthContext = Depends(get_auth_context),
+                         service: LearningResourceService = Depends(get_resource_service)):
+    return service.get_inspection_by_key(scope, target(project_id, position), key)
 
 
 @router.get("/searches/{search_id}", response_model=ResourceSearchView, operation_id="get_resource_search")
@@ -63,7 +90,8 @@ def list_selected(position: ResourceTargetRequest = Depends(), project_id: str =
 def select_resource(body: ResourceSelectionRequest, project_id: str = ProjectId,
                     scope: AuthContext = Depends(get_auth_context),
                     service: LearningResourceService = Depends(get_resource_service)):
-    return service.select(scope, target(project_id, body), body.search_id, body.candidate_id)
+    return service.select(scope, target(project_id, body), body.search_id, body.candidate_id,
+                          module_keys=body.module_keys, chapter_paths=body.chapter_paths, role=body.role)
 
 
 @router.post("/manual", response_model=SelectedResourceView, operation_id="add_manual_learning_resource")

@@ -21,6 +21,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/resources/inspections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Inspect Resource */
+        post: operations["inspect_learning_resource"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/inspections/{inspection_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Inspection */
+        get: operations["get_resource_inspection"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/resources/inspections/by-key/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Inspection By Key */
+        get: operations["get_resource_inspection_by_key"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/resources/searches/{search_id}": {
         parameters: {
             query?: never;
@@ -875,6 +926,127 @@ export interface components {
          * @enum {string}
          */
         AiRunStatus: "queued" | "running" | "waiting_user" | "succeeded" | "failed" | "cancelled" | "reconciliation_required";
+        /** ChapterEvidence */
+        ChapterEvidence: {
+            /** Path */
+            path: string;
+            /** Title */
+            title: string;
+            /** Order */
+            order: number;
+            /**
+             * Status
+             * @default listed
+             * @enum {string}
+             */
+            status: "listed" | "read" | "unsupported";
+            /** Module Keys */
+            module_keys?: string[];
+        };
+        /** ContentEvidence */
+        ContentEvidence: {
+            /** Path */
+            path: string;
+            /** Url */
+            url: string;
+            /** Blob Sha */
+            blob_sha?: string | null;
+            /** Content Hash */
+            content_hash: string;
+            /** Fetched At */
+            fetched_at: string;
+            /**
+             * Line Start
+             * @default 1
+             */
+            line_start: number;
+            /**
+             * Line End
+             * @default 1
+             */
+            line_end: number;
+            /**
+             * Truncated
+             * @default false
+             */
+            truncated: boolean;
+        };
+        /** DiscoveryEvidence */
+        DiscoveryEvidence: {
+            /**
+             * Schema Version
+             * @default 1
+             * @constant
+             */
+            schema_version: 1;
+            /**
+             * Source
+             * @default unknown
+             * @enum {string}
+             */
+            source: "web" | "github" | "manual" | "unknown";
+            /** Provider Rank */
+            provider_rank?: number | null;
+            /** Provider Score */
+            provider_score?: number | null;
+            /**
+             * Snippet
+             * @default
+             */
+            snippet: string;
+            repo?: components["schemas"]["GitHubRepository"] | null;
+            /**
+             * Inspection Status
+             * @default metadata_only
+             * @enum {string}
+             */
+            inspection_status: "metadata_only" | "readme_read" | "chapter_or_index_checked" | "controlled_review";
+            /** Files */
+            files?: components["schemas"]["ContentEvidence"][];
+            /** Chapters */
+            chapters?: components["schemas"]["ChapterEvidence"][];
+            signals?: components["schemas"]["DiscoverySignals"];
+            /**
+             * Recommended Role
+             * @default candidate
+             * @enum {string}
+             */
+            recommended_role: "candidate" | "mainline_candidate" | "reference" | "unsuitable";
+            /** Reasons */
+            reasons?: string[];
+            /** Limitations */
+            limitations?: string[];
+            selection_mapping?: components["schemas"]["SelectionMapping"] | null;
+        };
+        /** DiscoverySignals */
+        DiscoverySignals: {
+            /**
+             * Topic Overlap
+             * @default 0
+             */
+            topic_overlap: number;
+            /** Teaching Structure */
+            teaching_structure?: boolean | null;
+            /** Prerequisites */
+            prerequisites?: boolean | null;
+            /** Exercises */
+            exercises?: boolean | null;
+            /**
+             * Difficulty
+             * @default unknown
+             */
+            difficulty: string;
+            /**
+             * Language
+             * @default unknown
+             */
+            language: string;
+            /**
+             * Version
+             * @default unknown
+             */
+            version: string;
+        };
         /**
          * DraftDecision
          * @description 等待用户时的三种决定。
@@ -1052,11 +1224,30 @@ export interface components {
             /** Updated At */
             updated_at: string | null;
         };
+        /** GitHubRepository */
+        GitHubRepository: {
+            /** Owner */
+            owner: string;
+            /** Name */
+            name: string;
+            /**
+             * Default Branch
+             * @default
+             */
+            default_branch: string;
+            /** License */
+            license?: string | null;
+            /** Updated At */
+            updated_at?: string | null;
+            /** Stars */
+            stars?: number | null;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        JsonValue: unknown;
         /**
          * KnowledgeExtensionView
          * @description 阶段预置扩展知识（默认 1–2 项，**可选**，不强制完成）。
@@ -1108,6 +1299,30 @@ export interface components {
          * @enum {string}
          */
         KnowledgeNodeType: "concept" | "skill" | "tool" | "pattern" | "domain";
+        /** LearningGuidance */
+        LearningGuidance: {
+            /** Why Now */
+            why_now: string;
+            /** Previous Relation */
+            previous_relation: string;
+            /** Learning Focus */
+            learning_focus: string[];
+            /** Comparison Focus */
+            comparison_focus: string[];
+            practice_delta: components["schemas"]["PracticeDelta"];
+            source_slice?: components["schemas"]["SourceSlice"] | null;
+            /**
+             * Exposure Relation
+             * @default unknown
+             * @enum {string}
+             */
+            exposure_relation: "review" | "compare" | "deepen" | "version_context" | "unknown";
+            /**
+             * Knowledge Keys
+             * @default []
+             */
+            knowledge_keys: string[];
+        };
         /** LearningWorkspaceView */
         LearningWorkspaceView: {
             plan: components["schemas"]["PlanView"];
@@ -1143,6 +1358,8 @@ export interface components {
             stage_id: string;
             /** Unit Id */
             unit_id: string;
+            /** Node Id */
+            node_id?: string | null;
             /** Url */
             url: string;
             /** Title */
@@ -1627,6 +1844,19 @@ export interface components {
             stage_key: string;
             /** Order Index */
             order_index: number;
+        };
+        /** PracticeDelta */
+        PracticeDelta: {
+            /** Baseline */
+            baseline: string;
+            /** Increment */
+            increment: string[];
+            /** Preserved */
+            preserved: string[];
+            /** Validation */
+            validation: string[];
+            /** Reuse */
+            reuse: string[];
         };
         /** PracticeOutcomeGroupView */
         PracticeOutcomeGroupView: {
@@ -2425,6 +2655,7 @@ export interface components {
              * @default
              */
             source_note: string;
+            discovery?: components["schemas"]["DiscoveryEvidence"];
         };
         /** ResourceCatalogSectionView */
         ResourceCatalogSectionView: {
@@ -2711,6 +2942,51 @@ export interface components {
             /** Estimated Minutes */
             estimated_minutes: number | null;
         };
+        /** ResourceInspectionRequest */
+        ResourceInspectionRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /** Unit Id */
+            unit_id: string;
+            /** Node Id */
+            node_id?: string | null;
+            /** Search Id */
+            search_id: string;
+            /** Candidate Id */
+            candidate_id: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Paths */
+            paths?: string[];
+        };
+        /** ResourceInspectionView */
+        ResourceInspectionView: {
+            /** Inspection Id */
+            inspection_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "dispatched" | "succeeded" | "failed" | "reconciliation_required";
+            /** Search Id */
+            search_id: string;
+            /** Candidate Id */
+            candidate_id: string;
+            candidate?: components["schemas"]["ResourceCandidateView"] | null;
+            /** Receipts */
+            receipts?: {
+                [key: string]: components["schemas"]["JsonValue"];
+            }[];
+            /** Error */
+            error?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /**
          * ResourceProvenance
          * @description 资源出处。``OFFICIAL`` 必须能给出官方来源证据。
@@ -2732,6 +3008,12 @@ export interface components {
             unit_id: string;
             /** Node Id */
             node_id?: string | null;
+            /**
+             * Source
+             * @default web
+             * @enum {string}
+             */
+            source: "web" | "github";
             /** Query */
             query: string;
             /** Idempotency Key */
@@ -2757,6 +3039,16 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /**
+             * Source
+             * @default web
+             * @enum {string}
+             */
+            source: "web" | "github";
+            /** Context Snapshot */
+            context_snapshot?: {
+                [key: string]: components["schemas"]["JsonValue"];
+            };
         };
         /** ResourceSelectionRequest */
         ResourceSelectionRequest: {
@@ -2766,10 +3058,18 @@ export interface components {
             stage_id: string;
             /** Unit Id */
             unit_id: string;
+            /** Node Id */
+            node_id?: string | null;
             /** Search Id */
             search_id: string;
             /** Candidate Id */
             candidate_id: string;
+            /** Module Keys */
+            module_keys?: string[];
+            /** Chapter Paths */
+            chapter_paths?: string[];
+            /** @default reference */
+            role: components["schemas"]["StageResourceRole"];
         };
         /**
          * RunProgress
@@ -2889,6 +3189,21 @@ export interface components {
              */
             created_at: string;
         };
+        /** SelectionMapping */
+        SelectionMapping: {
+            /** Module Keys */
+            module_keys: string[];
+            /** Chapter Paths */
+            chapter_paths: string[];
+            /** @default reference */
+            role: components["schemas"]["StageResourceRole"];
+            /**
+             * Basis
+             * @default user_selected_read_chapters
+             * @constant
+             */
+            basis: "user_selected_read_chapters";
+        };
         /** SessionEntry */
         SessionEntry: {
             /** Token */
@@ -2908,6 +3223,30 @@ export interface components {
              * @default
              */
             csrf_token: string;
+        };
+        /** SourceSlice */
+        SourceSlice: {
+            /** Repo Url */
+            repo_url: string;
+            /** Ref */
+            ref: string;
+            /** Files */
+            files: string[];
+            /** Call Chain */
+            call_chain: string[];
+            /** Questions */
+            questions: string[];
+            /**
+             * Optional
+             * @default true
+             */
+            optional: boolean;
+            /**
+             * Verification Status
+             * @default suggested
+             * @enum {string}
+             */
+            verification_status: "suggested" | "reviewed";
         };
         /** StageCompletionView */
         StageCompletionView: {
@@ -2952,6 +3291,7 @@ export interface components {
              * @default
              */
             objective: string;
+            learning_guidance?: components["schemas"]["LearningGuidance"] | null;
         };
         /**
          * StageResourceAssignmentView
@@ -3443,6 +3783,118 @@ export interface operations {
             };
         };
     };
+    inspect_learning_resource: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourceInspectionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceInspectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_resource_inspection: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                plan_id: string;
+                stage_id: string;
+                unit_id: string;
+                node_id?: string | null;
+            };
+            header?: never;
+            path: {
+                inspection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceInspectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_resource_inspection_by_key: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+                plan_id: string;
+                stage_id: string;
+                unit_id: string;
+                node_id?: string | null;
+            };
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceInspectionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_resource_search: {
         parameters: {
             query: {
@@ -3451,6 +3903,7 @@ export interface operations {
                 plan_id: string;
                 stage_id: string;
                 unit_id: string;
+                node_id?: string | null;
             };
             header?: never;
             path: {
@@ -3488,6 +3941,7 @@ export interface operations {
                 plan_id: string;
                 stage_id: string;
                 unit_id: string;
+                node_id?: string | null;
             };
             header?: never;
             path: {
@@ -3525,6 +3979,7 @@ export interface operations {
                 plan_id: string;
                 stage_id: string;
                 unit_id: string;
+                node_id?: string | null;
             };
             header?: never;
             path?: never;
@@ -3632,6 +4087,7 @@ export interface operations {
                 plan_id: string;
                 stage_id: string;
                 unit_id: string;
+                node_id?: string | null;
             };
             header?: never;
             path: {

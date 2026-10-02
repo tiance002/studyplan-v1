@@ -88,7 +88,7 @@ def test_practice_context_preview_decision_owner_scoped_http(practice_scenario):
         preview = response.json()
         registration = client.post("/api/v1/auth/register", json={
             "username": "PracticeOther" + scope.actor_id[-10:],
-            "password": "isolated practice second account passphrase"})
+            "password": "Other-pass1!"})
         assert registration.status_code == 200
         other_headers = {"X-CSRF-Token": registration.json()["csrf_token"]}
         path = "/api/v1/practice-changes/" + preview["proposal_id"]

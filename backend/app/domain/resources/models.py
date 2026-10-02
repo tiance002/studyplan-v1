@@ -9,8 +9,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from math import isfinite
 from typing import Iterable
 from urllib.parse import urlparse
 
@@ -60,6 +61,11 @@ class ResourceRecord:
     section_anchor: str | None = None
     checked_at: datetime | None = None
     source_note: str = ""
+    discovery: dict = field(default_factory=dict)
+
+    def __post_init__(self):
+        if not isinstance(self.discovery, dict):
+            raise ValidationAppError("发现证据必须为字典")
 
     @staticmethod
     def create(
@@ -204,14 +210,9 @@ def rank_resources(
     *,
     preference: ResourcePreference,
 ) -> list[ResourceRecord]:
-    """按偏好排序资源。
-
-    排序键（依次）：
-    1. ``unavailable`` 沉底（不可用不应占据首屏）
-    2. 媒体形态匹配（both/mixed 时 text 优先，除非 video_first）
-    3. 语言匹配
-    4. 出处为官方
-    5. 标题稳定排序，保证结果可复现
+    """Unavailable/unsuitable last; factual relevance, teaching evidence,
+    preferences, and the original provider rank resolve the remaining order.
+    Unknown scores remain unknown; stable input order breaks legacy ties.
     """
     mode = preference.mode
     language = preference.language
@@ -225,14 +226,28 @@ def rank_resources(
             order = {MediaType.VIDEO: 0, MediaType.INTERACTIVE: 1, MediaType.TEXT: 2}
         return order.get(resource.media_type, 9)
 
-    def sort_key(resource: ResourceRecord) -> tuple[int, int, int, int, str]:
+    def sort_key(resource: ResourceRecord) -> tuple:
+        evidence = resource.discovery if isinstance(resource.discovery, dict) else {}
         unavailable = 1 if resource.verification_status is ResourceVerificationStatus.UNAVAILABLE else 0
         language_miss = 0 if resource.language == language else 1
         official_miss = 0 if (
             preference.official_priority
             and resource.provenance is ResourceProvenance.OFFICIAL
         ) else 1
-        return (unavailable, media_rank(resource), language_miss, official_miss, resource.title)
+        signals = evidence.get("signals", {})
+        signals = signals if isinstance(signals, dict) else {}
+        teaching = sum(signals.get(name) is True for name in ("teaching_structure", "prerequisites", "exercises"))
+        overlap = signals.get("topic_overlap", 0)
+        overlap = overlap if isinstance(overlap, int) and not isinstance(overlap, bool) and 0 <= overlap <= 500 else 0
+        score = evidence.get("provider_score")
+        score = score if isinstance(score, (int, float)) and not isinstance(score, bool) and isfinite(score) else None
+        provider_rank = evidence.get("provider_rank")
+        provider_rank = provider_rank if isinstance(provider_rank, int) and not isinstance(provider_rank, bool) and provider_rank > 0 else 10**9
+        # Unknown evidence is neutral. The original provider rank, then Python's
+        # stable ordering, resolves ties without manufacturing a score.
+        return (unavailable, evidence.get("recommended_role") == "unsuitable", -overlap,
+                -teaching, media_rank(resource), language_miss, official_miss,
+                score is None, -(score or 0), provider_rank)
 
     return sorted(resources, key=sort_key)
 

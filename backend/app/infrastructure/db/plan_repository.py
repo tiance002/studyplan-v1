@@ -49,6 +49,7 @@ from app.domain.enums import (
     StageResourceRole,
     TaskKnowledgeRole,
 )
+from app.domain.planning.guidance import guidance_from_payload, guidance_payload
 from app.domain.planning.models import (
     PlanDraft,
     PlanRevision,
@@ -98,6 +99,7 @@ def _stage_payload(stage: PlanStage) -> dict[str, Any]:
         "section_kind": str(stage.section_kind),
         "order_index": stage.order_index,
         "objective": stage.objective,
+        **({"learning_guidance": guidance_payload(stage.learning_guidance)} if stage.learning_guidance else {}),
     }
 
 
@@ -210,6 +212,7 @@ def _stage_from(row: dict[str, Any]) -> PlanStage:
         section_kind=OutlineSectionKind(str(row["section_kind"])),
         order_index=int(row["order_index"]),  # type: ignore[arg-type]
         objective=str(row.get("objective") or ""),
+        learning_guidance=guidance_from_payload(row.get("learning_guidance")),
     )
 
 
@@ -533,13 +536,17 @@ class PgPlanRepository:
             (project_id, plan_id),
         ).fetchall()
         structure = row.get("structure") or {}
+        # Structural fields remain authoritative in normalized tables. Only the
+        # new optional guidance lives in this version's existing JSONB snapshot.
+        guidance_by_key = {s["stable_key"]: s.get("learning_guidance")
+                           for s in structure.get("stages", [])} if isinstance(structure, dict) else {}
         approved_at = _parse_dt(structure.get("approved_at")) if isinstance(structure, dict) else None
         return PlanRevision(
             plan_id=plan_id,
             project_id=project_id,
             revision=int(row["revision"]),  # type: ignore[arg-type]
             goal_snapshot=str(row["goal_snapshot"]),
-            stages=tuple(_stage_from(s) for s in stages),  # type: ignore[arg-type]
+            stages=tuple(_stage_from({**s, "learning_guidance": guidance_by_key.get(s["stable_key"])}) for s in stages),
             resource_snapshots=tuple(_as_list(structure.get("resource_snapshots"))) if isinstance(structure, dict) else (),
             unit_links=tuple(_unit_link_from(x) for x in unit_links),  # type: ignore[arg-type]
             task_links=tuple(_task_link_from(x) for x in task_links),  # type: ignore[arg-type]

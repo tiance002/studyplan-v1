@@ -6,6 +6,7 @@ import { stageCompletionLabel } from '../../components/learningNavigation';
 import { ResourcePicker } from './ResourcePicker';
 import { PreferencePanel } from './PreferencePanel';
 import { ResourceChangePanel } from './ResourceChangePanel';
+import { LearningGuidance } from './LearningGuidance';
 export function KnowledgeNodeView({
   node,
   allNodes,
@@ -67,6 +68,7 @@ export function MainWorkspace({
   selectNode,
   create,
   projectId,
+  actorKey,
   planId,
   planRevision,
   onPublished,
@@ -78,6 +80,7 @@ export function MainWorkspace({
   selectNode: (id: string) => void;
   create: () => void;
   projectId: string;
+  actorKey: string;
   planId: string;
   planRevision: number;
   onPublished: () => Promise<void>;
@@ -111,6 +114,7 @@ export function MainWorkspace({
       ) : (
         <>
           <dl className="learning-meta"><div><dt>进入本阶段之前</dt><dd>{entryPrerequisites.length ? entryPrerequisites.map(id => {const prerequisite=allNodes.find(n=>n.node_id===id);return prerequisite ? <button key={id} className="prereq-link" onClick={()=>selectNode(id)}>{prerequisite.title}</button> : <span key={id}>关联前置知识暂不可用</span>;}) : '正式计划未声明前置知识。'}</dd></div><div><dt>本阶段实践</dt><dd>{stage.tasks.map(t=>t.title).join('、') || '本阶段尚无正式实践任务。'}</dd></div></dl>
+          <LearningGuidance key={`${projectId}:${planId}:${planRevision}:${stage.stage.stage_id}`} guidance={stage.stage.learning_guidance} />
           <div className="section-heading">
             <h2>知识结构</h2>
             <span className="muted">{stage.nodes.length} 个知识节点</span>
@@ -160,8 +164,10 @@ export function MainWorkspace({
               <label>资料所属学习单元<select aria-label="资料所属学习单元" value={unitId} onChange={event => setUnitChoice(event.target.value)}>
                 {stage.units.map(unit => <option key={unit.unit_id} value={unit.unit_id}>{unit.title}</option>)}
               </select></label>
-              <ResourcePicker key={`resources:${positionKey}`} projectId={projectId} nodeId={validNodeId}
-                target={{plan_id:planId,stage_id:stage.stage.stage_id,unit_id:unitId}} />
+              <ResourcePicker key={`resources:${positionKey}`} actorKey={actorKey} projectId={projectId} nodeId={validNodeId}
+                moduleTitles={Object.fromEntries(stage.nodes.map(node => [node.stable_key,node.title]))}
+                topic={stage.nodes.find(node => node.node_id === validNodeId)?.title || stage.stage.title}
+                target={{plan_id:planId,stage_id:stage.stage.stage_id,unit_id:unitId,...(validNodeId ? {node_id:validNodeId} : {})}} />
             </>}
           </ResourceDialog>
           {!!stage.tasks.length && <section className="practice-preview"><p className="eyebrow">把知识用到项目中</p>{stage.tasks.map(t=><article key={t.task_id}><h2>{t.title}</h2><p className="muted">{t.goal}</p><p>验收要求：{t.acceptance?.join('；') || '暂无补充条目'}</p></article>)}{practice && <button className="btn primary" onClick={practice}>查看任务与验收要求 →</button>}</section>}

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "fixture_status": "acceptance_only_not_published_seed",
+  "scenario": {
+    "target": "理解 Tool Calling 并放入自己的 Agent",
+    "starting_point": "基础 Python；在 Hello-Agents 见过 Tool 概念；已有最小聊天 Agent",
+    "outcome_purpose": "learn"
+  },
+  "stage_key": "stage.tools",
+  "learning_guidance": {
+    "why_now": "最小聊天 Agent 已能收发消息，现在需要把模型提出的工具请求变成可控、可观察的真实动作。",
+    "previous_relation": "在 Hello-Agents 见过 Tool 概念；本阶段快速复习概念，重点新增 Loop / Dispatch / Result 的实现。此起点来自本 fixture 的明确输入，不代表用户已经掌握。",
+    "exposure_relation": "deepen",
+    "knowledge_keys": ["node.tools"],
+    "learning_focus": ["tool schema", "model tool request", "dispatch", "observation / result", "error handling"],
+    "comparison_focus": ["对照 Hello-Agents 的概念说明与另一份工具循环实现：新增第三个 Tool 时，分别需要修改注册、dispatch 和结果回传的哪些位置？"],
+    "practice_delta": {
+      "baseline": "已有最小聊天 Agent",
+      "increment": ["增加 read_file 和 search_note 两个工具", "把工具结果作为 observation 传入下一轮模型调用"],
+      "preserved": ["普通聊天不受影响"],
+      "validation": ["正常工具调用", "未知 Tool", "错误参数", "Tool 抛错"],
+      "reuse": ["后续 Permission / RAG / MCP 复用同一工具边界"]
+    },
+    "source_slice": {
+      "repo_url": "https://github.com/shareAI-lab/learn-claude-code",
+      "ref": "main",
+      "files": [],
+      "call_chain": ["tool registration", "dispatch", "result", "next model turn"],
+      "questions": ["定位这条调用链所需的最少文件；不要阅读或执行完整仓库", "在哪一层处理未知工具与参数错误？"],
+      "optional": true,
+      "verification_status": "suggested"
+    }
+  },
+  "source_note": "本例只验证规划语义；未核对当前仓库文件或固定 commit，源码路径留空，不能冒充已审核正式资料。正式 Seed 须补来源/免费正文/章节审核证据。"
+}

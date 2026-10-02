@@ -1,5 +1,7 @@
 """Manual candidates and existing publication, all decisions in one owner transaction."""
 
+from dataclasses import replace
+
 from app.core.errors import (
     ConflictError,
     IdempotencyConflictError,
@@ -9,6 +11,7 @@ from app.core.errors import (
 )
 from app.core.ids import content_hash, new_id
 from app.domain.enums import TaskKnowledgeRole
+from app.domain.planning.guidance import changed_practice_guidance
 from app.domain.planning.models import PlanDraft, PlanPublicationService, PlanTaskKnowledgeLink, PlanTaskLink
 from app.infrastructure.db.learning_exposures import _json
 from app.infrastructure.db.plan_repository import PgPlanRepository
@@ -376,13 +379,18 @@ class PgPracticeChanges(PgResourceChanges):
                 warnings.append(
                     "旧路线部分资源缺少当时快照；本次仅冻结新版本预览时观察，不声称补全旧版本历史。"
                 )
+            changed_stage_ids = {d["after"]["stage_id"] for d in deltas}
+            future_tasks = [t for t in context["tasks"] if t["task_id"] not in replacements] + [d["after"] for d in deltas]
+            stages = tuple(replace(s, learning_guidance=changed_practice_guidance(
+                s.learning_guidance, [t for t in future_tasks if t["stage_id"] == s.stage_id]))
+                if s.stage_id in changed_stage_ids else s for s in current.stages)
             draft = PlanDraft(
                 new_id("drf"),
                 command.project_id,
                 "",
                 current.goal_snapshot,
                 current.revision + 1,
-                stages=current.stages,
+                stages=stages,
                 unit_links=current.unit_links,
                 task_links=tuple(t for t in current.task_links if t.task_id not in replacements)
                 + tuple(new_links),

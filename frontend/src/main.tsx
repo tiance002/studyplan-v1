@@ -7,6 +7,7 @@ import { AppShell } from "./components/AppShell";
 import { LearningDashboard } from "./features/learning/LearningDashboard";
 import { LearningPath } from "./features/learning/LearningPath";
 import { MainWorkspace } from "./features/learning/MainWorkspace";
+import { clearResourceBuffers } from "./features/learning/resourceBuffer";
 import {
   ConversationList,
   SummaryDetail,
@@ -121,6 +122,7 @@ function App() {
   async function logout() {
     try {
       await api.logout();
+      clearResourceBuffers();
       setSession(null);
       setWorkspace(null);
       setCsrfToken("");
@@ -193,6 +195,7 @@ function App() {
       )}
       {page === "workspace" && (
         <MainWorkspace
+          actorKey={session.username || session.csrf_token || 'development-session'}
           projectId={project}
           planId={workspace?.plan.plan_id || ''}
           planRevision={workspace?.plan.revision || 0}

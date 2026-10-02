@@ -1,0 +1,112 @@
+const { chromium } = require('playwright-core');
+const assert = require('node:assert/strict');
+
+// HTTP fixtures isolate paid/public services. Browser assertions exercise the real resource panel.
+(async () => {
+  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  try {
+    const page = await browser.newPage();
+    page.setDefaultTimeout(5000);
+    const failures = [], unknown = [];
+    page.on('pageerror', error => failures.push(error.message));
+    await page.route('**/api/v1/**', route => { unknown.push(route.request().url()); return route.abort('blockedbyclient'); });
+    const stage = { stage_id:'s1', stable_key:'stage.test', title:'工具与状态', section_kind:'core', order_index:0, objective:'不可自动外发的私有阶段目标' };
+    const units = ['u1','u2'].map(unit_id => ({ unit_id, title:unit_id, node_ids:[], objectives:[], progress:'not_started', progress_recorded:false }));
+    const workspace = { plan:{ plan_id:'p1', project_id:'project', revision:1, goal_snapshot:'不可自动外发的整段个人目标', stages:[stage], unit_links:[], task_links:[], stage_resources:[], extensions:[] }, stages:[{ stage, nodes:[], units, resources:[], tasks:[], completion:{ status:'incomplete', summary_completed:false, completed_practice_tasks:0, total_practice_tasks:0 } }], total_stages:1, completed_stages:0, total_units:2, completed_units:0 };
+    const discovery = { schema_version:1, source:'github', provider_rank:2, provider_score:null, snippet:'<img src=x onerror="window.resourceXss=true">', repo:{ owner:'example', name:'course', default_branch:'main', license:null, updated_at:'2026-10-01', stars:7 }, inspection_status:'metadata_only', files:[], chapters:[], signals:{ topic_overlap:1, teaching_structure:null, prerequisites:null, exercises:null, difficulty:'unknown', language:'en', version:'unknown' }, recommended_role:'candidate', reasons:['保留搜索返回顺序'], limitations:['尚未读取正文'] };
+    const candidate = { resource_id:'c1', project_id:'project', url:'https://github.com/example/course', title:'候选教程', media_type:'text', language:'en', provenance:'github_candidate', verification_status:'unverified', checked_at:null, source_note:'GitHub search', discovery };
+    const checked = { ...candidate, discovery:{ ...discovery, inspection_status:'chapter_or_index_checked', files:[{ path:'README.md', url:'https://github.com/example/course/blob/main/README.md', blob_sha:'blob123', content_hash:'sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', fetched_at:'2026-10-02T10:00:00Z', line_start:1, line_end:40, truncated:true }], chapters:[{ path:'chapter1.md', title:'工具章节', order:0, status:'read', module_keys:['tools'] }, { path:'chapter2.md', title:'状态章节', order:1, status:'listed', module_keys:[] }, { path:'exercise.ipynb', title:'Notebook练习', order:2, status:'unsupported', module_keys:[] }], signals:{ ...discovery.signals, teaching_structure:true, exercises:true }, recommended_role:'mainline_candidate', reasons:['README显示连续教学结构'], limitations:['只抽查一章，不代表整门课程质量'] } };
+    checked.discovery.chapters[0].module_keys=[];
+    checked.discovery.files.push({path:'chapter1.md',url:'https://github.com/example/course/blob/main/chapter1.md',blob_sha:'chapterblob',content_hash:'chapterhash',fetched_at:'2026-10-02T10:00:00Z',line_start:1,line_end:12,truncated:false});
+    const posts = [], inspections = [], reads = [], selectionPosts = [], selections = {u1:[],u2:[]};
+    let abortInspection = true, delay = false, release, entered;
+    const search = body => ({ search_id:'search-'+body.unit_id, status:'succeeded', source:body.source, query:body.query, candidates:[candidate], context_snapshot:{module_keys:['tools']}, error:null, created_at:'2026-10-02T10:00:00Z' });
+    const inspection = { inspection_id:'inspect1', status:'succeeded', search_id:'search-u1', candidate_id:'c1', candidate:checked, receipts:[], error:null, created_at:'2026-10-02T10:00:00Z' };
+    await page.route('**/api/v1/session', route => route.fulfill({ json:{ username:'discovery-user', project_ids:['project'], csrf_token:'fake' } }));
+    await page.route('**/healthz', route => route.fulfill({ json:{fake_llm:true} }));
+    await page.route('**/api/v1/workspace?**', route => route.fulfill({ json:workspace }));
+    await page.route('**/api/v1/resource-changes/catalog?**', route => route.fulfill({ json:[] }));
+    await page.route('**/api/v1/auth/logout', route => route.fulfill({ json:{logged_out:true} }));
+    await page.route('**/api/v1/auth/login', route => route.fulfill({ json:{username:route.request().postDataJSON().username,project_ids:['project'],csrf_token:'fake'} }));
+    await page.route('**/api/v1/preferences?**', route => route.fulfill({ json:{project:null,unit:null,node:null,effective:{scope:'system',scope_ref:'system',mode:'mixed',language:'zh',official_priority:true,pace:'normal',version:1},inherited:true,versions:{project:0,unit:0,node:0},invalid_scopes:[]} }));
+    await page.route('**/api/v1/resources/**', async route => {
+      const req = route.request(), url = new URL(req.url()), body = req.postDataJSON(), unit = body?.unit_id || url.searchParams.get('unit_id');
+      if (url.pathname.endsWith('/searches')) { posts.push(body); if (delay) { entered(); await new Promise(resolve => { release = resolve; }); } return route.fulfill({ json:search(body) }); }
+      if (url.pathname.endsWith('/inspections')) { inspections.push(body); if (abortInspection) { abortInspection = false; return route.abort('failed'); } return route.fulfill({ json:inspection }); }
+      if (url.pathname.includes('/inspections/')) { reads.push(req.method()); return route.fulfill({ json:inspection }); }
+      if (req.method() === 'GET') return route.fulfill({ json:selections[unit] || [] });
+      if (url.pathname.endsWith('/selections')) { selectionPosts.push(body); selections[unit] = [{selection_id:'selected1',resource:checked,created_at:'2026-10-02T10:00:00Z'}]; return route.fulfill({ json:selections[unit][0] }); }
+      throw new Error('Unexpected resource command '+url.pathname);
+    });
+    await page.goto((process.env.STUDYPLAN_URL || 'http://127.0.0.1:5177')+'/#workspace');
+    const open = () => page.getByRole('button',{name:'补充本单元资料',exact:true}).click();
+    const dialog = page.getByRole('dialog',{name:'补充本单元资料',exact:true});
+    await open();
+    await dialog.getByRole('combobox',{name:'搜索来源'}).selectOption('github');
+    await dialog.getByLabel('搜索词',{exact:true}).fill('agent tool tutorial');
+    assert.equal(posts.length,0,'mount/edit must never dispatch search');
+    await dialog.getByRole('button',{name:'搜索资料',exact:true}).click();
+    await dialog.getByText('候选未读',{exact:true}).waitFor();
+    assert.equal(posts.length,1); assert.equal(posts[0].source,'github'); assert.equal(posts[0].query,'agent tool tutorial');
+    assert.ok(!JSON.stringify(posts[0]).includes('不可自动外发'));
+    assert.equal(inspections.length,0,'search does not silently inspect');
+    assert.equal(await page.locator('[aria-label="单元资料选取"] img').count(),0);
+    assert.equal(await page.evaluate(() => window.resourceXss),undefined);
+    await dialog.getByRole('button',{name:'检查教程/章节',exact:true}).click();
+    await dialog.getByRole('alert').waitFor();
+    await dialog.getByRole('button',{name:'读取原检查',exact:true}).click();
+    await dialog.getByText('章节/目录抽查',{exact:true}).waitFor();
+    assert.equal(inspections.length,1,'ambiguous inspection is recovered without another POST'); assert.deepEqual(reads,['GET']);
+    assert.ok(inspections[0].idempotency_key); assert.equal(inspections[0].candidate_id,'c1');
+    await dialog.getByLabel('关联模块',{exact:true}).selectOption('tools');
+    await dialog.getByLabel('已读章节',{exact:true}).selectOption('chapter1.md');
+    assert.equal(await dialog.getByLabel('已读章节',{exact:true}).locator('option[value="chapter2.md"]').count(),0,'unread chapters cannot be mapped');
+    await dialog.getByLabel('私人资料用途',{exact:true}).selectOption('supplement');
+    await dialog.getByRole('button',{name:'选用并映射已读章节',exact:true}).click();
+    await dialog.getByRole('button',{name:'移除此资料',exact:true}).waitFor();
+    assert.deepEqual(selectionPosts[0].module_keys,['tools']);
+    assert.deepEqual(selectionPosts[0].chapter_paths,['chapter1.md']);
+    assert.equal(selectionPosts[0].role,'supplement');
+    const text = await dialog.innerText();
+    for (const part of ['README.md','1–40','blob123','sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef','2026-10-02T10:00:00Z','已截断','仅目录列出，未读','格式暂不支持，未读','许可证未知','README显示连续教学结构']) assert.ok(text.includes(part),part);
+    await page.setViewportSize({width:390,height:844});
+    assert.equal(await dialog.locator('.resource-dialog-body').evaluate(element => element.scrollWidth <= element.clientWidth),true,'long hash evidence remains readable without horizontal overflow');
+    await page.setViewportSize({width:1280,height:900});
+    await page.keyboard.press('Escape'); await open();
+    assert.equal(await dialog.getByLabel('搜索词',{exact:true}).inputValue(),'agent tool tutorial');
+    assert.equal(await dialog.getByRole('combobox',{name:'搜索来源'}).inputValue(),'github');
+    await dialog.getByLabel('资料所属学习单元').selectOption('u2');
+    assert.equal(await dialog.getByLabel('搜索词',{exact:true}).inputValue(),'');
+    await dialog.getByLabel('搜索词',{exact:true}).fill('second draft');
+    await dialog.getByLabel('资料所属学习单元').selectOption('u1');
+    assert.equal(await dialog.getByLabel('搜索词',{exact:true}).inputValue(),'agent tool tutorial');
+    await dialog.getByRole('button',{name:'选用此资料',exact:true}).click();
+    await dialog.getByRole('button',{name:'移除此资料',exact:true}).waitFor();
+    await page.reload(); await open();
+    await dialog.getByRole('button',{name:'移除此资料',exact:true}).waitFor();
+    assert.ok((await dialog.innerText()).includes('sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'),'selected evidence survives server refresh');
+    assert.equal(posts.length,1,'refresh only reads selections');
+    await dialog.getByLabel('搜索词',{exact:true}).fill('late original query'); delay = true;
+    const slowEntered = new Promise(resolve => { entered = resolve; });
+    await dialog.getByRole('button',{name:'搜索资料',exact:true}).click(); await slowEntered;
+    await dialog.getByLabel('资料所属学习单元').selectOption('u2');
+    await dialog.getByLabel('搜索词',{exact:true}).fill('preserved second query');
+    release();
+    await dialog.getByRole('button',{name:'搜索资料',exact:true}).waitFor();
+    assert.equal(await dialog.getByLabel('搜索词',{exact:true}).inputValue(),'preserved second query');
+    assert.equal(await dialog.getByRole('button',{name:'选用此资料',exact:true}).count(),0,'late result must not leak into another unit');
+    await dialog.getByLabel('资料所属学习单元').selectOption('u1');
+    await dialog.getByText('查询完成：late original query',{exact:true}).waitFor();
+    assert.equal(await dialog.getByLabel('搜索词',{exact:true}).inputValue(),'late original query');
+    await page.keyboard.press('Escape');
+    await page.getByRole('button',{name:'退出登录',exact:true}).click();
+    await page.getByRole('textbox',{name:'用户名',exact:true}).fill('discovery-user');
+    await page.getByLabel('密码',{exact:true}).fill('fakepassword');
+    await page.getByRole('button',{name:'登录学习空间',exact:true}).click();
+    await open();
+    assert.equal(await dialog.getByLabel('搜索词',{exact:true}).inputValue(),'','logout discards same-actor local drafts');
+    assert.equal(await dialog.getByRole('button',{name:'读取原查询',exact:true}).count(),0);
+    assert.equal(posts.length,2); assert.deepEqual(unknown,[]); assert.deepEqual(failures,[]);
+    console.log('PASS: Fake HTTP resource source isolation, explicit inspection/GET recovery, evidence escaping, scoped drafts/late responses, selected evidence refresh');
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode=1; });

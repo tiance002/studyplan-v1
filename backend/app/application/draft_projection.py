@@ -31,6 +31,7 @@ from typing import Any, Mapping, Sequence
 
 from app.core.ids import new_id
 from app.domain.enums import OutlineSectionKind, StageResourceRole, TaskKnowledgeRole
+from app.domain.planning.guidance import guidance_from_payload
 from app.domain.planning.models import (
     PlanDraft,
     PlanStage,
@@ -122,6 +123,7 @@ def project_draft(
             section_kind=_section_kind(section.get("section_kind")),
             order_index=order,
             objective=_text(section.get("objective")),
+            learning_guidance=guidance_from_payload(section.get("learning_guidance")),
         )
         stages.append(stage)
         stage_by_key[key] = stage

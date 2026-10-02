@@ -1417,6 +1417,51 @@ h3 {
   display:flex;
   flex-wrap:wrap;
   gap:5px 12px}
+.learning-guidance {
+  margin:0 0 28px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:white;
+  overflow-wrap:anywhere}
+.learning-guidance summary {
+  padding:16px 20px;
+  cursor:pointer;
+  font-size:13px}
+.learning-guidance summary .muted {
+  margin-left:12px;
+  font-size:11px}
+.learning-guidance summary:focus-visible {
+  outline:2px solid var(--accent-dark);
+  outline-offset:3px;
+  border-radius:14px}
+.learning-guidance-body {
+  padding:0 20px 18px;
+  font-size:12px;
+  line-height:1.8}
+.learning-guidance h3 {
+  font-size:13px;
+  margin:16px 0 5px}
+.learning-guidance p {
+  margin:5px 0}
+.learning-guidance ul {
+  margin:5px 0;
+  padding-left:20px}
+.learning-guidance-columns {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0 24px}
+.learning-guidance-practice,.learning-guidance-source {
+  margin-top:16px;
+  border-top:1px solid var(--line)}
+.learning-guidance a {
+  color:var(--accent-dark);
+  text-underline-offset:3px}
+.learning-guidance code {
+  white-space:normal}
+@media(max-width:650px) {
+  .learning-guidance-columns {
+    grid-template-columns:minmax(0,1fr)}
+}
 .prereq-link {
   border:0;
   background:transparent;
@@ -1565,4 +1610,5 @@ h3 {
 .resource-dialog-body .resource-picker,.resource-dialog-body .resource-change,.resource-dialog-body .preference-panel { margin-top:0; }
 .resource-dialog-body .chips { flex-wrap:wrap; }
 .resource-dialog-body .btn { white-space:normal; }
+.resource-evidence { overflow-wrap:anywhere; }
 @media(max-width:600px) { .resource-dialog-header,.resource-dialog-body {padding:16px;} .resource-dialog-body .panel {padding:14px;} .resource-dialog-body .resource-grid {grid-template-columns:1fr;} }
