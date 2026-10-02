@@ -4707,7 +4707,8 @@
             "type": "string",
             "enum": [
               "change_goal",
-              "regenerate_future_plan"
+              "regenerate_future_plan",
+              "add_topic"
             ],
             "title": "Operation"
           },
@@ -4726,6 +4727,16 @@
                 "type": "null"
               }
             ]
+          },
+          "topic_keys": {
+            "items": {
+              "type": "string",
+              "maxLength": 200,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Topic Keys"
           }
         },
         "additionalProperties": false,
@@ -5392,6 +5403,13 @@
             "type": "integer",
             "title": "Generation Max Requests",
             "default": 0
+          },
+          "add_topic_options": {
+            "items": {
+              "$ref": "#/components/schemas/PlanChangeTopic"
+            },
+            "type": "array",
+            "title": "Add Topic Options"
           }
         },
         "type": "object",
@@ -5475,7 +5493,8 @@
                 "type": "string",
                 "enum": [
                   "change_goal",
-                  "regenerate_future_plan"
+                  "regenerate_future_plan",
+                  "add_topic"
                 ]
               }
             ],
@@ -5529,6 +5548,34 @@
             },
             "type": "array",
             "title": "Before Stages"
+          },
+          "topic_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Topic Keys"
+          },
+          "added_node_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Added Node Keys"
+          },
+          "added_stage_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Added Stage Keys"
+          },
+          "topic_titles": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Topic Titles"
           }
         },
         "type": "object",
@@ -5681,6 +5728,32 @@
           "inclusion"
         ],
         "title": "PlanChangeStage"
+      },
+      "PlanChangeTopic": {
+        "properties": {
+          "stable_key": {
+            "type": "string",
+            "title": "Stable Key"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "added_stage_keys": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Added Stage Keys"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stable_key",
+          "title",
+          "added_stage_keys"
+        ],
+        "title": "PlanChangeTopic"
       },
       "PlanDecisionResponse": {
         "properties": {

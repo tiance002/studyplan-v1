@@ -4,7 +4,11 @@ from dataclasses import replace
 import pytest
 from app.core.errors import ValidationAppError
 from app.domain.enums import OutlineSectionKind, StageResourceRole
-from app.domain.generated_plan_changes import GeneratedPlanChangeCommand, compose_generated_draft
+from app.domain.generated_plan_changes import (
+    GeneratedPlanChangeCommand,
+    added_topic_route,
+    compose_generated_draft,
+)
 from app.domain.planning.guidance import LearningGuidance, PracticeDelta
 from app.domain.planning.intent import GoalSpec
 from app.domain.planning.models import (
@@ -148,3 +152,129 @@ def test_command_preserves_existing_identifier_and_version_bounds(changes):
     cmd = command(operation='regenerate_future_plan')
     with pytest.raises(ValidationAppError):
         replace(cmd, **changes)
+
+
+def topic_pack():
+    return {'knowledge_blueprints': [
+        {'stable_key': 'base'}, {'stable_key': 'parent', 'prerequisite_keys': ['base']},
+        {'stable_key': 'topic', 'parent_key': 'parent'},
+        {'stable_key': 'future', 'prerequisite_keys': ['topic']},
+        {'stable_key': 'final', 'prerequisite_keys': ['future']}],
+        'stage_blueprints': [
+            {'stable_key': 'a', 'node_keys': ['base']},
+            {'stable_key': 'optional', 'node_keys': ['parent', 'topic']},
+            {'stable_key': 'c', 'node_keys': ['future']},
+            {'stable_key': 'final', 'node_keys': ['final']}]}
+
+
+def test_add_topic_expands_parent_prerequisite_and_inserts_before_dependent():
+    pack = topic_pack()
+    original = deepcopy(pack)
+    route = added_topic_route(pack, ('a', 'c', 'final'), ('topic',), 0)
+    assert route == {'after_stage_keys': ('a', 'optional', 'c', 'final'),
+                     'added_node_keys': ('parent', 'topic'), 'added_stage_keys': ('optional',),
+                     'retained_stage_keys': ('a', 'c', 'final')}
+    assert pack == original
+
+
+@pytest.mark.parametrize('topics,boundary', [(('unknown',), 0), (('base',), 0),
+                                          (('topic',), 1), (('topic', 'topic'), 0)])
+def test_add_topic_rejects_unknown_noop_protected_dependency_and_duplicates(topics, boundary):
+    with pytest.raises(ValidationAppError):
+        added_topic_route(topic_pack(), ('a', 'c', 'final'), topics, boundary)
+
+
+def test_add_topic_rejects_cycle_and_ambiguous_exposure_but_accepts_declared_owner():
+    pack = topic_pack()
+    pack['knowledge_blueprints'][1]['prerequisite_keys'] = ['topic']
+    with pytest.raises(ValidationAppError):
+        added_topic_route(pack, ('a', 'c', 'final'), ('topic',), 0)
+    pack = topic_pack()
+    pack['stage_blueprints'].append({'stable_key': 'duplicate', 'node_keys': ['topic']})
+    with pytest.raises(ValidationAppError):
+        added_topic_route(pack, ('a', 'c', 'final'), ('topic',), 0)
+    pack['knowledge_blueprints'][2]['section_key'] = 'optional'
+    assert added_topic_route(pack, ('a', 'c', 'final'), ('topic',), 0)['added_stage_keys'] == ('optional',)
+
+
+def test_add_topic_composition_preserves_old_links_and_invalidates_future_guidance():
+    current, generated = draft('old'), draft('new', ('a', 'optional', 'c', 'final', 'discard'))
+    original = deepcopy((current, generated))
+    meta = metadata(operation='add_topic', after_stage_keys=['a', 'optional', 'c', 'final'],
+                    retained_stage_keys=['a', 'c', 'final'], protected_through=0,
+                    added_stage_keys=['optional'])
+    result = compose_generated_draft(current, generated, meta)
+    assert result.stages[0] == current.stages[0]
+    assert result.stages[0] is current.stages[0]
+    assert result.stages[1] == generated.stages[1]
+    assert result.stages[2].stage_id == current.stages[1].stage_id
+    assert result.stages[2].learning_guidance.why_now != current.stages[1].learning_guidance.why_now
+    assert result.stages[2].learning_guidance.practice_delta.baseline != 'old-baseline'
+    for field in ('unit_links', 'task_links', 'task_knowledge_links', 'stage_resources', 'extensions',
+                  'resource_snapshots'):
+        assert getattr(result, field) == (*getattr(current, field), getattr(generated, field)[1])
+    assert (current, generated) == original
+
+
+@pytest.mark.parametrize('changes', [
+    {'retained_stage_keys': ['a']}, {'added_stage_keys': ['other']},
+    {'after_stage_keys': ['a', 'optional', 'final', 'c']}, {'protected_through': 1},
+    {'after_stage_keys': ['a', 'optional', 'final']},
+])
+def test_add_topic_composition_rejects_mutated_server_route_decisions(changes):
+    meta = metadata(operation='add_topic', after_stage_keys=['a', 'optional', 'c', 'final'],
+                    retained_stage_keys=['a', 'c', 'final'], protected_through=0,
+                    added_stage_keys=['optional'])
+    with pytest.raises(ValidationAppError):
+        compose_generated_draft(draft('old'), draft('new', ('a', 'optional', 'c', 'final')),
+                                {**meta, **changes})
+
+
+def test_add_topic_reuses_existing_repeated_exposure_and_rejects_missing_ownership():
+    pack = topic_pack()
+    pack['stage_blueprints'][1]['node_keys'].append('base')
+    assert added_topic_route(pack, ('a', 'c', 'final'), ('topic',), 0)['added_stage_keys'] == ('optional',)
+    pack['stage_blueprints'][1]['node_keys'].remove('topic')
+    with pytest.raises(ValidationAppError):
+        added_topic_route(pack, ('a', 'c', 'final'), ('topic',), 0)
+
+
+def test_add_topic_expands_companion_nodes_and_their_transitive_stage_dependencies():
+    pack = topic_pack()
+    pack['knowledge_blueprints'].extend([
+        {'stable_key': 'companion', 'prerequisite_keys': ['extra']},
+        {'stable_key': 'extra', 'prerequisite_keys': ['extra-base']},
+        {'stable_key': 'extra-base', 'prerequisite_keys': None}])
+    pack['stage_blueprints'][1]['node_keys'].append('companion')
+    pack['stage_blueprints'][1:1] = [
+        {'stable_key': 'extra-base-stage', 'node_keys': ['extra-base']},
+        {'stable_key': 'extra-stage', 'node_keys': ['extra']}]
+    original = deepcopy(pack)
+    route = added_topic_route(pack, ('a', 'c', 'final'), ('topic',), 0)
+    assert route['after_stage_keys'] == ('a', 'extra-base-stage', 'extra-stage', 'optional', 'c', 'final')
+    assert set(route['added_node_keys']) == {'parent', 'topic', 'companion', 'extra', 'extra-base'}
+    assert route['added_node_keys'].index('extra-base') < route['added_node_keys'].index('extra')
+    assert route['added_node_keys'].index('extra') < route['added_node_keys'].index('companion')
+    assert pack == original
+
+
+def test_added_stage_guidance_is_invalidated_when_controlled_pack_predecessor_differs():
+    current = draft('old')
+    generated = draft('new', ('a', 'discard', 'optional', 'c', 'final'))
+    meta = metadata(operation='add_topic', after_stage_keys=['a', 'optional', 'c', 'final'],
+                    retained_stage_keys=['a', 'c', 'final'], protected_through=0,
+                    added_stage_keys=['optional'])
+    result = compose_generated_draft(current, generated, meta)
+    guide = result.stages[1].learning_guidance
+    assert guide.previous_relation != generated.stages[2].learning_guidance.previous_relation
+    assert guide.practice_delta.baseline != generated.stages[2].learning_guidance.practice_delta.baseline
+
+
+def test_topic_command_normalizes_and_rejects_cross_operation_parameters():
+    assert command(operation='add_topic', topic_keys=['topic']).topic_keys == ('topic',)
+    for values in ({'operation': 'add_topic', 'topic_keys': ('topic',), 'goal': 'Learn'},
+                   {'operation': 'change_goal', 'goal': 'Learn', 'topic_keys': ('topic',)},
+                   {'operation': 'regenerate_future_plan', 'topic_keys': ('topic',)},
+                   {'operation': 'add_topic', 'topic_keys': tuple(f'n{i}' for i in range(21))}):
+        with pytest.raises(ValidationAppError):
+            command(**values)

@@ -1338,13 +1338,15 @@ export interface components {
              * Operation
              * @enum {string}
              */
-            operation: "change_goal" | "regenerate_future_plan";
+            operation: "change_goal" | "regenerate_future_plan" | "add_topic";
             /**
              * Goal
              * @default
              */
             goal: string;
             goal_spec?: components["schemas"]["GoalSpec"] | null;
+            /** Topic Keys */
+            topic_keys?: string[];
         };
         /** GitHubRepository */
         GitHubRepository: {
@@ -1623,6 +1625,8 @@ export interface components {
              * @default 0
              */
             generation_max_requests: number;
+            /** Add Topic Options */
+            add_topic_options?: components["schemas"]["PlanChangeTopic"][];
         };
         /** PlanChangeDecisionRequest */
         PlanChangeDecisionRequest: {
@@ -1653,7 +1657,7 @@ export interface components {
             /** Base Revision */
             base_revision: number;
             /** Operation */
-            operation: ("reorder_future_stage" | "remove_optional_topic") | ("change_goal" | "regenerate_future_plan");
+            operation: ("reorder_future_stage" | "remove_optional_topic") | ("change_goal" | "regenerate_future_plan" | "add_topic");
             /** Before Stage Keys */
             before_stage_keys: string[];
             /** After Stage Keys */
@@ -1676,6 +1680,16 @@ export interface components {
             after_goal: string;
             /** Before Stages */
             before_stages?: components["schemas"]["StageDetail"][];
+            /** Topic Keys */
+            topic_keys?: string[];
+            /** Added Node Keys */
+            added_node_keys?: string[];
+            /** Added Stage Keys */
+            added_stage_keys?: string[];
+            /** Topic Titles */
+            topic_titles?: {
+                [key: string]: string;
+            };
         };
         /** PlanChangeRequest */
         PlanChangeRequest: {
@@ -1725,6 +1739,15 @@ export interface components {
              * @enum {string}
              */
             inclusion: "required" | "recommended" | "optional";
+        };
+        /** PlanChangeTopic */
+        PlanChangeTopic: {
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Added Stage Keys */
+            added_stage_keys: string[];
         };
         /**
          * PlanDecisionResponse

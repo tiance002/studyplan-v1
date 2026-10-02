@@ -11,6 +11,7 @@ from app.core.errors import (
 )
 from app.core.ids import content_hash
 from app.domain.domain_packs.validation import seed_digest, validate_seed
+from app.domain.generated_plan_changes import added_topic_route
 from app.domain.plan_changes import changed_draft
 from app.domain.planning.intent import goal_spec_payload, required_module_closure
 from app.domain.planning.models import PlanPublicationService, revision_from_draft
@@ -86,6 +87,7 @@ class PgPlanChanges(PgResourceChanges):
             last = max(s.order_index for s in current.stages)
             available = False
             maximum = 0
+            topics = []
             if current.source_pack_key:
                 pack_row = conn.execute('SELECT published_payload FROM domain_packs WHERE pack_key=%s AND version=%s',
                                         (current.source_pack_key, current.source_pack_version)).fetchone()
@@ -93,9 +95,22 @@ class PgPlanChanges(PgResourceChanges):
                     specs = pack_row['published_payload'].get('stage_blueprints', [])
                     maximum = 1 + 2 * len(specs) + 2
                     available = boundary < last and all(s.stable_key in {b['stable_key'] for b in specs} for s in current.stages)
+                    pack = pack_row['published_payload']
+                    keys = [s.stable_key for s in sorted(current.stages, key=lambda s: s.order_index)]
+                    covered = {k for s in specs if s['stable_key'] in keys for k in s.get('node_keys', [])}
+                    for node in pack.get('knowledge_blueprints', []):
+                        if node['stable_key'] in covered:
+                            continue
+                        try:
+                            route = added_topic_route(pack, keys, (node['stable_key'],), boundary)
+                        except ValidationAppError:
+                            continue
+                        topics.append(dict(stable_key=node['stable_key'], title=node['title'],
+                                           added_stage_keys=list(route['added_stage_keys'])))
             return dict(plan_id=current.plan_id, revision=current.version, goal=current.goal_snapshot,
                         goal_spec=goal_spec_payload(current.goal_spec), regenerate_available=available,
                         generation_max_requests=maximum,
+                        add_topic_options=topics,
                         stages=[dict(stage_id=s.stage_id, stable_key=s.stable_key, title=s.title,
                                      order_index=s.order_index, locked=s.order_index <= boundary or s.order_index == last,
                                      inclusion=inclusion.get(s.stable_key, 'required'))
@@ -117,7 +132,9 @@ class PgPlanChanges(PgResourceChanges):
                     warnings=list(draft.validation_warnings), preview_hash=draft.content_hash,
                     retained_stage_keys=meta.get('retained_stage_keys', []),
                     before_goal=meta.get('before_goal', draft.goal_snapshot), after_goal=draft.goal_snapshot,
-                    before_stages=meta.get('before_stages', []))
+                    before_stages=meta.get('before_stages', []), topic_keys=meta.get('topic_keys', []),
+                    added_node_keys=meta.get('added_node_keys', []), added_stage_keys=meta.get('added_stage_keys', []),
+                    topic_titles=meta.get('topic_titles', {}))
 
     def get(self, scope, project_id, proposal_id):
         with self._connection(scope, project_id) as conn:

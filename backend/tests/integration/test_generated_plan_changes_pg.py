@@ -13,21 +13,35 @@ from app.tools.seed_b3 import seed_reviewed_pack
 from fastapi.testclient import TestClient
 
 from tests.e2e.test_b2v_http_end_to_end import migrated_db as migrated_db
-from tests.unit.test_learning_guidance import repeated_guided_pack
+from tests.unit.test_learning_guidance import guided_pack, repeated_guided_pack
 
 pytestmark = pytest.mark.postgres
 
 
 @pytest.fixture
-def generated_route(migrated_db):
+def generated_route(migrated_db, request):
     pack = repeated_guided_pack()
-    pack['version'] = 14
+    optional = getattr(request, 'param', None) == 'optional'
+    if optional:
+        pack = guided_pack()
+        next(s for s in pack['stage_blueprints'] if s['stable_key'] == 'stage.mcp')['inclusion'] = 'optional'
+        pack['required_node_keys'] = [k for k in pack['required_node_keys'] if not k.startswith('node.mcp')]
+        next(n for n in pack['knowledge_blueprints'] if n['stable_key'] == 'node.reliability')['prerequisite_keys'].remove('node.mcp')
+    pack['version'] = 13 if optional else 14
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
         seed_reviewed_pack(conn, pack)
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider='fake',
                        local_session_token='', planning_worker_admission_mode='trusted_server',
                        allow_origins=('http://127.0.0.1:5178',))
     container = build_container(settings)
+    if optional:
+        # Distinct immutable synthetic fixture version; optional cases explicitly
+        # select it even when later tests publish other versions in the owned DB.
+        select = container.plan_service._domain_pack_selector
+        def optional_fixture(goal):
+            selected = select(goal)
+            return pack if selected.get('pack_key') == pack['pack_key'] else selected
+        container.plan_service._domain_pack_selector = optional_fixture
     with TestClient(create_app(container)) as client:
         auth = client.post('/api/v1/auth/register', json={'username': '重规划' + new_id('usr')[-10:],
                                                         'password': 'Test-pass1!'})
@@ -47,6 +61,126 @@ def generated_route(migrated_db):
                         'draft_hash': draft['draft_hash'], 'idempotency_key': 'initial'})
         assert approved.status_code == 200, approved.text
         yield migrated_db, container, client, params, headers, approved.json()['plan']
+
+
+@pytest.mark.parametrize('generated_route', ['optional'], indirect=True)
+def test_add_topic_worker_closure_history_private_reload_and_idempotency(generated_route):
+    db, container, client, params, headers, full = generated_route
+    removed = client.post('/api/v1/plan-changes', params=params, headers=headers,
+        json=dict(plan_id=full['plan_id'], expected_version=full['version'], operation='remove_optional_topic',
+                  stage_key='stage.mcp', idempotency_key='remove-for-add'))
+    assert removed.status_code == 200, removed.text
+    rm = removed.json()
+    assert client.post('/api/v1/plan-changes/' + rm['proposal_id'] + '/confirm', params=params, headers=headers,
+        json=dict(expected_version=full['version'], preview_hash=rm['preview_hash'],
+                  idempotency_key='confirm-remove', acknowledge_reset=True)).status_code == 200
+    old = client.get('/api/v1/plans/current', params=params).json()
+    first = old['stages'][0]
+    unit = next(link['unit_id'] for link in old['unit_links'] if link['stage_id'] == first['stage_id'])
+    pos = dict(plan_id=old['plan_id'], stage_id=first['stage_id'], unit_id=unit)
+    assert client.put('/api/v1/exposures', params=params, headers=headers, json={**pos, 'status': 'in_progress',
+        'expected_version': 0, 'idempotency_key': 'add-start'}).status_code == 200
+    scope = container.browser_auth.resolve(client.cookies.get(container.settings.session_cookie_name))
+    selected = PgLearningResources(db.app_dsn).select(scope, {**pos, **params}, dict(resource_id='add-private-' + params['project_id'],
+        project_id=params['project_id'], url='https://example.com/add-private', title='PRIVATE_ADD_BODY', media_type='text',
+        language='en', provenance='user_provided', verification_status='unverified', source_version=7))
+    context = client.get('/api/v1/plan-changes/context', params=params).json()
+    assert 'node.mcp.1' in {t['stable_key'] for t in context['add_topic_options']}
+    body = dict(plan_id=old['plan_id'], expected_version=old['version'], operation='add_topic',
+                topic_keys=['node.mcp.1'], idempotency_key='add-owned')
+    queued = client.post('/api/v1/plan-changes/generate', params=params, headers=headers, json=body)
+    assert queued.status_code == 202, queued.text
+    assert client.post('/api/v1/plan-changes/generate', params=params, headers=headers, json=body).json() == queued.json()
+    assert client.post('/api/v1/plan-changes/generate', params=params, headers=headers,
+        json={**body, 'topic_keys': ['node.mcp.2']}).status_code == 409
+    assert container.planning_worker.tick()
+    run = client.get(queued.json()['status_url']).json()
+    assert run['status'] == 'succeeded', run
+    url = '/api/v1/plan-changes/' + run['result_ref']
+    preview = client.get(url, params=params).json()
+    assert preview['operation'] == 'add_topic'
+    assert preview['added_stage_keys'] == ['stage.mcp']
+    assert {'node.mcp', 'node.mcp.1'} <= set(preview['added_node_keys'])
+    assert preview['topic_keys'] == ['node.mcp.1']
+    assert preview['topic_titles']['node.mcp.1'] == next(t['title'] for t in context['add_topic_options'] if t['stable_key'] == 'node.mcp.1')
+    before = [s['stable_key'] for s in old['stages']]
+    after = preview['after_stage_keys']
+    assert [k for k in after if k in before] == before and after[-1] == before[-1]
+    assert preview['draft']['stages'][0] == first
+    assert preview['retained_stage_keys'] == before
+    for stage in old['stages']:
+        assert next(s for s in preview['draft']['stages'] if s['stable_key'] == stage['stable_key'])['stage_id'] == stage['stage_id']
+    assert client.get('/api/v1/plans/current', params=params).json()['plan_id'] == old['plan_id']
+    decision = dict(expected_version=old['version'], preview_hash=preview['preview_hash'],
+                    idempotency_key='add-confirm', acknowledge_reset=True)
+    result = client.post(url + '/confirm', params=params, headers=headers, json=decision)
+    assert result.status_code == 200, result.text
+    assert client.post(url + '/confirm', params=params, headers=headers, json=decision).json() == result.json()
+    newer = client.get('/api/v1/plans/current', params=params).json()
+    assert newer['goal_snapshot'] == old['goal_snapshot'] and newer['goal_spec'] == old['goal_spec']
+    assert client.get('/api/v1/plan-changes/context', params=params).json()['add_topic_options'] == []
+    assert client.post('/api/v1/plan-changes/generate', params=params, headers=headers, json=body).json() == queued.json()
+    assert not container.planning_worker.tick()
+    with psycopg.connect(db.migrator_dsn) as conn:
+        copied = conn.execute('SELECT resource_snapshot FROM learning_resource_selections WHERE project_id=%s AND plan_id=%s',
+                             (params['project_id'], newer['plan_id'])).fetchone()[0]
+        assert copied['selection_copy_lineage']['original_selection_id'] == selected['selection_id']
+        assert conn.execute('SELECT count(*) FROM learning_exposures WHERE project_id=%s AND plan_id=%s',
+                            (params['project_id'], old['plan_id'])).fetchone()[0] == 1
+        assert conn.execute('SELECT count(*) FROM learning_exposures WHERE project_id=%s AND plan_id=%s',
+                            (params['project_id'], newer['plan_id'])).fetchone()[0] == 0
+    assert 'PRIVATE_ADD_BODY' not in str(container.plan_service._llm.calls)
+
+
+def test_add_topic_refusals_never_queue_or_dispatch(generated_route):
+    _, container, client, params, headers, old = generated_route
+    calls = len(container.plan_service._llm.calls)
+    body = dict(plan_id=old['plan_id'], expected_version=old['version'], operation='add_topic',
+                topic_keys=['node.tools'], idempotency_key='add-reject')
+    for changes, status in [({}, 400), ({'topic_keys': ['foreign.node']}, 400),
+            ({'topic_keys': []}, 400), ({'topic_keys': ['node.tools', 'node.tools']}, 400),
+            ({'goal': 'new goal'}, 400), ({'expected_version': old['version'] - 1}, 409),
+            ({'actor_id': 'spoof'}, 422), ({'topic_keys': ['foreign.node'] * 21}, 422)]:
+        response = client.post('/api/v1/plan-changes/generate', params=params, headers=headers,
+                               json={**body, **changes})
+        assert response.status_code == status, response.text
+    assert client.post('/api/v1/plan-changes/generate', params=params, json=body).status_code == 403
+    assert client.post('/api/v1/plan-changes/generate', params={'project_id': 'foreign-project'},
+                       headers=headers, json=body).status_code == 403
+    assert not container.planning_worker.tick()
+    assert len(container.plan_service._llm.calls) == calls
+
+
+@pytest.mark.parametrize('generated_route', ['optional'], indirect=True)
+def test_add_topic_learning_after_enqueue_fences_dispatch_and_protects_completed_route(generated_route):
+    _, container, client, params, headers, full = generated_route
+    removed = client.post('/api/v1/plan-changes', params=params, headers=headers,
+        json=dict(plan_id=full['plan_id'], expected_version=full['version'], operation='remove_optional_topic',
+                  stage_key='stage.mcp', idempotency_key='late-remove'))
+    assert removed.status_code == 200
+    preview = removed.json()
+    assert client.post('/api/v1/plan-changes/' + preview['proposal_id'] + '/confirm', params=params, headers=headers,
+        json=dict(expected_version=full['version'], preview_hash=preview['preview_hash'],
+                  idempotency_key='late-remove-confirm', acknowledge_reset=True)).status_code == 200
+    old = client.get('/api/v1/plans/current', params=params).json()
+    body = dict(plan_id=old['plan_id'], expected_version=old['version'], operation='add_topic',
+                topic_keys=['node.mcp.1'], idempotency_key='late-add')
+    queued = client.post('/api/v1/plan-changes/generate', params=params, headers=headers, json=body)
+    assert queued.status_code == 202
+    calls = len(container.plan_service._llm.calls)
+    final = old['stages'][-1]
+    unit = next(link['unit_id'] for link in old['unit_links'] if link['stage_id'] == final['stage_id'])
+    assert client.put('/api/v1/exposures', params=params, headers=headers, json=dict(plan_id=old['plan_id'],
+        stage_id=final['stage_id'], unit_id=unit, status='in_progress', expected_version=0,
+        idempotency_key='late-final-start')).status_code == 200
+    assert container.planning_worker.tick()
+    assert client.get(queued.json()['status_url']).json()['status'] == 'failed'
+    assert len(container.plan_service._llm.calls) == calls
+    assert client.get('/api/v1/plan-changes/context', params=params).json()['add_topic_options'] == []
+    assert client.post('/api/v1/plan-changes/generate', params=params, headers=headers,
+                       json={**body, 'idempotency_key': 'after-start'}).status_code == 400
+    assert not container.planning_worker.tick()
+
 
 
 def test_generated_future_worker_diff_confirm_restart_history_and_canonical_reuse(generated_route):
@@ -223,7 +357,7 @@ def test_unknown_generated_run_is_never_replayed_and_new_request_is_blocked(gene
     assert len(invocations) == 1
 
 
-def test_real_browser_generated_route(generated_route):
+def _run_owned_route_browser(generated_route, script):
     import os
     import socket
     import subprocess
@@ -266,7 +400,7 @@ def test_real_browser_generated_route(generated_route):
         assert server.started
         env = dict(os.environ, STUDYPLAN_GENERATED_ROUTE_API=f'http://127.0.0.1:{sock.getsockname()[1]}',
                    STUDYPLAN_GENERATED_ROUTE_USER=username)
-        result = subprocess.run(['node', 'frontend/tests/generated-route-pg.browser.cjs'],
+        result = subprocess.run(['node', script],
                 cwd=Path(__file__).resolve().parents[3], env=env, capture_output=True, text=True,
                 encoding='utf-8', errors='replace', timeout=100)
         assert result.returncode == 0, result.stdout + result.stderr
@@ -277,3 +411,23 @@ def test_real_browser_generated_route(generated_route):
         server.should_exit = True
         server_thread.join(10)
         sock.close()
+
+
+def test_real_browser_generated_route(generated_route):
+    _run_owned_route_browser(generated_route, 'frontend/tests/generated-route-pg.browser.cjs')
+
+
+@pytest.mark.parametrize('generated_route', ['optional'], indirect=True)
+def test_real_browser_add_topic(generated_route):
+    db, container, client, params, headers, full = generated_route
+    removed = client.post('/api/v1/plan-changes', params=params, headers=headers,
+        json=dict(plan_id=full['plan_id'], expected_version=full['version'], operation='remove_optional_topic',
+                  stage_key='stage.mcp', idempotency_key='browser-remove'))
+    assert removed.status_code == 200, removed.text
+    preview = removed.json()
+    result = client.post('/api/v1/plan-changes/' + preview['proposal_id'] + '/confirm', params=params, headers=headers,
+        json=dict(expected_version=full['version'], preview_hash=preview['preview_hash'],
+                  idempotency_key='browser-remove-confirm', acknowledge_reset=True))
+    assert result.status_code == 200, result.text
+    old = client.get('/api/v1/plans/current', params=params).json()
+    _run_owned_route_browser((db, container, client, params, headers, old), 'frontend/tests/add-topic-pg.browser.cjs')

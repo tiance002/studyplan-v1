@@ -25,6 +25,7 @@ export function PlanChanges({ actorKey, project, onPublished, generationAllowed,
   const [notice, setNotice] = useState(''), [opened, setOpened] = useState(false);
   const [noPlan, setNoPlan] = useState(false);
   const [newGoal, setNewGoal] = useState('');
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const pendingPreview = useRef<{ signature: string; body: DTO['PlanChangeRequest'] } | null>(null);
   const pendingConfirm = useRef<{ signature: string; body: DTO['PlanChangeDecisionRequest'] } | null>(null);
   const pendingGenerated = useRef<{ signature: string; body: DTO['GeneratedPlanChangeRequest'] } | null>(null);
@@ -159,6 +160,39 @@ export function PlanChanges({ actorKey, project, onPublished, generationAllowed,
       setNotice('路线调整已进入生成队列，完成后会显示受保护的调整预览。');
     });
   }
+  function toggleTopic(key: string, checked: boolean) {
+    setSelectedTopics(previous => {
+      if (!checked) return previous.filter(item => item !== key);
+      if (previous.includes(key)) return previous;
+      if (previous.length >= 20) {
+        setError('一次最多选择 20 个受控主题。');
+        return previous;
+      }
+      setError('');
+      return [...previous, key];
+    });
+  }
+  function generateTopics() {
+    if (!context || !generationAllowed || !live() || lease.busy || awaiting || selectedTopics.length === 0) return;
+    const options = context.add_topic_options ?? [];
+    const allowed = new Set(options.map(option => option.stable_key));
+    if (selectedTopics.some(key => !allowed.has(key))) {
+      setError('主题列表已变化，请重新读取路线后再选择。');
+      return;
+    }
+    const request: Omit<DTO['GeneratedPlanChangeRequest'], 'idempotency_key'> = { plan_id: context.plan_id, expected_version: context.revision, operation: 'add_topic', goal: '', topic_keys: selectedTopics };
+    const signature = JSON.stringify(request);
+    if (pendingGenerated.current?.signature !== signature) pendingGenerated.current = {
+      signature, body: { ...request, idempotency_key: crypto.randomUUID() },
+    };
+    const body = pendingGenerated.current!.body;
+    void act(async () => {
+      await onGeneratePlanChange(body);
+      if (!live()) return;
+      pendingGenerated.current = null;
+      setNotice('主题追加已进入生成队列，完成后会显示受保护的调整预览。');
+    });
+  }
   function decide(action: 'confirm' | 'cancel') {
     if (!preview || !awaiting || !live() || lease.busy || (action === 'confirm' && (!acknowledged || conflict))) return;
     const signature = `${action}:${preview.proposal_id}:${preview.preview_hash}`;
@@ -204,6 +238,18 @@ export function PlanChanges({ actorKey, project, onPublished, generationAllowed,
           <label>新的学习目标<textarea aria-label="新的学习目标" rows={2} maxLength={2000} value={newGoal} onChange={event => setNewGoal(event.target.value)} /></label>
           <button className="btn" disabled={busy || awaiting || !generationAllowed || !newGoal.trim() || newGoal.trim() === context.goal} onClick={() => generate('change_goal')}>生成目标调整草案</button>
         </section>
+        <section aria-label="追加受控主题">
+          <h3>追加学习主题</h3>
+          <p className="form-note">系统会按受控课程内容补入所选主题、必要父依赖及对应阶段。生成会使用当前配置的模型预算，可能产生费用；请求上限为 {context.generation_max_requests} 次模型请求（含修复请求）。已有阶段会保留，但相关学习指导可能需要重新核对。</p>
+          {(context.add_topic_options ?? []).length > 0 ? <>
+            {(context.add_topic_options ?? []).map(option => <label key={option.stable_key}>
+              <input type="checkbox" checked={selectedTopics.includes(option.stable_key)} disabled={busy || awaiting || !generationAllowed} onChange={event => toggleTopic(option.stable_key, event.target.checked)} />
+              {option.title}
+            </label>)}
+            <p className="form-note">已选 {selectedTopics.length} / 20 个主题。</p>
+            <button className="btn" disabled={busy || awaiting || !generationAllowed || !selectedTopics.length} onClick={generateTopics}>生成主题追加草案</button>
+          </> : <p className="form-note">当前没有可追加的受控主题。</p>}
+        </section>
         <ol aria-label="待预览阶段顺序">{order.map((key, index) => {
           const stage = context.stages.find(item => item.stable_key === key)!;
           const previous = context.stages.find(item => item.stable_key === order[index - 1]);
@@ -224,7 +270,26 @@ export function PlanChanges({ actorKey, project, onPublished, generationAllowed,
       {error && <p className="error" role="alert">{error}</p>}
       {notice && <p className="notice" role="status">{notice}</p>}
       {preview && <section aria-label="路线调整预览">
-        {(preview.operation === 'change_goal' || preview.operation === 'regenerate_future_plan') ? <>
+        {preview.operation === 'add_topic' ? (() => {
+          const topicPreview = preview;
+          const options = context?.add_topic_options ?? [];
+          const topicTitles = new Map(options.map(option => [option.stable_key, option.title]));
+          const topicTitle = (key: string) => preview.topic_titles?.[key] || topicTitles.get(key) || '未提供标题的主题（需核对）';
+          const beforeStages = preview.before_stages ?? [];
+          return <>
+            <h3>追加的受控主题</h3>
+            <ul>{(topicPreview.topic_keys ?? []).map(key => <li key={key}>{topicTitle(key)}</li>)}</ul>
+            <p><strong>补入的学习内容（含必要前置与同阶段内容）：</strong>{(topicPreview.added_node_keys ?? []).map(topicTitle).join('、') || '无额外内容'}</p>
+            <p><strong>新增阶段：</strong>{(topicPreview.added_stage_keys ?? []).map(key => preview.draft.stages?.find(stage => stage.stable_key === key)?.title ?? key).join('、') || '无'}</p>
+            <h3>调整前</h3>
+            {beforeStages.length ? <ol>{beforeStages.map(stage => <li key={stage.stage_id}><strong>{stage.title}</strong><p>{stage.objective}</p></li>)}</ol> : <ol>{preview.before_stage_keys.map(key => <li key={key}>{title(key)}</li>)}</ol>}
+            <h3>调整后</h3>
+            <ol>{(preview.draft.stages ?? []).map(stage => <li key={stage.stage_id}>
+              <strong>{(topicPreview.retained_stage_keys ?? []).includes(stage.stable_key) ? '保留的旧阶段' : '追加主题的阶段'} · {stage.title}</strong><p>{stage.objective}</p>
+              {stage.learning_guidance && <details><summary>学习指导</summary><p>{stage.learning_guidance.why_now}</p><p>{stage.learning_guidance.previous_relation}</p><p>本次重点：{stage.learning_guidance.learning_focus.join('；') || '未单独列出'}</p></details>}
+            </li>)}</ol>
+          </>;
+        })() : (preview.operation === 'change_goal' || preview.operation === 'regenerate_future_plan') ? <>
           <h3>目标调整</h3>
           <p><strong>调整前目标：</strong>{preview.before_goal}</p>
           <p><strong>调整后目标：</strong>{preview.after_goal}</p>

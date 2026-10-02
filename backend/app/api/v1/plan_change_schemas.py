@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 Key = Annotated[str, Field(min_length=1, max_length=200)]
 Operation = Literal['reorder_future_stage', 'remove_optional_topic']
-GeneratedOperation = Literal['change_goal', 'regenerate_future_plan']
+GeneratedOperation = Literal['change_goal', 'regenerate_future_plan', 'add_topic']
 
 
 class GeneratedPlanChangeRequest(BaseModel):
@@ -16,6 +16,7 @@ class GeneratedPlanChangeRequest(BaseModel):
     operation: GeneratedOperation
     goal: str = Field(default='', max_length=2000)
     goal_spec: GoalSpec | None = None
+    topic_keys: list[Key] = Field(default_factory=list, max_length=20)
 
 
 class PlanChangeRequest(BaseModel):
@@ -45,6 +46,12 @@ class PlanChangeStage(BaseModel):
     inclusion: Literal['required', 'recommended', 'optional']
 
 
+class PlanChangeTopic(BaseModel):
+    stable_key: str
+    title: str
+    added_stage_keys: list[str]
+
+
 class PlanChangeContext(BaseModel):
     plan_id: str
     revision: int
@@ -53,6 +60,7 @@ class PlanChangeContext(BaseModel):
     goal_spec: GoalSpec | None = None
     regenerate_available: bool = False
     generation_max_requests: int = 0
+    add_topic_options: list[PlanChangeTopic] = Field(default_factory=list)
 
 
 class PlanChangePreviewView(BaseModel):
@@ -70,6 +78,10 @@ class PlanChangePreviewView(BaseModel):
     before_goal: str = ''
     after_goal: str = ''
     before_stages: list[StageDetail] = Field(default_factory=list)
+    topic_keys: list[str] = Field(default_factory=list)
+    added_node_keys: list[str] = Field(default_factory=list)
+    added_stage_keys: list[str] = Field(default_factory=list)
+    topic_titles: dict[str, str] = Field(default_factory=dict)
 
 
 class PlanChangeResult(BaseModel):

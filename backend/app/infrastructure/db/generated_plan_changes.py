@@ -5,7 +5,7 @@ from uuid import NAMESPACE_URL, uuid5
 from app.core.errors import ConflictError, IdempotencyConflictError, ValidationAppError, VersionConflictError
 from app.core.ids import content_hash
 from app.domain.domain_packs.validation import seed_digest, validate_seed
-from app.domain.generated_plan_changes import compose_generated_draft
+from app.domain.generated_plan_changes import added_topic_route, compose_generated_draft
 from app.domain.planning.intent import goal_spec_payload
 from app.domain.planning.models import revision_from_draft
 from app.infrastructure.db.learning_exposures import _json
@@ -15,6 +15,14 @@ from app.infrastructure.db.resource_changes import capture_resource_snapshots
 
 
 class PgGeneratedPlanChanges(PgPlanChanges):
+    @staticmethod
+    def _input_hash(command):
+        payload = asdict(command)
+        # Empty optional topics did not exist in prior durable submissions.
+        if not payload['topic_keys']:
+            payload.pop('topic_keys')
+        return content_hash(payload)
+
     @staticmethod
     def _run_id(scope, command):
         return 'run_' + uuid5(NAMESPACE_URL, content_hash([scope.actor_id, command.project_id,
@@ -29,7 +37,7 @@ class PgGeneratedPlanChanges(PgPlanChanges):
             if row is None:
                 return None
             meta = row['detail'].get('initial', {}).get('route_change', {})
-            if meta.get('input_hash') != content_hash(asdict(command)):
+            if meta.get('input_hash') != self._input_hash(command):
                 raise IdempotencyConflictError()
             return run_id
 
@@ -54,6 +62,7 @@ class PgGeneratedPlanChanges(PgPlanChanges):
                 raise VersionConflictError('当前路线已变化，请刷新后重新发起变更')
             basis, boundary, _, _, _, _ = self._basis(conn, current)
             before = [s.stable_key for s in sorted(current.stages, key=lambda s: s.order_index)]
+            additions = {}
             if command.operation == 'change_goal':
                 goal, spec = command.goal, command.goal_spec
                 if goal == current.goal_snapshot and spec == current.goal_spec:
@@ -68,9 +77,15 @@ class PgGeneratedPlanChanges(PgPlanChanges):
                 goal, spec = current.goal_snapshot, current.goal_spec
                 pack = self._published_pack(conn, current.source_pack_key, current.source_pack_version)
                 available = {s['stable_key'] for s in pack['stage_blueprints']}
-                if not set(before) <= available or boundary >= len(before) - 1:
+                if not set(before) <= available:
+                    raise ConflictError('当前路线不能映射到受控课程')
+                if command.operation == 'add_topic':
+                    additions = added_topic_route(pack, before, command.topic_keys, boundary)
+                    retained, after = before, list(additions['after_stage_keys'])
+                elif boundary >= len(before) - 1:
                     raise ConflictError('当前路线没有可以重新生成的受控未来阶段')
-                retained, after = before[:boundary + 1], before
+                else:
+                    retained, after = before[:boundary + 1], before
             # Only exact keys and immutable IDs are frozen. No Summary/Prompt/Outcome/private body leaves PG.
             rows = conn.execute('''SELECT DISTINCT n.stable_key,n.node_id,n.content_version FROM plan_unit_links p
                 JOIN plan_stages s USING(project_id,plan_id,stage_id)
@@ -86,11 +101,17 @@ class PgGeneratedPlanChanges(PgPlanChanges):
                 reuse[key] = dict(node_id=row['node_id'], content_version=row['content_version'])
             metadata = dict(actor_id=scope.actor_id, project_id=command.project_id,
                     base_plan_id=current.plan_id, base_revision=current.revision,
-                    base_version=current.version, basis_hash=basis, input_hash=content_hash(asdict(command)),
+                    base_version=current.version, basis_hash=basis, input_hash=self._input_hash(command),
                     operation=command.operation, before_stage_keys=before, after_stage_keys=after,
                     retained_stage_keys=retained, node_reuse=reuse,
+                    protected_through=boundary,
                     before_goal=current.goal_snapshot, before_stages=[_json(asdict(s)) for s in current.stages],
                     source_pack_key=pack['pack_key'], source_pack_version=pack['version'], pack_hash=seed_digest(pack))
+            if additions:
+                metadata.update(topic_keys=list(command.topic_keys), added_node_keys=list(additions['added_node_keys']),
+                                added_stage_keys=list(additions['added_stage_keys']),
+                                topic_titles={node['stable_key']: node['title'] for node in pack['knowledge_blueprints']
+                                              if node['stable_key'] in additions['added_node_keys']})
             return dict(run_id=self._run_id(scope, command), goal=goal, goal_spec=goal_spec_payload(spec),
                         pack=pack, metadata=metadata)
 
@@ -134,7 +155,9 @@ class PgGeneratedPlanChanges(PgPlanChanges):
                     + capture_resource_snapshots(conn, missing, composed.stages),
                     validation_warnings=(*composed.validation_warnings,
                         '确认后创建新路线版本；旧路线和学习、总结、Prompt、成果、证据历史保留，新版学习进度重新记录。',
-                        '本次使用现有有界完整课程生成，保留阶段的生成候选会丢弃，不继承旧完成状态。'))
+                        '本次使用现有有界完整课程生成，保留阶段的生成候选会丢弃，不继承旧完成状态。',
+                        *(['追加主题按受控阶段组织，依赖与同阶段教材会一起补入；顺序变化后的学习基线请重新核对。']
+                          if metadata['operation'] == 'add_topic' else [])))
             revision_from_draft(composed, revision=composed.revision_candidate)
             repo.save_draft(composed, expected_version=metadata['base_version'], write_fence=write_fence)
             return self._loaded(repo, draft.project_id, draft.draft_id, scope.actor_id)
