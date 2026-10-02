@@ -60,3 +60,5 @@ GitHub提供[远程MCP与宿主集成说明](https://github.com/github/github-mc
 2026-10-02 G3/F10手动实践变更实际Chrome+HTTP+保留PG PASS，新模型请求0、搜索0；累计仍23/50和2/1000、unknown0。专用验收无模型Worker且阻断外部派发，只有预览/明确确认普通事务，不创建付费Run或沿用旧Acceptance journal。详见[G3实践报告](../acceptance/G3-practice-changes-2026-10-02.md)。
 
 2026-10-01续接核对官方用户授权文档：GitHub App的浏览器流程支持S256 PKCE；授权请求携带随机state与固定redirect_uri，回调校验state后用code、client_secret和code_verifier换取用户token。用户token权限是用户与App权限的交集，访问仓库也取双方可访问仓库的交集；App安装与账号授权须分别显示。后续薄集成依此实现服务端一次性会话绑定与按账号加密存储，不由前端存token，也不把手动URL或OAuth页面打开当作连接成功。此为下一实施契约的来源核对，当前账号连接仍未实现，实际授权验收NOT RUN。[GitHub官方授权流程](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app)
+
+2026-10-02用户明确资料搜集以教学教程优先，官方参考作补充。已按新ID完成匿名GitHub公开仓库搜索1次和两个示例README读取，均PASS；这证明本机公开API可达，不代表产品适配/MCP/OAuth已经实现。当前无需为公开接口预检填写新秘密；账号连接仍需后续维护者App配置，不能把历史GITHUB_TOKEN当作全部用户的授权。累计搜索现为3/1000（Tavily2、GitHub1），页面读取另记2，模型23/50、unknown0；不重置或覆盖旧额度/回执。详细[公开教程发现预检](../acceptance/github-public-search-preflight-2026-10-02.md)。
