@@ -12,13 +12,13 @@ export function Resources({
   return (
     <div>
       {items.map((item) => (
-        <div className="resource-group" key={item.assignment_id}>
+        <div className="resource-group" key={item.assignment_id}><h3>{item.title || "学习资料"}</h3><p className="resource-scope">阅读范围：{item.verification_status !== "unverified" && item.ordered_sections?.length ? item.ordered_sections.map(section=>section.title).join("、") : "暂无已核对章节范围"}</p>
           {!!item.warnings?.length && <p className="muted">{item.warnings.join("；")}</p>}
           {(item.verification_status === "unverified" ? [] : item.ordered_sections ?? []).map((section) => (
             <a
               className="resource-row"
               key={section.section_id}
-              href={section.url}
+              href={section.anchor ? `${section.url.split("#")[0]}#${section.anchor.replace(/^#/, "")}` : section.url}
               target="_blank"
               rel="noreferrer"
               title={`${item.title || section.title} · ${item.documentation_version || "旧版索引"} · ${item.language || ""}`}

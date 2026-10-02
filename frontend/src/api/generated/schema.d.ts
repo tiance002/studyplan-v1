@@ -1117,6 +1117,16 @@ export interface components {
             completed_units: number;
             /** Total Units */
             total_units: number;
+            /**
+             * Completed Stages
+             * @default 0
+             */
+            completed_stages: number;
+            /**
+             * Total Stages
+             * @default 0
+             */
+            total_stages: number;
         };
         /** LoginRequest */
         LoginRequest: {
@@ -2899,6 +2909,30 @@ export interface components {
              */
             csrf_token: string;
         };
+        /** StageCompletionView */
+        StageCompletionView: {
+            /**
+             * Status
+             * @default incomplete
+             * @enum {string}
+             */
+            status: "completed" | "incomplete";
+            /**
+             * Summary Completed
+             * @default false
+             */
+            summary_completed: boolean;
+            /**
+             * Completed Practice Tasks
+             * @default 0
+             */
+            completed_practice_tasks: number;
+            /**
+             * Total Practice Tasks
+             * @default 0
+             */
+            total_practice_tasks: number;
+        };
         /**
          * StageDetail
          * @description 阶段详情（前端「阶段导航」直接消费）。
@@ -3004,6 +3038,7 @@ export interface components {
             resources: components["schemas"]["StageResourceAssignmentView"][];
             /** Tasks */
             tasks: components["schemas"]["PracticeTaskView"][];
+            completion?: components["schemas"]["StageCompletionView"];
         };
         /** SummaryAttemptView */
         SummaryAttemptView: {
@@ -3016,7 +3051,7 @@ export interface components {
             /** Stage Id */
             stage_id: string | null;
             /** Unit Id */
-            unit_id: string;
+            unit_id: string | null;
             /** Attempt No */
             attempt_no: number;
             /** Version */
@@ -3123,7 +3158,7 @@ export interface components {
             /** Stage Id */
             stage_id: string;
             /** Unit Id */
-            unit_id: string;
+            unit_id?: string | null;
             /** Content */
             content: string;
             /** Expected Version */
@@ -3147,7 +3182,7 @@ export interface components {
             /** Stage Id */
             stage_id: string;
             /** Unit Id */
-            unit_id: string;
+            unit_id: string | null;
             /** Version */
             version: number;
             /** Questions */
@@ -4022,7 +4057,7 @@ export interface operations {
             query: {
                 plan_id: string;
                 stage_id: string;
-                unit_id: string;
+                unit_id?: string | null;
                 /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
                 project_id: string;
             };

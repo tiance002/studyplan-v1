@@ -18,7 +18,7 @@ def login(client, db, scope):
     with psycopg.connect(db.migrator_dsn) as conn:
         username = conn.execute("SELECT username FROM auth_users WHERE actor_id=%s", (scope.actor_id,)).fetchone()[0]
     response = client.post("/api/v1/auth/login", json={"username": username,
-        "password": "isolated resource replacement passphrase"})
+        "password": "isolatepass1"})
     assert response.status_code == 200
     return {"X-CSRF-Token": response.json()["csrf_token"]}
 
@@ -69,7 +69,7 @@ def test_cross_account_summary_and_history_http(scenario):
         first = client.post("/api/v1/summaries", params=query, headers=headers,
             json={**target, "content": "只有账号A可见的原文", "expected_version": 0, "idempotency_key": "private-save"}).json()["attempt"]
         registered = client.post("/api/v1/auth/register", json={"username": "SummaryOther" + scope.actor_id[-10:],
-            "password": "isolated summary second account passphrase"})
+            "password": "summarypass1"})
         assert registered.status_code == 200
         other_headers = {"X-CSRF-Token": registered.json()["csrf_token"]}
         assert client.get("/api/v1/summaries", params={**query, **target}).status_code == 403

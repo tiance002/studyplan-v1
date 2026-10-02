@@ -15,7 +15,7 @@ class SummarySaveCommand:
     project_id: str
     plan_id: str
     stage_id: str
-    unit_id: str
+    unit_id: str | None
     content: str
     expected_version: int
     idempotency_key: str
@@ -23,6 +23,8 @@ class SummarySaveCommand:
     def __post_init__(self):
         for key in ("project_id", "plan_id", "stage_id", "unit_id", "idempotency_key"):
             value = getattr(self, key)
+            if key == "unit_id" and value is None:
+                continue
             if (not isinstance(value, str) or not value.strip() or len(value) > (128 if key == "idempotency_key" else 512)
                     or "\x00" in value or any(0xD800 <= ord(char) <= 0xDFFF for char in value)):
                 raise ValidationAppError("总结位置或幂等键无效")
@@ -87,8 +89,13 @@ def validate_feedback(review):
 
 def review_rubric_context(snapshot):
     """Consent covers original + learning requirements, never private sources."""
-    fields = ("unit_title", "unit_stable_key", "rubric_version", "objectives", "rubric", "plan_revision")
+    fields = ("unit_title", "unit_stable_key", "rubric_version", "objectives", "rubric", "plan_revision",
+              "summary_scope", "stage_title", "stage_stable_key", "stage_objective")
     result = {key: snapshot[key] for key in fields if key in snapshot}
+    if snapshot.get("summary_scope") == "stage":
+        result["unit_snapshots"] = [{key: unit[key] for key in
+            ("unit_id", "stable_key", "title", "rubric_version", "objectives", "rubric") if key in unit}
+            for unit in snapshot.get("unit_snapshots", []) if isinstance(unit, dict)]
     result["node_snapshot"] = [{key: node[key] for key in ("stable_key", "title", "objectives", "content_version") if key in node}
         for node in snapshot.get("node_snapshot", []) if isinstance(node, dict)]
     return result

@@ -106,6 +106,8 @@ class PgSummaries:
     def _thread(self, conn, position):
         project, plan_id, stage, unit = position
         PgLearningExposures._plan(conn, project, plan_id)
+        if unit is None:
+            return self._stage_thread(conn, position)
         PgLearningExposures._position(conn, position)
         unit_row = conn.execute("SELECT objectives FROM learning_units WHERE project_id=%s AND unit_id=%s", (project, unit)).fetchone()
         objectives = unit_row["objectives"] if unit_row else []
@@ -124,7 +126,32 @@ class PgSummaries:
             "attempts": [self._attempt(conn, project, row["attempt_id"]) for row in reversed(rows[:20])],
             "history_truncated": len(rows) > 20}
 
-    def thread(self, scope, project_id, plan_id, stage_id, unit_id):
+    @staticmethod
+    def _stage(conn, position):
+        stage = conn.execute("SELECT stable_key,title,objective,section_kind,order_index FROM plan_stages "
+            "WHERE project_id=%s AND plan_id=%s AND stage_id=%s", position[:3]).fetchone()
+        if stage is None:
+            raise NotFoundError("阶段不属于指定路线")
+        return stage
+
+    def _stage_thread(self, conn, position):
+        project, plan_id, stage_id, _ = position
+        stage = self._stage(conn, position)
+        window = conn.execute("""SELECT h.version AS head_version,a.attempt_id FROM
+            (SELECT coalesce((SELECT version FROM summary_stage_heads WHERE project_id=%s AND plan_id=%s
+                AND stage_id=%s),0) AS version) h
+            LEFT JOIN LATERAL(SELECT attempt_id FROM summary_attempts WHERE project_id=%s AND plan_id=%s
+                AND stage_id=%s AND unit_id IS NULL ORDER BY version DESC LIMIT 21) a ON true""",
+            (*position[:3], *position[:3])).fetchall()
+        rows = [row for row in window if row["attempt_id"] is not None]
+        return {"project_id": project, "plan_id": plan_id, "stage_id": stage_id, "unit_id": None,
+            "version": window[0]["head_version"],
+            "questions": ["这个阶段你理解了哪些核心知识？", "还有哪些疑问或下一步想尝试的事？",
+                "结合本阶段目标，举一个自己的解释或应用例子：" + str(stage["objective"] or stage["title"])],
+            "attempts": [self._attempt(conn, project, row["attempt_id"]) for row in reversed(rows[:20])],
+            "history_truncated": len(rows) > 20}
+
+    def thread(self, scope, project_id, plan_id, stage_id, unit_id=None):
         with self._tx(scope, project_id) as conn:
             return self._thread(conn, (project_id, plan_id, stage_id, unit_id))
 
@@ -134,6 +161,8 @@ class PgSummaries:
             if prior:
                 return dict(prior, replayed=True)
             plan = PgLearningExposures._plan(conn, command.project_id, command.plan_id, current=True)
+            if command.unit_id is None:
+                return self._save_stage(conn, scope, command, plan)
             PgLearningExposures._position(conn, command.position)
             head = conn.execute("SELECT version FROM summary_position_heads WHERE project_id=%s AND plan_id=%s "
                                 "AND stage_id=%s AND unit_id=%s", command.position).fetchone()
@@ -171,6 +200,69 @@ class PgSummaries:
                       "replayed": False}
             self._record(conn, scope, command.project_id, command.idempotency_key, "save", command.input_hash(), result)
             return result
+
+    @staticmethod
+    def _stage_snapshot(conn, command, plan, stage):
+        units = conn.execute("""SELECT u.unit_id,u.stable_key,u.title,u.rubric_version,u.objectives,u.rubric,l.order_index
+            FROM plan_unit_links l JOIN learning_units u ON u.project_id=l.project_id AND u.unit_id=l.unit_id
+            WHERE l.project_id=%s AND l.plan_id=%s AND l.stage_id=%s ORDER BY l.order_index,l.unit_id""",
+            command.position[:3]).fetchall()
+        nodes, private, objectives, rubrics = [], [], [], []
+        if stage["objective"]:
+            objectives.append(stage["objective"])
+        seen_nodes, seen_private = set(), set()
+        for unit in units:
+            unit_nodes, sources = PgLearningExposures._snapshots(conn, (*command.position[:3], unit["unit_id"]), plan)
+            for node in unit_nodes:
+                if node["node_id"] not in seen_nodes:
+                    seen_nodes.add(node["node_id"])
+                    nodes.append(node)
+            for source in sources["private_selections"]:
+                if source["selection_id"] not in seen_private:
+                    seen_private.add(source["selection_id"])
+                    private.append(source)
+            for objective in unit["objectives"] or []:
+                if objective not in objectives:
+                    objectives.append(objective)
+            unit_rubric = unit["rubric"] or []
+            for rubric in ([unit_rubric] if isinstance(unit_rubric, dict) else unit_rubric):
+                if rubric not in rubrics:
+                    rubrics.append(rubric)
+        public = conn.execute("SELECT * FROM stage_resource_assignments WHERE project_id=%s AND plan_id=%s "
+            "AND stage_id=%s ORDER BY order_index,assignment_id", command.position[:3]).fetchall()
+        frozen = [item for item in (plan["structure"] or {}).get("resource_snapshots", [])
+                  if item.get("stage_id") == command.stage_id]
+        return _json({"snapshot_status": "frozen", "summary_scope": "stage", "unit_id": None,
+            "stage_title": stage["title"], "stage_stable_key": stage["stable_key"], "stage_objective": stage["objective"],
+            "stage_snapshot": stage, "unit_snapshots": units, "objectives": objectives, "rubric": rubrics,
+            "rubric_version": 1, "plan_id": command.plan_id, "plan_revision": plan["revision"], "stage_id": command.stage_id,
+            "plan_snapshot": {"plan_id": command.plan_id, "revision": plan["revision"],
+                "structure_hash": content_hash(plan["structure"] or {}), "stage": stage},
+            "node_snapshot": nodes, "source_snapshot": {"kind": "assigned_source_bindings",
+                "public_assignments": public, "private_selections": private, "published_resource_snapshots": frozen,
+                "published_metadata_status": "frozen" if frozen else "legacy_unfrozen"},
+            "source_pack_key": plan["source_pack_key"], "source_pack_version": plan["source_pack_version"]})
+
+    def _save_stage(self, conn, scope, command, plan):
+        stage = self._stage(conn, command.position)
+        head = conn.execute("SELECT version FROM summary_stage_heads WHERE project_id=%s AND plan_id=%s AND stage_id=%s",
+            command.position[:3]).fetchone()
+        version = head["version"] if head else 0
+        if version != command.expected_version:
+            raise VersionConflictError(actual_version=version, expected_version=command.expected_version)
+        snapshot = self._stage_snapshot(conn, command, plan, stage)
+        identifier = new_id("sum")
+        conn.execute("""INSERT INTO summary_attempts(attempt_id,project_id,unit_id,content,attempt_no,rubric_version,
+            plan_id,stage_id,version,content_hash,rubric_snapshot) VALUES(%s,%s,NULL,%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (identifier, command.project_id, command.content, version+1, snapshot["rubric_version"],
+             command.plan_id, command.stage_id, version+1, content_hash({"content": command.content}), Jsonb(snapshot)))
+        conn.execute("""INSERT INTO summary_stage_heads(project_id,plan_id,stage_id,version) VALUES(%s,%s,%s,%s)
+            ON CONFLICT(project_id,plan_id,stage_id) DO UPDATE SET version=excluded.version""",
+            (*command.position[:3], version+1))
+        result = {"thread": self._thread(conn, command.position), "attempt": self._attempt(conn, command.project_id, identifier),
+                  "replayed": False}
+        self._record(conn, scope, command.project_id, command.idempotency_key, "save", command.input_hash(), result)
+        return result
 
     def attempt(self, scope, project_id, attempt_id):
         with self._tx(scope, project_id) as conn:

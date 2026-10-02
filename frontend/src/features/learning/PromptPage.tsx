@@ -6,6 +6,8 @@ import type { DTO } from '../../api/types';
 import { PracticeChangePanel } from './PracticeChangePanel';
 import { SubmissionPanel } from './SubmissionPanel';
 import { OutcomeArchive } from './OutcomeArchive';
+import {taskSelectionForIntent} from '../../components/learningNavigation';
+import type {PracticeTaskIntent} from '../../components/learningNavigation';
 
 const terminal = new Set(['succeeded','failed','cancelled','canceled','unknown','reconciliation_required']);
 const errorText = (e: unknown) => e instanceof Error ? e.message : '操作未完成，请核对保存记录。';
@@ -46,9 +48,17 @@ function LegacyReview({revision}: {revision: PromptRevision}) {
   return <section><h4>历史反馈原文</h4><p>以下按旧格式保留，没有补写新的结论。</p>{[...new Set(collect(revision.legacy_review))].map((v,i)=><p className="prompt-original" key={i}>{v}</p>)}</section>;
 }
 
-export function PromptPage({project,workspace,initialStage,active=true,onPublished}: {project:string;workspace:DTO['LearningWorkspaceView']|null;initialStage:string;active?:boolean;onPublished?:()=>Promise<void>|void}) {
+export function PromptPage({project,workspace,initialStage,active=true,onPublished,onStageChange,taskIntent}: {project:string;workspace:DTO['LearningWorkspaceView']|null;initialStage:string;active?:boolean;onPublished?:()=>Promise<void>|void;onStageChange?:(id:string)=>void;taskIntent?:PracticeTaskIntent}) {
   const [stageChoice,setStageChoice]=useState(initialStage), [taskChoice,setTaskChoice]=useState('');
-  const stage=workspace?.stages.find(s=>s.stage.stage_id===stageChoice)||workspace?.stages[0];
+  const stage=workspace?.stages.find(s=>s.stage.stage_id===(onStageChange?initialStage:stageChoice))||workspace?.stages[0];
+  const appliedTaskIntent = useRef(0);
+  useEffect(() => {
+    const id = taskSelectionForIntent(stage?.stage.stage_id || '', stage?.tasks || [], taskIntent, appliedTaskIntent.current);
+    if (id && taskIntent) {
+      appliedTaskIntent.current = taskIntent.sequence;
+      setTaskChoice(id);
+    }
+  }, [taskIntent?.sequence, stage?.stage.stage_id]);
   const task=stage?.tasks.find(t=>t.task_id===taskChoice)||stage?.tasks[0];
   const target=workspace && stage && task ? {plan_id:workspace.plan.plan_id,stage_id:stage.stage.stage_id,task_id:task.task_id} : null;
   const key=target ? targetKey(target) : '';
@@ -97,7 +107,7 @@ export function PromptPage({project,workspace,initialStage,active=true,onPublish
   return <div className="content prompt-page"><h1>项目实践与 Prompt</h1><p className="lede">结合路线中的任务，把实现方案与 Prompt 一起保存。反馈与导出都使用你明确选择的已保存版本。</p><p aria-label="当前实践路线">路线第 {workspace.plan.revision} 版：{workspace.plan.goal_snapshot}</p>
     <PracticeChangePanel project={project} onPublished={onPublished}/>
     {oldDirty.length>0&&<section className="panel prompt-recovery" aria-label="旧路线未保存的原文"><h2>旧路线未保存的原文</h2><p>这些文字仍属于旧路线任务，仅保留在本次页面中。新任务不会自动继承；刷新或退出前请复制保管。</p>{oldDirty.map(([bufferKey,value])=><article key={bufferKey}><h3>路线第 {value.position!.revision} 版 · {value.position!.taskTitle}</h3><textarea aria-label={`旧路线原文：${value.position!.taskTitle}`} rows={6} readOnly value={value.text}/><button className="btn" onClick={()=>void navigator.clipboard.writeText(value.text).then(()=>update(bufferKey,old=>({...old,error:'旧原文已复制，请在本机保管。'}))).catch(()=>update(bufferKey,old=>({...old,error:'复制未完成，请选择旧原文手动复制。'})))}>复制旧路线原文</button>{value.error&&<p role="status">{value.error}</p>}</article>)}</section>}
-    <div className="prompt-targets"><label>实践所属阶段<select aria-label="实践所属阶段" value={stage?.stage.stage_id||''} onChange={e=>{setStageChoice(e.target.value);setTaskChoice('');}}>{workspace.stages.map(s=><option key={s.stage.stage_id} value={s.stage.stage_id}>{s.stage.title}</option>)}</select></label>
+    <div className="prompt-targets"><label>实践所属阶段<select aria-label="实践所属阶段" value={stage?.stage.stage_id||''} onChange={e=>{setStageChoice(e.target.value);onStageChange?.(e.target.value);setTaskChoice('');}}>{workspace.stages.map(s=><option key={s.stage.stage_id} value={s.stage.stage_id}>{s.stage.title}</option>)}</select></label>
       <label>实践任务<select aria-label="实践任务" value={task?.task_id||''} onChange={e=>setTaskChoice(e.target.value)}>{stage?.tasks.map(t=><option key={t.task_id} value={t.task_id}>{t.title}</option>)}</select></label></div>
     {!target||!task ? <p>当前阶段没有正式计划关联的实践任务。请选择其他阶段。</p> : <>
       <section className="panel prompt-context" aria-label="当前实践要求"><h2>路线中的主项目</h2>{b.thread ? <><h3>{b.thread.practice_project.title}</h3><p>{b.thread.practice_project.idea}</p><Requirements task={b.thread.task}/></> : <><h3>{task.title}</h3><p>{task.goal}</p><p>正在读取主项目与完整任务要求。</p></>}

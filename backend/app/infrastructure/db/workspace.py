@@ -1,6 +1,7 @@
 """Read catalog entities via published IDs; no title matching or dependency inference."""
 
 import psycopg
+from app.core.errors import ForbiddenError
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
 from psycopg.rows import dict_row
 
@@ -9,11 +10,29 @@ class PgWorkspaceReader:
     def __init__(self, dsn):
         self.dsn = to_psycopg_dsn(dsn)
 
-    def read(self, scope, project_id, unit_ids, task_ids):
+    def read(self, scope, project_id, unit_ids, task_ids, *, plan_id=None):
         scope.require_project(project_id)
         with psycopg.connect(self.dsn, row_factory=dict_row) as conn:
             conn.execute("SELECT set_config('app.project_id',%s,true)", (project_id,))
             conn.execute("SELECT set_config('app.actor_id',%s,true)", (scope.actor_id,))
+            if conn.execute("SELECT 1 FROM learning_projects WHERE project_id=%s AND owner_actor_id=%s "
+                            "AND archived_at IS NULL", (project_id, scope.actor_id)).fetchone() is None:
+                raise ForbiddenError()
+            summary_stage_ids, accepted_task_positions = set(), set()
+            if plan_id is not None:
+                # Both facts share one statement snapshot and the current owner RLS scope.
+                completion_facts = conn.execute("""SELECT 'summary' AS kind,h.stage_id,NULL::text AS task_id,s.content
+                    FROM summary_stage_heads h JOIN summary_attempts s ON s.project_id=h.project_id
+                        AND s.plan_id=h.plan_id AND s.stage_id=h.stage_id AND s.version=h.version AND s.unit_id IS NULL
+                    WHERE h.project_id=%s AND h.plan_id=%s
+                    UNION ALL
+                    SELECT DISTINCT 'practice' AS kind,s.stage_id,s.task_id,NULL::text AS content FROM practice_submissions s
+                    JOIN acceptance_reviews a ON a.project_id=s.project_id AND a.submission_id=s.submission_id
+                    WHERE s.project_id=%s AND s.plan_id=%s AND a.conclusion='accepted' AND a.reviewer_kind='user'""",
+                    (project_id, plan_id, project_id, plan_id)).fetchall()
+                summary_stage_ids = {row["stage_id"] for row in completion_facts
+                                     if row["kind"] == "summary" and row["content"].strip()}
+                accepted_task_positions = {(row["stage_id"], row["task_id"]) for row in completion_facts if row["kind"] == "practice"}
             units = conn.execute(
                 """SELECT u.unit_id,u.stable_key,u.title,u.objectives,u.rubric_version,
                 coalesce(p.status,'not_started') AS progress, p.unit_id IS NOT NULL AS progress_recorded FROM learning_units u LEFT JOIN unit_progress p
@@ -50,4 +69,5 @@ class PgWorkspaceReader:
             ]
             node["child_ids"] = [r["to_node_id"] for r in relations if r["from_node_id"] == node["node_id"] and r["relation_type"] == "contains"]
             node["progress"] = None
-        return {"units": units, "nodes": nodes, "tasks": tasks}
+        return {"units": units, "nodes": nodes, "tasks": tasks,
+                "summary_stage_ids": summary_stage_ids, "accepted_task_positions": accepted_task_positions}

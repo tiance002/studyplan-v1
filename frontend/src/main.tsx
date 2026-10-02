@@ -15,6 +15,8 @@ import {
 import { PlanningPage } from "./features/planning/PlanningPage";
 import { ModelSettings } from "./ModelSettings";
 import "./style.css";
+import {stagePage} from "./components/learningNavigation";
+import type {PracticeTaskIntent} from "./components/learningNavigation";
 
 const pages: Page[] = [
   "dashboard",
@@ -39,6 +41,7 @@ function App() {
       : "dashboard",
   );
   const [position, setPosition] = useState({ stage: "", node: "", storageKey: "" });
+  const [taskIntent, setTaskIntent] = useState<PracticeTaskIntent>();
   const [fake, setFake] = useState<boolean | null>(null);
   const stageId = position.stage, nodeId = position.node;
   const project = session?.project_ids[0] || "";
@@ -99,13 +102,21 @@ function App() {
       );
   }, [stageId, nodeId, workspace, positionKey, position.storageKey]);
   const stage = workspace?.stages.find((s) => s.stage.stage_id === stageId);
-  function selectStage(id: string) {
+  function selectStage(id: string, external = false) {
     setPosition({ storageKey: positionKey, stage: id,
-      node: workspace?.stages.find((s) => s.stage.stage_id === id)?.nodes[0]?.node_id || "" });
-    navigate("workspace");
+      node: id === stageId ? nodeId : workspace?.stages.find((s) => s.stage.stage_id === id)?.nodes[0]?.node_id || "" });
+    navigate(stagePage(page, external));
+  }
+  function selectTask(stageId: string, taskId: string) {
+    const selected = workspace?.stages.find(s => s.stage.stage_id === stageId);
+    if (!selected?.tasks.some(task => task.task_id === taskId)) return;
+    selectStage(stageId);
+    setTaskIntent(old => ({ stageId, taskId, sequence: (old?.sequence || 0) + 1 }));
+    navigate("practice");
   }
   function selectNode(id: string) {
-    if (stage?.nodes.some(n => n.node_id === id)) setPosition({ storageKey: positionKey, stage: stageId, node: id });
+    const owner = workspace?.stages.find(s => s.nodes.some(n => n.node_id === id));
+    if (owner) setPosition({ storageKey: positionKey, stage: owner.stage.stage_id, node: id });
   }
   async function logout() {
     try {
@@ -140,6 +151,7 @@ function App() {
       nodeId={nodeId}
       selectStage={selectStage}
       selectNode={selectNode}
+      selectTask={selectTask}
       logout={logout}
     >
       {error && (
@@ -161,7 +173,7 @@ function App() {
           workspace={workspace}
           stageId={stageId}
           navigate={navigate}
-          enterStage={selectStage}
+          enterStage={id => selectStage(id, true)}
         />
       )}
       {page === "planning" && (
@@ -175,7 +187,7 @@ function App() {
       {page === "path" && (
         <LearningPath
           workspace={workspace}
-          enterStage={selectStage}
+          enterStage={id => selectStage(id, true)}
           create={() => navigate("planning")}
         />
       )}
@@ -190,12 +202,13 @@ function App() {
           allNodes={workspace?.stages.flatMap((s) => s.nodes) || []}
           selectNode={selectNode}
           create={() => navigate("planning")}
+          practice={() => navigate("practice")} summary={() => navigate("summary")}
         />
       )}
       <div hidden={page !== 'summary'}><SummaryDetail key={project} project={project}
-        workspace={workspace} initialStage={stageId} active={page === 'summary'}/></div>
+        workspace={workspace} initialStage={stageId} onStageChange={selectStage} active={page === 'summary'} onSaved={refresh}/></div>
       <div hidden={page !== 'practice'}><PracticeDetail key={project} project={project}
-        workspace={workspace} initialStage={stageId} active={page === 'practice'} onPublished={refresh}/></div>
+        workspace={workspace} initialStage={stageId} onStageChange={selectStage} active={page === 'practice'} onPublished={refresh} taskIntent={taskIntent}/></div>
       {page === "conversations" && <ConversationList />}
       {page === "settings" && (
         <div className="content">

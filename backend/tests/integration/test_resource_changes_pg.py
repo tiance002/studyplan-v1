@@ -39,7 +39,7 @@ def scenario(migrated_db):
     container = build_container(settings)
     from app.core.ids import new_id
     suffix = new_id("user")[-12:]
-    token = container.browser_auth.register("变更用户" + suffix, "isolated resource replacement passphrase", "isolated-peer")
+    token = container.browser_auth.register("变更用户" + suffix, "isolatepass1", "isolated-peer")
     scope = container.browser_auth.resolve(token)
     project = scope.learning_project_scope[0]
     unit, node = "unit-" + project, "node-" + project

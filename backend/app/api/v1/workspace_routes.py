@@ -5,6 +5,7 @@ from app.api.v1.views import plan_view
 from app.application.container import AppContainer
 from app.application.plan_service import PlanService
 from app.core.errors import DependencyUnavailableError, NotFoundError
+from app.domain.stage_completion import derive_stage_completion
 from app.domain.workspace.models import AuthContext
 from fastapi import APIRouter, Depends
 
@@ -26,7 +27,7 @@ def workspace(
         raise NotFoundError("请先创建并确认学习计划")
     plan = plan_view(bundle)
     data = container.workspace_reader.read(
-        scope, project_id, [u.unit_id for u in plan.unit_links], [t.task_id for t in plan.task_links]
+        scope, project_id, [u.unit_id for u in plan.unit_links], [t.task_id for t in plan.task_links], plan_id=plan.plan_id
     )
     # New progress is scoped to this exact plan position. Legacy unit records
     # remain visible separately; they cannot complete new plan appearances.
@@ -52,6 +53,11 @@ def workspace(
                 nodes=[n for n in data["nodes"] if n["node_id"] in node_ids],
                 resources=[r for r in plan.stage_resources if r.stage_id == stage.stage_id],
                 tasks=[t for t in data["tasks"] if t["task_id"] in tasks],
+                completion=derive_stage_completion(
+                    summary_completed=stage.stage_id in data.get("summary_stage_ids", set()),
+                    required_task_ids=tasks, available_task_ids=[t["task_id"] for t in data["tasks"]],
+                    accepted_task_ids=[task_id for stage_id, task_id in data.get("accepted_task_positions", set())
+                                       if stage_id == stage.stage_id]),
             )
         )
     return LearningWorkspaceView(
@@ -59,4 +65,6 @@ def workspace(
         stages=stages,
         total_units=sum(len(stage.units) for stage in stages),
         completed_units=sum(u.progress == "completed" for stage in stages for u in stage.units),
+        total_stages=len(stages),
+        completed_stages=sum(stage.completion.status == "completed" for stage in stages),
     )

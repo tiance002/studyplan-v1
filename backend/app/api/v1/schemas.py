@@ -371,12 +371,20 @@ class PracticeTaskView(BaseModel):
     thinking_prompts: list[str] = Field(default_factory=list)
 
 
+class StageCompletionView(BaseModel):
+    status: Literal["completed", "incomplete"] = "incomplete"
+    summary_completed: bool = False
+    completed_practice_tasks: int = Field(default=0, ge=0)
+    total_practice_tasks: int = Field(default=0, ge=0)
+
+
 class StageWorkspaceView(BaseModel):
     stage: StageDetail
     units: list[WorkspaceUnitView]
     nodes: list[WorkspaceNodeView]
     resources: list[StageResourceAssignmentView]
     tasks: list[PracticeTaskView]
+    completion: StageCompletionView = Field(default_factory=StageCompletionView)
 
 
 class LearningWorkspaceView(BaseModel):
@@ -384,6 +392,8 @@ class LearningWorkspaceView(BaseModel):
     stages: list[StageWorkspaceView]
     completed_units: int
     total_units: int
+    completed_stages: int = Field(default=0, ge=0)
+    total_stages: int = Field(default=0, ge=0)
 
 
 class SummaryCreateRequest(BaseModel):
@@ -426,6 +436,7 @@ V1_SCHEMAS: tuple[type[BaseModel], ...] = (
     PreferenceView,
     PreferenceUpdateRequest,
     PracticeTaskView,
+    StageCompletionView,
     SummaryCreateRequest,
     PromptRevisionCreateRequest,
 )

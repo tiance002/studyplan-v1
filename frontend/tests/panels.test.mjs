@@ -4,6 +4,7 @@ import {
   togglePanel,
   fitPanels,
   initialPanels,
+  panelWidths,
 } from "../src/components/panels.ts";
 test("N+P opens A and closing restores prior layout", () => {
   const a = togglePanel(initialPanels, "assistant");
@@ -27,8 +28,8 @@ test("wide assistant preserves readable canvas at target widths", () => {
       width,
     );
     const consumed =
-      (s.nav ? width * 0.11 : 62) +
-      (s.plan ? width * 0.17 : 0) +
+      (s.nav ? panelWidths(width).nav : 62) +
+      (s.plan ? panelWidths(width).plan : 0) +
       (s.assistant ? s.assistantWidth : 0);
     assert.ok(width - consumed >= 600);
   }
@@ -43,3 +44,5 @@ test("manual reopening wins after assistant caused automatic collapse", () => {
   assert.equal(reopened.plan, false);
   assert.ok(reopened.assistantWidth < 800);
 });
+
+test("sidebar width remains readable at a narrow desktop viewport", () => {assert.ok(panelWidths(1176).plan >= 250);assert.ok(panelWidths(1176).nav >= 150);});

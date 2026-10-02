@@ -5,7 +5,7 @@ const links: { page: Page; label: string; icon: string }[] = [
   { page: "path", label: "学习路径", icon: "↝" },
   { page: "workspace", label: "阶段学习", icon: "▤" },
   { page: "conversations", label: "我的会话", icon: "☷" },
-  { page: "summary", label: "知识总结", icon: "▧" },
+  { page: "summary", label: "阶段总结", icon: "▧" },
   { page: "practice", label: "项目实践", icon: "⌘" },
 ];
 export function GlobalNavigation({
@@ -44,6 +44,7 @@ export function GlobalNavigation({
         <button
           title={l.label}
           aria-label={l.label}
+          aria-current={page === l.page ? "page" : undefined}
           className={`nav-link ${page === l.page ? "active" : ""}`}
           key={l.page}
           onClick={() => navigate(l.page)}

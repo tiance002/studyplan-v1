@@ -1,5 +1,6 @@
 import type { DTO, Page } from "../../api/types";
 import { Resources } from "../../components/Resources";
+import {stageCompletionLabel, stageTotals} from "../../components/learningNavigation";
 export function LearningDashboard({
   workspace,
   stageId,
@@ -14,6 +15,7 @@ export function LearningDashboard({
   const stage =
     workspace?.stages.find((s) => s.stage.stage_id === stageId) ||
     workspace?.stages[0];
+  const totals = stageTotals(workspace);
   return (
     <div className="dash-inner">
       <div className="dash-intro">
@@ -34,13 +36,12 @@ export function LearningDashboard({
             </span>
             <h2>{workspace.plan.goal_snapshot}</h2>
             <p className="muted">
-              {workspace.stages.length} 个阶段 · {workspace.completed_units}/
-              {workspace.total_units} 个学习单元完成
+              {totals.completed}/{totals.total} 个阶段已完成
             </p>
             <div className="progress-track">
               <span
                 style={{
-                  width: `${workspace.total_units ? (workspace.completed_units / workspace.total_units) * 100 : 0}%`,
+                  width: `${totals.total ? (totals.completed / totals.total) * 100 : 0}%`,
                 }}
               />
             </div>
@@ -48,7 +49,7 @@ export function LearningDashboard({
           <div className="feature-side">
             <p className="eyebrow">下一步学习</p>
             <h3>{stage?.stage.title}</h3>
-            <p className="muted">{stage?.stage.objective}</p>
+            <p className="muted">{stage?.stage.objective}</p><span className="pill">{stageCompletionLabel(stage)}</span>
             {stage && (
               <button
                 className="btn primary"
@@ -83,7 +84,7 @@ export function LearningDashboard({
         </section>
         <section className="panel">
           <div className="section-heading">
-            <h2>今日学习</h2>
+            <h2>当前阶段单元</h2>
             <span className="muted">按自己的节奏</span>
           </div>
           {stage?.units.length ? (
@@ -91,13 +92,7 @@ export function LearningDashboard({
               <div className="task-row" key={u.unit_id}>
                 <span className="task-circle" />
                 <strong>{u.title}</strong>
-                <small>
-                  {u.progress === "completed"
-                    ? "已完成"
-                    : u.progress === "in_progress"
-                      ? "学习中"
-                      : "未开始"}
-                </small>
+
               </div>
             ))
           ) : (
@@ -118,7 +113,7 @@ export function LearningDashboard({
               onClick={() => enterStage(s.stage.stage_id)}
             >
               <span className="step">{s.stage.order_index + 1}</span>
-              <strong>{s.stage.title}</strong>
+              <strong>{s.stage.title}</strong><small>{stageCompletionLabel(s)}</small>
               <span>→</span>
             </button>
           )) || <p className="empty">你的正式学习路线将在这里展开。</p>}

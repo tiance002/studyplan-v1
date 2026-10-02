@@ -41,7 +41,7 @@ class SummaryService:
         self.admission_mode = admission_mode
         self.actor_ids = tuple(actor_ids)
 
-    def thread(self, scope, project_id, plan_id, stage_id, unit_id):
+    def thread(self, scope, project_id, plan_id, stage_id, unit_id=None):
         scope.require_project(project_id)
         return self.repository.thread(scope, project_id, plan_id, stage_id, unit_id)
 

@@ -9,7 +9,7 @@ type Buffer = {text: string; baseline: string; edit: number; initialized: boolea
   runVersion?: {id: string; version: number}; cancelPending?: {id: string; body: SummaryCancelBody}; cancelling?: boolean};
 const fresh = (): Buffer => ({text: '', baseline: '', edit: 0, initialized: false});
 const terminal = new Set(['succeeded','failed','cancelled','canceled','unknown','reconciliation_required']);
-const targetKey = (t: SummaryTarget) => `${t.plan_id}/${t.stage_id}/${t.unit_id}`;
+const targetKey = (t: SummaryTarget) => `${t.plan_id}/${t.stage_id}/${t.unit_id || '@stage'}`;
 const message = (e: unknown) => e instanceof Error ? e.message : '操作未完成，请保留本地文字后再核对。';
 function mergeThread(old: SummaryThread|undefined, next: SummaryThread): SummaryThread {
   if (old && old.version > next.version) return old;
@@ -21,7 +21,7 @@ function mergeThread(old: SummaryThread|undefined, next: SummaryThread): Summary
 
 function Snapshot({value}: {value: Record<string,unknown>}) {
   const unit = typeof value.unit_snapshot === 'object' && value.unit_snapshot ? value.unit_snapshot as Record<string,unknown> : {};
-  const title = value.unit_title || unit.title;
+  const title = value.stage_title || value.unit_title || unit.title;
   const objectives = value.objectives || unit.objectives;
   const notes = Array.isArray(objectives) ? objectives.filter((v): v is string => typeof v === 'string') : [];
   const nodes = Array.isArray(value.node_snapshot) ? value.node_snapshot : [];
@@ -37,7 +37,7 @@ function Snapshot({value}: {value: Record<string,unknown>}) {
       : typeof published?.title === 'string' ? published.title : '';
   }).filter(Boolean);
   return <div className="summary-snapshot">
-    {typeof title === 'string' && <p>当时单元：{title}</p>}
+    {typeof title === 'string' && <p>{value.stage_title && !value.unit_title ? '当时阶段' : '当时单元'}：{title}</p>}
     {typeof value.plan_revision === 'number' && <p>当时路线：第 {value.plan_revision} 版</p>}
     {notes.length > 0 && <><h4>当时学习目标</h4><ul>{notes.map((v,i) => <li key={i}>{v}</li>)}</ul></>}
     {labels(nodes).length > 0 && <p>关联知识：{labels(nodes).join('、')}</p>}
@@ -68,14 +68,14 @@ function LegacyFeedback({attempt}: {attempt: SummaryAttempt}) {
   </section>;
 }
 
-export function SummaryPage({project, workspace, initialStage, active = true}: {
-  project: string; workspace: DTO['LearningWorkspaceView']|null; initialStage: string; active?: boolean;
+export function SummaryPage({project, workspace, initialStage, active = true, onStageChange, onSaved}: {
+  project: string; workspace: DTO['LearningWorkspaceView']|null; initialStage: string; active?: boolean; onStageChange?:(id:string)=>void; onSaved?:()=>Promise<void>|void;
 }) {
-  const [stageChoice, setStageChoice] = useState(initialStage), [unitChoice, setUnitChoice] = useState('');
-  const stage = workspace?.stages.find(s => s.stage.stage_id === stageChoice) || workspace?.stages[0];
-  const unit = stage?.units.find(u => u.unit_id === unitChoice) || stage?.units[0];
-  const currentTarget = workspace && stage && unit ? {plan_id: workspace.plan.plan_id, stage_id: stage.stage.stage_id, unit_id: unit.unit_id} : null;
+  const [stageChoice, setStageChoice] = useState(initialStage);
+  const stage = workspace?.stages.find(s => s.stage.stage_id === (onStageChange ? initialStage : stageChoice)) || workspace?.stages[0];
+  const currentTarget = workspace && stage ? {plan_id: workspace.plan.plan_id, stage_id: stage.stage.stage_id} : null;
   const [historicKey, setHistoricKey] = useState('');
+  useEffect(() => {if (onStageChange) setHistoricKey('');}, [initialStage, onStageChange ? true : false]);
   const [history, setHistory] = useState<SummaryAttempt[]>([]), [historyCursor, setHistoryCursor] = useState<string|null>(null);
   const [historySelected, setHistorySelected] = useState<SummaryAttempt|null>(null), [historyError, setHistoryError] = useState('');
   const [historyBusy, setHistoryBusy] = useState(false);
@@ -96,11 +96,11 @@ export function SummaryPage({project, workspace, initialStage, active = true}: {
   }
   useEffect(() => {alive.current = true; return () => {alive.current = false;};}, []);
   useEffect(() => {
-    if (!currentTarget || !stage || !unit) return;
+    if (!currentTarget || !stage) return;
     const k = targetKey(currentTarget);
     setTargets(old => old[k] ? old : {...old, [k]: {target: currentTarget,
-      label: `路线 ${workspace!.plan.revision} · ${stage.stage.title} · ${unit.title}`}});
-  }, [currentTarget?.plan_id, currentTarget?.stage_id, currentTarget?.unit_id]);
+      label: `路线 ${workspace!.plan.revision} · ${stage.stage.title} · 阶段总结`}});
+  }, [currentTarget?.plan_id, currentTarget?.stage_id]);
   async function read(k: string, t: SummaryTarget, initial = false) {
     const ticket = sequence.current[k] = (sequence.current[k] || 0) + 1;
     const edit = buffersRef.current[k]?.edit || 0;
@@ -127,13 +127,19 @@ export function SummaryPage({project, workspace, initialStage, active = true}: {
   async function save(k: string, body: SummarySaveBody) {
     sequence.current[k] = (sequence.current[k] || 0) + 1;
     update(k, old => ({...old, pending: body, busy: true, error: ''}));
+    let saved = false;
     try {
       const result = await api.saveSummary(project, body);
       update(k, old => ({...old, thread: mergeThread(old.thread, result.thread), baseline: body.content,
         selected: result.attempt.attempt_id, consent: false, pending: undefined, conflict: false, initialized: true}));
+      saved = true;
     } catch(e) {
       update(k, old => ({...old, error: message(e), conflict: e instanceof ApiError && e.status === 409}));
     } finally {sequence.current[k] = (sequence.current[k] || 0) + 1; update(k, old => ({...old, busy: false}));}
+    if (saved && onSaved) {
+      try { await onSaved(); }
+      catch { update(k, old => ({...old, error: '总结已保存，阶段状态暂未刷新。可稍后重新加载学习空间。'})); }
+    }
   }
   const selected = b.thread?.attempts.find(a => a.attempt_id === b.selected);
   async function review(k: string, attempt: SummaryAttempt, body: SummaryReviewBody) {
@@ -191,23 +197,23 @@ export function SummaryPage({project, workspace, initialStage, active = true}: {
     timer = setTimeout(poll, 300);
     return () => {stopped = true; clearTimeout(timer);};
   }, [active, key, selected?.attempt_id, selected?.run_id, selected?.run_status]);
-  if (!workspace || !target || !unit) return <div className="content"><h1>知识总结</h1><p>先确认一条学习路线，再选择学习单元整理总结。</p></div>;
+  if (!workspace || !target) return <div className="content"><h1>阶段总结</h1><p>先确认一条学习路线，再整理阶段总结。</p></div>;
   const isHistory = target.plan_id !== workspace.plan.plan_id;
   const chars = Array.from(b.text).length;
   return <div className="content summary-page">
-    <h1>知识总结</h1><p className="lede">留下自己的理解，再选择是否请模型给出反馈。保存总结不会自动完成学习单元。</p>
+    <h1>阶段总结</h1><p className="lede">围绕整个阶段整理概念、实践证据与尚未验证的问题，再选择是否请求反馈。保存总结不会自动完成学习单元。</p>
     <div className="summary-targets">
-      <label>总结所属阶段<select value={stage?.stage.stage_id} onChange={e => {setStageChoice(e.target.value); setUnitChoice(''); setHistoricKey('');}}>
+      <label>总结所属阶段<select value={stage?.stage.stage_id} onChange={e => {setStageChoice(e.target.value); onStageChange?.(e.target.value); setHistoricKey('');}}>
         {workspace.stages.map(s => <option key={s.stage.stage_id} value={s.stage.stage_id}>{s.stage.title}</option>)}</select></label>
-      <label>总结所属学习单元<select value={unit.unit_id} onChange={e => {setUnitChoice(e.target.value); setHistoricKey('');}}>
-        {stage?.units.map(u => <option key={u.unit_id} value={u.unit_id}>{u.title}</option>)}</select></label>
       <label>已访问的总结位置<select value={historicKey} onChange={e => setHistoricKey(e.target.value)}>
         <option value="">当前所选位置</option>{Object.entries(targets).map(([id,t]) => <option key={id} value={id}>{t.label}</option>)}</select></label>
     </div>
     {isHistory && <p className="note-callout">正在查看旧路线位置；原文和当时要求保留在旧版本，不会移到当前路线。</p>}
     <div className="summary-layout">
       <section className="panel summary-editor" aria-label="总结编辑">
-        <h2>用自己的语言说明</h2>
+        <h2>{historicKey ? targets[historicKey]?.label : `${stage?.stage.title} · 我的阶段总结`}</h2>
+        {historicKey ? <><p className="form-note">正在编辑已访问位置的文字。学习要求来自该位置保存时的快照。</p>{(selected || b.thread?.attempts.at(-1)) && <Snapshot value={(selected || b.thread!.attempts.at(-1))!.rubric_snapshot}/>}</>
+          : <p className="muted">本阶段知识：{stage?.nodes.map(n => n.title).join("、") || "暂无关联知识"}</p>}
         <ol className="summary-questions">{(b.thread?.questions || []).map((q,i) => <li key={i}>{q}</li>)}</ol>
         <label>总结原文<textarea aria-label="总结原文" value={b.text} rows={14} onChange={e => update(key, old => ({...old, text: e.target.value, edit: old.edit+1}))}/></label>
         <p className="form-note">{chars} / 20000 字符。短总结也能保存，空白行和原有格式会保留。</p>
@@ -252,7 +258,7 @@ export function SummaryPage({project, workspace, initialStage, active = true}: {
       <h2>项目总结历史</h2><p>查看旧路线与旧位置的原文，不会替换上面的编辑文字。</p>
       <button className="btn" disabled={historyBusy} onClick={() => void readHistory()}>读取项目总结历史</button>
       {history.map(a => <button className="resource-row" key={a.attempt_id} onClick={() => setHistorySelected(a)}>
-        {typeof a.rubric_snapshot.unit_title === 'string' ? a.rubric_snapshot.unit_title : '历史原文'} · 第 {a.attempt_no} 次 · {new Date(a.created_at).toLocaleString()}</button>)}
+        {typeof a.rubric_snapshot.stage_title === 'string' && !a.unit_id ? `${a.rubric_snapshot.stage_title} · 阶段总结` : typeof a.rubric_snapshot.unit_title === 'string' ? `${a.rubric_snapshot.unit_title} · 历史单元总结` : '历史原文'} · 第 {a.attempt_no} 次 · {new Date(a.created_at).toLocaleString()}</button>)}
       {historyCursor && <button className="btn" disabled={historyBusy} onClick={() => void readHistory(true)}>读取更早的总结</button>}
       {historyError && <p role="alert">{historyError}</p>}
       {historySelected && <HistoricalAttempt key={historySelected.attempt_id} project={project} initial={historySelected} active={active}/>}

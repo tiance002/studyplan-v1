@@ -5,14 +5,14 @@ import { GlobalNavigation } from "./GlobalNavigation";
 import { LearningPlanSidebar } from "./LearningPlanSidebar";
 import { LearningAssistantPanel } from "./LearningAssistantPanel";
 import { ResizableDivider } from "./ResizableDivider";
-import { fitPanels, initialPanels, togglePanel } from "./panels";
+import { fitPanels, initialPanels, togglePanel, panelWidths } from "./panels";
 import type { Panels } from "./panels";
 const titles: Record<Page, string> = {
   dashboard: "学习工作台",
   planning: "学习计划",
   path: "学习路径",
   workspace: "阶段学习工作区",
-  summary: "知识总结",
+  summary: "阶段总结",
   practice: "项目实践",
   conversations: "我的会话",
   settings: "模型设置",
@@ -26,6 +26,7 @@ export function AppShell({
   nodeId,
   selectStage,
   selectNode,
+  selectTask,
   logout,
   children,
 }: {
@@ -37,6 +38,7 @@ export function AppShell({
   nodeId: string;
   selectStage: (id: string) => void;
   selectNode: (id: string) => void;
+  selectTask?: (stageId: string, taskId: string) => void;
   logout: () => void;
   children: ReactNode;
 }) {
@@ -71,14 +73,15 @@ export function AppShell({
       className="app-shell"
       style={
         {
-          "--nav-width": visible.nav ? "11vw" : "62px",
-          "--plan-width": visible.plan ? "17vw" : "0px",
+          "--nav-width": visible.nav ? `${panelWidths(width).nav}px` : "62px",
+          "--plan-width": visible.plan ? `${panelWidths(width).plan}px` : "0px",
           "--assistant-width": visible.assistant
             ? `${visible.assistantWidth}px`
             : "0px",
         } as CSSProperties
       }
     >
+      <a className="skip-link" href="#main-content">跳到学习内容</a>
       <GlobalNavigation
         expanded={visible.nav}
         page={page}
@@ -94,6 +97,7 @@ export function AppShell({
           nodeId={nodeId}
           selectStage={selectStage}
           selectNode={selectNode}
+          selectTask={selectTask}
           navigate={navigate}
         />
       )}

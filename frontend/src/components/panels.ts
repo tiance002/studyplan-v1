@@ -11,6 +11,9 @@ export const initialPanels: Panels = {
   assistant: false,
   assistantWidth: 430,
 };
+export function panelWidths(width: number) {
+  return {nav: Math.max(150, Math.min(190, width * .12)), plan: Math.max(250, Math.min(300, width * .22))};
+}
 export function togglePanel(
   state: Panels,
   panel: "nav" | "plan" | "assistant",
@@ -38,8 +41,8 @@ export function togglePanel(
         Math.min(
           s.assistantWidth,
           width -
-            (s.nav ? width * 0.11 : 62) -
-            (s.plan ? width * 0.17 : 0) -
+            (s.nav ? panelWidths(width).nav : 62) -
+            (s.plan ? panelWidths(width).plan : 0) -
             600,
         ),
       );
@@ -51,8 +54,8 @@ export function fitPanels(state: Panels, width: number): Panels {
   const s = { ...state };
   const remaining = () =>
     width -
-    (s.nav ? width * 0.11 : 62) -
-    (s.plan ? width * 0.17 : 0) -
+    (s.nav ? panelWidths(width).nav : 62) -
+    (s.plan ? panelWidths(width).plan : 0) -
     (s.assistant ? s.assistantWidth : 0);
   if (remaining() < 600) s.nav = false;
   if (remaining() < 600) s.plan = false;

@@ -25,7 +25,7 @@ class SummaryAttemptView(BaseModel):
     project_id: str
     plan_id: str | None
     stage_id: str | None
-    unit_id: str
+    unit_id: str | None
     attempt_no: int
     version: int = Field(ge=0)
     content: str
@@ -43,7 +43,7 @@ class SummaryThreadView(BaseModel):
     project_id: str
     plan_id: str
     stage_id: str
-    unit_id: str
+    unit_id: str | None
     version: int = Field(ge=0)
     questions: list[str] = Field(min_length=3, max_length=3)
     attempts: list[SummaryAttemptView]
@@ -59,7 +59,7 @@ class SummarySaveRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     plan_id: Identifier
     stage_id: Identifier
-    unit_id: Identifier
+    unit_id: Identifier | None = None
     content: str = Field(min_length=1, max_length=20000)
     expected_version: int = Field(ge=0, strict=True)
     idempotency_key: Key

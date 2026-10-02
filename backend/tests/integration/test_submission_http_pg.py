@@ -128,7 +128,7 @@ def test_submission_and_outcome_owner_boundaries_include_receipt_replays(submiss
         item = saved.json()["submission"]
         registration = client.post("/api/v1/auth/register", json={
             "username": "SubmissionOther" + scope.actor_id[-10:],
-            "password": "isolated submission second account passphrase"})
+            "password": "submitpass1"})
         assert registration.status_code == 200
         other_headers = {"X-CSRF-Token": registration.json()["csrf_token"]}
         for endpoint in ("/api/v1/outcomes", "/api/v1/submissions/history", "/api/v1/submissions/" + item["submission_id"]):

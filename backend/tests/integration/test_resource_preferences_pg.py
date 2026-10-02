@@ -31,7 +31,7 @@ def preference_scenario(migrated_db):
         seed_reviewed_pack(conn, load_pack("agent-application-v3.json"))
     container = build_container(replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider="fake",
         local_session_token="", planning_worker_admission_mode="trusted_server"))
-    token = container.browser_auth.register("资料偏好用户", "long preference test passphrase", "preference-peer")
+    token = container.browser_auth.register("资料偏好用户", "prefpass123", "preference-peer")
     scope = container.browser_auth.resolve(token)
     project = scope.learning_project_scope[0]
     run_id = container.plan_service.submit_generation(scope=scope, project_id=project, goal="学习Agent应用开发")
@@ -48,7 +48,7 @@ def preference_scenario(migrated_db):
                             (project, targets[0]["unit_id"])).fetchall()
     assert len(targets) == 2 and nodes
     targets.append(dict(targets[0], node_id=nodes[0][0]))
-    other_token = container.browser_auth.register("资料偏好另一用户", "long other preference passphrase", "other-peer")
+    other_token = container.browser_auth.register("资料偏好另一用户", "otherpref123", "other-peer")
     other = container.browser_auth.resolve(other_token)
     return migrated_db, scope, targets, other
 

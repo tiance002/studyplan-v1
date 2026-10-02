@@ -61,7 +61,7 @@ export { request as requestApi };
 const resourceScope = (project: string, target: Pick<DTO['ResourceSearchRequest'], 'plan_id' | 'stage_id' | 'unit_id'>) =>
   `${scope(project)}&${new URLSearchParams({plan_id:target.plan_id,stage_id:target.stage_id,unit_id:target.unit_id})}`;
 export const api = {
-  summaryThread: (project: string, target: SummaryTarget) => request<SummaryThread>(`/summaries${scope(project)}&${new URLSearchParams(target)}`),
+  summaryThread: (project: string, target: SummaryTarget) => request<SummaryThread>(`/summaries${scope(project)}&${new URLSearchParams(Object.entries(target).filter(([,value]) => value != null) as [string,string][])}`),
   saveSummary: (project: string, body: SummarySaveBody) => request<SummarySave>(`/summaries${scope(project)}`, body),
   summaryAttempt: (project: string, id: string) => request<SummaryAttempt>(`/summaries/attempts/${encodeURIComponent(id)}${scope(project)}`),
   reviewSummary: (project: string, id: string, body: SummaryReviewBody) => request<SummaryReviewRun>(`/summaries/attempts/${encodeURIComponent(id)}/review${scope(project)}`, body),

@@ -32,7 +32,7 @@ def get_summary_service(container: AppContainer = Depends(get_container)) -> Sum
 @router.get("", response_model=SummaryThreadView, operation_id="get_summary_thread")
 def get_thread(plan_id: Annotated[str, Query(min_length=1, max_length=512)],
                stage_id: Annotated[str, Query(min_length=1, max_length=512)],
-               unit_id: Annotated[str, Query(min_length=1, max_length=512)], project_id: str = ProjectId,
+               unit_id: Annotated[str | None, Query(min_length=1, max_length=512)] = None, project_id: str = ProjectId,
                scope: AuthContext = Depends(get_auth_context), service: SummaryService = Depends(get_summary_service)):
     return service.thread(scope, project_id, plan_id, stage_id, unit_id)
 

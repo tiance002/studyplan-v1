@@ -547,7 +547,7 @@ def test_nonempty_downgrade_guard_refuses_before_any_destructive_statement(submi
             migration.downgrade()
     assert repo.get(scope, cmd.project_id, saved["submission"]["submission_id"]) == saved["submission"]
     with psycopg.connect(db.migrator_dsn) as conn:
-        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0022"
+        assert conn.execute("SELECT version_num FROM alembic_version").fetchone()[0] == "0023"
 
 
 def test_save_waiting_for_publication_rechecks_current_plan_before_original_write(submission_scenario):

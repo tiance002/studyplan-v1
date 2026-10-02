@@ -1207,11 +1207,18 @@
           {
             "name": "unit_id",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 512,
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512
+                },
+                {
+                  "type": "null"
+                }
+              ],
               "title": "Unit Id"
             }
           },
@@ -3843,6 +3850,18 @@
           "total_units": {
             "type": "integer",
             "title": "Total Units"
+          },
+          "completed_stages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Completed Stages",
+            "default": 0
+          },
+          "total_stages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Stages",
+            "default": 0
           }
         },
         "type": "object",
@@ -8730,6 +8749,38 @@
         ],
         "title": "SessionView"
       },
+      "StageCompletionView": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "completed",
+              "incomplete"
+            ],
+            "title": "Status",
+            "default": "incomplete"
+          },
+          "summary_completed": {
+            "type": "boolean",
+            "title": "Summary Completed",
+            "default": false
+          },
+          "completed_practice_tasks": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Completed Practice Tasks",
+            "default": 0
+          },
+          "total_practice_tasks": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Practice Tasks",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "StageCompletionView"
+      },
       "StageDetail": {
         "properties": {
           "stage_id": {
@@ -8916,6 +8967,9 @@
             },
             "type": "array",
             "title": "Tasks"
+          },
+          "completion": {
+            "$ref": "#/components/schemas/StageCompletionView"
           }
         },
         "type": "object",
@@ -8961,7 +9015,14 @@
             "title": "Stage Id"
           },
           "unit_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Unit Id"
           },
           "attempt_no": {
@@ -9276,9 +9337,16 @@
             "title": "Stage Id"
           },
           "unit_id": {
-            "type": "string",
-            "maxLength": 512,
-            "minLength": 1,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Unit Id"
           },
           "content": {
@@ -9304,7 +9372,6 @@
         "required": [
           "plan_id",
           "stage_id",
-          "unit_id",
           "content",
           "expected_version",
           "idempotency_key"
@@ -9347,7 +9414,14 @@
             "title": "Stage Id"
           },
           "unit_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Unit Id"
           },
           "version": {
