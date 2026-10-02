@@ -37,7 +37,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 import psycopg
 from app.core.errors import ConflictError, VersionConflictError
@@ -182,6 +182,7 @@ def _structure_payload(revision: PlanRevision) -> dict[str, Any]:
 def _draft_payload(draft: PlanDraft) -> dict[str, Any]:
     return {
         "goal_snapshot": draft.goal_snapshot,
+        **({"route_change": draft.route_change} if draft.route_change else {}),
         **({"goal_spec": goal_spec_payload(draft.goal_spec)} if draft.goal_spec else {}),
         "revision_candidate": draft.revision_candidate,
         "stages": [_stage_payload(s) for s in draft.stages],
@@ -292,11 +293,12 @@ class PgPlanRepository:
     单个事务内。构造只接收 DSN，便于在测试里指向临时库。
     """
 
-    def __init__(self, dsn: str, *, connection=None, resource_proposal_id=None, practice_proposal_id=None) -> None:
+    def __init__(self, dsn: str, *, connection=None, resource_proposal_id=None, practice_proposal_id=None, route_change_id=None) -> None:
         self._dsn = to_psycopg_dsn(dsn)
         self._connection = connection
         self._resource_proposal_id = resource_proposal_id
         self._practice_proposal_id = practice_proposal_id
+        self._route_change_id = route_change_id
 
     @contextmanager
     def _tx(self, project_id: str) -> Iterator[psycopg.Connection[dict[str, Any]]]:
@@ -318,13 +320,15 @@ class PgPlanRepository:
     # ------------------------------------------------------------- 草案
 
     def _guard_resource_proposal(self, conn, project_id, draft_id):
-        linked = conn.execute("SELECT resource_change_proposal_id AS proposal_id,practice_change_proposal_id FROM plan_drafts "
+        linked = conn.execute("SELECT resource_change_proposal_id AS proposal_id,practice_change_proposal_id,payload FROM plan_drafts "
                               "WHERE project_id=%s AND draft_id=%s FOR UPDATE",
                               (project_id, draft_id)).fetchone()
         if linked is not None and linked["proposal_id"] is not None and linked["proposal_id"] != self._resource_proposal_id:
             raise ConflictError("资源变更草案必须通过其预览确认入口处理", reason="resource_proposal_required")
         if linked is not None and linked["practice_change_proposal_id"] is not None and linked["practice_change_proposal_id"] != self._practice_proposal_id:
             raise ConflictError("实践变更草案必须通过其预览确认入口处理", reason="practice_proposal_required")
+        if linked is not None and (linked['payload'] or {}).get('route_change') and draft_id != self._route_change_id:
+            raise ConflictError('路线变更草案必须通过其预览确认入口处理', reason='route_change_required')
 
     @staticmethod
     def _lock_plan_version(conn: Any, project_id: str, expected_version: int | None) -> None:
@@ -342,6 +346,8 @@ class PgPlanRepository:
         with self._tx(draft.project_id) as conn:
             self._lock_plan_version(conn, draft.project_id, expected_version)
             self._guard_resource_proposal(conn, draft.project_id, draft.draft_id)
+            if draft.route_change and draft.draft_id != self._route_change_id:
+                raise ConflictError('路线变更草案必须由专用预览入口创建', reason='route_change_required')
             if write_fence is not None:
                 lock_planning_write(conn, project_id=draft.project_id, run_id=draft.run_id, fence=write_fence)
             if draft.stage_resources and not draft.resource_snapshots:
@@ -440,9 +446,10 @@ class PgPlanRepository:
             run_id=str(row.get("run_id") or ""),
             goal_snapshot=str(payload.get("goal_snapshot") or ""),
             goal_spec=goal_spec_from_payload(payload.get("goal_spec")),
+            route_change=payload.get('route_change'),
             revision_candidate=int(row.get("revision_candidate") or 1),
             stages=tuple(_stage_from(s) for s in _as_list(payload.get("stages"))),  # type: ignore[arg-type]
-            resource_snapshots=tuple(_as_list(payload.get("resource_snapshots"))),
+            resource_snapshots=cast(tuple[dict[str, object], ...], tuple(_as_list(payload.get("resource_snapshots")))),
             unit_refs=tuple(str(s) for s in _as_list(payload.get("unit_refs"))),
             task_refs=tuple(str(s) for s in _as_list(payload.get("task_refs"))),
             node_stable_keys=tuple(str(s) for s in _as_list(payload.get("node_stable_keys"))),
@@ -552,7 +559,7 @@ class PgPlanRepository:
             goal_snapshot=str(row["goal_snapshot"]),
             goal_spec=goal_spec_from_payload(structure.get("goal_spec")) if isinstance(structure, dict) else None,
             stages=tuple(_stage_from({**s, "learning_guidance": guidance_by_key.get(s["stable_key"])}) for s in stages),
-            resource_snapshots=tuple(_as_list(structure.get("resource_snapshots"))) if isinstance(structure, dict) else (),
+            resource_snapshots=cast(tuple[dict[str, object], ...], tuple(_as_list(structure.get("resource_snapshots")))) if isinstance(structure, dict) else (),
             unit_links=tuple(_unit_link_from(x) for x in unit_links),  # type: ignore[arg-type]
             task_links=tuple(_task_link_from(x) for x in task_links),  # type: ignore[arg-type]
             task_knowledge_links=tuple(

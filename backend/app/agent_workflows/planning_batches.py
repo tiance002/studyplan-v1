@@ -487,7 +487,7 @@ def merge_batches(
         section.pop("learning_guidance", None)
         if blueprint is not None:
             previous = blueprints.get(sections[index - 1].get("stable_key")) if index else None
-            frozen = next((s for s in (manifest or {}).get("stages", [])
+            frozen: dict[str, Any] = next((s for s in (manifest or {}).get("stages", [])
                            if s["stage_key"] == section.get("stable_key")), {})
             section["learning_guidance"] = deepcopy(frozen.get("learning_guidance")) or guidance_payload(stage_guidance(pack, blueprint, previous))
     stage_order = [section.get("stable_key") for section in sections]

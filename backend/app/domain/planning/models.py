@@ -462,6 +462,8 @@ class PlanDraft:
     validation_warnings: tuple[str, ...] = ()
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     goal_spec: GoalSpec | None = None
+    # Manual route preview metadata is immutable and included in confirmation hash.
+    route_change: dict[str, object] | None = None
 
     @property
     def content_hash(self) -> str:
@@ -481,6 +483,7 @@ class PlanDraft:
                 "goal_snapshot": self.goal_snapshot,
                 **({"goal_spec": goal_spec_payload(self.goal_spec)} if self.goal_spec else {}),
                 "revision_candidate": self.revision_candidate,
+                **({"route_change": self.route_change} if self.route_change else {}),
                 "stages": _stages_payload(self.stages),
                 "unit_refs": list(self.unit_refs),
                 "task_refs": list(self.task_refs),

@@ -62,6 +62,11 @@ export { request as requestApi };
 const resourceScope = (project: string, target: ResourceTarget) =>
   `${scope(project)}&${new URLSearchParams({plan_id:target.plan_id,stage_id:target.stage_id,unit_id:target.unit_id})}${target.node_id ? `&node_id=${encodeURIComponent(target.node_id)}` : ''}`;
 export const api = {
+  planChangeContext: (project: string) => request<DTO['PlanChangeContext']>(`/plan-changes/context${scope(project)}`),
+  previewPlanChange: (project: string, body: DTO['PlanChangeRequest']) => request<DTO['PlanChangePreviewView']>(`/plan-changes${scope(project)}`, body),
+  planChange: (project: string, id: string) => request<DTO['PlanChangePreviewView']>(`/plan-changes/${encodeURIComponent(id)}${scope(project)}`),
+  confirmPlanChange: (project: string, id: string, body: DTO['PlanChangeDecisionRequest']) => request<DTO['PlanChangeResult']>(`/plan-changes/${encodeURIComponent(id)}/confirm${scope(project)}`, body),
+  cancelPlanChange: (project: string, id: string, body: DTO['PlanChangeDecisionRequest']) => request<DTO['PlanChangeResult']>(`/plan-changes/${encodeURIComponent(id)}/cancel${scope(project)}`, body),
   summaryThread: (project: string, target: SummaryTarget) => request<SummaryThread>(`/summaries${scope(project)}&${new URLSearchParams(Object.entries(target).filter(([,value]) => value != null) as [string,string][])}`),
   saveSummary: (project: string, body: SummarySaveBody) => request<SummarySave>(`/summaries${scope(project)}`, body),
   summaryAttempt: (project: string, id: string) => request<SummaryAttempt>(`/summaries/attempts/${encodeURIComponent(id)}${scope(project)}`),

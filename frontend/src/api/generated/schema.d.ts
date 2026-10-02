@@ -588,6 +588,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/plan-changes/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Context */
+        get: operations["get_plan_change_context"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plan-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview */
+        post: operations["preview_plan_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plan-changes/{proposal_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Preview */
+        get: operations["get_plan_change_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plan-changes/{proposal_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm */
+        post: operations["confirm_plan_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plan-changes/{proposal_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel */
+        post: operations["cancel_plan_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/submissions": {
         parameters: {
             query?: never;
@@ -1477,6 +1562,106 @@ export interface components {
          * @enum {string}
          */
         OutlineSectionKind: "foundation" | "core" | "practice" | "advanced";
+        /** PlanChangeContext */
+        PlanChangeContext: {
+            /** Plan Id */
+            plan_id: string;
+            /** Revision */
+            revision: number;
+            /** Stages */
+            stages: components["schemas"]["PlanChangeStage"][];
+        };
+        /** PlanChangeDecisionRequest */
+        PlanChangeDecisionRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Preview Hash */
+            preview_hash: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /**
+             * Acknowledge Reset
+             * @default false
+             */
+            acknowledge_reset: boolean;
+        };
+        /** PlanChangePreviewView */
+        PlanChangePreviewView: {
+            /** Proposal Id */
+            proposal_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "awaiting_approval" | "approved" | "cancelled";
+            draft: components["schemas"]["PlanDraftView"];
+            /** Base Plan Id */
+            base_plan_id: string;
+            /** Base Revision */
+            base_revision: number;
+            /**
+             * Operation
+             * @enum {string}
+             */
+            operation: "reorder_future_stage" | "remove_optional_topic";
+            /** Before Stage Keys */
+            before_stage_keys: string[];
+            /** After Stage Keys */
+            after_stage_keys: string[];
+            /** Warnings */
+            warnings: string[];
+            /** Preview Hash */
+            preview_hash: string;
+        };
+        /** PlanChangeRequest */
+        PlanChangeRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /**
+             * Operation
+             * @enum {string}
+             */
+            operation: "reorder_future_stage" | "remove_optional_topic";
+            /** Stage Keys */
+            stage_keys?: string[];
+            /**
+             * Stage Key
+             * @default
+             */
+            stage_key: string;
+        };
+        /** PlanChangeResult */
+        PlanChangeResult: {
+            preview: components["schemas"]["PlanChangePreviewView"];
+            /** Plan Id */
+            plan_id?: string | null;
+            /** Revision */
+            revision?: number | null;
+            /** Created */
+            created: boolean;
+        };
+        /** PlanChangeStage */
+        PlanChangeStage: {
+            /** Stage Id */
+            stage_id: string;
+            /** Stable Key */
+            stable_key: string;
+            /** Title */
+            title: string;
+            /** Order Index */
+            order_index: number;
+            /** Locked */
+            locked: boolean;
+            /**
+             * Inclusion
+             * @enum {string}
+             */
+            inclusion: "required" | "recommended" | "optional";
+        };
         /**
          * PlanDecisionResponse
          * @description 一次决定的处理结果：更新后的草案 + （确认时）发布出的正式路线。
@@ -5216,6 +5401,184 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PracticeChangeResultView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_plan_change_context: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanChangeContext"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_plan_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanChangePreviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_plan_change_preview: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanChangePreviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_plan_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanChangeDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanChangeResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_plan_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanChangeDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanChangeResult"];
                 };
             };
             /** @description Validation Error */

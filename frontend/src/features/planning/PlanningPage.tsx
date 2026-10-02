@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "../../api/client";
 import type { DTO } from "../../api/types";
 import { Resources } from "../../components/Resources";
+import { PlanChanges } from './PlanChanges';
 
 const DEPTH_LABELS: Record<DTO['GoalSpec']['desired_depth'], string> = {
   unspecified: '暂不指定', foundation: '建立基础', applied: '能够应用', deep: '深入理解',
@@ -94,10 +95,12 @@ function RunProgressPanel({ progress }: { progress: DTO["RunProgress"] }) {
 
 export function PlanningPage({
   project,
+  actorKey,
   onPublished,
   fake,
 }: {
   project: string;
+  actorKey: string;
   onPublished: () => Promise<void>;
   fake: boolean | null;
 }) {
@@ -467,6 +470,7 @@ export function PlanningPage({
           <p>填写学习目标后，查看完整阶段及资源，再确认成为正式路线。</p>
         </div>
       )}
+      <PlanChanges key={JSON.stringify([actorKey, project])} actorKey={actorKey} project={project} onPublished={onPublished} />
     </div>
   );
 }

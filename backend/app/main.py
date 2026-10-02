@@ -20,6 +20,7 @@ from app.agent_workflows import GRAPH_VERSION
 from app.api.v1.deps import CONTAINER_STATE_KEY
 from app.api.v1.exposure_routes import router as exposure_router
 from app.api.v1.model_settings_routes import router as model_settings_router
+from app.api.v1.plan_change_routes import router as plan_change_router
 from app.api.v1.practice_change_routes import router as practice_change_router
 from app.api.v1.preference_routes import router as preference_router
 from app.api.v1.prompt_routes import router as prompt_router
@@ -165,6 +166,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
     application.include_router(summary_router)
     application.include_router(prompt_router)
     application.include_router(practice_change_router)
+    application.include_router(plan_change_router)
     application.include_router(submission_router)
     application.include_router(outcomes_router)
 

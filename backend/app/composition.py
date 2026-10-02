@@ -76,6 +76,9 @@ def build_container(settings: Settings) -> AppContainer:
     from app.application.practice_changes import PracticeChangeService
     from app.infrastructure.db.practice_changes import PgPracticeChanges
     practice_change_service = PracticeChangeService(PgPracticeChanges(dsn))
+    from app.application.plan_changes import PlanChangeService
+    from app.infrastructure.db.plan_changes import PgPlanChanges
+    plan_change_service = PlanChangeService(PgPlanChanges(dsn))
     from app.application.practice_submissions import PracticeSubmissionService
     from app.infrastructure.db.practice_submissions import PgPracticeSubmissions
     practice_submission_service = PracticeSubmissionService(PgPracticeSubmissions(dsn))
@@ -214,4 +217,5 @@ def build_container(settings: Settings) -> AppContainer:
                         preference_service=preference_service, resource_change_service=resource_change_service,
                         summary_service=summary_service, prompt_service=prompt_service,
                         practice_change_service=practice_change_service,
-                        practice_submission_service=practice_submission_service)
+                        practice_submission_service=practice_submission_service,
+                        plan_change_service=plan_change_service)

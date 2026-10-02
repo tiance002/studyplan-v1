@@ -11,6 +11,7 @@ from typing import Any, Mapping
 
 from app.api.v1.schemas import (
     ErrorBody,
+    GoalSpec,
     KnowledgeExtensionView,
     OrderedSection,
     PlanDraftView,
@@ -187,7 +188,7 @@ def draft_view(bundle: DraftBundle) -> PlanDraftView:
         project_id=draft.project_id,
         revision=draft.revision_candidate,
         goal_snapshot=draft.goal_snapshot,
-        goal_spec=draft.goal_spec,
+        goal_spec=GoalSpec.model_validate(draft.goal_spec) if draft.goal_spec else None,
         stages=[stage_detail(s) for s in draft.stages],
         unit_links=[
             UnitLinkView(
@@ -220,7 +221,7 @@ def plan_view(bundle: PlanBundle) -> PlanView:
         project_id=revision.project_id,
         revision=revision.revision,
         goal_snapshot=revision.goal_snapshot,
-        goal_spec=revision.goal_spec,
+        goal_spec=GoalSpec.model_validate(revision.goal_spec) if revision.goal_spec else None,
         stages=[stage_detail(s) for s in revision.stages],
         unit_links=[
             UnitLinkView(

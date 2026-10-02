@@ -181,6 +181,7 @@ function App() {
       {page === "planning" && (
         <PlanningPage
           key={project}
+          actorKey={session.username || session.csrf_token || 'development-session'}
           project={project}
           fake={fake}
           onPublished={refresh}
