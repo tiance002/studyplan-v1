@@ -1,5 +1,17 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-03 最新：服务端运行查找与只读恢复，整体NOT_READY
+
+用户现在新增能做什么：学习规划页可显式读取本账号/项目最近20条规划运行，在本地编号丢失时选择恢复正常草案或待核对运行；刷新沿用所选编号、不生成POST。活动/unknown/旧waiting/未确认草案不能经另一历史条目绕过。已在正常登录、真实HTTP/Worker/隔离PG/Chrome验证，模型Fake；原产品库未部署，尚非正式入口已上线声明。
+
+代码SHA `7ac7cf7086b1e8b2fd25b9cbe879a1ee943c663a`，分支`feat/n1-resource-discovery`，固定点祖先PASS；本地提交、未推送/核实新远端SHA。[本批证据](../acceptance/server-run-history-2026-10-03.md)。契约PASS31、真实PG/HTTP模型Fake PASS2、旧unknown生成PG PASS1、旧普通HTTP/PG PASS4；最终正常Chrome/HTTP/Worker/PG模型Fake PASS2；Frontend11有效复用、最终build及scope/history/generated/recovery/progress Fake Chrome PASS。Ruff/mypy/diff/18文件凭据模式、文档链接与原文hash PASS。重叠数量不相加；早期FAIL、环境/定位器问题与修复保留。
+
+只读GET列表精确服务端actor/project/kind、默认10/最多20，不暴露thread/manifest/私人正文；所选GET单独读取业务进度，详情新增actor匹配。审查后实际组件harness先观察旧scope详情覆盖FAIL再修复：scope/请求序号/卸载保护，旧异步错误与busy隔离；结果仍在回读或503失败时继续阻止新生成、手动GET可恢复。无迁移/依赖/新调度平台。
+
+用户停止6Astra持续生效，仅复用请求Luna/high的UI及只读代理，实际解析NOT OBSERVABLE；快速服务模式无可核实切换，不改全局配置。累计产品模型23/50、搜索6/1000、unknown1、旧README2；本批真实模型/Tavily/GitHub新增0，旧账/unknown不动。临时API/Worker与owned库结束清理，原PG5432/Vite5178不变。
+
+下一安全动作继续常态Worker取消：派发事务接入服务端claim fence，与取消共用锁；处理已派发/未知、迟到结果以及已保存草案/发布窗口，经真实PG barrier门禁后开放UI。当前取消尚未实现，不假标完成。额外GitHub1次搜索仍等待此前额度选择，只暂停该支线；三个正式Blueprint/免费正文、真实provider/GitHub完整链、完整E2E/备份恢复/用户接受仍待完成，10月3日不批量扩内容。普通revert可退回本批接口/UI并保留数据/账本，注意已有路线payload读取兼容；不no-ff/master/milestone。下文为此前时点。
+
 ## 2026-10-03 最新：受控主题追加与公开GitHub DNS，整体NOT_READY
 
 用户现在新增能做什么：可勾选同一已发布课程尚未覆盖的主题，补齐父/前置及同阶段内容，经完整差异/明确确认创建新路线；旧阶段与历史保留、刷新/重登录读回、新版完成不继承。正式Seed目前全覆盖，页面如实显示无候选；不是自由主题或跨模板语义合并。原产品库未部署。
