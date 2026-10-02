@@ -89,6 +89,22 @@ def generate_plan(
 
 
 @router.get(
+    "/runs",
+    response_model=list[RunView],
+    operation_id="list_planning_runs",
+    summary="读取当前账户与学习空间最近的规划运行",
+)
+def list_runs(
+    project_id: str = ProjectId,
+    limit: int = Query(default=10, ge=1, le=20),
+    scope: AuthContext = Depends(get_auth_context),
+    service: PlanService = Depends(get_plan_service),
+) -> list[RunView]:
+    """只读列表；不会恢复图、领取任务或重派模型。进度通过所选运行单独读取。"""
+    return [run_view(run) for run in service.list_runs(scope=scope, project_id=project_id, limit=limit)]
+
+
+@router.get(
     "/runs/{run_id}",
     response_model=RunView,
     operation_id="get_run",

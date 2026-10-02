@@ -150,7 +150,7 @@ const PROJECT = 'generated-route-project';
     // A 202 whose first status GET fails remains recoverable by ID and never
     // triggers another generation POST during manual status recovery.
     await page.locator('form').evaluate(form => form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
-    await page.getByText('已提交，待读回', { exact: true }).waitFor();
+    await page.getByText('运行编号已保存，待读回', { exact: true }).waitFor();
     assert.equal(generationCalls.length, 1);
     assert.equal(await page.evaluate(project => localStorage.getItem(`studyplan-run:${project}`), PROJECT), 'plain-run-1');
     await page.getByRole('button', { name: '手动读取运行状态', exact: true }).click();

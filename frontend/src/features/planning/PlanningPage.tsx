@@ -147,44 +147,192 @@ export function PlanningPage({
     [notice, setNotice] = useState("");
   const generating = useRef(false);
   const loadedDraft = useRef<string | null>(null);
+  const detailScope = JSON.stringify([actorKey, project]);
+  const currentDetailScope = useRef(detailScope);
+  currentDetailScope.current = detailScope;
+  const mounted = useRef(false);
+  const runReadSequence = useRef(0);
+  const draftReadSequence = useRef(0);
+  const actionSequence = useRef(0);
   const [pollAttempt, setPollAttempt] = useState(0);
   const [acceptedRun, setAcceptedRun] = useState(false);
   const [pendingPlanChange, setPendingPlanChange] = useState(false);
   const [planChangeSubmitting, setPlanChangeSubmitting] = useState(false);
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
+  const [historyRuns, setHistoryRuns] = useState<DTO['RunView'][]>([]);
+  const [historyRunsScope, setHistoryRunsScope] = useState<string | null>(null);
+  const [historyOpened, setHistoryOpened] = useState(false);
+  const [historyBusy, setHistoryBusy] = useState(false);
+  const [historyError, setHistoryError] = useState('');
+  const [pendingHistorySelection, setPendingHistorySelection] = useState<string | null>(null);
+  const runHistoryScope = JSON.stringify([actorKey, project]);
+  const currentRunHistoryScope = useRef(runHistoryScope);
+  currentRunHistoryScope.current = runHistoryScope;
+  const historyReadSequence = useRef(0);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      runReadSequence.current++;
+      draftReadSequence.current++;
+      historyReadSequence.current++;
+    };
+  }, []);
+  useEffect(() => {
+    runReadSequence.current++;
+    draftReadSequence.current++;
+    actionSequence.current++;
+    generating.current = false;
+    loadedDraft.current = null;
+    setRun(null);
+    setDraft(null);
+    setStages([]);
+    setBaseVersion(0);
+    setPendingRunId(null);
+    setAcceptedRun(false);
+    setBusy(false);
+    setPendingPlanChange(false);
+    setPlanChangeSubmitting(false);
+    setConflict(false);
+    setNotice('');
+    setError('');
+  }, [detailScope]);
   const generationLifecycleBlocked = busy || acceptedRun || !canStartNewRun(run) || fake === null ||
     pendingPlanChange || planChangeSubmitting ||
     draft?.status === "awaiting_approval" ||
     run?.status === "queued" || run?.status === "running" ||
     run?.status === "reconciliation_required";
   const generationBlocked = generationLifecycleBlocked || !goal.trim();
+  useEffect(() => {
+    historyReadSequence.current++;
+    setHistoryRuns([]);
+    setHistoryRunsScope(null);
+    setHistoryOpened(false);
+    setHistoryBusy(false);
+    setHistoryError('');
+    setPendingHistorySelection(null);
+  }, [runHistoryScope]);
+  useEffect(() => () => { historyReadSequence.current++; }, []);
   async function loadDraft(id: string, force = false) {
     // Status polling must never replace the user's editable snapshot or its base version.
     if (!force && loadedDraft.current === id) return;
-    const d = await api.draft(project, id);
-    const current = await api.current(project);
+    const scope = detailScope;
+    const sequence = ++draftReadSequence.current;
+    const isCurrent = () => mounted.current && currentDetailScope.current === scope && draftReadSequence.current === sequence;
+    let d: DTO['PlanDraftView'];
+    try {
+      d = await api.draft(project, id);
+    } catch (e) {
+      if (!isCurrent()) return;
+      throw e;
+    }
+    if (!isCurrent()) return;
+    let current: DTO['PlanView'] | null;
+    try {
+      current = await api.current(project);
+    } catch (e) {
+      if (!isCurrent()) return;
+      throw e;
+    }
+    if (!isCurrent()) return;
     loadedDraft.current = id;
     setDraft(d);
     setStages(d.stages ?? []);
     setBaseVersion(current?.revision ?? 0);
   }
   async function loadRun(id: string) {
-    const r = await api.run(project, id);
+    const scope = detailScope;
+    const sequence = ++runReadSequence.current;
+    draftReadSequence.current++;
+    const isCurrent = () => mounted.current && currentDetailScope.current === scope && runReadSequence.current === sequence;
+    let r: DTO['RunView'];
+    try {
+      r = await api.run(project, id);
+    } catch (e) {
+      if (!isCurrent()) return;
+      throw e;
+    }
+    if (!isCurrent()) return;
     setRun(r);
     setPendingRunId(null);
-    setAcceptedRun(!canStartNewRun(r));
-    if (!runNeedsCheck(r) && r.result_ref && (r.next_action === "review_draft" || r.status === "succeeded")) {
+    const readingResult = !runNeedsCheck(r) && !!r.result_ref &&
+      (r.next_action === "review_draft" || r.status === "succeeded");
+    setAcceptedRun(!canStartNewRun(r) || readingResult);
+    if (readingResult && r.result_ref) {
+      let resultVerified = false;
       try {
         await loadDraft(r.result_ref);
+        resultVerified = loadedDraft.current === r.result_ref;
       } catch (e) {
         // Historical successful Runs reference a plan. Resolve it by API identity,
         // without assuming the opaque result_ref has a particular prefix.
-        if (!(e instanceof ApiError && e.status === 404 &&
-            (await api.current(project))?.plan_id === r.result_ref)) throw e;
+        if (!isCurrent()) return;
+        if (!(e instanceof ApiError && e.status === 404)) throw e;
+        let current: DTO['PlanView'] | null;
+        try {
+          current = await api.current(project);
+        } catch (currentError) {
+          if (!isCurrent()) return;
+          throw currentError;
+        }
+        if (!isCurrent()) return;
+        if (current?.plan_id !== r.result_ref) throw e;
+        resultVerified = true;
       }
+      if (isCurrent() && resultVerified) setAcceptedRun(false);
     }
   }
+  async function readServerRuns() {
+    const scope = runHistoryScope;
+    const sequence = ++historyReadSequence.current;
+    setHistoryBusy(true);
+    setHistoryError('');
+    try {
+      const result = await api.runs(project, 20);
+      if (currentRunHistoryScope.current !== scope || historyReadSequence.current !== sequence) return;
+      setHistoryRuns(result);
+      setHistoryRunsScope(scope);
+      setHistoryOpened(true);
+    } catch (failure) {
+      if (currentRunHistoryScope.current !== scope || historyReadSequence.current !== sequence) return;
+      setHistoryError((failure as Error).message);
+    } finally {
+      if (currentRunHistoryScope.current === scope && historyReadSequence.current === sequence) setHistoryBusy(false);
+    }
+  }
+  function statusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      queued: '等待生成', running: '正在生成', waiting_user: '等待草案处理',
+      succeeded: '已完成', failed: '生成失败', cancelled: '已取消',
+      reconciliation_required: '需要核对',
+    };
+    return labels[status] ?? '未知状态，需要核对';
+  }
+  function runBlocksHistorySwitch(candidateId: string): boolean {
+    if (pendingRunId && !run && pendingRunId !== candidateId) return true;
+    if (run?.run_id === candidateId) return false;
+    if (draft?.status === 'awaiting_approval') return true;
+    if (acceptedRun && (!run || run.run_id !== candidateId)) return true;
+    if (run && (runNeedsCheck(run) || ['queued', 'running', 'waiting_user', 'reconciliation_required'].includes(run.status))) return true;
+    return false;
+  }
+  async function selectServerRun(id: string, discardEdits = false) {
+    if (busy || historyBusy || runBlocksHistorySwitch(id)) return;
+    if (run?.run_id === id) {
+      setPendingHistorySelection(null);
+      await act(() => loadRun(id));
+      return;
+    }
+    if (dirty && !discardEdits) {
+      setPendingHistorySelection(id);
+      return;
+    }
+    setPendingHistorySelection(null);
+    await act(() => acceptRun(id));
+  }
   async function acceptRun(id: string) {
+    const scope = detailScope;
+    if (currentDetailScope.current !== scope) return;
     localStorage.setItem(`studyplan-run:${project}`, id);
     setPendingRunId(id);
     setRun(null);
@@ -198,14 +346,18 @@ export function PlanningPage({
   }
   async function generatePlanChange(body: DTO['GeneratedPlanChangeRequest']) {
     if (generationLifecycleBlocked || generating.current) throw new Error('当前运行或草案尚未完成核对，不能再次生成。');
+    const scope = detailScope;
     generating.current = true;
     setPlanChangeSubmitting(true);
     try {
       const result = await api.generatePlanChange(project, body);
+      if (!mounted.current || currentDetailScope.current !== scope) return;
       await acceptRun(result.run_id);
     } finally {
-      generating.current = false;
-      setPlanChangeSubmitting(false);
+      if (mounted.current && currentDetailScope.current === scope) {
+        generating.current = false;
+        setPlanChangeSubmitting(false);
+      }
     }
   }
   async function refreshPlanChangeDraft(preview: DTO['PlanChangePreviewView']) {
@@ -232,7 +384,7 @@ export function PlanningPage({
       setAcceptedRun(true);
       loadRun(id).catch((e) => setError(e.message));
     }
-  }, [project]);
+  }, [detailScope]);
   useEffect(() => {
     if (!run || runNeedsCheck(run) || run.next_action !== "wait" || !["queued", "running"].includes(run.status)) return;
     const timer = setTimeout(
@@ -243,14 +395,17 @@ export function PlanningPage({
     return () => clearTimeout(timer);
   }, [run, pollAttempt]);
   async function act(fn: () => Promise<void>) {
+    const scope = detailScope;
+    const sequence = ++actionSequence.current;
+    const isCurrent = () => mounted.current && currentDetailScope.current === scope && actionSequence.current === sequence;
     setBusy(true);
     setError("");
     try {
       await fn();
     } catch (e) {
-      setError((e as Error).message);
+      if (isCurrent()) setError((e as Error).message);
     } finally {
-      setBusy(false);
+      if (isCurrent()) setBusy(false);
     }
   }
   const dirty =
@@ -378,8 +533,8 @@ export function PlanningPage({
         <p className="form-note">支持 Agent 应用开发与 Python 工程入门；其他方向生成通用结构，仅提供资料搜索建议。</p>
       </section>
       {pendingRunId && !run && <div className="run-banner" role="status">
-        <strong>已提交，待读回</strong>
-        <p className="form-note">服务已接受运行 {pendingRunId}，但暂时无法读取状态。编号已保存；请手动读取状态，不会再次提交。</p>
+        <strong>运行编号已保存，待读回</strong>
+        <p className="form-note">运行 {pendingRunId} 暂时无法读取状态。编号已保存；请手动读取状态，不会再次提交。</p>
         <button className="text-button" disabled={busy} onClick={() => act(() => loadRun(pendingRunId))}>手动读取运行状态</button>
       </div>}
       {run && (
@@ -425,6 +580,33 @@ export function PlanningPage({
           {error}
         </div>
       )}
+      <section className="panel" aria-label="运行历史恢复">
+        <div className="section-heading">
+          <div><h2>运行历史</h2><p className="form-note">只读取当前账号与项目最近的20条规划运行；选择一条后恢复查看，不会重新提交生成。</p></div>
+          <button className="btn" disabled={historyBusy || busy} onClick={() => void readServerRuns()}>{historyBusy ? '正在读取…' : '读取服务器上的运行'}</button>
+        </div>
+        {historyError && <div role="alert" className="error">{historyError}<button className="text-button" disabled={historyBusy} onClick={() => void readServerRuns()}>重新读取运行列表</button></div>}
+        {draft?.status === 'awaiting_approval' && <p className="form-note">请先处理当前未确认的草案，再切换到其他运行；未保存的修改会继续保留。</p>}
+        {historyOpened && historyRunsScope === runHistoryScope && <div role="region" aria-label="服务器上的运行">
+          {historyRuns.length ? <ul>{historyRuns.map(item => {
+            const blocked = runBlocksHistorySwitch(item.run_id);
+            return <li key={item.run_id} aria-label={item.run_id}>
+              <strong>{statusLabel(item.status)}</strong> · 运行编号 <code>{item.run_id}</code>
+              {item.result_ref && <p className="form-note">有可读取的草案或路线；选择后查看。</p>}
+              {item.error?.message && <p className="form-note">{item.error.message}</p>}
+              <button className="btn quiet" disabled={blocked || busy || historyBusy} onClick={() => void selectServerRun(item.run_id)}>
+                读取此运行
+              </button>
+            </li>;
+          })}</ul> : <p className="form-note">服务器没有可显示的运行记录。</p>}
+          {historyRuns.length === 20 && <p className="form-note">仅显示最近 20 条运行。</p>}
+        </div>}
+        {pendingHistorySelection && <div role="alert" className="error">
+          <p>切换到运行 {pendingHistorySelection} 会丢弃当前未保存的草案编辑。</p>
+          <button className="btn" disabled={busy} onClick={() => void selectServerRun(pendingHistorySelection, true)}>丢弃编辑并恢复此运行</button>
+          <button className="btn quiet" disabled={busy} onClick={() => setPendingHistorySelection(null)}>保留编辑</button>
+        </div>}
+      </section>
       {notice && (
         <p className="notice" role="status">
           {notice}

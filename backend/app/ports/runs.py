@@ -25,6 +25,10 @@ class RunRepositoryPort(Protocol):
 
     def get_run(self, *, project_id: str, run_id: str) -> RunRecord | None: ...
 
+    def list_runs(self, *, project_id: str, actor_id: str, limit: int) -> tuple[RunRecord, ...]:
+        """Recent planning runs for the exact actor/project, newest first; limit 1–20."""
+        ...
+
     def get_progress(self, *, project_id: str, run_id: str) -> dict[str, object] | None:
         """Latest **business** progress for a run, corrected by the paid-attempt ledger.
 

@@ -548,6 +548,14 @@ class PlanService:
 
     # -------------------------------------------------------------- 读取视图
 
+    def list_runs(self, *, scope: AuthContext, project_id: str, limit: int = 10) -> tuple[RunRecord, ...]:
+        scope.require_project(project_id)
+        if not 1 <= limit <= 20:
+            raise ValidationAppError("运行列表一次最多读取20条")
+        # A read-only recovery index. It never claims, resumes or dispatches work.
+        # Progress is read separately for the explicitly selected Run.
+        return self._runs.list_runs(project_id=project_id, actor_id=scope.actor_id, limit=limit)
+
     def get_run(self, *, scope: AuthContext, project_id: str, run_id: str) -> RunBundle:
         """运行投影 + 业务进度。
 
@@ -557,7 +565,7 @@ class PlanService:
         """
         scope.require_project(project_id)
         run = self._runs.get_run(project_id=project_id, run_id=run_id)
-        if run is None:
+        if run is None or run.actor_id != scope.actor_id:
             raise NotFoundError("运行不存在")
         return RunBundle(
             run=run,

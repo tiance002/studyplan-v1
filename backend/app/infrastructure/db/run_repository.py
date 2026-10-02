@@ -18,7 +18,7 @@ from contextlib import contextmanager
 from typing import Any
 
 import psycopg
-from app.core.errors import ConflictError
+from app.core.errors import ConflictError, ValidationAppError
 from app.domain.enums import AiRunNextAction, AiRunStatus
 from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
@@ -135,6 +135,18 @@ class PgRunRepository:
         )
         progress["usage_complete"] = requests > 0 and int(ledger["unknown_usage"] or 0) == 0
         return progress
+
+    def list_runs(self, *, project_id: str, actor_id: str, limit: int) -> tuple[RunRecord, ...]:
+        if not 1 <= limit <= 20:
+            raise ValidationAppError("运行列表一次最多读取20条")
+        with self._tx(project_id) as conn:
+            conn.execute("SELECT set_config('app.actor_id', %s, true)", (actor_id,))
+            rows = conn.execute(
+                """SELECT * FROM ai_runs WHERE project_id=%s AND actor_id=%s
+                AND kind='plan_generate' ORDER BY created_at DESC, run_id DESC LIMIT %s""",
+                (project_id, actor_id, limit),
+            ).fetchall()
+        return tuple(_run_from(row) for row in rows)
 
     def update_run(
         self,
