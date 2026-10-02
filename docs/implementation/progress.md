@@ -1,5 +1,31 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-03 当前：P0–P4学习编排增量，整体NOT_READY
+
+用户现在新增能做什么：新阶段可显示why/前次关系/重点/对比问题/贯穿实践增量/可选源码建议；普通编辑、发布、刷新和重登录保留。受控模板可以复用精确知识键，独立保存两次学习目的和Exposure；修改实践或Primary会更新新版本指导，旧历史继续可读。已用合成账号、Fake模型、真实隔离PG和Chrome核对；原产品库未部署此增量。
+
+最新权威入口为[10月6日最终交付Goal](STUDYPLAN_OCT6_FINAL_DELIVERY_GOAL_2026-10-03.md)及[ADR-0015](../adr/ADR-0015-learning-orchestration-deadline.md)。代码SHA `506048164261be06a166c5c9b8be4b6a556b4301`，分支 `feat/n1-resource-discovery`，参考点祖先PASS；复用N1未提交成果与用户UI，不回退。SHA为本地，未核实远端。下一文档提交须读取实际HEAD；不猜自指SHA。
+
+Tests：最新unit/contract PASS644，2 skipped记NOT RUN；真实PG+生成恢复+Chrome组合PASS20（模型Fake）。Frontend11/build/Fake浏览器PASS；原较宽PG组合FAIL保留，三个失败项修后定向PASS、fixtureERROR修后HTTP/PG PASS。不是测试数量推算交付比例。详细[证据报告](../acceptance/P0-P4-learning-orchestration-2026-10-03.md)，忽略证据目录 `var/oct6-guidance/`。
+
+额度：模型23/50、搜索4/1000，unknown1；旧README读取2次。本次新增外部模型/搜索/内容/元数据均0。旧unknown不重派。用户最新纠正api.github.com的fake-ip-filter尚未配置，真实GitHub验证NOT RUN；等实际需要时再提供操作。快速模式为用户偏好，但工具没有service mode切换接口，未声称已切换、未改全局配置；代理请求Luna/high、Sol/high，实际解析NOT OBSERVABLE。
+
+迁移仓库0024（本批N1增量），原产品库只读核对0023；本次指导新增迁移0。只在自有测试库迁移/写入并清理。原8022/5175、8024/5177已停；Vite5178自有，临时PG浏览器API已停，无旧Worker/unknown恢复。不得把产品库0023描述为可使用新N1入口。
+
+剩余门禁：规划思想全文路径、三个正式Blueprint与免费正文/章节审核、purpose/有限全路线重规划、真实模型/公开GitHub链、完整浏览器闭环、正常Worker恢复UX、备份恢复和用户接受。10月3日不批量扩内容；10月5日结束Feature Freeze。缺RAG契约只暂停支线。下一安全动作：继续目标解析与required closure、教材/实践前置提示的最小接入，不重复已有效的大型验证。正常revert可回滚代码并保留历史/计量；不破坏性降级、不N1集成、不master/milestone接受。下文保留各历史时点，旧“服务保留/unknown0/等待指令”不代表当前。
+
+## 2026-10-02 续接：N0 PASS，N1a/N1b实施中
+
+用户现在新增能做什么：本批正在实现独立 GitHub 来源和教程检查，尚未宣称产品入口可用。用户已给出续接实施授权，下文“等待新指令”仅为旧交接状态。
+
+执行依据为[续接计划](STUDYPLAN_CONTINUATION_PLAN_2026-10-02.md)、[新 Goal](STUDYPLAN_CONTINUATION_GOAL_2026-10-02.md)及[ADR-0014](../adr/ADR-0014-continuation-slices.md)。N0 固定点与实际 HEAD 均为 `cf1537040bbf8c52469e00461723f70726f5a3b2`，祖先检查 PASS；只有禁操作目录未跟踪。原文保存与入口提交 `3f31b18`，切片分支 `feat/n1-resource-discovery`，原父线保留。迁移原 head0023，本批分配0024，不改已发布迁移。
+
+额度按本机追加账重新计数：模型23/50，搜索3/1000，旧README读取2次；本批模型/Tavily/GitHub新增0。搜索旧回执字段版本不同，按原证据逐项核对，不把缺字段当成功或重发依据。PG安全测试入口只读预检 PASS，既有角色符合要求，无全局角色操作。现有正常8022/5175和只读8024/5177入口均保留。
+
+责任：主协调整合DTO/OpenAPI、0024和事务约束；后端子代理请求 `gpt-6.1-sol/xhigh`，前端 `gpt-6.1-sol/high`，只读契约审查 `gpt-6-astra/high`。工具不提供实际解析值，均记录 NOT OBSERVABLE，不声称已切换；最多两名业务写入者，两个代理写入时主协调不写业务代码。共享证据包位于忽略目录 `var/n1/evidence-packet.md`。
+
+测试：基线/祖先/PG安全预检 PASS；新切片真实GitHub、PG链和浏览器 NOT RUN。整体 NOT_READY。下一安全动作：完成有界发现、独立检查与来源快照，再用新合成账号/新AcceptanceId完成写入模式HTTP+PG+浏览器；第一批外部上限3搜索/9内容/6元数据，收费模型及Tavily新增0。回滚可关闭GitHub入口；已产生数据保留，非空历史拒绝迁移降级。
+
 2026-10-02规划交接：用户要求上传当前项目，并把后续方向交给ChatGPT-6-pro规划后再返回执行指令。本轮仅整理[规划交接包](CHATGPT_6_PRO_HANDOFF_2026-10-02.md)、核对与推送当前工作分支；不开展新业务切片，不接受里程碑。原完整Goal仍未达成、整体NOT_READY；后续业务实施等待用户新指令。具体远端SHA以本轮实际push/ls-remote核对结果为准。
 
 最新补充（2026-10-02）：沿用用户已提交的第4版测试课程/学习前端，当前本地HEAD `3d8ba67`。资料要求改为教程教学性优先、官方细节补充；GitHub匿名真实公开搜索1次及两个README读取PASS，产品专用适配/MCP/OAuth仍未实现，不能用预检替代F08完整验收。当前累计模型23/50、搜索3/1000（Tavily2+GitHub1）、unknown0。详见[GitHub公开教程发现预检](../acceptance/github-public-search-preflight-2026-10-02.md)；下文保留各时间点原始状态。
