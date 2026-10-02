@@ -1,5 +1,9 @@
 # Repository Workflow
 
+## 当前续接入口（2026-10-02）
+
+执行用户批准的 [续接计划](docs/implementation/STUDYPLAN_CONTINUATION_PLAN_2026-10-02.md) 与 [续接 Goal](docs/implementation/STUDYPLAN_CONTINUATION_GOAL_2026-10-02.md)，不是重新规划或重做旧 G1。最新用户决定优先；临时模型授权及从当前成果派生切片的例外见 [ADR-0014](docs/adr/ADR-0014-continuation-slices.md)。唯一当前进度仍为 [progress](docs/implementation/progress.md)。历史模型固定档位暂由上述临时授权替代，直至用户说“恢复原计划”。
+
 ## Git Workflow
 
 - `master` is the stable milestone branch. It receives only accepted milestone
