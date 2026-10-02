@@ -1,5 +1,17 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-03 最新：有限生成路线变更与恢复，整体NOT_READY
+
+用户现在新增能做什么：规划页可修改目标或重新生成受控未来路线，共用现有Worker和持久运行恢复；原目标/完整阶段内容与新草案对照，保留已开始前缀，经明确确认创建新版本。未知/旧待确认运行阻止新生成、不自动重派；202后首GET失败保留新编号并支持手动读取。当前库体验未切换到新代码/模板。
+
+本地代码SHA `a616838c327ab724916be59618bcc0e3d68acaa4`，分支 `feat/n1-resource-discovery`，固定参考点祖先关系沿用；未推送/核实远端新SHA。[本批证据](../acceptance/generated-route-and-recovery-2026-10-03.md)。规则/契约PASS688，2skipped NOT RUN；新规则+真实PG/HTTP/Worker、模型Fake PASS33；定向目标/隐私PG PASS1；手动有限/短生成断点恢复PG PASS25；正常Chrome真HTTP/Worker/ownedPG、模型Fake PASS1；Frontend11/build/4个Fake Chrome PASS；Ruff/mypy/diff/25文件密钥模式/原文哈希PASS。早期FAIL与修复留在证据，不合计重复测试数量。
+
+复用原有完整有界生成器而非另一套planner；当前会生成完整固定课程再丢弃保留阶段候选，尚未优化为仅派发未来批次。server保存冻结basis/hash/身份/精确知识ID与版本，模型看不到旧私有资料或历史原文。普通草案写入防绕过，确认/取消及回执原子，旧历史保留、新版不继承完成状态。无迁移/依赖/全局配置变化；原产品库未写入、隔离PG结束清理，验收API/Worker已停，Vite5178当前可读、PG5432不变。
+
+外部请求新增0，账本模型23/50、搜索4/1000（unknown1）保留。开发参数请求Sol/medium及Luna/high，实际解析NOT OBSERVABLE；快速服务模式无可核实切换工具，未声称切换。最多2业务写者，共享契约/事务主协调整合。
+
+下一安全动作：受控add_topic、常态Worker恢复。移除仍为明确optional阶段粒度；三正式Blueprint/免费正文审核、真实provider/GitHub、最终E2E/备份恢复/用户接受仍待完成。DNS按用户最新决定未配置，真正需要公开GitHub验证时才提示。10月3日不批量扩内容；不no-ff/master/milestone，不重置旧账或unknown。
+
 ## 2026-10-03 最新：有限未来路线调整，整体NOT_READY
 
 用户现在新增能做什么：规划页可预览调整未来阶段顺序或移除明确optional的未来阶段，再确认创建新路线；刷新和正常账号重登录读回。已开始前缀与最终综合实践保护，必需闭包/前置顺序校验；旧路线、学习/总结/Prompt/成果历史保留，私人资料沿用来源lineage。正式Seed无optional阶段，因此不猜可选；当前移除为阶段粒度，全部七种操作尚未完成。原产品库未部署。

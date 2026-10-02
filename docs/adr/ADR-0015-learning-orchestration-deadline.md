@@ -29,3 +29,5 @@ required module closure从受控Seed的required roots沿parent/prerequisite递�
 有限重规划第一增量支持调整未来阶段顺序、移除受控Seed明确optional的未来阶段。固定原课程版本的 inclusion 缺省required，不能从advanced/标题猜测；正式Seed没有optional时说明无移除项。学习边界按当前计划位置的真实原文/Exposure活动保护前缀；最终综合实践保留在最后，以保持用途验收位置。必要闭包和前置顺序由代码检查。当前remove_optional_topic是阶段粒度，不能宣称任意单个知识topic移除。
 
 手动变更复用现有PlanDraft payload和唯一publisher。route_change元数据进入草案hash，专用入口负责确认，通用草案写入防绕过；决策回执存payload的独立生命周期字段，不改变原预览内容hash。确认、新版本、私人选择copy lineage、回执在同一项目锁/CAS事务，重新核对学习/任务/知识/私人basis；不派发模型/创建伪Run。新版不继承旧完成状态，历史留在旧版本。其余有限操作及最终门禁继续实施，详见[有限调整证据](../acceptance/finite-route-changes-2026-10-03.md)。
+
+有限生成增量支持change_goal与regenerate_future_plan，复用现有Worker/manifest/短生成/草案/publisher。固定提交身份、base版本/basis、受控pack版本与精确节点ID/content_version；内部route_change摘要hash进入manifest，但旧阶段快照、身份、节点映射、私人资料与历史原文不传模型。未来重生成保持前缀并筛选当前阶段顺序，目标变更使用完整新受控路线，不做跨模板语义历史合并。模型仍生成完整固定课程，之后丢弃保留阶段候选，尚非未来批次费用优化。通用草案写入拒绝绕过；新旧学习记录按PlanVersion隔离。202后首次GET失败保留新Run编号，未知/旧待确认停止自动轮询与新生成，手动GET核对；不重派unknown。add_topic仍待实现。证据见[有限生成与恢复](../acceptance/generated-route-and-recovery-2026-10-03.md)。
