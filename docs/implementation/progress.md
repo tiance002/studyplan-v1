@@ -218,3 +218,19 @@ F01项目管理尚未开始业务写入时，用户报告注册范围应为6–1
 代码`b0e342fa9cdd948a7b4d882de8c4aa0458416afc`正常commit/push，GitHub SHA一致。实际Auth临时8023/5176精确停止并核对唯一自有studyplan_test_authfix_0ffbc5ce的schema/4合成账号/无Run/Draft/无活动连接后清理；正常8022/5175及保留8021不停止。最终新文档24链接、原文hash/额度检查PASS；当前仅文档收口，随后承接提交。
 
 收口时重新轮询实际77291服务，观察一次login401后正常login200；随后仅只读auth owner scope，确认用户旧账号在本轮库升级/启动后有一个新有效会话，未调用issue/login或获取秘密。正常旧账号认证技术证据PASS，用户主观体验反馈仍NOT RUN；workspace404对应该账号此前没有已批准路线，不标为登录失败。metadata留var/auth-fix/owner-login-observation.json。此前“实际登录NOT RUN”是观察前的时间点，以本条新增证据为准。
+
+## 2026-10-02学习前端、阶段总结与自动阶段进度收口
+
+用户已认可浅蓝HTML稿并要求实施；最新决定取消退出条件/4-of-5及每日总结，只做阶段总结，并将三项资料操作改为独立按钮/浮窗。阶段进度仅已完成/未完成，系统按同一路线同一阶段非空阶段总结及全部给定实践的既有成果完成记录计算；无实践时只要求总结。移除手动Exposure表单、节点与单元学习状态，不写旧进度/知识核验数据。见[ADR-0012](../adr/ADR-0012-stage-summaries-and-learning-workspace.md)、[ADR-0013](../adr/ADR-0013-automatic-stage-progress-and-resource-dialogs.md)与[本轮验收](../acceptance/frontend-learning-revision-2026-10-02.md)。
+
+React浅色重排、阶段折叠/嵌套小字号、资料章节范围、三浮窗保持未保存输入、阶段选择与总结/具体任务双向同步均已实现。总结API unit_id省略/null为整阶段，显式unit_id保留旧行为；0023新增阶段heads/RLS/FK/版本约束及完整冻结快照。阶段完成为只读投影，复用现有USER accepted成果记录，无新通关操作；旧路线/别阶段/任务全局accepted、旧单元总结及Prompt保存不算本阶段完成。工作区读取绑定owner/project/plan/stage，成功保存后的刷新失败与保存失败分离。
+
+课程建议视图补充Eval-Lite、Eval/Reward→Agentic RL基础→高级评估及可执行产物，RAG/编排目标相关，真实RL训练可选。**尚未导入/发布新Seed，不是生成器课程已更新的声明**；已批准九阶段及历史原文保留，正式课程版本与私人路线变更继续受控事务。
+
+验证：根最终unit+contract605 PASS、2 skipped NOT RUN，前端11 PASS/build57模块 PASS；阶段总结/原行为隔离suite61 PASS，最新阶段完成/成果HTTP与PG定向suite49 PASS（这些suite存在重叠，不累加）。Ruff/diff PASS。阶段完成覆盖无实践、部分/全部、Unicode空白、同位置/RLS隔离、有界head读取和真实accepted后GET。生成类型一次Windows文件打开FAIL，针对重试PASS后contract完整PASS。CUA真实5177三浮窗输入往返、Escape/焦点、默认折叠/嵌套、阶段总结与实践编辑缓冲、具体任务导航、页面390/1024及浮窗390px PASS；所有临时输入恢复，无业务保存/搜索/批准/付费派发。更新mock脚本语法PASS、脚本执行NOT RUN，真实UI保存后的刷新未在实际账号执行；负责人体验/真实provider/RL/恢复演练NOT RUN。
+
+原正常库与保留只读预览库均备份后仅0022→0023，59原表及1516/829原行字段hash一致，归档可读PASS，恢复演练NOT RUN；ignored var/frontend-redesign保存报告/备份。当前正常API8022 exec41685/PID60348、前端5175维持正常业务代理；5177继续8024 exec29938只读预览，仅供审阅，原验收账号/项目保留，业务写入保护不移除。没有Worker、新收费Run、历史journal重派或数据迁移复制；原RAG服务不操作。
+
+前端及阶段总结/进度两个worker均STOP，实际SolMedium已从JSONL核实；独立只读进度/浮窗review实际LunaMax亦核实，无可复现实质缺陷。契约由root整合，最多两业务writer。继续既有feat/v2-g1-user-slice，普通代码/文档提交留后续SHA；没有develop/master合并或milestone接受，完整V2 Goal保持active/NOT_READY。
+
+本轮代码本地提交 `63689bc61f42e50b357e53f5d64fd34dd94a718f`，47个白名单文件，未推送，不声明GitHub已存在。文档提交随后承接；不处理两原禁目录。
