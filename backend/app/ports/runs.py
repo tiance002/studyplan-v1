@@ -65,6 +65,7 @@ class PlanningCatalogPort(Protocol):
         practice: dict[str, object] | None = None,
         write_fence: PlanningWriteFence | None = None,
         expected_plan_version: int | None = None,
+        existing_node_ids: dict[str, dict[str, object]] | None = None,
     ) -> "CatalogIds": ...
 
 

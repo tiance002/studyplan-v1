@@ -12,7 +12,7 @@ from app.core.errors import (
 from app.core.ids import content_hash
 from app.domain.domain_packs.validation import seed_digest, validate_seed
 from app.domain.plan_changes import changed_draft
-from app.domain.planning.intent import required_module_closure
+from app.domain.planning.intent import goal_spec_payload, required_module_closure
 from app.domain.planning.models import PlanPublicationService, revision_from_draft
 from app.infrastructure.db.learning_exposures import _json
 from app.infrastructure.db.plan_repository import PgPlanRepository
@@ -84,7 +84,18 @@ class PgPlanChanges(PgResourceChanges):
                 raise NotFoundError('尚无批准路线')
             _, boundary, inclusion, _, _, _ = self._basis(conn, current)
             last = max(s.order_index for s in current.stages)
-            return dict(plan_id=current.plan_id, revision=current.version,
+            available = False
+            maximum = 0
+            if current.source_pack_key:
+                pack_row = conn.execute('SELECT published_payload FROM domain_packs WHERE pack_key=%s AND version=%s',
+                                        (current.source_pack_key, current.source_pack_version)).fetchone()
+                if pack_row:
+                    specs = pack_row['published_payload'].get('stage_blueprints', [])
+                    maximum = 1 + 2 * len(specs) + 2
+                    available = boundary < last and all(s.stable_key in {b['stable_key'] for b in specs} for s in current.stages)
+            return dict(plan_id=current.plan_id, revision=current.version, goal=current.goal_snapshot,
+                        goal_spec=goal_spec_payload(current.goal_spec), regenerate_available=available,
+                        generation_max_requests=maximum,
                         stages=[dict(stage_id=s.stage_id, stable_key=s.stable_key, title=s.title,
                                      order_index=s.order_index, locked=s.order_index <= boundary or s.order_index == last,
                                      inclusion=inclusion.get(s.stable_key, 'required'))
@@ -103,7 +114,10 @@ class PgPlanChanges(PgResourceChanges):
         return dict(proposal_id=draft.draft_id, status=str(draft.status), draft=draft,
                     base_plan_id=meta['base_plan_id'], base_revision=meta['base_revision'], operation=meta['operation'],
                     before_stage_keys=meta['before_stage_keys'], after_stage_keys=meta['after_stage_keys'],
-                    warnings=list(draft.validation_warnings), preview_hash=draft.content_hash)
+                    warnings=list(draft.validation_warnings), preview_hash=draft.content_hash,
+                    retained_stage_keys=meta.get('retained_stage_keys', []),
+                    before_goal=meta.get('before_goal', draft.goal_snapshot), after_goal=draft.goal_snapshot,
+                    before_stages=meta.get('before_stages', []))
 
     def get(self, scope, project_id, proposal_id):
         with self._connection(scope, project_id) as conn:
@@ -173,7 +187,7 @@ class PgPlanChanges(PgResourceChanges):
                     raise VersionConflictError('学习记录、知识关系或私人资料已变化，请重新预览')
                 published = PlanPublicationService(repo).publish(draft=draft, presented_hash=preview_hash,
                              expected_version=expected_version, idempotency_key='route-change:' + proposal_id + ':' + receipt_key)
-                if published.created:
+                if published.created and draft.route_change['operation'] != 'change_goal':
                     copy_private_selections(conn, current, published.plan_id, 'copy_active')
                 result = dict(plan_id=published.plan_id, revision=published.revision, created=published.created)
             conn.execute('UPDATE plan_drafts SET payload=jsonb_set(payload,\'{route_change_receipts}\',%s) WHERE project_id=%s AND draft_id=%s',

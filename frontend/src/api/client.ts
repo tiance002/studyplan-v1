@@ -146,6 +146,8 @@ export const api = {
       goal,
       ...(goalSpec ? { goal_spec: goalSpec } : {}),
     } satisfies DTO["PlanGenerateRequest"]),
+  generatePlanChange: (project: string, body: DTO['GeneratedPlanChangeRequest']) =>
+    request<DTO['PlanGenerateResponse']>(`/plan-changes/generate${scope(project)}`, body),
   run: (project: string, id: string) =>
     request<DTO["RunView"]>(`/runs/${encodeURIComponent(id)}${scope(project)}`),
   draft: (project: string, id: string) =>

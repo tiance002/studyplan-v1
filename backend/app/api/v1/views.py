@@ -210,6 +210,7 @@ def draft_view(bundle: DraftBundle) -> PlanDraftView:
         draft_hash=draft.content_hash,
         version=draft.revision_candidate,
         validation_warnings=list(draft.validation_warnings),
+        change_preview_id=draft.draft_id if draft.route_change else None,
     )
 
 

@@ -185,23 +185,22 @@ function baseProgress(overrides) {
         `DOM leaked a graph internal: ${token}`,
       );
     }
-    // Two submits in the same event turn create exactly one accepted Run.
+    // A legacy waiting_user/review_draft run is not a safe terminal state.
+    // Until its draft is explicitly resolved, do not start or replay anything.
     runView = { ...runView, status: "waiting_user" };
     await open();
     await page.locator(".run-banner").waitFor();
-    assert.equal(await page.locator("button.btn.primary").first().isDisabled(), false);
-    runView = { ...runView, status: "queued" };
-    const submitted = page.waitForResponse(r => r.url().includes("/plans/generate"));
+    assert.equal(await page.locator("button.btn.primary").first().isDisabled(), true);
+    const readsBeforeLegacySubmit = runReads;
     await page.locator("form").evaluate(form => {
       form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
       form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     });
-    await submitted;
-    await page.getByText("等待生成", { exact: true }).waitFor();
-    assert.equal(generations, 1);
-    assert.equal(await page.locator("button.btn.primary").first().isDisabled(), true);
+    await page.waitForTimeout(50);
+    assert.equal(generations, 0, "legacy waiting_user must not submit a new/replayed Run");
+    assert.equal(runReads, readsBeforeLegacySubmit, "legacy waiting_user must not poll automatically");
     console.log(
-      "PASS: queued/running polling and duplicate-submit guards, NULL usage, business-only progress, failure location, no-progress fallback",
+      "PASS: queued/running polling and duplicate-submit guards, NULL usage, business-only progress, failure location, no-progress fallback, legacy waiting_user submit guard",
     );
   } finally {
     await browser.close();

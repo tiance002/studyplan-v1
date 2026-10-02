@@ -249,6 +249,7 @@ class PlanDraftView(PlanSnapshot):
     draft_hash: str = Field(..., max_length=128, description="确认时原样回传，防确认期间被改写")
     version: int = Field(..., ge=0)
     validation_warnings: list[str] = Field(default_factory=list)
+    change_preview_id: str | None = Field(default=None, max_length=64)
 
 
 class PlanView(PlanSnapshot):

@@ -62,7 +62,7 @@ from app.application.plan_resources import (
     restrict_pack_resources,
 )
 from app.core.errors import ConflictError, NotFoundError, ValidationAppError, VersionConflictError
-from app.core.ids import new_id
+from app.core.ids import content_hash, new_id
 from app.domain.enums import (
     AiRunKind,
     AiRunNextAction,
@@ -72,7 +72,8 @@ from app.domain.enums import (
     PlanDraftStatus,
     StageResourceRole,
 )
-from app.domain.planning.intent import GoalSpec, goal_spec_payload
+from app.domain.generated_plan_changes import GeneratedPlanChangeCommand
+from app.domain.planning.intent import GoalSpec, goal_spec_from_payload, goal_spec_payload
 from app.domain.planning.models import (
     PlanDraft,
     PlanPublicationService,
@@ -85,6 +86,7 @@ from app.domain.resources.curation import ResolvedSection, StageResourceAssignme
 from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
 from app.domain.workspace.models import AuthContext
+from app.ports.generated_plan_changes import GeneratedPlanChangesPort
 from app.ports.graph_runner import PlanningExecutorPort, PlanningRuntime
 from app.ports.llm import LLMDispatchUnknownError, LLMPort
 from app.ports.planning_jobs import JobClaim, PlanningJobsPort, PlanningLeaseLostError
@@ -184,6 +186,7 @@ class PlanService:
         binding_resolver: Callable[[AuthContext, str], SubmissionBinding] | None = None,
         planning_worker_admission_mode: str = "allowlist",
         preference_resolver: Callable[[AuthContext, str], Any] | None = None,
+        route_changes: GeneratedPlanChangesPort | None = None,
     ) -> None:
         self._repo = repository
         self._runs = runs
@@ -210,6 +213,7 @@ class PlanService:
         self._planning_worker_admission_mode = planning_worker_admission_mode
         self._binding_resolver = binding_resolver or _unbound_submission
         self._preference_resolver = preference_resolver
+        self._route_changes = route_changes
 
     # ------------------------------------------------------------------ 生成
 
@@ -221,19 +225,22 @@ class PlanService:
         goal: str,
         prefs_snapshot: Mapping[str, Any] | None = None,
         goal_spec: GoalSpec | None = None,
+        prepared_change: dict[str, Any] | None = None,
     ) -> tuple[str, str, PlanningState, dict[str, Any]]:
         """Freeze protocol, model configuration and batch catalog for a new run.
 
         Everything the run will later depend on is captured here, before the run
         row exists, so a later settings change cannot alter what was submitted.
         """
-        run_id = new_id("run")
+        run_id = prepared_change['run_id'] if prepared_change else new_id("run")
         thread_id = graph_thread_id(run_id=run_id, graph_version=self._graph_version)
-        selected = self._domain_pack_selector(goal_spec.target if goal_spec else goal) if self._domain_pack_selector else None
+        selected = (prepared_change['pack'] if prepared_change else
+                    self._domain_pack_selector(goal_spec.target if goal_spec else goal) if self._domain_pack_selector else None)
         pack: dict[str, Any] = dict(selected) if isinstance(selected, Mapping) else {}
         binding = self._binding_resolver(scope, project_id)
         manifest = freeze_manifest(
-            pack=pack, policy=binding.budget_policy, model_ref=binding.model_ref, goal_spec=goal_spec
+            pack=pack, policy=binding.budget_policy, model_ref=binding.model_ref, goal_spec=goal_spec,
+            route_change_hash=content_hash(prepared_change['metadata']) if prepared_change else '',
         )
         current = self._repo.get_current(project_id=project_id)
         if prefs_snapshot is None and self._preference_resolver is not None:
@@ -249,8 +256,10 @@ class PlanService:
             "prefs_snapshot": dict(prefs_snapshot or {}),
             "manifest": manifest,
             "protocol": PROTOCOL_VERSION,
-            "expected_version": current.version if current else 0,
+            "expected_version": prepared_change['metadata']['base_version'] if prepared_change else current.version if current else 0,
         }
+        if prepared_change:
+            initial['route_change'] = prepared_change['metadata']
         if pack:
             initial["domain_pack"] = pack
         return run_id, thread_id, initial, manifest
@@ -263,6 +272,7 @@ class PlanService:
         goal: str,
         prefs_snapshot: Mapping[str, Any] | None = None,
         goal_spec: GoalSpec | None = None,
+        route_command: GeneratedPlanChangeCommand | None = None,
     ) -> str:
         """Validate and durably enqueue one planning run; never invoke the model."""
         scope.require_project(project_id)
@@ -274,12 +284,22 @@ class PlanService:
             raise ForbiddenError(
                 "当前账户尚未纳入本地规划 Worker 服务范围；开放注册云端 V1 需先完成免人工登记的 RLS 安全领取"
             )
+        prepared = None
+        if route_command is not None:
+            if route_command.project_id != project_id or self._route_changes is None:
+                raise ValidationAppError('路线变更服务未装配或项目不一致')
+            existing = self._route_changes.existing_submission(scope, route_command)
+            if existing:
+                return existing
+            prepared = self._route_changes.prepare(scope, route_command, self._domain_pack_selector)
+            goal, goal_spec = prepared['goal'], goal_spec_from_payload(prepared['goal_spec'])
         cleaned_goal = goal.strip()
         if not cleaned_goal:
             raise ValidationAppError("学习目标不能为空")
 
         run_id, thread_id, initial, manifest = self._freeze_submission(
-            scope=scope, project_id=project_id, goal=cleaned_goal, prefs_snapshot=prefs_snapshot, goal_spec=goal_spec
+            scope=scope, project_id=project_id, goal=cleaned_goal, prefs_snapshot=prefs_snapshot, goal_spec=goal_spec,
+            prepared_change=prepared,
         )
         run = RunRecord(
             run_id=run_id,
@@ -293,7 +313,16 @@ class PlanService:
             thread_id=thread_id,
             version=1,
         )
-        self._planning_jobs.enqueue(run, dict(initial), manifest)
+        try:
+            self._planning_jobs.enqueue(run, dict(initial), manifest)
+        except ConflictError:
+            # A simultaneous identical submission returns the durable original,
+            # without rebinding settings or repeating provider dispatch.
+            if route_command and self._route_changes:
+                existing = self._route_changes.existing_submission(scope, route_command)
+                if existing:
+                    return existing
+            raise
         return run_id
 
     def _progress_sink(self, claim: JobClaim | None) -> Callable[[PlanningState], None] | None:
@@ -353,6 +382,12 @@ class PlanService:
                         project_id=claim.project_id, actor_id=claim.actor_id,
                         lease_token=claim.lease_token) if claim is not None else None)
         try:
+            route_change = initial.get('route_change')
+            if route_change:
+                if (self._route_changes is None or not isinstance(manifest, Mapping)
+                        or manifest.get('route_change_hash') != content_hash(route_change)):
+                    raise ConflictError('路线变更与冻结清单不一致')
+                self._route_changes.validate_generation(scope, route_change)
             runtime = (
                 self._runtime_factory(scope, project_id, run_id, model_ref)
                 if self._runtime_factory
@@ -367,6 +402,7 @@ class PlanService:
                 selected_pack=selected_pack,
                 guard=guard,
                 write_fence=write_fence,
+                route_change=route_change,
             )
             trace = (
                 self._run_executor(executor, nodes, initial, run.thread_id, run.graph_version, guard, progress)
@@ -707,7 +743,8 @@ class PlanService:
     def _build_nodes(self, *, project_id: str, run_id: str, goal: str, llm: LLMPort | None = None,
                      selected_pack: Mapping[str, Any] | None = None,
                      guard: Callable[[], None] = lambda: None,
-                     write_fence: PlanningWriteFence | None = None) -> PlanningNodes:
+                     write_fence: PlanningWriteFence | None = None,
+                     route_change: dict[str, Any] | None = None) -> PlanningNodes:
         """装配图节点，并把「保存草案」接回应用层的投影 + 物化 + 仓储。"""
 
         def save_draft(state: PlanningState) -> dict[str, str]:
@@ -715,6 +752,7 @@ class PlanService:
             return self._persist_draft(
                 project_id=project_id, run_id=run_id, goal=goal, state=state, selected_pack=selected_pack,
                 write_fence=write_fence,
+                route_change=route_change,
             )
 
         return PlanningNodes(
@@ -731,11 +769,19 @@ class PlanService:
         self, *, project_id: str, run_id: str, goal: str, state: PlanningState,
         selected_pack: Mapping[str, Any] | None = None,
         write_fence: PlanningWriteFence | None = None,
+        route_change: dict[str, Any] | None = None,
     ) -> dict[str, str]:
         """把图产物投影为 ``PlanDraft`` 并持久化（B2-V §三 §五）。"""
         if selected_pack is not None:
             state = restrict_pack_resources(state, selected_pack)  # type: ignore[assignment]
         base_version = state.get("expected_version")
+        scope = None
+        if route_change:
+            if self._route_changes is None or (state.get('manifest') or {}).get('route_change_hash') != content_hash(route_change):
+                raise ConflictError('路线变更与冻结清单不一致')
+            scope = AuthContext(actor_id=route_change['actor_id'], session_id='planning-worker',
+                                issued_at=datetime.now(timezone.utc), learning_project_scope=(project_id,))
+            self._route_changes.validate_generation(scope, route_change)
         # The immutable submission has one draft identity. A crash after its
         # commit but before the graph checkpoint reuses the retained business
         # result and does not materialize another candidate or dispatch again.
@@ -745,8 +791,11 @@ class PlanService:
             if (existing.run_id != run_id or existing.goal_snapshot != goal
                     or (base_version is not None and existing.revision_candidate != int(base_version) + 1)):
                 raise ConflictError("草案与冻结提交不一致", reason="planning_submission_invalid")
-            self._repo.save_draft(existing, expected_hash=existing.content_hash,
-                                  expected_version=base_version, write_fence=write_fence)
+            if route_change and self._route_changes:
+                existing = self._route_changes.save_generated(scope, route_change, existing, write_fence)
+            else:
+                self._repo.save_draft(existing, expected_hash=existing.content_hash,
+                                      expected_version=base_version, write_fence=write_fence)
             return {"draft_ref": existing.draft_id, "draft_hash": existing.content_hash}
         catalog_ids = self._catalog.materialize(
             project_id=project_id,
@@ -756,6 +805,7 @@ class PlanService:
             practice=dict(state.get("practice_proposal") or {}),
             write_fence=write_fence,
             expected_plan_version=base_version,
+            **({'existing_node_ids': route_change['node_reuse']} if route_change and route_change['node_reuse'] else {}),
         )
         current = self._repo.get_current(project_id=project_id)
         revision_candidate = (int(base_version) if base_version is not None
@@ -778,7 +828,10 @@ class PlanService:
             catalog=self._resources,
             stage_titles={s.stage_id: s.title for s in draft.stages},
         )
-        self._repo.save_draft(draft, expected_version=base_version, write_fence=write_fence)
+        if route_change and self._route_changes:
+            draft = self._route_changes.save_generated(scope, route_change, draft, write_fence)
+        else:
+            self._repo.save_draft(draft, expected_version=base_version, write_fence=write_fence)
         return {"draft_ref": draft.draft_id, "draft_hash": draft.content_hash}
 
     def _resolve(

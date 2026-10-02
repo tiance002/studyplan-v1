@@ -2,14 +2,21 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { api, ApiError } from '../../api/client';
 import type { DTO } from '../../api/types';
 
-export function PlanChanges({ actorKey, project, onPublished }: {
+export function PlanChanges({ actorKey, project, onPublished, generationAllowed, changeDraftId, onGeneratePlanChange, onDraftDecision, onPreviewPending }: {
   actorKey: string; project: string; onPublished: () => Promise<void>;
+  generationAllowed: boolean;
+  changeDraftId?: string | null;
+  onGeneratePlanChange: (body: DTO['GeneratedPlanChangeRequest']) => Promise<void>;
+  onDraftDecision: (preview: DTO['PlanChangePreviewView']) => Promise<void>;
+  onPreviewPending: (pending: boolean) => void;
 }) {
   const cacheKey = `studyplan-plan-change:${JSON.stringify([actorKey, project])}`;
   const currentScope = useRef(cacheKey);
   currentScope.current = cacheKey;
   const lease = useMemo(() => ({ key: cacheKey, active: true, busy: false }), [cacheKey]);
   const live = () => lease.active && currentScope.current === lease.key;
+  const previewPendingCallback = useRef(onPreviewPending);
+  previewPendingCallback.current = onPreviewPending;
   const [context, setContext] = useState<DTO['PlanChangeContext'] | null>(null);
   const [order, setOrder] = useState<string[]>([]);
   const [preview, setPreview] = useState<DTO['PlanChangePreviewView'] | null>(null);
@@ -17,8 +24,14 @@ export function PlanChanges({ actorKey, project, onPublished }: {
   const [conflict, setConflict] = useState(false), [acknowledged, setAcknowledged] = useState(false);
   const [notice, setNotice] = useState(''), [opened, setOpened] = useState(false);
   const [noPlan, setNoPlan] = useState(false);
+  const [newGoal, setNewGoal] = useState('');
   const pendingPreview = useRef<{ signature: string; body: DTO['PlanChangeRequest'] } | null>(null);
   const pendingConfirm = useRef<{ signature: string; body: DTO['PlanChangeDecisionRequest'] } | null>(null);
+  const pendingGenerated = useRef<{ signature: string; body: DTO['GeneratedPlanChangeRequest'] } | null>(null);
+  useEffect(() => {
+    previewPendingCallback.current(Boolean(preview?.status === 'awaiting_approval' || (!preview && localStorage.getItem(cacheKey))));
+    return () => previewPendingCallback.current(false);
+  }, [cacheKey, preview]);
 
   async function act(work: () => Promise<void>) {
     if (!live() || lease.busy) return;
@@ -41,6 +54,7 @@ export function PlanChanges({ actorKey, project, onPublished }: {
       if (!live()) return;
       setContext(value);
       setOrder(value.stages.map(stage => stage.stable_key));
+      setNewGoal(value.goal || '');
       setNoPlan(false);
     } catch (failure) {
       if (failure instanceof ApiError && failure.status === 404) {
@@ -69,6 +83,24 @@ export function PlanChanges({ actorKey, project, onPublished }: {
   useEffect(() => {
     if (opened && !context && !noPlan) void act(readContext);
   }, [opened, context, noPlan]);
+  useEffect(() => {
+    if (!changeDraftId || !live()) return;
+    let cancelled = false;
+    const recover = async () => {
+      while (lease.busy && live() && !cancelled) await new Promise(resolve => setTimeout(resolve, 25));
+      if (!cancelled && live()) void act(async () => {
+        const value = await api.planChange(project, changeDraftId);
+        if (!live()) return;
+        setPreview(value);
+        localStorage.setItem(cacheKey, value.proposal_id);
+        setAcknowledged(false);
+        setConflict(false);
+        pendingGenerated.current = null;
+      });
+    };
+    void recover();
+    return () => { cancelled = true; };
+  }, [changeDraftId, lease]);
 
   const awaiting = preview?.status === 'awaiting_approval';
   const originalOrder = context?.stages.map(stage => stage.stable_key) || [];
@@ -90,15 +122,41 @@ export function PlanChanges({ actorKey, project, onPublished }: {
       signature, body: { ...request, idempotency_key: crypto.randomUUID() },
     };
     const body = pendingPreview.current.body;
+    onPreviewPending(true);
     void act(async () => {
-      const value = await api.previewPlanChange(project, body);
+      try {
+        const value = await api.previewPlanChange(project, body);
+        if (!live()) return;
+        setPreview(value);
+        localStorage.setItem(cacheKey, value.proposal_id);
+        setAcknowledged(false);
+        setConflict(false);
+        setNotice('');
+        pendingConfirm.current = null;
+      } catch (failure) {
+        if (live()) onPreviewPending(awaiting);
+        throw failure;
+      }
+    });
+  }
+  function generate(operation: DTO['GeneratedPlanChangeRequest']['operation']) {
+    if (!context || !generationAllowed || !live() || lease.busy || awaiting) return;
+    const target = operation === 'change_goal' ? newGoal.trim() : '';
+    if (operation === 'change_goal' && (!target || Array.from(target).length > 2000)) {
+      setError('学习目标不能为空，且最多 2000 个字符。');
+      return;
+    }
+    const request = { plan_id: context.plan_id, expected_version: context.revision, operation, goal: target };
+    const signature = JSON.stringify(request);
+    if (pendingGenerated.current?.signature !== signature) pendingGenerated.current = {
+      signature, body: { ...request, idempotency_key: crypto.randomUUID() },
+    };
+    const body = pendingGenerated.current.body;
+    void act(async () => {
+      await onGeneratePlanChange(body);
       if (!live()) return;
-      setPreview(value);
-      localStorage.setItem(cacheKey, value.proposal_id);
-      setAcknowledged(false);
-      setConflict(false);
-      setNotice('');
-      pendingConfirm.current = null;
+      pendingGenerated.current = null;
+      setNotice('路线调整已进入生成队列，完成后会显示受保护的调整预览。');
     });
   }
   function decide(action: 'confirm' | 'cancel') {
@@ -117,9 +175,12 @@ export function PlanChanges({ actorKey, project, onPublished }: {
       setConflict(false);
       pendingPreview.current = null;
       setNotice(value.preview.status === 'approved' ? '新路线已发布。' : '路线调整已取消。');
+      await onDraftDecision(value.preview);
       if (value.preview.status === 'approved') {
         await onPublished();
         if (live()) await readContext();
+      } else if (live()) {
+        await readContext();
       }
     });
   }
@@ -135,6 +196,14 @@ export function PlanChanges({ actorKey, project, onPublished }: {
       {context && <>
         {!context.stages.some(stage => stage.inclusion === 'optional') &&
           <p className="form-note">当前正式路线没有明确标记为可选的阶段，因此这里不会显示移除选项；必修和推荐内容会保留。</p>}
+        <section aria-label="生成未来路线草案">
+          <h3>重新生成未来路线</h3>
+          <p className="form-note">生成会使用当前配置的模型预算，可能产生费用。重新生成未来阶段的上限为 {context.generation_max_requests} 次模型请求（含修复请求）；改变目标的请求上限未提供。</p>
+          <button className="btn" disabled={busy || awaiting || !generationAllowed || !context.regenerate_available || context.generation_max_requests <= 0} onClick={() => generate('regenerate_future_plan')}>重新生成未来阶段</button>
+          {!context.regenerate_available && <p className="form-note">当前路线没有可重新生成的未来阶段。</p>}
+          <label>新的学习目标<textarea aria-label="新的学习目标" rows={2} maxLength={2000} value={newGoal} onChange={event => setNewGoal(event.target.value)} /></label>
+          <button className="btn" disabled={busy || awaiting || !generationAllowed || !newGoal.trim() || newGoal.trim() === context.goal} onClick={() => generate('change_goal')}>生成目标调整草案</button>
+        </section>
         <ol aria-label="待预览阶段顺序">{order.map((key, index) => {
           const stage = context.stages.find(item => item.stable_key === key)!;
           const previous = context.stages.find(item => item.stable_key === order[index - 1]);
@@ -155,8 +224,38 @@ export function PlanChanges({ actorKey, project, onPublished }: {
       {error && <p className="error" role="alert">{error}</p>}
       {notice && <p className="notice" role="status">{notice}</p>}
       {preview && <section aria-label="路线调整预览">
-        <h3>调整前</h3><ol>{preview.before_stage_keys.map(key => <li key={key}>{title(key)}</li>)}</ol>
-        <h3>调整后</h3><ol>{preview.after_stage_keys.map(key => <li key={key}>{title(key)}</li>)}</ol>
+        {(preview.operation === 'change_goal' || preview.operation === 'regenerate_future_plan') ? <>
+          <h3>目标调整</h3>
+          <p><strong>调整前目标：</strong>{preview.before_goal}</p>
+          <p><strong>调整后目标：</strong>{preview.after_goal}</p>
+          <h3>调整前的完整阶段内容</h3>
+          {preview.before_stages?.length ? <ol>{preview.before_stages.map(stage => <li key={stage.stage_id}>
+            <strong>{stage.title}</strong><p>{stage.objective}</p>
+            {stage.learning_guidance && <details><summary>学习指导</summary>
+              <p>{stage.learning_guidance.why_now}</p><p>{stage.learning_guidance.previous_relation}</p>
+              <p>本次重点：{stage.learning_guidance.learning_focus.join('；') || '未单独列出'}</p>
+              <p>实践增量：{stage.learning_guidance.practice_delta.increment.join('；') || '未单独列出'}</p>
+            </details>}
+          </li>)}</ol> : <p className="form-note">服务未提供调整前阶段的完整目标文本，以下保留阶段键仅用于定位。</p>}
+          {!preview.before_stages?.length && <ol>{preview.before_stage_keys.map(key => <li key={key}>{title(key)}</li>)}</ol>}
+          <h3>调整后的完整阶段内容</h3>
+          <ol>{(preview.draft.stages ?? []).map(stage => {
+            const retained = preview.retained_stage_keys?.includes(stage.stable_key) ?? false;
+            return <li key={stage.stage_id}>
+              <strong>{retained ? '保留的前置阶段' : '重新生成的未来阶段'} · {stage.title}</strong>
+              <p>{stage.objective}</p>
+              {stage.learning_guidance && <details><summary>学习指导</summary>
+                <p>{stage.learning_guidance.why_now}</p><p>{stage.learning_guidance.previous_relation}</p>
+                <p>本次重点：{stage.learning_guidance.learning_focus.join('；') || '未单独列出'}</p>
+                {!!stage.learning_guidance.comparison_focus.length && <p>对比问题：{stage.learning_guidance.comparison_focus.join('；')}</p>}
+                <p>实践增量：{stage.learning_guidance.practice_delta.increment.join('；') || '未单独列出'}</p>
+              </details>}
+            </li>;
+          })}</ol>
+        </> : <>
+          <h3>调整前</h3><ol>{preview.before_stage_keys.map(key => <li key={key}>{title(key)}</li>)}</ol>
+          <h3>调整后</h3><ol>{preview.after_stage_keys.map(key => <li key={key}>{title(key)}</li>)}</ol>
+        </>}
         {preview.warnings.map((warning, index) => <p className="form-note" key={index}>{warning}</p>)}
         <p>旧路线与历史总结、Prompt、成果、证据继续保留；新版学习记录不自动继承旧阶段的完成状态。</p>
         {awaiting && <>

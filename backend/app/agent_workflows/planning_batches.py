@@ -88,6 +88,7 @@ def freeze_manifest(
     model_ref: str,
     generic_stage_count: int = DEFAULT_GENERIC_STAGE_COUNT,
     goal_spec: GoalSpec | None = None,
+    route_change_hash: str = '',
 ) -> dict[str, Any]:
     """Freeze the reviewed pack + budget into an immutable execution manifest.
 
@@ -171,6 +172,7 @@ def freeze_manifest(
         "stages": stage_specs,
         "required_node_keys": required_node_keys,
         **({"goal_spec": goal_spec_payload(goal_spec)} if goal_spec else {}),
+        **({"route_change_hash": route_change_hash} if route_change_hash else {}),
         "required_root_keys": list(pack.get("required_node_keys") or []) if reviewed else [],
         "structure_batches": structure_batches,
         "practice_batches": practice_batches,

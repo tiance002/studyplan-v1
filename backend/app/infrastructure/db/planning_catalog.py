@@ -31,6 +31,7 @@ from contextlib import contextmanager
 from typing import Any
 
 import psycopg
+from app.core.errors import ConflictError
 from app.core.ids import new_id
 from app.domain.runs.fencing import PlanningWriteFence
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -95,6 +96,7 @@ class PgPlanningCatalog:
         practice: dict[str, object] | None = None,
         write_fence: PlanningWriteFence | None = None,
         expected_plan_version: int | None = None,
+        existing_node_ids: dict[str, dict[str, object]] | None = None,
     ) -> CatalogIds:
         node_ids: dict[str, str] = {}
         unit_ids: dict[str, str] = {}
@@ -103,7 +105,10 @@ class PgPlanningCatalog:
 
         # Immutable generation snapshot. Identical graph content reuses its entities;
         # changed content gets new IDs, while legacy IDs/FKs remain untouched.
-        content = json.dumps([nodes, units, relations, practice], sort_keys=True,
+        content_parts: list[Any] = [nodes, units, relations, practice]
+        if existing_node_ids:
+            content_parts.append(existing_node_ids)
+        content = json.dumps(content_parts, sort_keys=True,
                              ensure_ascii=False, separators=(",", ":"))
         namespace = project_id + ":" + hashlib.sha256(content.encode()).hexdigest()
         with self._tx(project_id) as conn:
@@ -111,9 +116,19 @@ class PgPlanningCatalog:
                 lock_plan_version(conn, project_id, expected_plan_version)
             if write_fence is not None:
                 lock_planning_write(conn, project_id=project_id, run_id=write_fence.run_id, fence=write_fence)
+            reuse = existing_node_ids or {}
+            for key, reference in reuse.items():
+                row = conn.execute('SELECT stable_key,content_version FROM knowledge_nodes '
+                                   'WHERE project_id=%s AND node_id=%s FOR SHARE',
+                                   (project_id, reference['node_id'])).fetchone()
+                if row is None or row['stable_key'] != key or row['content_version'] != reference['content_version']:
+                    raise ConflictError('保留知识身份或版本已变化')
             for node in nodes:
                 key = _text(node.get("stable_key"))
                 if not key:
+                    continue
+                if key in reuse:
+                    node_ids[key] = str(reuse[key]['node_id'])
                     continue
                 node_id = stable_entity_id("nod", namespace, key)
                 node_ids[key] = node_id

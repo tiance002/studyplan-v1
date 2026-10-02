@@ -33,6 +33,33 @@ const PROGRESS_PHASE_LABELS: Record<DTO["RunProgress"]["phase"], string> = {
   done: "草案已生成",
 };
 
+const KNOWN_RUN_STATUSES = new Set<string>([
+  "queued", "running", "waiting_user", "succeeded", "failed", "cancelled", "reconciliation_required",
+]);
+const KNOWN_RUN_ACTIONS = new Set<string>(["none", "review_draft", "retry", "reconcile", "wait"]);
+
+function runNeedsCheck(run: DTO["RunView"]): boolean {
+  if (!KNOWN_RUN_STATUSES.has(run.status) || !KNOWN_RUN_ACTIONS.has(run.next_action)) return true;
+  switch (run.status) {
+    case "queued":
+    case "running": return run.next_action !== "wait";
+    case "waiting_user": return run.next_action !== "review_draft";
+    case "succeeded": return run.next_action !== "none" && !(run.next_action === "review_draft" && !!run.result_ref);
+    case "failed": return run.next_action !== "retry" && run.next_action !== "none";
+    case "cancelled": return run.next_action !== "none";
+    case "reconciliation_required": return run.next_action !== "reconcile";
+    default: return true;
+  }
+}
+
+function canStartNewRun(run: DTO["RunView"] | null): boolean {
+  if (!run) return true;
+  if (runNeedsCheck(run)) return false;
+  return (run.status === "succeeded" && run.next_action === "none") ||
+    (run.status === "failed" && (run.next_action === "retry" || run.next_action === "none")) ||
+    (run.status === "cancelled" && run.next_action === "none");
+}
+
 function RunProgressPanel({ progress }: { progress: DTO["RunProgress"] }) {
   const totalBatches =
     progress.total_structure_batches + progress.total_practice_batches;
@@ -122,10 +149,15 @@ export function PlanningPage({
   const loadedDraft = useRef<string | null>(null);
   const [pollAttempt, setPollAttempt] = useState(0);
   const [acceptedRun, setAcceptedRun] = useState(false);
-  const generationBlocked = busy || acceptedRun || !goal.trim() || fake === null ||
+  const [pendingPlanChange, setPendingPlanChange] = useState(false);
+  const [planChangeSubmitting, setPlanChangeSubmitting] = useState(false);
+  const [pendingRunId, setPendingRunId] = useState<string | null>(null);
+  const generationLifecycleBlocked = busy || acceptedRun || !canStartNewRun(run) || fake === null ||
+    pendingPlanChange || planChangeSubmitting ||
     draft?.status === "awaiting_approval" ||
     run?.status === "queued" || run?.status === "running" ||
     run?.status === "reconciliation_required";
+  const generationBlocked = generationLifecycleBlocked || !goal.trim();
   async function loadDraft(id: string, force = false) {
     // Status polling must never replace the user's editable snapshot or its base version.
     if (!force && loadedDraft.current === id) return;
@@ -139,8 +171,9 @@ export function PlanningPage({
   async function loadRun(id: string) {
     const r = await api.run(project, id);
     setRun(r);
-    setAcceptedRun(["queued", "running", "reconciliation_required"].includes(r.status));
-    if (r.result_ref && (r.next_action === "review_draft" || r.status === "succeeded")) {
+    setPendingRunId(null);
+    setAcceptedRun(!canStartNewRun(r));
+    if (!runNeedsCheck(r) && r.result_ref && (r.next_action === "review_draft" || r.status === "succeeded")) {
       try {
         await loadDraft(r.result_ref);
       } catch (e) {
@@ -151,12 +184,57 @@ export function PlanningPage({
       }
     }
   }
+  async function acceptRun(id: string) {
+    localStorage.setItem(`studyplan-run:${project}`, id);
+    setPendingRunId(id);
+    setRun(null);
+    setAcceptedRun(true);
+    setPollAttempt(0);
+    loadedDraft.current = null;
+    setDraft(null);
+    setConflict(false);
+    setNotice("");
+    await loadRun(id);
+  }
+  async function generatePlanChange(body: DTO['GeneratedPlanChangeRequest']) {
+    if (generationLifecycleBlocked || generating.current) throw new Error('当前运行或草案尚未完成核对，不能再次生成。');
+    generating.current = true;
+    setPlanChangeSubmitting(true);
+    try {
+      const result = await api.generatePlanChange(project, body);
+      await acceptRun(result.run_id);
+    } finally {
+      generating.current = false;
+      setPlanChangeSubmitting(false);
+    }
+  }
+  async function refreshPlanChangeDraft(preview: DTO['PlanChangePreviewView']) {
+    const changedDraft = preview.draft;
+    loadedDraft.current = changedDraft.draft_id;
+    setDraft(changedDraft);
+    setStages(changedDraft.stages ?? []);
+    setBaseVersion(changedDraft.revision);
+    setConflict(false);
+    const decidedGoal = preview.status === 'approved' ? preview.after_goal : preview.before_goal;
+    if (typeof decidedGoal === 'string') setGoal(decidedGoal);
+    if (preview.status === 'approved' && preview.operation === 'change_goal') {
+      setDepth('unspecified');
+      setPurpose('learn');
+      setStartingPoint('');
+      setScopeInput('');
+      setConstraintsInput('');
+    }
+  }
   useEffect(() => {
     const id = localStorage.getItem(`studyplan-run:${project}`);
-    if (id) loadRun(id).catch((e) => setError(e.message));
+    if (id) {
+      setPendingRunId(id);
+      setAcceptedRun(true);
+      loadRun(id).catch((e) => setError(e.message));
+    }
   }, [project]);
   useEffect(() => {
-    if (!run || !["queued", "running"].includes(run.status)) return;
+    if (!run || runNeedsCheck(run) || run.next_action !== "wait" || !["queued", "running"].includes(run.status)) return;
     const timer = setTimeout(
       () => loadRun(run.run_id).catch((e) => setError(e.message))
         .finally(() => setPollAttempt(n => n + 1)),
@@ -177,7 +255,7 @@ export function PlanningPage({
   }
   const dirty =
       !!draft && JSON.stringify(stages) !== JSON.stringify(draft.stages ?? []),
-    editable = draft?.status === "awaiting_approval";
+    editable = draft?.status === "awaiting_approval" && !draft.change_preview_id;
   function goalSpec(): DTO['GoalSpec'] | undefined {
     const scope = scopeInput.split(/\r?\n/).map(item => item.trim()).filter(Boolean);
     const constraints = constraintsInput.split(/\r?\n/).map(item => item.trim()).filter(Boolean);
@@ -253,15 +331,7 @@ export function PlanningPage({
             generating.current = true;
             act(async () => {
               const result = await api.generate(project, goal, goalSpec());
-              localStorage.setItem(`studyplan-run:${project}`, result.run_id);
-              // A failed first GET is shown as an error, never another POST.
-              setAcceptedRun(true);
-              setPollAttempt(0);
-              loadedDraft.current = null;
-              setDraft(null);
-              setConflict(false);
-              setNotice("");
-              await loadRun(result.run_id);
+              await acceptRun(result.run_id);
             }).finally(() => { generating.current = false; });
           }}
         >
@@ -307,10 +377,17 @@ export function PlanningPage({
         </form>
         <p className="form-note">支持 Agent 应用开发与 Python 工程入门；其他方向生成通用结构，仅提供资料搜索建议。</p>
       </section>
+      {pendingRunId && !run && <div className="run-banner" role="status">
+        <strong>已提交，待读回</strong>
+        <p className="form-note">服务已接受运行 {pendingRunId}，但暂时无法读取状态。编号已保存；请手动读取状态，不会再次提交。</p>
+        <button className="text-button" disabled={busy} onClick={() => act(() => loadRun(pendingRunId))}>手动读取运行状态</button>
+      </div>}
       {run && (
         <div className="run-banner" role="status">
           <strong>
-            {draft?.status === "awaiting_approval"
+            {runNeedsCheck(run)
+              ? "运行状态需要核对"
+              : draft?.status === "awaiting_approval"
               ? "草案已生成 · 等待确认"
               : draft?.status === "approved"
                 ? "路线已发布"
@@ -330,6 +407,8 @@ export function PlanningPage({
                         ? "生成已完成"
                         : "运行已取消"}
           </strong>
+          {runNeedsCheck(run) && <p className="form-note">服务返回了当前页面无法安全处理的运行状态或下一步操作。运行编号 {run.run_id} 已保留；请手动刷新状态核对，不会自动重试、重放或启动新运行。</p>}
+          {run.status === "failed" && !runNeedsCheck(run) && <p className="form-note">再次生成会创建一条新运行，不会恢复或重派这条失败运行。</p>}
           {run.error && <p>{run.error.message}</p>}
           <button
             className="text-button"
@@ -386,6 +465,7 @@ export function PlanningPage({
               {w}
             </p>
           ))}
+          {draft.change_preview_id && draft.status === "awaiting_approval" && <p className="form-note">这是受保护的全路线调整草案。请在“有限路线调整”中查看完整差异并确认或取消。</p>}
           {stages.map((s, i) => (
             <section className="panel draft-stage" key={s.stage_id}>
               <div className="stage-top">
@@ -470,7 +550,17 @@ export function PlanningPage({
           <p>填写学习目标后，查看完整阶段及资源，再确认成为正式路线。</p>
         </div>
       )}
-      <PlanChanges key={JSON.stringify([actorKey, project])} actorKey={actorKey} project={project} onPublished={onPublished} />
+      <PlanChanges
+        key={JSON.stringify([actorKey, project])}
+        actorKey={actorKey}
+        project={project}
+        onPublished={onPublished}
+        generationAllowed={!generationLifecycleBlocked}
+        changeDraftId={draft?.change_preview_id}
+        onGeneratePlanChange={generatePlanChange}
+        onDraftDecision={refreshPlanChangeDraft}
+        onPreviewPending={setPendingPlanChange}
+      />
     </div>
   );
 }

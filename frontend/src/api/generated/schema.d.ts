@@ -622,6 +622,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/plan-changes/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate */
+        post: operations["generate_plan_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/plan-changes/{proposal_id}": {
         parameters: {
             query?: never;
@@ -1309,6 +1326,26 @@ export interface components {
             /** Updated At */
             updated_at: string | null;
         };
+        /** GeneratedPlanChangeRequest */
+        GeneratedPlanChangeRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /**
+             * Operation
+             * @enum {string}
+             */
+            operation: "change_goal" | "regenerate_future_plan";
+            /**
+             * Goal
+             * @default
+             */
+            goal: string;
+            goal_spec?: components["schemas"]["GoalSpec"] | null;
+        };
         /** GitHubRepository */
         GitHubRepository: {
             /** Owner */
@@ -1570,6 +1607,22 @@ export interface components {
             revision: number;
             /** Stages */
             stages: components["schemas"]["PlanChangeStage"][];
+            /**
+             * Goal
+             * @default
+             */
+            goal: string;
+            goal_spec?: components["schemas"]["GoalSpec"] | null;
+            /**
+             * Regenerate Available
+             * @default false
+             */
+            regenerate_available: boolean;
+            /**
+             * Generation Max Requests
+             * @default 0
+             */
+            generation_max_requests: number;
         };
         /** PlanChangeDecisionRequest */
         PlanChangeDecisionRequest: {
@@ -1599,11 +1652,8 @@ export interface components {
             base_plan_id: string;
             /** Base Revision */
             base_revision: number;
-            /**
-             * Operation
-             * @enum {string}
-             */
-            operation: "reorder_future_stage" | "remove_optional_topic";
+            /** Operation */
+            operation: ("reorder_future_stage" | "remove_optional_topic") | ("change_goal" | "regenerate_future_plan");
             /** Before Stage Keys */
             before_stage_keys: string[];
             /** After Stage Keys */
@@ -1612,6 +1662,20 @@ export interface components {
             warnings: string[];
             /** Preview Hash */
             preview_hash: string;
+            /** Retained Stage Keys */
+            retained_stage_keys?: string[];
+            /**
+             * Before Goal
+             * @default
+             */
+            before_goal: string;
+            /**
+             * After Goal
+             * @default
+             */
+            after_goal: string;
+            /** Before Stages */
+            before_stages?: components["schemas"]["StageDetail"][];
         };
         /** PlanChangeRequest */
         PlanChangeRequest: {
@@ -1728,6 +1792,8 @@ export interface components {
             version: number;
             /** Validation Warnings */
             validation_warnings?: string[];
+            /** Change Preview Id */
+            change_preview_id?: string | null;
         };
         /** PlanGenerateRequest */
         PlanGenerateRequest: {
@@ -5469,6 +5535,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanChangePreviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_plan_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GeneratedPlanChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanGenerateResponse"];
                 };
             };
             /** @description Validation Error */

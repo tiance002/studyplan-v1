@@ -78,6 +78,7 @@ def build_container(settings: Settings) -> AppContainer:
     practice_change_service = PracticeChangeService(PgPracticeChanges(dsn))
     from app.application.plan_changes import PlanChangeService
     from app.infrastructure.db.plan_changes import PgPlanChanges
+    from app.infrastructure.db.generated_plan_changes import PgGeneratedPlanChanges
     plan_change_service = PlanChangeService(PgPlanChanges(dsn))
     from app.application.practice_submissions import PracticeSubmissionService
     from app.infrastructure.db.practice_submissions import PgPracticeSubmissions
@@ -149,6 +150,7 @@ def build_container(settings: Settings) -> AppContainer:
         planning_worker_admission_mode=settings.planning_worker_admission_mode,
         binding_resolver=binding_resolver,
         preference_resolver=preference_service.project_default,
+        route_changes=PgGeneratedPlanChanges(dsn),
     )
     from app.application.summaries import SummaryService
     from app.infrastructure.db.summaries import PgSummaries
