@@ -2,6 +2,8 @@
 
 日期：2026-10-02。依据：用户提供的[续接计划](../implementation/STUDYPLAN_CONTINUATION_PLAN_2026-10-02.md)及[新 Goal](../implementation/STUDYPLAN_CONTINUATION_GOAL_2026-10-02.md)。
 
+2026-10-03 最新补充覆盖：Luna 所有实际可用档位自由使用；Sol 6.1 medium/high 路由保留，难题使用 xhigh，不使用 max；6Astra 继续停用。快速模式请求仍已结束，实际解析不可核实时记 NOT OBSERVABLE；其余额度、操作门禁与切片授权不变。
+
 2026-10-03 追加决定：用户已说“恢复原计划”，下文临时模型档位授权终止，恢复[原动态路由](../execution/model-routing-policy.md) Sol/high、Sol/medium、Luna/max。6Astra 停用仍有效。快速服务模式请求结束，但没有工具切换证据，不宣称主会话模型或服务模式已切换。仅恢复开发执行偏好；当前成果派生切片、交付Goal及外部操作/额度门禁继续有效。
 
 N0 实测 HEAD 为 `cf1537040bbf8c52469e00461723f70726f5a3b2`，分支 `feat/v2-g1-user-slice`，固定点祖先检查 PASS。工作区只有禁止操作的 `.workbuddy/`、`design-preview/` 未跟踪目录。迁移 head 为 0023。

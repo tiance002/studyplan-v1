@@ -2,6 +2,8 @@
 
 日期：2026-10-03。依据：[最终交付 Goal](../implementation/STUDYPLAN_OCT6_FINAL_DELIVERY_GOAL_2026-10-03.md)。用户最新决定优先，既有阶段总结与自动阶段完成规则继续生效。
 
+2026-10-03 最新补充：用户明确 Luna 所有实际可用档位自由使用，并要求难题 Sol 6.1/xhigh。保留 Sol/medium 与主协调 Sol/high，不使用 Sol/max 或6Astra；快速模式请求仍已结束。此条覆盖下方恢复记录的 Luna/max 固定限制，实际模型解析继续如实记录，不扩大产品调用授权。
+
 2026-10-03 最新覆盖：用户明确“恢复原计划”，终止临时开发模型档位授权，恢复[原动态路由](../execution/model-routing-policy.md) Sol/high、Sol/medium、Luna/max；6Astra 停用继续有效。快速模式临时请求结束，当前没有主会话模型或服务模式切换接口，实际解析记 NOT OBSERVABLE，不改全局配置。10月6日交付范围、当前切片成果、未完成门禁与取消链路实施继续；此前临时授权文字仅作历史记录。
 
 本轮复核实际 HEAD `3f31b182855c608bbc48fdf185204494eb4be09c`，分支 `feat/n1-resource-discovery`，固定参考点为祖先。复用上一批未提交 N1 资料发现实现，不切回 master 或固定点。迁移 head 0024，其中0024为尚未发布的 N1 资料预约增量；本次学习编排不新增迁移。
