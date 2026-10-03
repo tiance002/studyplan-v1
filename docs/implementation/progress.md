@@ -1,5 +1,19 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-03 最新：普通规划取消与审查输入，整体NOT_READY
+
+用户现在新增能做什么：排队/运行中规划可显式取消；503保留原请求、刷新不自动提交；取消后可明确创建新运行，可能已派发则待核对并阻止再生成。真实正常登录/HTTP/Worker/ownedPG/Chrome验证运行中取消、刷新/重登录和零重派，模型Fake；原产品环境未部署。
+
+本地代码SHA `8c1595d24bb9d7f06387fdd6a498c0011da6d314`，分支 `feat/n1-resource-discovery`。[证据与回滚](../acceptance/planning-cancellation-2026-10-03.md)。规则/契约PASS67，相关ownedPG/HTTP/租约/短生成PASS81，最新审查fixture+取消HTTP PASS5/NOT RUN1，独立真实Chrome PASS1，Fake取消/scope/recovery/progress与Frontend11/build PASS；Ruff/mypy/diff/凭据模式/原文hash PASS。早期FAIL及修复保留，重叠不合计。真实外部与完整闭环NOT RUN。
+
+取消、派发和待确认草案共享事务锁；token失效、幂等回执与状态原子，Attempt/原文不删除、不重派unknown。发布先完成的真实竞态曾误记生成失败，已在锁内核对本Run的已确认publication后修复。无新migration/依赖/平台；product0023未写、repo0024沿用。临时API/Worker与owned库清理；Vite5178自有session84785/PID57788，PG5432不变。新SHA未推送/核实远端，不no-ff/master/milestone。
+
+用户转交[闭环审查](../reviews/2026-10-03-learning-loop-audit.md)与[三个Blueprint候选](../reviews/2026-10-03-blueprint-candidates.md)已保存。失效注册密码及硬编码迁移head的测试真实RED后修复PASS；旧总结Acceptance脚本保留不重跑。三个候选待新JSON/免费教材证据及导入，不能标正式课程；当前阶段总结、全部实践门槛、自动刷新、历史与隔离的E1–E5整链仍NOT RUN，后续实施不重复大规划。
+
+模型23/50、搜索6/1000、unknown1、旧README2不变，本批外部新增0。请求Sol/xhigh派发难题、Sol/medium UI，实际解析NOT OBSERVABLE；最新Luna所有档位、Sol难题xhigh授权保留，Sol/max/6Astra停用，快速模式请求已结束且无工具切换证据。
+
+下一安全动作：三个候选内容落成与免费正文审核、当前普通账号阶段总结/成果/自动完成的真实PG浏览器闭环；真实模型代表路径按授权门禁，额外GitHub1次仍等待此前选择，RAG缺契约不阻塞独立工作。备份恢复及用户接受继续为门禁。下文保留历史时点。
+
 ## 2026-10-03 最新：Luna自由档位与Sol难题升级，整体NOT_READY
 
 用户现在新增能做什么：后续开发保留原风险路由，同时允许 Luna 所有实际可用档位自由使用，有证据的难题使用 Sol 6.1/xhigh。普通有界实现 Sol/medium、主协调 Sol/high；Sol/max 与6Astra不使用。快速服务模式请求仍已结束，实际模型/服务模式解析不可核实时记 NOT OBSERVABLE，不修改全局配置或产品费用授权。当前取消链路仍在实施，不因路由调整宣称完成；既有成果与门禁保留。

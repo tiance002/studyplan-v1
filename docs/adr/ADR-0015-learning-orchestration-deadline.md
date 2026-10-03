@@ -41,3 +41,5 @@ required module closure从受控Seed的required roots沿parent/prerequisite递�
 2026-10-03用户最新决定：后续停止6Astra。开发选择仅保留临时授权的6Luna实际可用档位、6.1Sol除max的实际可用档位；不改全局配置，仍记录请求参数与不可观测的实际解析，快速服务模式没有切换证据。此决定优先于此前临时Astra许可，除非用户之后明确重新授权。
 
 服务端运行恢复增量采用有界只读集合GET（服务端actor/project精确过滤、仅规划、最多20），显式选择后复用普通Run/Draft读取，不引入恢复Graph/重派API。详情和草案读取以作用域/请求序号隔离迟到响应；结果核对完成前保留生成阻塞，503仍可手动读回。取消仍需独立完成派发事务claim fence及已保存草案/发布并发门禁，不能由运行查找推导为已实现。证据见[服务端运行查找](../acceptance/server-run-history-2026-10-03.md)。
+
+普通规划取消增量已接入同一预算/项目锁与live claim：取消Run/Job、失效token、关联pending草案及幂等回执原子；可能已派发保留reconciliation，迟到Attempt回执继续记录，不自动恢复业务。内部claim不进入语义指纹/provider参数。完成事务在项目锁内识别本Run已确认publication，防止发布先完成被旧base CAS误记失败，其余base校验保留。UI原取消请求恢复、scope/迟到响应、真实PG/HTTP/Worker/Chrome门禁见[取消证据](../acceptance/planning-cancellation-2026-10-03.md)。无新迁移。用户转交闭环审查与三个内容候选只作为后续输入，完整闭环及正式教材仍待验证。
