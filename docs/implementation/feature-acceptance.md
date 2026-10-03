@@ -1,5 +1,7 @@
 # V2.0功能与验收矩阵
 
+2026-10-04 v6.2最新增量：F02/F03/F05/F15章级内容更新为AI2/Agent5/Cloud2，用户项目优先、Starter fallback、Agent开放专项组合及未命中补审、hold/审读门禁；F13修改目标与受控未来路线保留私人载体，旧Plan快照不变。F18沿用现有卡片/纯Prompt，仅修正optional/资料缺口展示。六场景普通认证/worker Fake/ownedPG/Chrome与独立新内容恢复PASS；本轮内容门禁READY，整体NOT_READY。原基线也复现的十项更宽测试失败、真实服务/RAG/产品库恢复/用户接受保留独立门禁。[本批证据与范围](../acceptance/v6-2-semantic-content-2026-10-04.md)。下文为历史功能矩阵，未核实项不自动升级。
+
 2026-10-03 v6.1最新增量：当前分支 feat/n1-resource-discovery；F03/F05/F15 已增加统一注册表、AI/Agent/Cloud最小包及确定性教学事实保留；F18 已接现有Plan.extensions项目卡片、统一纯Prompt复制与静态课程生产降级。详细章节深审按v6.1留后续，outline_checked/selected_scope_pending不等于深审正式课程。三代表正常HTTP/ownedPG/Chrome与旧专项回归PASS；闭环两实践/无实践和Outcome历史UI PASS。独立owned库原生备份恢复PASS1，63表及ACL/RLS/policies和原ID回读保留、全局角色不变，测试库清理PASS。真实模型/GitHub完整链/独立RAG/产品数据恢复/用户接受仍须相应门禁，整体NOT_READY；最新证据见[本批报告](../acceptance/v6-1-directions-project-study-2026-10-03.md)。下表较早事实保留溯源，不覆盖本最新补充。
 
 整体：NOT_READY。起点develop `aa37e4b`；当前工作分支 `feat/v2-g1-user-slice`。本表保留F01–F18完整范围，Implemented不表示全部子能力完成；Verified仅来自本轮实际运行。具体范围以 [指导§4](CODEX_GUIDANCE_V2.0.md) 为准。

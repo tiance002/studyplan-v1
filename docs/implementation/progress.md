@@ -1,5 +1,30 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 最新：v6.2 内容门禁 READY，整体 NOT_READY
+
+用户现在新增能做什么：三方向按已审章节生成、确认和回读；已有项目优先，Starter可替换；Agent 0..N专项组合，Voice缺口可见且不fatal，项目案例optional；修改目标与受控未来路线保留私人载体。六场景已走普通注册/Worker Fake/真实ownedPG/Chrome，原产品入口未部署。[完整验收、证据、风险和回滚](../acceptance/v6-2-semantic-content-2026-10-04.md)。
+
+实施SHA `168d9b4d674ac65030831c4781f946074e101d78`（主体0109b23，末次carrier经验排除168d9b4）；内容63a77a9、消费修复933441f；分支feat/n1-resource-discovery。N0实际841ef9e及固定cf153704祖先PASS，无reset。23原文哈希/Goal复制PASS；AI2/Agent5/Cloud2为下一版本，87阶段/知识、86来源实例/71不同catalog scope与12独立root候选、294章节、4hold排除，不是研究86条全导入。Migration/DTO/API/Graph/依赖NO；产品0023只读未写，repo0024沿用。
+
+最终unit/contract PASS840、NOT RUN2（Windows目录symlink权限）；六语义PG+Chrome/immutable旧Plan/hold/RLS/change_goal PASS9；未来新语义PG PASS1（Node exact keys/carrier、相同内容不制造新revision）；旧变更/取消/派发/history/闭环PG PASS61、NOT RUN6；显式Chrome闭环/history/cancel PASS6；checkpoint定向恢复PASS4；owned原生恢复PASS1（63表+ACL/RLS/policies、普通登录原文/成果/extensions、恢复模型调用0、两库清理）。Frontend13/Build62modules、Ruff/mypy8、diff/哈希PASS。重叠不累加，早期FAIL原样保留。
+
+更宽Auth/RLS/旧schema组合当前与原基线同样PASS51/FAIL10，ignored只读基线快照复现，不能写全绿；四项published migration downgrade错误留整体风险，不改旧迁移。受保护首轮87项PASS77/FAIL8/NOT RUN2，旧夹具/连带setup与checkpoint时序失败保留，相关最终定向如上。TOC参考仍剥离refs提供fallback，未升级审读/候选/工程运行资格。attempt6/7精确owned库名未捕获，独立回查NOT RUN，fixture/API/worker/socket/context退出PASS；root临时Vite已结束。
+
+真实付费模型/搜索/公网读取本轮0；模型23/50、搜索6/1000、unknown1与旧账不重置/重派。root请求Sol6.1/high、两有界Sol6.1/medium、只读Luna/high，实际解析NOT OBSERVABLE；Astra/max/全局配置不使用。无新远端SHA验证/推送、master/milestone。文档提交后的实际HEAD交付时动态读取，不冒充实施SHA。
+
+下一安全动作：正式入口只读配置/发布版本核对及用户体验准备；独立RAG契约、受许可真实服务、私人产品数据恢复和用户接受仍待门禁。普通代码授权持续。以下保留N0及历史时点。
+
+## 2026-10-04 最新：v6.2 N0 PASS、章节落地与语义薄适配实施中，整体 NOT_READY
+
+用户现在新增能做什么：本轮目标是深审章节教学、用户项目优先与可组合Recipe；新界面尚未声明已验收。最新权威[v6.2 Goal](STUDYPLAN_V6_2_SEMANTIC_CONTENT_GOAL_2026-10-04.md)，输入ZIP及23份哈希证据已保存，审计本地提交 `1b5a98c`。[真实schema映射](../reviews/2026-10-04-v6-2-n0-schema-mapping.md)。
+
+实际起点 `841ef9e31f0db70af238fa8c89796e3a5cf1c3e1`，分支 feat/n1-resource-discovery、跟踪clean、旧点祖先PASS，无reset。READ ONLY真实产品库0023、Agent1/Python1；Registry AI1/Agent4/Cloud1，下一合法AI2/Agent5/Cloud2。产品库未写入。优先现有JSONB、Guidance/resources/extensions/practice；不新增Migration/DTO/API/Graph/职业实体。
+
+纯选择/载体薄适配定向RED→GREEN：用户项目、3Recipe、Starter可替换、Voice/open标签缺口、旧包兼容、前置闭包、模型重引Starter合并防护；发布资格7个真实RED后门禁GREEN。相关unit共PASS20，不累加重复。新三包、六条ownedPG/Chrome、完整受影响回归本批仍NOT RUN，不能用unit声明新服务已上线。内容/PGChrome两位writer独立文件，root公共契约/整合唯一负责人；原v6.1证据保留。
+
+模型23/50、搜索6/1000、旧unknown及元数据账本不重置，本轮新增真实付费/外部搜索0。请求root Sol6.1/high、两个有界Sol6.1/medium、只读Luna/high；实际解析NOT OBSERVABLE，无Astra/max/全局设置。下一安全动作三新包受控校验、语义PG/Chrome与immutable旧计划回归；普通实施不重复询问。以下为历史时点。
+
+
 ## 2026-10-03 最新：v6.1 P1–P7 实施通过、P8回归收口，整体 NOT_READY
 
 用户现在新增能做什么：代码支持 AI Fullstack/Agent/Cloud 最小路线，草案中可读教学与持续实践安排，正式学习阶段可查看项目重点/深度/比较问题并“复制给AI”。只认已发布Plan，静态课程生产入口隐藏。已在普通注册、Worker Fake、ownedPG与Chrome验证；原产品环境未部署。

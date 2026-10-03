@@ -2,6 +2,8 @@
 
 ## 当前续接入口（2026-10-02）
 
+2026-10-04 用户批准 [v6.2 语义内容落地 Goal](docs/implementation/STUDYPLAN_V6_2_SEMANTIC_CONTENT_GOAL_2026-10-04.md) 为最新入口。先已完成最新 HEAD 只读 N0/schema映射，保留v6.1能力；把语义校正版23份研究证据映射为AI2/Agent5/Cloud2下一版本，用户项目优先、Starter仅fallback、开放0..N Recipe、未命中补审、项目案例optional、4hold排除。新内容默认无迁移/DTO/API/Graph重写/clone/index，不覆写旧包或已冻结Run，持续按授权实施。产品写入和真实费用门禁保持，详见审计与唯一progress。
+
 2026-10-03 用户批准 [v6.1 截止期优化 Goal](docs/implementation/STUDYPLAN_V6_1_DEADLINE_GOAL_2026-10-03.md) 为最新实施入口。已在最新 HEAD 完成只读 N0/P0；连续推进统一 CURRENT_PACKS、审核事实保留、AI/Agent/Cloud 最小包及现有 extensions 项目卡片/纯 Prompt，正式路线只认已发布 Plan。不重做已通过能力、不 reset；本批不新增迁移/API/clone/索引/固定 commit 或源码文件。
 
 2026-10-03 用户进一步调整恢复规则：Luna 所有实际可用档位自由使用；Sol 6.1 主协调/high、有界实现/medium，有证据的难题使用 xhigh，max 不使用；6Astra 继续停用。按任务风险显式选择并记录请求 model/effort，无法核实实际解析时记 NOT OBSERVABLE。此条覆盖下方恢复记录中 Luna 固定 max 的限制；快速模式临时请求仍已结束，产品费用与外部操作门禁不变。
