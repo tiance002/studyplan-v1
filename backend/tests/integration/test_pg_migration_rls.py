@@ -109,7 +109,20 @@ def test_all_private_tables_enable_and_force_rls(migrated_db: PgTestDatabase) ->
             WHERE n.nspname='public' AND c.relkind='r'
             """
         ).fetchall()
-    private = {name: (enabled, forced) for name, enabled, forced in rows if name != "alembic_version"}
+    # These singleton counters contain deployment-wide budget totals, not
+    # actor/project content (0013/0024). Every other table retains the RLS gate.
+    global_tables = {"alembic_version", "search_usage_counter", "resource_read_usage_counter"}
+    with psycopg.connect(migrated_db.migrator_dsn) as conn:
+        for table, expected in (
+            ("search_usage_counter", {"singleton", "request_count"}),
+            ("resource_read_usage_counter", {"singleton", "content_reserved", "metadata_reserved"}),
+        ):
+            columns = {r[0] for r in conn.execute(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_schema='public' AND table_name=%s", (table,),
+            ).fetchall()}
+            assert columns == expected, f"{table} must remain a global budget-only singleton"
+    private = {name: (enabled, forced) for name, enabled, forced in rows if name not in global_tables}
     for name, (enabled, forced) in private.items():
         assert enabled, f"{name} 未启用 RLS"
         assert forced, f"{name} 未启用 FORCE ROW LEVEL SECURITY"

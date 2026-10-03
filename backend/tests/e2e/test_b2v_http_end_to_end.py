@@ -111,15 +111,17 @@ def migrated_db() -> PgTestDatabase:
         )
         conn.execute(
             "INSERT INTO public_resource_sources"
-            "(source_id,canonical_url,title,creator,media_type,language,source_version) "
-            "VALUES (%s,'https://example.com/b2v-course','B2V 示例课程','示例作者','course','zh',1)",
+            "(source_id,canonical_url,title,creator,media_type,language,source_version,"
+            "documentation_version,verification_status,checked_at) "
+            "VALUES (%s,'https://example.com/b2v-course','B2V 示例课程','示例作者','course','zh',1,"
+            "'B2V v1','reviewed','2026-09-29T00:00:00Z')",
             (PUBLIC_SOURCE,),
         )
         conn.execute(
             "INSERT INTO public_resource_sections"
-            "(section_id,source_id,order_index,title,url,anchor) VALUES "
-            "(%s,%s,0,'第一章 环境','https://example.com/b2v-course#1','c1'), "
-            "(%s,%s,1,'第二章 第一个脚本','https://example.com/b2v-course#2','c2')",
+            "(section_id,source_id,order_index,title,url,anchor,verification_status,checked_at) VALUES "
+            "(%s,%s,0,'第一章 环境','https://example.com/b2v-course#1','c1','reviewed','2026-09-29T00:00:00Z'), "
+            "(%s,%s,1,'第二章 第一个脚本','https://example.com/b2v-course#2','c2','reviewed','2026-09-29T00:00:00Z')",
             (PUBLIC_SECTIONS[0], PUBLIC_SOURCE, PUBLIC_SECTIONS[1], PUBLIC_SOURCE),
         )
     try:
@@ -163,6 +165,7 @@ def db(migrated_db: PgTestDatabase) -> PgTestDatabase:
 # 本套用例验收的是「草案 → 确认 → 发布」链路，而不是领域包的规模。因此显式注入
 # 一个**两阶段**的受审核包，使生成的批次与断言一一对应；生产组合根仍使用
 # ``select_domain_pack``（Agent 方向为九阶段）。
+# 当前契约由 stage_blueprints 冻结资源/扩展事实，模型纲要不能独自声明它们。
 #
 # ``MISSING_SOURCE`` 出现在受审核清单与本包 ``resources`` 中，但**不写入**测试库：
 # 因此落库前必须显式降级为搜索建议，绝不编造已核验章节。
@@ -181,6 +184,15 @@ _B2V_PACK: dict[str, Any] = {
             "section_kind": "foundation",
             "objective": "搭好环境，能跑通第一个脚本",
             "node_keys": ["node.python.env"],
+            "resources": [{"role": "primary", "source_ref": PUBLIC_SOURCE,
+                           "section_refs": list(PUBLIC_SECTIONS), "order_index": 0,
+                           "source_version": 1, "fallback_search_terms": []}],
+            "extensions": [{"topic": "关系型数据库认识与对比",
+                            "concepts": ["基本特点", "典型适用场景"],
+                            "guidance": "了解 SQLite / PostgreSQL / MySQL 的典型适用场景",
+                            "links": [], "search_hints": ["关系型数据库对比 入门"],
+                            "thinking_prompts": ["多人同时写入？"], "required": False,
+                            "order_index": 0}],
         },
         {
             "stable_key": "stage.core",
@@ -188,6 +200,9 @@ _B2V_PACK: dict[str, Any] = {
             "section_kind": "core",
             "objective": "实现 PDF 文本解析",
             "node_keys": ["node.pdf.parse"],
+            "resources": [{"role": "primary", "source_ref": MISSING_SOURCE,
+                           "section_refs": [MISSING_SECTION], "order_index": 0,
+                           "source_version": 0, "fallback_search_terms": []}],
         },
     ],
     "knowledge_blueprints": [

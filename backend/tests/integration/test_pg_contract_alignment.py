@@ -414,7 +414,13 @@ def _entity_table_pairs() -> list[tuple[type, str]]:
 
 #: 不落成同名列的领域字段：复合结构存于 jsonb（`structure`/`payload`），
 #: 或为纯派生/时间字段。其 jsonb 载体列在 `test_composite_structure_carrier_columns_exist` 断言。
-_NON_COLUMN_FIELDS: dict[str, set[str]] = {}
+_JSONB_FIELD_CARRIERS = {
+    "PlanStage": {"learning_guidance": ("plan_revisions", "structure")},
+    "ResourceRecord": {"discovery": ("learning_resource_selections", "resource_snapshot")},
+}
+_NON_COLUMN_FIELDS: dict[str, set[str]] = {
+    entity: set(fields) for entity, fields in _JSONB_FIELD_CARRIERS.items()
+}
 
 
 @pytest.mark.parametrize(
@@ -425,7 +431,7 @@ _NON_COLUMN_FIELDS: dict[str, set[str]] = {}
 def test_domain_entity_fields_have_columns(
     migrated_db: PgTestDatabase, entity_cls: type, table: str
 ) -> None:
-    """domain/schema 对齐矩阵：领域实体每个字段都必须有同名列。
+    """domain/schema 对齐矩阵：标量字段落列，复合字段须有明确 JSONB 载体。
 
     新增字段而忘了迁移时，本测试会失败——这是防止再次出现 P1-03 的护栏。
     """
@@ -445,3 +451,14 @@ def test_composite_structure_carrier_columns_exist(migrated_db: PgTestDatabase) 
     """``PlanRevision``/``PlanDraft`` 的复合结构存于 jsonb，载体列必须存在。"""
     assert "structure" in _columns(migrated_db, "plan_revisions")
     assert "payload" in _columns(migrated_db, "plan_drafts")
+    # Optional nested values use existing snapshots, rather than new scalar
+    # columns. Check their actual JSONB carriers instead of silently skipping.
+    with psycopg.connect(migrated_db.migrator_dsn) as conn:
+        for fields in _JSONB_FIELD_CARRIERS.values():
+            for table, column in fields.values():
+                row = conn.execute(
+                    "SELECT data_type FROM information_schema.columns "
+                    "WHERE table_schema='public' AND table_name=%s AND column_name=%s",
+                    (table, column),
+                ).fetchone()
+                assert row == ("jsonb",), f"{table}.{column} must carry the nested snapshot"

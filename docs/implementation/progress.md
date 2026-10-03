@@ -1,5 +1,21 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 最新：v6.1续接审计PASS，RC真实副本基础演练PASS，STAGING_BLOCKED / NOT_READY
+
+用户现在新增能做什么：在 [5179只读副本](http://127.0.0.1:5179/) 用原正常账号登录，查看恢复的学习空间/路线/历史、刷新/重新登录；当前不开放生成/确认/保存。真实产品库未修改、正式日常入口未切换。当前源码三方向/纯Prompt/已有项目优先/Recipe/当前UI与自动阶段完成均复用，不重新开发已通过能力。
+
+N0实际 `161bacd5fa3e88c566b806697ebe52ef34cb6456`、feat/n1-resource-discovery；固定cf153704祖先PASS。Downloads v6.1指定文件已不存在，读取仓库归档；[最新N0/P0差异审计](../reviews/2026-10-04-v6-1-resume-n0-p0-audit.md)。进入时三个RC测试文件已有修改，保留；两禁目录不处理、无reset/checkout/历史改写/remote push/develop/master集成。普通实施授权连续执行；当前 [RC Goal](STUDYPLAN_V6_3_RC_CLOSURE_GOAL_2026-10-04.md) 原产品/费用STOP不扩大。
+
+RC-A [preflight](../reviews/2026-10-04-v6-3-formal-entry-preflight.md) SAFE_TO_STAGE（仅副本）。原日常前端/API/Worker当前停止；正常脚本默认5175/8022。源.env数据库0023、61表1517行、13user/18space、12plan revision/14publication、Summary/Prompt/Submission/Review0；已发布Agent1/Python1。源只读检查与原生snapshot backup、native restore到新owned studyplan_test_v63_realcopy_a798a903 PASS；全表计数/摘要、columns/ACL/RLS/policies/schema ACL一致。副本动态upgrade head0024 PASS，官方immutable导入AI2/Agent5/Cloud2 PASS；旧pack/所有私人表/history、源库最终snapshot保持PASS。App-role PG catalog/private manifest/guidance消费PASS，真实用户普通登录及历史页面回读NOT RUN；不能用账号存在/匿名页代替。副本5179/PID33136、8024/PID20012为本次快照，Worker OFF/外部key disabled/业务写403。
+
+新配置blocker：`.env`部署output cap8000小于structure/repair8192，绑定预算gate FAIL、请求dispatch0；staging候选8192离线PASS，未改原.env。已明确写入 [staging/rollback方案](../reviews/2026-10-04-v6-3-staging-plan.md)。不拿基线相同免责，RC-C10个宽FAIL [分类](../reviews/2026-10-04-v6-3-baseline-failure-triage.md) A0/B6/C4/D0；六个B先RED6后修fixture/载体断言PASS7，相邻PG/HTTP/RLS59 PASS与最后singleton严格gate1 PASS；四个C根因0022→0021 policy依赖actor_id，原FAIL保留、不改published migration。正常forward-only/backup restore回滚，不伪造全宽绿。
+
+本轮最终unit/contract PASS840、NOT RUN2（842总、symlink权限；39.34s）；新Auth/入口/普通用户ownedPG PASS10；frontend PASS13/build62 modules；匿名Chrome真实5179→8024→restoredPG smoke PASS，首轮旧health字段断言FAIL后只改检查脚本，非业务问题。Checkpoint相关代码未变、沿用v6.2 PASS4，本次NOT RUN。新迁移/API/DTO/Graph/依赖/产品功能 NO。源码只改三个stale测试文件，其余为文档/ignored本机证据。
+
+RAG只读16次本机GET尝试，唯一在线18086，现有配置不能证明用户常用，NEEDS_USER_INSTANCE_SELECTION；没有pure retrieve/auth/caller tenant/citation/error timeout完整契约，[报告](../reviews/2026-10-04-v6-3-rag-contract-status.md)。[收费代表计划](../reviews/2026-10-04-v6-3-paid-representative-plan.md)：建议单独新synthetic库的Agent6阶段1Run、正常13请求/最大15（含repair2）、output94208，当前执行0，不自动批准用户草案。模型23/50、搜索6/1000、unknown1原账保留，不重置/重派；GitHub/Tavily公网新增0。Root请求Sol/high、有界fixtureSol/medium、RAG只读Luna/high，实际NOT OBSERVABLE；无Astra/max/全局设置。
+
+已备 [用户12步体验清单](../acceptance/USER_ACCEPTANCE_CHECKLIST_2026-10-04.md)，由用户接受，不代执行。当前剩余最小动作是用户在副本私下登录/看旧历史/刷新重登录；后续正式cap/原库staging/收费代表/RAG合同分别有门禁。缺用户密码不伪会话、不重置hash；独立代码/资料工作已推进。当前STAGING_BLOCKED、整体NOT_READY；文档提交后真实HEAD动态读取，不猜SHA，不推送。
+
 ## 2026-10-04 最新：v6.2 内容门禁 READY，整体 NOT_READY
 
 用户现在新增能做什么：三方向按已审章节生成、确认和回读；已有项目优先，Starter可替换；Agent 0..N专项组合，Voice缺口可见且不fatal，项目案例optional；修改目标与受控未来路线保留私人载体。六场景已走普通注册/Worker Fake/真实ownedPG/Chrome，原产品入口未部署。[完整验收、证据、风险和回滚](../acceptance/v6-2-semantic-content-2026-10-04.md)。
