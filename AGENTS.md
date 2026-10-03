@@ -2,6 +2,8 @@
 
 ## 当前续接入口（2026-10-02）
 
+2026-10-03 用户批准 [v6.1 截止期优化 Goal](docs/implementation/STUDYPLAN_V6_1_DEADLINE_GOAL_2026-10-03.md) 为最新实施入口。已在最新 HEAD 完成只读 N0/P0；连续推进统一 CURRENT_PACKS、审核事实保留、AI/Agent/Cloud 最小包及现有 extensions 项目卡片/纯 Prompt，正式路线只认已发布 Plan。不重做已通过能力、不 reset；本批不新增迁移/API/clone/索引/固定 commit 或源码文件。
+
 2026-10-03 用户进一步调整恢复规则：Luna 所有实际可用档位自由使用；Sol 6.1 主协调/high、有界实现/medium，有证据的难题使用 xhigh，max 不使用；6Astra 继续停用。按任务风险显式选择并记录请求 model/effort，无法核实实际解析时记 NOT OBSERVABLE。此条覆盖下方恢复记录中 Luna 固定 max 的限制；快速模式临时请求仍已结束，产品费用与外部操作门禁不变。
 
 2026-10-03 用户已明确说“恢复原计划”：临时开发模型档位授权与快速服务模式请求结束。恢复 [原动态模型路由](docs/execution/model-routing-policy.md)：主协调/HARD `gpt-6.1-sol/high`、有界实现/NORMAL `gpt-6.1-sol/medium`、低风险/FAST `gpt-6-luna/max`。6Astra 停用继续有效，不因恢复而重新授权。当前工具无法切换主会话模型或快速/标准服务模式，实际解析不可观测时如实记录，不宣称已切换、不改全局配置。此恢复仅调整开发执行偏好，不撤销10月6日交付Goal、续接分支例外、既有成果或产品费用/外部操作门禁；下文临时授权文字保留溯源，以本条为当前规则。

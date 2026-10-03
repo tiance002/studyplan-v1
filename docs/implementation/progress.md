@@ -1,5 +1,29 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-03 最新：v6.1 P1–P7 实施通过、P8回归收口，整体 NOT_READY
+
+用户现在新增能做什么：代码支持 AI Fullstack/Agent/Cloud 最小路线，草案中可读教学与持续实践安排，正式学习阶段可查看项目重点/深度/比较问题并“复制给AI”。只认已发布Plan，静态课程生产入口隐藏。已在普通注册、Worker Fake、ownedPG与Chrome验证；原产品环境未部署。
+
+业务本地SHA `8a05cae60153b4af6c7a830668053af3d6d8d3f2`，分支 feat/n1-resource-discovery，固定参考祖先PASS。Migration NO；Plan.extensions直接传递，不改DTO/API/worker/事务/自动阶段完成。旧专项、Python v2与Agent v3保留；新Agent v4/AI v1/Cloud v1为outline_checked/selected_scope_pending，详细内容深审按v6.1留后续。[详细证据与回滚](../acceptance/v6-1-directions-project-study-2026-10-03.md)。
+
+验证：unit/contract PASS795、NOT RUN2；三代表目标+Seed真实PG/HTTP/Chrome PASS10；最新Chrome三目标PASS1；旧专项三目标Chrome PASS1；恢复PG最终PASS4，原受保护PG组合FAIL53中仅两夹具旧计数失败，其余49未受影响，不改写原命令结果。Frontend13/build62modules、Mock开发/生产卡片、Ruff/mypy/diff/Goal复制PASS。闭环新增两实践/无实践Chrome PASS1及Outcome UI+受影响主链PASS1。独立ownedPG原生custom备份恢复PASS1（v61-restore-opt-in-final.xml），63表与ACL/RLS/policies精确保留、普通登录原ID回读、恢复模型调用0、两个临时库清理PASS。真实服务/产品数据恢复/用户接受本批NOT RUN。重叠不累加，早期FAIL均保留。
+
+模型23/50、搜索6/1000、unknown1及旧README2不重置；真实收费模型/Tavily/GitHub API本批0。13次免费公共网页open含3仓库根元数据，3/6已追加原GitHub账本，不深读/clone/执行源码。开发请求Sol high/medium、Luna high复核，实际解析NOT OBSERVABLE；无Astra/Sol max/全局设置。
+
+未推送/核实新远端SHA，不接受milestone/master。文档提交后HEAD续接动态读取。下一安全动作内容范围深审与正式入口准备；owned恢复已完成，私人产品数据恢复不作已验收声明；缺外部RAG契约/真实费用许可只暂停相关支线，不删除需求。下文为历史时点。
+
+## 2026-10-03 最新：v6.1 N0/P0 PASS，连续实施中，整体 NOT_READY
+
+用户现在新增能做什么：本轮正在收口三个主方向与项目学习卡片，尚未声明新界面已通过验收。最新权威为 [v6.1 Goal](STUDYPLAN_V6_1_DEADLINE_GOAL_2026-10-03.md)，保留既有 RAG/Coding/Workflow 专项包和学习闭环。
+
+只读基线 HEAD `6621b89df37d334bd01fd0566622e1d9903f8f3f`，分支 `feat/n1-resource-discovery`，固定参考祖先 PASS；跟踪文件 clean，禁操作目录不处理。repo migration head0024 PASS，本批不新增迁移/DTO/API，产品库本次 NOT RUN。PlanView 已有 extensions，采用前端直接 stage_id 过滤。[差异审计](../reviews/2026-10-03-v6-1-n0-p0-audit.md)记录单一注册表、审核事实丢失风险与静态课程入口漂移。
+
+责任：root 单一整合 CURRENT_PACKS/Seed/确定性合并/资源保留及门禁；两个有界 worker 请求 Sol6.1/medium 分别拥有新三包+内容单元测试、前端纯 Prompt+项目卡片+静态预览降级，root 在两人业务编辑期间只做只读审计/文档，不写业务代码。实际 model/effort NOT OBSERVABLE；无 Astra/Sol max/全局设置操作。
+
+已有证据复用：direction-unit-final PASS180、direction-pg-first PASS4；current-loop PASS3/browser-final PASS1，模型 Fake + ownedPG。上一方向浏览器最后 FAIL1（刷新/移动端阶段定位器超时），不能标通过。闭环两实践/无实践浏览器和 Outcome history UI NOT RUN，已有 PG PASS 不替代。新 v6.1 业务/PG/浏览器本次 NOT RUN。
+
+模型产品23/50、搜索6/1000、unknown1及旧README2不重置；本批收费调用/产品搜索新增0。详细内容深审留后续内容生产，AI/Cloud允许入口索引核对与 selected_scope_pending，不伪造章节深审。保留真实外部接口、恢复演练、用户接受的独立门禁，整体 NOT_READY。下一安全动作连续 P1–P7，不重复普通代码授权。
+
 ## 2026-10-03 最新：普通规划取消与审查输入，整体NOT_READY
 
 用户现在新增能做什么：排队/运行中规划可显式取消；503保留原请求、刷新不自动提交；取消后可明确创建新运行，可能已派发则待核对并阻止再生成。真实正常登录/HTTP/Worker/ownedPG/Chrome验证运行中取消、刷新/重登录和零重派，模型Fake；原产品环境未部署。

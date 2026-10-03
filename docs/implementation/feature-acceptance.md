@@ -1,5 +1,7 @@
 # V2.0功能与验收矩阵
 
+2026-10-03 v6.1最新增量：当前分支 feat/n1-resource-discovery；F03/F05/F15 已增加统一注册表、AI/Agent/Cloud最小包及确定性教学事实保留；F18 已接现有Plan.extensions项目卡片、统一纯Prompt复制与静态课程生产降级。详细章节深审按v6.1留后续，outline_checked/selected_scope_pending不等于深审正式课程。三代表正常HTTP/ownedPG/Chrome与旧专项回归PASS；闭环两实践/无实践和Outcome历史UI PASS。独立owned库原生备份恢复PASS1，63表及ACL/RLS/policies和原ID回读保留、全局角色不变，测试库清理PASS。真实模型/GitHub完整链/独立RAG/产品数据恢复/用户接受仍须相应门禁，整体NOT_READY；最新证据见[本批报告](../acceptance/v6-1-directions-project-study-2026-10-03.md)。下表较早事实保留溯源，不覆盖本最新补充。
+
 整体：NOT_READY。起点develop `aa37e4b`；当前工作分支 `feat/v2-g1-user-slice`。本表保留F01–F18完整范围，Implemented不表示全部子能力完成；Verified仅来自本轮实际运行。具体范围以 [指导§4](CODEX_GUIDANCE_V2.0.md) 为准。
 
 | ID | 功能 | 状态 | 已有事实 / 仍须交付与实证 |
