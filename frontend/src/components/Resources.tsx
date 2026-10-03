@@ -31,7 +31,10 @@ export function Resources({
               <span className="pill">{roleLabels[item.role] ?? "未知资料角色"}</span>
             </a>
           ))}
-          {(!item.ordered_sections?.length || item.verification_status === "unverified") && (
+          {item.role === 'case_study' && item.media_type === 'repo' && item.source_ref && item.verification_status !== 'unverified' && !item.ordered_sections?.length && (
+            <div className="resource-row"><span className="resource-icon">↗</span><span><strong>项目学习</strong><small>仓库入口已收录；具体阅读范围待根据当前源码确认。请查看该阶段的项目学习安排。</small></span><span className="pill">案例</span></div>
+          )}
+          {(!item.ordered_sections?.length || item.verification_status === "unverified") && !(item.role === 'case_study' && item.media_type === 'repo' && item.source_ref && item.verification_status !== 'unverified') && (
             <div className="resource-row">
               <span className="resource-icon">⌕</span>
               <span>

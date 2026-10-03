@@ -488,6 +488,16 @@ def merge_batches(
         # The model cannot invent previously learned relationships or source proof.
         section.pop("learning_guidance", None)
         if blueprint is not None:
+            allowed_sources = set(pack.get("resource_refs") or [])
+            for resource in section.get("resources") or []:
+                if resource.get("source_ref") and resource["source_ref"] not in allowed_sources:
+                    errors.append("资源来源未在受审核清单中：" + str(resource["source_ref"]))
+            # Curated facts survive omitted/rewritten model output. Personal
+            # titles/objectives remain; model-authored material cannot replace
+            # the pack's primary/comparison/case study or extension instructions.
+            section["section_kind"] = blueprint.get("section_kind", "core")
+            section["resources"] = deepcopy(blueprint.get("resources") or [])
+            section["extensions"] = deepcopy(blueprint.get("extensions") or [])
             previous = blueprints.get(sections[index - 1].get("stable_key")) if index else None
             frozen: dict[str, Any] = next((s for s in (manifest or {}).get("stages", [])
                            if s["stage_key"] == section.get("stable_key")), {})

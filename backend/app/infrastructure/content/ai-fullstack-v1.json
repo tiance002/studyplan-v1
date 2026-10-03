@@ -1,0 +1,510 @@
+{
+  "pack_key": "ai.fullstack",
+  "version": 1,
+  "status": "published",
+  "title": "AI 全栈：从 Web 到自己的资料工作台",
+  "supported_scope": "初学者最小进入能力：会操作浏览器、编辑文件；无需预先同时掌握 JS、Python 和数据库语言；同一贯穿项目：AI 资料工作台。只提供最小路线，深度章节范围待确认。",
+  "resource_support": "reviewed_index",
+  "provenance": "v6.1 minimal curriculum outline 2026-10-03. Public official entries/root titles checked using bounded free web opens; legacy_index means entry/index only, NOT a deep teaching/source audit. No repo clone, fixed commit or file mapping. Internal source versions are independent of upstream versions. No provider, cloud or example execution.",
+  "stage_blueprints": [
+    {
+      "stable_key": "stage.web",
+      "title": "Web 基础与交互",
+      "section_kind": "foundation",
+      "objective": "先理解页面、用户输入与请求响应，JavaScript 在主线内按需学习",
+      "inclusion": "required",
+      "node_keys": [
+        "node.web"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_ai_fullstack_web_v1",
+          "section_refs": [
+            "sec_ai_fullstack_web_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.web"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "先理解页面、用户输入与请求响应，JavaScript 在主线内按需学习",
+        "previous_relation": "会操作浏览器、编辑文件；无需预先同时掌握 JS、Python 和数据库语言",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.web"
+        ],
+        "learning_focus": [
+          "HTML 与页面结构",
+          "JavaScript 表单交互",
+          "请求响应认知"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "会操作浏览器、编辑文件；无需预先同时掌握 JS、Python 和数据库语言"
+        ],
+        "practice_prerequisites": [
+          "从最小进入能力开始建立同一 AI 资料工作台"
+        ],
+        "practice_delta": {
+          "baseline": "从最小进入能力开始建立同一 AI 资料工作台",
+          "increment": [
+            "制作资料列表与输入表单，用本地样例练习页面交互"
+          ],
+          "preserved": [
+            "保留同一 AI 资料工作台 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "表单空输入明确提示；列表与详情可访问；记录测试输入和结果"
+          ],
+          "reuse": [
+            "后续继续同一 AI 资料工作台，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.own_project",
+      "title": "自己的资料工作台 API",
+      "section_kind": "core",
+      "objective": "先做自己的可运行项目，再接入生成式能力；Python 与持久化按实际缺口补齐",
+      "inclusion": "required",
+      "node_keys": [
+        "node.own_project"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_ai_fullstack_api_v1",
+          "section_refs": [
+            "sec_ai_fullstack_api_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.own_project"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "先做自己的可运行项目，再接入生成式能力；Python 与持久化按实际缺口补齐",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：为同一资料工作台增加本地 API 与记录保存；先用文件或简单存储，SQL 在选用关系库时再学。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.own_project"
+        ],
+        "learning_focus": [
+          "API 输入校验",
+          "错误响应",
+          "资料保存与读取"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 AI 资料工作台 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 AI 资料工作台 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "为同一资料工作台增加本地 API 与记录保存；先用文件或简单存储，SQL 在选用关系库时再学"
+          ],
+          "preserved": [
+            "保留同一 AI 资料工作台 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "新增、查询与不存在的记录有明确响应；重启不丢样例记录"
+          ],
+          "reuse": [
+            "后续继续同一 AI 资料工作台，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.genai",
+      "title": "GenAI 接入同一工作台",
+      "section_kind": "core",
+      "objective": "已有 Web 和 API 后学习模型消息、工具与输出校验，避免先读整门 GenAI 课程",
+      "inclusion": "required",
+      "node_keys": [
+        "node.genai"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_ai_fullstack_genai_v1",
+          "section_refs": [
+            "sec_ai_fullstack_genai_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.genai"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "已有 Web 和 API 后学习模型消息、工具与输出校验，避免先读整门 GenAI 课程",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：在同一资料工作台接入可替换模型适配；先用 Fake 验证摘要、错误和取消边界。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.genai"
+        ],
+        "learning_focus": [
+          "模型消息",
+          "输出校验",
+          "费用与隐私边界"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 AI 资料工作台 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 AI 资料工作台 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "在同一资料工作台接入可替换模型适配；先用 Fake 验证摘要、错误和取消边界"
+          ],
+          "preserved": [
+            "保留同一 AI 资料工作台 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "Fake 摘要可显示；失败保留原文；未经许可不调用真实模型"
+          ],
+          "reuse": [
+            "后续继续同一 AI 资料工作台，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.repo",
+      "title": "真实全栈项目对照学习",
+      "section_kind": "core",
+      "objective": "自己的项目已形成后再对照真实全栈工程结构",
+      "inclusion": "required",
+      "node_keys": [
+        "node.repo"
+      ],
+      "resources": [
+        {
+          "role": "case_study",
+          "source_ref": "src_ai_fullstack_ai_repo_v1",
+          "section_refs": [],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.repo"
+          ]
+        }
+      ],
+      "extensions": [
+        {
+          "topic": "项目学习：Full Stack FastAPI Template",
+          "concepts": [
+            "前后端边界",
+            "数据与 API 层",
+            "测试组织"
+          ],
+          "guidance": "为什么现在：已有同一项目可对照，现在理解真实项目如何组织这些能力。\n学习深度：先建立项目地图，再按本阶段目标动态拆解 3–8 个切片；能解释调用边界、失败行为与权衡即可。\n暂不涉及：逐函数通读、框架全部实现、固定历史版本、自动源码索引；只迁移最多 1–2 项适合当前项目的机制。",
+          "links": [
+            "https://github.com/fastapi/full-stack-fastapi-template"
+          ],
+          "search_hints": [],
+          "thinking_prompts": [
+            "真实项目与自己的项目如何组织输入、输出及失败边界？",
+            "哪些机制只是版本或规模差异，哪些是本阶段的新知识？",
+            "最多选择 1–2 项机制迁移回同一 AI 资料工作台，如何用现有测试验证收益？"
+          ],
+          "required": false,
+          "order_index": 0
+        }
+      ],
+      "learning_guidance": {
+        "why_now": "自己的项目已形成后再对照真实全栈工程结构",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：阅读真实项目结构，最多迁移 1–2 项输入校验或测试组织机制回同一工作台。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.repo"
+        ],
+        "learning_focus": [
+          "前后端边界",
+          "数据与 API 层",
+          "测试组织"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 AI 资料工作台 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 AI 资料工作台 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "阅读真实项目结构，最多迁移 1–2 项输入校验或测试组织机制回同一工作台"
+          ],
+          "preserved": [
+            "保留同一 AI 资料工作台 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "保存项目地图与源码事实依据；迁移前后同一测试通过"
+          ],
+          "reuse": [
+            "后续继续同一 AI 资料工作台，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    }
+  ],
+  "knowledge_blueprints": [
+    {
+      "stable_key": "node.web",
+      "title": "Web 基础与交互",
+      "node_type": "concept",
+      "prerequisite_keys": []
+    },
+    {
+      "stable_key": "node.own_project",
+      "title": "自己的资料工作台 API",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.web"
+      ]
+    },
+    {
+      "stable_key": "node.genai",
+      "title": "GenAI 接入同一工作台",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.own_project"
+      ]
+    },
+    {
+      "stable_key": "node.repo",
+      "title": "真实全栈项目对照学习",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.genai"
+      ]
+    }
+  ],
+  "practice_blueprints": [
+    {
+      "stable_key": "practice.web",
+      "title": "AI 资料工作台：Web 基础与交互",
+      "section_key": "stage.web",
+      "goal": "制作资料列表与输入表单，用本地样例练习页面交互",
+      "acceptance": [
+        "表单空输入明确提示；列表与详情可访问；记录测试输入和结果"
+      ],
+      "node_keys": [
+        "node.web"
+      ],
+      "in_scope": [
+        "HTML 与页面结构",
+        "JavaScript 表单交互",
+        "请求响应认知"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.own_project",
+      "title": "AI 资料工作台：自己的资料工作台 API",
+      "section_key": "stage.own_project",
+      "goal": "为同一资料工作台增加本地 API 与记录保存；先用文件或简单存储，SQL 在选用关系库时再学",
+      "acceptance": [
+        "新增、查询与不存在的记录有明确响应；重启不丢样例记录"
+      ],
+      "node_keys": [
+        "node.own_project"
+      ],
+      "in_scope": [
+        "API 输入校验",
+        "错误响应",
+        "资料保存与读取"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.genai",
+      "title": "AI 资料工作台：GenAI 接入同一工作台",
+      "section_key": "stage.genai",
+      "goal": "在同一资料工作台接入可替换模型适配；先用 Fake 验证摘要、错误和取消边界",
+      "acceptance": [
+        "Fake 摘要可显示；失败保留原文；未经许可不调用真实模型"
+      ],
+      "node_keys": [
+        "node.genai"
+      ],
+      "in_scope": [
+        "模型消息",
+        "输出校验",
+        "费用与隐私边界"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.repo",
+      "title": "AI 资料工作台：真实全栈项目对照学习",
+      "section_key": "stage.repo",
+      "goal": "阅读真实项目结构，最多迁移 1–2 项输入校验或测试组织机制回同一工作台",
+      "acceptance": [
+        "保存项目地图与源码事实依据；迁移前后同一测试通过"
+      ],
+      "node_keys": [
+        "node.repo"
+      ],
+      "in_scope": [
+        "前后端边界",
+        "数据与 API 层",
+        "测试组织"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "source_id": "src_ai_fullstack_web_v1",
+      "canonical_url": "https://developer.mozilla.org/en-US/docs/Learn_web_development",
+      "title": "MDN Learn web development",
+      "creator": "MDN",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_ai_fullstack_web_entry_v1",
+          "title": "MDN Learn web development：教程入口（章节范围待确认）",
+          "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.web"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_ai_fullstack_api_v1",
+      "canonical_url": "https://fastapi.tiangolo.com/tutorial/",
+      "title": "FastAPI Tutorial - User Guide",
+      "creator": "FastAPI",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_ai_fullstack_api_entry_v1",
+          "title": "FastAPI Tutorial - User Guide：教程入口（章节范围待确认）",
+          "url": "https://fastapi.tiangolo.com/tutorial/",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.own_project"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_ai_fullstack_genai_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/overview",
+      "title": "LangChain overview",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_ai_fullstack_genai_entry_v1",
+          "title": "LangChain overview：教程入口（章节范围待确认）",
+          "url": "https://docs.langchain.com/oss/python/langchain/overview",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.genai"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_ai_fullstack_ai_repo_v1",
+      "canonical_url": "https://github.com/fastapi/full-stack-fastapi-template",
+      "title": "Full Stack FastAPI Template",
+      "creator": "FastAPI",
+      "media_type": "repo",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": []
+    }
+  ],
+  "resource_refs": [
+    "src_ai_fullstack_web_v1",
+    "src_ai_fullstack_api_v1",
+    "src_ai_fullstack_genai_v1",
+    "src_ai_fullstack_ai_repo_v1"
+  ],
+  "required_node_keys": [
+    "node.web",
+    "node.own_project",
+    "node.genai",
+    "node.repo"
+  ],
+  "curriculum_review": {
+    "date": "2026-10-03",
+    "status": "outline_checked",
+    "review_status": "selected_scope_pending",
+    "practice_execution": "NOT RUN",
+    "provider_execution": "NOT RUN",
+    "limitations": [
+      "仅核对公开官方入口、标题与主题适配；不声明逐段深读或完整课程质量审核",
+      "教程入口章节为目录提示，详细章节选择和实现版本兼容性待深审",
+      "资料阅读免费；实际模型 API、云部署、Actions 等运行可能收费，需另行许可",
+      "源码阶段使用当前仓库动态拆解，不固定源码版本、文件或函数"
+    ]
+  }
+}

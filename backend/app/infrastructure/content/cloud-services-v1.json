@@ -1,0 +1,932 @@
+{
+  "pack_key": "cloud.services",
+  "version": 1,
+  "status": "published",
+  "title": "云服务：开发 API 到单一 Azure 部署与运维",
+  "supported_scope": "初学者最小进入能力：会编辑文件和运行本地命令；最低 Python 函数与 JSON 能力明确缺失时先补齐，API 主线不再重复要求；同一贯穿项目：资料查询 API 服务。只提供最小路线，深度章节范围待确认。",
+  "resource_support": "reviewed_index",
+  "provenance": "v6.1 minimal curriculum outline 2026-10-03. Public official entries/root titles checked using bounded free web opens; legacy_index means entry/index only, NOT a deep teaching/source audit. No repo clone, fixed commit or file mapping. Internal source versions are independent of upstream versions. No provider, cloud or example execution.",
+  "stage_blueprints": [
+    {
+      "stable_key": "stage.service",
+      "title": "Service Development：本地 API",
+      "section_kind": "foundation",
+      "objective": "先有可运行服务与请求响应，再学习容器和云",
+      "inclusion": "required",
+      "node_keys": [
+        "node.service"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_cloud_services_api_v1",
+          "section_refs": [
+            "sec_cloud_services_api_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.service"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "先有可运行服务与请求响应，再学习容器和云",
+        "previous_relation": "会编辑文件和运行本地命令；最低 Python 函数与 JSON 能力明确缺失时先补齐，API 主线不再重复要求",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.service"
+        ],
+        "learning_focus": [
+          "服务输入输出",
+          "错误响应",
+          "健康检查"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "会编辑文件和运行本地命令；最低 Python 函数与 JSON 能力明确缺失时先补齐，API 主线不再重复要求"
+        ],
+        "practice_prerequisites": [
+          "从最小进入能力开始建立同一 资料查询 API 服务"
+        ],
+        "practice_delta": {
+          "baseline": "从最小进入能力开始建立同一 资料查询 API 服务",
+          "increment": [
+            "建立同一资料查询 API，加入输入校验、错误响应和健康检查"
+          ],
+          "preserved": [
+            "保留同一 资料查询 API 服务 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "合法、非法和不存在的请求结果可断言；本地健康检查通过"
+          ],
+          "reuse": [
+            "后续继续同一 资料查询 API 服务，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.docker",
+      "title": "Docker：容器化已有服务",
+      "section_kind": "core",
+      "objective": "保持已有 API 行为，学习镜像、容器、端口与配置",
+      "inclusion": "required",
+      "node_keys": [
+        "node.docker"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_cloud_services_docker_v1",
+          "section_refs": [
+            "sec_cloud_services_docker_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.docker"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "保持已有 API 行为，学习镜像、容器、端口与配置",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：将同一 API 容器化，记录本地启动与配置方法。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.docker"
+        ],
+        "learning_focus": [
+          "镜像与容器",
+          "端口与配置",
+          "本地排错"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "将同一 API 容器化，记录本地启动与配置方法"
+          ],
+          "preserved": [
+            "保留同一 资料查询 API 服务 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "本地容器健康检查和原 API 样例结果一致"
+          ],
+          "reuse": [
+            "后续继续同一 资料查询 API 服务，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.cloud",
+      "title": "单一 Cloud Spine：Azure App Service",
+      "section_kind": "core",
+      "objective": "只选择 Azure 一条云主线，先理解服务与资源边界",
+      "inclusion": "required",
+      "node_keys": [
+        "node.cloud"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_cloud_services_azure_v1",
+          "section_refs": [
+            "sec_cloud_services_azure_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.cloud"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "只选择 Azure 一条云主线，先理解服务与资源边界",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：为同一 API 绘制 Azure App Service 的资源与运行配置草图，不创建真实资源。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.cloud"
+        ],
+        "learning_focus": [
+          "App Service 概念",
+          "配置与日志",
+          "费用与权限边界"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "为同一 API 绘制 Azure App Service 的资源与运行配置草图，不创建真实资源"
+          ],
+          "preserved": [
+            "保留同一 资料查询 API 服务 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "草图区分应用、运行配置和费用边界"
+          ],
+          "reuse": [
+            "后续继续同一 资料查询 API 服务，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.manual_deploy",
+      "title": "先手工部署与恢复",
+      "section_kind": "core",
+      "objective": "先理解一次手工部署的过程和失败，再自动化",
+      "inclusion": "required",
+      "node_keys": [
+        "node.manual_deploy"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_cloud_services_azure_v1",
+          "section_refs": [
+            "sec_cloud_services_azure_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.manual_deploy"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "先理解一次手工部署的过程和失败，再自动化",
+        "previous_relation": "沿用单一 Azure 主线的资源草图；首次手工部署前先核对最小资源与配置，不创建未经授权的云资源。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.manual_deploy"
+        ],
+        "learning_focus": [
+          "部署前最小资源与配置核对",
+          "手工部署顺序",
+          "日志与健康检查",
+          "回退步骤"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "先核对同一 API 的最小手工资源、权限与配置清单，再编写手工部署、健康检查与回退步骤；无授权时仅本地模拟"
+          ],
+          "preserved": [
+            "保留同一 资料查询 API 服务 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "部署前资源与配置清单可检查；后续手工资源阶段继续深化运维",
+            "部署与回退步骤可检查；区分本地模拟与真实云证据"
+          ],
+          "reuse": [
+            "后续继续同一 资料查询 API 服务，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.cicd",
+      "title": "CI/CD：手工流程之后自动化",
+      "section_kind": "core",
+      "objective": "已能解释手工部署后，再把已验证步骤转为流水线",
+      "inclusion": "required",
+      "node_keys": [
+        "node.cicd"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_cloud_services_actions_v1",
+          "section_refs": [
+            "sec_cloud_services_actions_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.cicd"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "已能解释手工部署后，再把已验证步骤转为流水线",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：为同一 API 设计先测试后构建的 CI/CD，部署步骤待授权启用。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.cicd"
+        ],
+        "learning_focus": [
+          "测试与构建",
+          "部署门禁",
+          "凭证边界"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "为同一 API 设计先测试后构建的 CI/CD，部署步骤待授权启用"
+          ],
+          "preserved": [
+            "保留同一 资料查询 API 服务 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "测试失败阻止构建或部署；凭证不写入源码"
+          ],
+          "reuse": [
+            "后续继续同一 资料查询 API 服务，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.manual_resources",
+      "title": "先理解手工资源与运维",
+      "section_kind": "core",
+      "objective": "先理解手工资源配置及日志排错，再用 IaC 表达",
+      "inclusion": "required",
+      "node_keys": [
+        "node.manual_resources"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_cloud_services_azure_v1",
+          "section_refs": [
+            "sec_cloud_services_azure_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.manual_resources"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "先理解手工资源配置及日志排错，再用 IaC 表达",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：记录同一 API 的手工资源配置、运行日志和删除回收清单；未授权不操作真实云。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.manual_resources"
+        ],
+        "learning_focus": [
+          "资源配置",
+          "日志排错",
+          "回收与成本"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "记录同一 API 的手工资源配置、运行日志和删除回收清单；未授权不操作真实云"
+          ],
+          "preserved": [
+            "保留同一 资料查询 API 服务 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "配置清单与应用需求一致；有回收与排错检查点"
+          ],
+          "reuse": [
+            "后续继续同一 资料查询 API 服务，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.iac",
+      "title": "IaC：复现已有资源",
+      "section_kind": "core",
+      "objective": "在手工资源理解之后用 Bicep 表达，不引入第二个云平台",
+      "inclusion": "required",
+      "node_keys": [
+        "node.iac"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_cloud_services_iac_v1",
+          "section_refs": [
+            "sec_cloud_services_iac_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.iac"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "在手工资源理解之后用 Bicep 表达，不引入第二个云平台",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：将同一 API 已理解的资源清单转成最小 Bicep 设计，先检查参数与变化范围。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.iac"
+        ],
+        "learning_focus": [
+          "声明式资源",
+          "参数与依赖",
+          "变化与回滚边界"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "将同一 API 已理解的资源清单转成最小 Bicep 设计，先检查参数与变化范围"
+          ],
+          "preserved": [
+            "保留同一 资料查询 API 服务 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "参数不含密钥；能解释每项资源与预期变化；无授权不部署"
+          ],
+          "reuse": [
+            "后续继续同一 资料查询 API 服务，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.repo",
+      "title": "真实云 API 项目对照",
+      "section_kind": "core",
+      "objective": "已有服务、容器和部署理解后，对照官方 FastAPI 云示例",
+      "inclusion": "required",
+      "node_keys": [
+        "node.repo"
+      ],
+      "resources": [
+        {
+          "role": "case_study",
+          "source_ref": "src_cloud_services_cloud_repo_v1",
+          "section_refs": [],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.repo"
+          ]
+        }
+      ],
+      "extensions": [
+        {
+          "topic": "项目学习：Azure FastAPI Web App Quickstart",
+          "concepts": [
+            "服务与云适配",
+            "启动与配置",
+            "日志与健康检查"
+          ],
+          "guidance": "为什么现在：已有同一项目可对照，现在理解真实项目如何组织这些能力。\n学习深度：先建立项目地图，再按本阶段目标动态拆解 3–8 个切片；能解释调用边界、失败行为与权衡即可。\n暂不涉及：逐函数通读、框架全部实现、固定历史版本、自动源码索引；只迁移最多 1–2 项适合当前项目的机制。",
+          "links": [
+            "https://github.com/Azure-Samples/msdocs-python-fastapi-webapp-quickstart"
+          ],
+          "search_hints": [],
+          "thinking_prompts": [
+            "真实项目与自己的项目如何组织输入、输出及失败边界？",
+            "哪些机制只是版本或规模差异，哪些是本阶段的新知识？",
+            "最多选择 1–2 项机制迁移回同一 资料查询 API 服务，如何用现有测试验证收益？"
+          ],
+          "required": false,
+          "order_index": 0
+        }
+      ],
+      "learning_guidance": {
+        "why_now": "已有服务、容器和部署理解后，对照官方 FastAPI 云示例",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：动态研究当前仓库的服务启动和云适配，最多迁移 1–2 项配置或日志机制回同一 API。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.repo"
+        ],
+        "learning_focus": [
+          "服务与云适配",
+          "启动与配置",
+          "日志与健康检查"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 资料查询 API 服务 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "动态研究当前仓库的服务启动和云适配，最多迁移 1–2 项配置或日志机制回同一 API"
+          ],
+          "preserved": [
+            "保留同一 资料查询 API 服务 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "记录源码事实与差异；迁移后本地健康检查和原请求测试通过"
+          ],
+          "reuse": [
+            "后续继续同一 资料查询 API 服务，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    }
+  ],
+  "knowledge_blueprints": [
+    {
+      "stable_key": "node.service",
+      "title": "Service Development：本地 API",
+      "node_type": "concept",
+      "prerequisite_keys": []
+    },
+    {
+      "stable_key": "node.docker",
+      "title": "Docker：容器化已有服务",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.service"
+      ]
+    },
+    {
+      "stable_key": "node.cloud",
+      "title": "单一 Cloud Spine：Azure App Service",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.docker"
+      ]
+    },
+    {
+      "stable_key": "node.manual_deploy",
+      "title": "先手工部署与恢复",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.cloud"
+      ]
+    },
+    {
+      "stable_key": "node.cicd",
+      "title": "CI/CD：手工流程之后自动化",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.manual_deploy"
+      ]
+    },
+    {
+      "stable_key": "node.manual_resources",
+      "title": "先理解手工资源与运维",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.cicd"
+      ]
+    },
+    {
+      "stable_key": "node.iac",
+      "title": "IaC：复现已有资源",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.manual_resources"
+      ]
+    },
+    {
+      "stable_key": "node.repo",
+      "title": "真实云 API 项目对照",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.iac"
+      ]
+    }
+  ],
+  "practice_blueprints": [
+    {
+      "stable_key": "practice.service",
+      "title": "资料查询 API 服务：Service Development：本地 API",
+      "section_key": "stage.service",
+      "goal": "建立同一资料查询 API，加入输入校验、错误响应和健康检查",
+      "acceptance": [
+        "合法、非法和不存在的请求结果可断言；本地健康检查通过"
+      ],
+      "node_keys": [
+        "node.service"
+      ],
+      "in_scope": [
+        "服务输入输出",
+        "错误响应",
+        "健康检查"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.docker",
+      "title": "资料查询 API 服务：Docker：容器化已有服务",
+      "section_key": "stage.docker",
+      "goal": "将同一 API 容器化，记录本地启动与配置方法",
+      "acceptance": [
+        "本地容器健康检查和原 API 样例结果一致"
+      ],
+      "node_keys": [
+        "node.docker"
+      ],
+      "in_scope": [
+        "镜像与容器",
+        "端口与配置",
+        "本地排错"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.cloud",
+      "title": "资料查询 API 服务：单一 Cloud Spine：Azure App Service",
+      "section_key": "stage.cloud",
+      "goal": "为同一 API 绘制 Azure App Service 的资源与运行配置草图，不创建真实资源",
+      "acceptance": [
+        "草图区分应用、运行配置和费用边界"
+      ],
+      "node_keys": [
+        "node.cloud"
+      ],
+      "in_scope": [
+        "App Service 概念",
+        "配置与日志",
+        "费用与权限边界"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.manual_deploy",
+      "title": "资料查询 API 服务：先手工部署与恢复",
+      "section_key": "stage.manual_deploy",
+      "goal": "先核对同一 API 的最小手工资源、权限与配置清单，再编写手工部署、健康检查与回退步骤；无授权时仅本地模拟",
+      "acceptance": [
+        "部署前资源与配置清单可检查；后续手工资源阶段继续深化运维",
+        "部署与回退步骤可检查；区分本地模拟与真实云证据"
+      ],
+      "node_keys": [
+        "node.manual_deploy"
+      ],
+      "in_scope": [
+        "部署前最小资源与配置核对",
+        "手工部署顺序",
+        "日志与健康检查",
+        "回退步骤"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.cicd",
+      "title": "资料查询 API 服务：CI/CD：手工流程之后自动化",
+      "section_key": "stage.cicd",
+      "goal": "为同一 API 设计先测试后构建的 CI/CD，部署步骤待授权启用",
+      "acceptance": [
+        "测试失败阻止构建或部署；凭证不写入源码"
+      ],
+      "node_keys": [
+        "node.cicd"
+      ],
+      "in_scope": [
+        "测试与构建",
+        "部署门禁",
+        "凭证边界"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.manual_resources",
+      "title": "资料查询 API 服务：先理解手工资源与运维",
+      "section_key": "stage.manual_resources",
+      "goal": "记录同一 API 的手工资源配置、运行日志和删除回收清单；未授权不操作真实云",
+      "acceptance": [
+        "配置清单与应用需求一致；有回收与排错检查点"
+      ],
+      "node_keys": [
+        "node.manual_resources"
+      ],
+      "in_scope": [
+        "资源配置",
+        "日志排错",
+        "回收与成本"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.iac",
+      "title": "资料查询 API 服务：IaC：复现已有资源",
+      "section_key": "stage.iac",
+      "goal": "将同一 API 已理解的资源清单转成最小 Bicep 设计，先检查参数与变化范围",
+      "acceptance": [
+        "参数不含密钥；能解释每项资源与预期变化；无授权不部署"
+      ],
+      "node_keys": [
+        "node.iac"
+      ],
+      "in_scope": [
+        "声明式资源",
+        "参数与依赖",
+        "变化与回滚边界"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.repo",
+      "title": "资料查询 API 服务：真实云 API 项目对照",
+      "section_key": "stage.repo",
+      "goal": "动态研究当前仓库的服务启动和云适配，最多迁移 1–2 项配置或日志机制回同一 API",
+      "acceptance": [
+        "记录源码事实与差异；迁移后本地健康检查和原请求测试通过"
+      ],
+      "node_keys": [
+        "node.repo"
+      ],
+      "in_scope": [
+        "服务与云适配",
+        "启动与配置",
+        "日志与健康检查"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "source_id": "src_cloud_services_api_v1",
+      "canonical_url": "https://fastapi.tiangolo.com/tutorial/",
+      "title": "FastAPI Tutorial - User Guide",
+      "creator": "FastAPI",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_cloud_services_api_entry_v1",
+          "title": "FastAPI Tutorial - User Guide：教程入口（章节范围待确认）",
+          "url": "https://fastapi.tiangolo.com/tutorial/",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.service"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_cloud_services_docker_v1",
+      "canonical_url": "https://docs.docker.com/get-started/",
+      "title": "Docker Get started",
+      "creator": "Docker",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_cloud_services_docker_entry_v1",
+          "title": "Docker Get started：教程入口（章节范围待确认）",
+          "url": "https://docs.docker.com/get-started/",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.docker"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_cloud_services_azure_v1",
+      "canonical_url": "https://learn.microsoft.com/en-us/azure/app-service/overview",
+      "title": "Overview of Azure App Service",
+      "creator": "Microsoft",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_cloud_services_azure_entry_v1",
+          "title": "Overview of Azure App Service：教程入口（章节范围待确认）",
+          "url": "https://learn.microsoft.com/en-us/azure/app-service/overview",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.cloud",
+            "node.manual_deploy",
+            "node.manual_resources"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_cloud_services_actions_v1",
+      "canonical_url": "https://docs.github.com/en/actions",
+      "title": "GitHub Actions documentation",
+      "creator": "GitHub",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_cloud_services_actions_entry_v1",
+          "title": "GitHub Actions documentation：教程入口（章节范围待确认）",
+          "url": "https://docs.github.com/en/actions",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.cicd"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_cloud_services_iac_v1",
+      "canonical_url": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview",
+      "title": "What is Bicep?",
+      "creator": "Microsoft",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_cloud_services_iac_entry_v1",
+          "title": "What is Bicep?：教程入口（章节范围待确认）",
+          "url": "https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.iac"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_cloud_services_cloud_repo_v1",
+      "canonical_url": "https://github.com/Azure-Samples/msdocs-python-fastapi-webapp-quickstart",
+      "title": "Azure FastAPI Web App Quickstart",
+      "creator": "Microsoft Azure Samples",
+      "media_type": "repo",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": []
+    }
+  ],
+  "resource_refs": [
+    "src_cloud_services_api_v1",
+    "src_cloud_services_docker_v1",
+    "src_cloud_services_azure_v1",
+    "src_cloud_services_actions_v1",
+    "src_cloud_services_iac_v1",
+    "src_cloud_services_cloud_repo_v1"
+  ],
+  "required_node_keys": [
+    "node.service",
+    "node.docker",
+    "node.cloud",
+    "node.manual_deploy",
+    "node.cicd",
+    "node.manual_resources",
+    "node.iac",
+    "node.repo"
+  ],
+  "curriculum_review": {
+    "date": "2026-10-03",
+    "status": "outline_checked",
+    "review_status": "selected_scope_pending",
+    "practice_execution": "NOT RUN",
+    "provider_execution": "NOT RUN",
+    "limitations": [
+      "仅核对公开官方入口、标题与主题适配；不声明逐段深读或完整课程质量审核",
+      "教程入口章节为目录提示，详细章节选择和实现版本兼容性待深审",
+      "资料阅读免费；实际模型 API、云部署、Actions 等运行可能收费，需另行许可",
+      "源码阶段使用当前仓库动态拆解，不固定源码版本、文件或函数"
+    ]
+  }
+}

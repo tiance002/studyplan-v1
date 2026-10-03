@@ -7,6 +7,7 @@ import { ResourcePicker } from './ResourcePicker';
 import { PreferencePanel } from './PreferencePanel';
 import { ResourceChangePanel } from './ResourceChangePanel';
 import { LearningGuidance } from './LearningGuidance';
+import { ProjectStudyCard } from './ProjectStudyCard';
 export function KnowledgeNodeView({
   node,
   allNodes,
@@ -73,6 +74,7 @@ export function MainWorkspace({
   planRevision,
   onPublished,
   practice, summary,
+  plan, introducedNodeIds = [],
 }: {
   stage: StageWorkspace | undefined;
   nodeId: string;
@@ -85,6 +87,8 @@ export function MainWorkspace({
   planRevision: number;
   onPublished: () => Promise<void>;
   practice?: () => void; summary?: () => void;
+  plan?: DTO['PlanView'];
+  introducedNodeIds?: string[];
 }) {
   const [unitChoice, setUnitChoice] = useState('');
   const [dialog, setDialog] = useState<'mainline' | 'preferences' | 'supplement' | null>(null);
@@ -115,6 +119,17 @@ export function MainWorkspace({
         <>
           <dl className="learning-meta"><div><dt>进入本阶段之前</dt><dd>{entryPrerequisites.length ? entryPrerequisites.map(id => {const prerequisite=allNodes.find(n=>n.node_id===id);return prerequisite ? <button key={id} className="prereq-link" onClick={()=>selectNode(id)}>{prerequisite.title}</button> : <span key={id}>关联前置知识暂不可用</span>;}) : '正式计划未声明前置知识。'}</dd></div><div><dt>本阶段实践</dt><dd>{stage.tasks.map(t=>t.title).join('、') || '本阶段尚无正式实践任务。'}</dd></div></dl>
           <LearningGuidance key={`${projectId}:${planId}:${planRevision}:${stage.stage.stage_id}`} guidance={stage.stage.learning_guidance} />
+          {plan && <ProjectStudyCard key={`project-study:${projectId}:${planId}:${planRevision}:${stage.stage.stage_id}`} stage={stage} plan={plan}
+            priorNodes={allNodes.filter(node => introducedNodeIds.includes(node.node_id))}
+            extensions={(plan.extensions || []).filter(extension => extension.stage_id === stage.stage.stage_id)} />}
+          {(plan?.extensions || []).filter(extension => extension.stage_id === stage.stage.stage_id && !extension.topic.startsWith('项目学习：')).map(extension => (
+            <section className="panel" key={extension.extension_id} aria-label="对比与思考提示">
+              <h2>{extension.topic}</h2>
+              {!!extension.concepts?.length && <ul>{extension.concepts.map(concept => <li key={concept}>{concept}</li>)}</ul>}
+              {extension.guidance && <p style={{ whiteSpace: 'pre-line' }}>{extension.guidance}</p>}
+              {!!extension.thinking_prompts?.length && <ul>{extension.thinking_prompts.map(question => <li key={question}>{question}</li>)}</ul>}
+            </section>
+          ))}
           <div className="section-heading">
             <h2>知识结构</h2>
             <span className="muted">{stage.nodes.length} 个知识节点</span>

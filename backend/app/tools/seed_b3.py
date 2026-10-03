@@ -7,7 +7,7 @@ from app.agent_workflows.runtime import PostgresSaver
 from app.core.config import get_settings
 from app.domain.domain_packs.validation import seed_digest, validate_seed
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
-from app.infrastructure.domain_pack import DIRECTION_PACK_FILES, load_pack, load_python_pack
+from app.infrastructure.domain_pack import CURRENT_PACKS, load_pack
 from psycopg import sql
 from psycopg.types.json import Jsonb
 
@@ -74,9 +74,8 @@ def main():
     with psycopg.connect(migration) as conn:
         conn.execute("INSERT INTO learning_projects(project_id,owner_actor_id,title,goal_statement,stable_key) VALUES (%s,%s,%s,%s,%s) ON CONFLICT(project_id) DO NOTHING",
                      (settings.local_project_id, settings.local_actor_id, "我的学习空间", "Python 工程入门", "local.learning"))
-        for data in (load_python_pack(), load_pack("agent-application-v3.json"),
-                     *(load_pack(filename) for filename in DIRECTION_PACK_FILES.values())):
-            seed_reviewed_pack(conn, data)
+        for filename in CURRENT_PACKS.values():
+            seed_reviewed_pack(conn, load_pack(filename))
     if os.environ.get("CHECKPOINT_SETUP_DSN"):
         with PostgresSaver.from_conn_string(to_psycopg_dsn(os.environ["CHECKPOINT_SETUP_DSN"])) as saver:
             saver.setup()

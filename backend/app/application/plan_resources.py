@@ -46,6 +46,7 @@ def restrict_pack_resources(state: Mapping[str, Any], pack: Mapping[str, Any]) -
     result = deepcopy(dict(state))
     sources = {s["source_id"]: s for s in pack.get("resources", [])}
     approved_urls = {section["url"] for source in sources.values() for section in source.get("sections", [])}
+    approved_urls.update(source["canonical_url"] for source in sources.values())
     for stage in (result.get("outline") or {}).get("sections", []):
         stage_nodes = {n for u in result.get("units", []) if u.get("section_key") == stage["stable_key"]
                        for n in u.get("node_keys", [])}
@@ -53,9 +54,16 @@ def restrict_pack_resources(state: Mapping[str, Any], pack: Mapping[str, Any]) -
             source = sources.get(item.get("source_ref"))
             sections = {s["section_id"]: s for s in source.get("sections", [])} if source else {}
             refs = item.get("section_refs", [])
-            valid = bool(source and refs and item.get("source_version") == source["source_version"]
+            root_case = bool(source and source.get("media_type") == "repo" and item.get("role") == "case_study"
+                             and not refs and source.get("verification_status") == "legacy_index")
+            valid = bool(source and (refs or root_case) and item.get("source_version") == source["source_version"]
                          and all(ref in sections for ref in refs))
-            if valid and source is not None and pack.get("pack_key") == "agent.application":
+            pending_scope = (pack.get("curriculum_review") or {}).get("review_status") == "selected_scope_pending"
+            indexed_entry = bool(pending_scope and source and source.get("verification_status") == "legacy_index"
+                                 and source.get("checked_at")
+                                 and all(sections[ref].get("verification_status") == "legacy_index"
+                                         and sections[ref].get("checked_at") for ref in refs))
+            if valid and source is not None and pack.get("pack_key") == "agent.application" and not root_case and not indexed_entry:
                 valid = source.get("verification_status") == "reviewed" and all(
                     sections[ref].get("verification_status") == "reviewed" for ref in refs)
                 applicable = {k for ref in refs for k in sections[ref].get("applicable_node_keys", [])}

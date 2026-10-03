@@ -54,7 +54,7 @@ BLOCKING_CHILD = textwrap.dedent(
     from tests.helpers.batched_planning import ScriptedLLM
 
     dsn, thread_id, sentinel = sys.argv[1], sys.argv[2], sys.argv[3]
-    pack = domain_pack.select_domain_pack({goal!r})
+    pack = domain_pack.load_pack("agent-application-v3.json")
     manifest = freeze_manifest(pack, BudgetPolicy(4096, 8192, 4096, 8192, 8192, 393216), "mock:1")
 
     class BlockingLLM(ScriptedLLM):
@@ -126,7 +126,7 @@ def test_worker_killed_mid_run_resumes_without_redispatching_completed_batches(
 
     from tests.helpers.batched_planning import PRACTICE, STRUCTURE, ScriptedLLM
 
-    pack = domain_pack.select_domain_pack(AGENT_GOAL)
+    pack = domain_pack.load_pack("agent-application-v3.json")
     llm = ScriptedLLM(pack)
     nodes = PlanningNodes(llm=llm, save_draft=lambda s: {"draft_ref": "draft:resumed", "draft_hash": "h"})
     with PostgresSaver.from_conn_string(recovery_db.migrator_dsn) as saver:
@@ -151,7 +151,7 @@ def test_waiting_user_checkpoint_is_not_auto_continued(recovery_db: PgTestDataba
 
     from tests.helpers.batched_planning import ScriptedLLM
 
-    pack = domain_pack.select_domain_pack(AGENT_GOAL)
+    pack = domain_pack.load_pack("agent-application-v3.json")
     manifest = freeze_manifest(pack, DEFAULT_BUDGET, "mock:1")
     thread_id = f"run-waiting::{PROTOCOL_VERSION}"
     llm = ScriptedLLM(pack)
@@ -195,7 +195,7 @@ def test_guard_is_called_before_resume(recovery_db: PgTestDatabase) -> None:
 
     from tests.helpers.batched_planning import ScriptedLLM
 
-    pack = domain_pack.select_domain_pack(AGENT_GOAL)
+    pack = domain_pack.load_pack("agent-application-v3.json")
     manifest = freeze_manifest(pack, DEFAULT_BUDGET, "mock:1")
     thread_id = f"run-guard::{PROTOCOL_VERSION}"
     llm = ScriptedLLM(pack)

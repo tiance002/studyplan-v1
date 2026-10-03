@@ -6,6 +6,85 @@ const path = require('node:path');
 const {createHash}=require('node:crypto');
 const hash=value=>createHash('sha256').update(value,'utf8').digest('hex');
 
+async function controlledE2({page,request,authenticate,ui,forwarded,errors}) {
+  const plan=JSON.parse(process.env.STUDYPLAN_CURRENT_LOOP_PLAN);
+  assert.equal(plan.goal_snapshot,'Controlled E2 boundary');
+  await page.goto(ui+'/#summary');
+  await authenticate(false,process.env.STUDYPLAN_CURRENT_LOOP_USER);
+  const session=(await request('/api/v1/session')).body;
+  const q='?project_id='+session.project_ids[0];
+  const tools=plan.stages.find(s=>s.stable_key==='stage.tools');
+  const empty=plan.stages.find(s=>s.stable_key==='stage.environment');
+  const tasks=plan.task_links.filter(t=>t.stage_id===tools.stage_id);
+  assert.equal(tasks.length,2);
+  assert.equal(plan.task_links.filter(t=>t.stage_id===empty.stage_id).length,0);
+  const gate=async stageId=>(await request('/api/v1/workspace'+q)).body.stages.find(s=>s.stage.stage_id===stageId).completion;
+  assert.equal((await gate(tools.stage_id)).status,'incomplete');
+  const summaryRaw='  受控两实践阶段总结🙂\n\t ';
+  await page.getByLabel('总结所属阶段').selectOption(tools.stage_id);
+  await page.getByLabel('总结原文',{exact:true}).fill(summaryRaw);
+  let response=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/v1/summaries'&&r.request().method()==='POST');
+  await page.getByRole('button',{name:'保存总结',exact:true}).click();
+  let http=await response; assert.equal(http.status(),200); const summary=await http.json();
+  assert.equal(summary.attempt.content,summaryRaw);
+  assert.deepEqual(await gate(tools.stage_id),{status:'incomplete',summary_completed:true,completed_practice_tasks:0,total_practice_tasks:2});
+  await page.evaluate(()=>{location.hash='practice';});
+  await page.getByLabel('实践所属阶段').selectOption(tools.stage_id);
+  const panel=page.getByRole('region',{name:'成果提交与人工验收',exact:true}), originals=[];
+  for(const [index,task] of tasks.entries()) {
+    await page.getByLabel('实践任务',{exact:true}).selectOption(task.task_id);
+    await panel.getByLabel('成果说明原文',{exact:true}).fill('受控任务'+index+'🙂\n原文 ');
+    await panel.getByRole('button',{name:'添加证据',exact:true}).click();
+    const evidence=panel.getByRole('group',{name:'证据 1',exact:true});
+    await evidence.getByLabel('证据类别').selectOption('external_report');
+    await evidence.getByLabel('证据标题').fill('合成边界观察');
+    await evidence.getByLabel('证据原文').fill('合成人工观察🙂\n非平台执行 ');
+    response=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/v1/submissions'&&r.request().method()==='POST');
+    await panel.getByRole('button',{name:'保存成果与证据',exact:true}).click();
+    http=await response; assert.equal(http.status(),200); const saved=await http.json();
+    const detail=panel.locator('.submission-detail:visible');
+    await detail.getByLabel('人工决定',{exact:true}).selectOption('accepted');
+    await detail.getByLabel('人工决定理由').fill('受控人工决定🙂\n未平台核验 ');
+    for(let i=0;i<saved.submission.task_snapshot.task.acceptance.length;i++) {
+      const criterion=detail.getByRole('group',{name:'验收要求 '+(i+1),exact:true});
+      await criterion.getByLabel('选择证据 1',{exact:true}).check();
+      await criterion.getByLabel('实际观察',{exact:true}).fill('逐项观察🙂\n'+i);
+    }
+    await detail.getByLabel('我理解这是人工确认，平台没有独立运行代码或核验来源').check();
+    response=page.waitForResponse(r=>new URL(r.url()).pathname.endsWith('/decision')&&r.request().method()==='POST');
+    await detail.getByRole('button',{name:'记录人工决定',exact:true}).click();
+    http=await response; assert.equal(http.status(),200); originals.push((await http.json()).submission);
+    assert.deepEqual(await gate(tools.stage_id),{status:index===0?'incomplete':'completed',summary_completed:true,completed_practice_tasks:index+1,total_practice_tasks:2});
+    await page.evaluate(()=>{location.hash='workspace';});
+    await page.locator('.stage-completion').filter({hasText:index===0?'未完成':'已完成'}).waitFor();
+    if(index===0) await page.evaluate(()=>{location.hash='practice';});
+  }
+  await page.evaluate(()=>{location.hash='summary';});
+  await page.getByLabel('总结所属阶段').selectOption(empty.stage_id);
+  const raw='  无实践阶段总结🙂\n\t ';
+  await page.getByLabel('总结原文',{exact:true}).fill(raw);
+  response=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/v1/summaries'&&r.request().method()==='POST');
+  await page.getByRole('button',{name:'保存总结',exact:true}).click();
+  http=await response; assert.equal(http.status(),200); const emptySummary=await http.json();
+  assert.equal(emptySummary.attempt.content,raw);
+  assert.deepEqual(await gate(empty.stage_id),{status:'completed',summary_completed:true,completed_practice_tasks:0,total_practice_tasks:0});
+  await page.evaluate(()=>{location.hash='workspace';});
+  await page.locator('.stage-completion').filter({hasText:'已完成'}).waitFor();
+  const writes=forwarded.filter(r=>r.method==='POST'&&!r.path.startsWith('/api/v1/auth/')).length;
+  await page.reload(); await page.getByRole('button',{name:'退出登录',exact:true}).click();
+  await authenticate(false,process.env.STUDYPLAN_CURRENT_LOOP_USER);
+  assert.equal((await gate(tools.stage_id)).status,'completed'); assert.equal((await gate(empty.stage_id)).status,'completed');
+  for(const s of [summary.attempt,emptySummary.attempt]) assert.equal((await request('/api/v1/summaries/attempts/'+s.attempt_id+q)).body.content,s.content);
+  for(const s of originals) {const persisted=(await request('/api/v1/submissions/'+s.submission_id+q)).body; assert.deepEqual(persisted.task_snapshot,s.task_snapshot); assert.deepEqual(persisted.review,s.review);}
+  assert.equal(forwarded.filter(r=>r.method==='POST'&&!r.path.startsWith('/api/v1/auth/')).length,writes);
+  assert.equal(forwarded.filter(r=>r.method==='POST'&&(r.path.includes('/generate')||r.path.endsWith('/review'))).length,0);
+  await page.waitForLoadState('networkidle'); assert.deepEqual(errors,[]);
+  const directory=path.resolve(__dirname,'../../var/current-learning-loop');fs.mkdirSync(directory,{recursive:true});
+  await page.screenshot({path:path.join(directory,'controlled-e2.png')});
+  fs.writeFileSync(path.join(directory,'controlled-e2-browser.json'),JSON.stringify({status:'PASS',model:'Fake',fixture:'ordinary account/generated baseline + controlled Domain publication, not taskless generator proof',plan_id:plan.plan_id,tools_stage:tools.stage_id,no_task_stage:empty.stage_id,summary_ids:[summary.attempt.attempt_id,emptySummary.attempt.attempt_id],submission_ids:originals.map(s=>s.submission_id),forwarded},null,2));
+  console.log('PASS: controlled E2 browser summary-only, one of two, both accepted, no-task summary, refresh/relogin');
+}
+
 (async () => {
   const api = process.env.STUDYPLAN_CURRENT_LOOP_API;
   assert.equal(new URL(api).hostname, '127.0.0.1');
@@ -56,6 +135,9 @@ const hash=value=>createHash('sha256').update(value,'utf8').digest('hex');
       const response = await fetch(url, {method:body?'POST':'GET', headers:body?{'Content-Type':'application/json','X-CSRF-Token':session.csrf_token}:{}, body:body?JSON.stringify(body):undefined});
       return {status:response.status, body:await response.json()};
     }, {url,body});
+    if(process.env.STUDYPLAN_CURRENT_LOOP_MODE==='e2') {
+      await controlledE2({page,request,authenticate,ui,forwarded,errors}); return;
+    }
     await page.goto(ui+'/#planning');
     await authenticate(true);
     await page.getByRole('button',{name:'退出登录',exact:true}).click();
@@ -188,6 +270,27 @@ const hash=value=>createHash('sha256').update(value,'utf8').digest('hex');
     assert.equal((await completion()).status,'completed');
     assert.equal(forwarded.filter(r=>r.method==='POST'&&!r.path.startsWith('/api/v1/auth/')).length,postsBefore);
     assert.equal(forwarded.filter(r=>r.path.endsWith('/review')&&r.method==='POST').length,0);
+    // E3 representative Outcome/history UI read, including frozen criteria and manual decision.
+    await page.evaluate(()=>{location.hash='practice';});
+    const archive=page.getByRole('region',{name:'成果资料归档',exact:true});
+    const archiveResponse=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/v1/outcomes');
+    await archive.getByRole('button',{name:'读取成果资料归档',exact:true}).click();
+    assert.equal((await archiveResponse).status(),200);
+    const rows=archive.locator('.outcome-groups button.resource-row');
+    assert.equal(await rows.count(),originals.length);
+    for(let i=0;i<originals.length;i++) {
+      const detailResponse=page.waitForResponse(r=>new URL(r.url()).pathname.startsWith('/api/v1/submissions/psb_')&&r.request().method()==='GET');
+      await rows.nth(i).click();
+      const persisted=await (await detailResponse).json(), known=originals.find(s=>s.submission_id===persisted.submission_id);
+      assert.ok(known); assert.deepEqual(persisted.task_snapshot,known.task_snapshot); assert.deepEqual(persisted.review,known.review);
+      const detail=archive.getByRole('article',{name:'所选成果详情',exact:true});
+      assert.equal(await detail.locator('pre.submission-raw').first().textContent(),known.note);
+      await detail.getByText('保存时的任务要求和版本',{exact:true}).click();
+      for(const criterion of known.task_snapshot.task.acceptance) assert.ok((await detail.locator('details').innerText()).includes(criterion));
+      await detail.getByRole('heading',{name:known.review.conclusion==='accepted'?'人工确认通过（未平台实测）':'人工决定：需要补充证据',exact:true}).waitFor();
+      assert.ok((await detail.locator('pre.submission-raw').allTextContents()).includes(known.review.rationale));
+    }
+    assert.equal(forwarded.filter(r=>r.method==='POST'&&!r.path.startsWith('/api/v1/auth/')).length,postsBefore);
     // E5 uses B's ordinary browser cookie and B's valid CSRF, including A receipt replay.
     collectOwnedWrites=false;
     await page.getByRole('button',{name:'退出登录',exact:true}).click();

@@ -36,6 +36,10 @@ AGENT_GOAL = "从 Python 基础开始学习 Agent 应用开发"
 
 
 def _pack(goal: str = AGENT_GOAL) -> dict:
+    if goal == AGENT_GOAL:
+        # Freeze the original 9-stage protocol stress case independently of
+        # the current product direction registry. New packs have their own tests.
+        return domain_pack.load_pack("agent-application-v1.json")
     return domain_pack.select_domain_pack(goal)
 
 

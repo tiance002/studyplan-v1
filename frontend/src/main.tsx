@@ -200,6 +200,8 @@ function App() {
           projectId={project}
           planId={workspace?.plan.plan_id || ''}
           planRevision={workspace?.plan.revision || 0}
+          plan={workspace?.plan}
+          introducedNodeIds={workspace?.stages.filter(item => item.stage.order_index < (stage?.stage.order_index ?? 0)).flatMap(item => item.nodes.map(node => node.node_id)) || []}
           onPublished={refresh}
           stage={stage}
           nodeId={nodeId}

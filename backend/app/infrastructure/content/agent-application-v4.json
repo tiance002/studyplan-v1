@@ -1,0 +1,649 @@
+{
+  "pack_key": "agent.application",
+  "version": 4,
+  "status": "published",
+  "title": "Agent 应用：一条主线到 RAG 与真实运行时",
+  "supported_scope": "初学者最小进入能力：会编辑文件和执行本地脚本；函数、字典与环境缺口在首阶段补齐；同一贯穿项目：样例文档 Agent 助手。只提供最小路线，深度章节范围待确认。",
+  "resource_support": "reviewed_index",
+  "provenance": "v6.1 minimal curriculum outline 2026-10-03. Public official entries/root titles checked using bounded free web opens; legacy_index means entry/index only, NOT a deep teaching/source audit. No repo clone, fixed commit or file mapping. Internal source versions are independent of upstream versions. No provider, cloud or example execution.",
+  "stage_blueprints": [
+    {
+      "stable_key": "stage.entry",
+      "title": "最小 Python 进入能力",
+      "section_kind": "foundation",
+      "objective": "只补函数、字典、JSON、环境与错误基础，完整 GenAI 课程不作硬前置",
+      "inclusion": "required",
+      "node_keys": [
+        "node.entry"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_application_python_v1",
+          "section_refs": [
+            "sec_agent_application_python_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.entry"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "只补函数、字典、JSON、环境与错误基础，完整 GenAI 课程不作硬前置",
+        "previous_relation": "会编辑文件和执行本地脚本；函数、字典与环境缺口在首阶段补齐",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.entry"
+        ],
+        "learning_focus": [
+          "函数与字典",
+          "JSON 与异常",
+          "可复现环境"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "会编辑文件和执行本地脚本；函数、字典与环境缺口在首阶段补齐"
+        ],
+        "practice_prerequisites": [
+          "从最小进入能力开始建立同一 样例文档 Agent 助手"
+        ],
+        "practice_delta": {
+          "baseline": "从最小进入能力开始建立同一 样例文档 Agent 助手",
+          "increment": [
+            "用无敏感样例编写可断言的文档读取与工具函数"
+          ],
+          "preserved": [
+            "保留同一 样例文档 Agent 助手 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "成功、空输入与缺失文档可区分；记录可复现运行步骤"
+          ],
+          "reuse": [
+            "后续继续同一 样例文档 Agent 助手，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.agent_spine",
+      "title": "单一 Agent 教学主线",
+      "section_kind": "core",
+      "objective": "用一个 Agent 教程学习模型、消息、工具循环和停止条件，必要知识在主线内教授",
+      "inclusion": "required",
+      "node_keys": [
+        "node.agent_spine"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_application_genai_v1",
+          "section_refs": [
+            "sec_agent_application_genai_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.agent_spine"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "用一个 Agent 教程学习模型、消息、工具循环和停止条件，必要知识在主线内教授",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：在同一样例助手增加模型适配与一个只读工具；先用 Fake 跑通循环。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.agent_spine"
+        ],
+        "learning_focus": [
+          "模型与消息",
+          "工具输入输出",
+          "工具循环与停止条件"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 样例文档 Agent 助手 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 样例文档 Agent 助手 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "在同一样例助手增加模型适配与一个只读工具；先用 Fake 跑通循环"
+          ],
+          "preserved": [
+            "保留同一 样例文档 Agent 助手 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "工具输入非法被拒绝；循环有停止条件；错误可复现"
+          ],
+          "reuse": [
+            "后续继续同一 样例文档 Agent 助手，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.comparison",
+      "title": "可选对比：LangGraph 编排",
+      "section_kind": "core",
+      "objective": "在已有 Agent 循环后按需比较显式状态与路由，不把第二套教程作进入门槛",
+      "inclusion": "optional",
+      "node_keys": [
+        "node.comparison"
+      ],
+      "resources": [
+        {
+          "role": "comparison",
+          "source_ref": "src_agent_application_graph_v1",
+          "section_refs": [
+            "sec_agent_application_graph_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.comparison"
+          ]
+        }
+      ],
+      "extensions": [
+        {
+          "topic": "对比学习：Agent 调用与显式状态编排",
+          "concepts": [
+            "显式状态",
+            "节点与路由",
+            "停止与失败边界"
+          ],
+          "guidance": "已学：单一 Agent 教学主线中的模型、工具和消息循环。\n本次新增：显式状态、节点和路由的工程表达。\n关系：COMPARE / DEEPEN；按需要阅读，不先学完整第二门课。",
+          "links": [
+            "https://docs.langchain.com/oss/python/langgraph/overview"
+          ],
+          "search_hints": [],
+          "thinking_prompts": [
+            "工具循环与显式图如何分别表达停止条件和错误？",
+            "什么情况下已有 Agent 抽象足够，何时值得增加显式状态？"
+          ],
+          "required": false,
+          "order_index": 0
+        }
+      ],
+      "learning_guidance": {
+        "why_now": "在已有 Agent 循环后按需比较显式状态与路由，不把第二套教程作进入门槛",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：对照同一助手画出工具循环与显式状态图，选择最小编排表达。不把阅读或自述当掌握证明。",
+        "exposure_relation": "compare",
+        "knowledge_keys": [
+          "node.comparison"
+        ],
+        "learning_focus": [
+          "显式状态",
+          "节点与路由",
+          "停止与失败边界"
+        ],
+        "comparison_focus": [
+          "对比已有工具循环与显式状态编排的停止条件、错误边界"
+        ],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 样例文档 Agent 助手 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 样例文档 Agent 助手 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "对照同一助手画出工具循环与显式状态图，选择最小编排表达"
+          ],
+          "preserved": [
+            "保留同一 样例文档 Agent 助手 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "记录两种表达的错误边界和选型理由；原工具行为保留"
+          ],
+          "reuse": [
+            "后续继续同一 样例文档 Agent 助手，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.rag",
+      "title": "RAG 深化与来源核对",
+      "section_kind": "core",
+      "objective": "在已有助手上增加检索与引用；此入口含检索架构视野，具体章节仍待范围深审",
+      "inclusion": "required",
+      "node_keys": [
+        "node.rag"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_agent_application_rag_v1",
+          "section_refs": [
+            "sec_agent_application_rag_entry_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.rag"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "在已有助手上增加检索与引用；此入口含检索架构视野，具体章节仍待范围深审",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：为同一助手增加三份样例文档的检索与引用；先用确定性检索和 Fake 输出核对证据。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.rag"
+        ],
+        "learning_focus": [
+          "检索与生成边界",
+          "来源引用",
+          "无答案与评估样例"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 样例文档 Agent 助手 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 样例文档 Agent 助手 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "为同一助手增加三份样例文档的检索与引用；先用确定性检索和 Fake 输出核对证据"
+          ],
+          "preserved": [
+            "保留同一 样例文档 Agent 助手 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "命中能定位来源；未命中明确回答不足；保存引用核对样例"
+          ],
+          "reuse": [
+            "后续继续同一 样例文档 Agent 助手，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.runtime_repo",
+      "title": "真实 Agent Runtime 项目学习",
+      "section_kind": "core",
+      "objective": "有自己的 Agent/RAG 实现后再观察真实运行时，不要求通读大型框架",
+      "inclusion": "required",
+      "node_keys": [
+        "node.runtime_repo"
+      ],
+      "resources": [
+        {
+          "role": "case_study",
+          "source_ref": "src_agent_application_agent_repo_v1",
+          "section_refs": [],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.runtime_repo"
+          ]
+        }
+      ],
+      "extensions": [
+        {
+          "topic": "项目学习：LangGraph",
+          "concepts": [
+            "运行时边界",
+            "状态与持久化",
+            "失败与恢复"
+          ],
+          "guidance": "为什么现在：已有同一项目可对照，现在理解真实项目如何组织这些能力。\n学习深度：先建立项目地图，再按本阶段目标动态拆解 3–8 个切片；能解释调用边界、失败行为与权衡即可。\n暂不涉及：逐函数通读、框架全部实现、固定历史版本、自动源码索引；只迁移最多 1–2 项适合当前项目的机制。",
+          "links": [
+            "https://github.com/langchain-ai/langgraph"
+          ],
+          "search_hints": [],
+          "thinking_prompts": [
+            "真实项目与自己的项目如何组织输入、输出及失败边界？",
+            "哪些机制只是版本或规模差异，哪些是本阶段的新知识？",
+            "最多选择 1–2 项机制迁移回同一 样例文档 Agent 助手，如何用现有测试验证收益？"
+          ],
+          "required": false,
+          "order_index": 0
+        }
+      ],
+      "learning_guidance": {
+        "why_now": "有自己的 Agent/RAG 实现后再观察真实运行时，不要求通读大型框架",
+        "previous_relation": "沿用前阶段已有功能；本阶段新增：按当前仓库动态拆解状态、运行与恢复边界，最多迁移 1–2 项机制回同一助手。不把阅读或自述当掌握证明。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.runtime_repo"
+        ],
+        "learning_focus": [
+          "运行时边界",
+          "状态与持久化",
+          "失败与恢复"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先补齐本阶段依赖的前阶段最小能力；主线内将教授的新知识不再当外部前置"
+        ],
+        "practice_prerequisites": [
+          "沿用同一 样例文档 Agent 助手 的前阶段已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "沿用同一 样例文档 Agent 助手 的前阶段已保存成果；未完成时先补齐",
+          "increment": [
+            "按当前仓库动态拆解状态、运行与恢复边界，最多迁移 1–2 项机制回同一助手"
+          ],
+          "preserved": [
+            "保留同一 样例文档 Agent 助手 的已有功能、无敏感输入样例和原始验证记录"
+          ],
+          "validation": [
+            "区分源码事实与推断；迁移机制有失败测试；保留已有引用行为"
+          ],
+          "reuse": [
+            "后续继续同一 样例文档 Agent 助手，引用本阶段成果；不继承 accepted 状态、不另开练习项目"
+          ]
+        }
+      }
+    }
+  ],
+  "knowledge_blueprints": [
+    {
+      "stable_key": "node.entry",
+      "title": "最小 Python 进入能力",
+      "node_type": "concept",
+      "prerequisite_keys": []
+    },
+    {
+      "stable_key": "node.agent_spine",
+      "title": "单一 Agent 教学主线",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.entry"
+      ]
+    },
+    {
+      "stable_key": "node.comparison",
+      "title": "可选对比：LangGraph 编排",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.agent_spine"
+      ]
+    },
+    {
+      "stable_key": "node.rag",
+      "title": "RAG 深化与来源核对",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.agent_spine"
+      ]
+    },
+    {
+      "stable_key": "node.runtime_repo",
+      "title": "真实 Agent Runtime 项目学习",
+      "node_type": "concept",
+      "prerequisite_keys": [
+        "node.rag"
+      ]
+    }
+  ],
+  "practice_blueprints": [
+    {
+      "stable_key": "practice.entry",
+      "title": "样例文档 Agent 助手：最小 Python 进入能力",
+      "section_key": "stage.entry",
+      "goal": "用无敏感样例编写可断言的文档读取与工具函数",
+      "acceptance": [
+        "成功、空输入与缺失文档可区分；记录可复现运行步骤"
+      ],
+      "node_keys": [
+        "node.entry"
+      ],
+      "in_scope": [
+        "函数与字典",
+        "JSON 与异常",
+        "可复现环境"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.agent_spine",
+      "title": "样例文档 Agent 助手：单一 Agent 教学主线",
+      "section_key": "stage.agent_spine",
+      "goal": "在同一样例助手增加模型适配与一个只读工具；先用 Fake 跑通循环",
+      "acceptance": [
+        "工具输入非法被拒绝；循环有停止条件；错误可复现"
+      ],
+      "node_keys": [
+        "node.agent_spine"
+      ],
+      "in_scope": [
+        "模型与消息",
+        "工具输入输出",
+        "工具循环与停止条件"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.comparison",
+      "title": "样例文档 Agent 助手：可选对比：LangGraph 编排",
+      "section_key": "stage.comparison",
+      "goal": "对照同一助手画出工具循环与显式状态图，选择最小编排表达",
+      "acceptance": [
+        "记录两种表达的错误边界和选型理由；原工具行为保留"
+      ],
+      "node_keys": [
+        "node.comparison"
+      ],
+      "in_scope": [
+        "显式状态",
+        "节点与路由",
+        "停止与失败边界"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.rag",
+      "title": "样例文档 Agent 助手：RAG 深化与来源核对",
+      "section_key": "stage.rag",
+      "goal": "为同一助手增加三份样例文档的检索与引用；先用确定性检索和 Fake 输出核对证据",
+      "acceptance": [
+        "命中能定位来源；未命中明确回答不足；保存引用核对样例"
+      ],
+      "node_keys": [
+        "node.rag"
+      ],
+      "in_scope": [
+        "检索与生成边界",
+        "来源引用",
+        "无答案与评估样例"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    },
+    {
+      "stable_key": "practice.runtime_repo",
+      "title": "样例文档 Agent 助手：真实 Agent Runtime 项目学习",
+      "section_key": "stage.runtime_repo",
+      "goal": "按当前仓库动态拆解状态、运行与恢复边界，最多迁移 1–2 项机制回同一助手",
+      "acceptance": [
+        "区分源码事实与推断；迁移机制有失败测试；保留已有引用行为"
+      ],
+      "node_keys": [
+        "node.runtime_repo"
+      ],
+      "in_scope": [
+        "运行时边界",
+        "状态与持久化",
+        "失败与恢复"
+      ],
+      "out_scope": [
+        "未经许可的收费模型或云资源创建",
+        "敏感私有内容外发、生产部署与任意外部仓库执行"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "source_id": "src_agent_application_python_v1",
+      "canonical_url": "https://docs.python.org/3.14/tutorial/",
+      "title": "The Python Tutorial",
+      "creator": "Python Software Foundation",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_agent_application_python_entry_v1",
+          "title": "The Python Tutorial：教程入口（章节范围待确认）",
+          "url": "https://docs.python.org/3.14/tutorial/",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.entry"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_agent_application_genai_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/overview",
+      "title": "LangChain overview",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_agent_application_genai_entry_v1",
+          "title": "LangChain overview：教程入口（章节范围待确认）",
+          "url": "https://docs.langchain.com/oss/python/langchain/overview",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.agent_spine"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_agent_application_graph_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langgraph/overview",
+      "title": "LangGraph overview",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_agent_application_graph_entry_v1",
+          "title": "LangGraph overview：教程入口（章节范围待确认）",
+          "url": "https://docs.langchain.com/oss/python/langgraph/overview",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.comparison"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_agent_application_rag_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+      "title": "Retrieval - Docs by LangChain",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": [
+        {
+          "section_id": "sec_agent_application_rag_entry_v1",
+          "title": "Retrieval - Docs by LangChain：教程入口（章节范围待确认）",
+          "url": "https://docs.langchain.com/oss/python/deepagents/retrieval",
+          "order_index": 0,
+          "verification_status": "legacy_index",
+          "checked_at": "2026-10-03T12:31:24.503264+00:00",
+          "review_note": "Only public entry/title and topic fit checked in bounded free web open on 2026-10-03; selected teaching scope not deeply reviewed; examples NOT RUN.",
+          "applicable_node_keys": [
+            "node.rag"
+          ]
+        }
+      ]
+    },
+    {
+      "source_id": "src_agent_application_agent_repo_v1",
+      "canonical_url": "https://github.com/langchain-ai/langgraph",
+      "title": "LangGraph",
+      "creator": "LangChain",
+      "media_type": "repo",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "legacy_index",
+      "checked_at": "2026-10-03T12:31:24.503264+00:00",
+      "documentation_version": "Current public entry; internal source_version=1; upstream revision NOT OBSERVABLE",
+      "free_body_access": "public_without_login",
+      "sections": []
+    }
+  ],
+  "resource_refs": [
+    "src_agent_application_python_v1",
+    "src_agent_application_genai_v1",
+    "src_agent_application_graph_v1",
+    "src_agent_application_rag_v1",
+    "src_agent_application_agent_repo_v1"
+  ],
+  "required_node_keys": [
+    "node.entry",
+    "node.agent_spine",
+    "node.rag",
+    "node.runtime_repo"
+  ],
+  "curriculum_review": {
+    "date": "2026-10-03",
+    "status": "outline_checked",
+    "review_status": "selected_scope_pending",
+    "practice_execution": "NOT RUN",
+    "provider_execution": "NOT RUN",
+    "limitations": [
+      "仅核对公开官方入口、标题与主题适配；不声明逐段深读或完整课程质量审核",
+      "教程入口章节为目录提示，详细章节选择和实现版本兼容性待深审",
+      "资料阅读免费；实际模型 API、云部署、Actions 等运行可能收费，需另行许可",
+      "源码阶段使用当前仓库动态拆解，不固定源码版本、文件或函数"
+    ]
+  }
+}

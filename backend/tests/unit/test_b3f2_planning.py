@@ -19,7 +19,7 @@ from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
 def test_select_pack_by_actual_direction(goal, expected):
     selected = domain_pack.select_domain_pack(goal)
     assert selected.get("pack_key", "") == expected
-    assert selected.get("version", 0) == (2 if expected == 'python.engineering' else 1 if expected else 0)
+    assert selected.get("version", 0) == (domain_pack.load_pack(domain_pack.CURRENT_PACKS[expected])["version"] if expected else 0)
     if not expected:
         assert not selected.get("resources")
         assert selected["resource_support"] == "search_only"

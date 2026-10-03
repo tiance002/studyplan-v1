@@ -16,7 +16,7 @@ SHORT_VERSION = "b3f2-short-v2"
 
 
 def test_new_protocol_ends_after_draft_without_user_interrupt():
-    pack = domain_pack.select_domain_pack("学习 Agent 应用开发")
+    pack = domain_pack.load_pack("agent-application-v3.json")
     llm = ScriptedLLM(pack)
     nodes = PlanningNodes(llm=llm, save_draft=lambda state: {"draft_ref": "draft:1", "draft_hash": "hash:1"})
     trace = run_batched_planning_graph(nodes, {
@@ -30,7 +30,7 @@ def test_new_protocol_ends_after_draft_without_user_interrupt():
 
 
 def test_legacy_protocol_keeps_original_interrupt():
-    pack = domain_pack.select_domain_pack("学习 Agent 应用开发")
+    pack = domain_pack.load_pack("agent-application-v3.json")
     llm = ScriptedLLM(pack)
     trace = run_batched_planning_graph(
         PlanningNodes(llm=llm, save_draft=lambda state: {"draft_ref": "old:1", "draft_hash": "h"}),
@@ -44,7 +44,7 @@ def test_real_short_graph_has_terminal_checkpoint_after_draft():
     import pytest
 
     memory = pytest.importorskip("langgraph.checkpoint.memory")
-    pack = domain_pack.select_domain_pack("学习 Agent 应用开发")
+    pack = domain_pack.load_pack("agent-application-v3.json")
     llm = ScriptedLLM(pack)
     nodes = PlanningNodes(llm=llm, save_draft=lambda state: {"draft_ref": "draft:1", "draft_hash": "hash:1"})
     graph = build_short_planning_graph(nodes, checkpointer=memory.InMemorySaver())

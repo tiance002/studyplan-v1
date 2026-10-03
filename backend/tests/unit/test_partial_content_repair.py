@@ -7,7 +7,7 @@ import httpx
 import pytest
 from app.agent_workflows.nodes import PlanningNodes
 from app.agent_workflows.planning_batches import run_batched_planning_graph
-from app.infrastructure.domain_pack import select_domain_pack
+from app.infrastructure.domain_pack import load_pack
 from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
 from app.ports.llm import LLMFailure
 
@@ -23,7 +23,7 @@ GOAL = "从 Python 基础开始学习 Agent 应用开发"
 ])
 @pytest.mark.parametrize("persistent", [False, True])
 def test_partial_object_is_preserved_and_repaired_within_shared_cap(purpose, field, persistent):
-    pack = select_domain_pack(GOAL)
+    pack = load_pack("agent-application-v3.json")
     fake = ScriptedLLM(pack)
     messages = []
     dispatches = []
@@ -86,7 +86,7 @@ def test_partial_object_is_preserved_and_repaired_within_shared_cap(purpose, fie
     ('[]', "stop", "provider_invalid_shape"),
 ])
 def test_provider_failures_still_stop_without_content_repair(content, finish, error):
-    pack = select_domain_pack(GOAL)
+    pack = load_pack("agent-application-v3.json")
     fake = ScriptedLLM(pack)
     requests = []
 
@@ -119,7 +119,7 @@ def test_provider_failures_still_stop_without_content_repair(content, finish, er
 
 
 def test_rag_object_missing_all_three_fields_reaches_local_repair_without_unwrapping():
-    pack = select_domain_pack(GOAL)
+    pack = load_pack("agent-application-v3.json")
 
     class PartialRag(ScriptedLLM):
         def _structure(self, payload):

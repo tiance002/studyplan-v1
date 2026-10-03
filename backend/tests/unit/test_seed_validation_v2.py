@@ -74,9 +74,10 @@ def test_bootstrap_selects_valid_v3_without_database_side_effects(monkeypatch):
     monkeypatch.setattr(seed_b3.psycopg, 'connect', lambda *args: nullcontext(BootstrapConnection()))
     monkeypatch.setattr(seed_b3, 'seed_reviewed_pack', lambda conn, data: packs.append(validate_seed(data)))
     seed_b3.main()
+    from app.infrastructure.domain_pack import CURRENT_PACKS
     assert [(pack['pack_key'], pack['version']) for pack in packs] == [
-        ('python.engineering', 2), ('agent.application', 3),
-        ('agent.knowledge_rag', 1), ('agent.coding', 1), ('agent.workflow_automation', 1)]
+        (data['pack_key'], data['version']) for filename in CURRENT_PACKS.values()
+        for data in [load_pack(filename)]]
 
 
 def test_python_v2_has_reviewed_author_ordered_foundation_without_rewriting_v1():

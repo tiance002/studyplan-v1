@@ -3,6 +3,7 @@ import { api, ApiError } from "../../api/client";
 import type { DTO } from "../../api/types";
 import { Resources } from "../../components/Resources";
 import { PlanChanges } from './PlanChanges';
+import { LearningGuidance } from '../learning/LearningGuidance';
 
 const DEPTH_LABELS: Record<DTO['GoalSpec']['desired_depth'], string> = {
   unspecified: '暂不指定', foundation: '建立基础', applied: '能够应用', deep: '深入理解',
@@ -586,7 +587,7 @@ export function PlanningPage({
             </button>
           </div>
         </form>
-        <p className="form-note">可明确选择 Knowledge/RAG Agent、Coding Agent、Workflow/Automation Agent 或 Python 工程前置。一次先确定一个方向；其他或未明确的方向仅提供通用结构和资料搜索建议。</p>
+        <p className="form-note">可选择 AI 全栈应用、Agent 应用开发或云服务，也保留 RAG、Coding、Workflow 专项及 Python 基础。一次先确定一个方向；不明确时请补充目标。新方向资料先核对教程入口，详细章节范围会如实标注。</p>
       </section>
       {pendingRunId && !run && <div className="run-banner" role="status">
         <strong>运行编号已保存，待读回</strong>
@@ -758,6 +759,15 @@ export function PlanningPage({
               ) : (
                 <p>{s.objective}</p>
               )}
+              <LearningGuidance guidance={s.learning_guidance} />
+              {(draft.extensions ?? []).filter(extension => extension.stage_id === s.stage_id && extension.topic.startsWith('项目学习：')).slice(0, 1).map(extension => (
+                <details key={extension.extension_id} aria-label="项目学习安排">
+                  <summary>{extension.topic}</summary>
+                  <p style={{whiteSpace:'pre-line'}}>{extension.guidance}</p>
+                  <ul>{(extension.concepts ?? []).map(concept => <li key={concept}>{concept}</li>)}</ul>
+                  <p className="form-note">确认路线后，可在学习阶段复制项目学习 Prompt 给外部 AI。</p>
+                </details>
+              ))}
               <Resources
                 items={(draft.stage_resources ?? []).filter(
                   (r) => r.stage_id === s.stage_id,

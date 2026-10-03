@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { useState } from 'react';
 import type { DTO } from '../../api/types';
 import { Resources } from '../../components/Resources';
@@ -20,10 +21,10 @@ function CurriculumRecommendations() {
   const stages = (keys: string[]) => keys.map(key => agentCurriculum.find(stage => stage.key === key)!);
   return (
     <section className="recommendation-view" aria-label="建议能力路线">
-      <p className="eyebrow">建议路线 · 尚未应用到正式计划</p>
+      <p className="eyebrow">开发预览 · 静态测试示例</p>
       <h2>从能运行，到能评估与改进</h2>
       <p className="lede">围绕你的主项目选择能力。评测从第一个可运行的 Agent 开始；完整 RL 训练属于可选进阶。当前正式计划和任务验收要求保持原样。</p>
-      <p className="form-note">此处是产品学习建议，结合下方参考来源组织；不会改写已确认计划，也不代表已阅读或已掌握。</p>
+      <p className="form-note">此处仅供开发预览，正式学习路线以已发布 Plan 为准；不代表已阅读或已掌握。</p>
       <section className="curriculum-section"><h2>建立基础与第一个 Agent</h2>
         {stages(['python', 'llm', 'tools', 'minAgent']).map(item => <Capability key={item.key} item={item} />)}
       </section>
@@ -56,17 +57,18 @@ export function LearningPath({ workspace, enterStage, create }: {
   create: () => void;
 }) {
   const [view, setView] = useState<'current' | 'recommended'>('current');
+  const preview = import.meta.env.DEV && new URLSearchParams(window.location.search).get('previewCurriculum') === '1';
   const totals = stageTotals(workspace);
   return (
     <div className="content">
       <p className="eyebrow">学习路径</p>
       <h1>你的学习路径</h1>
-      <p className="lede">查看已确认的阶段、资料与任务，或比较适合主项目的能力安排建议。</p>
-      <div className="path-view-toggle" role="group" aria-label="学习路径视图">
+      <p className="lede">查看正式计划中的阶段、资料与任务，按目标继续学习和实践。</p>
+      {preview && <div className="path-view-toggle" role="group" aria-label="学习路径视图">
         <button className={`btn ${view === 'current' ? 'selected' : ''}`} aria-pressed={view === 'current'} onClick={() => setView('current')}>当前正式路线</button>
         <button className={`btn ${view === 'recommended' ? 'selected' : ''}`} aria-pressed={view === 'recommended'} onClick={() => setView('recommended')}>课程改进建议</button>
-      </div>
-      {view === 'recommended' ? <CurriculumRecommendations /> : workspace ? (
+      </div>}
+      {preview && view === 'recommended' ? <CurriculumRecommendations /> : workspace ? (
         <>
           <div className="goal-banner">
             <span className="pill">正式路线 · 版本 {workspace.plan.revision}</span>
