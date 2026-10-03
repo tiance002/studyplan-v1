@@ -586,7 +586,7 @@ export function PlanningPage({
             </button>
           </div>
         </form>
-        <p className="form-note">支持 Agent 应用开发与 Python 工程入门；其他方向生成通用结构，仅提供资料搜索建议。</p>
+        <p className="form-note">可明确选择 Knowledge/RAG Agent、Coding Agent、Workflow/Automation Agent 或 Python 工程前置。一次先确定一个方向；其他或未明确的方向仅提供通用结构和资料搜索建议。</p>
       </section>
       {pendingRunId && !run && <div className="run-banner" role="status">
         <strong>运行编号已保存，待读回</strong>

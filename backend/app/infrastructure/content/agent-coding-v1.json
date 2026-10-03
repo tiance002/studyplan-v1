@@ -1,0 +1,1832 @@
+{
+  "pack_key": "agent.coding",
+  "version": 1,
+  "status": "published",
+  "title": "Coding Agent：Python 前置到同一项目验收",
+  "supported_scope": "具备基础编程认知的 Agent 初学者；贯穿项目：文本统计 CLI 的缺陷修复与小功能",
+  "resource_support": "reviewed_index",
+  "provenance": "Controlled curriculum review 2026-10-03; official public body and specified reading scope audited in docs/curriculum/blueprint-source-audit-2026-10-03.md and blueprint-boundary-source-audit-2026-10-03.md. checked_at records when curriculum audit evidence was consolidated, not a measured page-fetch time. Source version 1 is internal; LangChain/LangGraph SDK version NOT OBSERVABLE. Body is free to read; API/cloud practice may cost separately. No examples/provider calls executed; bounded approval/patch references do not prove full safety teaching, remote exactly-once or learner mastery.",
+  "stage_blueprints": [
+    {
+      "stable_key": "stage.python_functions",
+      "title": "Python 控制流、函数与数据结构",
+      "section_kind": "foundation",
+      "objective": "用函数、列表和字典将输入转换成明确的成功或错误结果",
+      "inclusion": "required",
+      "node_keys": [
+        "node.python_functions"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_coding_python_v1",
+          "section_refs": [
+            "sec_coding_python_ch4_v1",
+            "sec_coding_python_ch5_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.python_functions"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "用函数、列表和字典将输入转换成明确的成功或错误结果",
+        "previous_relation": "从基础编程认知开始，用固定输入检查函数结果；若曾学过相关语法可快速复习，未推断已经掌握。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.python_functions"
+        ],
+        "learning_focus": [
+          "用函数、列表和字典将输入转换成明确的成功或错误结果",
+          "增加输入校验、列表/字典过滤和排序及可断言的函数结果"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "具备基础编程认知；此路线不声称覆盖完全零编程基础"
+        ],
+        "practice_prerequisites": [
+          "从当前已有基础编程认知与无敏感样例开始建立 文本统计 CLI 的缺陷修复与小功能"
+        ],
+        "practice_delta": {
+          "baseline": "从当前已有基础编程认知与无敏感样例开始建立 文本统计 CLI 的缺陷修复与小功能",
+          "increment": [
+            "增加输入校验、列表/字典过滤和排序及可断言的函数结果"
+          ],
+          "preserved": [
+            "保留输入样例和预期结果；尚无前阶段项目，先建立最小函数基线"
+          ],
+          "validation": [
+            "正常、空输入、类型不符分别有固定预期；函数结果可断言"
+          ],
+          "reuse": [
+            "后续阶段继续使用同一 文本统计 CLI 的缺陷修复与小功能，引用本阶段成果与验收记录，不另建项目或继承 accepted 状态"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.python_files",
+      "title": "Python 文件、异常、JSON 与测试",
+      "section_kind": "foundation",
+      "objective": "读取 UTF-8 文件，区分异常并保存可测试的 JSON 记录",
+      "inclusion": "required",
+      "node_keys": [
+        "node.python_files"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_coding_python_v1",
+          "section_refs": [
+            "sec_coding_python_ch7_v1",
+            "sec_coding_python_ch8_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.python_files"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_python_v1",
+          "section_refs": [
+            "sec_coding_python_ch6_v1"
+          ],
+          "source_version": 1,
+          "order_index": 1,
+          "node_keys": [
+            "node.python_files"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_json_v1",
+          "section_refs": [
+            "sec_coding_json_v1"
+          ],
+          "source_version": 1,
+          "order_index": 2,
+          "node_keys": [
+            "node.python_files"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_pathlib_v1",
+          "section_refs": [
+            "sec_coding_pathlib_v1"
+          ],
+          "source_version": 1,
+          "order_index": 3,
+          "node_keys": [
+            "node.python_files"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_unittest_v1",
+          "section_refs": [
+            "sec_coding_unittest_v1"
+          ],
+          "source_version": 1,
+          "order_index": 4,
+          "node_keys": [
+            "node.python_files"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "读取 UTF-8 文件，区分异常并保存可测试的 JSON 记录",
+        "previous_relation": "沿用上一阶段的可断言函数，新增文件、JSON与异常边界；输入校验继续保留。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.python_files"
+        ],
+        "learning_focus": [
+          "读取 UTF-8 文件，区分异常并保存可测试的 JSON 记录",
+          "读取本地样例，保存路径、正文和错误；增加 JSON 往返、模块导入和基础测试"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先完成 Python 控制流、函数与数据结构 的阅读；未完成则先补齐"
+        ],
+        "practice_prerequisites": [
+          "文本统计 CLI 的缺陷修复与小功能：沿用 Python 控制流、函数与数据结构 的已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "文本统计 CLI 的缺陷修复与小功能：沿用 Python 控制流、函数与数据结构 的已保存成果；未完成时先补齐",
+          "increment": [
+            "读取本地样例，保存路径、正文和错误；增加 JSON 往返、模块导入和基础测试"
+          ],
+          "preserved": [
+            "保留 文本统计 CLI 的缺陷修复与小功能 的前阶段可运行行为、输入原文与验证记录"
+          ],
+          "validation": [
+            "正常、空文件、缺失文件可区分",
+            "JSON 往返不丢关键字段；保留测试命令及原始输出",
+            "路径限制到项目根目录；非法路径明确拒绝"
+          ],
+          "reuse": [
+            "后续阶段继续使用同一 文本统计 CLI 的缺陷修复与小功能，引用本阶段成果与验收记录，不另建项目或继承 accepted 状态"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.environment",
+      "title": "Python 可复现开发环境",
+      "section_kind": "foundation",
+      "objective": "为已有脚本建立隔离、可复现的启动方式",
+      "inclusion": "required",
+      "node_keys": [
+        "node.environment"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_coding_python_v1",
+          "section_refs": [
+            "sec_coding_python_ch12_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.environment"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "为已有脚本建立隔离、可复现的启动方式",
+        "previous_relation": "前阶段脚本已可在当前环境运行；本阶段增加可复现启动，业务行为保持一致。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.environment"
+        ],
+        "learning_focus": [
+          "为已有脚本建立隔离、可复现的启动方式",
+          "创建虚拟环境，记录解释器、依赖与 README 启动步骤"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先完成 Python 文件、异常、JSON 与测试 的阅读；未完成则先补齐"
+        ],
+        "practice_prerequisites": [
+          "文本统计 CLI 的缺陷修复与小功能：沿用 Python 文件、异常、JSON 与测试 的已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "文本统计 CLI 的缺陷修复与小功能：沿用 Python 文件、异常、JSON 与测试 的已保存成果；未完成时先补齐",
+          "increment": [
+            "创建虚拟环境，记录解释器、依赖与 README 启动步骤"
+          ],
+          "preserved": [
+            "保留 文本统计 CLI 的缺陷修复与小功能 的前阶段可运行行为、输入原文与验证记录"
+          ],
+          "validation": [
+            "新环境按 README 复现前两阶段脚本",
+            "记录解释器版本与依赖，不把环境差异混为业务失败"
+          ],
+          "reuse": [
+            "后续阶段继续使用同一 文本统计 CLI 的缺陷修复与小功能，引用本阶段成果与验收记录，不另建项目或继承 accepted 状态"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.model_api",
+      "title": "模型与消息边界",
+      "section_kind": "core",
+      "objective": "将问题描述、代码材料和修改建议分开；从CLI代码进入结构化分析",
+      "inclusion": "required",
+      "node_keys": [
+        "node.model_api"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_coding_models_v1",
+          "section_refs": [
+            "sec_coding_models_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.model_api"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_messages_v1",
+          "section_refs": [
+            "sec_coding_messages_v1"
+          ],
+          "source_version": 1,
+          "order_index": 1,
+          "node_keys": [
+            "node.model_api"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "将问题描述、代码材料和修改建议分开；从CLI代码进入结构化分析",
+        "previous_relation": "已有本地文件/结构化记录，现在新增消息与请求响应；模型调用与本地样例验证分别记录。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.model_api"
+        ],
+        "learning_focus": [
+          "将问题描述、代码材料和修改建议分开；从CLI代码进入结构化分析",
+          "给CLI增加代码问题分析入口，输出目标文件、问题、建议与不确定项"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先完成 Python 可复现开发环境 的阅读；未完成则先补齐"
+        ],
+        "practice_prerequisites": [
+          "文本统计 CLI 的缺陷修复与小功能：沿用 Python 可复现开发环境 的已保存成果；未完成时先补齐",
+          "教材正文免费；真实模型/API可能收费，先配置并核对额度，可先用固定响应验证格式，需分别记录"
+        ],
+        "practice_delta": {
+          "baseline": "文本统计 CLI 的缺陷修复与小功能：沿用 Python 可复现开发环境 的已保存成果；未完成时先补齐",
+          "increment": [
+            "给CLI增加代码问题分析入口，输出目标文件、问题、建议与不确定项"
+          ],
+          "preserved": [
+            "保留 文本统计 CLI 的缺陷修复与小功能 的前阶段可运行行为、输入原文与验证记录"
+          ],
+          "validation": [
+            "保留CLI运行。用固定缺陷检查建议是否对应实际代码，缺材料时明确说明"
+          ],
+          "reuse": [
+            "后续阶段继续使用同一 文本统计 CLI 的缺陷修复与小功能，引用本阶段成果与验收记录，不另建项目或继承 accepted 状态"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.tools",
+      "title": "工具与结构化输出",
+      "section_kind": "core",
+      "objective": "只读代码工具的schema、路径范围与错误；首次工具实现",
+      "inclusion": "required",
+      "node_keys": [
+        "node.tools"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_coding_tools_v1",
+          "section_refs": [
+            "sec_coding_tools_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.tools"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_structured_v1",
+          "section_refs": [
+            "sec_coding_structured_v1"
+          ],
+          "source_version": 1,
+          "order_index": 1,
+          "node_keys": [
+            "node.tools"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "只读代码工具的schema、路径范围与错误；首次工具实现",
+        "previous_relation": "上一阶段只有直接问答或结构化分析；现在新增schema→请求→dispatch→result，首次正式实现工具。",
+        "exposure_relation": "unknown",
+        "knowledge_keys": [
+          "node.tools"
+        ],
+        "learning_focus": [
+          "只读代码工具的schema、路径范围与错误；首次工具实现",
+          "增加`list_files`、`read_file`、`search_code`"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先完成 模型与消息边界 的阅读；未完成则先补齐"
+        ],
+        "practice_prerequisites": [
+          "文本统计 CLI 的缺陷修复与小功能：沿用 模型与消息边界 的已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "文本统计 CLI 的缺陷修复与小功能：沿用 模型与消息边界 的已保存成果；未完成时先补齐",
+          "increment": [
+            "增加`list_files`、`read_file`、`search_code`"
+          ],
+          "preserved": [
+            "保留 文本统计 CLI 的缺陷修复与小功能 的前阶段可运行行为、输入原文与验证记录"
+          ],
+          "validation": [
+            "保留普通分析。正常文件、缺失路径、越界路径、未知工具均有记录",
+            "尚不写文件"
+          ],
+          "reuse": [
+            "后续阶段继续使用同一 文本统计 CLI 的缺陷修复与小功能，引用本阶段成果与验收记录，不另建项目或继承 accepted 状态"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.agent_loop",
+      "title": "有界 Agent 循环与 Eval-Lite",
+      "section_kind": "core",
+      "objective": "完成观察→定位→修改提案的有界循环。",
+      "inclusion": "required",
+      "node_keys": [
+        "node.agent_loop",
+        "node.eval_lite"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_coding_agents_v1",
+          "section_refs": [
+            "sec_coding_agents_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.agent_loop"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_testing_v1",
+          "section_refs": [
+            "sec_coding_testing_v1"
+          ],
+          "source_version": 1,
+          "order_index": 1,
+          "node_keys": [
+            "node.agent_loop"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "完成观察→定位→修改提案的有界循环。",
+        "previous_relation": "深入前阶段单次工具调用，新增多轮观察、步数上限和停止原因；保留直接调用入口。",
+        "exposure_relation": "deepen",
+        "knowledge_keys": [
+          "node.agent_loop",
+          "node.eval_lite"
+        ],
+        "learning_focus": [
+          "完成观察→定位→修改提案的有界循环。",
+          "增加最大步数和“找到依据/需要补材料/失败”终态，准备固定缺陷集。保留只读边界"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先完成 工具与结构化输出 的阅读；未完成则先补齐"
+        ],
+        "practice_prerequisites": [
+          "文本统计 CLI 的缺陷修复与小功能：沿用 工具与结构化输出 的已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "文本统计 CLI 的缺陷修复与小功能：沿用 工具与结构化输出 的已保存成果；未完成时先补齐",
+          "increment": [
+            "增加最大步数和“找到依据/需要补材料/失败”终态，准备固定缺陷集。保留只读边界"
+          ],
+          "preserved": [
+            "保留 文本统计 CLI 的缺陷修复与小功能 的前阶段可运行行为、输入原文与验证记录"
+          ],
+          "validation": [
+            "每项建议可定位到真实文件，未知内容不能伪造"
+          ],
+          "reuse": [
+            "后续阶段继续使用同一 文本统计 CLI 的缺陷修复与小功能，引用本阶段成果与验收记录，不另建项目或继承 accepted 状态"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.coding_workspace",
+      "title": "受控代码修改与确认",
+      "section_kind": "core",
+      "objective": "将“建议修改”与“实际应用”分开；从读取能力扩展到受控修改",
+      "inclusion": "required",
+      "node_keys": [
+        "node.coding_workspace"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_coding_interrupts_v1",
+          "section_refs": [
+            "sec_coding_interrupts_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.coding_workspace"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_git_diff_v1",
+          "section_refs": [
+            "sec_coding_git_diff_v1"
+          ],
+          "source_version": 1,
+          "order_index": 1,
+          "node_keys": [
+            "node.coding_workspace"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_git_apply_v1",
+          "section_refs": [
+            "sec_coding_git_apply_v1"
+          ],
+          "source_version": 1,
+          "order_index": 2,
+          "node_keys": [
+            "node.coding_workspace"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_persistence_v1",
+          "section_refs": [
+            "sec_coding_persistence_v1"
+          ],
+          "source_version": 1,
+          "order_index": 3,
+          "node_keys": [
+            "node.coding_workspace"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "将“建议修改”与“实际应用”分开；从读取能力扩展到受控修改",
+        "previous_relation": "深入只读代码工具：从修改提案增加差异、确认和基线检查；首次实际应用修改，不继承读取权限。",
+        "exposure_relation": "deepen",
+        "knowledge_keys": [
+          "node.coding_workspace"
+        ],
+        "learning_focus": [
+          "将“建议修改”与“实际应用”分开；从读取能力扩展到受控修改",
+          "增加目标文件白名单、差异预览、明确确认与基线检查。保留读工具",
+          "官方资料仅覆盖 interrupts 或 Git diff/apply/check 的有界阅读；完整安全教材链及示例兼容性待审核",
+          "使用 git diff --no-index 展示差异；git apply --check 只预检，不替代白名单、基线比对与明确确认；工作树外路径拒绝不得绕过",
+          "实践算法：保存白名单文件基线→展示差异→确认→再查基线/范围→应用一次→固定测试。基线变化拒绝旧提案，结果未知先核对文件。"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先完成 有界 Agent 循环与 Eval-Lite 的阅读；未完成则先补齐"
+        ],
+        "practice_prerequisites": [
+          "文本统计 CLI 的缺陷修复与小功能：沿用 有界 Agent 循环与 Eval-Lite 的已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "文本统计 CLI 的缺陷修复与小功能：沿用 有界 Agent 循环与 Eval-Lite 的已保存成果；未完成时先补齐",
+          "increment": [
+            "增加目标文件白名单、差异预览、明确确认与基线检查。保留读工具"
+          ],
+          "preserved": [
+            "保留 文本统计 CLI 的缺陷修复与小功能 的前阶段可运行行为、输入原文与验证记录"
+          ],
+          "validation": [
+            "未确认零写入，基线变化拒绝旧提案，重复确认不重复应用，无关文件保持原样"
+          ],
+          "reuse": [
+            "后续阶段继续使用同一 文本统计 CLI 的缺陷修复与小功能，引用本阶段成果与验收记录，不另建项目或继承 accepted 状态"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.langgraph",
+      "title": "状态编排与恢复",
+      "section_kind": "core",
+      "objective": "编排提案→确认→应用→测试→结束；新增执行状态和失败分支",
+      "inclusion": "required",
+      "node_keys": [
+        "node.langgraph"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_coding_graph_v1",
+          "section_refs": [
+            "sec_coding_graph_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.langgraph"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_persistence_v1",
+          "section_refs": [
+            "sec_coding_persistence_v1"
+          ],
+          "source_version": 1,
+          "order_index": 1,
+          "node_keys": [
+            "node.langgraph"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "编排提案→确认→应用→测试→结束；新增执行状态和失败分支",
+        "previous_relation": "深入已有有限循环：将节点、状态和失败路由显式化；上一阶段项目能力继续通过原案例。",
+        "exposure_relation": "deepen",
+        "knowledge_keys": [
+          "node.langgraph"
+        ],
+        "learning_focus": [
+          "编排提案→确认→应用→测试→结束；新增执行状态和失败分支",
+          "增加状态记录、固定测试入口与失败终态"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先完成 受控代码修改与确认 的阅读；未完成则先补齐"
+        ],
+        "practice_prerequisites": [
+          "文本统计 CLI 的缺陷修复与小功能：沿用 受控代码修改与确认 的已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "文本统计 CLI 的缺陷修复与小功能：沿用 受控代码修改与确认 的已保存成果；未完成时先补齐",
+          "increment": [
+            "增加状态记录、固定测试入口与失败终态"
+          ],
+          "preserved": [
+            "保留 文本统计 CLI 的缺陷修复与小功能 的前阶段可运行行为、输入原文与验证记录"
+          ],
+          "validation": [
+            "保留C4确认边界。测试失败不报告成功，重启后能区分未应用/已应用/待核对",
+            "未知执行结果不盲目重跑"
+          ],
+          "reuse": [
+            "后续阶段继续使用同一 文本统计 CLI 的缺陷修复与小功能，引用本阶段成果与验收记录，不另建项目或继承 accepted 状态"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.context",
+      "title": "上下文与会话隔离",
+      "section_kind": "core",
+      "objective": "保存需求、基线、已读文件和验证结果。运行状态、上下文组织",
+      "inclusion": "required",
+      "node_keys": [
+        "node.context"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_coding_memory_v1",
+          "section_refs": [
+            "sec_coding_memory_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.context"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_messages_v1",
+          "section_refs": [
+            "sec_coding_messages_v1"
+          ],
+          "source_version": 1,
+          "order_index": 1,
+          "node_keys": [
+            "node.context"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_persistence_v1",
+          "section_refs": [
+            "sec_coding_persistence_v1"
+          ],
+          "source_version": 1,
+          "order_index": 2,
+          "node_keys": [
+            "node.context"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "保存需求、基线、已读文件和验证结果。运行状态、上下文组织",
+        "previous_relation": "复习已保存状态，新增消息预算及摘要到原文的引用；裁剪/摘要都不能删除原要求和更正。",
+        "exposure_relation": "deepen",
+        "knowledge_keys": [
+          "node.context"
+        ],
+        "learning_focus": [
+          "保存需求、基线、已读文件和验证结果。运行状态、上下文组织",
+          "增加任务摘要并保留原需求/差异/测试记录"
+        ],
+        "comparison_focus": [
+          "裁剪与摘要分别遗漏哪个需求或验收约束？"
+        ],
+        "reading_prerequisites": [
+          "先完成 状态编排与恢复 的阅读；未完成则先补齐"
+        ],
+        "practice_prerequisites": [
+          "文本统计 CLI 的缺陷修复与小功能：沿用 状态编排与恢复 的已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "文本统计 CLI 的缺陷修复与小功能：沿用 状态编排与恢复 的已保存成果；未完成时先补齐",
+          "increment": [
+            "增加任务摘要并保留原需求/差异/测试记录"
+          ],
+          "preserved": [
+            "保留 文本统计 CLI 的缺陷修复与小功能 的前阶段可运行行为、输入原文与验证记录"
+          ],
+          "validation": [
+            "用户更正能覆盖旧计划中的假设。对比问题：长代码上下文裁剪后，哪个验收条件容易丢失？"
+          ],
+          "reuse": [
+            "后续阶段继续使用同一 文本统计 CLI 的缺陷修复与小功能，引用本阶段成果与验收记录，不另建项目或继承 accepted 状态"
+          ]
+        }
+      }
+    },
+    {
+      "stable_key": "stage.capstone",
+      "title": "综合项目验收",
+      "section_kind": "capstone",
+      "objective": "检查实际环境结果；从提案格式到代码和回归",
+      "inclusion": "required",
+      "node_keys": [
+        "node.capstone",
+        "node.reliability"
+      ],
+      "resources": [
+        {
+          "role": "primary",
+          "source_ref": "src_coding_unit_testing_v1",
+          "section_refs": [
+            "sec_coding_unit_testing_v1"
+          ],
+          "source_version": 1,
+          "order_index": 0,
+          "node_keys": [
+            "node.capstone"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_testing_v1",
+          "section_refs": [
+            "sec_coding_testing_v1"
+          ],
+          "source_version": 1,
+          "order_index": 1,
+          "node_keys": [
+            "node.capstone"
+          ]
+        },
+        {
+          "role": "supplement",
+          "source_ref": "src_coding_evaluation_v1",
+          "section_refs": [
+            "sec_coding_evaluation_v1"
+          ],
+          "source_version": 1,
+          "order_index": 2,
+          "node_keys": [
+            "node.capstone"
+          ]
+        }
+      ],
+      "extensions": [],
+      "learning_guidance": {
+        "why_now": "检查实际环境结果；从提案格式到代码和回归",
+        "previous_relation": "深入早期Eval-Lite：复用同一固定案例集，增加本方向的失败、隔离、重复与回归检查，统计可复算。",
+        "exposure_relation": "deepen",
+        "knowledge_keys": [
+          "node.capstone",
+          "node.reliability"
+        ],
+        "learning_focus": [
+          "检查实际环境结果；从提案格式到代码和回归",
+          "完成一项缺陷修复与一项小功能，提交差异、确认记录、测试命令及原始输出。合法修改满足要求"
+        ],
+        "comparison_focus": [],
+        "reading_prerequisites": [
+          "先完成 上下文与会话隔离 的阅读；未完成则先补齐"
+        ],
+        "practice_prerequisites": [
+          "文本统计 CLI 的缺陷修复与小功能：沿用 上下文与会话隔离 的已保存成果；未完成时先补齐"
+        ],
+        "practice_delta": {
+          "baseline": "文本统计 CLI 的缺陷修复与小功能：沿用 上下文与会话隔离 的已保存成果；未完成时先补齐",
+          "increment": [
+            "完成一项缺陷修复与一项小功能，提交差异、确认记录、测试命令及原始输出。合法修改满足要求"
+          ],
+          "preserved": [
+            "保留 文本统计 CLI 的缺陷修复与小功能 的前阶段可运行行为、输入原文与验证记录"
+          ],
+          "validation": [
+            "越界、过期提案、测试失败、动作上限都有证据",
+            "原CLI回归通过"
+          ],
+          "reuse": [
+            "后续阶段继续使用同一 文本统计 CLI 的缺陷修复与小功能，引用本阶段成果与验收记录，不另建项目或继承 accepted 状态"
+          ]
+        }
+      }
+    }
+  ],
+  "knowledge_blueprints": [
+    {
+      "stable_key": "node.python_functions",
+      "title": "Python 控制流、函数与数据结构",
+      "node_type": "skill",
+      "objectives": [
+        "用函数、列表和字典将输入转换成明确的成功或错误结果"
+      ],
+      "prerequisite_keys": []
+    },
+    {
+      "stable_key": "node.python_files",
+      "title": "Python 文件、异常、JSON 与测试",
+      "node_type": "skill",
+      "objectives": [
+        "读取 UTF-8 文件，区分异常并保存可测试的 JSON 记录"
+      ],
+      "prerequisite_keys": [
+        "node.python_functions"
+      ]
+    },
+    {
+      "stable_key": "node.environment",
+      "title": "Python 可复现开发环境",
+      "node_type": "skill",
+      "objectives": [
+        "为已有脚本建立隔离、可复现的启动方式"
+      ],
+      "prerequisite_keys": [
+        "node.python_files"
+      ]
+    },
+    {
+      "stable_key": "node.model_api",
+      "title": "模型与消息边界",
+      "node_type": "skill",
+      "objectives": [
+        "将问题描述、代码材料和修改建议分开；从CLI代码进入结构化分析"
+      ],
+      "prerequisite_keys": [
+        "node.environment"
+      ]
+    },
+    {
+      "stable_key": "node.tools",
+      "title": "工具与结构化输出",
+      "node_type": "skill",
+      "objectives": [
+        "只读代码工具的schema、路径范围与错误；首次工具实现"
+      ],
+      "prerequisite_keys": [
+        "node.model_api"
+      ]
+    },
+    {
+      "stable_key": "node.agent_loop",
+      "title": "有界 Agent 循环与 Eval-Lite",
+      "node_type": "skill",
+      "objectives": [
+        "完成观察→定位→修改提案的有界循环。"
+      ],
+      "prerequisite_keys": [
+        "node.tools"
+      ]
+    },
+    {
+      "stable_key": "node.coding_workspace",
+      "title": "受控代码修改与确认",
+      "node_type": "skill",
+      "objectives": [
+        "将“建议修改”与“实际应用”分开；从读取能力扩展到受控修改"
+      ],
+      "prerequisite_keys": [
+        "node.agent_loop"
+      ]
+    },
+    {
+      "stable_key": "node.langgraph",
+      "title": "状态编排与恢复",
+      "node_type": "skill",
+      "objectives": [
+        "编排提案→确认→应用→测试→结束；新增执行状态和失败分支"
+      ],
+      "prerequisite_keys": [
+        "node.agent_loop",
+        "node.coding_workspace"
+      ]
+    },
+    {
+      "stable_key": "node.context",
+      "title": "上下文与会话隔离",
+      "node_type": "skill",
+      "objectives": [
+        "保存需求、基线、已读文件和验证结果。运行状态、上下文组织"
+      ],
+      "prerequisite_keys": [
+        "node.langgraph"
+      ]
+    },
+    {
+      "stable_key": "node.capstone",
+      "title": "综合项目验收",
+      "node_type": "skill",
+      "objectives": [
+        "检查实际环境结果；从提案格式到代码和回归"
+      ],
+      "prerequisite_keys": [
+        "node.reliability",
+        "node.context",
+        "node.langgraph",
+        "node.coding_workspace"
+      ]
+    },
+    {
+      "stable_key": "node.eval_lite",
+      "title": "固定案例、trace 与早期评价",
+      "node_type": "skill",
+      "objectives": [
+        "保存 10–20 个固定案例的预期、实际结果、调用数和失败分类"
+      ],
+      "prerequisite_keys": [
+        "node.agent_loop"
+      ]
+    },
+    {
+      "stable_key": "node.reliability",
+      "title": "项目回归与可复算验收",
+      "node_type": "skill",
+      "objectives": [
+        "复用固定案例并检查成功、失败、隔离和重复执行边界"
+      ],
+      "prerequisite_keys": [
+        "node.eval_lite"
+      ]
+    }
+  ],
+  "practice_blueprints": [
+    {
+      "stable_key": "task.python_functions",
+      "title": "文本统计 CLI 的缺陷修复与小功能：Python 控制流、函数与数据结构",
+      "section_key": "stage.python_functions",
+      "goal": "增加输入校验、列表/字典过滤和排序及可断言的函数结果",
+      "acceptance": [
+        "正常、空输入、类型不符分别有固定预期；函数结果可断言"
+      ],
+      "node_keys": [
+        "node.python_functions"
+      ],
+      "in_scope": [
+        "增加输入校验、列表/字典过滤和排序及可断言的函数结果"
+      ],
+      "out_scope": [
+        "真实业务账号、真实邮件或生产副作用",
+        "未经许可的收费模型调用",
+        "任意 shell、自动安装依赖或执行外部仓库"
+      ]
+    },
+    {
+      "stable_key": "task.python_files",
+      "title": "文本统计 CLI 的缺陷修复与小功能：Python 文件、异常、JSON 与测试",
+      "section_key": "stage.python_files",
+      "goal": "读取本地样例，保存路径、正文和错误；增加 JSON 往返、模块导入和基础测试",
+      "acceptance": [
+        "正常、空文件、缺失文件可区分",
+        "JSON 往返不丢关键字段；保留测试命令及原始输出",
+        "路径限制到项目根目录；非法路径明确拒绝"
+      ],
+      "node_keys": [
+        "node.python_files"
+      ],
+      "in_scope": [
+        "读取本地样例，保存路径、正文和错误；增加 JSON 往返、模块导入和基础测试"
+      ],
+      "out_scope": [
+        "真实业务账号、真实邮件或生产副作用",
+        "未经许可的收费模型调用",
+        "任意 shell、自动安装依赖或执行外部仓库"
+      ]
+    },
+    {
+      "stable_key": "task.environment",
+      "title": "文本统计 CLI 的缺陷修复与小功能：Python 可复现开发环境",
+      "section_key": "stage.environment",
+      "goal": "创建虚拟环境，记录解释器、依赖与 README 启动步骤",
+      "acceptance": [
+        "新环境按 README 复现前两阶段脚本",
+        "记录解释器版本与依赖，不把环境差异混为业务失败"
+      ],
+      "node_keys": [
+        "node.environment"
+      ],
+      "in_scope": [
+        "创建虚拟环境，记录解释器、依赖与 README 启动步骤"
+      ],
+      "out_scope": [
+        "真实业务账号、真实邮件或生产副作用",
+        "未经许可的收费模型调用",
+        "任意 shell、自动安装依赖或执行外部仓库"
+      ]
+    },
+    {
+      "stable_key": "task.model_api",
+      "title": "文本统计 CLI 的缺陷修复与小功能：模型与消息边界",
+      "section_key": "stage.model_api",
+      "goal": "给CLI增加代码问题分析入口，输出目标文件、问题、建议与不确定项",
+      "acceptance": [
+        "保留CLI运行。用固定缺陷检查建议是否对应实际代码，缺材料时明确说明"
+      ],
+      "node_keys": [
+        "node.model_api"
+      ],
+      "in_scope": [
+        "给CLI增加代码问题分析入口，输出目标文件、问题、建议与不确定项"
+      ],
+      "out_scope": [
+        "真实业务账号、真实邮件或生产副作用",
+        "未经许可的收费模型调用",
+        "任意 shell、自动安装依赖或执行外部仓库"
+      ]
+    },
+    {
+      "stable_key": "task.tools",
+      "title": "文本统计 CLI 的缺陷修复与小功能：工具与结构化输出",
+      "section_key": "stage.tools",
+      "goal": "增加`list_files`、`read_file`、`search_code`",
+      "acceptance": [
+        "保留普通分析。正常文件、缺失路径、越界路径、未知工具均有记录",
+        "尚不写文件"
+      ],
+      "node_keys": [
+        "node.tools"
+      ],
+      "in_scope": [
+        "增加`list_files`、`read_file`、`search_code`"
+      ],
+      "out_scope": [
+        "真实业务账号、真实邮件或生产副作用",
+        "未经许可的收费模型调用",
+        "任意 shell、自动安装依赖或执行外部仓库"
+      ]
+    },
+    {
+      "stable_key": "task.agent_loop",
+      "title": "文本统计 CLI 的缺陷修复与小功能：有界 Agent 循环与 Eval-Lite",
+      "section_key": "stage.agent_loop",
+      "goal": "增加最大步数和“找到依据/需要补材料/失败”终态，准备固定缺陷集。保留只读边界",
+      "acceptance": [
+        "每项建议可定位到真实文件，未知内容不能伪造"
+      ],
+      "node_keys": [
+        "node.agent_loop",
+        "node.eval_lite"
+      ],
+      "in_scope": [
+        "增加最大步数和“找到依据/需要补材料/失败”终态，准备固定缺陷集。保留只读边界"
+      ],
+      "out_scope": [
+        "真实业务账号、真实邮件或生产副作用",
+        "未经许可的收费模型调用",
+        "任意 shell、自动安装依赖或执行外部仓库"
+      ]
+    },
+    {
+      "stable_key": "task.coding_workspace",
+      "title": "文本统计 CLI 的缺陷修复与小功能：受控代码修改与确认",
+      "section_key": "stage.coding_workspace",
+      "goal": "增加目标文件白名单、差异预览、明确确认与基线检查。保留读工具",
+      "acceptance": [
+        "未确认零写入，基线变化拒绝旧提案，重复确认不重复应用，无关文件保持原样"
+      ],
+      "node_keys": [
+        "node.coding_workspace"
+      ],
+      "in_scope": [
+        "增加目标文件白名单、差异预览、明确确认与基线检查。保留读工具"
+      ],
+      "out_scope": [
+        "真实业务账号、真实邮件或生产副作用",
+        "未经许可的收费模型调用",
+        "任意 shell、自动安装依赖或执行外部仓库"
+      ]
+    },
+    {
+      "stable_key": "task.langgraph",
+      "title": "文本统计 CLI 的缺陷修复与小功能：状态编排与恢复",
+      "section_key": "stage.langgraph",
+      "goal": "增加状态记录、固定测试入口与失败终态",
+      "acceptance": [
+        "保留C4确认边界。测试失败不报告成功，重启后能区分未应用/已应用/待核对",
+        "未知执行结果不盲目重跑"
+      ],
+      "node_keys": [
+        "node.langgraph"
+      ],
+      "in_scope": [
+        "增加状态记录、固定测试入口与失败终态"
+      ],
+      "out_scope": [
+        "真实业务账号、真实邮件或生产副作用",
+        "未经许可的收费模型调用",
+        "任意 shell、自动安装依赖或执行外部仓库"
+      ]
+    },
+    {
+      "stable_key": "task.context",
+      "title": "文本统计 CLI 的缺陷修复与小功能：上下文与会话隔离",
+      "section_key": "stage.context",
+      "goal": "增加任务摘要并保留原需求/差异/测试记录",
+      "acceptance": [
+        "用户更正能覆盖旧计划中的假设。对比问题：长代码上下文裁剪后，哪个验收条件容易丢失？"
+      ],
+      "node_keys": [
+        "node.context"
+      ],
+      "in_scope": [
+        "增加任务摘要并保留原需求/差异/测试记录"
+      ],
+      "out_scope": [
+        "真实业务账号、真实邮件或生产副作用",
+        "未经许可的收费模型调用",
+        "任意 shell、自动安装依赖或执行外部仓库"
+      ]
+    },
+    {
+      "stable_key": "task.capstone",
+      "title": "文本统计 CLI 的缺陷修复与小功能：综合项目验收",
+      "section_key": "stage.capstone",
+      "goal": "完成一项缺陷修复与一项小功能，提交差异、确认记录、测试命令及原始输出。合法修改满足要求",
+      "acceptance": [
+        "越界、过期提案、测试失败、动作上限都有证据",
+        "原CLI回归通过"
+      ],
+      "node_keys": [
+        "node.capstone",
+        "node.reliability"
+      ],
+      "in_scope": [
+        "完成一项缺陷修复与一项小功能，提交差异、确认记录、测试命令及原始输出。合法修改满足要求"
+      ],
+      "out_scope": [
+        "真实业务账号、真实邮件或生产副作用",
+        "未经许可的收费模型调用",
+        "任意 shell、自动安装依赖或执行外部仓库"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "source_id": "src_coding_python_v1",
+      "canonical_url": "https://docs.python.org/3.14/tutorial/",
+      "title": "The Python Tutorial",
+      "creator": "Python Software Foundation",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "Python 3.14 series; body audit showed 3.14.8; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_python_ch4_v1",
+          "title": "4. More Control Flow Tools",
+          "url": "https://docs.python.org/3.14/tutorial/controlflow.html",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Python 3.14 教程第4章：分支、循环和函数；不承担完整零编程基础课程。",
+          "applicable_node_keys": [
+            "node.python_functions"
+          ],
+          "free_body_access": "public_without_login"
+        },
+        {
+          "section_id": "sec_coding_python_ch5_v1",
+          "title": "5. Data Structures",
+          "url": "https://docs.python.org/3.14/tutorial/datastructures.html",
+          "order_index": 1,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Python 3.14 教程第5章：列表、字典、集合、过滤与推导；作者顺序在第4章后。",
+          "applicable_node_keys": [
+            "node.python_functions"
+          ],
+          "free_body_access": "public_without_login"
+        },
+        {
+          "section_id": "sec_coding_python_ch6_v1",
+          "title": "6. Modules",
+          "url": "https://docs.python.org/3.14/tutorial/modules.html",
+          "order_index": 2,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Python 3.14 教程第6章：模块、导入和包；不代表可执行任意外部代码。",
+          "applicable_node_keys": [
+            "node.python_files"
+          ],
+          "free_body_access": "public_without_login"
+        },
+        {
+          "section_id": "sec_coding_python_ch7_v1",
+          "title": "7. Input and Output",
+          "url": "https://docs.python.org/3.14/tutorial/inputoutput.html",
+          "order_index": 3,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Python 3.14 教程第7章：UTF-8文件读写及7.2.2 JSON；不提供文件授权边界。",
+          "applicable_node_keys": [
+            "node.python_files"
+          ],
+          "free_body_access": "public_without_login"
+        },
+        {
+          "section_id": "sec_coding_python_ch8_v1",
+          "title": "8. Errors and Exceptions",
+          "url": "https://docs.python.org/3.14/tutorial/errors.html",
+          "order_index": 4,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Python 3.14 教程第8章：异常捕获和清理；不等同分布式失败/重试规范。",
+          "applicable_node_keys": [
+            "node.python_files"
+          ],
+          "free_body_access": "public_without_login"
+        },
+        {
+          "section_id": "sec_coding_python_ch12_v1",
+          "title": "12. Virtual Environments and Packages",
+          "url": "https://docs.python.org/3.14/tutorial/venv.html",
+          "order_index": 5,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Python 3.14 教程第12章12.1–12.3：环境、venv、pip及依赖记录；本次未安装或执行。",
+          "applicable_node_keys": [
+            "node.environment"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_agents_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/agents",
+      "title": "Agents",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_agents_v1",
+          "title": "Agents",
+          "url": "https://docs.langchain.com/oss/python/langchain/agents",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Agent loop及线程续接；课程另设步数、终态和固定案例，不默认教程有这些门禁。",
+          "applicable_node_keys": [
+            "node.agent_loop"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_evaluation_v1",
+      "canonical_url": "https://docs.langchain.com/langsmith/evaluation",
+      "title": "LangSmith Evaluation",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_evaluation_v1",
+          "title": "LangSmith Evaluation",
+          "url": "https://docs.langchain.com/langsmith/evaluation",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Offline/Online及dataset→evaluator→experiment→analysis；正文免费，云运行需账号/API key，基础实践不上传trace。",
+          "applicable_node_keys": [
+            "node.capstone"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_git_apply_v1",
+      "canonical_url": "https://git-scm.com/docs/git-apply",
+      "title": "git-apply",
+      "creator": "Git project",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "Git living manual; local installed version must be checked; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_git_apply_v1",
+          "title": "git-apply",
+          "url": "https://git-scm.com/docs/git-apply",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "--check、--index、默认原子失败和外部路径拒绝；预检不保证并发/符号链接隔离，课程禁止--unsafe-paths。",
+          "applicable_node_keys": [
+            "node.coding_workspace"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_git_diff_v1",
+      "canonical_url": "https://git-scm.com/docs/git-diff",
+      "title": "git-diff",
+      "creator": "Git project",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "Git living manual; local installed version must be checked; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_git_diff_v1",
+          "title": "git-diff",
+          "url": "https://git-scm.com/docs/git-diff",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "diff工作区/索引/提交和--no-index；只读差异是Supplement，不代替明确确认。",
+          "applicable_node_keys": [
+            "node.coding_workspace"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_graph_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+      "title": "Graph API overview",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_graph_v1",
+          "title": "Graph API overview",
+          "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "StateGraph、state/reducers、节点和条件路由；不等同业务事务和副作用回滚。",
+          "applicable_node_keys": [
+            "node.langgraph"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_interrupts_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+      "title": "Interrupts",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_interrupts_v1",
+          "title": "Interrupts",
+          "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "批准/拒绝、修改状态、恢复节点重执行和副作用幂等提醒；输入基线、业务键及unknown核对由实践单独要求。",
+          "applicable_node_keys": [
+            "node.coding_workspace"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_json_v1",
+      "canonical_url": "https://docs.python.org/3.14/library/json.html",
+      "title": "json — JSON encoder and decoder",
+      "creator": "Python Software Foundation",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "Python 3.14 series; body audit showed 3.14.8; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_json_v1",
+          "title": "json — JSON encoder and decoder",
+          "url": "https://docs.python.org/3.14/library/json.html",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "dump/load与转换规则、重复dump文件问题；课程另设版本和损坏数据检查。",
+          "applicable_node_keys": [
+            "node.python_files"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_memory_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+      "title": "Short-term memory",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_memory_v1",
+          "title": "Short-term memory",
+          "url": "https://docs.langchain.com/oss/python/langchain/short-term-memory",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "消息历史trim/delete/summarize和上下文预算；摘要不替代原文历史和隔离。",
+          "applicable_node_keys": [
+            "node.context"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_messages_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/messages",
+      "title": "Messages",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_messages_v1",
+          "title": "Messages",
+          "url": "https://docs.langchain.com/oss/python/langchain/messages",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "System/Human/AI/Tool消息及工具结果；不等同不可信输入权限规则。",
+          "applicable_node_keys": [
+            "node.model_api",
+            "node.context"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_models_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/models",
+      "title": "Models",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_models_v1",
+          "title": "Models",
+          "url": "https://docs.langchain.com/oss/python/langchain/models",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "模型调用、工具请求/执行结果回传与结构化输出；示例API成本另计。",
+          "applicable_node_keys": [
+            "node.model_api"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_pathlib_v1",
+      "canonical_url": "https://docs.python.org/3.14/library/pathlib.html",
+      "title": "pathlib — Object-oriented filesystem paths",
+      "creator": "Python Software Foundation",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "Python 3.14 series; body audit showed 3.14.8; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_pathlib_v1",
+          "title": "pathlib — Object-oriented filesystem paths",
+          "url": "https://docs.python.org/3.14/library/pathlib.html",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Path读写与路径API；不是目录沙箱、符号链接或文件授权教程。",
+          "applicable_node_keys": [
+            "node.python_files"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_persistence_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+      "title": "Persistence",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_persistence_v1",
+          "title": "Persistence",
+          "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "checkpointer线程状态与store跨线程数据；不代表审批、幂等或exactly-once。",
+          "applicable_node_keys": [
+            "node.coding_workspace",
+            "node.langgraph",
+            "node.context"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_structured_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/structured-output",
+      "title": "Structured output",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_structured_v1",
+          "title": "Structured output",
+          "url": "https://docs.langchain.com/oss/python/langchain/structured-output",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Provider/Tool策略及schema；格式校验不替代业务校验和动作授权。",
+          "applicable_node_keys": [
+            "node.tools"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_testing_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/test",
+      "title": "Test",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_testing_v1",
+          "title": "Test",
+          "url": "https://docs.langchain.com/oss/python/langchain/test",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Test策略概览：Fake单元、真实集成、轨迹评价；仅Supplement，不冒称完整测试教程。",
+          "applicable_node_keys": [
+            "node.agent_loop",
+            "node.capstone"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_tools_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/tools",
+      "title": "Tools",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_tools_v1",
+          "title": "Tools",
+          "url": "https://docs.langchain.com/oss/python/langchain/tools",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "工具定义、参数schema、返回、执行与错误处理；不证明文件修改或业务幂等安全。",
+          "applicable_node_keys": [
+            "node.tools"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_unittest_v1",
+      "canonical_url": "https://docs.python.org/3.14/library/unittest.html",
+      "title": "unittest — Unit testing framework",
+      "creator": "Python Software Foundation",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "Python 3.14 series; body audit showed 3.14.8; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_unittest_v1",
+          "title": "unittest — Unit testing framework",
+          "url": "https://docs.python.org/3.14/library/unittest.html",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "Basic example、TestCase、assertEqual/assertRaises、运行与发现；发现会导入模块。",
+          "applicable_node_keys": [
+            "node.python_files"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    },
+    {
+      "source_id": "src_coding_unit_testing_v1",
+      "canonical_url": "https://docs.langchain.com/oss/python/langchain/test/unit-testing",
+      "title": "Unit testing: fixed responses and in-memory persistence",
+      "creator": "LangChain",
+      "media_type": "documentation",
+      "language": "en",
+      "source_version": 1,
+      "verification_status": "reviewed",
+      "checked_at": "2026-10-03T03:27:29.094082+00:00",
+      "documentation_version": "OSS Python living docs; exact SDK package version NOT OBSERVABLE; examples NOT RUN",
+      "sections": [
+        {
+          "section_id": "sec_coding_unit_testing_v1",
+          "title": "Unit testing: fixed responses and in-memory persistence",
+          "url": "https://docs.langchain.com/oss/python/langchain/test/unit-testing",
+          "order_index": 0,
+          "verification_status": "reviewed",
+          "checked_at": "2026-10-03T03:27:29.094082+00:00",
+          "review_note": "固定响应/工具请求的GenericFakeChatModel及InMemorySaver教程；本地Fake不证明真实模型质量。",
+          "applicable_node_keys": [
+            "node.agent_loop",
+            "node.capstone"
+          ],
+          "free_body_access": "public_without_login"
+        }
+      ],
+      "free_body_access": "public_without_login",
+      "review_evidence": [
+        "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+        "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+      ]
+    }
+  ],
+  "resource_refs": [
+    "src_coding_python_v1",
+    "src_coding_agents_v1",
+    "src_coding_evaluation_v1",
+    "src_coding_git_apply_v1",
+    "src_coding_git_diff_v1",
+    "src_coding_graph_v1",
+    "src_coding_interrupts_v1",
+    "src_coding_json_v1",
+    "src_coding_memory_v1",
+    "src_coding_messages_v1",
+    "src_coding_models_v1",
+    "src_coding_pathlib_v1",
+    "src_coding_persistence_v1",
+    "src_coding_structured_v1",
+    "src_coding_testing_v1",
+    "src_coding_tools_v1",
+    "src_coding_unittest_v1",
+    "src_coding_unit_testing_v1"
+  ],
+  "required_node_keys": [
+    "node.capstone"
+  ],
+  "curriculum_review": {
+    "date": "2026-10-03",
+    "status": "reviewed_bounded_scope",
+    "evidence": [
+      "docs/curriculum/blueprint-source-audit-2026-10-03.md",
+      "docs/curriculum/blueprint-boundary-source-audit-2026-10-03.md"
+    ],
+    "practice_execution": "NOT RUN",
+    "provider_execution": "NOT RUN",
+    "limitations": [
+      "具备基础编程认知，不承诺完整零编程基础教学",
+      "正文免费，实际模型/API/云运行可能收费，另行配置和确认",
+      "当前SDK示例兼容性未运行核对；内部source_version不是官方发布版本",
+      "Coding安全与Workflow业务幂等采用有限实践边界，不承诺远端exactly-once或任意代码隔离"
+    ]
+  }
+}

@@ -75,4 +75,16 @@ def test_bootstrap_selects_valid_v3_without_database_side_effects(monkeypatch):
     monkeypatch.setattr(seed_b3, 'seed_reviewed_pack', lambda conn, data: packs.append(validate_seed(data)))
     seed_b3.main()
     assert [(pack['pack_key'], pack['version']) for pack in packs] == [
-        ('python.engineering', 1), ('agent.application', 3)]
+        ('python.engineering', 2), ('agent.application', 3),
+        ('agent.knowledge_rag', 1), ('agent.coding', 1), ('agent.workflow_automation', 1)]
+
+
+def test_python_v2_has_reviewed_author_ordered_foundation_without_rewriting_v1():
+    previous = load_pack('python-engineering-v1.json')
+    current = validate_seed(load_pack('python-engineering-v2.json'))
+    assert previous['version'] == 1 and current['version'] == 2
+    assert [s['stable_key'] for s in current['stage_blueprints']] == [
+        'stage.python_functions', 'stage.python_files', 'stage.environment']
+    assert all(s['learning_guidance'] for s in current['stage_blueprints'])
+    assert all(r['verification_status'] == 'reviewed' for r in current['resources'])
+    assert all('node.model_api' not in s['node_keys'] for s in current['stage_blueprints'])

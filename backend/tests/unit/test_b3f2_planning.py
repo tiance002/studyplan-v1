@@ -10,7 +10,7 @@ from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
     ("从 Python 基础开始学习 Agent 应用开发", "agent.application"),
     ("Agent开发", "agent.application"),
     ("Python机器学习", ""),
-    ("学习 LangGraph 和 RAG，做知识助手", "agent.application"),
+    ("学习 LangGraph 和 RAG，做知识助手", "agent.knowledge_rag"),
     ("学习 MCP 工具调用和 LLM API", "agent.application"),
     ("我想学习 Python 工程入门和命令行工具", "python.engineering"),
     ("学习绘画与水彩构图", ""),
@@ -19,7 +19,7 @@ from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
 def test_select_pack_by_actual_direction(goal, expected):
     selected = domain_pack.select_domain_pack(goal)
     assert selected.get("pack_key", "") == expected
-    assert selected.get("version", 0) == (1 if expected else 0)
+    assert selected.get("version", 0) == (2 if expected == 'python.engineering' else 1 if expected else 0)
     if not expected:
         assert not selected.get("resources")
         assert selected["resource_support"] == "search_only"

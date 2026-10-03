@@ -6,12 +6,25 @@ import httpx
 import pytest
 from app.agent_workflows.nodes import PlanningNodes
 from app.agent_workflows.planning_batches import run_batched_planning_graph
-from app.infrastructure.domain_pack import select_domain_pack
+from app.infrastructure.domain_pack import load_pack
 from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
 
 from tests.helpers.batched_planning import OUTLINE, PRACTICE, REPAIR, STRUCTURE, ScriptedLLM
 
 GOAL = "从零学习 Agent 应用开发，并完成一个可验收的知识库 Agent 项目"
+
+
+@pytest.fixture(params=[
+    ("agent-application-v1.json", 9, 27, 20),
+    ("agent-knowledge-rag-v1.json", 10, 12, 22),
+    ("agent-coding-v1.json", 10, 12, 22),
+    ("agent-workflow-automation-v1.json", 10, 12, 22),
+])
+def curriculum_input(request):
+    # This is a payload isolation regression, independent of evolving goal
+    # routing. Retain the original large 27-node case and add all new inputs.
+    filename, stages, nodes, repaired_calls = request.param
+    return load_pack(filename), stages, nodes, repaired_calls
 
 
 def _run(llm, pack):
@@ -42,32 +55,32 @@ def _assert_local(payload, pack, stage_key):
         assert context["practice_blueprint"]["section_key"] == stage_key
 
 
-def test_outline_dispatch_preserves_all_nine_stages_and_twenty_seven_nodes():
-    pack = select_domain_pack(GOAL)
+def test_outline_dispatch_preserves_complete_stage_and_node_catalog(curriculum_input):
+    pack, expected_stages, expected_nodes, _ = curriculum_input
     llm = ScriptedLLM(pack)
     trace = _run(llm, pack)
     assert trace.stopped_at == "await_approval"
     call = llm.calls[0]
     assert call["purpose"] == OUTLINE
-    assert len(call["payload"]["domain_pack"]["stage_blueprints"]) == 9
-    assert len(call["payload"]["manifest"]["required_node_keys"]) == 27
+    assert len(call["payload"]["domain_pack"]["stage_blueprints"]) == expected_stages
+    assert len(call["payload"]["manifest"]["required_node_keys"]) == expected_nodes
 
 
 @pytest.mark.parametrize("purpose", [STRUCTURE, PRACTICE])
-def test_all_final_batch_dispatches_are_stage_local(purpose):
-    pack = select_domain_pack(GOAL)
+def test_all_final_batch_dispatches_are_stage_local(purpose, curriculum_input):
+    pack, expected_stages, _, _ = curriculum_input
     llm = ScriptedLLM(pack)
     trace = _run(llm, pack)
     assert trace.stopped_at == "await_approval"
     calls = [c for c in llm.calls if c["purpose"] == purpose]
-    assert len(calls) == 9
+    assert len(calls) == expected_stages
     for call in calls:
         _assert_local(call["payload"], pack, call["payload"]["stage"]["stable_key"])
 
 
 @pytest.mark.parametrize("invalid_purpose", [STRUCTURE, PRACTICE])
-def test_repair_dispatch_contains_only_failed_batch_and_local_context(invalid_purpose):
-    pack = select_domain_pack(GOAL)
+def test_repair_dispatch_contains_only_failed_batch_and_local_context(invalid_purpose, curriculum_input):
+    pack, _, _, _ = curriculum_input
     llm = ScriptedLLM(pack, invalid_at=(invalid_purpose, 1))
     trace = _run(llm, pack)
     assert trace.stopped_at == "await_approval"
@@ -80,8 +93,8 @@ def test_repair_dispatch_contains_only_failed_batch_and_local_context(invalid_pu
 
 
 @pytest.mark.parametrize("purpose", [STRUCTURE, PRACTICE, REPAIR])
-def test_provider_never_injects_constructor_pack_into_http_body(purpose):
-    pack = select_domain_pack(GOAL)
+def test_provider_never_injects_constructor_pack_into_http_body(purpose, curriculum_input):
+    pack, _, _, _ = curriculum_input
     requests = []
 
     def reply(request):
@@ -100,8 +113,8 @@ def test_provider_never_injects_constructor_pack_into_http_body(purpose):
 
 
 @pytest.mark.parametrize("invalid_purpose", [STRUCTURE, PRACTICE])
-def test_graph_through_provider_http_preserves_local_scope_and_repair_shape(invalid_purpose):
-    pack = select_domain_pack(GOAL)
+def test_graph_through_provider_http_preserves_local_scope_and_repair_shape(invalid_purpose, curriculum_input):
+    pack, _, _, expected_calls = curriculum_input
     fake = ScriptedLLM(pack, invalid_at=(invalid_purpose, 1))
     messages = []
 
@@ -123,7 +136,7 @@ def test_graph_through_provider_http_preserves_local_scope_and_repair_shape(inva
                                   client=client, domain_pack=pack)
         trace = _run(llm, pack)
     assert trace.stopped_at == "await_approval"
-    assert len(messages) == 20
+    assert len(messages) == expected_calls
     assert messages[0]["domain_pack"] == pack
     for message in messages[1:]:
         assert "domain_pack" not in message
