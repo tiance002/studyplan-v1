@@ -23,6 +23,10 @@ def _user_project(text):
         match = re.search(pattern, text)
         if match and not re.search(r'没有|暂无|无项目|没项目', match.group(0)):
             value = match.group(1).strip()
+            if not re.search(r'(?:用户项目|已有项目|我的项目)\s*[:：]', match.group(0)) and re.search(
+                r'(?:经验|基础|认知|知识|能力|了解|背景|经历)$', value
+            ):
+                continue
             if not re.search(r'用户项目|已有项目|我的项目|一个|一套|已经有|已有', match.group(0)) and not re.search(
                 r'项目|仓库|应用|后台|服务|助手|网站|(?i:\bagent\b|\bapi\b)', value
             ):

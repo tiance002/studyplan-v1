@@ -166,3 +166,9 @@ def test_finite_route_keeps_exact_keys_and_user_carrier_without_expanding_recipe
     assert [s['stable_key'] for s in selected['stage_blueprints']] == ['stage.core', 'stage.rag']
     assert selected['semantic_context']['carrier_title'] == '旅行 Agent'
     assert all('旅行 Agent' in p['goal'] for p in selected['practice_blueprints'])
+
+
+@pytest.mark.parametrize('starting', ['已有云服务经验', '我有AI应用开发经验', '已经有基础编程认知'])
+def test_experience_descriptions_are_not_projects(starting):
+    selected = adapt_semantic_pack(pack(), '学习 Agent', GoalSpec(target='学习 Agent', starting_point=starting))
+    assert selected['semantic_context']['carrier_kind'] == 'starter_candidate'
