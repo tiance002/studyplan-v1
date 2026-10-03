@@ -1,0 +1,3460 @@
+{
+  "catalog_records": 86,
+  "catalog_depth_counts": {
+    "selected_sections_read": 75,
+    "metadata_only": 7,
+    "deep_reviewed": 3,
+    "toc_checked": 1
+  },
+  "holds": {
+    "zcode-softorize-identity": "hold_identity_review",
+    "zcode-zerx-identity": "hold_identity_review",
+    "maxkb-metadata-reference": "hold_content_review",
+    "alibaba-cloudnative-access": "hold_access_review"
+  },
+  "publication_records": [
+    {
+      "pack_key": "agent.application",
+      "version": 5,
+      "stages": 61,
+      "knowledge_nodes": 61,
+      "sources": 57,
+      "sections": 179,
+      "source_depth_counts": {
+        "selected_sections_read": 50,
+        "metadata_only": 7
+      },
+      "primary_continuations": [
+        {
+          "stage_key": "stage.v62.agent.application.a1",
+          "stage_code": "A1",
+          "source_ref": "src_agent_application_v5_v62_hello-common-ch4",
+          "catalog_scope": "hello-common-ch4",
+          "original_teaching_scope": "ch4 ReAct→Plan-and-Solve→Reflection，保持作者概念到实现链；LCC s01/02只COMPARE",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch4_f11708bfa5",
+            "sec_agent_application_v5_v62_hello-common-ch4_ae73551f87",
+            "sec_agent_application_v5_v62_hello-common-ch4_8e8ee32eb3",
+            "sec_agent_application_v5_v62_hello-common-ch4_61cf0032a1"
+          ],
+          "original_section_titles": [
+            "4.1 LLM与工具入口",
+            "4.2 ReAct",
+            "4.3 Plan-and-Solve",
+            "4.4 Reflection"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch4_f11708bfa5",
+            "sec_agent_application_v5_v62_hello-common-ch4_ae73551f87"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch4_8e8ee32eb3",
+            "sec_agent_application_v5_v62_hello-common-ch4_61cf0032a1"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.a4",
+          "stage_code": "A4",
+          "source_ref": "src_agent_application_v5_v62_hello-common-ch9",
+          "catalog_scope": "hello-common-ch9",
+          "original_teaching_scope": "ch9 9.1/9.2→9.3 ContextBuilder→9.4 NoteTool→9.5 TerminalTool；LCC s08/09COMPARE",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch9_59fbc7723c",
+            "sec_agent_application_v5_v62_hello-common-ch9_70ca62a8d4",
+            "sec_agent_application_v5_v62_hello-common-ch9_5108e6633c",
+            "sec_agent_application_v5_v62_hello-common-ch9_634452fa81"
+          ],
+          "original_section_titles": [
+            "9.1/9.2 上下文原则",
+            "9.3 ContextBuilder",
+            "9.4 NoteTool",
+            "9.5 TerminalTool"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch9_59fbc7723c",
+            "sec_agent_application_v5_v62_hello-common-ch9_70ca62a8d4"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch9_5108e6633c",
+            "sec_agent_application_v5_v62_hello-common-ch9_634452fa81"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.a6",
+          "stage_code": "A6",
+          "source_ref": "src_agent_application_v5_v62_hello-common-ch10",
+          "catalog_scope": "hello-common-ch10",
+          "original_teaching_scope": "ch10 10.1协议角色→10.2 MCP→10.5自建server按目标；A2A/ANP选读；LCC s14比较",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch10_4c8674db87",
+            "sec_agent_application_v5_v62_hello-common-ch10_56113724df"
+          ],
+          "original_section_titles": [
+            "10.2 MCP",
+            "10.5 自建server（按目标）"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch10_4c8674db87"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch10_56113724df"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.a7",
+          "stage_code": "A7",
+          "source_ref": "src_agent_application_v5_v62_hello-common-ch12",
+          "catalog_scope": "hello-common-ch12",
+          "original_teaching_scope": "ch12 12.1→12.2工具调用→12.3任务成功→12.4judge；配合Evaluation专项",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch12_51dad35510",
+            "sec_agent_application_v5_v62_hello-common-ch12_4ed99dc6a2",
+            "sec_agent_application_v5_v62_hello-common-ch12_2f9ecee8e5",
+            "sec_agent_application_v5_v62_hello-common-ch12_2524405449"
+          ],
+          "original_section_titles": [
+            "12.1 评价入口",
+            "12.2 工具调用评价",
+            "12.3 任务成功",
+            "12.4 Judge"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch12_51dad35510"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_hello-common-ch12_4ed99dc6a2",
+            "sec_agent_application_v5_v62_hello-common-ch12_2f9ecee8e5",
+            "sec_agent_application_v5_v62_hello-common-ch12_2524405449"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.g1",
+          "stage_code": "G1",
+          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "catalog_scope": "all-in-rag-spine",
+          "original_teaching_scope": "All-in-RAG ch2 `04_data_load`、`05_text_chunking`；ch8 `02_data_preparation`。看 loader 输入输出、固定/递归/Markdown/语义切块与父子块。",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_4a1fe9ab6c",
+            "sec_agent_application_v5_v62_all-in-rag-spine_dd05bc900e",
+            "sec_agent_application_v5_v62_all-in-rag-spine_8e4ec19bb9"
+          ],
+          "original_section_titles": [
+            "ch2/04 数据加载",
+            "ch2/05 文本切块",
+            "ch8/02 数据准备/父子块"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_4a1fe9ab6c",
+            "sec_agent_application_v5_v62_all-in-rag-spine_dd05bc900e"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_8e4ec19bb9"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.g3",
+          "stage_code": "G3",
+          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "catalog_scope": "all-in-rag-spine",
+          "original_teaching_scope": "All-in-RAG ch4 `11_hybrid_search` 中的检索基础、ch6 `18_system_evaluation`：BM25/dense、Precision/Recall/MRR/MAP 与评估工具概念。",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_050a15c92a",
+            "sec_agent_application_v5_v62_all-in-rag-spine_93bae68bec"
+          ],
+          "original_section_titles": [
+            "ch4/11 检索基础",
+            "ch6/18 系统评估"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_050a15c92a"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_93bae68bec"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.g4",
+          "stage_code": "G4",
+          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "catalog_scope": "all-in-rag-spine",
+          "original_teaching_scope": "All-in-RAG ch4 `11_hybrid_search`、`12_query_construction`、`14_query_rewriting`；ch8 `03_index_retrieval`。对比 BM25、dense、BGE-M3 learned sparse、RRF、weighted fusion、metadata filter、MQE、HyDE、step-back、rewrite、routing。",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_04987e8a03",
+            "sec_agent_application_v5_v62_all-in-rag-spine_b029a0b674",
+            "sec_agent_application_v5_v62_all-in-rag-spine_af671e12c7",
+            "sec_agent_application_v5_v62_all-in-rag-spine_84c7e770f8"
+          ],
+          "original_section_titles": [
+            "ch4/11 Hybrid",
+            "ch4/12 查询构造",
+            "ch4/14 查询改写",
+            "ch8/03 BM25+dense+RRF"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_04987e8a03",
+            "sec_agent_application_v5_v62_all-in-rag-spine_b029a0b674",
+            "sec_agent_application_v5_v62_all-in-rag-spine_af671e12c7"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_84c7e770f8"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.g5",
+          "stage_code": "G5",
+          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "catalog_scope": "all-in-rag-spine",
+          "original_teaching_scope": "All-in-RAG ch4 `15_advanced_retrieval_techniques`、ch5 `16_formatted_generation`、ch8 `04_generation_sys`；补 Microsoft RAG/index provenance、Cohere RAG citations、RAGFlow citation prompt 或 WeKnora references API。",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_4013f55d7a",
+            "sec_agent_application_v5_v62_all-in-rag-spine_fd7a98c7fd",
+            "sec_agent_application_v5_v62_all-in-rag-spine_bbfd25596e"
+          ],
+          "original_section_titles": [
+            "ch4/15 高级检索/Rerank",
+            "ch5/16 格式化生成",
+            "ch8/04 回答集成"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_4013f55d7a",
+            "sec_agent_application_v5_v62_all-in-rag-spine_fd7a98c7fd"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_bbfd25596e"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.g6",
+          "stage_code": "G6",
+          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "catalog_scope": "all-in-rag-spine",
+          "original_teaching_scope": "All-in-RAG ch8 `01_env_architecture` 至 `04_generation_sys`；ch6 `19_common_tools` 按需。",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_0376658fde",
+            "sec_agent_application_v5_v62_all-in-rag-spine_38dc3d57ab",
+            "sec_agent_application_v5_v62_all-in-rag-spine_08d2a6c63e",
+            "sec_agent_application_v5_v62_all-in-rag-spine_c6cd950123",
+            "sec_agent_application_v5_v62_all-in-rag-spine_6937f68434"
+          ],
+          "original_section_titles": [
+            "ch6/19 评估工具（按需）",
+            "ch8/01 环境与架构",
+            "ch8/02 数据准备",
+            "ch8/03 索引检索",
+            "ch8/04 生成集成"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_0376658fde"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_all-in-rag-spine_38dc3d57ab",
+            "sec_agent_application_v5_v62_all-in-rag-spine_08d2a6c63e",
+            "sec_agent_application_v5_v62_all-in-rag-spine_c6cd950123",
+            "sec_agent_application_v5_v62_all-in-rag-spine_6937f68434"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.c3",
+          "stage_code": "C3",
+          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "catalog_scope": "lcc-coding-spine",
+          "original_teaching_scope": "s05 TodoWrite；s10只先看 Todo vs Task 比较",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_3203dd84e3",
+            "sec_agent_application_v5_v62_lcc-coding-spine_d8e9e2cafa"
+          ],
+          "original_section_titles": [
+            "s05 TodoWrite",
+            "s10 Todo与Task对照"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_3203dd84e3"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_d8e9e2cafa"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.c5",
+          "stage_code": "C5",
+          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "catalog_scope": "lcc-coding-spine",
+          "original_teaching_scope": "s09 Memory；s10 Task System",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_7573d51159",
+            "sec_agent_application_v5_v62_lcc-coding-spine_18c55a7881"
+          ],
+          "original_section_titles": [
+            "s09 Memory",
+            "s10 Task System"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_7573d51159"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_18c55a7881"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.c6",
+          "stage_code": "C6",
+          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "catalog_scope": "lcc-coding-spine",
+          "original_teaching_scope": "s11 Background；s12 Cron选读；s15恢复段",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_a9b38ae003",
+            "sec_agent_application_v5_v62_lcc-coding-spine_38205e2266",
+            "sec_agent_application_v5_v62_lcc-coding-spine_36edfe6692"
+          ],
+          "original_section_titles": [
+            "s11 Background",
+            "s12 Cron（只有定时目标）",
+            "s15 恢复边界"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_a9b38ae003",
+            "sec_agent_application_v5_v62_lcc-coding-spine_38205e2266"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_36edfe6692"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.c7",
+          "stage_code": "C7",
+          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "catalog_scope": "lcc-coding-spine",
+          "original_teaching_scope": "s13 Agent Teams；s15团队/任务集成",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_d5b624df9c",
+            "sec_agent_application_v5_v62_lcc-coding-spine_f80b61a6ab"
+          ],
+          "original_section_titles": [
+            "s13 Agent Teams（协作目标）",
+            "s15 团队任务集成"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_d5b624df9c"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_f80b61a6ab"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.c8",
+          "stage_code": "C8",
+          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "catalog_scope": "lcc-coding-spine",
+          "original_teaching_scope": "s14 MCP Tools；s15 Integrated Harness",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_88a1c0f2d0",
+            "sec_agent_application_v5_v62_lcc-coding-spine_e2ac14ed92"
+          ],
+          "original_section_titles": [
+            "s14 MCP mock工具池",
+            "s15 Integrated Harness"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_88a1c0f2d0"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_lcc-coding-spine_e2ac14ed92"
+          ]
+        },
+        {
+          "stage_key": "stage.v62.agent.application.b6",
+          "stage_code": "B6",
+          "source_ref": "src_agent_application_v5_v62_playwright-python-spine",
+          "catalog_scope": "playwright-python-spine",
+          "original_teaching_scope": "Playwright Assertions/Trace Viewer 给确定性基线；browser-use AgentHistoryList 里可看 action model outputs、final_result、done/success/error 等字段。Hello-Agents ch12 可作整体 Agent Eval 暴露；浏览器专用指标由本地任务集定义，不把单一排行榜分数当产品质量。",
+          "original_section_refs": [
+            "sec_agent_application_v5_v62_playwright-python-spine_609a28f125",
+            "sec_agent_application_v5_v62_playwright-python-spine_2956ea385d"
+          ],
+          "original_section_titles": [
+            "Trace Viewer",
+            "Writing tests/web-first assertions"
+          ],
+          "primary_section_refs": [
+            "sec_agent_application_v5_v62_playwright-python-spine_609a28f125"
+          ],
+          "supplement_section_refs": [
+            "sec_agent_application_v5_v62_playwright-python-spine_2956ea385d"
+          ]
+        }
+      ],
+      "resources": [
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch1",
+          "catalog_scope": "hello-common-ch1",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter1",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch1_58323a862d",
+              "title": "1.1/1.2 Agent概念",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch1_89f788fd26",
+              "title": "1.4 Workflow与Agent",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch2",
+          "catalog_scope": "hello-common-ch2",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter2",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch2_90a327e62a",
+              "title": "历史概览（选读）",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch3",
+          "catalog_scope": "hello-common-ch3",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter3",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch3_393af176f9",
+              "title": "3.2.1–3.2.4 应用基础",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch3_d0531aff62",
+              "title": "3.3.2 生成局限",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_python-zh-jit",
+          "catalog_scope": "python-zh-jit",
+          "url": "https://docs.python.org/zh-cn/3/tutorial/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_python-zh-jit_3888bfd493",
+              "title": "4.1/4.2/4.8 函数循环",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_python-zh-jit_101234ec22",
+              "title": "5.5 字典",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_python-zh-jit_9e68256d0d",
+              "title": "7.2/7.2.2 文件JSON",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_python-zh-jit_8aace92881",
+              "title": "8.2/8.3 异常",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch4",
+          "catalog_scope": "hello-common-ch4",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch4_9046d908a7",
+              "title": "工具循环轨迹",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch4_f11708bfa5",
+              "title": "4.1 LLM与工具入口",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch4_ae73551f87",
+              "title": "4.2 ReAct",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch4_ffecffdb4d",
+              "title": "4.2 ReAct文本范式",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch4_8e8ee32eb3",
+              "title": "4.3 Plan-and-Solve",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch4_61cf0032a1",
+              "title": "4.4 Reflection",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_lcc-coding-spine",
+          "catalog_scope": "lcc-coding-spine",
+          "url": "https://github.com/shareAI-lab/learn-claude-code",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_fa3da8fb42",
+              "title": "s01 Agent Loop",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_969e7e5014",
+              "title": "s02 Tool Use",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_58c7563356",
+              "title": "s02 文件工具",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_e7d11f55c8",
+              "title": "s03 Permission",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_19c03ed2c2",
+              "title": "s04 Hooks",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_3203dd84e3",
+              "title": "s05 TodoWrite",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_93e86365ce",
+              "title": "s06 Subagent",
+              "order_index": 6,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_19ca4965be",
+              "title": "s07 Skill Loading",
+              "order_index": 7,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_83ec044e97",
+              "title": "s08 Context Compact",
+              "order_index": 8,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_7573d51159",
+              "title": "s09 Memory",
+              "order_index": 9,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_d8e9e2cafa",
+              "title": "s10 Todo与Task对照",
+              "order_index": 10,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_18c55a7881",
+              "title": "s10 Task System",
+              "order_index": 11,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_a9b38ae003",
+              "title": "s11 Background",
+              "order_index": 12,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_38205e2266",
+              "title": "s12 Cron（只有定时目标）",
+              "order_index": 13,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_d5b624df9c",
+              "title": "s13 Agent Teams（协作目标）",
+              "order_index": 14,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_88a1c0f2d0",
+              "title": "s14 MCP mock工具池",
+              "order_index": 15,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_36edfe6692",
+              "title": "s15 恢复边界",
+              "order_index": 16,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_f80b61a6ab",
+              "title": "s15 团队任务集成",
+              "order_index": 17,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_e2ac14ed92",
+              "title": "s15 Integrated Harness",
+              "order_index": 18,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_7493395d78",
+              "title": "s16 Workflow Runtime",
+              "order_index": 19,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_e95d03cf8c",
+              "title": "s17 Goal Loop",
+              "order_index": 20,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch12",
+          "catalog_scope": "hello-common-ch12",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch12_fad78d7825",
+              "title": "12.1 评价对象（Eval-Lite预读）",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch12_51dad35510",
+              "title": "12.1 评价入口",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch12_ea737491ce",
+              "title": "12.1 评价对象/Eval-Lite",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch12_4ed99dc6a2",
+              "title": "12.2 工具调用评价",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch12_2f9ecee8e5",
+              "title": "12.3 任务成功",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch12_2524405449",
+              "title": "12.4 Judge",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch7",
+          "catalog_scope": "hello-common-ch7",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch7_19db1e2092",
+              "title": "7.1–7.3 Agent与LLM抽象",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch7_5e841ddece",
+              "title": "7.4–7.5 Tool与registry",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch8",
+          "catalog_scope": "hello-common-ch8",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch8_07b84efd35",
+              "title": "8.1–8.2 Memory",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch8_622e3aada7",
+              "title": "8.3 RAG",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch8_b390cecc29",
+              "title": "8.4 文档问答助手",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_all-in-rag-spine",
+          "catalog_scope": "all-in-rag-spine",
+          "url": "https://github.com/datawhalechina/all-in-rag",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_53bcf665ae",
+              "title": "ch1 最小RAG四步",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_0cd562b14c",
+              "title": "ch1 RAG导论/最小链路",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_4a1fe9ab6c",
+              "title": "ch2/04 数据加载",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_dd05bc900e",
+              "title": "ch2/05 文本切块",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_1ab2b13502",
+              "title": "ch3/06 文本Embedding",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_5d53f9a3f9",
+              "title": "ch3/08 向量数据库",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_050a15c92a",
+              "title": "ch4/11 检索基础",
+              "order_index": 6,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_04987e8a03",
+              "title": "ch4/11 Hybrid",
+              "order_index": 7,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_b029a0b674",
+              "title": "ch4/12 查询构造",
+              "order_index": 8,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_af671e12c7",
+              "title": "ch4/14 查询改写",
+              "order_index": 9,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_4013f55d7a",
+              "title": "ch4/15 高级检索/Rerank",
+              "order_index": 10,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_fd7a98c7fd",
+              "title": "ch5/16 格式化生成",
+              "order_index": 11,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_93bae68bec",
+              "title": "ch6/18 系统评估",
+              "order_index": 12,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_0376658fde",
+              "title": "ch6/19 评估工具（按需）",
+              "order_index": 13,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_2abdc7d2c8",
+              "title": "ch7/20 KG-RAG（图需求触发）",
+              "order_index": 14,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_17111c1c0a",
+              "title": "ch7/21 Agentic RAG（有基线坏例才进入）",
+              "order_index": 15,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_38dc3d57ab",
+              "title": "ch8/01 环境与架构",
+              "order_index": 16,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_8e4ec19bb9",
+              "title": "ch8/02 数据准备/父子块",
+              "order_index": 17,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_08d2a6c63e",
+              "title": "ch8/02 数据准备",
+              "order_index": 18,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_84c7e770f8",
+              "title": "ch8/03 BM25+dense+RRF",
+              "order_index": 19,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_c6cd950123",
+              "title": "ch8/03 索引检索",
+              "order_index": 20,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_bbfd25596e",
+              "title": "ch8/04 回答集成",
+              "order_index": 21,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_6937f68434",
+              "title": "ch8/04 生成集成",
+              "order_index": 22,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch9",
+          "catalog_scope": "hello-common-ch9",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch9_59fbc7723c",
+              "title": "9.1/9.2 上下文原则",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch9_70ca62a8d4",
+              "title": "9.3 ContextBuilder",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch9_0626f1627c",
+              "title": "9.3 ContextBuilder选择与压缩",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch9_5108e6633c",
+              "title": "9.4 NoteTool",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch9_634452fa81",
+              "title": "9.5 TerminalTool",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch6",
+          "catalog_scope": "hello-common-ch6",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter6",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch6_14cce98326",
+              "title": "6.1 框架位置",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch6_654d836cf2",
+              "title": "6.3 AgentScope（按目标）",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch6_f817f33dee",
+              "title": "6.5 LangGraph图基础（按目标）",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_langgraph-workflows",
+          "catalog_scope": "langgraph-workflows",
+          "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-workflows_8281c2901c",
+              "title": "Workflows与Agents区别",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-workflows_594d9bf6b5",
+              "title": "Predetermined workflow与dynamic agent",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-workflows_5dd5e14068",
+              "title": "Prompt chaining",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-workflows_a67870b910",
+              "title": "Parallelization",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-workflows_bcba696f3e",
+              "title": "Routing",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-workflows_74aea5e2c4",
+              "title": "Evaluator-optimizer",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-workflows_960bd4e4b1",
+              "title": "Agents（比较）",
+              "order_index": 6,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-workflows_4af0f3f1dc",
+              "title": "Orchestrator-worker与动态Send（目标需要）",
+              "order_index": 7,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch10",
+          "catalog_scope": "hello-common-ch10",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter10",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch10_7eca658761",
+              "title": "10.1 协议角色",
+              "order_index": 0,
+              "review_depth": "toc_checked",
+              "verification_status": "legacy_index"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch10_4c8674db87",
+              "title": "10.2 MCP",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch10_b437e6b804",
+              "title": "10.2 真实MCP协议边界",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch10_56113724df",
+              "title": "10.5 自建server（按目标）",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_langsmith-evaluation-types",
+          "catalog_scope": "langsmith-evaluation-types",
+          "url": "https://docs.langchain.com/langsmith/evaluation-types",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_langsmith-evaluation-types_861dcd1ecd",
+              "title": "Unit/Regression/Benchmarking/Pairwise",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langsmith-evaluation-types_dae02d84d3",
+              "title": "Regression与评价对象",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langsmith-evaluation-types_e0a5bb2321",
+              "title": "Benchmarking/Unit/Regression/Pairwise",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langsmith-evaluation-types_f30d6bbc1e",
+              "title": "Regression/benchmarking/pairwise",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-rag-context-bridge",
+          "catalog_scope": "hello-rag-context-bridge",
+          "url": "https://github.com/datawhalechina/hello-agents/blob/main/docs/chapter8/Chapter8-Memory-and-Retrieval.md",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-rag-context-bridge_f6de0f4966",
+              "title": "8.3–8.4 Agent中的RAG",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_ragas-evaluation",
+          "catalog_scope": "ragas-evaluation",
+          "url": "https://docs.ragas.io/en/stable/getstarted/quickstart/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_ragas-evaluation_8342d25998",
+              "title": "Context Precision/Recall定义与口径",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_bge-m3-retrieval-modes",
+          "catalog_scope": "bge-m3-retrieval-modes",
+          "url": "https://huggingface.co/BAAI/bge-m3",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_bge-m3-retrieval-modes_4fe483c7a7",
+              "title": "Dense/Learned sparse与独立BM25基线",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_rag-citation-contract",
+          "catalog_scope": "rag-citation-contract",
+          "url": "https://learn.microsoft.com/en-us/azure/foundry/concepts/retrieval-augmented-generation",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_rag-citation-contract_280a5cad30",
+              "title": "来源元数据与claim支持性",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_rag-citation-contract_233be7c932",
+              "title": "Cohere结构化citation对象",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_pi-sdk-case",
+          "catalog_scope": "pi-sdk-case",
+          "url": "https://github.com/earendil-works/pi",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_pi-sdk-case_7ba7ff3f1b",
+              "title": "SDK lifecycle/storage/prompting/events",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_pi-sdk-case_80571ca98a",
+              "title": "Sessions and Context",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_pi-sdk-case_fa478855bb",
+              "title": "Extensions lifecycle/events/tools",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_pi-sdk-case_8dda74142f",
+              "title": "Security/Containerization",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_openhands-sdk-case",
+          "catalog_scope": "openhands-sdk-case",
+          "url": "https://docs.openhands.dev/sdk/getting-started",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_openhands-sdk-case_d00eca1bae",
+              "title": "Getting Started",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_openhands-sdk-case_f60727af5c",
+              "title": "Security/Persistence/Docker Sandbox（目录候选，正文待审）",
+              "order_index": 1,
+              "review_depth": "toc_checked",
+              "verification_status": "legacy_index"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-workflow-bridge",
+          "catalog_scope": "hello-workflow-bridge",
+          "url": "https://github.com/datawhalechina/hello-agents",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-workflow-bridge_19fa368d8b",
+              "title": "6.5.1–6.5.3 图基础",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_langgraph-graph-api",
+          "catalog_scope": "langgraph-graph-api",
+          "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-graph-api_b9fae6b345",
+              "title": "StateGraph/state/nodes/edges/reducers/loop limit",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-graph-api_804cc5be8c",
+              "title": "节点/路由/状态确定性测试",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_langgraph-thinking",
+          "catalog_scope": "langgraph-thinking",
+          "url": "https://docs.langchain.com/oss/python/langgraph/thinking-in-langgraph",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-thinking_52978add68",
+              "title": "State/node设计",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-thinking_1bfc1efb10",
+              "title": "Transient/LLM-recoverable/user-fixable/unexpected errors",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-thinking_6348811a1d",
+              "title": "Retry/timeout/compensation",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_langgraph-persistence",
+          "catalog_scope": "langgraph-persistence",
+          "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-persistence_75203e69bf",
+              "title": "Checkpoint与Store边界",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-persistence_899b816ce7",
+              "title": "thread_id与backend",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-persistence_deaeca2971",
+              "title": "Crash/replay/durability",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_langgraph-interrupts",
+          "catalog_scope": "langgraph-interrupts",
+          "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-interrupts_9d5e7c7b9d",
+              "title": "Checkpoint与稳定thread要求",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-interrupts_2374d485ac",
+              "title": "Command resume/approve/reject/edit",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-interrupts_3fc2f555fc",
+              "title": "节点重跑与幂等副作用",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-interrupts_00658ff3bc",
+              "title": "Interrupt重放与副作用",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_langgraph-agent-server",
+          "catalog_scope": "langgraph-agent-server",
+          "url": "https://docs.langchain.com/langsmith/agent-server",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-agent-server_85f2c30625",
+              "title": "Assistants/Threads/Runs",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langgraph-agent-server_014edb3c6e",
+              "title": "Background/worker/queue/取消/隔离",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_agentscope-current-case",
+          "catalog_scope": "agentscope-current-case",
+          "url": "https://github.com/agentscope-ai/agentscope",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_agentscope-current-case_c0a1607a27",
+              "title": "2.x NEWS/迁移/版本匹配团队入口",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_agentscope-v1-comparison",
+          "catalog_scope": "agentscope-v1-comparison",
+          "url": "https://doc.agentscope.io/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_agentscope-v1-comparison_66888b5f49",
+              "title": "v1 pipeline与handoff版本对照",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_playwright-python-spine",
+          "catalog_scope": "playwright-python-spine",
+          "url": "https://playwright.dev/python/docs/intro",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_1018f13f72",
+              "title": "Intro/Installation",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_b1c06d715e",
+              "title": "Writing tests",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_ed658c4de5",
+              "title": "Locators",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_f20c408e60",
+              "title": "Input/Actions",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_2d5808ac96",
+              "title": "Actionability/Assertions",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_3a059f393a",
+              "title": "Navigations",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_069f513413",
+              "title": "Pages/context/tabs",
+              "order_index": 6,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_609a28f125",
+              "title": "Trace Viewer",
+              "order_index": 7,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_391a24a47c",
+              "title": "Actionability/auto-wait与web-first断言",
+              "order_index": 8,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_5683e0d565",
+              "title": "Network/Frames/Dialogs（按需）",
+              "order_index": 9,
+              "review_depth": "toc_checked",
+              "verification_status": "legacy_index"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_9556a2cbb1",
+              "title": "Authentication/storage state",
+              "order_index": 10,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_b3d1be3a24",
+              "title": "Pages/context isolation",
+              "order_index": 11,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_2956ea385d",
+              "title": "Writing tests/web-first assertions",
+              "order_index": 12,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_playwright-python-spine_33c68f68d3",
+              "title": "Assertions/Trace Viewer",
+              "order_index": 13,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_browser-use-api-reference",
+          "catalog_scope": "browser-use-api-reference",
+          "url": "https://github.com/browser-use/browser-use/tree/main/skills/open-source/references",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_browser-use-api-reference_57aba5efbf",
+              "title": "max_failures/timeouts与安全重试",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_browser-use-api-reference_a10b66ed4a",
+              "title": "Agent/Browser/History/Examples",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_browser-use-api-reference_6e640fbb1b",
+              "title": "Domain allowlist/sensitive_data/session",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_browser-use-api-reference_c49b9e7833",
+              "title": "History/final_result与独立oracle",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_browser-use-quickstart",
+          "catalog_scope": "browser-use-quickstart",
+          "url": "https://github.com/browser-use/browser-use/blob/main/skills/open-source/references/quickstart.md",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_browser-use-quickstart_13855704c6",
+              "title": "Installation/First Agent/local safe example",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_browser-use-observation-guidance",
+          "catalog_scope": "browser-use-observation-guidance",
+          "url": "https://github.com/browser-use/browser-use/blob/main/skills/browser-use/SKILL.md",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_browser-use-observation-guidance_82f0a96946",
+              "title": "AX-first/过滤观察/动作后验证",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-browser-extra",
+          "catalog_scope": "hello-browser-extra",
+          "url": "https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent%E7%A7%91%E6%99%AE%E4%B8%8E%E5%AE%9E%E6%88%98.md",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-browser-extra_115b665aba",
+              "title": "Extra11/1.1–1.2.3 DOM/AX/vision",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_langsmith-complex-agent-eval",
+          "catalog_scope": "langsmith-complex-agent-eval",
+          "url": "https://docs.langchain.com/langsmith/evaluate-complex-agent",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_langsmith-complex-agent-eval_e34cfffabc",
+              "title": "Final response",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langsmith-complex-agent-eval_75a42dfa45",
+              "title": "Single step",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langsmith-complex-agent-eval_2321a9dc20",
+              "title": "Trajectory evaluator",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_openai-eval-best-practices",
+          "catalog_scope": "openai-eval-best-practices",
+          "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_openai-eval-best-practices_e9c490bc5f",
+              "title": "Metric/human/judge与edge cases",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_openai-eval-best-practices_a451733e4c",
+              "title": "位置/冗长偏差与人工校准",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_agentevals-comparison",
+          "catalog_scope": "agentevals-comparison",
+          "url": "https://github.com/langchain-ai/agentevals",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_agentevals-comparison_0c4d916d19",
+              "title": "Strict/unordered/subset/superset/tool args",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_langsmith-rag-eval",
+          "catalog_scope": "langsmith-rag-eval",
+          "url": "https://docs.langchain.com/langsmith/evaluate-rag-tutorial",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_langsmith-rag-eval_a504da0edb",
+              "title": "Create dataset",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langsmith-rag-eval_8bf3574504",
+              "title": "Define evaluators",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_langsmith-rag-eval_c445c5c487",
+              "title": "Run evaluation",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_openai-evals-transition",
+          "catalog_scope": "openai-evals-transition",
+          "url": "https://developers.openai.com/api/docs/guides/evals",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_openai-evals-transition_97051fd2fc",
+              "title": "退役提示与流程概览（历史快照）",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_openai-agent-evals-concepts",
+          "catalog_scope": "openai-agent-evals-concepts",
+          "url": "https://developers.openai.com/api/docs/guides/agent-evals",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_openai-agent-evals-concepts_02e9377420",
+              "title": "Traces→datasets概念",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hf-llm-grpo",
+          "catalog_scope": "hf-llm-grpo",
+          "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_47b2552431",
+              "title": "12/4 数据与独立评估",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_6b4236627c",
+              "title": "12/2 后训练背景",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_4ef3ac1ea7",
+              "title": "12/4 Reward Function Design",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_d18abdef46",
+              "title": "12/5 Define reward",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_fc7832650d",
+              "title": "12/3 Group Formation",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_7e174ef6ec",
+              "title": "12/4 Dataset Format",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_807721bb4c",
+              "title": "12/2 Post-training",
+              "order_index": 6,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_46864b1f36",
+              "title": "12/3 GRPO",
+              "order_index": 7,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_275e4f9a93",
+              "title": "12/4 最小实现",
+              "order_index": 8,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_4177d72b2d",
+              "title": "12/5 完整实践与独立评估",
+              "order_index": 9,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hello-common-ch11",
+          "catalog_scope": "hello-common-ch11",
+          "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter11",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hello-common-ch11_4d8eca3549",
+              "title": "Agent轨迹/reward/RL应用背景",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hf-deep-rl-introduction",
+          "catalog_scope": "hf-deep-rl-introduction",
+          "url": "https://huggingface.co/learn/deep-rl-course/en/unit1/rl-framework",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-deep-rl-introduction_62bbeb50a3",
+              "title": "Process/Markov/state-observation/action/rewards/discount",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_deepseek-r1-paper",
+          "catalog_scope": "deepseek-r1-paper",
+          "url": "https://arxiv.org/html/2501.12948v1",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_deepseek-r1-paper_8d689d8617",
+              "title": "2.2.2 可验证奖励与限制",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hf-llm-sft",
+          "catalog_scope": "hf-llm-sft",
+          "url": "https://huggingface.co/learn/llm-course/en/chapter11/1",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-sft_dd60f148de",
+              "title": "11/2 Chat Templates",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-sft_80f7260c06",
+              "title": "11/3 SFT",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-llm-sft_21f3f3d917",
+              "title": "11/4 LoRA",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hf-policy-gradient",
+          "catalog_scope": "hf-policy-gradient",
+          "url": "https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-policy-gradient_9a9c74037c",
+              "title": "Getting big picture/Objective/Reinforce",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_hf-ppo",
+          "catalog_scope": "hf-ppo",
+          "url": "https://huggingface.co/learn/deep-rl-course/en/unit8/clipped-surrogate-objective",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_hf-ppo_1bb9ffcc7e",
+              "title": "Ratio/advantage/clipped objective",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_trl-grpo-api",
+          "catalog_scope": "trl-grpo-api",
+          "url": "https://huggingface.co/docs/trl/main/en/grpo_trainer",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_trl-grpo-api_ea93d6a262",
+              "title": "Tools",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_trl-grpo-api_07437cd651",
+              "title": "Environments",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_trl-grpo-api_bcf6eeeef2",
+              "title": "Logged metrics（执行前核stable）",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_agent-lightning-paper",
+          "catalog_scope": "agent-lightning-paper",
+          "url": "https://arxiv.org/html/2508.03680v1",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_agent-lightning-paper_8fa36ec3a7",
+              "title": "3.1 数据接口",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_agent-lightning-paper_f683a72db7",
+              "title": "3.2 MDP",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_agent_application_v5_v62_agent-lightning-paper_144dbbd0f0",
+              "title": "3.3 Credit assignment",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_agent-lightning-framework",
+          "catalog_scope": "agent-lightning-framework",
+          "url": "https://microsoft.github.io/agent-lightning/stable/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_agent_application_v5_v62_agent-lightning-framework_9243865181",
+              "title": "Basics/QuickStart硬件/Calc-X",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_case_pi",
+          "catalog_scope": null,
+          "url": "https://github.com/earendil-works/pi",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_case_ragflow",
+          "catalog_scope": null,
+          "url": "https://github.com/infiniflow/ragflow",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_case_weknora",
+          "catalog_scope": null,
+          "url": "https://github.com/Tencent/WeKnora",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_case_software-agent-sdk",
+          "catalog_scope": null,
+          "url": "https://github.com/OpenHands/software-agent-sdk",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_case_langgraph",
+          "catalog_scope": null,
+          "url": "https://github.com/langchain-ai/langgraph",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_case_browser-use",
+          "catalog_scope": null,
+          "url": "https://github.com/browser-use/browser-use",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        },
+        {
+          "source_id": "src_agent_application_v5_v62_case_agentscope",
+          "catalog_scope": null,
+          "url": "https://github.com/agentscope-ai/agentscope",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        }
+      ]
+    },
+    {
+      "pack_key": "ai.fullstack",
+      "version": 2,
+      "stages": 11,
+      "knowledge_nodes": 11,
+      "sources": 16,
+      "sections": 57,
+      "source_depth_counts": {
+        "selected_sections_read": 13,
+        "metadata_only": 3
+      },
+      "primary_continuations": [],
+      "resources": [
+        {
+          "source_id": "src_ai_fullstack_v2_v62_mdn-javascript-jit",
+          "catalog_scope": "mdn-javascript-jit",
+          "url": "https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Scripting",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_mdn-javascript-jit_959e14ca6b",
+              "title": "JSON/Fetch网络请求诊断",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_mdn-javascript-jit_654ae7e54a",
+              "title": "Fetch GET/POST与response.ok",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_javascript-info-supplement",
+          "catalog_scope": "javascript-info-supplement",
+          "url": "https://javascript.info/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_javascript-info-supplement_ab61d6d139",
+              "title": "Fetch/Promise chaining/async-await按缺口",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_javascript-info-supplement_c67c6cba7b",
+              "title": "Fetch response.ok",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_mdn-http-mental-model",
+          "catalog_scope": "mdn-http-mental-model",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_mdn-http-mental-model_6c8e8926c7",
+              "title": "Client/server",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_mdn-http-mental-model_931eecbdc7",
+              "title": "HTTP flow",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_mdn-http-mental-model_6c38cc533a",
+              "title": "Requests/Responses/status",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_mdn-http-mental-model_31de9d17e0",
+              "title": "HTTP APIs/SSE单向事件",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_react-learn-spine",
+          "catalog_scope": "react-learn-spine",
+          "url": "https://zh-hans.react.dev/learn",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_328908a832",
+              "title": "Quick Start",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_6067f0fdfe",
+              "title": "Describing the UI",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_303cb77a31",
+              "title": "Thinking in React",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_29079714c9",
+              "title": "Adding Interactivity",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_e02aedc24f",
+              "title": "Managing State",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_b22b9ef2b7",
+              "title": "You Might Not Need an Effect",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_ab4214483c",
+              "title": "Synchronizing with Effects",
+              "order_index": 6,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_vite-build-deploy",
+          "catalog_scope": "vite-build-deploy",
+          "url": "https://vite.dev/guide/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_vite-build-deploy_3eb938f866",
+              "title": "Guide/create/development server",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_vite-build-deploy_bdd254b65b",
+              "title": "Build",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_vite-build-deploy_4c19eecd5a",
+              "title": "Static Deploy",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_fastapi-api-spine",
+          "catalog_scope": "fastapi-api-spine",
+          "url": "https://fastapi.tiangolo.com/zh/tutorial/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_a07a7da3d0",
+              "title": "First Steps",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_52393d8fca",
+              "title": "Path Parameters",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_2867b24f4c",
+              "title": "Query Parameters",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_ff5c0686b2",
+              "title": "Request Body",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_60851ed19d",
+              "title": "Response Model",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_9a64564844",
+              "title": "Handling Errors",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_2e41b118eb",
+              "title": "Dependencies",
+              "order_index": 6,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_fdd4938853",
+              "title": "Query/Path validation（待明确正文审读）",
+              "order_index": 7,
+              "review_depth": "toc_checked",
+              "verification_status": "legacy_index"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_3892f50f52",
+              "title": "Status Codes（待明确正文审读）",
+              "order_index": 8,
+              "review_depth": "toc_checked",
+              "verification_status": "legacy_index"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_b54759281b",
+              "title": "Server-Sent Events（版本边界）",
+              "order_index": 9,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_1cea04db61",
+              "title": "Testing/TestClient/pytest",
+              "order_index": 10,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_6e93c42342",
+              "title": "Security First Steps",
+              "order_index": 11,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_ac3b765f43",
+              "title": "Get Current User",
+              "order_index": 12,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_0d3a7487b8",
+              "title": "OAuth2/JWT概念（非生产方案）",
+              "order_index": 13,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_020ba065d2",
+              "title": "Deployment Concepts",
+              "order_index": 14,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_e6169e958b",
+              "title": "Docker",
+              "order_index": 15,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_9b0d3cd241",
+              "title": "CORS",
+              "order_index": 16,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_74a883a037",
+              "title": "Settings",
+              "order_index": 17,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_python-en-jit",
+          "catalog_scope": "python-en-jit",
+          "url": "https://docs.python.org/3/tutorial/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_python-en-jit_b598a23dc3",
+              "title": "4.1/4.2/4.8/5.1/5.5/8.2–8.4按缺口",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_microsoft-genai-beginners",
+          "catalog_scope": "microsoft-genai-beginners",
+          "url": "https://github.com/microsoft/generative-ai-for-beginners",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_af79503cdb",
+              "title": "01 GenAI/token/局限",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_2c0a17e076",
+              "title": "04 Prompt概念",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_a6529b93e5",
+              "title": "06 服务端Text Generation",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_10d557a8c8",
+              "title": "08 Search/15 RAG仅概念",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_openai-provider-api",
+          "catalog_scope": "openai-provider-api",
+          "url": "https://developers.openai.com/api/docs/guides/text",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_6fb43e75d8",
+              "title": "Responses Text",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_13f33299df",
+              "title": "Structured Outputs/refusal/incomplete",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_26133a50d3",
+              "title": "Streaming created/delta/completed/error",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_ed129d234f",
+              "title": "Rate Limits",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_b34a84c073",
+              "title": "Error Codes",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_63dafe2251",
+              "title": "Production Best Practices",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_f3ea183d70",
+              "title": "Structured Outputs/Streaming/provider比较按目标",
+              "order_index": 6,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_wonderful-sql-practice",
+          "catalog_scope": "wonderful-sql-practice",
+          "url": "https://github.com/datawhalechina/wonderful-sql",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_wonderful-sql-practice_9080c2d45b",
+              "title": "ch01 表/约束/CRUD",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_wonderful-sql-practice_39d59e5489",
+              "title": "ch02 SELECT/WHERE/order/aggregate",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_wonderful-sql-practice_b540652f93",
+              "title": "ch04/4.2 JOIN（按需）",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_postgresql-sql-semantics",
+          "catalog_scope": "postgresql-sql-semantics",
+          "url": "https://www.postgresql.org/docs/current/tutorial.html",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_postgresql-sql-semantics_000f5aa3ae",
+              "title": "JOIN/ON/explicit columns",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_postgresql-sql-semantics_10ff00f667",
+              "title": "Table Expressions",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge",
+          "catalog_scope": "fastapi-sqlmodel-bridge",
+          "url": "https://fastapi.tiangolo.com/zh/tutorial/sql-databases/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge_27e6e7622b",
+              "title": "Engine/models",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge_9dcbbf5abb",
+              "title": "Session dependency",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge_f8e90bfea5",
+              "title": "CRUD/input-table-public",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_oauth-security-rfc9700",
+          "catalog_scope": "oauth-security-rfc9700",
+          "url": "https://www.rfc-editor.org/rfc/rfc9700.html",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_ai_fullstack_v2_v62_oauth-security-rfc9700_37b29eee69",
+              "title": "2.4 Password grant禁用与原因",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_case_full-stack-fastapi-template",
+          "catalog_scope": null,
+          "url": "https://github.com/fastapi/full-stack-fastapi-template",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_case_openai-responses-starter-app",
+          "catalog_scope": null,
+          "url": "https://github.com/openai/openai-responses-starter-app",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        },
+        {
+          "source_id": "src_ai_fullstack_v2_v62_case_open-webui",
+          "catalog_scope": null,
+          "url": "https://github.com/open-webui/open-webui",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        }
+      ]
+    },
+    {
+      "pack_key": "cloud.services",
+      "version": 2,
+      "stages": 15,
+      "knowledge_nodes": 15,
+      "sources": 13,
+      "sections": 58,
+      "source_depth_counts": {
+        "selected_sections_read": 8,
+        "deep_reviewed": 3,
+        "metadata_only": 2
+      },
+      "primary_continuations": [],
+      "resources": [
+        {
+          "source_id": "src_cloud_services_v2_v62_fastapi-api-spine",
+          "catalog_scope": "fastapi-api-spine",
+          "url": "https://fastapi.tiangolo.com/zh/tutorial/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_a07a7da3d0",
+              "title": "First Steps",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_752a0b9493",
+              "title": "Path/Query Params",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_ff5c0686b2",
+              "title": "Request Body",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_60851ed19d",
+              "title": "Response Model",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_9a64564844",
+              "title": "Handling Errors",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_e806a291cf",
+              "title": "Testing",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_c133c334c4",
+              "title": "Settings（按需）",
+              "order_index": 6,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_fastapi-sqlmodel-bridge",
+          "catalog_scope": "fastapi-sqlmodel-bridge",
+          "url": "https://fastapi.tiangolo.com/zh/tutorial/sql-databases/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_fastapi-sqlmodel-bridge_bfde3422aa",
+              "title": "Engine/model",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_fastapi-sqlmodel-bridge_9dcbbf5abb",
+              "title": "Session dependency",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_fastapi-sqlmodel-bridge_afec20c6d5",
+              "title": "CRUD",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_python-en-jit",
+          "catalog_scope": "python-en-jit",
+          "url": "https://docs.python.org/3/tutorial/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_python-en-jit_05004f8cac",
+              "title": "函数/list/dict/异常按缺口",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_docker-run-app",
+          "catalog_scope": "docker-run-app",
+          "url": "https://docs.docker.com/get-started/tutorials/run-an-app/",
+          "review_depth": "deep_reviewed",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-run-app_74e492d5d0",
+              "title": "Before you start",
+              "order_index": 0,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-run-app_946d605c49",
+              "title": "Run a container",
+              "order_index": 1,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-run-app_9321000115",
+              "title": "Run an application stack",
+              "order_index": 2,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-run-app_7d13bbccda",
+              "title": "Build an image",
+              "order_index": 3,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-run-app_317e03c96e",
+              "title": "Share the image",
+              "order_index": 4,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-run-app_f938c3286f",
+              "title": "Clean up",
+              "order_index": 5,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-run-app_098675a3aa",
+              "title": "What you learned/Next",
+              "order_index": 6,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_docker-runtime-concepts",
+          "catalog_scope": "docker-runtime-concepts",
+          "url": "https://docs.docker.com/get-started/docker-concepts/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-runtime-concepts_c392dca9db",
+              "title": "What is a container",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-runtime-concepts_4bbfee6dd9",
+              "title": "Writing a Dockerfile",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-runtime-concepts_f033eaa0b0",
+              "title": "Publishing ports",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_docker-compose-spine",
+          "catalog_scope": "docker-compose-spine",
+          "url": "https://docs.docker.com/compose/gettingstarted/",
+          "review_depth": "deep_reviewed",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_1c98237fbb",
+              "title": "Step1 Project/Dockerfile/env",
+              "order_index": 0,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_45d4ca9709",
+              "title": "Step2 Define services",
+              "order_index": 1,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_8a0265ba43",
+              "title": "Step3 DB healthcheck/depends_on",
+              "order_index": 2,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_1e789552de",
+              "title": "Step4 Watch（可选）",
+              "order_index": 3,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_bee29a1922",
+              "title": "Step5 Named volume",
+              "order_index": 4,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_67990130a1",
+              "title": "Step6 Multiple files/include（可选）",
+              "order_index": 5,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_962b399f08",
+              "title": "Step7 config/logs/exec",
+              "order_index": 6,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_kubernetes-basics",
+          "catalog_scope": "kubernetes-basics",
+          "url": "https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_2ae2055313",
+              "title": "Module1 Create cluster",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_f969a17666",
+              "title": "Module2 Deploy app",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_e962ec178d",
+              "title": "Module3 Explore Pod/Node",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_2f66d5daa7",
+              "title": "Module4 Expose Service",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_24e2a67f32",
+              "title": "Module5 Scale",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_2eba6cb5ff",
+              "title": "Module6 Update/rollback",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_b4cd99c13b",
+              "title": "基础对象复习；probe/config/secret详细正文另按需求核查",
+              "order_index": 6,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_otel-demo-case",
+          "catalog_scope": "otel-demo-case",
+          "url": "https://opentelemetry.io/docs/demo/",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_otel-demo-case_cd74053c54",
+              "title": "Architecture",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_otel-demo-case_5141632d2c",
+              "title": "Telemetry Features",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_otel-demo-case_7ec89053c3",
+              "title": "Docker Deployment",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_otel-demo-case_11922dba38",
+              "title": "Feature flag/recommendation-cache",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_otel-demo-case_ce6ffc6b45",
+              "title": "Collector troubleshooting",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_otel-demo-case_d6363e1616",
+              "title": "Kubernetes Deployment（按需）",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_github-actions-ci-deploy",
+          "catalog_scope": "github-actions-ci-deploy",
+          "url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_9262c10913",
+              "title": "Workflow/events/jobs/runners/steps",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_e49b58f7b3",
+              "title": "Example workflow",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_b302c21f0a",
+              "title": "Python build/test（按项目语言替换）",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_785499dc97",
+              "title": "Artifacts与cache",
+              "order_index": 3,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_a51905621b",
+              "title": "Control deployments/environment/concurrency",
+              "order_index": 4,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_f28a6fd0fb",
+              "title": "Secure use/action pinning",
+              "order_index": 5,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_d004d68b55",
+              "title": "OIDC provider（目标选定后）",
+              "order_index": 6,
+              "review_depth": "toc_checked",
+              "verification_status": "legacy_index"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_terraform-docker-spine",
+          "catalog_scope": "terraform-docker-spine",
+          "url": "https://developer.hashicorp.com/terraform/tutorials/docker-get-started",
+          "review_depth": "deep_reviewed",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_1f36bdce30",
+              "title": "Infrastructure as Code",
+              "order_index": 0,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_569ca49f4a",
+              "title": "Install",
+              "order_index": 1,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_bdd254b65b",
+              "title": "Build",
+              "order_index": 2,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_c0bf75bd78",
+              "title": "Change",
+              "order_index": 3,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_ea9bb7ea83",
+              "title": "Destroy",
+              "order_index": 4,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_02db55bac5",
+              "title": "Variables",
+              "order_index": 5,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_e7ce99764a",
+              "title": "Outputs",
+              "order_index": 6,
+              "review_depth": "deep_reviewed",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_terraform-aws-comparison",
+          "catalog_scope": "terraform-aws-comparison",
+          "url": "https://developer.hashicorp.com/terraform/tutorials/aws-get-started",
+          "review_depth": "selected_sections_read",
+          "content_access": "free_public",
+          "verification_status": "reviewed",
+          "runtime_validation": "not_run",
+          "sections": [
+            {
+              "section_id": "sec_cloud_services_v2_v62_terraform-aws-comparison_4759498ac2",
+              "title": "Create",
+              "order_index": 0,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_terraform-aws-comparison_5a23444828",
+              "title": "Manage",
+              "order_index": 1,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            },
+            {
+              "section_id": "sec_cloud_services_v2_v62_terraform-aws-comparison_b496903467",
+              "title": "Destroy与费用清理",
+              "order_index": 2,
+              "review_depth": "selected_sections_read",
+              "verification_status": "reviewed"
+            }
+          ]
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_case_opentelemetry-demo",
+          "catalog_scope": null,
+          "url": "https://github.com/open-telemetry/opentelemetry-demo",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        },
+        {
+          "source_id": "src_cloud_services_v2_v62_case_getting-started-todo-app",
+          "catalog_scope": null,
+          "url": "https://github.com/docker/getting-started-todo-app",
+          "review_depth": "metadata_only",
+          "content_access": "free_public",
+          "verification_status": "legacy_index",
+          "runtime_validation": "not_run",
+          "sections": []
+        }
+      ]
+    }
+  ],
+  "research_date": "2026-10-03",
+  "mapping_date": "2026-10-04",
+  "runtime_validation": "NOT RUN",
+  "validation": "PASS",
+  "section_qualification_limits": [
+    {
+      "catalog_scope": "hello-common-ch10",
+      "section_title": "10.1 协议角色",
+      "reason": "只有chapter structure/summary记录，明确正文为10.2与10.5.1。",
+      "review_depth": "toc_checked",
+      "verification_status": "legacy_index"
+    },
+    {
+      "catalog_scope": "playwright-python-spine",
+      "section_title": "Network/Frames/Dialogs（按需）",
+      "reason": "实际审读只明确docs index；不认证可选专题正文。",
+      "review_depth": "toc_checked",
+      "verification_status": "legacy_index"
+    },
+    {
+      "catalog_scope": "github-actions-ci-deploy",
+      "section_title": "OIDC provider（目标选定后）",
+      "reason": "recommended_scope候选，实际审读没有provider policy正文。",
+      "review_depth": "toc_checked",
+      "verification_status": "legacy_index"
+    },
+    {
+      "catalog_scope": "fastapi-api-spine",
+      "section_title": "Query/Path validation（待明确正文审读）",
+      "reason": "recommended_scope列出；actual_scope没有独立该页正文记录。",
+      "review_depth": "toc_checked",
+      "verification_status": "legacy_index"
+    },
+    {
+      "catalog_scope": "fastapi-api-spine",
+      "section_title": "Status Codes（待明确正文审读）",
+      "reason": "recommended_scope列出；actual_scope没有独立该页正文记录。",
+      "review_depth": "toc_checked",
+      "verification_status": "legacy_index"
+    }
+  ],
+  "limits": [
+    "No new web review, paid calls, DB writes or project execution.",
+    "Python zh 5.1 is TOC-only and not published as reviewed body.",
+    "OpenHands Security/Persistence/Docker Sandbox stays TOC-only.",
+    "Case roots are legacy_index identity, independent of tutorial catalog qualification."
+  ]
+}
