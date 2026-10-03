@@ -34,7 +34,7 @@ def clean(value):
     return re.sub(r'\*\*|`', '', value).strip()
 
 
-def parts(value, limit=1000):
+def parts(value, limit=750):
     """Lossless bounded text partition; reject overload rather than drop content."""
     text = clean(value) or '本阶段没有新增该类材料；沿当前学习证据按需核对。'
     values = []
@@ -48,6 +48,35 @@ def parts(value, limit=1000):
     if len(values) > 20:
         raise ValueError('Teaching field exceeds bounded guidance; split the authored unit')
     return values
+
+
+def resource_id(kind, namespace, identity):
+    """Global immutable identity, bounded by the real 64-character view contract."""
+    digest = hashlib.sha256(identity.encode('utf-8')).hexdigest()[:20]
+    value = kind + '_' + namespace + '_' + digest
+    if len(value) > 64:
+        raise ValueError('Resource namespace exceeds consumer identity bound')
+    return value
+
+
+def bounded_extensions(stage):
+    """Exact text fragments with headroom for existing private-carrier notes."""
+    result = []
+    for extension_index, extension in enumerate(stage['extensions']):
+        text = extension['guidance']
+        fragments = [text[i:i + 850] for i in range(0, len(text), 850)] or ['']
+        group = stage['stable_key'] + ':' + str(extension_index)
+        for i, fragment in enumerate(fragments):
+            item = {**extension, 'guidance': fragment, 'order_index': len(result)}
+            if len(fragments) > 1:
+                item.update(fragment_group=group, fragment_index=i, fragment_count=len(fragments))
+                if i == 0:
+                    item['original_guidance'] = text
+                else:
+                    item.pop('project_study_card', None)
+                    item['topic'] += f'（续{i + 1}/{len(fragments)}）'
+            result.append(item)
+    return result
 
 
 def blocks(text, pattern):
@@ -403,7 +432,7 @@ def build_all(research=RESEARCH):
             r = by_scope[scope]
             if scope in holds:
                 raise ValueError(f'Cannot publish held resource: {scope}')
-            s = dict(source_id='src_' + ns + '_' + scope, canonical_url=r['url'], title=r['title'],
+            s = dict(source_id=resource_id('src', ns, scope), canonical_url=r['url'], title=r['title'],
                      creator='原始官方/作者来源，见catalog审读记录', media_type=r['media_type'], language=r['language'],
                      source_version=1, documentation_version='研究快照2026-10-03；学习时核对当前兼容版本',
                      verification_status='legacy_index' if r['review_depth'] in {'metadata_only', 'toc_checked'} else 'reviewed',
@@ -436,7 +465,7 @@ def build_all(research=RESEARCH):
                         depth = 'toc_checked'
                     if role == 'primary' and depth in {'toc_checked', 'metadata_only'}:
                         raise ValueError(f'Insufficient Primary subsection evidence: {scope}: {title}')
-                    section_id = 'sec_' + ns + '_' + scope + '_' + hashlib.sha256(title.encode()).hexdigest()[:10]
+                    section_id = resource_id('sec', ns, scope + '\n' + title)
                     note = ('教学选择：' + title + '。URL可能为作者目录/入口，不假设直达细节。实际审读：' + s['review_note'])
                     if limitation:
                         note += '；保守资格限制：' + limitation
@@ -554,8 +583,7 @@ def build_all(research=RESEARCH):
             if stage is None:
                 continue
             root_url = card['repo_url']
-            token = root_url.split('/')[-1].lower()
-            candidate_source = dict(source_id='src_' + ns + '_case_' + token, canonical_url=root_url,
+            candidate_source = dict(source_id=resource_id('src', ns, 'case:' + root_url), canonical_url=root_url,
                 title=card['title'], creator='已核对原包项目身份；未新增源码/网页审核', media_type='repo', language='en',
                 source_version=1, documentation_version='', verification_status='legacy_index', checked_at=DATE,
                 sections=[], review_depth='metadata_only', content_access='free_public',
@@ -581,6 +609,7 @@ def build_all(research=RESEARCH):
             for order, section in enumerate(s['sections']):
                 section['order_index'] = order
         for stage in pack['stage_blueprints']:
+            stage['extensions'] = bounded_extensions(stage)
             continuations = []
             for assignment in stage['resources']:
                 s = next(s for s in pack['resources'] if s['source_id'] == assignment['source_ref'])
@@ -629,6 +658,9 @@ def build_all(research=RESEARCH):
     report = dict(catalog_records=len(catalog['resources']), catalog_depth_counts=dict(Counter(r['review_depth'] for r in catalog['resources'])),
                   holds=holds, publication_records=audit, research_date='2026-10-03', mapping_date='2026-10-04',
                   runtime_validation='NOT RUN', validation='PASS',
+                  consumer_bounds=dict(resource_identifiers=64, stable_keys=128, extension_guidance=1000,
+                                       extension_fragment_size=850, guidance_item_size=750,
+                                       private_carrier_checked_length=100),
                   section_qualification_limits=[dict(catalog_scope=scope, section_title=title, reason=reason,
                                                      review_depth='toc_checked', verification_status='legacy_index')
                                                 for (scope, title), reason in SECTION_QUALIFICATION_LIMITS.items()],

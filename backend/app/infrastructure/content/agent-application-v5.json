@@ -26,10 +26,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch1",
+          "source_ref": "src_agent_application_v5_v62_404d25fa52f24dc2be39",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch1_58323a862d",
-            "sec_agent_application_v5_v62_hello-common-ch1_89f788fd26"
+            "sec_agent_application_v5_v62_85e1c39eb6c28fefeeea",
+            "sec_agent_application_v5_v62_699f51c3f1a605beb627"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -39,9 +39,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch2",
+          "source_ref": "src_agent_application_v5_v62_db73d24bfd741f4b3c43",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch2_90a327e62a"
+            "sec_agent_application_v5_v62_7020ea0b37c79fc874c8"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -51,10 +51,10 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch3",
+          "source_ref": "src_agent_application_v5_v62_c84a138cc7f9a11eec9e",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch3_393af176f9",
-            "sec_agent_application_v5_v62_hello-common-ch3_d0531aff62"
+            "sec_agent_application_v5_v62_3adbd2bf3a1a372117da",
+            "sec_agent_application_v5_v62_c6f91cc10e3f2ed54b40"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -64,12 +64,12 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_python-zh-jit",
+          "source_ref": "src_agent_application_v5_v62_c300d0bb98758882427d",
           "section_refs": [
-            "sec_agent_application_v5_v62_python-zh-jit_3888bfd493",
-            "sec_agent_application_v5_v62_python-zh-jit_101234ec22",
-            "sec_agent_application_v5_v62_python-zh-jit_9e68256d0d",
-            "sec_agent_application_v5_v62_python-zh-jit_8aace92881"
+            "sec_agent_application_v5_v62_361663d68a72f23c8125",
+            "sec_agent_application_v5_v62_8c467b199b799b712349",
+            "sec_agent_application_v5_v62_9263c9c66b0ba5883f14",
+            "sec_agent_application_v5_v62_7cf6f5cc3ad9a60804dd"
           ],
           "source_version": 1,
           "order_index": 3,
@@ -178,10 +178,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch4",
+          "source_ref": "src_agent_application_v5_v62_7b35476246aa1b12023c",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch4_f11708bfa5",
-            "sec_agent_application_v5_v62_hello-common-ch4_ae73551f87"
+            "sec_agent_application_v5_v62_ba239e06b1d63e42fe07",
+            "sec_agent_application_v5_v62_cd49d06ec6be29df7717"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -191,10 +191,10 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_fa3da8fb42",
-            "sec_agent_application_v5_v62_lcc-coding-spine_969e7e5014"
+            "sec_agent_application_v5_v62_716796b5dba6517bfc55",
+            "sec_agent_application_v5_v62_a03dec509756acde66c0"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -204,9 +204,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch12",
+          "source_ref": "src_agent_application_v5_v62_d3fcc3994894d29174e4",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch12_fad78d7825"
+            "sec_agent_application_v5_v62_438d8c2d537ef7eb367d"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -216,10 +216,10 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch4",
+          "source_ref": "src_agent_application_v5_v62_7b35476246aa1b12023c",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch4_8e8ee32eb3",
-            "sec_agent_application_v5_v62_hello-common-ch4_61cf0032a1"
+            "sec_agent_application_v5_v62_3afb5087566d3d076667",
+            "sec_agent_application_v5_v62_d3e988b769de8631a297"
           ],
           "source_version": 1,
           "order_index": 3,
@@ -332,10 +332,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch7",
+          "source_ref": "src_agent_application_v5_v62_024e3710db538d14fa27",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch7_19db1e2092",
-            "sec_agent_application_v5_v62_hello-common-ch7_5e841ddece"
+            "sec_agent_application_v5_v62_6c3294f3528c2a1e9491",
+            "sec_agent_application_v5_v62_327fc4750e96e1a6af8d"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -345,10 +345,10 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_e7d11f55c8",
-            "sec_agent_application_v5_v62_lcc-coding-spine_19c03ed2c2"
+            "sec_agent_application_v5_v62_842993bff0769ff74051",
+            "sec_agent_application_v5_v62_0ec4740203de27d1cadc"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -457,11 +457,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch8",
+          "source_ref": "src_agent_application_v5_v62_243595be34a1cea2f8fb",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch8_07b84efd35",
-            "sec_agent_application_v5_v62_hello-common-ch8_622e3aada7",
-            "sec_agent_application_v5_v62_hello-common-ch8_b390cecc29"
+            "sec_agent_application_v5_v62_0b0ca6b7155261a23971",
+            "sec_agent_application_v5_v62_e42f69738ee5c164b8ab",
+            "sec_agent_application_v5_v62_933cfc6287a8ba5ac7fc"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -471,9 +471,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_53bcf665ae"
+            "sec_agent_application_v5_v62_8962ea00419df4b8386c"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -582,10 +582,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch9",
+          "source_ref": "src_agent_application_v5_v62_bb825e030c7385c9a978",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch9_59fbc7723c",
-            "sec_agent_application_v5_v62_hello-common-ch9_70ca62a8d4"
+            "sec_agent_application_v5_v62_9949940b966298bf9729",
+            "sec_agent_application_v5_v62_9c7661cca3650f5cdcd8"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -595,10 +595,10 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_83ec044e97",
-            "sec_agent_application_v5_v62_lcc-coding-spine_7573d51159"
+            "sec_agent_application_v5_v62_0e11415a7e8325ac5267",
+            "sec_agent_application_v5_v62_e3021e391920aa0a2610"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -608,10 +608,10 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch9",
+          "source_ref": "src_agent_application_v5_v62_bb825e030c7385c9a978",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch9_5108e6633c",
-            "sec_agent_application_v5_v62_hello-common-ch9_634452fa81"
+            "sec_agent_application_v5_v62_81a7428525a003f595f0",
+            "sec_agent_application_v5_v62_d2bd9429ced2f25b0022"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -722,11 +722,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch6",
+          "source_ref": "src_agent_application_v5_v62_2ff98861a5beb53ca056",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch6_14cce98326",
-            "sec_agent_application_v5_v62_hello-common-ch6_654d836cf2",
-            "sec_agent_application_v5_v62_hello-common-ch6_f817f33dee"
+            "sec_agent_application_v5_v62_c9bae8650efc1e3fa0bb",
+            "sec_agent_application_v5_v62_7fdb989e1cf392b59438",
+            "sec_agent_application_v5_v62_ced6c1dd4a97934ad3be"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -736,9 +736,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_langgraph-workflows",
+          "source_ref": "src_agent_application_v5_v62_2d824263edbf3518ed94",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-workflows_8281c2901c"
+            "sec_agent_application_v5_v62_3d52ea8cc65b270b727a"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -854,9 +854,9 @@
       "resources": [
         {
           "role": "reference",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch10",
+          "source_ref": "src_agent_application_v5_v62_4e3c3cda00c4a38db26c",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch10_7eca658761"
+            "sec_agent_application_v5_v62_b2fd27047ca5bdacc68d"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -866,9 +866,9 @@
         },
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch10",
+          "source_ref": "src_agent_application_v5_v62_4e3c3cda00c4a38db26c",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch10_4c8674db87"
+            "sec_agent_application_v5_v62_286639675fe1c1e4994b"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -878,9 +878,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_88a1c0f2d0"
+            "sec_agent_application_v5_v62_589731cd4748799a2755"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -890,9 +890,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch10",
+          "source_ref": "src_agent_application_v5_v62_4e3c3cda00c4a38db26c",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch10_56113724df"
+            "sec_agent_application_v5_v62_33d6af5a0c793fd99df1"
           ],
           "source_version": 1,
           "order_index": 3,
@@ -1010,9 +1010,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch12",
+          "source_ref": "src_agent_application_v5_v62_d3fcc3994894d29174e4",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch12_51dad35510"
+            "sec_agent_application_v5_v62_5d4bd6603985e30603d9"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1022,9 +1022,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_langsmith-evaluation-types",
+          "source_ref": "src_agent_application_v5_v62_ab4f70eb2d76765cd0dc",
           "section_refs": [
-            "sec_agent_application_v5_v62_langsmith-evaluation-types_861dcd1ecd"
+            "sec_agent_application_v5_v62_aa4e2aa656a3eda8d4df"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1034,11 +1034,11 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch12",
+          "source_ref": "src_agent_application_v5_v62_d3fcc3994894d29174e4",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch12_4ed99dc6a2",
-            "sec_agent_application_v5_v62_hello-common-ch12_2f9ecee8e5",
-            "sec_agent_application_v5_v62_hello-common-ch12_2524405449"
+            "sec_agent_application_v5_v62_d7f9ddb9c276f3f5751d",
+            "sec_agent_application_v5_v62_d7aecc84d0ae7ad4bb35",
+            "sec_agent_application_v5_v62_56fd98d021595a831ae2"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -1253,9 +1253,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_0cd562b14c"
+            "sec_agent_application_v5_v62_96f2ac93da74b2555fde"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1265,9 +1265,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_hello-rag-context-bridge",
+          "source_ref": "src_agent_application_v5_v62_2f5e62896028a2af86b8",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-rag-context-bridge_f6de0f4966"
+            "sec_agent_application_v5_v62_45c65ea2d9d23f396a50"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1381,10 +1381,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_4a1fe9ab6c",
-            "sec_agent_application_v5_v62_all-in-rag-spine_dd05bc900e"
+            "sec_agent_application_v5_v62_255c4084a8c9417bbf9d",
+            "sec_agent_application_v5_v62_9f7b26ab686c14afd277"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1394,9 +1394,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_8e4ec19bb9"
+            "sec_agent_application_v5_v62_a5b9eac908dd5b0e408a"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1512,10 +1512,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_1ab2b13502",
-            "sec_agent_application_v5_v62_all-in-rag-spine_5d53f9a3f9"
+            "sec_agent_application_v5_v62_812c56604591d743cec0",
+            "sec_agent_application_v5_v62_276c204270b60c09f95e"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1629,9 +1629,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_050a15c92a"
+            "sec_agent_application_v5_v62_cc4858cf18eac5a925db"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1641,9 +1641,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_ragas-evaluation",
+          "source_ref": "src_agent_application_v5_v62_477b93b97d3e3d1a1a2b",
           "section_refs": [
-            "sec_agent_application_v5_v62_ragas-evaluation_8342d25998"
+            "sec_agent_application_v5_v62_a3104dca3d2d80e9eca4"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1653,9 +1653,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_93bae68bec"
+            "sec_agent_application_v5_v62_785258bc04e88e3e084d"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -1771,11 +1771,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_04987e8a03",
-            "sec_agent_application_v5_v62_all-in-rag-spine_b029a0b674",
-            "sec_agent_application_v5_v62_all-in-rag-spine_af671e12c7"
+            "sec_agent_application_v5_v62_98fa5a275fb76520256d",
+            "sec_agent_application_v5_v62_c073bf0d4dbd2f356b7b",
+            "sec_agent_application_v5_v62_e6b5bb8d93b9f6f0d3df"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1785,9 +1785,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_bge-m3-retrieval-modes",
+          "source_ref": "src_agent_application_v5_v62_df544ffcdc0a9251c5d9",
           "section_refs": [
-            "sec_agent_application_v5_v62_bge-m3-retrieval-modes_4fe483c7a7"
+            "sec_agent_application_v5_v62_64445ea23657b871fe5a"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1797,9 +1797,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_84c7e770f8"
+            "sec_agent_application_v5_v62_7f8b524e9e05b53aea18"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -1917,10 +1917,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_4013f55d7a",
-            "sec_agent_application_v5_v62_all-in-rag-spine_fd7a98c7fd"
+            "sec_agent_application_v5_v62_effea036da2618b9ebcd",
+            "sec_agent_application_v5_v62_91ca2a72625aa1265f62"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1930,10 +1930,10 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_rag-citation-contract",
+          "source_ref": "src_agent_application_v5_v62_5721ce0828859ed02922",
           "section_refs": [
-            "sec_agent_application_v5_v62_rag-citation-contract_280a5cad30",
-            "sec_agent_application_v5_v62_rag-citation-contract_233be7c932"
+            "sec_agent_application_v5_v62_9d3c5dbf942bd40ceced",
+            "sec_agent_application_v5_v62_4c092819f16ca44b2e82"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1943,9 +1943,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_bbfd25596e"
+            "sec_agent_application_v5_v62_96e1e476785dc08ad49e"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -2061,9 +2061,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_0376658fde"
+            "sec_agent_application_v5_v62_0560a0936ad5ff39ef31"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -2073,7 +2073,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_agent_application_v5_v62_case_ragflow",
+          "source_ref": "src_agent_application_v5_v62_7453e611be20a66f5703",
           "section_refs": [],
           "source_version": 1,
           "order_index": 1,
@@ -2083,7 +2083,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_agent_application_v5_v62_case_weknora",
+          "source_ref": "src_agent_application_v5_v62_23a1cc1c750696848f60",
           "section_refs": [],
           "source_version": 1,
           "order_index": 2,
@@ -2093,12 +2093,12 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_38dc3d57ab",
-            "sec_agent_application_v5_v62_all-in-rag-spine_08d2a6c63e",
-            "sec_agent_application_v5_v62_all-in-rag-spine_c6cd950123",
-            "sec_agent_application_v5_v62_all-in-rag-spine_6937f68434"
+            "sec_agent_application_v5_v62_c44a95406db6043df630",
+            "sec_agent_application_v5_v62_4e0cb8fd489d176c0380",
+            "sec_agent_application_v5_v62_8093c6955639f5e3912c",
+            "sec_agent_application_v5_v62_d59032ff1ec88e3bbd2a"
           ],
           "source_version": 1,
           "order_index": 3,
@@ -2280,10 +2280,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_all-in-rag-spine",
+          "source_ref": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
           "section_refs": [
-            "sec_agent_application_v5_v62_all-in-rag-spine_2abdc7d2c8",
-            "sec_agent_application_v5_v62_all-in-rag-spine_17111c1c0a"
+            "sec_agent_application_v5_v62_3821f801813b71fa2496",
+            "sec_agent_application_v5_v62_f76ae7a3324b68fba8ce"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -2396,10 +2396,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_fa3da8fb42",
-            "sec_agent_application_v5_v62_lcc-coding-spine_969e7e5014"
+            "sec_agent_application_v5_v62_716796b5dba6517bfc55",
+            "sec_agent_application_v5_v62_a03dec509756acde66c0"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -2409,9 +2409,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch4",
+          "source_ref": "src_agent_application_v5_v62_7b35476246aa1b12023c",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch4_ffecffdb4d"
+            "sec_agent_application_v5_v62_e5aa0876c458bdec21f3"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -2527,11 +2527,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_58c7563356",
-            "sec_agent_application_v5_v62_lcc-coding-spine_e7d11f55c8",
-            "sec_agent_application_v5_v62_lcc-coding-spine_19c03ed2c2"
+            "sec_agent_application_v5_v62_34e018b39d2150ed006e",
+            "sec_agent_application_v5_v62_842993bff0769ff74051",
+            "sec_agent_application_v5_v62_0ec4740203de27d1cadc"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -2647,9 +2647,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_3203dd84e3"
+            "sec_agent_application_v5_v62_316d71fe2a1e62297288"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -2659,9 +2659,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_d8e9e2cafa"
+            "sec_agent_application_v5_v62_5665d6b1637ae3b54e1e"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -2777,11 +2777,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_93e86365ce",
-            "sec_agent_application_v5_v62_lcc-coding-spine_19ca4965be",
-            "sec_agent_application_v5_v62_lcc-coding-spine_83ec044e97"
+            "sec_agent_application_v5_v62_fc9fa26008b74a2dc5cc",
+            "sec_agent_application_v5_v62_d5030ce81dea26279bdd",
+            "sec_agent_application_v5_v62_0e11415a7e8325ac5267"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -2791,9 +2791,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch9",
+          "source_ref": "src_agent_application_v5_v62_bb825e030c7385c9a978",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch9_0626f1627c"
+            "sec_agent_application_v5_v62_d9e796dd9fb564591251"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -2907,9 +2907,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_7573d51159"
+            "sec_agent_application_v5_v62_e3021e391920aa0a2610"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -2919,9 +2919,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_18c55a7881"
+            "sec_agent_application_v5_v62_ab7dfe83de3eb176276a"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -3037,10 +3037,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_a9b38ae003",
-            "sec_agent_application_v5_v62_lcc-coding-spine_38205e2266"
+            "sec_agent_application_v5_v62_5e56e36baf6e4faa174a",
+            "sec_agent_application_v5_v62_36f767c15fe03fdb3722"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -3050,9 +3050,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_36edfe6692"
+            "sec_agent_application_v5_v62_ffc480960de5e0a27e41"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -3168,9 +3168,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_d5b624df9c"
+            "sec_agent_application_v5_v62_3dc0a6bab60f5b147c3e"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -3180,9 +3180,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_f80b61a6ab"
+            "sec_agent_application_v5_v62_8b1a1cd43b1bd3b4012c"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -3298,9 +3298,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_88a1c0f2d0"
+            "sec_agent_application_v5_v62_589731cd4748799a2755"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -3310,9 +3310,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch10",
+          "source_ref": "src_agent_application_v5_v62_4e3c3cda00c4a38db26c",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch10_b437e6b804"
+            "sec_agent_application_v5_v62_4a4ed47245fda9ec7270"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -3322,9 +3322,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_e2ac14ed92"
+            "sec_agent_application_v5_v62_1c81b85f272ce16b87eb"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -3442,10 +3442,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_7493395d78",
-            "sec_agent_application_v5_v62_lcc-coding-spine_e95d03cf8c"
+            "sec_agent_application_v5_v62_6e6f5287d8c074921d06",
+            "sec_agent_application_v5_v62_656e627de02bee5d97ea"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -3559,12 +3559,12 @@
       "resources": [
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_pi-sdk-case",
+          "source_ref": "src_agent_application_v5_v62_3d1efee26983053780c3",
           "section_refs": [
-            "sec_agent_application_v5_v62_pi-sdk-case_7ba7ff3f1b",
-            "sec_agent_application_v5_v62_pi-sdk-case_80571ca98a",
-            "sec_agent_application_v5_v62_pi-sdk-case_fa478855bb",
-            "sec_agent_application_v5_v62_pi-sdk-case_8dda74142f"
+            "sec_agent_application_v5_v62_10f09972aeb57ada7036",
+            "sec_agent_application_v5_v62_b9a6cef899913c9dbe90",
+            "sec_agent_application_v5_v62_705fc529d1adb847c62f",
+            "sec_agent_application_v5_v62_4075421a7c9d290c3f38"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -3574,10 +3574,10 @@
         },
         {
           "role": "reference",
-          "source_ref": "src_agent_application_v5_v62_openhands-sdk-case",
+          "source_ref": "src_agent_application_v5_v62_c41d09619246000e0edd",
           "section_refs": [
-            "sec_agent_application_v5_v62_openhands-sdk-case_d00eca1bae",
-            "sec_agent_application_v5_v62_openhands-sdk-case_f60727af5c"
+            "sec_agent_application_v5_v62_7f62252a4ab847263bc0",
+            "sec_agent_application_v5_v62_cd408ac163bb4316a9ba"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -3587,7 +3587,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_agent_application_v5_v62_case_pi",
+          "source_ref": "src_agent_application_v5_v62_300cce35361bdd8a0b56",
           "section_refs": [],
           "source_version": 1,
           "order_index": 2,
@@ -3597,7 +3597,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_agent_application_v5_v62_case_software-agent-sdk",
+          "source_ref": "src_agent_application_v5_v62_d1a72a24510e80ef5299",
           "section_refs": [],
           "source_version": 1,
           "order_index": 3,
@@ -3779,9 +3779,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langgraph-workflows",
+          "source_ref": "src_agent_application_v5_v62_2d824263edbf3518ed94",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-workflows_594d9bf6b5"
+            "sec_agent_application_v5_v62_4df045f7b284b56c2646"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -3791,9 +3791,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_hello-workflow-bridge",
+          "source_ref": "src_agent_application_v5_v62_9b248ab3820293737de6",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-workflow-bridge_19fa368d8b"
+            "sec_agent_application_v5_v62_1a35b9a339ca0008b60c"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -3907,13 +3907,13 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langgraph-workflows",
+          "source_ref": "src_agent_application_v5_v62_2d824263edbf3518ed94",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-workflows_5dd5e14068",
-            "sec_agent_application_v5_v62_langgraph-workflows_a67870b910",
-            "sec_agent_application_v5_v62_langgraph-workflows_bcba696f3e",
-            "sec_agent_application_v5_v62_langgraph-workflows_74aea5e2c4",
-            "sec_agent_application_v5_v62_langgraph-workflows_960bd4e4b1"
+            "sec_agent_application_v5_v62_812b2377c9458bdefd8d",
+            "sec_agent_application_v5_v62_3ca38cf3776b935959b6",
+            "sec_agent_application_v5_v62_356e30451af84efe4703",
+            "sec_agent_application_v5_v62_c425fe0611c6ce11fc1c",
+            "sec_agent_application_v5_v62_8d54fa7dfd47867a7e85"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -3923,9 +3923,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_langgraph-graph-api",
+          "source_ref": "src_agent_application_v5_v62_046a6a96fcadac34b7b1",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-graph-api_b9fae6b345"
+            "sec_agent_application_v5_v62_81f18d69373aacf8f866"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -4041,11 +4041,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langgraph-thinking",
+          "source_ref": "src_agent_application_v5_v62_64c8cdc907c9d18a12ea",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-thinking_52978add68",
-            "sec_agent_application_v5_v62_langgraph-thinking_1bfc1efb10",
-            "sec_agent_application_v5_v62_langgraph-thinking_6348811a1d"
+            "sec_agent_application_v5_v62_827b5b4ec38115ba4741",
+            "sec_agent_application_v5_v62_729c91ae03d1e9c080c2",
+            "sec_agent_application_v5_v62_b674e29cff88791881c1"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -4159,11 +4159,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langgraph-persistence",
+          "source_ref": "src_agent_application_v5_v62_a49406a9845175badc41",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-persistence_75203e69bf",
-            "sec_agent_application_v5_v62_langgraph-persistence_899b816ce7",
-            "sec_agent_application_v5_v62_langgraph-persistence_deaeca2971"
+            "sec_agent_application_v5_v62_2e0b2696983707dfc9d9",
+            "sec_agent_application_v5_v62_4ea173a005275d7b1571",
+            "sec_agent_application_v5_v62_6b61c145148e63498d41"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -4279,11 +4279,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langgraph-interrupts",
+          "source_ref": "src_agent_application_v5_v62_4c22c69daf7f1940bff5",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-interrupts_9d5e7c7b9d",
-            "sec_agent_application_v5_v62_langgraph-interrupts_2374d485ac",
-            "sec_agent_application_v5_v62_langgraph-interrupts_3fc2f555fc"
+            "sec_agent_application_v5_v62_612f61c28fd58be713aa",
+            "sec_agent_application_v5_v62_78c5ecb47e9521fc5d22",
+            "sec_agent_application_v5_v62_dad3df6559a0b751699f"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -4399,9 +4399,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langgraph-graph-api",
+          "source_ref": "src_agent_application_v5_v62_046a6a96fcadac34b7b1",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-graph-api_804cc5be8c"
+            "sec_agent_application_v5_v62_7b55389213afa43e36b0"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -4411,9 +4411,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_langsmith-evaluation-types",
+          "source_ref": "src_agent_application_v5_v62_ab4f70eb2d76765cd0dc",
           "section_refs": [
-            "sec_agent_application_v5_v62_langsmith-evaluation-types_dae02d84d3"
+            "sec_agent_application_v5_v62_1e441b984fb1ac7cc90a"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -4423,7 +4423,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_agent_application_v5_v62_case_langgraph",
+          "source_ref": "src_agent_application_v5_v62_def4ae591b324b46d3d2",
           "section_refs": [],
           "source_version": 1,
           "order_index": 2,
@@ -4572,10 +4572,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langgraph-agent-server",
+          "source_ref": "src_agent_application_v5_v62_dc066b9238c041400a30",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-agent-server_85f2c30625",
-            "sec_agent_application_v5_v62_langgraph-agent-server_014edb3c6e"
+            "sec_agent_application_v5_v62_d7bdd54f319befe9756c",
+            "sec_agent_application_v5_v62_7857c86a8a27f068fb63"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -4690,9 +4690,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langgraph-workflows",
+          "source_ref": "src_agent_application_v5_v62_2d824263edbf3518ed94",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-workflows_4af0f3f1dc"
+            "sec_agent_application_v5_v62_1191e957f259c48ddda4"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -4702,9 +4702,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_agentscope-current-case",
+          "source_ref": "src_agent_application_v5_v62_78751d0230ad37d4bcc5",
           "section_refs": [
-            "sec_agent_application_v5_v62_agentscope-current-case_c0a1607a27"
+            "sec_agent_application_v5_v62_27c79bb32c5827385464"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -4714,9 +4714,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_agentscope-v1-comparison",
+          "source_ref": "src_agent_application_v5_v62_8adeb1bd3666799ab4ca",
           "section_refs": [
-            "sec_agent_application_v5_v62_agentscope-v1-comparison_66888b5f49"
+            "sec_agent_application_v5_v62_ea0d683a73b5afd030bb"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -4726,7 +4726,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_agent_application_v5_v62_case_agentscope",
+          "source_ref": "src_agent_application_v5_v62_2d8cba1f5c550a53db17",
           "section_refs": [],
           "source_version": 1,
           "order_index": 3,
@@ -4872,10 +4872,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_playwright-python-spine",
+          "source_ref": "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
           "section_refs": [
-            "sec_agent_application_v5_v62_playwright-python-spine_1018f13f72",
-            "sec_agent_application_v5_v62_playwright-python-spine_b1c06d715e"
+            "sec_agent_application_v5_v62_a21f84ba9042a11e51ca",
+            "sec_agent_application_v5_v62_1303490b41538623f9cb"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -4991,11 +4991,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_playwright-python-spine",
+          "source_ref": "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
           "section_refs": [
-            "sec_agent_application_v5_v62_playwright-python-spine_ed658c4de5",
-            "sec_agent_application_v5_v62_playwright-python-spine_f20c408e60",
-            "sec_agent_application_v5_v62_playwright-python-spine_2d5808ac96"
+            "sec_agent_application_v5_v62_b44fca02c28deb346e34",
+            "sec_agent_application_v5_v62_fd6cedf9bbaddd21989f",
+            "sec_agent_application_v5_v62_9b88e3e6789189bde3c1"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -5109,11 +5109,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_playwright-python-spine",
+          "source_ref": "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
           "section_refs": [
-            "sec_agent_application_v5_v62_playwright-python-spine_3a059f393a",
-            "sec_agent_application_v5_v62_playwright-python-spine_069f513413",
-            "sec_agent_application_v5_v62_playwright-python-spine_609a28f125"
+            "sec_agent_application_v5_v62_39e483d790a4bca5a788",
+            "sec_agent_application_v5_v62_f5f6061cbf2edf55f92d",
+            "sec_agent_application_v5_v62_eb2d24d5b214f6271d31"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -5227,9 +5227,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_playwright-python-spine",
+          "source_ref": "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
           "section_refs": [
-            "sec_agent_application_v5_v62_playwright-python-spine_391a24a47c"
+            "sec_agent_application_v5_v62_c6da37c07c762ff22cdf"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -5239,9 +5239,9 @@
         },
         {
           "role": "reference",
-          "source_ref": "src_agent_application_v5_v62_playwright-python-spine",
+          "source_ref": "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
           "section_refs": [
-            "sec_agent_application_v5_v62_playwright-python-spine_5683e0d565"
+            "sec_agent_application_v5_v62_802dafe55040c1dbf4c0"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -5251,9 +5251,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_browser-use-api-reference",
+          "source_ref": "src_agent_application_v5_v62_4faf0a9e9f15b7bcfc96",
           "section_refs": [
-            "sec_agent_application_v5_v62_browser-use-api-reference_57aba5efbf"
+            "sec_agent_application_v5_v62_3e0a28bf55ec9e716133"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -5369,9 +5369,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_browser-use-quickstart",
+          "source_ref": "src_agent_application_v5_v62_f5cc55f7f2360797c274",
           "section_refs": [
-            "sec_agent_application_v5_v62_browser-use-quickstart_13855704c6"
+            "sec_agent_application_v5_v62_53a8cadad811bcfbaff0"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -5381,9 +5381,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_browser-use-api-reference",
+          "source_ref": "src_agent_application_v5_v62_4faf0a9e9f15b7bcfc96",
           "section_refs": [
-            "sec_agent_application_v5_v62_browser-use-api-reference_a10b66ed4a"
+            "sec_agent_application_v5_v62_f9913cdfd4752a7d6170"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -5393,9 +5393,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_browser-use-observation-guidance",
+          "source_ref": "src_agent_application_v5_v62_2939f689c32d6eb772f5",
           "section_refs": [
-            "sec_agent_application_v5_v62_browser-use-observation-guidance_82f0a96946"
+            "sec_agent_application_v5_v62_022fec167bf5a4acfe42"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -5405,9 +5405,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_hello-browser-extra",
+          "source_ref": "src_agent_application_v5_v62_63fc832a197087752680",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-browser-extra_115b665aba"
+            "sec_agent_application_v5_v62_7538426abe16670d6353"
           ],
           "source_version": 1,
           "order_index": 3,
@@ -5422,14 +5422,35 @@
           "concepts": [
             "Browser-use current open-source quickstart：安装浏览器、最小 Agent.run。Agent reference：Agent config、use_vision、timeouts、max_failures、hooks 与 AgentHistoryList。Browser reference：BrowserSession/context/tab、local browser/cloud browser、storage state、allowed_domains。Examples：keep_alive/session、structured output、sensitive_data。仓库当前 SKILL.md：优先 accessibility tree、过滤后观察、布局相关再 screenshot，导航后 wait_for_load，动作后做 targeted verification，登录墙和敏感交互应停下。"
           ],
-          "guidance": "前置：**Why now**：已能用 Playwright 确定性完成任务后，才让 LLM 在观察上选择动作。**前置**：阶段1–3通过；理解模型 API 可能收费。\n重复关系：Hello Extra11 的“三种感知” **REVIEW/COMPARE**；browser-use 默认视觉开启以及当前 SKILL 的 AX-first 提示属于 **VERSION_CONTEXT**，应学习时核对当前版本。Playwright 本身是确定性自动化；LLM 规划和 page observation 是 **NEW**。\n补充/比较：Hello Extra11 的“三种感知” **REVIEW/COMPARE**；browser-use 默认视觉开启以及当前 SKILL 的 AX-first 提示属于 **VERSION_CONTEXT**，应学习时核对当前版本。Playwright 本身是确定性自动化；LLM 规划和 page observation 是 **NEW**。\n小实践：只让 Agent 读取本地假 catalog 并回答“指定商品的描述”；禁止购买/下单。通过 history 记录 step、action、URL、错误、结果；固定测试集对照 Playwright baseline。\n载体与增量：只让 Agent 读取本地假 catalog 并回答“指定商品的描述”；禁止购买/下单。通过 history 记录 step、action、URL、错误、结果；固定测试集对照 Playwright baseline。\n出口：能指明 action 是由 agent 哪轮决定、看到哪个证据、动作后哪些状态确认；final_result 与 is_successful 不能单独作为成功判定；域名 allowlist/step 上限/超时都生效。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：**Why now**：已能用 Playwright 确定性完成任务后，才让 LLM 在观察上选择动作。**前置**：阶段1–3通过；理解模型 API 可能收费。\n重复关系：Hello Extra11 的“三种感知” **REVIEW/COMPARE**；browser-use 默认视觉开启以及当前 SKILL 的 AX-first 提示属于 **VERSION_CONTEXT**，应学习时核对当前版本。Playwright 本身是确定性自动化；LLM 规划和 page observation 是 **NEW**。\n补充/比较：Hello Extra11 的“三种感知” **REVIEW/COMPARE**；browser-use 默认视觉开启以及当前 SKILL 的 AX-first 提示属于 **VERSION_CONTEXT**，应学习时核对当前版本。Playwright 本身是确定性自动化；LLM 规划和 page observation 是 **NEW**。\n小实践：只让 Agent 读取本地假 catalog 并回答“指定商品的描述”；禁止购买/下单。通过 history 记录 step、action、URL、错误、结果；固定测试集对照 Playwright baseline。\n载体与增量：只让 Agent 读取本地假 catalog 并回答“指定商品的描述”；禁止购买/下单。通过 history 记录 step、action、URL、错误、结果；固定测试集对照 Playwright baseline。\n出口：能指明 action 是由 agent 哪轮决定、看到哪个证据、动作后哪些状态确认；final_result 与 is_successful 不能单独作为成功判定；域名 allowlist/step 上限/超时都生效。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.agent.application.b4:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：**Why now**：已能用 Playwright 确定性完成任务后，才让 LLM 在观察上选择动作。**前置**：阶段1–3通过；理解模型 API 可能收费。\n重复关系：Hello Extra11 的“三种感知” **REVIEW/COMPARE**；browser-use 默认视觉开启以及当前 SKILL 的 AX-first 提示属于 **VERSION_CONTEXT**，应学习时核对当前版本。Playwright 本身是确定性自动化；LLM 规划和 page observation 是 **NEW**。\n补充/比较：Hello Extra11 的“三种感知” **REVIEW/COMPARE**；browser-use 默认视觉开启以及当前 SKILL 的 AX-first 提示属于 **VERSION_CONTEXT**，应学习时核对当前版本。Playwright 本身是确定性自动化；LLM 规划和 page observation 是 **NEW**。\n小实践：只让 Agent 读取本地假 catalog 并回答“指定商品的描述”；禁止购买/下单。通过 history 记录 step、action、URL、错误、结果；固定测试集对照 Playwright baseline。\n载体与增量：只让 Agent 读取本地假 catalog 并回答“指定商品的描述”；禁止购买/下单。通过 history 记录 step、action、URL、错误、结果；固定测试集对照 Playwright baseline。\n出口：能指明 action 是由 agent 哪轮决定、看到哪个证据、动作后哪些状态确认；final_result 与 is_successful 不能单独作为成功判定；域名 allowlist/step 上限/超时都生效。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "Browser-use current open-source quickstart：安装浏览器、最小 Agent.run。Agent reference：Agent config、use_vision、timeouts、max_failures、hooks 与 AgentHistoryList。Browser reference：BrowserSession/context/tab、local browser/cloud browser、storage state、allowed_domains。Examples：keep_alive/session、structured output、sensitive_data。仓库当前 SKILL.md：优先 accessibility tree、过滤后观察、布局相关再 screenshot，导航后 wait_for_load，动作后做 targeted verification，登录墙和敏感交互应停下。"
+          ],
+          "guidance": "留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.agent.application.b4:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -5445,7 +5466,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         }
       ],
       "learning_guidance": {
@@ -5521,10 +5542,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_playwright-python-spine",
+          "source_ref": "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
           "section_refs": [
-            "sec_agent_application_v5_v62_playwright-python-spine_9556a2cbb1",
-            "sec_agent_application_v5_v62_playwright-python-spine_b3d1be3a24"
+            "sec_agent_application_v5_v62_8287bbbb9ac9ecd44287",
+            "sec_agent_application_v5_v62_f7a6b42f171e7c243e24"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -5534,9 +5555,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_browser-use-api-reference",
+          "source_ref": "src_agent_application_v5_v62_4faf0a9e9f15b7bcfc96",
           "section_refs": [
-            "sec_agent_application_v5_v62_browser-use-api-reference_6e640fbb1b"
+            "sec_agent_application_v5_v62_f1d9d9f4981ac5ba2f7b"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -5649,9 +5670,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_playwright-python-spine",
+          "source_ref": "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
           "section_refs": [
-            "sec_agent_application_v5_v62_playwright-python-spine_609a28f125"
+            "sec_agent_application_v5_v62_eb2d24d5b214f6271d31"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -5661,9 +5682,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_browser-use-api-reference",
+          "source_ref": "src_agent_application_v5_v62_4faf0a9e9f15b7bcfc96",
           "section_refs": [
-            "sec_agent_application_v5_v62_browser-use-api-reference_c49b9e7833"
+            "sec_agent_application_v5_v62_d759483d31038e484b91"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -5673,9 +5694,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_playwright-python-spine",
+          "source_ref": "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
           "section_refs": [
-            "sec_agent_application_v5_v62_playwright-python-spine_2956ea385d"
+            "sec_agent_application_v5_v62_005fe7bae440a2ea2419"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -5692,14 +5713,35 @@
           "concepts": [
             "Playwright Assertions/Trace Viewer 给确定性基线；browser-use AgentHistoryList 里可看 action model outputs、final_result、done/success/error 等字段。Hello-Agents ch12 可作整体 Agent Eval 暴露；浏览器专用指标由本地任务集定义，不把单一排行榜分数当产品质量。"
           ],
-          "guidance": "前置：**Why now**：browser agent 会说“已完成”但页面未必改变；需独立 oracle 后才能比较模型/提示/观察策略。**前置**：阶段4有轨迹导出，阶段5有安全边界。\n重复关系：Agent 一般回答质量 **COMPARE**；Browser 专项增加 page state、URL、正确 tab、DOM expected state、唯一 fake backend side effect、禁止域/越权 action、任务时间/步数/调用成本 **DEEPEN**。LLM-as-judge 仅辅助。\n补充/比较：Agent 一般回答质量 **COMPARE**；Browser 专项增加 page state、URL、正确 tab、DOM expected state、唯一 fake backend side effect、禁止域/越权 action、任务时间/步数/调用成本 **DEEPEN**。LLM-as-judge 仅辅助。\n小实践：8–12 个合成任务含静态提取、延迟 SPA、表单验证、tab、新窗口、fake auth、429、错状态、重复提交、域名拒绝。每个任务留成功条件与禁止动作；随机改变按钮 label/布局/延迟作 hidden variants。\n载体与增量：8–12 个合成任务含静态提取、延迟 SPA、表单验证、tab、新窗口、fake auth、429、错状态、重复提交、域名拒绝。每个任务留成功条件与禁止动作；随机改变按钮 label/布局/延迟作 hidden variants。\n出口：评分 oracle 读取页面/本地假后端而不是 agent 自述；报告任务成功率、任务失败类、误动作/越权、重试次数、耗时和模型费用；切出 held-out variations 防过拟合。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：**Why now**：browser agent 会说“已完成”但页面未必改变；需独立 oracle 后才能比较模型/提示/观察策略。**前置**：阶段4有轨迹导出，阶段5有安全边界。\n重复关系：Agent 一般回答质量 **COMPARE**；Browser 专项增加 page state、URL、正确 tab、DOM expected state、唯一 fake backend side effect、禁止域/越权 action、任务时间/步数/调用成本 **DEEPEN**。LLM-as-judge 仅辅助。\n补充/比较：Agent 一般回答质量 **COMPARE**；Browser 专项增加 page state、URL、正确 tab、DOM expected state、唯一 fake backend side effect、禁止域/越权 action、任务时间/步数/调用成本 **DEEPEN**。LLM-as-judge 仅辅助。\n小实践：8–12 个合成任务含静态提取、延迟 SPA、表单验证、tab、新窗口、fake auth、429、错状态、重复提交、域名拒绝。每个任务留成功条件与禁止动作；随机改变按钮 label/布局/延迟作 hidden variants。\n载体与增量：8–12 个合成任务含静态提取、延迟 SPA、表单验证、tab、新窗口、fake auth、429、错状态、重复提交、域名拒绝。每个任务留成功条件与禁止动作；随机改变按钮 label/布局/延迟作 hidden variants。\n出口：评分 oracle 读取页面/本地假后端而不是 agent 自述；报告任务成功率、任务失败类、误动作/越权、重试次数、耗时和模型费用；切出 held-out variations 防过拟合。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.agent.application.b6:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：**Why now**：browser agent 会说“已完成”但页面未必改变；需独立 oracle 后才能比较模型/提示/观察策略。**前置**：阶段4有轨迹导出，阶段5有安全边界。\n重复关系：Agent 一般回答质量 **COMPARE**；Browser 专项增加 page state、URL、正确 tab、DOM expected state、唯一 fake backend side effect、禁止域/越权 action、任务时间/步数/调用成本 **DEEPEN**。LLM-as-judge 仅辅助。\n补充/比较：Agent 一般回答质量 **COMPARE**；Browser 专项增加 page state、URL、正确 tab、DOM expected state、唯一 fake backend side effect、禁止域/越权 action、任务时间/步数/调用成本 **DEEPEN**。LLM-as-judge 仅辅助。\n小实践：8–12 个合成任务含静态提取、延迟 SPA、表单验证、tab、新窗口、fake auth、429、错状态、重复提交、域名拒绝。每个任务留成功条件与禁止动作；随机改变按钮 label/布局/延迟作 hidden variants。\n载体与增量：8–12 个合成任务含静态提取、延迟 SPA、表单验证、tab、新窗口、fake auth、429、错状态、重复提交、域名拒绝。每个任务留成功条件与禁止动作；随机改变按钮 label/布局/延迟作 hidden variants。\n出口：评分 oracle 读取页面/本地假后端而不是 agent 自述；报告任务成功率、任务失败类、误动作/越权、重试次数、耗时和模型费用；切出 held-out variations 防过拟合。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "Playwright Assertions/Trace Viewer 给确定性基线；browser-use AgentHistoryList 里可看 action model outputs、final_result、done/success/error 等字段。Hello-Agents ch12 可作整体 Agent Eval 暴露；浏览器专用指标由本地任务集定义，不把单一排行榜分数当产品质量。"
+          ],
+          "guidance": "测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.agent.application.b6:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -5715,7 +5757,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         }
       ],
       "learning_guidance": {
@@ -5793,7 +5835,7 @@
       "resources": [
         {
           "role": "case_study",
-          "source_ref": "src_agent_application_v5_v62_case_browser-use",
+          "source_ref": "src_agent_application_v5_v62_7e22b37659c28c9bce43",
           "section_refs": [],
           "source_version": 1,
           "order_index": 0,
@@ -5942,9 +5984,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch12",
+          "source_ref": "src_agent_application_v5_v62_d3fcc3994894d29174e4",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch12_ea737491ce"
+            "sec_agent_application_v5_v62_3a6c51d46b735b2437f3"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -5954,9 +5996,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch4",
+          "source_ref": "src_agent_application_v5_v62_7b35476246aa1b12023c",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch4_9046d908a7"
+            "sec_agent_application_v5_v62_bddb8cbf6a73b9443292"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -6069,10 +6111,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langsmith-complex-agent-eval",
+          "source_ref": "src_agent_application_v5_v62_d11d1b504578d6834451",
           "section_refs": [
-            "sec_agent_application_v5_v62_langsmith-complex-agent-eval_e34cfffabc",
-            "sec_agent_application_v5_v62_langsmith-complex-agent-eval_75a42dfa45"
+            "sec_agent_application_v5_v62_8f2cca37ee35bc8cd9d6",
+            "sec_agent_application_v5_v62_8ce72b43d2e33d04a7a5"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -6082,9 +6124,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_langsmith-evaluation-types",
+          "source_ref": "src_agent_application_v5_v62_ab4f70eb2d76765cd0dc",
           "section_refs": [
-            "sec_agent_application_v5_v62_langsmith-evaluation-types_e0a5bb2321"
+            "sec_agent_application_v5_v62_e260d21f9f825957d940"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -6094,9 +6136,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_openai-eval-best-practices",
+          "source_ref": "src_agent_application_v5_v62_ca5f4c09b45f837a3199",
           "section_refs": [
-            "sec_agent_application_v5_v62_openai-eval-best-practices_e9c490bc5f"
+            "sec_agent_application_v5_v62_9eae631a340bb2e15f74"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -6111,14 +6153,35 @@
           "concepts": [
             "主读图教程中的数据集、target function、code evaluator与结构化judge输出；对照 OpenAI best practices 中的 metric-based、human、LLM-as-judge 三类评估。SQLite退款业务快速了解，复杂子图构建可以跳过；已有Workflow经验者将它作为 COMPARE。"
           ],
-          "guidance": "前置：先读 Evaluation types 的 Benchmarking / Unit / Regression / Pairwise，再按 complex agent 的 Final response → Single step 顺序完成；不要求复制全部复杂图。前置是有两个工具及一套可复现输入。\n重复关系：主读图教程中的数据集、target function、code evaluator与结构化judge输出；对照 OpenAI best practices 中的 metric-based、human、LLM-as-judge 三类评估。SQLite退款业务快速了解，复杂子图构建可以跳过；已有Workflow经验者将它作为 COMPARE。\n持续增量：提供一次评估入口，输出按题结果、成功数/总数、排除与失败原因。退出标准是能定位单步失误与最终失败之间的关系，避免一个平均分掩盖全部失败类别。样本小就列逐题结果和计数，不宣称统计显著。\n补充/比较：主读图教程中的数据集、target function、code evaluator与结构化judge输出；对照 OpenAI best practices 中的 metric-based、human、LLM-as-judge 三类评估。SQLite退款业务快速了解，复杂子图构建可以跳过；已有Workflow经验者将它作为 COMPARE。\n小实践：小实践：按场景写20条题，先分“开发集”和封存测试集，近似改写的同一题不能跨组。每条包含 task_id、输入、可接受结果、必须/禁止动作、环境fixture、失败标签。确定性grader检查参数、环境状态及结果文件；回答语义无法规则检查时才增加judge。\n载体与增量：持续增量：提供一次评估入口，输出按题结果、成功数/总数、排除与失败原因。退出标准是能定位单步失误与最终失败之间的关系，避免一个平均分掩盖全部失败类别。样本小就列逐题结果和计数，不宣称统计显著。\n出口：持续增量：提供一次评估入口，输出按题结果、成功数/总数、排除与失败原因。退出标准是能定位单步失误与最终失败之间的关系，避免一个平均分掩盖全部失败类别。样本小就列逐题结果和计数，不宣称统计显著。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：先读 Evaluation types 的 Benchmarking / Unit / Regression / Pairwise，再按 complex agent 的 Final response → Single step 顺序完成；不要求复制全部复杂图。前置是有两个工具及一套可复现输入。\n重复关系：主读图教程中的数据集、target function、code evaluator与结构化judge输出；对照 OpenAI best practices 中的 metric-based、human、LLM-as-judge 三类评估。SQLite退款业务快速了解，复杂子图构建可以跳过；已有Workflow经验者将它作为 COMPARE。\n持续增量：提供一次评估入口，输出按题结果、成功数/总数、排除与失败原因。退出标准是能定位单步失误与最终失败之间的关系，避免一个平均分掩盖全部失败类别。样本小就列逐题结果和计数，不宣称统计显著。\n补充/比较：主读图教程中的数据集、target function、code evaluator与结构化judge输出；对照 OpenAI best practices 中的 metric-based、human、LLM-as-judge 三类评估。SQLite退款业务快速了解，复杂子图构建可以跳过；已有Workflow经验者将它作为 COMPARE。\n小实践：小实践：按场景写20条题，先分“开发集”和封存测试集，近似改写的同一题不能跨组。每条包含 task_id、输入、可接受结果、必须/禁止动作、环境fixture、失败标签。确定性grader检查参数、环境状态及结果文件；回答语义无法规则检查时才增加judge。\n载体与增量：持续增量：提供一次评估入口，输出按题结果、成功数/总数、排除与失败原因。退出标准是能定位单步失误与最终失败之间的关系，避免一个平均分掩盖全部失败类别。样本小就列逐题结果和计数，不宣称统计显著。\n出口：持续增量：提供一次",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.agent.application.e1:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：先读 Evaluation types 的 Benchmarking / Unit / Regression / Pairwise，再按 complex agent 的 Final response → Single step 顺序完成；不要求复制全部复杂图。前置是有两个工具及一套可复现输入。\n重复关系：主读图教程中的数据集、target function、code evaluator与结构化judge输出；对照 OpenAI best practices 中的 metric-based、human、LLM-as-judge 三类评估。SQLite退款业务快速了解，复杂子图构建可以跳过；已有Workflow经验者将它作为 COMPARE。\n持续增量：提供一次评估入口，输出按题结果、成功数/总数、排除与失败原因。退出标准是能定位单步失误与最终失败之间的关系，避免一个平均分掩盖全部失败类别。样本小就列逐题结果和计数，不宣称统计显著。\n补充/比较：主读图教程中的数据集、target function、code evaluator与结构化judge输出；对照 OpenAI best practices 中的 metric-based、human、LLM-as-judge 三类评估。SQLite退款业务快速了解，复杂子图构建可以跳过；已有Workflow经验者将它作为 COMPARE。\n小实践：小实践：按场景写20条题，先分“开发集”和封存测试集，近似改写的同一题不能跨组。每条包含 task_id、输入、可接受结果、必须/禁止动作、环境fixture、失败标签。确定性grader检查参数、环境状态及结果文件；回答语义无法规则检查时才增加judge。\n载体与增量：持续增量：提供一次评估入口，输出按题结果、成功数/总数、排除与失败原因。退出标准是能定位单步失误与最终失败之间的关系，避免一个平均分掩盖全部失败类别。样本小就列逐题结果和计数，不宣称统计显著。\n出口：持续增量：提供一次评估入口，输出按题结果、成功数/总数、排除与失败原因。退出标准是能定位单步失误与最终失败之间的关系，避免一个平均分掩盖全部失败类别。样本小就列逐题结果和计数，不宣称统计显著。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "主读图教程中的数据集、target function、code evaluator与结构化judge输出；对照 OpenAI best practices 中的 metric-based、human、LLM-as-judge 三类评估。SQLite退款业务快速了解，复杂子图构建可以跳过；已有Workflow经验者将它作为 COMPARE。"
+          ],
+          "guidance": "评估入口，输出按题结果、成功数/总数、排除与失败原因。退出标准是能定位单步失误与最终失败之间的关系，避免一个平均分掩盖全部失败类别。样本小就列逐题结果和计数，不宣称统计显著。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.agent.application.e1:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -6134,7 +6197,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         }
       ],
       "learning_guidance": {
@@ -6211,9 +6274,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langsmith-complex-agent-eval",
+          "source_ref": "src_agent_application_v5_v62_d11d1b504578d6834451",
           "section_refs": [
-            "sec_agent_application_v5_v62_langsmith-complex-agent-eval_2321a9dc20"
+            "sec_agent_application_v5_v62_a90818fcc85e647af6d0"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -6223,9 +6286,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_agentevals-comparison",
+          "source_ref": "src_agent_application_v5_v62_ab0f3fd825f32c4a9154",
           "section_refs": [
-            "sec_agent_application_v5_v62_agentevals-comparison_0c4d916d19"
+            "sec_agent_application_v5_v62_acd023d3b174050c4403"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -6235,9 +6298,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_openai-eval-best-practices",
+          "source_ref": "src_agent_application_v5_v62_ca5f4c09b45f837a3199",
           "section_refs": [
-            "sec_agent_application_v5_v62_openai-eval-best-practices_a451733e4c"
+            "sec_agent_application_v5_v62_425126192fc6663e6f0c"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -6350,11 +6413,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langsmith-rag-eval",
+          "source_ref": "src_agent_application_v5_v62_59d93f42c2b43e053326",
           "section_refs": [
-            "sec_agent_application_v5_v62_langsmith-rag-eval_a504da0edb",
-            "sec_agent_application_v5_v62_langsmith-rag-eval_8bf3574504",
-            "sec_agent_application_v5_v62_langsmith-rag-eval_c445c5c487"
+            "sec_agent_application_v5_v62_b6862878b1f707ba39e8",
+            "sec_agent_application_v5_v62_ca12c118f3e67c01ecb9",
+            "sec_agent_application_v5_v62_f0c3dc75f392657ee0b2"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -6467,10 +6530,10 @@
       "resources": [
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_lcc-coding-spine",
+          "source_ref": "src_agent_application_v5_v62_de71f08679b5bd598141",
           "section_refs": [
-            "sec_agent_application_v5_v62_lcc-coding-spine_e7d11f55c8",
-            "sec_agent_application_v5_v62_lcc-coding-spine_e95d03cf8c"
+            "sec_agent_application_v5_v62_842993bff0769ff74051",
+            "sec_agent_application_v5_v62_656e627de02bee5d97ea"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -6585,9 +6648,9 @@
       "resources": [
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_langgraph-interrupts",
+          "source_ref": "src_agent_application_v5_v62_4c22c69daf7f1940bff5",
           "section_refs": [
-            "sec_agent_application_v5_v62_langgraph-interrupts_00658ff3bc"
+            "sec_agent_application_v5_v62_f80da0d8ebeb2f18e870"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -6597,9 +6660,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_playwright-python-spine",
+          "source_ref": "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
           "section_refs": [
-            "sec_agent_application_v5_v62_playwright-python-spine_33c68f68d3"
+            "sec_agent_application_v5_v62_69b7f7629b2c71e49dae"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -6712,9 +6775,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_langsmith-evaluation-types",
+          "source_ref": "src_agent_application_v5_v62_ab4f70eb2d76765cd0dc",
           "section_refs": [
-            "sec_agent_application_v5_v62_langsmith-evaluation-types_f30d6bbc1e"
+            "sec_agent_application_v5_v62_05c1c498669ef1b85148"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -6724,9 +6787,9 @@
         },
         {
           "role": "reference",
-          "source_ref": "src_agent_application_v5_v62_openai-evals-transition",
+          "source_ref": "src_agent_application_v5_v62_1d759d9d6aad9b30b765",
           "section_refs": [
-            "sec_agent_application_v5_v62_openai-evals-transition_97051fd2fc"
+            "sec_agent_application_v5_v62_6fb3601cd938bca7288b"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -6736,9 +6799,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_openai-agent-evals-concepts",
+          "source_ref": "src_agent_application_v5_v62_06dce207ad0ba3ac2ebc",
           "section_refs": [
-            "sec_agent_application_v5_v62_openai-agent-evals-concepts_02e9377420"
+            "sec_agent_application_v5_v62_bf8c55921421362b1fcd"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -6851,9 +6914,9 @@
       "resources": [
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_hf-llm-grpo",
+          "source_ref": "src_agent_application_v5_v62_01f03e0a227c3bbfc3b5",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-llm-grpo_47b2552431"
+            "sec_agent_application_v5_v62_b000bdbe5d4b4e485947"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -6969,9 +7032,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hello-common-ch11",
+          "source_ref": "src_agent_application_v5_v62_cb037ac672d961b768c0",
           "section_refs": [
-            "sec_agent_application_v5_v62_hello-common-ch11_4d8eca3549"
+            "sec_agent_application_v5_v62_e3bf6c4b20e8c26f5a94"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -7085,9 +7148,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hf-deep-rl-introduction",
+          "source_ref": "src_agent_application_v5_v62_a4d689e43b67f2c69d18",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-deep-rl-introduction_62bbeb50a3"
+            "sec_agent_application_v5_v62_fc2e4822f535d65f4bfb"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -7097,9 +7160,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_hf-llm-grpo",
+          "source_ref": "src_agent_application_v5_v62_01f03e0a227c3bbfc3b5",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-llm-grpo_6b4236627c"
+            "sec_agent_application_v5_v62_a2dfebae623c4befafcc"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -7215,10 +7278,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hf-llm-grpo",
+          "source_ref": "src_agent_application_v5_v62_01f03e0a227c3bbfc3b5",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-llm-grpo_4ef3ac1ea7",
-            "sec_agent_application_v5_v62_hf-llm-grpo_d18abdef46"
+            "sec_agent_application_v5_v62_401603a1a57170a0a6a5",
+            "sec_agent_application_v5_v62_0ce4ca12a187eccf1f7a"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -7228,9 +7291,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_deepseek-r1-paper",
+          "source_ref": "src_agent_application_v5_v62_70b2a4fb3dbcedbbc2f7",
           "section_refs": [
-            "sec_agent_application_v5_v62_deepseek-r1-paper_8d689d8617"
+            "sec_agent_application_v5_v62_174fbd024a436018ec82"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -7344,10 +7407,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hf-llm-grpo",
+          "source_ref": "src_agent_application_v5_v62_01f03e0a227c3bbfc3b5",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-llm-grpo_fc7832650d",
-            "sec_agent_application_v5_v62_hf-llm-grpo_7e174ef6ec"
+            "sec_agent_application_v5_v62_31f77d4aaf411cd9ea64",
+            "sec_agent_application_v5_v62_79fca6ae411d2c1f34f5"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -7568,11 +7631,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hf-llm-sft",
+          "source_ref": "src_agent_application_v5_v62_e226179b6cee7e421c70",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-llm-sft_dd60f148de",
-            "sec_agent_application_v5_v62_hf-llm-sft_80f7260c06",
-            "sec_agent_application_v5_v62_hf-llm-sft_21f3f3d917"
+            "sec_agent_application_v5_v62_da1dcea082499c7342e6",
+            "sec_agent_application_v5_v62_6e6292643f8fcea17c7c",
+            "sec_agent_application_v5_v62_9e0b7714a80a46e913ad"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -7582,9 +7645,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_hf-llm-grpo",
+          "source_ref": "src_agent_application_v5_v62_01f03e0a227c3bbfc3b5",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-llm-grpo_807721bb4c"
+            "sec_agent_application_v5_v62_023d630724fb12749554"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -7702,10 +7765,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hf-llm-grpo",
+          "source_ref": "src_agent_application_v5_v62_01f03e0a227c3bbfc3b5",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-llm-grpo_46864b1f36",
-            "sec_agent_application_v5_v62_hf-llm-grpo_275e4f9a93"
+            "sec_agent_application_v5_v62_c0cc8519f145028237d9",
+            "sec_agent_application_v5_v62_b002579f15cbb3457385"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -7715,9 +7778,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_agent_application_v5_v62_hf-policy-gradient",
+          "source_ref": "src_agent_application_v5_v62_5c8297b386a3a033de0b",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-policy-gradient_9a9c74037c"
+            "sec_agent_application_v5_v62_6f232deaaa2ba704444f"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -7727,9 +7790,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_hf-ppo",
+          "source_ref": "src_agent_application_v5_v62_22bffb6b9b98c854ea32",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-ppo_1bb9ffcc7e"
+            "sec_agent_application_v5_v62_d812a6abe0e0b7304033"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -7744,14 +7807,35 @@
           "concepts": [
             "主读PPO Unit8的ratio与clipped objective，前置补[Unit4 policy-gradient](https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient)的Getting the big picture → Objective → Reinforce关键段落（正文已读；证明选读）；再连续读ch12/3 GRPO算法部分与ch12/4实现。"
           ],
-          "guidance": "前置：主读PPO Unit8的ratio与clipped objective，前置补[Unit4 policy-gradient](https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient)的Getting the big picture → Objective → Reinforce关键段落（正文已读；证明选读）；再连续读ch12/3 GRPO算法部分与ch12/4实现。\n重复关系：NEW：新增能力；已有者以诊断证据 REVIEW，框架差异按 COMPARE。\n补充/比较：主读PPO Unit8的ratio与clipped objective，前置补[Unit4 policy-gradient](https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient)的Getting the big picture → Objective → Reinforce关键段落（正文已读；证明选读）；再连续读ch12/3 GRPO算法部分与ch12/4实现。\n小实践：练习：奖励[0,1,1,0]手算相对优势方向；同一动作新旧概率0.2与0.3，解释ratio=1.5及clip的作用。clip不是所有概率变化的绝对硬上限，不保证每次更新安全；零方差组的具体实现按当前库核对。GRPO不使用同样的critic结构不代表不需基线或任何额外开销。\n载体与增量：项目增量：训练配置说明书，涵盖group size、sampling、batch、长度、reward与KL设置。退出：能指出组内全成功/失败为什么缺信号，不能背“GRPO必优于PPO”。\n出口：项目增量：训练配置说明书，涵盖group size、sampling、batch、长度、reward与KL设置。退出：能指出组内全成功/失败为什么缺信号，不能背“GRPO必优于PPO”。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：主读PPO Unit8的ratio与clipped objective，前置补[Unit4 policy-gradient](https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient)的Getting the big picture → Objective → Reinforce关键段落（正文已读；证明选读）；再连续读ch12/3 GRPO算法部分与ch12/4实现。\n重复关系：NEW：新增能力；已有者以诊断证据 REVIEW，框架差异按 COMPARE。\n补充/比较：主读PPO Unit8的ratio与clipped objective，前置补[Unit4 policy-gradient](https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient)的Getting the big picture → Objective → Reinforce关键段落（正文已读；证明选读）；再连续读ch12/3 GRPO算法部分与ch12/4实现。\n小实践：练习：奖励[0,1,1,0]手算相对优势方向；同一动作新旧概率0.2与0.3，解释ratio=1.5及clip的作用。clip不是所有概率变化的绝对硬上限，不保证每次更新安全；零方差组的具体实现按当前库核对。GRPO不使用同样的critic结构不代表不需基线或任何额外开销。\n载体与增量：项目增量：训练配置说明书，涵盖group size、sampling、batch、长度、reward与KL设置。退出：能指出组内全成功/失败为什么缺信号，不能背“GRPO必优于PPO”。\n出口：项目增量：训练配置说明书，涵盖group size、sampling、batch、长度、reward与KL设置。退出：能指出组内全成功/失败为什么缺信号，不能背“GRPO必优于PPO”。\n优先用户已",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.agent.application.r6:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：主读PPO Unit8的ratio与clipped objective，前置补[Unit4 policy-gradient](https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient)的Getting the big picture → Objective → Reinforce关键段落（正文已读；证明选读）；再连续读ch12/3 GRPO算法部分与ch12/4实现。\n重复关系：NEW：新增能力；已有者以诊断证据 REVIEW，框架差异按 COMPARE。\n补充/比较：主读PPO Unit8的ratio与clipped objective，前置补[Unit4 policy-gradient](https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient)的Getting the big picture → Objective → Reinforce关键段落（正文已读；证明选读）；再连续读ch12/3 GRPO算法部分与ch12/4实现。\n小实践：练习：奖励[0,1,1,0]手算相对优势方向；同一动作新旧概率0.2与0.3，解释ratio=1.5及clip的作用。clip不是所有概率变化的绝对硬上限，不保证每次更新安全；零方差组的具体实现按当前库核对。GRPO不使用同样的critic结构不代表不需基线或任何额外开销。\n载体与增量：项目增量：训练配置说明书，涵盖group size、sampling、batch、长度、reward与KL设置。退出：能指出组内全成功/失败为什么缺信号，不能背“GRPO必优于PPO”。\n出口：项目增量：训练配置说明书，涵盖group size、sampling、batch、长度、reward与KL设置。退出：能指出组内全成功/失败为什么缺信号，不能背“GRPO必优于PPO”。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "主读PPO Unit8的ratio与clipped objective，前置补[Unit4 policy-gradient](https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient)的Getting the big picture → Objective → Reinforce关键段落（正文已读；证明选读）；再连续读ch12/3 GRPO算法部分与ch12/4实现。"
+          ],
+          "guidance": "有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.agent.application.r6:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -7767,7 +7851,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         }
       ],
       "learning_guidance": {
@@ -7847,11 +7931,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_trl-grpo-api",
+          "source_ref": "src_agent_application_v5_v62_dd5e5935f3da6975c098",
           "section_refs": [
-            "sec_agent_application_v5_v62_trl-grpo-api_ea93d6a262",
-            "sec_agent_application_v5_v62_trl-grpo-api_07437cd651",
-            "sec_agent_application_v5_v62_trl-grpo-api_bcf6eeeef2"
+            "sec_agent_application_v5_v62_5ccdc33eb3e31f503773",
+            "sec_agent_application_v5_v62_c744968073c403803b6e",
+            "sec_agent_application_v5_v62_2e544f813244734a53ff"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -7969,11 +8053,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_agent-lightning-paper",
+          "source_ref": "src_agent_application_v5_v62_1343c9d09fa8d9a3dfc1",
           "section_refs": [
-            "sec_agent_application_v5_v62_agent-lightning-paper_8fa36ec3a7",
-            "sec_agent_application_v5_v62_agent-lightning-paper_f683a72db7",
-            "sec_agent_application_v5_v62_agent-lightning-paper_144dbbd0f0"
+            "sec_agent_application_v5_v62_45e5be9d9029c938b9b0",
+            "sec_agent_application_v5_v62_e40f5bb6254ea967d067",
+            "sec_agent_application_v5_v62_935facc730e17aabddae"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -7983,9 +8067,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_agent_application_v5_v62_agent-lightning-framework",
+          "source_ref": "src_agent_application_v5_v62_f0819a1f113c6a6a5741",
           "section_refs": [
-            "sec_agent_application_v5_v62_agent-lightning-framework_9243865181"
+            "sec_agent_application_v5_v62_0623f20c43ccd0a7fa03"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -8101,9 +8185,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_agent_application_v5_v62_hf-llm-grpo",
+          "source_ref": "src_agent_application_v5_v62_01f03e0a227c3bbfc3b5",
           "section_refs": [
-            "sec_agent_application_v5_v62_hf-llm-grpo_4177d72b2d"
+            "sec_agent_application_v5_v62_2568d15b080d6dd0e2f4"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -9987,7 +10071,7 @@
   ],
   "resources": [
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch1",
+      "source_id": "src_agent_application_v5_v62_404d25fa52f24dc2be39",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter1",
       "title": "Hello-Agents 第1章：初识智能体",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -9999,7 +10083,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch1_58323a862d",
+          "section_id": "sec_agent_application_v5_v62_85e1c39eb6c28fefeeea",
           "title": "1.1/1.2 Agent概念",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter1",
           "anchor": "",
@@ -10015,7 +10099,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch1_89f788fd26",
+          "section_id": "sec_agent_application_v5_v62_699f51c3f1a605beb627",
           "title": "1.4 Workflow与Agent",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter1",
           "anchor": "",
@@ -10166,7 +10250,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Selected body sections 1.1-1.4; focused on 1.3 travel-agent code, 1.4.3 Workflow/Agent distinction and exercises. Not line-by-line full chapter."
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch2",
+      "source_id": "src_agent_application_v5_v62_db73d24bfd741f4b3c43",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter2",
       "title": "Hello-Agents 第2章：智能体发展史",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -10178,7 +10262,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch2_90a327e62a",
+          "section_id": "sec_agent_application_v5_v62_7020ea0b37c79fc874c8",
           "title": "历史概览（选读）",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter2",
           "anchor": "",
@@ -10326,7 +10410,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read main sections 2.1-2.4 selectively, including ELIZA pattern implementation in 2.2.2-2.2.3, summary and exercises; historical references not exhaustively checked."
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch3",
+      "source_id": "src_agent_application_v5_v62_c84a138cc7f9a11eec9e",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter3",
       "title": "Hello-Agents 第3章：大语言模型基础",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -10338,7 +10422,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch3_393af176f9",
+          "section_id": "sec_agent_application_v5_v62_3adbd2bf3a1a372117da",
           "title": "3.2.1–3.2.4 应用基础",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter3",
           "anchor": "",
@@ -10354,7 +10438,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch3_d0531aff62",
+          "section_id": "sec_agent_application_v5_v62_c6f91cc10e3f2ed54b40",
           "title": "3.3.2 生成局限",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter3",
           "anchor": "",
@@ -10502,7 +10586,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Chapter outline plus selected sections 3.1.1-3.1.3, 3.2.1-3.2.4 and 3.3.1-3.3.2; examples and exercises sampled."
     },
     {
-      "source_id": "src_agent_application_v5_v62_python-zh-jit",
+      "source_id": "src_agent_application_v5_v62_c300d0bb98758882427d",
       "canonical_url": "https://docs.python.org/zh-cn/3/tutorial/",
       "title": "Python官方中文教程：即时前置",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -10514,7 +10598,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_python-zh-jit_3888bfd493",
+          "section_id": "sec_agent_application_v5_v62_361663d68a72f23c8125",
           "title": "4.1/4.2/4.8 函数循环",
           "url": "https://docs.python.org/zh-cn/3/tutorial/",
           "anchor": "",
@@ -10530,7 +10614,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_python-zh-jit_101234ec22",
+          "section_id": "sec_agent_application_v5_v62_8c467b199b799b712349",
           "title": "5.5 字典",
           "url": "https://docs.python.org/zh-cn/3/tutorial/",
           "anchor": "",
@@ -10546,7 +10630,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_python-zh-jit_9e68256d0d",
+          "section_id": "sec_agent_application_v5_v62_9263c9c66b0ba5883f14",
           "title": "7.2/7.2.2 文件JSON",
           "url": "https://docs.python.org/zh-cn/3/tutorial/",
           "anchor": "",
@@ -10562,7 +10646,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_python-zh-jit_8aace92881",
+          "section_id": "sec_agent_application_v5_v62_7cf6f5cc3ad9a60804dd",
           "title": "8.2/8.3 异常",
           "url": "https://docs.python.org/zh-cn/3/tutorial/",
           "anchor": "",
@@ -10704,7 +10788,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：控制流目录及4.1/4.2/4.8/4.9.1正文；数据结构5.5/5.6正文，5.1目录；输入输出7.2与7.2.2正文；错误异常8.2/8.3正文和示例；非全书阅读"
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch4",
+      "source_id": "src_agent_application_v5_v62_7b35476246aa1b12023c",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4",
       "title": "Hello-Agents 第4章：智能体经典范式构建",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -10716,7 +10800,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch4_9046d908a7",
+          "section_id": "sec_agent_application_v5_v62_bddb8cbf6a73b9443292",
           "title": "工具循环轨迹",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4",
           "anchor": "",
@@ -10732,7 +10816,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch4_f11708bfa5",
+          "section_id": "sec_agent_application_v5_v62_ba239e06b1d63e42fe07",
           "title": "4.1 LLM与工具入口",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4",
           "anchor": "",
@@ -10748,7 +10832,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch4_ae73551f87",
+          "section_id": "sec_agent_application_v5_v62_cd49d06ec6be29df7717",
           "title": "4.2 ReAct",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4",
           "anchor": "",
@@ -10764,7 +10848,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch4_ffecffdb4d",
+          "section_id": "sec_agent_application_v5_v62_e5aa0876c458bdec21f3",
           "title": "4.2 ReAct文本范式",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4",
           "anchor": "",
@@ -10780,7 +10864,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch4_8e8ee32eb3",
+          "section_id": "sec_agent_application_v5_v62_3afb5087566d3d076667",
           "title": "4.3 Plan-and-Solve",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4",
           "anchor": "",
@@ -10796,7 +10880,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch4_61cf0032a1",
+          "section_id": "sec_agent_application_v5_v62_d3e988b769de8631a297",
           "title": "4.4 Reflection",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter4",
           "anchor": "",
@@ -10947,7 +11031,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Core sections 4.1-4.4, including LLM client, tools, ReAct, Plan-and-Solve, Reflection and exercises; code was statically read, not run."
     },
     {
-      "source_id": "src_agent_application_v5_v62_lcc-coding-spine",
+      "source_id": "src_agent_application_v5_v62_de71f08679b5bd598141",
       "canonical_url": "https://github.com/shareAI-lab/learn-claude-code",
       "title": "Learn Claude Code 新版17章",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -10959,7 +11043,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_fa3da8fb42",
+          "section_id": "sec_agent_application_v5_v62_716796b5dba6517bfc55",
           "title": "s01 Agent Loop",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -10976,7 +11060,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_969e7e5014",
+          "section_id": "sec_agent_application_v5_v62_a03dec509756acde66c0",
           "title": "s02 Tool Use",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -10993,7 +11077,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_58c7563356",
+          "section_id": "sec_agent_application_v5_v62_34e018b39d2150ed006e",
           "title": "s02 文件工具",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11009,7 +11093,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_e7d11f55c8",
+          "section_id": "sec_agent_application_v5_v62_842993bff0769ff74051",
           "title": "s03 Permission",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11027,7 +11111,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_19c03ed2c2",
+          "section_id": "sec_agent_application_v5_v62_0ec4740203de27d1cadc",
           "title": "s04 Hooks",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11044,7 +11128,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_3203dd84e3",
+          "section_id": "sec_agent_application_v5_v62_316d71fe2a1e62297288",
           "title": "s05 TodoWrite",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11060,7 +11144,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_93e86365ce",
+          "section_id": "sec_agent_application_v5_v62_fc9fa26008b74a2dc5cc",
           "title": "s06 Subagent",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11076,7 +11160,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_19ca4965be",
+          "section_id": "sec_agent_application_v5_v62_d5030ce81dea26279bdd",
           "title": "s07 Skill Loading",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11092,7 +11176,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_83ec044e97",
+          "section_id": "sec_agent_application_v5_v62_0e11415a7e8325ac5267",
           "title": "s08 Context Compact",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11109,7 +11193,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_7573d51159",
+          "section_id": "sec_agent_application_v5_v62_e3021e391920aa0a2610",
           "title": "s09 Memory",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11126,7 +11210,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_d8e9e2cafa",
+          "section_id": "sec_agent_application_v5_v62_5665d6b1637ae3b54e1e",
           "title": "s10 Todo与Task对照",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11142,7 +11226,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_18c55a7881",
+          "section_id": "sec_agent_application_v5_v62_ab7dfe83de3eb176276a",
           "title": "s10 Task System",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11158,7 +11242,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_a9b38ae003",
+          "section_id": "sec_agent_application_v5_v62_5e56e36baf6e4faa174a",
           "title": "s11 Background",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11174,7 +11258,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_38205e2266",
+          "section_id": "sec_agent_application_v5_v62_36f767c15fe03fdb3722",
           "title": "s12 Cron（只有定时目标）",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11190,7 +11274,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_d5b624df9c",
+          "section_id": "sec_agent_application_v5_v62_3dc0a6bab60f5b147c3e",
           "title": "s13 Agent Teams（协作目标）",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11206,7 +11290,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_88a1c0f2d0",
+          "section_id": "sec_agent_application_v5_v62_589731cd4748799a2755",
           "title": "s14 MCP mock工具池",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11223,7 +11307,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_36edfe6692",
+          "section_id": "sec_agent_application_v5_v62_ffc480960de5e0a27e41",
           "title": "s15 恢复边界",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11239,7 +11323,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_f80b61a6ab",
+          "section_id": "sec_agent_application_v5_v62_8b1a1cd43b1bd3b4012c",
           "title": "s15 团队任务集成",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11255,7 +11339,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_e2ac14ed92",
+          "section_id": "sec_agent_application_v5_v62_1c81b85f272ce16b87eb",
           "title": "s15 Integrated Harness",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11271,7 +11355,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_7493395d78",
+          "section_id": "sec_agent_application_v5_v62_6e6f5287d8c074921d06",
           "title": "s16 Workflow Runtime",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11287,7 +11371,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_lcc-coding-spine_e95d03cf8c",
+          "section_id": "sec_agent_application_v5_v62_656e627de02bee5d97ea",
           "title": "s17 Goal Loop",
           "url": "https://github.com/shareAI-lab/learn-claude-code",
           "anchor": "",
@@ -11436,7 +11520,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：全新版目录、中文正文s01–s09完整；s10/s11/s13/s14/s15/s16/s17相关正文，s12选段；实际代码s02工具、s04权限、s08压缩/循环选段；旧新版README映射"
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch12",
+      "source_id": "src_agent_application_v5_v62_d3fcc3994894d29174e4",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12",
       "title": "Hello-Agents 第12章：智能体性能评估",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -11448,7 +11532,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch12_fad78d7825",
+          "section_id": "sec_agent_application_v5_v62_438d8c2d537ef7eb367d",
           "title": "12.1 评价对象（Eval-Lite预读）",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12",
           "anchor": "",
@@ -11464,7 +11548,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch12_51dad35510",
+          "section_id": "sec_agent_application_v5_v62_5d4bd6603985e30603d9",
           "title": "12.1 评价入口",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12",
           "anchor": "",
@@ -11480,7 +11564,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch12_ea737491ce",
+          "section_id": "sec_agent_application_v5_v62_3a6c51d46b735b2437f3",
           "title": "12.1 评价对象/Eval-Lite",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12",
           "anchor": "",
@@ -11496,7 +11580,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch12_4ed99dc6a2",
+          "section_id": "sec_agent_application_v5_v62_d7f9ddb9c276f3f5751d",
           "title": "12.2 工具调用评价",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12",
           "anchor": "",
@@ -11512,7 +11596,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch12_2f9ecee8e5",
+          "section_id": "sec_agent_application_v5_v62_d7aecc84d0ae7ad4bb35",
           "title": "12.3 任务成功",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12",
           "anchor": "",
@@ -11528,7 +11612,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch12_2524405449",
+          "section_id": "sec_agent_application_v5_v62_56fd98d021595a831ae2",
           "title": "12.4 Judge",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter12",
           "anchor": "",
@@ -11673,7 +11757,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Selected sections of 12.1-12.4 and corresponding code/report examples for BFCL, GAIA and AIME generated-data evaluation; not full benchmark source audit."
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch7",
+      "source_id": "src_agent_application_v5_v62_024e3710db538d14fa27",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7",
       "title": "Hello-Agents 第7章：构建你的智能体框架",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -11685,7 +11769,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch7_19db1e2092",
+          "section_id": "sec_agent_application_v5_v62_6c3294f3528c2a1e9491",
           "title": "7.1–7.3 Agent与LLM抽象",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7",
           "anchor": "",
@@ -11701,7 +11785,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch7_5e841ddece",
+          "section_id": "sec_agent_application_v5_v62_327fc4750e96e1a6af8d",
           "title": "7.4–7.5 Tool与registry",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter7",
           "anchor": "",
@@ -11849,7 +11933,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Focused review of sections 7.1-7.5: package/client, Message/Config/Agent abstractions, four agent patterns, tool registry and multi-source search; not every code block executed."
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch8",
+      "source_id": "src_agent_application_v5_v62_243595be34a1cea2f8fb",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8",
       "title": "Hello-Agents 第8章：记忆与检索",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -11861,7 +11945,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch8_07b84efd35",
+          "section_id": "sec_agent_application_v5_v62_0b0ca6b7155261a23971",
           "title": "8.1–8.2 Memory",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8",
           "anchor": "",
@@ -11877,7 +11961,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch8_622e3aada7",
+          "section_id": "sec_agent_application_v5_v62_e42f69738ee5c164b8ab",
           "title": "8.3 RAG",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8",
           "anchor": "",
@@ -11893,7 +11977,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch8_b390cecc29",
+          "section_id": "sec_agent_application_v5_v62_933cfc6287a8ba5ac7fc",
           "title": "8.4 文档问答助手",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter8",
           "anchor": "",
@@ -12044,7 +12128,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Focused review of sections 8.1-8.3.5, memory types, RAG ingestion/retrieval and selected 8.4 application sections, conclusion and exercises."
     },
     {
-      "source_id": "src_agent_application_v5_v62_all-in-rag-spine",
+      "source_id": "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
       "canonical_url": "https://github.com/datawhalechina/all-in-rag",
       "title": "All-in-RAG：大模型应用开发实战一：RAG 技术全栈指南",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -12056,7 +12140,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_53bcf665ae",
+          "section_id": "sec_agent_application_v5_v62_8962ea00419df4b8386c",
           "title": "ch1 最小RAG四步",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12072,7 +12156,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_0cd562b14c",
+          "section_id": "sec_agent_application_v5_v62_96f2ac93da74b2555fde",
           "title": "ch1 RAG导论/最小链路",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12088,7 +12172,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_4a1fe9ab6c",
+          "section_id": "sec_agent_application_v5_v62_255c4084a8c9417bbf9d",
           "title": "ch2/04 数据加载",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12104,7 +12188,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_dd05bc900e",
+          "section_id": "sec_agent_application_v5_v62_9f7b26ab686c14afd277",
           "title": "ch2/05 文本切块",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12120,7 +12204,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_1ab2b13502",
+          "section_id": "sec_agent_application_v5_v62_812c56604591d743cec0",
           "title": "ch3/06 文本Embedding",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12136,7 +12220,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_5d53f9a3f9",
+          "section_id": "sec_agent_application_v5_v62_276c204270b60c09f95e",
           "title": "ch3/08 向量数据库",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12152,7 +12236,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_050a15c92a",
+          "section_id": "sec_agent_application_v5_v62_cc4858cf18eac5a925db",
           "title": "ch4/11 检索基础",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12168,7 +12252,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_04987e8a03",
+          "section_id": "sec_agent_application_v5_v62_98fa5a275fb76520256d",
           "title": "ch4/11 Hybrid",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12184,7 +12268,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_b029a0b674",
+          "section_id": "sec_agent_application_v5_v62_c073bf0d4dbd2f356b7b",
           "title": "ch4/12 查询构造",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12200,7 +12284,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_af671e12c7",
+          "section_id": "sec_agent_application_v5_v62_e6b5bb8d93b9f6f0d3df",
           "title": "ch4/14 查询改写",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12216,7 +12300,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_4013f55d7a",
+          "section_id": "sec_agent_application_v5_v62_effea036da2618b9ebcd",
           "title": "ch4/15 高级检索/Rerank",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12232,7 +12316,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_fd7a98c7fd",
+          "section_id": "sec_agent_application_v5_v62_91ca2a72625aa1265f62",
           "title": "ch5/16 格式化生成",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12248,7 +12332,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_93bae68bec",
+          "section_id": "sec_agent_application_v5_v62_785258bc04e88e3e084d",
           "title": "ch6/18 系统评估",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12264,7 +12348,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_0376658fde",
+          "section_id": "sec_agent_application_v5_v62_0560a0936ad5ff39ef31",
           "title": "ch6/19 评估工具（按需）",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12280,7 +12364,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_2abdc7d2c8",
+          "section_id": "sec_agent_application_v5_v62_3821f801813b71fa2496",
           "title": "ch7/20 KG-RAG（图需求触发）",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12296,7 +12380,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_17111c1c0a",
+          "section_id": "sec_agent_application_v5_v62_f76ae7a3324b68fba8ce",
           "title": "ch7/21 Agentic RAG（有基线坏例才进入）",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12312,7 +12396,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_38dc3d57ab",
+          "section_id": "sec_agent_application_v5_v62_c44a95406db6043df630",
           "title": "ch8/01 环境与架构",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12328,7 +12412,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_8e4ec19bb9",
+          "section_id": "sec_agent_application_v5_v62_a5b9eac908dd5b0e408a",
           "title": "ch8/02 数据准备/父子块",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12344,7 +12428,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_08d2a6c63e",
+          "section_id": "sec_agent_application_v5_v62_4e0cb8fd489d176c0380",
           "title": "ch8/02 数据准备",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12360,7 +12444,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_84c7e770f8",
+          "section_id": "sec_agent_application_v5_v62_7f8b524e9e05b53aea18",
           "title": "ch8/03 BM25+dense+RRF",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12376,7 +12460,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_c6cd950123",
+          "section_id": "sec_agent_application_v5_v62_8093c6955639f5e3912c",
           "title": "ch8/03 索引检索",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12392,7 +12476,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_bbfd25596e",
+          "section_id": "sec_agent_application_v5_v62_96e1e476785dc08ad49e",
           "title": "ch8/04 回答集成",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12408,7 +12492,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_all-in-rag-spine_6937f68434",
+          "section_id": "sec_agent_application_v5_v62_d59032ff1ec88e3bbd2a",
           "title": "ch8/04 生成集成",
           "url": "https://github.com/datawhalechina/all-in-rag",
           "anchor": "",
@@ -12792,7 +12876,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：当前 README 全章目录和教学顺序；第1章 RAG 导论/最小四步；第2章数据加载与文本切块；第3章文本/多模态 embedding、向量数据库、Milvus、索引优化；第4章 hybrid retrieval、query construction、query rewriting/routing、advanced retrieval；第5章结构化生成；第6章系统评估与工具；第7/9章 GraphRAG 定位；第8章项目准备、索引检索、生成集成的正文、示例代码与练习。未把整仓每份代码都运行或逐行审查，因此不标为 deep_reviewed。 另核对 README.md、docs/README.md、README_en.md、docs/en/README.md、docs/_sidebar.md 与 chapter7 实际目录；阅读 chapter7/21_agentic_rag.md、配套代码 README/demo.py/agent.py。"
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch9",
+      "source_id": "src_agent_application_v5_v62_bb825e030c7385c9a978",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9",
       "title": "Hello-Agents 第9章：上下文工程",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -12804,7 +12888,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch9_59fbc7723c",
+          "section_id": "sec_agent_application_v5_v62_9949940b966298bf9729",
           "title": "9.1/9.2 上下文原则",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9",
           "anchor": "",
@@ -12820,7 +12904,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch9_70ca62a8d4",
+          "section_id": "sec_agent_application_v5_v62_9c7661cca3650f5cdcd8",
           "title": "9.3 ContextBuilder",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9",
           "anchor": "",
@@ -12836,7 +12920,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch9_0626f1627c",
+          "section_id": "sec_agent_application_v5_v62_d9e796dd9fb564591251",
           "title": "9.3 ContextBuilder选择与压缩",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9",
           "anchor": "",
@@ -12852,7 +12936,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch9_5108e6633c",
+          "section_id": "sec_agent_application_v5_v62_81a7428525a003f595f0",
           "title": "9.4 NoteTool",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9",
           "anchor": "",
@@ -12868,7 +12952,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch9_634452fa81",
+          "section_id": "sec_agent_application_v5_v62_d2bd9429ced2f25b0022",
           "title": "9.5 TerminalTool",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter9",
           "anchor": "",
@@ -13016,7 +13100,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Focused sections 9.1-9.6, especially context principles, GSSC ContextBuilder, NoteTool, TerminalTool and long-task example; no complete class-by-class audit."
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch6",
+      "source_id": "src_agent_application_v5_v62_2ff98861a5beb53ca056",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter6",
       "title": "Hello-Agents 第6章：框架开发实践",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -13028,7 +13112,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch6_14cce98326",
+          "section_id": "sec_agent_application_v5_v62_c9bae8650efc1e3fa0bb",
           "title": "6.1 框架位置",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter6",
           "anchor": "",
@@ -13044,7 +13128,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch6_654d836cf2",
+          "section_id": "sec_agent_application_v5_v62_7fdb989e1cf392b59438",
           "title": "6.3 AgentScope（按目标）",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter6",
           "anchor": "",
@@ -13060,7 +13144,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch6_f817f33dee",
+          "section_id": "sec_agent_application_v5_v62_ced6c1dd4a97934ad3be",
           "title": "6.5 LangGraph图基础（按目标）",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter6",
           "anchor": "",
@@ -13208,7 +13292,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read framework survey and selected parts of sections 6.2-6.5, particularly LangGraph 6.5.1-6.5.2, summary and exercises; did not audit every framework example line-by-line."
     },
     {
-      "source_id": "src_agent_application_v5_v62_langgraph-workflows",
+      "source_id": "src_agent_application_v5_v62_2d824263edbf3518ed94",
       "canonical_url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
       "title": "LangGraph Workflows and Agents guide",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -13220,7 +13304,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-workflows_8281c2901c",
+          "section_id": "sec_agent_application_v5_v62_3d52ea8cc65b270b727a",
           "title": "Workflows与Agents区别",
           "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
           "anchor": "",
@@ -13236,7 +13320,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-workflows_594d9bf6b5",
+          "section_id": "sec_agent_application_v5_v62_4df045f7b284b56c2646",
           "title": "Predetermined workflow与dynamic agent",
           "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
           "anchor": "",
@@ -13252,7 +13336,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-workflows_5dd5e14068",
+          "section_id": "sec_agent_application_v5_v62_812b2377c9458bdefd8d",
           "title": "Prompt chaining",
           "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
           "anchor": "",
@@ -13268,7 +13352,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-workflows_a67870b910",
+          "section_id": "sec_agent_application_v5_v62_3ca38cf3776b935959b6",
           "title": "Parallelization",
           "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
           "anchor": "",
@@ -13284,7 +13368,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-workflows_bcba696f3e",
+          "section_id": "sec_agent_application_v5_v62_356e30451af84efe4703",
           "title": "Routing",
           "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
           "anchor": "",
@@ -13300,7 +13384,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-workflows_74aea5e2c4",
+          "section_id": "sec_agent_application_v5_v62_c425fe0611c6ce11fc1c",
           "title": "Evaluator-optimizer",
           "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
           "anchor": "",
@@ -13316,7 +13400,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-workflows_960bd4e4b1",
+          "section_id": "sec_agent_application_v5_v62_8d54fa7dfd47867a7e85",
           "title": "Agents（比较）",
           "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
           "anchor": "",
@@ -13332,7 +13416,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-workflows_4af0f3f1dc",
+          "section_id": "sec_agent_application_v5_v62_1191e957f259c48ddda4",
           "title": "Orchestrator-worker与动态Send（目标需要）",
           "url": "https://docs.langchain.com/oss/python/langgraph/workflows-agents",
           "anchor": "",
@@ -13459,7 +13543,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Current page body and example code for Prompt chaining, Parallelization, Routing, Orchestrator-worker including Send dynamic workers, Evaluator-optimizer, and Agents; compared Graph API and Functional API presentations."
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch10",
+      "source_id": "src_agent_application_v5_v62_4e3c3cda00c4a38db26c",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter10",
       "title": "Hello-Agents 第10章：智能体通信协议",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -13471,7 +13555,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch10_7eca658761",
+          "section_id": "sec_agent_application_v5_v62_b2fd27047ca5bdacc68d",
           "title": "10.1 协议角色",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter10",
           "anchor": "",
@@ -13487,7 +13571,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch10_4c8674db87",
+          "section_id": "sec_agent_application_v5_v62_286639675fe1c1e4994b",
           "title": "10.2 MCP",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter10",
           "anchor": "",
@@ -13503,7 +13587,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch10_b437e6b804",
+          "section_id": "sec_agent_application_v5_v62_4a4ed47245fda9ec7270",
           "title": "10.2 真实MCP协议边界",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter10",
           "anchor": "",
@@ -13519,7 +13603,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch10_56113724df",
+          "section_id": "sec_agent_application_v5_v62_33d6af5a0c793fd99df1",
           "title": "10.5 自建server（按目标）",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter10",
           "anchor": "",
@@ -13667,7 +13751,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Focused review of MCP sections 10.2.1-10.2.5 and 10.5.1, plus chapter structure/summary/exercises; A2A/ANP were sampled rather than deeply reviewed."
     },
     {
-      "source_id": "src_agent_application_v5_v62_langsmith-evaluation-types",
+      "source_id": "src_agent_application_v5_v62_ab4f70eb2d76765cd0dc",
       "canonical_url": "https://docs.langchain.com/langsmith/evaluation-types",
       "title": "LangSmith Evaluation types",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -13679,7 +13763,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_langsmith-evaluation-types_861dcd1ecd",
+          "section_id": "sec_agent_application_v5_v62_aa4e2aa656a3eda8d4df",
           "title": "Unit/Regression/Benchmarking/Pairwise",
           "url": "https://docs.langchain.com/langsmith/evaluation-types",
           "anchor": "",
@@ -13695,7 +13779,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langsmith-evaluation-types_dae02d84d3",
+          "section_id": "sec_agent_application_v5_v62_1e441b984fb1ac7cc90a",
           "title": "Regression与评价对象",
           "url": "https://docs.langchain.com/langsmith/evaluation-types",
           "anchor": "",
@@ -13711,7 +13795,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langsmith-evaluation-types_e0a5bb2321",
+          "section_id": "sec_agent_application_v5_v62_e260d21f9f825957d940",
           "title": "Benchmarking/Unit/Regression/Pairwise",
           "url": "https://docs.langchain.com/langsmith/evaluation-types",
           "anchor": "",
@@ -13727,7 +13811,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langsmith-evaluation-types_f30d6bbc1e",
+          "section_id": "sec_agent_application_v5_v62_05c1c498669ef1b85148",
           "title": "Regression/benchmarking/pairwise",
           "url": "https://docs.langchain.com/langsmith/evaluation-types",
           "anchor": "",
@@ -13844,7 +13928,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：offline/online全目录与正文，code/LLM/composite/pairwise evaluator"
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-rag-context-bridge",
+      "source_id": "src_agent_application_v5_v62_2f5e62896028a2af86b8",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/blob/main/docs/chapter8/Chapter8-Memory-and-Retrieval.md",
       "title": "Hello-Agents：第8章记忆与检索 + 第9章上下文工程（重叠/边界）",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -13856,7 +13940,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-rag-context-bridge_f6de0f4966",
+          "section_id": "sec_agent_application_v5_v62_45c65ea2d9d23f396a50",
           "title": "8.3–8.4 Agent中的RAG",
           "url": "https://github.com/datawhalechina/hello-agents/blob/main/docs/chapter8/Chapter8-Memory-and-Retrieval.md",
           "anchor": "",
@@ -14068,7 +14152,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：当前第8章 README 对应正文的 RAG §8.3.1–8.3.5 与 §8.4 学习助手实践；通过正文与示例核查 MarkItDown 转换、多格式处理、智能 chunking、Embedding provider/Qdrant、RAGTool、MQE、HyDE、Gradio PDF 助手；核查章节是否包含 BM25 hybrid、RRF、rerank、citation 与 evaluation。未把该章所有其他 Memory 子主题逐一深审。 同时核对当前中文版第9章上下文工程的 JIT 检索、渐进式披露、GSSC/ContextBuilder 与长时程上下文内容；不扩展为对所有 ContextBuilder 示例的运行验证。"
     },
     {
-      "source_id": "src_agent_application_v5_v62_ragas-evaluation",
+      "source_id": "src_agent_application_v5_v62_477b93b97d3e3d1a1a2b",
       "canonical_url": "https://docs.ragas.io/en/stable/getstarted/quickstart/",
       "title": "Ragas 官方文档：Quick Start、RAG metrics 与评估工作流",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -14080,7 +14164,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_ragas-evaluation_8342d25998",
+          "section_id": "sec_agent_application_v5_v62_a3104dca3d2d80e9eca4",
           "title": "Context Precision/Recall定义与口径",
           "url": "https://docs.ragas.io/en/stable/getstarted/quickstart/",
           "anchor": "",
@@ -14267,7 +14351,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：当前 stable Quick Start 正文与导航；官方 simple RAG/evaluation 与 evaluate-and-improve 工作流；Context Precision/Recall、Faithfulness、Response Relevancy 等指标说明；注意 Quick Start 默认设置 API Key 但也示范 Ollama/custom provider。未运行 Ragas，也未验证不同 judge/provider 的评分相关性。"
     },
     {
-      "source_id": "src_agent_application_v5_v62_bge-m3-retrieval-modes",
+      "source_id": "src_agent_application_v5_v62_df544ffcdc0a9251c5d9",
       "canonical_url": "https://huggingface.co/BAAI/bge-m3",
       "title": "BGE-M3 官方模型卡与论文：dense / learned sparse / multi-vector",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -14279,7 +14363,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_bge-m3-retrieval-modes_4fe483c7a7",
+          "section_id": "sec_agent_application_v5_v62_64445ea23657b871fe5a",
           "title": "Dense/Learned sparse与独立BM25基线",
           "url": "https://huggingface.co/BAAI/bge-m3",
           "anchor": "",
@@ -14417,7 +14501,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：截至 2026-10-03 阅读官方模型卡关于 retrieval modes/BM25 baseline 的说明和原始论文摘要/实验设置；未下载或运行模型。"
     },
     {
-      "source_id": "src_agent_application_v5_v62_rag-citation-contract",
+      "source_id": "src_agent_application_v5_v62_5721ce0828859ed02922",
       "canonical_url": "https://learn.microsoft.com/en-us/azure/foundry/concepts/retrieval-augmented-generation",
       "title": "RAG source citations：Microsoft RAG 指南与 Cohere structured citations",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -14429,7 +14513,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_rag-citation-contract_280a5cad30",
+          "section_id": "sec_agent_application_v5_v62_9d3c5dbf942bd40ceced",
           "title": "来源元数据与claim支持性",
           "url": "https://learn.microsoft.com/en-us/azure/foundry/concepts/retrieval-augmented-generation",
           "anchor": "",
@@ -14445,7 +14529,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_rag-citation-contract_233be7c932",
+          "section_id": "sec_agent_application_v5_v62_4c092819f16ca44b2e82",
           "title": "Cohere结构化citation对象",
           "url": "https://docs.cohere.com/docs/rag-citations",
           "anchor": "",
@@ -14591,7 +14675,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：截至 2026-10-03 阅读 Microsoft RAG/index/citation 说明及 Cohere citations 文档；未调用 Cohere API。"
     },
     {
-      "source_id": "src_agent_application_v5_v62_pi-sdk-case",
+      "source_id": "src_agent_application_v5_v62_3d1efee26983053780c3",
       "canonical_url": "https://github.com/earendil-works/pi",
       "title": "Pi Coding Agent",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -14603,7 +14687,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_pi-sdk-case_7ba7ff3f1b",
+          "section_id": "sec_agent_application_v5_v62_10f09972aeb57ada7036",
           "title": "SDK lifecycle/storage/prompting/events",
           "url": "https://github.com/earendil-works/pi",
           "anchor": "",
@@ -14619,7 +14703,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_pi-sdk-case_80571ca98a",
+          "section_id": "sec_agent_application_v5_v62_b9a6cef899913c9dbe90",
           "title": "Sessions and Context",
           "url": "https://github.com/earendil-works/pi",
           "anchor": "",
@@ -14635,7 +14719,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_pi-sdk-case_fa478855bb",
+          "section_id": "sec_agent_application_v5_v62_705fc529d1adb847c62f",
           "title": "Extensions lifecycle/events/tools",
           "url": "https://github.com/earendil-works/pi",
           "anchor": "",
@@ -14651,7 +14735,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_pi-sdk-case_8dda74142f",
+          "section_id": "sec_agent_application_v5_v62_4075421a7c9d290c3f38",
           "title": "Security/Containerization",
           "url": "https://github.com/earendil-works/pi",
           "anchor": "",
@@ -14791,7 +14875,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：coding-agent docs完整文件目录；SDK/Sessions/Security/Containerization全文；Extensions前220行生命周期/事件/工具契约；SDK01/05示例正文"
     },
     {
-      "source_id": "src_agent_application_v5_v62_openhands-sdk-case",
+      "source_id": "src_agent_application_v5_v62_c41d09619246000e0edd",
       "canonical_url": "https://docs.openhands.dev/sdk/getting-started",
       "title": "OpenHands Software Agent SDK",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -14803,7 +14887,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_openhands-sdk-case_d00eca1bae",
+          "section_id": "sec_agent_application_v5_v62_7f62252a4ab847263bc0",
           "title": "Getting Started",
           "url": "https://docs.openhands.dev/sdk/getting-started",
           "anchor": "",
@@ -14819,7 +14903,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_openhands-sdk-case_f60727af5c",
+          "section_id": "sec_agent_application_v5_v62_cd408ac163bb4316a9ba",
           "title": "Security/Persistence/Docker Sandbox（目录候选，正文待审）",
           "url": "https://docs.openhands.dev/sdk/getting-started",
           "anchor": "",
@@ -14959,7 +15043,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Getting Started正文/安装示例；导航全索引；Security/Persistence/Docker Sandbox页面已获取但未全文深审"
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-workflow-bridge",
+      "source_id": "src_agent_application_v5_v62_9b248ab3820293737de6",
       "canonical_url": "https://github.com/datawhalechina/hello-agents",
       "title": "Hello-Agents core chapters 4-7 (Workflow exposure)",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -14971,7 +15055,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-workflow-bridge_19fa368d8b",
+          "section_id": "sec_agent_application_v5_v62_1a35b9a339ca0008b60c",
           "title": "6.5.1–6.5.3 图基础",
           "url": "https://github.com/datawhalechina/hello-agents",
           "anchor": "",
@@ -15101,7 +15185,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Current online book index and relevant chapter bodies/examples: ch4 ReAct / Plan-and-Solve / Reflection; ch5 Dify and n8n low-code introductions; ch6.1 framework abstractions, ch6.3 AgentScope, ch6.5 LangGraph state/node/edge and three-step Understand-Search-Answer example plus conditional retry/reflection exercise; ch7 framework construction, tool registry, async execution, session branch/rollback exercise; ch8 RAG entry as sequencing context."
     },
     {
-      "source_id": "src_agent_application_v5_v62_langgraph-graph-api",
+      "source_id": "src_agent_application_v5_v62_046a6a96fcadac34b7b1",
       "canonical_url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
       "title": "LangGraph Graph API",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -15113,7 +15197,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-graph-api_b9fae6b345",
+          "section_id": "sec_agent_application_v5_v62_81f18d69373aacf8f866",
           "title": "StateGraph/state/nodes/edges/reducers/loop limit",
           "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
           "anchor": "",
@@ -15129,7 +15213,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-graph-api_804cc5be8c",
+          "section_id": "sec_agent_application_v5_v62_7b55389213afa43e36b0",
           "title": "节点/路由/状态确定性测试",
           "url": "https://docs.langchain.com/oss/python/langgraph/graph-api",
           "anchor": "",
@@ -15254,7 +15338,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Current Graph API overview and state/node/edge/routing/reducer and recursion-limit sections; cross-checked guide's graph examples."
     },
     {
-      "source_id": "src_agent_application_v5_v62_langgraph-thinking",
+      "source_id": "src_agent_application_v5_v62_64c8cdc907c9d18a12ea",
       "canonical_url": "https://docs.langchain.com/oss/python/langgraph/thinking-in-langgraph",
       "title": "Thinking in LangGraph",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -15266,7 +15350,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-thinking_52978add68",
+          "section_id": "sec_agent_application_v5_v62_827b5b4ec38115ba4741",
           "title": "State/node设计",
           "url": "https://docs.langchain.com/oss/python/langgraph/thinking-in-langgraph",
           "anchor": "",
@@ -15282,7 +15366,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-thinking_1bfc1efb10",
+          "section_id": "sec_agent_application_v5_v62_729c91ae03d1e9c080c2",
           "title": "Transient/LLM-recoverable/user-fixable/unexpected errors",
           "url": "https://docs.langchain.com/oss/python/langgraph/thinking-in-langgraph",
           "anchor": "",
@@ -15298,7 +15382,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-thinking_6348811a1d",
+          "section_id": "sec_agent_application_v5_v62_b674e29cff88791881c1",
           "title": "Retry/timeout/compensation",
           "url": "https://docs.langchain.com/oss/python/langgraph/thinking-in-langgraph",
           "anchor": "",
@@ -15422,7 +15506,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read page structure, state/node design, the email-support example, error categories, RetryPolicy example, human review/interrupt path and error handler/compensation example."
     },
     {
-      "source_id": "src_agent_application_v5_v62_langgraph-persistence",
+      "source_id": "src_agent_application_v5_v62_a49406a9845175badc41",
       "canonical_url": "https://docs.langchain.com/oss/python/langgraph/persistence",
       "title": "LangGraph Persistence and Checkpointers",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -15434,7 +15518,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-persistence_75203e69bf",
+          "section_id": "sec_agent_application_v5_v62_2e0b2696983707dfc9d9",
           "title": "Checkpoint与Store边界",
           "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
           "anchor": "",
@@ -15450,7 +15534,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-persistence_899b816ce7",
+          "section_id": "sec_agent_application_v5_v62_4ea173a005275d7b1571",
           "title": "thread_id与backend",
           "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
           "anchor": "",
@@ -15466,7 +15550,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-persistence_deaeca2971",
+          "section_id": "sec_agent_application_v5_v62_6b61c145148e63498d41",
           "title": "Crash/replay/durability",
           "url": "https://docs.langchain.com/oss/python/langgraph/persistence",
           "anchor": "",
@@ -15594,7 +15678,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read persistence overview and checkpointer guide, including thread-scoped checkpoints, cross-thread Store, InMemorySaver vs SQLite/Postgres, per-step checkpointing, replay, pending writes and durability modes."
     },
     {
-      "source_id": "src_agent_application_v5_v62_langgraph-interrupts",
+      "source_id": "src_agent_application_v5_v62_4c22c69daf7f1940bff5",
       "canonical_url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
       "title": "LangGraph Interrupts",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -15606,7 +15690,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-interrupts_9d5e7c7b9d",
+          "section_id": "sec_agent_application_v5_v62_612f61c28fd58be713aa",
           "title": "Checkpoint与稳定thread要求",
           "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
           "anchor": "",
@@ -15622,7 +15706,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-interrupts_2374d485ac",
+          "section_id": "sec_agent_application_v5_v62_78c5ecb47e9521fc5d22",
           "title": "Command resume/approve/reject/edit",
           "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
           "anchor": "",
@@ -15638,7 +15722,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-interrupts_3fc2f555fc",
+          "section_id": "sec_agent_application_v5_v62_dad3df6559a0b751699f",
           "title": "节点重跑与幂等副作用",
           "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
           "anchor": "",
@@ -15654,7 +15738,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-interrupts_00658ff3bc",
+          "section_id": "sec_agent_application_v5_v62_f80da0d8ebeb2f18e870",
           "title": "Interrupt重放与副作用",
           "url": "https://docs.langchain.com/oss/python/langgraph/interrupts",
           "anchor": "",
@@ -15778,7 +15862,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read interrupt rules, approval/edit/reject examples, resume with same thread ID, checkpointer requirement, JSON-serializable payload, repeated node execution and side-effect idempotency guidance."
     },
     {
-      "source_id": "src_agent_application_v5_v62_langgraph-agent-server",
+      "source_id": "src_agent_application_v5_v62_dc066b9238c041400a30",
       "canonical_url": "https://docs.langchain.com/langsmith/agent-server",
       "title": "LangGraph Agent Server",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -15790,7 +15874,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-agent-server_85f2c30625",
+          "section_id": "sec_agent_application_v5_v62_d7bdd54f319befe9756c",
           "title": "Assistants/Threads/Runs",
           "url": "https://docs.langchain.com/langsmith/agent-server",
           "anchor": "",
@@ -15806,7 +15890,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langgraph-agent-server_014edb3c6e",
+          "section_id": "sec_agent_application_v5_v62_7857c86a8a27f068fb63",
           "title": "Background/worker/queue/取消/隔离",
           "url": "https://docs.langchain.com/langsmith/agent-server",
           "anchor": "",
@@ -15930,7 +16014,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read current Agent Server overview and data-plane material for assistants, threads, runs, background execution, workers, queue, persistence and deployment shapes."
     },
     {
-      "source_id": "src_agent_application_v5_v62_agentscope-current-case",
+      "source_id": "src_agent_application_v5_v62_78751d0230ad37d4bcc5",
       "canonical_url": "https://github.com/agentscope-ai/agentscope",
       "title": "AgentScope 2.x repository and migration context",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -15942,7 +16026,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_agentscope-current-case_c0a1607a27",
+          "section_id": "sec_agent_application_v5_v62_27c79bb32c5827385464",
           "title": "2.x NEWS/迁移/版本匹配团队入口",
           "url": "https://github.com/agentscope-ai/agentscope",
           "anchor": "",
@@ -16071,7 +16155,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Checked current repository and news/releases plus official FAQ dated 2026-09-10; verified AgentScope 2.0 release and breaking API migration. Inspected current 2.x team/runtime direction at overview level."
     },
     {
-      "source_id": "src_agent_application_v5_v62_agentscope-v1-comparison",
+      "source_id": "src_agent_application_v5_v62_8adeb1bd3666799ab4ca",
       "canonical_url": "https://doc.agentscope.io/",
       "title": "AgentScope v1 workflow tutorial pages",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -16083,7 +16167,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_agentscope-v1-comparison_66888b5f49",
+          "section_id": "sec_agent_application_v5_v62_ea0d683a73b5afd030bb",
           "title": "v1 pipeline与handoff版本对照",
           "url": "https://doc.agentscope.io/",
           "anchor": "",
@@ -16207,7 +16291,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Inspected v1 task pipeline, handoffs, routing, conversation and concurrent-agent tutorial pages; noted examples use message hub, sequential/fanout pipelines and tool handoffs."
     },
     {
-      "source_id": "src_agent_application_v5_v62_playwright-python-spine",
+      "source_id": "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
       "canonical_url": "https://playwright.dev/python/docs/intro",
       "title": "Playwright Python official documentation set",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -16219,7 +16303,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_1018f13f72",
+          "section_id": "sec_agent_application_v5_v62_a21f84ba9042a11e51ca",
           "title": "Intro/Installation",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16235,7 +16319,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_b1c06d715e",
+          "section_id": "sec_agent_application_v5_v62_1303490b41538623f9cb",
           "title": "Writing tests",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16251,7 +16335,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_ed658c4de5",
+          "section_id": "sec_agent_application_v5_v62_b44fca02c28deb346e34",
           "title": "Locators",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16267,7 +16351,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_f20c408e60",
+          "section_id": "sec_agent_application_v5_v62_fd6cedf9bbaddd21989f",
           "title": "Input/Actions",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16283,7 +16367,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_2d5808ac96",
+          "section_id": "sec_agent_application_v5_v62_9b88e3e6789189bde3c1",
           "title": "Actionability/Assertions",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16299,7 +16383,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_3a059f393a",
+          "section_id": "sec_agent_application_v5_v62_39e483d790a4bca5a788",
           "title": "Navigations",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16315,7 +16399,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_069f513413",
+          "section_id": "sec_agent_application_v5_v62_f5f6061cbf2edf55f92d",
           "title": "Pages/context/tabs",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16331,7 +16415,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_609a28f125",
+          "section_id": "sec_agent_application_v5_v62_eb2d24d5b214f6271d31",
           "title": "Trace Viewer",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16348,7 +16432,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_391a24a47c",
+          "section_id": "sec_agent_application_v5_v62_c6da37c07c762ff22cdf",
           "title": "Actionability/auto-wait与web-first断言",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16364,7 +16448,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_5683e0d565",
+          "section_id": "sec_agent_application_v5_v62_802dafe55040c1dbf4c0",
           "title": "Network/Frames/Dialogs（按需）",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16380,7 +16464,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_9556a2cbb1",
+          "section_id": "sec_agent_application_v5_v62_8287bbbb9ac9ecd44287",
           "title": "Authentication/storage state",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16396,7 +16480,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_b3d1be3a24",
+          "section_id": "sec_agent_application_v5_v62_f7a6b42f171e7c243e24",
           "title": "Pages/context isolation",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16412,7 +16496,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_2956ea385d",
+          "section_id": "sec_agent_application_v5_v62_005fe7bae440a2ea2419",
           "title": "Writing tests/web-first assertions",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16428,7 +16512,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_playwright-python-spine_33c68f68d3",
+          "section_id": "sec_agent_application_v5_v62_69b7f7629b2c71e49dae",
           "title": "Assertions/Trace Viewer",
           "url": "https://playwright.dev/python/docs/intro",
           "anchor": "",
@@ -16575,7 +16659,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read current Intro/Installation and checked full relevant bodies/examples or TOCs for Writing tests, Locators, Actionability, Input/Actions, Navigations, Pages, Authentication, Trace Viewer. Also checked docs index for Frames, Dialogs, Network, Mock APIs, Isolation and Screenshots."
     },
     {
-      "source_id": "src_agent_application_v5_v62_browser-use-api-reference",
+      "source_id": "src_agent_application_v5_v62_4faf0a9e9f15b7bcfc96",
       "canonical_url": "https://github.com/browser-use/browser-use/tree/main/skills/open-source/references",
       "title": "browser-use Agent, Browser and Examples references",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -16587,7 +16671,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_browser-use-api-reference_57aba5efbf",
+          "section_id": "sec_agent_application_v5_v62_3e0a28bf55ec9e716133",
           "title": "max_failures/timeouts与安全重试",
           "url": "https://github.com/browser-use/browser-use/tree/main/skills/open-source/references",
           "anchor": "",
@@ -16603,7 +16687,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_browser-use-api-reference_a10b66ed4a",
+          "section_id": "sec_agent_application_v5_v62_f9913cdfd4752a7d6170",
           "title": "Agent/Browser/History/Examples",
           "url": "https://github.com/browser-use/browser-use/tree/main/skills/open-source/references",
           "anchor": "",
@@ -16619,7 +16703,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_browser-use-api-reference_6e640fbb1b",
+          "section_id": "sec_agent_application_v5_v62_f1d9d9f4981ac5ba2f7b",
           "title": "Domain allowlist/sensitive_data/session",
           "url": "https://github.com/browser-use/browser-use/tree/main/skills/open-source/references",
           "anchor": "",
@@ -16635,7 +16719,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_browser-use-api-reference_c49b9e7833",
+          "section_id": "sec_agent_application_v5_v62_d759483d31038e484b91",
           "title": "History/final_result与独立oracle",
           "url": "https://github.com/browser-use/browser-use/tree/main/skills/open-source/references",
           "anchor": "",
@@ -16767,7 +16851,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read current Agent reference settings and history, Browser reference session/storage/domain controls, and Examples reference session keeping and sensitive data handling."
     },
     {
-      "source_id": "src_agent_application_v5_v62_browser-use-quickstart",
+      "source_id": "src_agent_application_v5_v62_f5cc55f7f2360797c274",
       "canonical_url": "https://github.com/browser-use/browser-use/blob/main/skills/open-source/references/quickstart.md",
       "title": "browser-use open-source quickstart",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -16779,7 +16863,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_browser-use-quickstart_13855704c6",
+          "section_id": "sec_agent_application_v5_v62_53a8cadad811bcfbaff0",
           "title": "Installation/First Agent/local safe example",
           "url": "https://github.com/browser-use/browser-use/blob/main/skills/open-source/references/quickstart.md",
           "anchor": "",
@@ -16901,7 +16985,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read current Quickstart & Production Deployment, setup, environment provider keys, first-agent code and local development/test commands."
     },
     {
-      "source_id": "src_agent_application_v5_v62_browser-use-observation-guidance",
+      "source_id": "src_agent_application_v5_v62_2939f689c32d6eb772f5",
       "canonical_url": "https://github.com/browser-use/browser-use/blob/main/skills/browser-use/SKILL.md",
       "title": "browser-use current Browser Use skill instructions",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -16913,7 +16997,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_browser-use-observation-guidance_82f0a96946",
+          "section_id": "sec_agent_application_v5_v62_022fec167bf5a4acfe42",
           "title": "AX-first/过滤观察/动作后验证",
           "url": "https://github.com/browser-use/browser-use/blob/main/skills/browser-use/SKILL.md",
           "anchor": "",
@@ -17040,7 +17124,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read current browser skill instructions for AX-first observation, filtered accessibility tree, screenshot fallback, post-navigation waits, re-observation, local tracing and login-wall handling."
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-browser-extra",
+      "source_id": "src_agent_application_v5_v62_63fc832a197087752680",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent%E7%A7%91%E6%99%AE%E4%B8%8E%E5%AE%9E%E6%88%98.md",
       "title": "Hello-Agents Extra 11 Web Agent",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -17052,7 +17136,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-browser-extra_115b665aba",
+          "section_id": "sec_agent_application_v5_v62_7538426abe16670d6353",
           "title": "Extra11/1.1–1.2.3 DOM/AX/vision",
           "url": "https://github.com/datawhalechina/hello-agents/blob/main/Extra-Chapter/Extra11-WebAgent%E7%A7%91%E6%99%AE%E4%B8%8E%E5%AE%9E%E6%88%98.md",
           "anchor": "",
@@ -17173,7 +17257,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read §1.1-§1.2.3 on Web Agent vs RPA/GUI, DOM/accessibility tree/screenshot observation, action loop and page state; read §2.1-§2.5 TinyFish hosted API/tool integration code, paid-key setup, streaming and anti-bot/stealth/proxy guidance; read §3.3 onward references to evaluation and browser projects."
     },
     {
-      "source_id": "src_agent_application_v5_v62_langsmith-complex-agent-eval",
+      "source_id": "src_agent_application_v5_v62_d11d1b504578d6834451",
       "canonical_url": "https://docs.langchain.com/langsmith/evaluate-complex-agent",
       "title": "LangSmith Evaluate a complex agent",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -17185,7 +17269,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_langsmith-complex-agent-eval_e34cfffabc",
+          "section_id": "sec_agent_application_v5_v62_8f2cca37ee35bc8cd9d6",
           "title": "Final response",
           "url": "https://docs.langchain.com/langsmith/evaluate-complex-agent",
           "anchor": "",
@@ -17201,7 +17285,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langsmith-complex-agent-eval_75a42dfa45",
+          "section_id": "sec_agent_application_v5_v62_8ce72b43d2e33d04a7a5",
           "title": "Single step",
           "url": "https://docs.langchain.com/langsmith/evaluate-complex-agent",
           "anchor": "",
@@ -17217,7 +17301,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langsmith-complex-agent-eval_2321a9dc20",
+          "section_id": "sec_agent_application_v5_v62_a90818fcc85e647af6d0",
           "title": "Trajectory evaluator",
           "url": "https://docs.langchain.com/langsmith/evaluate-complex-agent",
           "anchor": "",
@@ -17335,7 +17419,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Setup/SQLite/路由代码及Final response/Trajectory/Single step正文和代码"
     },
     {
-      "source_id": "src_agent_application_v5_v62_openai-eval-best-practices",
+      "source_id": "src_agent_application_v5_v62_ca5f4c09b45f837a3199",
       "canonical_url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
       "title": "OpenAI Evaluation best practices",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -17347,7 +17431,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_openai-eval-best-practices_e9c490bc5f",
+          "section_id": "sec_agent_application_v5_v62_9eae631a340bb2e15f74",
           "title": "Metric/human/judge与edge cases",
           "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
           "anchor": "",
@@ -17363,7 +17447,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_openai-eval-best-practices_a451733e4c",
+          "section_id": "sec_agent_application_v5_v62_425126192fc6663e6f0c",
           "title": "位置/冗长偏差与人工校准",
           "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices",
           "anchor": "",
@@ -17493,7 +17577,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：阅读 metric-based、human、LLM-as-a-judge 分类与建议，及位置偏差/冗长偏差和 edge-case 覆盖章节；未执行 grader。"
     },
     {
-      "source_id": "src_agent_application_v5_v62_agentevals-comparison",
+      "source_id": "src_agent_application_v5_v62_ab0f3fd825f32c4a9154",
       "canonical_url": "https://github.com/langchain-ai/agentevals",
       "title": "AgentEvals",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -17505,7 +17589,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_agentevals-comparison_0c4d916d19",
+          "section_id": "sec_agent_application_v5_v62_acd023d3b174050c4403",
           "title": "Strict/unordered/subset/superset/tool args",
           "url": "https://github.com/langchain-ai/agentevals",
           "anchor": "",
@@ -17622,7 +17706,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：README完整评估目录，四种匹配、args override和judge例子，未逐行读库实现"
     },
     {
-      "source_id": "src_agent_application_v5_v62_langsmith-rag-eval",
+      "source_id": "src_agent_application_v5_v62_59d93f42c2b43e053326",
       "canonical_url": "https://docs.langchain.com/langsmith/evaluate-rag-tutorial",
       "title": "LangSmith RAG evaluation tutorial",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -17634,7 +17718,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_langsmith-rag-eval_a504da0edb",
+          "section_id": "sec_agent_application_v5_v62_b6862878b1f707ba39e8",
           "title": "Create dataset",
           "url": "https://docs.langchain.com/langsmith/evaluate-rag-tutorial",
           "anchor": "",
@@ -17650,7 +17734,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langsmith-rag-eval_8bf3574504",
+          "section_id": "sec_agent_application_v5_v62_ca12c118f3e67c01ecb9",
           "title": "Define evaluators",
           "url": "https://docs.langchain.com/langsmith/evaluate-rag-tutorial",
           "anchor": "",
@@ -17666,7 +17750,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_langsmith-rag-eval_c445c5c487",
+          "section_id": "sec_agent_application_v5_v62_f0c3dc75f392657ee0b2",
           "title": "Run evaluation",
           "url": "https://docs.langchain.com/langsmith/evaluate-rag-tutorial",
           "anchor": "",
@@ -17783,7 +17867,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：全文目录/正文与索引、dataset、四类grader、evaluation代码静态检查"
     },
     {
-      "source_id": "src_agent_application_v5_v62_openai-evals-transition",
+      "source_id": "src_agent_application_v5_v62_1d759d9d6aad9b30b765",
       "canonical_url": "https://developers.openai.com/api/docs/guides/evals",
       "title": "OpenAI Working with evals (deprecation notice)",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -17795,7 +17879,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_openai-evals-transition_97051fd2fc",
+          "section_id": "sec_agent_application_v5_v62_6fb3601cd938bca7288b",
           "title": "退役提示与流程概览（历史快照）",
           "url": "https://developers.openai.com/api/docs/guides/evals",
           "anchor": "",
@@ -17915,7 +17999,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：检查官方文档中的三步 eval 流程、datasets 推荐提示和 Evals 平台退役时间。"
     },
     {
-      "source_id": "src_agent_application_v5_v62_openai-agent-evals-concepts",
+      "source_id": "src_agent_application_v5_v62_06dce207ad0ba3ac2ebc",
       "canonical_url": "https://developers.openai.com/api/docs/guides/agent-evals",
       "title": "OpenAI Evaluate agent workflows",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -17927,7 +18011,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_openai-agent-evals-concepts_02e9377420",
+          "section_id": "sec_agent_application_v5_v62_bf8c55921421362b1fcd",
           "title": "Traces→datasets概念",
           "url": "https://developers.openai.com/api/docs/guides/agent-evals",
           "anchor": "",
@@ -18058,7 +18142,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：阅读 traces 用于行为调试、trace grading 的适用问题，以及从 traces 转向 datasets/eval runs 的正文；未执行平台操作。"
     },
     {
-      "source_id": "src_agent_application_v5_v62_hf-llm-grpo",
+      "source_id": "src_agent_application_v5_v62_01f03e0a227c3bbfc3b5",
       "canonical_url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
       "title": "Hugging Face LLM Course Chapter12",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -18070,7 +18154,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_47b2552431",
+          "section_id": "sec_agent_application_v5_v62_b000bdbe5d4b4e485947",
           "title": "12/4 数据与独立评估",
           "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
           "anchor": "",
@@ -18086,7 +18170,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_6b4236627c",
+          "section_id": "sec_agent_application_v5_v62_a2dfebae623c4befafcc",
           "title": "12/2 后训练背景",
           "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
           "anchor": "",
@@ -18102,7 +18186,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_4ef3ac1ea7",
+          "section_id": "sec_agent_application_v5_v62_401603a1a57170a0a6a5",
           "title": "12/4 Reward Function Design",
           "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
           "anchor": "",
@@ -18118,7 +18202,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_d18abdef46",
+          "section_id": "sec_agent_application_v5_v62_0ce4ca12a187eccf1f7a",
           "title": "12/5 Define reward",
           "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
           "anchor": "",
@@ -18134,7 +18218,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_fc7832650d",
+          "section_id": "sec_agent_application_v5_v62_31f77d4aaf411cd9ea64",
           "title": "12/3 Group Formation",
           "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
           "anchor": "",
@@ -18150,7 +18234,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_7e174ef6ec",
+          "section_id": "sec_agent_application_v5_v62_79fca6ae411d2c1f34f5",
           "title": "12/4 Dataset Format",
           "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
           "anchor": "",
@@ -18166,7 +18250,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_807721bb4c",
+          "section_id": "sec_agent_application_v5_v62_023d630724fb12749554",
           "title": "12/2 Post-training",
           "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
           "anchor": "",
@@ -18182,7 +18266,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_46864b1f36",
+          "section_id": "sec_agent_application_v5_v62_c0cc8519f145028237d9",
           "title": "12/3 GRPO",
           "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
           "anchor": "",
@@ -18198,7 +18282,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_275e4f9a93",
+          "section_id": "sec_agent_application_v5_v62_b002579f15cbb3457385",
           "title": "12/4 最小实现",
           "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
           "anchor": "",
@@ -18214,7 +18298,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-grpo_4177d72b2d",
+          "section_id": "sec_agent_application_v5_v62_2568d15b080d6dd0e2f4",
           "title": "12/5 完整实践与独立评估",
           "url": "https://huggingface.co/learn/llm-course/en/chapter12/1",
           "anchor": "",
@@ -18341,7 +18425,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：当前ch12目录；12/2、3、4、5四页完整正文与reward/config/LoRA/train代码静态检查"
     },
     {
-      "source_id": "src_agent_application_v5_v62_hello-common-ch11",
+      "source_id": "src_agent_application_v5_v62_cb037ac672d961b768c0",
       "canonical_url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter11",
       "title": "Hello-Agents 第11章：Agentic-RL",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -18353,7 +18437,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hello-common-ch11_4d8eca3549",
+          "section_id": "sec_agent_application_v5_v62_e3bf6c4b20e8c26f5a94",
           "title": "Agent轨迹/reward/RL应用背景",
           "url": "https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter11",
           "anchor": "",
@@ -18504,7 +18588,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Selected sections across 11.1-11.6 with focus on quickstart, GSM8K/rewards, SFT/LoRA, GRPO, evaluation and exercises; no full distributed training audit."
     },
     {
-      "source_id": "src_agent_application_v5_v62_hf-deep-rl-introduction",
+      "source_id": "src_agent_application_v5_v62_a4d689e43b67f2c69d18",
       "canonical_url": "https://huggingface.co/learn/deep-rl-course/en/unit1/rl-framework",
       "title": "Hugging Face Deep RL Unit1",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -18516,7 +18600,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hf-deep-rl-introduction_62bbeb50a3",
+          "section_id": "sec_agent_application_v5_v62_fc2e4822f535d65f4bfb",
           "title": "Process/Markov/state-observation/action/rewards/discount",
           "url": "https://huggingface.co/learn/deep-rl-course/en/unit1/rl-framework",
           "anchor": "",
@@ -18638,7 +18722,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：完整所选页正文：Process/Markov/state-observation/action/discount；Unit目录检查"
     },
     {
-      "source_id": "src_agent_application_v5_v62_deepseek-r1-paper",
+      "source_id": "src_agent_application_v5_v62_70b2a4fb3dbcedbbc2f7",
       "canonical_url": "https://arxiv.org/html/2501.12948v1",
       "title": "DeepSeek-R1 paper",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -18650,7 +18734,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_deepseek-r1-paper_8d689d8617",
+          "section_id": "sec_agent_application_v5_v62_174fbd024a436018ec82",
           "title": "2.2.2 可验证奖励与限制",
           "url": "https://arxiv.org/html/2501.12948v1",
           "anchor": "",
@@ -18772,7 +18856,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：目录与2.2.1 GRPO、2.2.2 rewards、2.3 post-training所选正文"
     },
     {
-      "source_id": "src_agent_application_v5_v62_hf-llm-sft",
+      "source_id": "src_agent_application_v5_v62_e226179b6cee7e421c70",
       "canonical_url": "https://huggingface.co/learn/llm-course/en/chapter11/1",
       "title": "Hugging Face LLM Course Chapter11",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -18784,7 +18868,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-sft_dd60f148de",
+          "section_id": "sec_agent_application_v5_v62_da1dcea082499c7342e6",
           "title": "11/2 Chat Templates",
           "url": "https://huggingface.co/learn/llm-course/en/chapter11/1",
           "anchor": "",
@@ -18800,7 +18884,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-sft_80f7260c06",
+          "section_id": "sec_agent_application_v5_v62_6e6292643f8fcea17c7c",
           "title": "11/3 SFT",
           "url": "https://huggingface.co/learn/llm-course/en/chapter11/1",
           "anchor": "",
@@ -18816,7 +18900,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_hf-llm-sft_21f3f3d917",
+          "section_id": "sec_agent_application_v5_v62_9e0b7714a80a46e913ad",
           "title": "11/4 LoRA",
           "url": "https://huggingface.co/learn/llm-course/en/chapter11/1",
           "anchor": "",
@@ -18942,7 +19026,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：ch11全目录；11/2 Chat Templates、11/3 SFT、11/4 LoRA正文与实际例子"
     },
     {
-      "source_id": "src_agent_application_v5_v62_hf-policy-gradient",
+      "source_id": "src_agent_application_v5_v62_5c8297b386a3a033de0b",
       "canonical_url": "https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient",
       "title": "Hugging Face Policy Gradient Unit4",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -18954,7 +19038,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hf-policy-gradient_9a9c74037c",
+          "section_id": "sec_agent_application_v5_v62_6f232deaaa2ba704444f",
           "title": "Getting big picture/Objective/Reinforce",
           "url": "https://huggingface.co/learn/deep-rl-course/en/unit4/policy-gradient",
           "anchor": "",
@@ -19074,7 +19158,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Unit4目录与Introduction，policy-gradient正文：目标/采样/更新/Reinforce"
     },
     {
-      "source_id": "src_agent_application_v5_v62_hf-ppo",
+      "source_id": "src_agent_application_v5_v62_22bffb6b9b98c854ea32",
       "canonical_url": "https://huggingface.co/learn/deep-rl-course/en/unit8/clipped-surrogate-objective",
       "title": "Hugging Face PPO Unit8",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -19086,7 +19170,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_hf-ppo_1bb9ffcc7e",
+          "section_id": "sec_agent_application_v5_v62_d812a6abe0e0b7304033",
           "title": "Ratio/advantage/clipped objective",
           "url": "https://huggingface.co/learn/deep-rl-course/en/unit8/clipped-surrogate-objective",
           "anchor": "",
@@ -19208,7 +19292,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：所选页全文：ratio/unclipped/clipped，Unit目录与Unit8定位"
     },
     {
-      "source_id": "src_agent_application_v5_v62_trl-grpo-api",
+      "source_id": "src_agent_application_v5_v62_dd5e5935f3da6975c098",
       "canonical_url": "https://huggingface.co/docs/trl/main/en/grpo_trainer",
       "title": "TRL GRPO Trainer",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -19220,7 +19304,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_trl-grpo-api_ea93d6a262",
+          "section_id": "sec_agent_application_v5_v62_5ccdc33eb3e31f503773",
           "title": "Tools",
           "url": "https://huggingface.co/docs/trl/main/en/grpo_trainer",
           "anchor": "",
@@ -19236,7 +19320,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_trl-grpo-api_07437cd651",
+          "section_id": "sec_agent_application_v5_v62_c744968073c403803b6e",
           "title": "Environments",
           "url": "https://huggingface.co/docs/trl/main/en/grpo_trainer",
           "anchor": "",
@@ -19252,7 +19336,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_trl-grpo-api_bcf6eeeef2",
+          "section_id": "sec_agent_application_v5_v62_2e544f813244734a53ff",
           "title": "Logged metrics（执行前核stable）",
           "url": "https://huggingface.co/docs/trl/main/en/grpo_trainer",
           "anchor": "",
@@ -19375,7 +19459,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：当前目录、Tools/Environments代码与Logged metrics、相关config接口；并非全文逐参数审读"
     },
     {
-      "source_id": "src_agent_application_v5_v62_agent-lightning-paper",
+      "source_id": "src_agent_application_v5_v62_1343c9d09fa8d9a3dfc1",
       "canonical_url": "https://arxiv.org/html/2508.03680v1",
       "title": "Agent Lightning paper",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -19387,7 +19471,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_agent-lightning-paper_8fa36ec3a7",
+          "section_id": "sec_agent_application_v5_v62_45e5be9d9029c938b9b0",
           "title": "3.1 数据接口",
           "url": "https://arxiv.org/html/2508.03680v1",
           "anchor": "",
@@ -19403,7 +19487,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_agent-lightning-paper_f683a72db7",
+          "section_id": "sec_agent_application_v5_v62_e40f5bb6254ea967d067",
           "title": "3.2 MDP",
           "url": "https://arxiv.org/html/2508.03680v1",
           "anchor": "",
@@ -19419,7 +19503,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_agent_application_v5_v62_agent-lightning-paper_144dbbd0f0",
+          "section_id": "sec_agent_application_v5_v62_935facc730e17aabddae",
           "title": "3.3 Credit assignment",
           "url": "https://arxiv.org/html/2508.03680v1",
           "anchor": "",
@@ -19541,7 +19625,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：论文目录，3.1数据接口/3.2 MDP/3.3 credit assignment所选正文"
     },
     {
-      "source_id": "src_agent_application_v5_v62_agent-lightning-framework",
+      "source_id": "src_agent_application_v5_v62_f0819a1f113c6a6a5741",
       "canonical_url": "https://microsoft.github.io/agent-lightning/stable/",
       "title": "Agent Lightning v1.0 docs",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -19553,7 +19637,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_agent_application_v5_v62_agent-lightning-framework_9243865181",
+          "section_id": "sec_agent_application_v5_v62_0623f20c43ccd0a7fa03",
           "title": "Basics/QuickStart硬件/Calc-X",
           "url": "https://microsoft.github.io/agent-lightning/stable/",
           "anchor": "",
@@ -19679,7 +19763,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：站点全目录，Quick Start/Basics/Calc-X三页完整正文与启动示例"
     },
     {
-      "source_id": "src_agent_application_v5_v62_case_pi",
+      "source_id": "src_agent_application_v5_v62_300cce35361bdd8a0b56",
       "canonical_url": "https://github.com/earendil-works/pi",
       "title": "Agent：Pi",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -19703,7 +19787,7 @@
       }
     },
     {
-      "source_id": "src_agent_application_v5_v62_case_ragflow",
+      "source_id": "src_agent_application_v5_v62_7453e611be20a66f5703",
       "canonical_url": "https://github.com/infiniflow/ragflow",
       "title": "Agent：RAGFlow",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -19727,7 +19811,7 @@
       }
     },
     {
-      "source_id": "src_agent_application_v5_v62_case_weknora",
+      "source_id": "src_agent_application_v5_v62_23a1cc1c750696848f60",
       "canonical_url": "https://github.com/Tencent/WeKnora",
       "title": "Agent：WeKnora",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -19751,7 +19835,7 @@
       }
     },
     {
-      "source_id": "src_agent_application_v5_v62_case_software-agent-sdk",
+      "source_id": "src_agent_application_v5_v62_d1a72a24510e80ef5299",
       "canonical_url": "https://github.com/OpenHands/software-agent-sdk",
       "title": "Agent：OpenHands",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -19775,7 +19859,7 @@
       }
     },
     {
-      "source_id": "src_agent_application_v5_v62_case_langgraph",
+      "source_id": "src_agent_application_v5_v62_def4ae591b324b46d3d2",
       "canonical_url": "https://github.com/langchain-ai/langgraph",
       "title": "Workflow：LangGraph",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -19799,7 +19883,7 @@
       }
     },
     {
-      "source_id": "src_agent_application_v5_v62_case_browser-use",
+      "source_id": "src_agent_application_v5_v62_7e22b37659c28c9bce43",
       "canonical_url": "https://github.com/browser-use/browser-use",
       "title": "Browser：browser-use",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -19823,7 +19907,7 @@
       }
     },
     {
-      "source_id": "src_agent_application_v5_v62_case_agentscope",
+      "source_id": "src_agent_application_v5_v62_2d8cba1f5c550a53db17",
       "canonical_url": "https://github.com/agentscope-ai/agentscope",
       "title": "AgentScope：按协作目标条件选择",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -19848,63 +19932,63 @@
     }
   ],
   "resource_refs": [
-    "src_agent_application_v5_v62_hello-common-ch1",
-    "src_agent_application_v5_v62_hello-common-ch2",
-    "src_agent_application_v5_v62_hello-common-ch3",
-    "src_agent_application_v5_v62_python-zh-jit",
-    "src_agent_application_v5_v62_hello-common-ch4",
-    "src_agent_application_v5_v62_lcc-coding-spine",
-    "src_agent_application_v5_v62_hello-common-ch12",
-    "src_agent_application_v5_v62_hello-common-ch7",
-    "src_agent_application_v5_v62_hello-common-ch8",
-    "src_agent_application_v5_v62_all-in-rag-spine",
-    "src_agent_application_v5_v62_hello-common-ch9",
-    "src_agent_application_v5_v62_hello-common-ch6",
-    "src_agent_application_v5_v62_langgraph-workflows",
-    "src_agent_application_v5_v62_hello-common-ch10",
-    "src_agent_application_v5_v62_langsmith-evaluation-types",
-    "src_agent_application_v5_v62_hello-rag-context-bridge",
-    "src_agent_application_v5_v62_ragas-evaluation",
-    "src_agent_application_v5_v62_bge-m3-retrieval-modes",
-    "src_agent_application_v5_v62_rag-citation-contract",
-    "src_agent_application_v5_v62_pi-sdk-case",
-    "src_agent_application_v5_v62_openhands-sdk-case",
-    "src_agent_application_v5_v62_hello-workflow-bridge",
-    "src_agent_application_v5_v62_langgraph-graph-api",
-    "src_agent_application_v5_v62_langgraph-thinking",
-    "src_agent_application_v5_v62_langgraph-persistence",
-    "src_agent_application_v5_v62_langgraph-interrupts",
-    "src_agent_application_v5_v62_langgraph-agent-server",
-    "src_agent_application_v5_v62_agentscope-current-case",
-    "src_agent_application_v5_v62_agentscope-v1-comparison",
-    "src_agent_application_v5_v62_playwright-python-spine",
-    "src_agent_application_v5_v62_browser-use-api-reference",
-    "src_agent_application_v5_v62_browser-use-quickstart",
-    "src_agent_application_v5_v62_browser-use-observation-guidance",
-    "src_agent_application_v5_v62_hello-browser-extra",
-    "src_agent_application_v5_v62_langsmith-complex-agent-eval",
-    "src_agent_application_v5_v62_openai-eval-best-practices",
-    "src_agent_application_v5_v62_agentevals-comparison",
-    "src_agent_application_v5_v62_langsmith-rag-eval",
-    "src_agent_application_v5_v62_openai-evals-transition",
-    "src_agent_application_v5_v62_openai-agent-evals-concepts",
-    "src_agent_application_v5_v62_hf-llm-grpo",
-    "src_agent_application_v5_v62_hello-common-ch11",
-    "src_agent_application_v5_v62_hf-deep-rl-introduction",
-    "src_agent_application_v5_v62_deepseek-r1-paper",
-    "src_agent_application_v5_v62_hf-llm-sft",
-    "src_agent_application_v5_v62_hf-policy-gradient",
-    "src_agent_application_v5_v62_hf-ppo",
-    "src_agent_application_v5_v62_trl-grpo-api",
-    "src_agent_application_v5_v62_agent-lightning-paper",
-    "src_agent_application_v5_v62_agent-lightning-framework",
-    "src_agent_application_v5_v62_case_pi",
-    "src_agent_application_v5_v62_case_ragflow",
-    "src_agent_application_v5_v62_case_weknora",
-    "src_agent_application_v5_v62_case_software-agent-sdk",
-    "src_agent_application_v5_v62_case_langgraph",
-    "src_agent_application_v5_v62_case_browser-use",
-    "src_agent_application_v5_v62_case_agentscope"
+    "src_agent_application_v5_v62_404d25fa52f24dc2be39",
+    "src_agent_application_v5_v62_db73d24bfd741f4b3c43",
+    "src_agent_application_v5_v62_c84a138cc7f9a11eec9e",
+    "src_agent_application_v5_v62_c300d0bb98758882427d",
+    "src_agent_application_v5_v62_7b35476246aa1b12023c",
+    "src_agent_application_v5_v62_de71f08679b5bd598141",
+    "src_agent_application_v5_v62_d3fcc3994894d29174e4",
+    "src_agent_application_v5_v62_024e3710db538d14fa27",
+    "src_agent_application_v5_v62_243595be34a1cea2f8fb",
+    "src_agent_application_v5_v62_04a9cd3e245d91d3017e",
+    "src_agent_application_v5_v62_bb825e030c7385c9a978",
+    "src_agent_application_v5_v62_2ff98861a5beb53ca056",
+    "src_agent_application_v5_v62_2d824263edbf3518ed94",
+    "src_agent_application_v5_v62_4e3c3cda00c4a38db26c",
+    "src_agent_application_v5_v62_ab4f70eb2d76765cd0dc",
+    "src_agent_application_v5_v62_2f5e62896028a2af86b8",
+    "src_agent_application_v5_v62_477b93b97d3e3d1a1a2b",
+    "src_agent_application_v5_v62_df544ffcdc0a9251c5d9",
+    "src_agent_application_v5_v62_5721ce0828859ed02922",
+    "src_agent_application_v5_v62_3d1efee26983053780c3",
+    "src_agent_application_v5_v62_c41d09619246000e0edd",
+    "src_agent_application_v5_v62_9b248ab3820293737de6",
+    "src_agent_application_v5_v62_046a6a96fcadac34b7b1",
+    "src_agent_application_v5_v62_64c8cdc907c9d18a12ea",
+    "src_agent_application_v5_v62_a49406a9845175badc41",
+    "src_agent_application_v5_v62_4c22c69daf7f1940bff5",
+    "src_agent_application_v5_v62_dc066b9238c041400a30",
+    "src_agent_application_v5_v62_78751d0230ad37d4bcc5",
+    "src_agent_application_v5_v62_8adeb1bd3666799ab4ca",
+    "src_agent_application_v5_v62_dcf7836910e230d2cfc8",
+    "src_agent_application_v5_v62_4faf0a9e9f15b7bcfc96",
+    "src_agent_application_v5_v62_f5cc55f7f2360797c274",
+    "src_agent_application_v5_v62_2939f689c32d6eb772f5",
+    "src_agent_application_v5_v62_63fc832a197087752680",
+    "src_agent_application_v5_v62_d11d1b504578d6834451",
+    "src_agent_application_v5_v62_ca5f4c09b45f837a3199",
+    "src_agent_application_v5_v62_ab0f3fd825f32c4a9154",
+    "src_agent_application_v5_v62_59d93f42c2b43e053326",
+    "src_agent_application_v5_v62_1d759d9d6aad9b30b765",
+    "src_agent_application_v5_v62_06dce207ad0ba3ac2ebc",
+    "src_agent_application_v5_v62_01f03e0a227c3bbfc3b5",
+    "src_agent_application_v5_v62_cb037ac672d961b768c0",
+    "src_agent_application_v5_v62_a4d689e43b67f2c69d18",
+    "src_agent_application_v5_v62_70b2a4fb3dbcedbbc2f7",
+    "src_agent_application_v5_v62_e226179b6cee7e421c70",
+    "src_agent_application_v5_v62_5c8297b386a3a033de0b",
+    "src_agent_application_v5_v62_22bffb6b9b98c854ea32",
+    "src_agent_application_v5_v62_dd5e5935f3da6975c098",
+    "src_agent_application_v5_v62_1343c9d09fa8d9a3dfc1",
+    "src_agent_application_v5_v62_f0819a1f113c6a6a5741",
+    "src_agent_application_v5_v62_300cce35361bdd8a0b56",
+    "src_agent_application_v5_v62_7453e611be20a66f5703",
+    "src_agent_application_v5_v62_23a1cc1c750696848f60",
+    "src_agent_application_v5_v62_d1a72a24510e80ef5299",
+    "src_agent_application_v5_v62_def4ae591b324b46d3d2",
+    "src_agent_application_v5_v62_7e22b37659c28c9bce43",
+    "src_agent_application_v5_v62_2d8cba1f5c550a53db17"
   ],
   "required_node_keys": [
     "node.v62.agent.application.a0",

@@ -26,15 +26,15 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_cloud_services_v2_v62_fastapi-api-spine",
+          "source_ref": "src_cloud_services_v2_v62_6c3a14594050c78b78b6",
           "section_refs": [
-            "sec_cloud_services_v2_v62_fastapi-api-spine_a07a7da3d0",
-            "sec_cloud_services_v2_v62_fastapi-api-spine_752a0b9493",
-            "sec_cloud_services_v2_v62_fastapi-api-spine_ff5c0686b2",
-            "sec_cloud_services_v2_v62_fastapi-api-spine_60851ed19d",
-            "sec_cloud_services_v2_v62_fastapi-api-spine_9a64564844",
-            "sec_cloud_services_v2_v62_fastapi-api-spine_e806a291cf",
-            "sec_cloud_services_v2_v62_fastapi-api-spine_c133c334c4"
+            "sec_cloud_services_v2_v62_d3a0990cb627d83ba389",
+            "sec_cloud_services_v2_v62_4837fbdd4c97aaf9ce8e",
+            "sec_cloud_services_v2_v62_85762750731fc2d3d940",
+            "sec_cloud_services_v2_v62_8cf6184cd3c5cdf684e9",
+            "sec_cloud_services_v2_v62_93b0544fe89ec6a440cc",
+            "sec_cloud_services_v2_v62_cd9d66d8c6dbc335410b",
+            "sec_cloud_services_v2_v62_27f748348229b2c92871"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -44,11 +44,11 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_cloud_services_v2_v62_fastapi-sqlmodel-bridge",
+          "source_ref": "src_cloud_services_v2_v62_5bb388f4602a13cdb3a5",
           "section_refs": [
-            "sec_cloud_services_v2_v62_fastapi-sqlmodel-bridge_bfde3422aa",
-            "sec_cloud_services_v2_v62_fastapi-sqlmodel-bridge_9dcbbf5abb",
-            "sec_cloud_services_v2_v62_fastapi-sqlmodel-bridge_afec20c6d5"
+            "sec_cloud_services_v2_v62_db0522d76d59a014bf4f",
+            "sec_cloud_services_v2_v62_50e7c2a7cb92a0c854dc",
+            "sec_cloud_services_v2_v62_3bc296ba37e11ccc970b"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -58,9 +58,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_cloud_services_v2_v62_python-en-jit",
+          "source_ref": "src_cloud_services_v2_v62_9bb327b753e81170d9b3",
           "section_refs": [
-            "sec_cloud_services_v2_v62_python-en-jit_05004f8cac"
+            "sec_cloud_services_v2_v62_d23bf592639c9dcd2e26"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -73,17 +73,57 @@
         {
           "topic": "本阶段章级练习与教学边界",
           "concepts": [
-            "Primary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI ",
-            "tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。"
+            "Primary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide ",
+            "SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。"
           ],
-          "guidance": "前置：前置：基本 Python 语法、函数、类型标注、异常、虚拟环境和命令行；若这些也不熟，只补能完成 FastAPI 样例的 Python 基础，不要求先学完整全栈路线。SQL 概念在需要表、主键、CRUD 时即时引入。\n重复关系：重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。\n补充/比较：为什么现在学：云工程学习需要一个真实服务作为承载；如果用户还没有 API，从容器开始只会把编排工具变成孤立练习。已会开发 API 的用户不必重学，直接跑本阶段出口诊断后跳过。\nPrimary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n已会者诊断/略过：用现有项目自测 GET/POST/PATCH/DELETE、请求验证、响应字段过滤、错误码、配置外置、持久化和自动化测试；已通过者跳到阶段 0，只补云路线首次使用但此前未学的运维边界。\n出口：能演示 CRUD、请求校验、response model、错误处理与自动化测试；能解释服务监听端口、环境配置来源、API 进程与数据库的数据边界；已有项目达到同等标准即可跳过本阶段。\n小实践：小实践：建立 tasks 的最小数据模型（id、title、completed、created_at）；完成创建、按 id 查询、列表过滤、更新、删除；用无效输入和不存在 id 验证 validation error 与 404；重启进程后检查数据是否仍在；用 TestClient 测成功与失败路径。\n载体与增量：Task Service 增量：生成最小 API + 数据库 + 自动化测试；加入 /health/live 和依赖 DB 的 /health/ready，但不要提前部署或加可观测性栈。\n出口：为什么现在学：云工程学习需要一个真实服务作为承载；如果用户还没有 API，从容器开始只会把编排工具变成孤立练习。已会开发 API 的用户不必重学，直接跑本阶段出口诊断后跳过。\n出口：能演示 CRUD、请求校验、response model、错误处理与自动化测试；能解释服务监听端口、环境配置来源、API 进程与数据库的数据边界；已有项目达到同等标准即可跳过本阶段。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：基本 Python 语法、函数、类型标注、异常、虚拟环境和命令行；若这些也不熟，只补能完成 FastAPI 样例的 Python 基础，不要求先学完整全栈路线。SQL 概念在需要表、主键、CRUD 时即时引入。\n重复关系：重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。\n补充/比较：为什么现在学：云工程学习需要一个真实服务作为承载；如果用户还没有 API，从容器开始只会把编排工具变成孤立练习。已会开发 API 的用户不必重学，直接跑本阶段出口诊断后跳过。\nPrimary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.cloud.services.sm1:0",
+          "fragment_index": 0,
+          "fragment_count": 3,
+          "original_guidance": "前置：前置：基本 Python 语法、函数、类型标注、异常、虚拟环境和命令行；若这些也不熟，只补能完成 FastAPI 样例的 Python 基础，不要求先学完整全栈路线。SQL 概念在需要表、主键、CRUD 时即时引入。\n重复关系：重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。\n补充/比较：为什么现在学：云工程学习需要一个真实服务作为承载；如果用户还没有 API，从容器开始只会把编排工具变成孤立练习。已会开发 API 的用户不必重学，直接跑本阶段出口诊断后跳过。\nPrimary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n已会者诊断/略过：用现有项目自测 GET/POST/PATCH/DELETE、请求验证、响应字段过滤、错误码、配置外置、持久化和自动化测试；已通过者跳到阶段 0，只补云路线首次使用但此前未学的运维边界。\n出口：能演示 CRUD、请求校验、response model、错误处理与自动化测试；能解释服务监听端口、环境配置来源、API 进程与数据库的数据边界；已有项目达到同等标准即可跳过本阶段。\n小实践：小实践：建立 tasks 的最小数据模型（id、title、completed、created_at）；完成创建、按 id 查询、列表过滤、更新、删除；用无效输入和不存在 id 验证 validation error 与 404；重启进程后检查数据是否仍在；用 TestClient 测成功与失败路径。\n载体与增量：Task Service 增量：生成最小 API + 数据库 + 自动化测试；加入 /health/live 和依赖 DB 的 /health/ready，但不要提前部署或加可观测性栈。\n出口：为什么现在学：云工程学习需要一个真实服务作为承载；如果用户还没有 API，从容器开始只会把编排工具变成孤立练习。已会开发 API 的用户不必重学，直接跑本阶段出口诊断后跳过。\n出口：能演示 CRUD、请求校验、response model、错误处理与自动化测试；能解释服务监听端口、环境配置来源、API 进程与数据库的数据边界；已有项目达到同等标准即可跳过本阶段。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/3）",
+          "concepts": [
+            "Primary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide ",
+            "SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。"
+          ],
+          "guidance": "handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n已会者诊断/略过：用现有项目自测 GET/POST/PATCH/DELETE、请求验证、响应字",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.cloud.services.sm1:0",
+          "fragment_index": 1,
+          "fragment_count": 3
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续3/3）",
+          "concepts": [
+            "Primary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide ",
+            "SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。"
+          ],
+          "guidance": "段过滤、错误码、配置外置、持久化和自动化测试；已通过者跳到阶段 0，只补云路线首次使用但此前未学的运维边界。\n出口：能演示 CRUD、请求校验、response model、错误处理与自动化测试；能解释服务监听端口、环境配置来源、API 进程与数据库的数据边界；已有项目达到同等标准即可跳过本阶段。\n小实践：小实践：建立 tasks 的最小数据模型（id、title、completed、created_at）；完成创建、按 id 查询、列表过滤、更新、删除；用无效输入和不存在 id 验证 validation error 与 404；重启进程后检查数据是否仍在；用 TestClient 测成功与失败路径。\n载体与增量：Task Service 增量：生成最小 API + 数据库 + 自动化测试；加入 /health/live 和依赖 DB 的 /health/ready，但不要提前部署或加可观测性栈。\n出口：为什么现在学：云工程学习需要一个真实服务作为承载；如果用户还没有 API，从容器开始只会把编排工具变成孤立练习。已会开发 API 的用户不必重学，直接跑本阶段出口诊断后跳过。\n出口：能演示 CRUD、请求校验、response model、错误处理与自动化测试；能解释服务监听端口、环境配置来源、API 进程与数据库的数据边界；已有项目达到同等标准即可跳过本阶段。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 2,
+          "fragment_group": "stage.v62.cloud.services.sm1:0",
+          "fragment_index": 2,
+          "fragment_count": 3
         },
         {
           "topic": "贯穿评价与证据",
@@ -99,7 +139,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 3
         }
       ],
       "learning_guidance": {
@@ -110,12 +150,13 @@
           "node.v62.cloud.services.sm1"
         ],
         "learning_focus": [
-          "Primary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI ",
-          "tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。"
+          "Primary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide ",
+          "SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。"
         ],
         "comparison_focus": [
-          "为什么现在学：云工程学习需要一个真实服务作为承载；如果用户还没有 API，从容器开始只会把编排工具变成孤立练习。已会开发 API 的用户不必重学，直接跑本阶段出口诊断后跳过。\nPrimary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 ",
-          "CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n已会者诊断/略过：用现有项目自测 GET/POST/PATCH/DELETE、请求验证、响应字段过滤、错误码、配置外置、持久化和自动化测试；已通过者跳到阶段 0，只补云路线首次使用但此前未学的运维边界。\n出口：能演示 CRUD、请求校验、response model、错误处理与自动化测试；能解释服务监听端口、环境配置来源、API 进程与数据库的数据边界；已有项目达到同等标准即可跳过本阶段。"
+          "为什么现在学：云工程学习需要一个真实服务作为承载；如果用户还没有 API，从容器开始只会把编排工具变成孤立练习。已会开发 API 的用户不必重学，直接跑本阶段出口诊断后跳过。\nPrimary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic ",
+          "Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n已会者诊断/略过：用现有项目自测 GET/POST/PATCH/DELETE、请求验证、响应字段过滤、错误码、配置外置、持久化和自动化测试；已通过者跳到阶段 0，只补云路线首次使用但此前未学的运维边界。\n出口：能演示 CRUD、请求校验、response ",
+          "model、错误处理与自动化测试；能解释服务监听端口、环境配置来源、API 进程与数据库的数据边界；已有项目达到同等标准即可跳过本阶段。"
         ],
         "reading_prerequisites": [
           "前置：基本 Python 语法、函数、类型标注、异常、虚拟环境和命令行；若这些也不熟，只补能完成 FastAPI 样例的 Python 基础，不要求先学完整全栈路线。SQL 概念在需要表、主键、CRUD 时即时引入。"
@@ -282,15 +323,15 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_cloud_services_v2_v62_docker-run-app",
+          "source_ref": "src_cloud_services_v2_v62_3092c2efdf52b5a90b32",
           "section_refs": [
-            "sec_cloud_services_v2_v62_docker-run-app_74e492d5d0",
-            "sec_cloud_services_v2_v62_docker-run-app_946d605c49",
-            "sec_cloud_services_v2_v62_docker-run-app_9321000115",
-            "sec_cloud_services_v2_v62_docker-run-app_7d13bbccda",
-            "sec_cloud_services_v2_v62_docker-run-app_317e03c96e",
-            "sec_cloud_services_v2_v62_docker-run-app_f938c3286f",
-            "sec_cloud_services_v2_v62_docker-run-app_098675a3aa"
+            "sec_cloud_services_v2_v62_34a35102568a83575a2b",
+            "sec_cloud_services_v2_v62_08845634102666b7a226",
+            "sec_cloud_services_v2_v62_97219983751bc75e164c",
+            "sec_cloud_services_v2_v62_f9e7cbacd8b7f2fb9507",
+            "sec_cloud_services_v2_v62_b359f68eecca8d3044ab",
+            "sec_cloud_services_v2_v62_282926be1cf578d088a7",
+            "sec_cloud_services_v2_v62_d558311d5ede41c85d7e"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -300,11 +341,11 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_cloud_services_v2_v62_docker-runtime-concepts",
+          "source_ref": "src_cloud_services_v2_v62_387d3368d854da00be21",
           "section_refs": [
-            "sec_cloud_services_v2_v62_docker-runtime-concepts_c392dca9db",
-            "sec_cloud_services_v2_v62_docker-runtime-concepts_4bbfee6dd9",
-            "sec_cloud_services_v2_v62_docker-runtime-concepts_f033eaa0b0"
+            "sec_cloud_services_v2_v62_0564cb69e5de0e6d0d7f",
+            "sec_cloud_services_v2_v62_3d4acbfda6d51ae02686",
+            "sec_cloud_services_v2_v62_bb3f66fce70151310c5c"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -416,15 +457,15 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_cloud_services_v2_v62_docker-compose-spine",
+          "source_ref": "src_cloud_services_v2_v62_5813eb6a7cce03250a8e",
           "section_refs": [
-            "sec_cloud_services_v2_v62_docker-compose-spine_1c98237fbb",
-            "sec_cloud_services_v2_v62_docker-compose-spine_45d4ca9709",
-            "sec_cloud_services_v2_v62_docker-compose-spine_8a0265ba43",
-            "sec_cloud_services_v2_v62_docker-compose-spine_1e789552de",
-            "sec_cloud_services_v2_v62_docker-compose-spine_bee29a1922",
-            "sec_cloud_services_v2_v62_docker-compose-spine_67990130a1",
-            "sec_cloud_services_v2_v62_docker-compose-spine_962b399f08"
+            "sec_cloud_services_v2_v62_877938d44e0c62500f76",
+            "sec_cloud_services_v2_v62_8250ba99f13669b38665",
+            "sec_cloud_services_v2_v62_f5a2a0e167defd636b0c",
+            "sec_cloud_services_v2_v62_c2d1b651c33cb50a46b1",
+            "sec_cloud_services_v2_v62_3c09a2282b9dc582a3bf",
+            "sec_cloud_services_v2_v62_d5aeba8acd256680417a",
+            "sec_cloud_services_v2_v62_fae576f5adf6de9edd21"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -434,7 +475,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_cloud_services_v2_v62_case_getting-started-todo-app",
+          "source_ref": "src_cloud_services_v2_v62_238ef50884fc4ffabe8a",
           "section_refs": [],
           "source_version": 1,
           "order_index": 1,
@@ -803,14 +844,14 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_cloud_services_v2_v62_kubernetes-basics",
+          "source_ref": "src_cloud_services_v2_v62_198e051516a51b371a5f",
           "section_refs": [
-            "sec_cloud_services_v2_v62_kubernetes-basics_2ae2055313",
-            "sec_cloud_services_v2_v62_kubernetes-basics_f969a17666",
-            "sec_cloud_services_v2_v62_kubernetes-basics_e962ec178d",
-            "sec_cloud_services_v2_v62_kubernetes-basics_2f66d5daa7",
-            "sec_cloud_services_v2_v62_kubernetes-basics_24e2a67f32",
-            "sec_cloud_services_v2_v62_kubernetes-basics_2eba6cb5ff"
+            "sec_cloud_services_v2_v62_7917a350ca2736374b05",
+            "sec_cloud_services_v2_v62_54cd3953ab05b65f3364",
+            "sec_cloud_services_v2_v62_e48b8f867e94d1885054",
+            "sec_cloud_services_v2_v62_fbb4347c1b4bf69a2980",
+            "sec_cloud_services_v2_v62_c797695a95f49b01e07f",
+            "sec_cloud_services_v2_v62_8ffa975dae0b88b6c0d4"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -825,14 +866,35 @@
           "concepts": [
             "Primary：[Kubernetes Basics](https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/) 按原序六模块：① create cluster（Minikube）；② deploy app（Deployment/desired replicas）；③ explore（Pod、Node、kubectl get/describe/logs/exec）；④ expose（Service、labels/selectors、NodePort）；⑤ scale；⑥ update / observe rollout / rollback。"
           ],
-          "guidance": "前置：前置：有可运行容器镜像；基本掌握 Service/Pod 不是应用代码本身。不会 Kubernetes 的用户直接从官方 Basics 开始，无需先修集群管理员课程。\n重复关系：重复处理：镜像与 Registry REVIEW；Pod/Deployment/控制器/自愈 NEW；Compose service vs K8s Service COMPARE；Compose volume vs PV/PVC COMPARE/DEEPEN；depends_on vs reconciliation COMPARE；scale/rollout 在实际 controller 层 DEEPEN。\n补充/比较：跳过/后移：不在此阶段读所有 API reference、网络插件、调度器、etcd、K8s 内部源码；官方六模块未系统教 probes、Secret、资源请求限制、PV/PVC，后续按 Task Service 需求补。\n小实践：小实践：把 Task Service 镜像部署成 1 个副本，expose 后 curl；scale 到 3，删一个 Pod 看控制器补回；滚动更新到新标签，故意使用不存在的标签后 rollback。检查端点与日志，不只看命令成功。\n载体与增量：Task Service 增量：保留一组最小 Deployment + ClusterIP Service（或仅本地 port-forward），把现有 readiness endpoint 接到 readiness probe；DB 使用现有托管服务，不放入此阶段集群。\n出口：出口：可以画出 Deployment→ReplicaSet→Pod 和 Service→selector→Pod 流量；能观察 rollout/rollback；能解释本地集群的访问方式与云负载均衡计费区别。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：有可运行容器镜像；基本掌握 Service/Pod 不是应用代码本身。不会 Kubernetes 的用户直接从官方 Basics 开始，无需先修集群管理员课程。\n重复关系：重复处理：镜像与 Registry REVIEW；Pod/Deployment/控制器/自愈 NEW；Compose service vs K8s Service COMPARE；Compose volume vs PV/PVC COMPARE/DEEPEN；depends_on vs reconciliation COMPARE；scale/rollout 在实际 controller 层 DEEPEN。\n补充/比较：跳过/后移：不在此阶段读所有 API reference、网络插件、调度器、etcd、K8s 内部源码；官方六模块未系统教 probes、Secret、资源请求限制、PV/PVC，后续按 Task Service 需求补。\n小实践：小实践：把 Task Service 镜像部署成 1 个副本，expose 后 curl；scale 到 3，删一个 Pod 看控制器补回；滚动更新到新标签，故意使用不存在的标签后 rollback。检查端点与日志，不只看命令成功。\n载体与增量：Task Service 增量：保留一组最小 Deployment + ClusterIP Service（或仅本地 port-forward），把现有 readiness endpoint 接到 readiness probe；DB 使用现有托管服务，不放入此阶段集群。\n出口：出口：可以画出 Deployment→ReplicaSet→Pod 和 Service→selector→Pod 流量；能观察 rollout/rollback；能解释本地集群的访问方式与云负载均衡计费区别。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.cloud.services.s5:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：前置：有可运行容器镜像；基本掌握 Service/Pod 不是应用代码本身。不会 Kubernetes 的用户直接从官方 Basics 开始，无需先修集群管理员课程。\n重复关系：重复处理：镜像与 Registry REVIEW；Pod/Deployment/控制器/自愈 NEW；Compose service vs K8s Service COMPARE；Compose volume vs PV/PVC COMPARE/DEEPEN；depends_on vs reconciliation COMPARE；scale/rollout 在实际 controller 层 DEEPEN。\n补充/比较：跳过/后移：不在此阶段读所有 API reference、网络插件、调度器、etcd、K8s 内部源码；官方六模块未系统教 probes、Secret、资源请求限制、PV/PVC，后续按 Task Service 需求补。\n小实践：小实践：把 Task Service 镜像部署成 1 个副本，expose 后 curl；scale 到 3，删一个 Pod 看控制器补回；滚动更新到新标签，故意使用不存在的标签后 rollback。检查端点与日志，不只看命令成功。\n载体与增量：Task Service 增量：保留一组最小 Deployment + ClusterIP Service（或仅本地 port-forward），把现有 readiness endpoint 接到 readiness probe；DB 使用现有托管服务，不放入此阶段集群。\n出口：出口：可以画出 Deployment→ReplicaSet→Pod 和 Service→selector→Pod 流量；能观察 rollout/rollback；能解释本地集群的访问方式与云负载均衡计费区别。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "Primary：[Kubernetes Basics](https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/) 按原序六模块：① create cluster（Minikube）；② deploy app（Deployment/desired replicas）；③ explore（Pod、Node、kubectl get/describe/logs/exec）；④ expose（Service、labels/selectors、NodePort）；⑤ scale；⑥ update / observe rollout / rollback。"
+          ],
+          "guidance": "现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.cloud.services.s5:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -848,7 +910,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         }
       ],
       "learning_guidance": {
@@ -925,9 +987,9 @@
       "resources": [
         {
           "role": "reference",
-          "source_ref": "src_cloud_services_v2_v62_kubernetes-basics",
+          "source_ref": "src_cloud_services_v2_v62_198e051516a51b371a5f",
           "section_refs": [
-            "sec_cloud_services_v2_v62_kubernetes-basics_b4cd99c13b"
+            "sec_cloud_services_v2_v62_ce52d14dccc14b644d50"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -942,14 +1004,35 @@
           "concepts": [
             "Primary/选读：[Kubernetes probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/)、[ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/)、[Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)、[resource management](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)、[Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) 只学 Task Service 当前要用的章节；阿里云中文公开课 8–14 节可作中文词汇补充，但需登录且实际正文未核。"
           ],
-          "guidance": "前置：前置：阶段 5 的 Deployment/Service/Pod 心智模型。\n重复关系：重复处理：Compose healthcheck COMPARE，K8s readiness/liveness/startup 的分工 DEEPEN；.env→ConfigMap/Secret DEEPEN；Compose volume→PV/PVC/StorageClass COMPARE，但 Task Service 初期外置 DB 时可不部署卷。\n补充/比较：Primary/选读：[Kubernetes probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/)、[ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/)、[Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)、[resource management](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)、[Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) 只学 Task Service 当前要用的章节；阿里云中文公开课 8–14 节可作中文词汇补充，但需登录且实际正文未核。\n略过/后移：StatefulSet、volume snapshot/topology、NetworkPolicy、CNI、DaemonSet 只在确有学习目标时选读；不把厂商课未打开的内容当已教会。\n小实践：小实践：将配置值注入 ConfigMap、敏感值放 Secret/外部密钥管理；人为令依赖不可用，观察 readiness 从流量端点移除但 liveness 不不断重启；设置合理 requests/limits 并观察 Pod 状态。\n载体与增量：Task Service 增量：补 K8s 运行配置与 threat boundary 说明，确保镜像非 root、配置不硬编码、探针对应语义；只在自建数据库确有目标时考虑 PVC。\n出口：出口：能选择 probe 语义和资源界限；能说清 Secret 的 base64 不代表加密、需要 RBAC/加密存储；知道 K8s 本身不会替代应用级事务/备份。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：阶段 5 的 Deployment/Service/Pod 心智模型。\n重复关系：重复处理：Compose healthcheck COMPARE，K8s readiness/liveness/startup 的分工 DEEPEN；.env→ConfigMap/Secret DEEPEN；Compose volume→PV/PVC/StorageClass COMPARE，但 Task Service 初期外置 DB 时可不部署卷。\n补充/比较：Primary/选读：[Kubernetes probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/)、[ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/)、[Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)、[resource management](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)、[Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) 只学 Task Service 当前要用的章节；阿里云中文公开课 8–14 节可作中文词汇补充，但需登录且实际正文未核。\n略过/后移：StatefulSet、volume snapshot/topology、NetworkPolicy、CNI、DaemonSet 只在确有学习目标时选读；不把厂商课未打开的内容当已教会。\n小实践：小实践：将",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.cloud.services.s6:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：前置：阶段 5 的 Deployment/Service/Pod 心智模型。\n重复关系：重复处理：Compose healthcheck COMPARE，K8s readiness/liveness/startup 的分工 DEEPEN；.env→ConfigMap/Secret DEEPEN；Compose volume→PV/PVC/StorageClass COMPARE，但 Task Service 初期外置 DB 时可不部署卷。\n补充/比较：Primary/选读：[Kubernetes probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/)、[ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/)、[Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)、[resource management](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)、[Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) 只学 Task Service 当前要用的章节；阿里云中文公开课 8–14 节可作中文词汇补充，但需登录且实际正文未核。\n略过/后移：StatefulSet、volume snapshot/topology、NetworkPolicy、CNI、DaemonSet 只在确有学习目标时选读；不把厂商课未打开的内容当已教会。\n小实践：小实践：将配置值注入 ConfigMap、敏感值放 Secret/外部密钥管理；人为令依赖不可用，观察 readiness 从流量端点移除但 liveness 不不断重启；设置合理 requests/limits 并观察 Pod 状态。\n载体与增量：Task Service 增量：补 K8s 运行配置与 threat boundary 说明，确保镜像非 root、配置不硬编码、探针对应语义；只在自建数据库确有目标时考虑 PVC。\n出口：出口：能选择 probe 语义和资源界限；能说清 Secret 的 base64 不代表加密、需要 RBAC/加密存储；知道 K8s 本身不会替代应用级事务/备份。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "Primary/选读：[Kubernetes probes](https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/)、[ConfigMaps](https://kubernetes.io/docs/concepts/configuration/configmap/)、[Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)、[resource management](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)、[Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) 只学 Task Service 当前要用的章节；阿里云中文公开课 8–14 节可作中文词汇补充，但需登录且实际正文未核。"
+          ],
+          "guidance": "配置值注入 ConfigMap、敏感值放 Secret/外部密钥管理；人为令依赖不可用，观察 readiness 从流量端点移除但 liveness 不不断重启；设置合理 requests/limits 并观察 Pod 状态。\n载体与增量：Task Service 增量：补 K8s 运行配置与 threat boundary 说明，确保镜像非 root、配置不硬编码、探针对应语义；只在自建数据库确有目标时考虑 PVC。\n出口：出口：能选择 probe 语义和资源界限；能说清 Secret 的 base64 不代表加密、需要 RBAC/加密存储；知道 K8s 本身不会替代应用级事务/备份。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.cloud.services.s6:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -965,7 +1048,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         },
         {
           "topic": "按当前目标核对资料范围",
@@ -982,7 +1065,7 @@
             "当前资料究竟教授了哪个边界，哪些内容仍未审或未运行？"
           ],
           "required": false,
-          "order_index": 2
+          "order_index": 3
         }
       ],
       "learning_guidance": {
@@ -1179,14 +1262,14 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_cloud_services_v2_v62_otel-demo-case",
+          "source_ref": "src_cloud_services_v2_v62_164759e3b5aec2fa2549",
           "section_refs": [
-            "sec_cloud_services_v2_v62_otel-demo-case_cd74053c54",
-            "sec_cloud_services_v2_v62_otel-demo-case_5141632d2c",
-            "sec_cloud_services_v2_v62_otel-demo-case_7ec89053c3",
-            "sec_cloud_services_v2_v62_otel-demo-case_11922dba38",
-            "sec_cloud_services_v2_v62_otel-demo-case_ce6ffc6b45",
-            "sec_cloud_services_v2_v62_otel-demo-case_d6363e1616"
+            "sec_cloud_services_v2_v62_d7980d1c89c9f48ac35e",
+            "sec_cloud_services_v2_v62_e5daf511530957c9fe61",
+            "sec_cloud_services_v2_v62_a83fb62fbccf0c57c509",
+            "sec_cloud_services_v2_v62_d34c9600fb941b8f2660",
+            "sec_cloud_services_v2_v62_d3fe07929d9a03f7e3ba",
+            "sec_cloud_services_v2_v62_ab663038977569709b50"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1196,7 +1279,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_cloud_services_v2_v62_case_opentelemetry-demo",
+          "source_ref": "src_cloud_services_v2_v62_91c69cdbe11e4f0f1b63",
           "section_refs": [],
           "source_version": 1,
           "order_index": 1,
@@ -1211,14 +1294,35 @@
           "concepts": [
             "主资料：[Demo Architecture](https://opentelemetry.io/docs/demo/requirements/architecture/) → [Telemetry Features](https://opentelemetry.io/docs/demo/telemetry-features/) → [Docker Deployment](https://opentelemetry.io/docs/demo/docker-deployment/) → [feature flags / memory leak](https://opentelemetry.io/docs/demo/feature-flags/recommendation-cache/)；按目标选一个 scenario。默认用 Compose minimal/full 文档路径，不默认上 Helm。"
           ],
-          "guidance": "前置：前置：阶段 7 至少能阅读一条 trace；本机有足够 RAM 和磁盘。文档给 full mode 约 6 GB RAM / 14 GB disk、minimal 约 3 GB RAM。\n选 3–8 切片：系统地图；单条请求 trace；Collector receiver/processor/exporter；recommendation cache fault 的 metrics→trace 诊断；Task Service 的 OTel 移植；telemetry sanity tests；有 K8s 前置后再看 Helm 与 Compose 映射。一次只读一个切片；小项目先整体地图、大项目绝不整体通读。\n重复关系：重复处理：基础 span REVIEW；Collector pipeline NEW；metrics 与 trace 联合诊断 DEEPEN；Demo Compose 与 Helm COMPARE。文档在 2026-09-11 更新 Compose 命令，复现旧教程命令时先核对当前文档/版本。\n小实践：打开一个故障 flag，先提出会观察到什么的假设，再看 latency/error dashboard 和 Jaeger；记录事实（图表）、解释（可能关系）、推断（根因）三类证据。\n补充/比较：跳过：逐个服务的所有语言代码、Kafka 和 fraud detection（当前场景不涉及）、agentic/profile extras、一次部署全部 K8s 资源。\n小实践：小实践：打开一个故障 flag，先提出会观察到什么的假设，再看 latency/error dashboard 和 Jaeger；记录事实（图表）、解释（可能关系）、推断（根因）三类证据。\n载体与增量：Task Service 增量：只吸收 1–2 项：请求 trace 与结构化日志关联；明确 SLIs（请求成功率/延迟）和一个报警草案。不要复制 Demo 全量 stack。\n出口：出口：能追一条分布式请求；解释为何 Compose 裸启动不含观测后端；不依赖固定源码路径，能从当前仓库地图动态定位相应实现。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：阶段 7 至少能阅读一条 trace；本机有足够 RAM 和磁盘。文档给 full mode 约 6 GB RAM / 14 GB disk、minimal 约 3 GB RAM。\n选 3–8 切片：系统地图；单条请求 trace；Collector receiver/processor/exporter；recommendation cache fault 的 metrics→trace 诊断；Task Service 的 OTel 移植；telemetry sanity tests；有 K8s 前置后再看 Helm 与 Compose 映射。一次只读一个切片；小项目先整体地图、大项目绝不整体通读。\n重复关系：重复处理：基础 span REVIEW；Collector pipeline NEW；metrics 与 trace 联合诊断 DEEPEN；Demo Compose 与 Helm COMPARE。文档在 2026-09-11 更新 Compose 命令，复现旧教程命令时先核对当前文档/版本。\n小实践：打开一个故障 flag，先提出会观察到什么的假设，再看 latency/error dashboard 和 Jaeger；记录事实（图表）、解释（可能关系）、推断（根因）三类证据。\n补充/比较：跳过：逐个服务的所有语言代码、Kafka 和 fraud detection（当前场景不涉及）、agentic/profile extras、一次部署全部 K8s 资源。\n小实践：小实践：打开一个故障 flag，先提出会观察到什么的假设，再看 latency/error dashboard 和 Jaeger；记录事实（图表）、解释（可能关系）、推断（根因）三类证据。\n载体与增量：Task Service 增量：只吸收 1–2 项：请求 trace 与结构化日志关联；明确 SLIs（请求成功率/延迟）和一个报警草案。不要复制 Demo 全量 stack。\n出口：出口",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.cloud.services.s8:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：前置：阶段 7 至少能阅读一条 trace；本机有足够 RAM 和磁盘。文档给 full mode 约 6 GB RAM / 14 GB disk、minimal 约 3 GB RAM。\n选 3–8 切片：系统地图；单条请求 trace；Collector receiver/processor/exporter；recommendation cache fault 的 metrics→trace 诊断；Task Service 的 OTel 移植；telemetry sanity tests；有 K8s 前置后再看 Helm 与 Compose 映射。一次只读一个切片；小项目先整体地图、大项目绝不整体通读。\n重复关系：重复处理：基础 span REVIEW；Collector pipeline NEW；metrics 与 trace 联合诊断 DEEPEN；Demo Compose 与 Helm COMPARE。文档在 2026-09-11 更新 Compose 命令，复现旧教程命令时先核对当前文档/版本。\n小实践：打开一个故障 flag，先提出会观察到什么的假设，再看 latency/error dashboard 和 Jaeger；记录事实（图表）、解释（可能关系）、推断（根因）三类证据。\n补充/比较：跳过：逐个服务的所有语言代码、Kafka 和 fraud detection（当前场景不涉及）、agentic/profile extras、一次部署全部 K8s 资源。\n小实践：小实践：打开一个故障 flag，先提出会观察到什么的假设，再看 latency/error dashboard 和 Jaeger；记录事实（图表）、解释（可能关系）、推断（根因）三类证据。\n载体与增量：Task Service 增量：只吸收 1–2 项：请求 trace 与结构化日志关联；明确 SLIs（请求成功率/延迟）和一个报警草案。不要复制 Demo 全量 stack。\n出口：出口：能追一条分布式请求；解释为何 Compose 裸启动不含观测后端；不依赖固定源码路径，能从当前仓库地图动态定位相应实现。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "主资料：[Demo Architecture](https://opentelemetry.io/docs/demo/requirements/architecture/) → [Telemetry Features](https://opentelemetry.io/docs/demo/telemetry-features/) → [Docker Deployment](https://opentelemetry.io/docs/demo/docker-deployment/) → [feature flags / memory leak](https://opentelemetry.io/docs/demo/feature-flags/recommendation-cache/)；按目标选一个 scenario。默认用 Compose minimal/full 文档路径，不默认上 Helm。"
+          ],
+          "guidance": "：能追一条分布式请求；解释为何 Compose 裸启动不含观测后端；不依赖固定源码路径，能从当前仓库地图动态定位相应实现。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.cloud.services.s8:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -1234,7 +1338,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         },
         {
           "topic": "项目学习：云：OpenTelemetry Demo",
@@ -1250,7 +1354,7 @@
             "trace断在哪？collector不等于业务服务？采样丢什么？metric与单请求证据有何区别？"
           ],
           "required": false,
-          "order_index": 2,
+          "order_index": 3,
           "project_study_card": {
             "repo_url": "https://github.com/open-telemetry/opentelemetry-demo",
             "why_now": "用户选定服务（无项目时可用Task Service默认候选）已运行，并确有跨进程链路，单日志不能定位跨服务失败。",
@@ -1344,12 +1448,12 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_cloud_services_v2_v62_github-actions-ci-deploy",
+          "source_ref": "src_cloud_services_v2_v62_916d6d486e657729ae77",
           "section_refs": [
-            "sec_cloud_services_v2_v62_github-actions-ci-deploy_9262c10913",
-            "sec_cloud_services_v2_v62_github-actions-ci-deploy_e49b58f7b3",
-            "sec_cloud_services_v2_v62_github-actions-ci-deploy_b302c21f0a",
-            "sec_cloud_services_v2_v62_github-actions-ci-deploy_785499dc97"
+            "sec_cloud_services_v2_v62_f831579991051a44754b",
+            "sec_cloud_services_v2_v62_7f0200c33fc2da529772",
+            "sec_cloud_services_v2_v62_ace6c3df44b1dabb0a61",
+            "sec_cloud_services_v2_v62_cbbfeb76bbed9c5af77a"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1463,10 +1567,10 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_cloud_services_v2_v62_github-actions-ci-deploy",
+          "source_ref": "src_cloud_services_v2_v62_916d6d486e657729ae77",
           "section_refs": [
-            "sec_cloud_services_v2_v62_github-actions-ci-deploy_a51905621b",
-            "sec_cloud_services_v2_v62_github-actions-ci-deploy_f28a6fd0fb"
+            "sec_cloud_services_v2_v62_5b7590ffa207bbd441cf",
+            "sec_cloud_services_v2_v62_3861b4949a5ddb8dac53"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1476,9 +1580,9 @@
         },
         {
           "role": "reference",
-          "source_ref": "src_cloud_services_v2_v62_github-actions-ci-deploy",
+          "source_ref": "src_cloud_services_v2_v62_916d6d486e657729ae77",
           "section_refs": [
-            "sec_cloud_services_v2_v62_github-actions-ci-deploy_d004d68b55"
+            "sec_cloud_services_v2_v62_8948f0931afe3844a29a"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1592,15 +1696,15 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_cloud_services_v2_v62_terraform-docker-spine",
+          "source_ref": "src_cloud_services_v2_v62_ab4126213cd9a98b44be",
           "section_refs": [
-            "sec_cloud_services_v2_v62_terraform-docker-spine_1f36bdce30",
-            "sec_cloud_services_v2_v62_terraform-docker-spine_569ca49f4a",
-            "sec_cloud_services_v2_v62_terraform-docker-spine_bdd254b65b",
-            "sec_cloud_services_v2_v62_terraform-docker-spine_c0bf75bd78",
-            "sec_cloud_services_v2_v62_terraform-docker-spine_ea9bb7ea83",
-            "sec_cloud_services_v2_v62_terraform-docker-spine_02db55bac5",
-            "sec_cloud_services_v2_v62_terraform-docker-spine_e7ce99764a"
+            "sec_cloud_services_v2_v62_22c89bc1c8fabd9a78b8",
+            "sec_cloud_services_v2_v62_fe10b9c979e776a9df8e",
+            "sec_cloud_services_v2_v62_2069ea7a2b0ffec837ce",
+            "sec_cloud_services_v2_v62_1f866d3815697e52d39e",
+            "sec_cloud_services_v2_v62_033dffa64e2b739841d1",
+            "sec_cloud_services_v2_v62_6ac18335866779e97cfe",
+            "sec_cloud_services_v2_v62_a32eb68fe1af97990229"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1615,14 +1719,35 @@
           "concepts": [
             "Primary：[Terraform Docker getting started](https://developer.hashicorp.com/terraform/tutorials/docker-get-started) 按 IaC → Install → Build → Change → Destroy → Variables → Outputs 原序读完；每次执行都先读 plan。关注 terraform init/fmt/validate/plan/apply/show/output/destroy 和 .terraform.lock.hcl/state。"
           ],
-          "guidance": "前置：前置：Docker 可用；手工部署中理解至少一项网络/主机/容器服务资源。\n略过/后移：module registry、复杂 provider aliases、远端协作 state 与策略即使在教程目录中出现，也不是第一份配置的前置。\n重复关系：为什么现在学：服务运行和部署步骤有了，再将基础设施写成可 review、可重复执行的目标状态。\n重复处理：手工 run 服务 REVIEW；Terraform plan/apply NEW；配置的声明式 desired state 与 Compose reconciliation COMPARE；state 与业务 DB 内容 COMPARE（完全不同备份对象）。\n出口：能解释 provider/resource/state 和 plan 的关系；能先读破坏性替换；能销毁所有练习资源；知道本地 state 不适合多人生产协作。\n补充/比较：略过/后移：module registry、复杂 provider aliases、远端协作 state 与策略即使在教程目录中出现，也不是第一份配置的前置。\n小实践：小实践：用 Docker provider 创建一个无持久数据容器；修改端口后读 plan，判断 in-place/update/replacement；输出访问地址并销毁；将 state 加入本地忽略规则，检查是否泄漏。\n载体与增量：Task Service 增量：先为本地/临时环境创建一小块可逆资源；不把生产账号状态与练习目录混用；README 给出 fmt/validate/plan/apply/destroy 顺序。\n出口：出口：能解释 provider/resource/state 和 plan 的关系；能先读破坏性替换；能销毁所有练习资源；知道本地 state 不适合多人生产协作。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：Docker 可用；手工部署中理解至少一项网络/主机/容器服务资源。\n略过/后移：module registry、复杂 provider aliases、远端协作 state 与策略即使在教程目录中出现，也不是第一份配置的前置。\n重复关系：为什么现在学：服务运行和部署步骤有了，再将基础设施写成可 review、可重复执行的目标状态。\n重复处理：手工 run 服务 REVIEW；Terraform plan/apply NEW；配置的声明式 desired state 与 Compose reconciliation COMPARE；state 与业务 DB 内容 COMPARE（完全不同备份对象）。\n出口：能解释 provider/resource/state 和 plan 的关系；能先读破坏性替换；能销毁所有练习资源；知道本地 state 不适合多人生产协作。\n补充/比较：略过/后移：module registry、复杂 provider aliases、远端协作 state 与策略即使在教程目录中出现，也不是第一份配置的前置。\n小实践：小实践：用 Docker provider 创建一个无持久数据容器；修改端口后读 plan，判断 in-place/update/replacement；输出访问地址并销毁；将 state 加入本地忽略规则，检查是否泄漏。\n载体与增量：Task Service 增量：先为本地/临时环境创建一小块可逆资源；不把生产账号状态与练习目录混用；README 给出 fmt/validate/plan/apply/destroy 顺序。\n出口：出口：能解释 provider/resource/state 和 plan 的关系；能先读破坏性替换；能销毁所有练习资源；知道本地 state 不适合多人生产协作。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.cloud.services.s11:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：前置：Docker 可用；手工部署中理解至少一项网络/主机/容器服务资源。\n略过/后移：module registry、复杂 provider aliases、远端协作 state 与策略即使在教程目录中出现，也不是第一份配置的前置。\n重复关系：为什么现在学：服务运行和部署步骤有了，再将基础设施写成可 review、可重复执行的目标状态。\n重复处理：手工 run 服务 REVIEW；Terraform plan/apply NEW；配置的声明式 desired state 与 Compose reconciliation COMPARE；state 与业务 DB 内容 COMPARE（完全不同备份对象）。\n出口：能解释 provider/resource/state 和 plan 的关系；能先读破坏性替换；能销毁所有练习资源；知道本地 state 不适合多人生产协作。\n补充/比较：略过/后移：module registry、复杂 provider aliases、远端协作 state 与策略即使在教程目录中出现，也不是第一份配置的前置。\n小实践：小实践：用 Docker provider 创建一个无持久数据容器；修改端口后读 plan，判断 in-place/update/replacement；输出访问地址并销毁；将 state 加入本地忽略规则，检查是否泄漏。\n载体与增量：Task Service 增量：先为本地/临时环境创建一小块可逆资源；不把生产账号状态与练习目录混用；README 给出 fmt/validate/plan/apply/destroy 顺序。\n出口：出口：能解释 provider/resource/state 和 plan 的关系；能先读破坏性替换；能销毁所有练习资源；知道本地 state 不适合多人生产协作。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "Primary：[Terraform Docker getting started](https://developer.hashicorp.com/terraform/tutorials/docker-get-started) 按 IaC → Install → Build → Change → Destroy → Variables → Outputs 原序读完；每次执行都先读 plan。关注 terraform init/fmt/validate/plan/apply/show/output/destroy 和 .terraform.lock.hcl/state。"
+          ],
+          "guidance": "问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.cloud.services.s11:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -1638,7 +1763,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         }
       ],
       "learning_guidance": {
@@ -1715,11 +1840,11 @@
       "resources": [
         {
           "role": "comparison",
-          "source_ref": "src_cloud_services_v2_v62_terraform-aws-comparison",
+          "source_ref": "src_cloud_services_v2_v62_6f2a1aaf1f841afb5ffb",
           "section_refs": [
-            "sec_cloud_services_v2_v62_terraform-aws-comparison_4759498ac2",
-            "sec_cloud_services_v2_v62_terraform-aws-comparison_5a23444828",
-            "sec_cloud_services_v2_v62_terraform-aws-comparison_b496903467"
+            "sec_cloud_services_v2_v62_2a79dc4b8f6f97fc9ea1",
+            "sec_cloud_services_v2_v62_d375be36da58e9d9c4b2",
+            "sec_cloud_services_v2_v62_8c9cbb6c34fdb9ee9e9f"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1734,14 +1859,35 @@
           "concepts": [
             "Primary/选读：HashiCorp [AWS getting started](https://developer.hashicorp.com/terraform/tutorials/aws-get-started) 或用户现用云商的当前官方教程；AWS 页 create/manage/destroy 顺序包含 EC2/VPC/security group、变量输出、模块和销毁，官方明确提醒符合 Free Tier 条件也可能发生费用。任何 apply 前核对 region、资源规格、流量/公网费用和 plan。"
           ],
-          "guidance": "前置：前置：阶段 11 通过；云账户已设预算与 alert；理解 Terraform apply 实际会创建收费资源。\n重复关系：为什么现在学：Terraform 的本地资源模型掌握后，才把它映射到目标云商资源；跨环境重复、多人协作和审计需要出现时才引入远端 state/modules。\n平台扩展门槛：当两套以上环境/团队重复同类部署，或共享模块/远端 state/review 审计已成痛点，再学 HCP Terraform/远端后端、module、policy、Helm；不要为了“平台工程”提前建 Internal Developer Platform。\n重复处理：阶段 3 手工云拓扑 REVIEW；Terraform state/plan/apply DEEPEN；GitHub Actions deploy 与 IaC apply COMPARE，将应用交付与基础设施变更分成不同权限/审批。\nTask Service 增量：将可以安全重复的 staging 基础设施写为 Terraform，state 使用合适的远端加密/锁定方案；为生产部署预设人工 review，而不是将任意 PR 的 plan/apply 凭证开放。\n补充/比较：Primary/选读：HashiCorp [AWS getting started](https://developer.hashicorp.com/terraform/tutorials/aws-get-started) 或用户现用云商的当前官方教程；AWS 页 create/manage/destroy 顺序包含 EC2/VPC/security group、变量输出、模块和销毁，官方明确提醒符合 Free Tier 条件也可能发生费用。任何 apply 前核对 region、资源规格、流量/公网费用和 plan。\n小实践：小实践：只创建一组极小 staging 资源；将 plan 保存/审阅，apply 后验证，再 destroy；通过账单和资源列表确认清零。适当时先用 HashiCorp hosted interactive lab，但确认是否会调用真实账号资源。\n载体与增量：Task Service 增量：将可以安全重复的 staging 基础设施写为 Terraform，state 使用合适的远端加密/锁定方案；为生产部署预设人工 review，而不是将任意 PR 的 plan/apply 凭证开放。\n出口：出口：能解释 plan 的所有新增/修改/删除；云资源清理与账单核查有记录；知道何时使用远端 state、何时不需要平台产品。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：阶段 11 通过；云账户已设预算与 alert；理解 Terraform apply 实际会创建收费资源。\n重复关系：为什么现在学：Terraform 的本地资源模型掌握后，才把它映射到目标云商资源；跨环境重复、多人协作和审计需要出现时才引入远端 state/modules。\n平台扩展门槛：当两套以上环境/团队重复同类部署，或共享模块/远端 state/review 审计已成痛点，再学 HCP Terraform/远端后端、module、policy、Helm；不要为了“平台工程”提前建 Internal Developer Platform。\n重复处理：阶段 3 手工云拓扑 REVIEW；Terraform state/plan/apply DEEPEN；GitHub Actions deploy 与 IaC apply COMPARE，将应用交付与基础设施变更分成不同权限/审批。\nTask Service 增量：将可以安全重复的 staging 基础设施写为 Terraform，state 使用合适的远端加密/锁定方案；为生产部署预设人工 review，而不是将任意 PR 的 plan/apply 凭证开放。\n补充/比较：Primary/选读：HashiCorp [AWS getting started](https://developer.hashicorp.com/terraform/tutorials/aws-get-started) 或用户现用云商的当前官方教程；AWS 页 create/manage/destroy 顺序包含 EC2/VPC/security group、变量输出、模块和销毁，官方明确提醒符合 Free Tier 条件也可能发生费用。任何 apply 前核对 region、资源规格、流量/公网费用和 plan。\n小实践：小实践：只创建一组极小 staging 资源；将 plan 保存/审阅，apply 后验证，再 destroy；",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.cloud.services.s12:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：前置：阶段 11 通过；云账户已设预算与 alert；理解 Terraform apply 实际会创建收费资源。\n重复关系：为什么现在学：Terraform 的本地资源模型掌握后，才把它映射到目标云商资源；跨环境重复、多人协作和审计需要出现时才引入远端 state/modules。\n平台扩展门槛：当两套以上环境/团队重复同类部署，或共享模块/远端 state/review 审计已成痛点，再学 HCP Terraform/远端后端、module、policy、Helm；不要为了“平台工程”提前建 Internal Developer Platform。\n重复处理：阶段 3 手工云拓扑 REVIEW；Terraform state/plan/apply DEEPEN；GitHub Actions deploy 与 IaC apply COMPARE，将应用交付与基础设施变更分成不同权限/审批。\nTask Service 增量：将可以安全重复的 staging 基础设施写为 Terraform，state 使用合适的远端加密/锁定方案；为生产部署预设人工 review，而不是将任意 PR 的 plan/apply 凭证开放。\n补充/比较：Primary/选读：HashiCorp [AWS getting started](https://developer.hashicorp.com/terraform/tutorials/aws-get-started) 或用户现用云商的当前官方教程；AWS 页 create/manage/destroy 顺序包含 EC2/VPC/security group、变量输出、模块和销毁，官方明确提醒符合 Free Tier 条件也可能发生费用。任何 apply 前核对 region、资源规格、流量/公网费用和 plan。\n小实践：小实践：只创建一组极小 staging 资源；将 plan 保存/审阅，apply 后验证，再 destroy；通过账单和资源列表确认清零。适当时先用 HashiCorp hosted interactive lab，但确认是否会调用真实账号资源。\n载体与增量：Task Service 增量：将可以安全重复的 staging 基础设施写为 Terraform，state 使用合适的远端加密/锁定方案；为生产部署预设人工 review，而不是将任意 PR 的 plan/apply 凭证开放。\n出口：出口：能解释 plan 的所有新增/修改/删除；云资源清理与账单核查有记录；知道何时使用远端 state、何时不需要平台产品。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "Primary/选读：HashiCorp [AWS getting started](https://developer.hashicorp.com/terraform/tutorials/aws-get-started) 或用户现用云商的当前官方教程；AWS 页 create/manage/destroy 顺序包含 EC2/VPC/security group、变量输出、模块和销毁，官方明确提醒符合 Free Tier 条件也可能发生费用。任何 apply 前核对 region、资源规格、流量/公网费用和 plan。"
+          ],
+          "guidance": "通过账单和资源列表确认清零。适当时先用 HashiCorp hosted interactive lab，但确认是否会调用真实账号资源。\n载体与增量：Task Service 增量：将可以安全重复的 staging 基础设施写为 Terraform，state 使用合适的远端加密/锁定方案；为生产部署预设人工 review，而不是将任意 PR 的 plan/apply 凭证开放。\n出口：出口：能解释 plan 的所有新增/修改/删除；云资源清理与账单核查有记录；知道何时使用远端 state、何时不需要平台产品。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.cloud.services.s12:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -1757,7 +1903,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         }
       ],
       "learning_guidance": {
@@ -1951,8 +2097,8 @@
       "node_type": "concept",
       "prerequisite_keys": [],
       "objectives": [
-        "Primary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI ",
-        "tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。"
+        "Primary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide ",
+        "SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。"
       ],
       "scope": "Primary 顺序：FastAPI [First Steps](https://fastapi.tiangolo.com/tutorial/first-steps/)（path operation、交互式文档、OpenAPI）→ [Path Parameters](https://fastapi.tiangolo.com/tutorial/path-params/) 和必要的 [Query Parameters](https://fastapi.tiangolo.com/tutorial/query-params/) → [Request Body](https://fastapi.tiangolo.com/tutorial/body/) → [Response Model](https://fastapi.tiangolo.com/tutorial/response-model/) → [Handling Errors](https://fastapi.tiangolo.com/tutorial/handling-errors/) → [Testing](https://fastapi.tiangolo.com/tutorial/testing/)；第一次引入环境配置时按需读 [Settings and Environment Variables](https://fastapi.tiangolo.com/advanced/settings/) 的 Pydantic Settings、环境变量、.env 和 testing 部分。\nDB 的 Just-in-time 顺序：只有要持久化 Task 时，复用 AI 全栈方向已深审的 FastAPI User Guide SQL (Relational) Databases 连续示例：数据库连接/Engine 与 model → session dependency → CRUD path operations → 测试；这是 Task Service 首次接数据库的 Primary，不要求先学完整 SQL 课程。先用 SQLite 做小型 CRUD，后续 Compose 阶段迁移到 PostgreSQL。若读者需要 ORM 对照，再选读 [SQLModel FastAPI tutorial](https://sqlmodel.tiangolo.com/tutorial/fastapi/) 或 [Create a Table with SQLModel](https://sqlmodel.tiangolo.com/tutorial/create-db-and-table/)；本次仅核查 SQLModel 教程目录、FastAPI intro 与建表页代表性正文，不将 SQLModel 全站课程列为云服务 Primary。无论工具如何，create_all() 是入门建表例子，不是生产 schema migration 策略。\n重复处理：HTTP 与 Python 已会部分 REVIEW；FastAPI 参数绑定、Pydantic 请求/响应校验 NEW；普通数据模型 vs SQL 表模型 COMPARE；把同一套 API 测试带入容器/CI DEEPEN。FastAPI SQL 数据库 CRUD 教程复用 AI 全栈 Primary，不在 Cloud 方向重复造一条 ORM 课程。",
       "acceptance": [
@@ -2385,7 +2531,7 @@
   ],
   "resources": [
     {
-      "source_id": "src_cloud_services_v2_v62_fastapi-api-spine",
+      "source_id": "src_cloud_services_v2_v62_6c3a14594050c78b78b6",
       "canonical_url": "https://fastapi.tiangolo.com/zh/tutorial/",
       "title": "FastAPI Tutorial / User Guide (official Simplified Chinese pages)",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -2397,7 +2543,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_a07a7da3d0",
+          "section_id": "sec_cloud_services_v2_v62_d3a0990cb627d83ba389",
           "title": "First Steps",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2413,7 +2559,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_752a0b9493",
+          "section_id": "sec_cloud_services_v2_v62_4837fbdd4c97aaf9ce8e",
           "title": "Path/Query Params",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2429,7 +2575,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_ff5c0686b2",
+          "section_id": "sec_cloud_services_v2_v62_85762750731fc2d3d940",
           "title": "Request Body",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2445,7 +2591,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_60851ed19d",
+          "section_id": "sec_cloud_services_v2_v62_8cf6184cd3c5cdf684e9",
           "title": "Response Model",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2461,7 +2607,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_9a64564844",
+          "section_id": "sec_cloud_services_v2_v62_93b0544fe89ec6a440cc",
           "title": "Handling Errors",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2477,7 +2623,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_e806a291cf",
+          "section_id": "sec_cloud_services_v2_v62_cd9d66d8c6dbc335410b",
           "title": "Testing",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2493,7 +2639,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_fastapi-api-spine_c133c334c4",
+          "section_id": "sec_cloud_services_v2_v62_27f748348229b2c92871",
           "title": "Settings（按需）",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2639,7 +2785,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read tutorial TOC and selected full sections/examples: First Steps, path/query params, request body, response model, errors, dependencies, SQL databases, testing, CORS, security first steps/JWT, settings, SSE, deployment concepts/docker. This is selected-section review, not whole tutorial audit."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_fastapi-sqlmodel-bridge",
+      "source_id": "src_cloud_services_v2_v62_5bb388f4602a13cdb3a5",
       "canonical_url": "https://fastapi.tiangolo.com/zh/tutorial/sql-databases/",
       "title": "FastAPI SQL Databases / SQLModel examples",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -2651,7 +2797,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_fastapi-sqlmodel-bridge_bfde3422aa",
+          "section_id": "sec_cloud_services_v2_v62_db0522d76d59a014bf4f",
           "title": "Engine/model",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/sql-databases/",
           "anchor": "",
@@ -2667,7 +2813,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_fastapi-sqlmodel-bridge_9dcbbf5abb",
+          "section_id": "sec_cloud_services_v2_v62_50e7c2a7cb92a0c854dc",
           "title": "Session dependency",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/sql-databases/",
           "anchor": "",
@@ -2683,7 +2829,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_fastapi-sqlmodel-bridge_afec20c6d5",
+          "section_id": "sec_cloud_services_v2_v62_3bc296ba37e11ccc970b",
           "title": "CRUD",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/sql-databases/",
           "anchor": "",
@@ -2814,7 +2960,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read the selected tutorial body/examples for SQLModel + SQLite table creation, per-request session dependency, CRUD and separate base/table/public/create/update models."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_python-en-jit",
+      "source_id": "src_cloud_services_v2_v62_9bb327b753e81170d9b3",
       "canonical_url": "https://docs.python.org/3/tutorial/",
       "title": "Python Tutorial (Python 3.14 documentation)",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -2826,7 +2972,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_python-en-jit_05004f8cac",
+          "section_id": "sec_cloud_services_v2_v62_d23bf592639c9dcd2e26",
           "title": "函数/list/dict/异常按缺口",
           "url": "https://docs.python.org/3/tutorial/",
           "anchor": "",
@@ -2955,7 +3101,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read official scope warning and TOC; opened正文/examples for control flow, data structures and errors/exceptions. The tutorial states it is designed for programmers new to Python, not people new to programming."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_docker-run-app",
+      "source_id": "src_cloud_services_v2_v62_3092c2efdf52b5a90b32",
       "canonical_url": "https://docs.docker.com/get-started/tutorials/run-an-app/",
       "title": "Docker Docs: Run an app",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -2967,7 +3113,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-run-app_74e492d5d0",
+          "section_id": "sec_cloud_services_v2_v62_34a35102568a83575a2b",
           "title": "Before you start",
           "url": "https://docs.docker.com/get-started/tutorials/run-an-app/",
           "anchor": "",
@@ -2983,7 +3129,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-run-app_946d605c49",
+          "section_id": "sec_cloud_services_v2_v62_08845634102666b7a226",
           "title": "Run a container",
           "url": "https://docs.docker.com/get-started/tutorials/run-an-app/",
           "anchor": "",
@@ -2999,7 +3145,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-run-app_9321000115",
+          "section_id": "sec_cloud_services_v2_v62_97219983751bc75e164c",
           "title": "Run an application stack",
           "url": "https://docs.docker.com/get-started/tutorials/run-an-app/",
           "anchor": "",
@@ -3015,7 +3161,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-run-app_7d13bbccda",
+          "section_id": "sec_cloud_services_v2_v62_f9e7cbacd8b7f2fb9507",
           "title": "Build an image",
           "url": "https://docs.docker.com/get-started/tutorials/run-an-app/",
           "anchor": "",
@@ -3031,7 +3177,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-run-app_317e03c96e",
+          "section_id": "sec_cloud_services_v2_v62_b359f68eecca8d3044ab",
           "title": "Share the image",
           "url": "https://docs.docker.com/get-started/tutorials/run-an-app/",
           "anchor": "",
@@ -3047,7 +3193,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-run-app_f938c3286f",
+          "section_id": "sec_cloud_services_v2_v62_282926be1cf578d088a7",
           "title": "Clean up",
           "url": "https://docs.docker.com/get-started/tutorials/run-an-app/",
           "anchor": "",
@@ -3063,7 +3209,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-run-app_098675a3aa",
+          "section_id": "sec_cloud_services_v2_v62_d558311d5ede41c85d7e",
           "title": "What you learned/Next",
           "url": "https://docs.docker.com/get-started/tutorials/run-an-app/",
           "anchor": "",
@@ -3199,7 +3345,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read the complete page in the documented order: Before you start; Run a container; Run an application stack; Build an image; Share the image; Clean up; What you learned; What's next. Checked the docker pull/run and port publishing examples, Compose command, image build/tag/push path, and volume cleanup warning."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_docker-runtime-concepts",
+      "source_id": "src_cloud_services_v2_v62_387d3368d854da00be21",
       "canonical_url": "https://docs.docker.com/get-started/docker-concepts/",
       "title": "Docker Docs: container, port publishing, Dockerfile and build best practices",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -3211,7 +3357,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-runtime-concepts_c392dca9db",
+          "section_id": "sec_cloud_services_v2_v62_0564cb69e5de0e6d0d7f",
           "title": "What is a container",
           "url": "https://docs.docker.com/get-started/docker-concepts/",
           "anchor": "",
@@ -3227,7 +3373,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-runtime-concepts_4bbfee6dd9",
+          "section_id": "sec_cloud_services_v2_v62_3d4acbfda6d51ae02686",
           "title": "Writing a Dockerfile",
           "url": "https://docs.docker.com/get-started/docker-concepts/",
           "anchor": "",
@@ -3243,7 +3389,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-runtime-concepts_f033eaa0b0",
+          "section_id": "sec_cloud_services_v2_v62_bb3f66fce70151310c5c",
           "title": "Publishing ports",
           "url": "https://docs.docker.com/get-started/docker-concepts/",
           "anchor": "",
@@ -3376,7 +3522,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Selected pages: what is a container; publishing ports; persisting container data; multi-container apps; Dockerfile writing guide; build best practices; Python guide outline and FastAPI-related sections."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_docker-compose-spine",
+      "source_id": "src_cloud_services_v2_v62_5813eb6a7cce03250a8e",
       "canonical_url": "https://docs.docker.com/compose/gettingstarted/",
       "title": "Docker Docs: Compose Getting Started",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -3388,7 +3534,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_1c98237fbb",
+          "section_id": "sec_cloud_services_v2_v62_877938d44e0c62500f76",
           "title": "Step1 Project/Dockerfile/env",
           "url": "https://docs.docker.com/compose/gettingstarted/",
           "anchor": "",
@@ -3404,7 +3550,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_45d4ca9709",
+          "section_id": "sec_cloud_services_v2_v62_8250ba99f13669b38665",
           "title": "Step2 Define services",
           "url": "https://docs.docker.com/compose/gettingstarted/",
           "anchor": "",
@@ -3420,7 +3566,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_8a0265ba43",
+          "section_id": "sec_cloud_services_v2_v62_f5a2a0e167defd636b0c",
           "title": "Step3 DB healthcheck/depends_on",
           "url": "https://docs.docker.com/compose/gettingstarted/",
           "anchor": "",
@@ -3436,7 +3582,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_1e789552de",
+          "section_id": "sec_cloud_services_v2_v62_c2d1b651c33cb50a46b1",
           "title": "Step4 Watch（可选）",
           "url": "https://docs.docker.com/compose/gettingstarted/",
           "anchor": "",
@@ -3452,7 +3598,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_bee29a1922",
+          "section_id": "sec_cloud_services_v2_v62_3c09a2282b9dc582a3bf",
           "title": "Step5 Named volume",
           "url": "https://docs.docker.com/compose/gettingstarted/",
           "anchor": "",
@@ -3468,7 +3614,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_67990130a1",
+          "section_id": "sec_cloud_services_v2_v62_d5aeba8acd256680417a",
           "title": "Step6 Multiple files/include（可选）",
           "url": "https://docs.docker.com/compose/gettingstarted/",
           "anchor": "",
@@ -3484,7 +3630,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_docker-compose-spine_962b399f08",
+          "section_id": "sec_cloud_services_v2_v62_fae576f5adf6de9edd21",
           "title": "Step7 config/logs/exec",
           "url": "https://docs.docker.com/compose/gettingstarted/",
           "anchor": "",
@@ -3627,7 +3773,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read all seven tutorial steps and checked sample files/configuration and demonstrations: Flask/Dockerfile/.env/.dockerignore, Web+Redis services, Redis healthcheck and service_healthy dependency, Compose Watch, named-volume persistence, multiple Compose files/include, and config/logs/exec debugging."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_kubernetes-basics",
+      "source_id": "src_cloud_services_v2_v62_198e051516a51b371a5f",
       "canonical_url": "https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/",
       "title": "Kubernetes: Kubernetes Basics Tutorial (Chinese landing page, English/Chinese module content)",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -3639,7 +3785,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_2ae2055313",
+          "section_id": "sec_cloud_services_v2_v62_7917a350ca2736374b05",
           "title": "Module1 Create cluster",
           "url": "https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/",
           "anchor": "",
@@ -3655,7 +3801,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_f969a17666",
+          "section_id": "sec_cloud_services_v2_v62_54cd3953ab05b65f3364",
           "title": "Module2 Deploy app",
           "url": "https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/",
           "anchor": "",
@@ -3671,7 +3817,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_e962ec178d",
+          "section_id": "sec_cloud_services_v2_v62_e48b8f867e94d1885054",
           "title": "Module3 Explore Pod/Node",
           "url": "https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/",
           "anchor": "",
@@ -3687,7 +3833,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_2f66d5daa7",
+          "section_id": "sec_cloud_services_v2_v62_fbb4347c1b4bf69a2980",
           "title": "Module4 Expose Service",
           "url": "https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/",
           "anchor": "",
@@ -3703,7 +3849,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_24e2a67f32",
+          "section_id": "sec_cloud_services_v2_v62_c797695a95f49b01e07f",
           "title": "Module5 Scale",
           "url": "https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/",
           "anchor": "",
@@ -3719,7 +3865,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_2eba6cb5ff",
+          "section_id": "sec_cloud_services_v2_v62_8ffa975dae0b88b6c0d4",
           "title": "Module6 Update/rollback",
           "url": "https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/",
           "anchor": "",
@@ -3735,7 +3881,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_kubernetes-basics_b4cd99c13b",
+          "section_id": "sec_cloud_services_v2_v62_ce52d14dccc14b644d50",
           "title": "基础对象复习；probe/config/secret详细正文另按需求核查",
           "url": "https://kubernetes.io/zh-cn/docs/tutorials/kubernetes-basics/",
           "anchor": "",
@@ -3876,7 +4022,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Checked the six-module sequence and objectives, plus selected module bodies/examples for cluster start, imperative Deployment creation, Pod/Node inspection, Service exposure, scaling, rollout/update and rollback. Did not audit every paragraph, translation variant or all troubleshooting branches."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_otel-demo-case",
+      "source_id": "src_cloud_services_v2_v62_164759e3b5aec2fa2549",
       "canonical_url": "https://opentelemetry.io/docs/demo/",
       "title": "OpenTelemetry Demo and documentation: architecture, telemetry, Compose/Helm, fault diagnosis",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -3888,7 +4034,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_otel-demo-case_cd74053c54",
+          "section_id": "sec_cloud_services_v2_v62_d7980d1c89c9f48ac35e",
           "title": "Architecture",
           "url": "https://opentelemetry.io/docs/demo/",
           "anchor": "",
@@ -3904,7 +4050,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_otel-demo-case_5141632d2c",
+          "section_id": "sec_cloud_services_v2_v62_e5daf511530957c9fe61",
           "title": "Telemetry Features",
           "url": "https://opentelemetry.io/docs/demo/",
           "anchor": "",
@@ -3920,7 +4066,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_otel-demo-case_7ec89053c3",
+          "section_id": "sec_cloud_services_v2_v62_a83fb62fbccf0c57c509",
           "title": "Docker Deployment",
           "url": "https://opentelemetry.io/docs/demo/",
           "anchor": "",
@@ -3936,7 +4082,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_otel-demo-case_11922dba38",
+          "section_id": "sec_cloud_services_v2_v62_d34c9600fb941b8f2660",
           "title": "Feature flag/recommendation-cache",
           "url": "https://opentelemetry.io/docs/demo/",
           "anchor": "",
@@ -3952,7 +4098,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_otel-demo-case_ce6ffc6b45",
+          "section_id": "sec_cloud_services_v2_v62_d3fe07929d9a03f7e3ba",
           "title": "Collector troubleshooting",
           "url": "https://opentelemetry.io/docs/demo/",
           "anchor": "",
@@ -3968,7 +4114,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_otel-demo-case_d6363e1616",
+          "section_id": "sec_cloud_services_v2_v62_ab663038977569709b50",
           "title": "Kubernetes Deployment（按需）",
           "url": "https://opentelemetry.io/docs/demo/",
           "anchor": "",
@@ -4114,7 +4260,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read selected sections of Architecture, Telemetry Features, Docker Deployment, Kubernetes Deployment, recommendation-cache feature-flag diagnosis and Collector troubleshooting; checked commands and documented resource requirements. Did not inspect the full demo source tree or every service implementation."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_github-actions-ci-deploy",
+      "source_id": "src_cloud_services_v2_v62_916d6d486e657729ae77",
       "canonical_url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
       "title": "GitHub Docs: Actions basics, example workflow, Python CI, deployment controls and secure use",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -4126,7 +4272,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_9262c10913",
+          "section_id": "sec_cloud_services_v2_v62_f831579991051a44754b",
           "title": "Workflow/events/jobs/runners/steps",
           "url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
           "anchor": "",
@@ -4142,7 +4288,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_e49b58f7b3",
+          "section_id": "sec_cloud_services_v2_v62_7f0200c33fc2da529772",
           "title": "Example workflow",
           "url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
           "anchor": "",
@@ -4158,7 +4304,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_b302c21f0a",
+          "section_id": "sec_cloud_services_v2_v62_ace6c3df44b1dabb0a61",
           "title": "Python build/test（按项目语言替换）",
           "url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
           "anchor": "",
@@ -4174,7 +4320,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_785499dc97",
+          "section_id": "sec_cloud_services_v2_v62_cbbfeb76bbed9c5af77a",
           "title": "Artifacts与cache",
           "url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
           "anchor": "",
@@ -4190,7 +4336,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_a51905621b",
+          "section_id": "sec_cloud_services_v2_v62_5b7590ffa207bbd441cf",
           "title": "Control deployments/environment/concurrency",
           "url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
           "anchor": "",
@@ -4206,7 +4352,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_f28a6fd0fb",
+          "section_id": "sec_cloud_services_v2_v62_3861b4949a5ddb8dac53",
           "title": "Secure use/action pinning",
           "url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
           "anchor": "",
@@ -4222,7 +4368,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_github-actions-ci-deploy_d004d68b55",
+          "section_id": "sec_cloud_services_v2_v62_8948f0931afe3844a29a",
           "title": "OIDC provider（目标选定后）",
           "url": "https://docs.github.com/en/actions/get-started/understand-github-actions",
           "anchor": "",
@@ -4363,7 +4509,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read the workflow/event/job/runner/step model, one working example workflow, selected Python setup/dependency/test sections, deployment Environment/concurrency/approval controls, workflow artifact explanation, secure-use recommendations and current billing concepts. Did not audit the complete GitHub Actions reference."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_terraform-docker-spine",
+      "source_id": "src_cloud_services_v2_v62_ab4126213cd9a98b44be",
       "canonical_url": "https://developer.hashicorp.com/terraform/tutorials/docker-get-started",
       "title": "HashiCorp Developer: Terraform Docker getting started",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -4375,7 +4521,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_1f36bdce30",
+          "section_id": "sec_cloud_services_v2_v62_22c89bc1c8fabd9a78b8",
           "title": "Infrastructure as Code",
           "url": "https://developer.hashicorp.com/terraform/tutorials/docker-get-started",
           "anchor": "",
@@ -4391,7 +4537,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_569ca49f4a",
+          "section_id": "sec_cloud_services_v2_v62_fe10b9c979e776a9df8e",
           "title": "Install",
           "url": "https://developer.hashicorp.com/terraform/tutorials/docker-get-started",
           "anchor": "",
@@ -4407,7 +4553,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_bdd254b65b",
+          "section_id": "sec_cloud_services_v2_v62_2069ea7a2b0ffec837ce",
           "title": "Build",
           "url": "https://developer.hashicorp.com/terraform/tutorials/docker-get-started",
           "anchor": "",
@@ -4423,7 +4569,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_c0bf75bd78",
+          "section_id": "sec_cloud_services_v2_v62_1f866d3815697e52d39e",
           "title": "Change",
           "url": "https://developer.hashicorp.com/terraform/tutorials/docker-get-started",
           "anchor": "",
@@ -4439,7 +4585,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_ea9bb7ea83",
+          "section_id": "sec_cloud_services_v2_v62_033dffa64e2b739841d1",
           "title": "Destroy",
           "url": "https://developer.hashicorp.com/terraform/tutorials/docker-get-started",
           "anchor": "",
@@ -4455,7 +4601,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_02db55bac5",
+          "section_id": "sec_cloud_services_v2_v62_6ac18335866779e97cfe",
           "title": "Variables",
           "url": "https://developer.hashicorp.com/terraform/tutorials/docker-get-started",
           "anchor": "",
@@ -4471,7 +4617,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_terraform-docker-spine_e7ce99764a",
+          "section_id": "sec_cloud_services_v2_v62_a32eb68fe1af97990229",
           "title": "Outputs",
           "url": "https://developer.hashicorp.com/terraform/tutorials/docker-get-started",
           "anchor": "",
@@ -4608,7 +4754,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Reviewed the full seven-lesson sequence and selected body/examples from infrastructure-as-code introduction, installation, build, change, destroy, variables and outputs; checked plan/apply/state/lockfile commands and destructive-resource behavior."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_terraform-aws-comparison",
+      "source_id": "src_cloud_services_v2_v62_6f2a1aaf1f841afb5ffb",
       "canonical_url": "https://developer.hashicorp.com/terraform/tutorials/aws-get-started",
       "title": "HashiCorp Developer: Terraform AWS getting started",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -4620,7 +4766,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_cloud_services_v2_v62_terraform-aws-comparison_4759498ac2",
+          "section_id": "sec_cloud_services_v2_v62_2a79dc4b8f6f97fc9ea1",
           "title": "Create",
           "url": "https://developer.hashicorp.com/terraform/tutorials/aws-get-started",
           "anchor": "",
@@ -4636,7 +4782,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_terraform-aws-comparison_5a23444828",
+          "section_id": "sec_cloud_services_v2_v62_d375be36da58e9d9c4b2",
           "title": "Manage",
           "url": "https://developer.hashicorp.com/terraform/tutorials/aws-get-started",
           "anchor": "",
@@ -4652,7 +4798,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_cloud_services_v2_v62_terraform-aws-comparison_b496903467",
+          "section_id": "sec_cloud_services_v2_v62_8c9cbb6c34fdb9ee9e9f",
           "title": "Destroy与费用清理",
           "url": "https://developer.hashicorp.com/terraform/tutorials/aws-get-started",
           "anchor": "",
@@ -4783,7 +4929,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Selected create/manage/destroy pages and sequence; checked EC2/VPC/security-group examples, credentials environment, module use, plan/apply and destroy warning. Did not execute resources or calculate account-specific price."
     },
     {
-      "source_id": "src_cloud_services_v2_v62_case_opentelemetry-demo",
+      "source_id": "src_cloud_services_v2_v62_91c69cdbe11e4f0f1b63",
       "canonical_url": "https://github.com/open-telemetry/opentelemetry-demo",
       "title": "云：OpenTelemetry Demo",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -4807,7 +4953,7 @@
       }
     },
     {
-      "source_id": "src_cloud_services_v2_v62_case_getting-started-todo-app",
+      "source_id": "src_cloud_services_v2_v62_238ef50884fc4ffabe8a",
       "canonical_url": "https://github.com/docker/getting-started-todo-app",
       "title": "云：Docker Getting Started Todo App",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -4832,19 +4978,19 @@
     }
   ],
   "resource_refs": [
-    "src_cloud_services_v2_v62_fastapi-api-spine",
-    "src_cloud_services_v2_v62_fastapi-sqlmodel-bridge",
-    "src_cloud_services_v2_v62_python-en-jit",
-    "src_cloud_services_v2_v62_docker-run-app",
-    "src_cloud_services_v2_v62_docker-runtime-concepts",
-    "src_cloud_services_v2_v62_docker-compose-spine",
-    "src_cloud_services_v2_v62_kubernetes-basics",
-    "src_cloud_services_v2_v62_otel-demo-case",
-    "src_cloud_services_v2_v62_github-actions-ci-deploy",
-    "src_cloud_services_v2_v62_terraform-docker-spine",
-    "src_cloud_services_v2_v62_terraform-aws-comparison",
-    "src_cloud_services_v2_v62_case_opentelemetry-demo",
-    "src_cloud_services_v2_v62_case_getting-started-todo-app"
+    "src_cloud_services_v2_v62_6c3a14594050c78b78b6",
+    "src_cloud_services_v2_v62_5bb388f4602a13cdb3a5",
+    "src_cloud_services_v2_v62_9bb327b753e81170d9b3",
+    "src_cloud_services_v2_v62_3092c2efdf52b5a90b32",
+    "src_cloud_services_v2_v62_387d3368d854da00be21",
+    "src_cloud_services_v2_v62_5813eb6a7cce03250a8e",
+    "src_cloud_services_v2_v62_198e051516a51b371a5f",
+    "src_cloud_services_v2_v62_164759e3b5aec2fa2549",
+    "src_cloud_services_v2_v62_916d6d486e657729ae77",
+    "src_cloud_services_v2_v62_ab4126213cd9a98b44be",
+    "src_cloud_services_v2_v62_6f2a1aaf1f841afb5ffb",
+    "src_cloud_services_v2_v62_91c69cdbe11e4f0f1b63",
+    "src_cloud_services_v2_v62_238ef50884fc4ffabe8a"
   ],
   "required_node_keys": [
     "node.v62.cloud.services.sm1",

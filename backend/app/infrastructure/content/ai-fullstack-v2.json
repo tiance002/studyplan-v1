@@ -26,9 +26,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_ai_fullstack_v2_v62_mdn-javascript-jit",
+          "source_ref": "src_ai_fullstack_v2_v62_52b28ed9059b07b228ef",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_mdn-javascript-jit_959e14ca6b"
+            "sec_ai_fullstack_v2_v62_0dce9c22684e5ece3fa1"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -38,9 +38,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_javascript-info-supplement",
+          "source_ref": "src_ai_fullstack_v2_v62_345ee28e1db4813cbc09",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_javascript-info-supplement_ab61d6d139"
+            "sec_ai_fullstack_v2_v62_97439e68b0cbf5257368"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -55,14 +55,35 @@
           "concepts": [
             "主读/选读：先打开 [MDN Scripting](https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Scripting) 的目录。最低测：变量/字符串/数组/对象、if/loop、function/return、事件处理、JSON、fetch、Promise/async-await、map/filter。"
           ],
-          "guidance": "前置：前置：基本 HTML/CSS 能搭一张卡片；不要求已学 React。\n重复关系：重复处理：MDN 已学过的基础语法 → REVIEW 小测，不整套重读；MDN 异步与 javascript.info 对应章节 → COMPARE 仅在 Promise 状态、响应体一次性读取、HTTP status 概念有疑问时对照；Array filter/map 用 15 分钟补 React 实际要求。\n补充/比较：主读/选读：先打开 [MDN Scripting](https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Scripting) 的目录。最低测：变量/字符串/数组/对象、if/loop、function/return、事件处理、JSON、fetch、Promise/async-await、map/filter。\n按缺口进入：无 JS 基础就顺着 MDN 的「变量→数学/字符串→数组→条件/循环→函数→事件→对象→DOM→网络请求→JSON→调试」学核心；HTTP 请求不会时专门读 [MDN 使用 Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) 与 MDN [异步 JavaScript](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS)。javascript.info 的 [Fetch](https://javascript.info/fetch)、[Promise chaining](https://javascript.info/promise-chaining)、[async/await](https://javascript.info/async-await) 按解释缺口选读。\n小实践：小实践：给定 6 个本地资料对象，通过输入框过滤标题；按钮点击后 fetch 一个公开 JSON 接口，分别显示 loading/data/404/error。\n载体与增量：项目增量：确定数据字段（id/title/source_url/note/created_at）并画出 Browser → HTTP → API → response JSON → UI；先不写 React。\n出口：出口：能口头解释 404 为什么不会让 fetch() Promise 自动 reject；能看出 response parsing 和 error check 是两个步骤；熟悉数组、函数、事件、对象。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：基本 HTML/CSS 能搭一张卡片；不要求已学 React。\n重复关系：重复处理：MDN 已学过的基础语法 → REVIEW 小测，不整套重读；MDN 异步与 javascript.info 对应章节 → COMPARE 仅在 Promise 状态、响应体一次性读取、HTTP status 概念有疑问时对照；Array filter/map 用 15 分钟补 React 实际要求。\n补充/比较：主读/选读：先打开 [MDN Scripting](https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Scripting) 的目录。最低测：变量/字符串/数组/对象、if/loop、function/return、事件处理、JSON、fetch、Promise/async-await、map/filter。\n按缺口进入：无 JS 基础就顺着 MDN 的「变量→数学/字符串→数组→条件/循环→函数→事件→对象→DOM→网络请求→JSON→调试」学核心；HTTP 请求不会时专门读 [MDN 使用 Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) 与 MDN [异步 JavaScript](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS)。javascript.info 的 [Fetch](https://javascript.info/fetch)、[Promise chaining](https://javascript.info/promise-chaining)、[async/await](https://javascript.info/async-a",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.ai.fullstack.f0:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：前置：基本 HTML/CSS 能搭一张卡片；不要求已学 React。\n重复关系：重复处理：MDN 已学过的基础语法 → REVIEW 小测，不整套重读；MDN 异步与 javascript.info 对应章节 → COMPARE 仅在 Promise 状态、响应体一次性读取、HTTP status 概念有疑问时对照；Array filter/map 用 15 分钟补 React 实际要求。\n补充/比较：主读/选读：先打开 [MDN Scripting](https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Scripting) 的目录。最低测：变量/字符串/数组/对象、if/loop、function/return、事件处理、JSON、fetch、Promise/async-await、map/filter。\n按缺口进入：无 JS 基础就顺着 MDN 的「变量→数学/字符串→数组→条件/循环→函数→事件→对象→DOM→网络请求→JSON→调试」学核心；HTTP 请求不会时专门读 [MDN 使用 Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) 与 MDN [异步 JavaScript](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Async_JS)。javascript.info 的 [Fetch](https://javascript.info/fetch)、[Promise chaining](https://javascript.info/promise-chaining)、[async/await](https://javascript.info/async-await) 按解释缺口选读。\n小实践：小实践：给定 6 个本地资料对象，通过输入框过滤标题；按钮点击后 fetch 一个公开 JSON 接口，分别显示 loading/data/404/error。\n载体与增量：项目增量：确定数据字段（id/title/source_url/note/created_at）并画出 Browser → HTTP → API → response JSON → UI；先不写 React。\n出口：出口：能口头解释 404 为什么不会让 fetch() Promise 自动 reject；能看出 response parsing 和 error check 是两个步骤；熟悉数组、函数、事件、对象。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "主读/选读：先打开 [MDN Scripting](https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Scripting) 的目录。最低测：变量/字符串/数组/对象、if/loop、function/return、事件处理、JSON、fetch、Promise/async-await、map/filter。"
+          ],
+          "guidance": "wait) 按解释缺口选读。\n小实践：小实践：给定 6 个本地资料对象，通过输入框过滤标题；按钮点击后 fetch 一个公开 JSON 接口，分别显示 loading/data/404/error。\n载体与增量：项目增量：确定数据字段（id/title/source_url/note/created_at）并画出 Browser → HTTP → API → response JSON → UI；先不写 React。\n出口：出口：能口头解释 404 为什么不会让 fetch() Promise 自动 reject；能看出 response parsing 和 error check 是两个步骤；熟悉数组、函数、事件、对象。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.ai.fullstack.f0:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -78,7 +99,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         }
       ],
       "learning_guidance": {
@@ -153,11 +174,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_ai_fullstack_v2_v62_mdn-http-mental-model",
+          "source_ref": "src_ai_fullstack_v2_v62_c0a2aeb32833a36f7511",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_mdn-http-mental-model_6c8e8926c7",
-            "sec_ai_fullstack_v2_v62_mdn-http-mental-model_931eecbdc7",
-            "sec_ai_fullstack_v2_v62_mdn-http-mental-model_6c38cc533a"
+            "sec_ai_fullstack_v2_v62_ccf93880e9fa5b456ee0",
+            "sec_ai_fullstack_v2_v62_4b62c72eabe425b4e5b8",
+            "sec_ai_fullstack_v2_v62_5a9881927d83409f3a87"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -167,9 +188,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_mdn-javascript-jit",
+          "source_ref": "src_ai_fullstack_v2_v62_52b28ed9059b07b228ef",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_mdn-javascript-jit_654ae7e54a"
+            "sec_ai_fullstack_v2_v62_578f2569584f55b1f31a"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -282,15 +303,15 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_ai_fullstack_v2_v62_react-learn-spine",
+          "source_ref": "src_ai_fullstack_v2_v62_b7fceb2f15132c3e4434",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_react-learn-spine_328908a832",
-            "sec_ai_fullstack_v2_v62_react-learn-spine_6067f0fdfe",
-            "sec_ai_fullstack_v2_v62_react-learn-spine_303cb77a31",
-            "sec_ai_fullstack_v2_v62_react-learn-spine_29079714c9",
-            "sec_ai_fullstack_v2_v62_react-learn-spine_e02aedc24f",
-            "sec_ai_fullstack_v2_v62_react-learn-spine_b22b9ef2b7",
-            "sec_ai_fullstack_v2_v62_react-learn-spine_ab4214483c"
+            "sec_ai_fullstack_v2_v62_2169726b651227b09b4a",
+            "sec_ai_fullstack_v2_v62_5553877d2f5020b7b801",
+            "sec_ai_fullstack_v2_v62_8b497a87c9a2e939285f",
+            "sec_ai_fullstack_v2_v62_51088a0cea99aa0ffb54",
+            "sec_ai_fullstack_v2_v62_cf13b5b31a2e1c40dd7d",
+            "sec_ai_fullstack_v2_v62_5e31d675c5715a9ec1b4",
+            "sec_ai_fullstack_v2_v62_8615ed2c58ba6530108b"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -300,9 +321,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_vite-build-deploy",
+          "source_ref": "src_ai_fullstack_v2_v62_642a663a2f1e39eda66f",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_vite-build-deploy_3eb938f866"
+            "sec_ai_fullstack_v2_v62_e1c20f5cdcb88c86339e"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -317,14 +338,35 @@
           "concepts": [
             "主读（顺序就是练习顺序）：\n1. [React Quick Start](https://zh-hans.react.dev/learn)：作全局预览，略过不懂的 hook 深度细节。\n2. [Describing the UI](https://zh-hans.react.dev/learn/describing-the-ui)：组件/导出/JSX/JS 表达式/props/条件/列表与 key/纯组件。\n3. [Thinking in React](https://zh-hans.react.dev/learn/thinking-in-react)：从静态组件树定位最小 state，派生过滤结果，状态上提。\n4. [Adding Interactivity](https://zh-hans.react.dev/learn/adding-interactivity)：事件、useState、快照/更新队列、表单、数组对象不可变更新。\n5. [Managing State](https://zh-hans.react.dev/learn/managing-state)：状态结构与共享状态；Reducer/context 先只了解其存在。\n6. [You Might Not Need an Effect](https://zh-hans.react.dev/learn/you-might-not-need-an-effect) → [Synchronizing with Effects](https://zh-hans.react.dev/learn/synchronizing-with-effects)：先认识何时不用 Effect，再学真正的同步情形。"
           ],
-          "guidance": "前置：前置：JavaScript 函数、数组、对象、模块导入导出、map/filter、自定义事件处理过关；HTML/CSS 足以读 JSX。\n重复关系：暴露处理：JSX/数组操作是已有 JS 的 REVIEW；组件树、state 快照、纯 render 是 NEW；“派生值不存第二份”属 DEEPEN；旧教程里 lifecycle/class components 与当前函数组件 docs 有差异则标 VERSION_CONTEXT，初版不学旧 API。\n补充/比较：1. [React Quick Start](https://zh-hans.react.dev/learn)：作全局预览，略过不懂的 hook 深度细节。\n2. [Describing the UI](https://zh-hans.react.dev/learn/describing-the-ui)：组件/导出/JSX/JS 表达式/props/条件/列表与 key/纯组件。\n3. [Thinking in React](https://zh-hans.react.dev/learn/thinking-in-react)：从静态组件树定位最小 state，派生过滤结果，状态上提。\n4. [Adding Interactivity](https://zh-hans.react.dev/learn/adding-interactivity)：事件、useState、快照/更新队列、表单、数组对象不可变更新。\n5. [Managing State](https://zh-hans.react.dev/learn/managing-state)：状态结构与共享状态；Reducer/context 先只了解其存在。\n6. [You Might Not Need an Effect](https://zh-hans.react.dev/learn/you-might-not-need-an-effect) → [Synchronizing with Effects](https://zh-hans.react.dev/learn/synchronizing-with-effects)：先认识何时不用 Effect，再学真正的同步情形。\n补充：[Vite Guide](https://vite.dev/guide/) 用来建项目；[Build](https://vite.dev/guide/build)、[Static Deploy](https://vite.dev/guide/static-deploy) 留到部署。暂不引入 TypeScript、Redux、TanStack Query、Tailwind、Next.js。\n小实践：小实践：把资料条目数组拆成 WorkspacePage / SearchBar / SourceList / SourceRow；加过滤、归档切换和编辑 modal；派生后的 filtered list 不放入 state。\n载体与增量：项目增量：本地研究板达到可点击的产品界面，使用假数组；添加 loading / empty / error / ready 的 UI 空态占位。\n出口：出口：可以解释组件为什么拆成这些部分、搜索输入状态在哪、何时 state 要上提；能为列表项使用稳定 id key；能区分用户点击提交与外部系统同步。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：JavaScript 函数、数组、对象、模块导入导出、map/filter、自定义事件处理过关；HTML/CSS 足以读 JSX。\n重复关系：暴露处理：JSX/数组操作是已有 JS 的 REVIEW；组件树、state 快照、纯 render 是 NEW；“派生值不存第二份”属 DEEPEN；旧教程里 lifecycle/class components 与当前函数组件 docs 有差异则标 VERSION_CONTEXT，初版不学旧 API。\n补充/比较：1. [React Quick Start](https://zh-hans.react.dev/learn)：作全局预览，略过不懂的 hook 深度细节。\n2. [Describing the UI](https://zh-hans.react.dev/learn/describing-the-ui)：组件/导出/JSX/JS 表达式/props/条件/列表与 key/纯组件。\n3. [Thinking in React](https://zh-hans.react.dev/learn/thinking-in-react)：从静态组件树定位最小 state，派生过滤结果，状态上提。\n4. [Adding Interactivity](https://zh-hans.react.dev/learn/adding-interactivity)：事件、useState、快照/更新队列、表单、数组对象不可变更新。\n5. [Managing State](https://zh-hans.react.dev/learn/managing-state)：状态结构与共享状态；Reducer/context 先只了解其存在。\n6. [You Might Not Need an Effect](https://zh-hans.react.dev/learn/you-might-not-need-an-effect) → [S",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.ai.fullstack.f2:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：前置：JavaScript 函数、数组、对象、模块导入导出、map/filter、自定义事件处理过关；HTML/CSS 足以读 JSX。\n重复关系：暴露处理：JSX/数组操作是已有 JS 的 REVIEW；组件树、state 快照、纯 render 是 NEW；“派生值不存第二份”属 DEEPEN；旧教程里 lifecycle/class components 与当前函数组件 docs 有差异则标 VERSION_CONTEXT，初版不学旧 API。\n补充/比较：1. [React Quick Start](https://zh-hans.react.dev/learn)：作全局预览，略过不懂的 hook 深度细节。\n2. [Describing the UI](https://zh-hans.react.dev/learn/describing-the-ui)：组件/导出/JSX/JS 表达式/props/条件/列表与 key/纯组件。\n3. [Thinking in React](https://zh-hans.react.dev/learn/thinking-in-react)：从静态组件树定位最小 state，派生过滤结果，状态上提。\n4. [Adding Interactivity](https://zh-hans.react.dev/learn/adding-interactivity)：事件、useState、快照/更新队列、表单、数组对象不可变更新。\n5. [Managing State](https://zh-hans.react.dev/learn/managing-state)：状态结构与共享状态；Reducer/context 先只了解其存在。\n6. [You Might Not Need an Effect](https://zh-hans.react.dev/learn/you-might-not-need-an-effect) → [Synchronizing with Effects](https://zh-hans.react.dev/learn/synchronizing-with-effects)：先认识何时不用 Effect，再学真正的同步情形。\n补充：[Vite Guide](https://vite.dev/guide/) 用来建项目；[Build](https://vite.dev/guide/build)、[Static Deploy](https://vite.dev/guide/static-deploy) 留到部署。暂不引入 TypeScript、Redux、TanStack Query、Tailwind、Next.js。\n小实践：小实践：把资料条目数组拆成 WorkspacePage / SearchBar / SourceList / SourceRow；加过滤、归档切换和编辑 modal；派生后的 filtered list 不放入 state。\n载体与增量：项目增量：本地研究板达到可点击的产品界面，使用假数组；添加 loading / empty / error / ready 的 UI 空态占位。\n出口：出口：可以解释组件为什么拆成这些部分、搜索输入状态在哪、何时 state 要上提；能为列表项使用稳定 id key；能区分用户点击提交与外部系统同步。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "主读（顺序就是练习顺序）：\n1. [React Quick Start](https://zh-hans.react.dev/learn)：作全局预览，略过不懂的 hook 深度细节。\n2. [Describing the UI](https://zh-hans.react.dev/learn/describing-the-ui)：组件/导出/JSX/JS 表达式/props/条件/列表与 key/纯组件。\n3. [Thinking in React](https://zh-hans.react.dev/learn/thinking-in-react)：从静态组件树定位最小 state，派生过滤结果，状态上提。\n4. [Adding Interactivity](https://zh-hans.react.dev/learn/adding-interactivity)：事件、useState、快照/更新队列、表单、数组对象不可变更新。\n5. [Managing State](https://zh-hans.react.dev/learn/managing-state)：状态结构与共享状态；Reducer/context 先只了解其存在。\n6. [You Might Not Need an Effect](https://zh-hans.react.dev/learn/you-might-not-need-an-effect) → [Synchronizing with Effects](https://zh-hans.react.dev/learn/synchronizing-with-effects)：先认识何时不用 Effect，再学真正的同步情形。"
+          ],
+          "guidance": "ynchronizing with Effects](https://zh-hans.react.dev/learn/synchronizing-with-effects)：先认识何时不用 Effect，再学真正的同步情形。\n补充：[Vite Guide](https://vite.dev/guide/) 用来建项目；[Build](https://vite.dev/guide/build)、[Static Deploy](https://vite.dev/guide/static-deploy) 留到部署。暂不引入 TypeScript、Redux、TanStack Query、Tailwind、Next.js。\n小实践：小实践：把资料条目数组拆成 WorkspacePage / SearchBar / SourceList / SourceRow；加过滤、归档切换和编辑 modal；派生后的 filtered list 不放入 state。\n载体与增量：项目增量：本地研究板达到可点击的产品界面，使用假数组；添加 loading / empty / error / ready 的 UI 空态占位。\n出口：出口：可以解释组件为什么拆成这些部分、搜索输入状态在哪、何时 state 要上提；能为列表项使用稳定 id key；能区分用户点击提交与外部系统同步。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.ai.fullstack.f2:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -340,7 +382,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         }
       ],
       "learning_guidance": {
@@ -413,15 +455,15 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_ai_fullstack_v2_v62_fastapi-api-spine",
+          "source_ref": "src_ai_fullstack_v2_v62_6c3a14594050c78b78b6",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_a07a7da3d0",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_52393d8fca",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_2867b24f4c",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_ff5c0686b2",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_60851ed19d",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_9a64564844",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_2e41b118eb"
+            "sec_ai_fullstack_v2_v62_d3a0990cb627d83ba389",
+            "sec_ai_fullstack_v2_v62_01df8439cc02d70be7bd",
+            "sec_ai_fullstack_v2_v62_c26fe6c1323bae2d6831",
+            "sec_ai_fullstack_v2_v62_85762750731fc2d3d940",
+            "sec_ai_fullstack_v2_v62_8cf6184cd3c5cdf684e9",
+            "sec_ai_fullstack_v2_v62_93b0544fe89ec6a440cc",
+            "sec_ai_fullstack_v2_v62_617338cf32615f010086"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -431,10 +473,10 @@
         },
         {
           "role": "reference",
-          "source_ref": "src_ai_fullstack_v2_v62_fastapi-api-spine",
+          "source_ref": "src_ai_fullstack_v2_v62_6c3a14594050c78b78b6",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_fdd4938853",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_3892f50f52"
+            "sec_ai_fullstack_v2_v62_a8283d23cc6f7c270c03",
+            "sec_ai_fullstack_v2_v62_d2f1c20dae71804a8be8"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -444,9 +486,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_python-en-jit",
+          "source_ref": "src_ai_fullstack_v2_v62_9bb327b753e81170d9b3",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_python-en-jit_b598a23dc3"
+            "sec_ai_fullstack_v2_v62_47a1302f514aa79d8800"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -456,9 +498,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_ai_fullstack_v2_v62_javascript-info-supplement",
+          "source_ref": "src_ai_fullstack_v2_v62_345ee28e1db4813cbc09",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_javascript-info-supplement_c67c6cba7b"
+            "sec_ai_fullstack_v2_v62_e8150a7ed5d329301205"
           ],
           "source_version": 1,
           "order_index": 3,
@@ -471,17 +513,57 @@
         {
           "topic": "本阶段章级练习与教学边界",
           "concepts": [
-            "主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- ",
-            "[Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。"
+            "主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response ",
+            "Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- [Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。"
           ],
-          "guidance": "前置：前置：了解 HTTP/JSON；Python 缺口此时才补，不在阶段 0 预先要求掌握。\nJIT Python 补缺（仅有缺口时）：FastAPI route 是 Python 函数，body/response 用 Pydantic/type hints，依赖也用函数。先做入场测：能读懂函数、list/dict、type hints、异常和 async def 示例则直接继续；否则查官方 [Python Tutorial](https://docs.python.org/3/tutorial/) 的 3.1–3.2、4.1/4.2/4.8、5.1/5.5、6、8.2–8.4。该教程明确面向会编程但新学 Python 的人，不是零编程入门。用一条练习将阶段 0 的资料数组筛选改写为 Python 函数，能读 FastAPI 代码即止；不提前学完整 Python 课程。\n重复关系：暴露处理：MDN 写 request/response 思路为 REVIEW；前端用 OpenAPI 自动 API docs 是 NEW；输入模型、持久化模型、公开响应分离是 DEEPEN。\n补充/比较：JIT Python 补缺（仅有缺口时）：FastAPI route 是 Python 函数，body/response 用 Pydantic/type hints，依赖也用函数。先做入场测：能读懂函数、list/dict、type hints、异常和 async def 示例则直接继续；否则查官方 [Python Tutorial](https://docs.python.org/3/tutorial/) 的 3.1–3.2、4.1/4.2/4.8、5.1/5.5、6、8.2–8.4。该教程明确面向会编程但新学 Python 的人，不是零编程入门。用一条练习将阶段 0 的资料数组筛选改写为 Python 函数，能读 FastAPI 代码即止；不提前学完整 Python 课程。\n主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- [Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。\n补充：MDN HTTP methods/status codes 只查所用状态码；[javascript.info/fetch](https://javascript.info/fetch) 复核浏览器要 response.ok。\n小实践：小实践：手动给一个 POST 送有效 JSON、缺字段、错误类型、超长字段；让学员看到 OpenAPI 对应的 422；GET /sources/{id} 不存在回 404。\n载体与增量：项目增量：React 页面改为调用 FastAPI 的 GET/POST/PATCH/DELETE /sources；分页/搜索使用 query 参数。先用内存数组保存，重启丢失可接受。\n出口：出口：能画 API 表（method/path/input/status/output/error），能用 Swagger 文档手工调用，能解释 422 是输入校验而非 provider 失败；可以本地独立启动 FE/BE 并查 CORS。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：了解 HTTP/JSON；Python 缺口此时才补，不在阶段 0 预先要求掌握。\nJIT Python 补缺（仅有缺口时）：FastAPI route 是 Python 函数，body/response 用 Pydantic/type hints，依赖也用函数。先做入场测：能读懂函数、list/dict、type hints、异常和 async def 示例则直接继续；否则查官方 [Python Tutorial](https://docs.python.org/3/tutorial/) 的 3.1–3.2、4.1/4.2/4.8、5.1/5.5、6、8.2–8.4。该教程明确面向会编程但新学 Python 的人，不是零编程入门。用一条练习将阶段 0 的资料数组筛选改写为 Python 函数，能读 FastAPI 代码即止；不提前学完整 Python 课程。\n重复关系：暴露处理：MDN 写 request/response 思路为 REVIEW；前端用 OpenAPI 自动 API docs 是 NEW；输入模型、持久化模型、公开响应分离是 DEEPEN。\n补充/比较：JIT Python 补缺（仅有缺口时）：FastAPI route 是 Python 函数，body/response 用 Pydantic/type hints，依赖也用函数。先做入场测：能读懂函数、list/dict、type hints、异常和 async def 示例则直接继续；否则查官方 [Python Tutorial](https://docs.python.org/3/tutorial/) 的 3.1–3.2、4.1/4.2/4.8、5.1/5.5、6、8.2–8.4。该教程明确面向会编程但新学 Python 的人，不是零编程入门。用一条练习将阶段 0 的资料数组筛选改写为 Python 函数，能读 FastAPI 代码即止；不提前学完整 Python 课程。\n主读：沿 Fa",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.ai.fullstack.f3:0",
+          "fragment_index": 0,
+          "fragment_count": 3,
+          "original_guidance": "前置：前置：了解 HTTP/JSON；Python 缺口此时才补，不在阶段 0 预先要求掌握。\nJIT Python 补缺（仅有缺口时）：FastAPI route 是 Python 函数，body/response 用 Pydantic/type hints，依赖也用函数。先做入场测：能读懂函数、list/dict、type hints、异常和 async def 示例则直接继续；否则查官方 [Python Tutorial](https://docs.python.org/3/tutorial/) 的 3.1–3.2、4.1/4.2/4.8、5.1/5.5、6、8.2–8.4。该教程明确面向会编程但新学 Python 的人，不是零编程入门。用一条练习将阶段 0 的资料数组筛选改写为 Python 函数，能读 FastAPI 代码即止；不提前学完整 Python 课程。\n重复关系：暴露处理：MDN 写 request/response 思路为 REVIEW；前端用 OpenAPI 自动 API docs 是 NEW；输入模型、持久化模型、公开响应分离是 DEEPEN。\n补充/比较：JIT Python 补缺（仅有缺口时）：FastAPI route 是 Python 函数，body/response 用 Pydantic/type hints，依赖也用函数。先做入场测：能读懂函数、list/dict、type hints、异常和 async def 示例则直接继续；否则查官方 [Python Tutorial](https://docs.python.org/3/tutorial/) 的 3.1–3.2、4.1/4.2/4.8、5.1/5.5、6、8.2–8.4。该教程明确面向会编程但新学 Python 的人，不是零编程入门。用一条练习将阶段 0 的资料数组筛选改写为 Python 函数，能读 FastAPI 代码即止；不提前学完整 Python 课程。\n主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- [Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。\n补充：MDN HTTP methods/status codes 只查所用状态码；[javascript.info/fetch](https://javascript.info/fetch) 复核浏览器要 response.ok。\n小实践：小实践：手动给一个 POST 送有效 JSON、缺字段、错误类型、超长字段；让学员看到 OpenAPI 对应的 422；GET /sources/{id} 不存在回 404。\n载体与增量：项目增量：React 页面改为调用 FastAPI 的 GET/POST/PATCH/DELETE /sources；分页/搜索使用 query 参数。先用内存数组保存，重启丢失可接受。\n出口：出口：能画 API 表（method/path/input/status/output/error），能用 Swagger 文档手工调用，能解释 422 是输入校验而非 provider 失败；可以本地独立启动 FE/BE 并查 CORS。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/3）",
+          "concepts": [
+            "主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response ",
+            "Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- [Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。"
+          ],
+          "guidance": "stAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) ",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.ai.fullstack.f3:0",
+          "fragment_index": 1,
+          "fragment_count": 3
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续3/3）",
+          "concepts": [
+            "主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response ",
+            "Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- [Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。"
+          ],
+          "guidance": "→ 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- [Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。\n补充：MDN HTTP methods/status codes 只查所用状态码；[javascript.info/fetch](https://javascript.info/fetch) 复核浏览器要 response.ok。\n小实践：小实践：手动给一个 POST 送有效 JSON、缺字段、错误类型、超长字段；让学员看到 OpenAPI 对应的 422；GET /sources/{id} 不存在回 404。\n载体与增量：项目增量：React 页面改为调用 FastAPI 的 GET/POST/PATCH/DELETE /sources；分页/搜索使用 query 参数。先用内存数组保存，重启丢失可接受。\n出口：出口：能画 API 表（method/path/input/status/output/error），能用 Swagger 文档手工调用，能解释 422 是输入校验而非 provider 失败；可以本地独立启动 FE/BE 并查 CORS。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 2,
+          "fragment_group": "stage.v62.ai.fullstack.f3:0",
+          "fragment_index": 2,
+          "fragment_count": 3
         },
         {
           "topic": "贯穿评价与证据",
@@ -497,7 +579,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 3
         }
       ],
       "learning_guidance": {
@@ -508,8 +590,8 @@
           "node.v62.ai.fullstack.f3"
         ],
         "learning_focus": [
-          "主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- ",
-          "[Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。"
+          "主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response ",
+          "Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- [Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。"
         ],
         "comparison_focus": [],
         "reading_prerequisites": [
@@ -571,11 +653,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_ai_fullstack_v2_v62_microsoft-genai-beginners",
+          "source_ref": "src_ai_fullstack_v2_v62_5258f3381d9514f7f82d",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_af79503cdb",
-            "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_2c0a17e076",
-            "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_a6529b93e5"
+            "sec_ai_fullstack_v2_v62_c439eba6f57f17505254",
+            "sec_ai_fullstack_v2_v62_4ba172ee3b2cc3762d79",
+            "sec_ai_fullstack_v2_v62_acf7e2398363f6c3cfef"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -585,10 +667,10 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_openai-provider-api",
+          "source_ref": "src_ai_fullstack_v2_v62_2e4f7deee51c99bdf3af",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_openai-provider-api_6fb43e75d8",
-            "sec_ai_fullstack_v2_v62_openai-provider-api_13f33299df"
+            "sec_ai_fullstack_v2_v62_854a76875d901a096983",
+            "sec_ai_fullstack_v2_v62_6291087d66ee95737094"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -699,11 +781,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_ai_fullstack_v2_v62_wonderful-sql-practice",
+          "source_ref": "src_ai_fullstack_v2_v62_eae4bc02343a85ba3340",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_wonderful-sql-practice_9080c2d45b",
-            "sec_ai_fullstack_v2_v62_wonderful-sql-practice_39d59e5489",
-            "sec_ai_fullstack_v2_v62_wonderful-sql-practice_b540652f93"
+            "sec_ai_fullstack_v2_v62_da769811ae49c00839e2",
+            "sec_ai_fullstack_v2_v62_fd6ea2b63cb6f39159be",
+            "sec_ai_fullstack_v2_v62_4e8c32ba29a6a84df429"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -713,10 +795,10 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_postgresql-sql-semantics",
+          "source_ref": "src_ai_fullstack_v2_v62_0c9d4209b31cc12d26b4",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_postgresql-sql-semantics_000f5aa3ae",
-            "sec_ai_fullstack_v2_v62_postgresql-sql-semantics_10ff00f667"
+            "sec_ai_fullstack_v2_v62_332a7551156da0e72be1",
+            "sec_ai_fullstack_v2_v62_e12c0e008458358c7b19"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -726,11 +808,11 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge",
+          "source_ref": "src_ai_fullstack_v2_v62_5bb388f4602a13cdb3a5",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge_27e6e7622b",
-            "sec_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge_9dcbbf5abb",
-            "sec_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge_f8e90bfea5"
+            "sec_ai_fullstack_v2_v62_f005a388254cdaaf33c2",
+            "sec_ai_fullstack_v2_v62_50e7c2a7cb92a0c854dc",
+            "sec_ai_fullstack_v2_v62_a7e78bfa40f8e6434333"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -743,16 +825,57 @@
         {
           "topic": "本阶段章级练习与教学边界",
           "concepts": [
-            "主读顺序：\n1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。"
+            "主读顺序：\n1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session ",
+            "dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。"
           ],
-          "guidance": "前置：前置：能够描述实体字段及关联；API 至少有内存 CRUD。\n重复关系：重复处理/校正：SQL 课程重复介绍 CRUD → REVIEW 但需做题；ORM 和手写 SQL 同一行为 → COMPARE（它们是表达方式，不是互斥语义）；MySQL 示例迁到 SQLite/Postgres → VERSION_CONTEXT；FK/session/model boundaries → DEEPEN。Wonderful SQL 有个别不准确/方言特定说明，关键规则由 DB 官方文档与本地运行校正。\n补充/比较：5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。\n暂不学：SQL 面试题、窗口函数、存储过程、索引调优、数据库内部原理、多数据库部署、异步 ORM。索引在测量到慢查询后再进；迁移工具在 schema 需要升级时再进。\n小实践：1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。\n小实践：手写三表 ERD workspace(id)、source(id, workspace_id)、message(id, conversation_id, role, content, created_at)；写 SELECT（where/order/limit）、insert source、update title、delete message、JOIN 查会话中的消息。运行前对 UPDATE/DELETE 确认 where 条件。\n载体与增量：项目增量：把内存 list 换 SQLite/SQLModel；保存资料、生成摘要、会话和消息。至少验证重启服务数据仍在，删除资源时外键/级联策略有意图。\n出口：出口：在空白表上写基础 CRUD/inner join；能解释主键、外键、nullable/unique、input/table/public model 和 per-request session；知道 SQLModel 教程不是完整 SQL 教程。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：能够描述实体字段及关联；API 至少有内存 CRUD。\n重复关系：重复处理/校正：SQL 课程重复介绍 CRUD → REVIEW 但需做题；ORM 和手写 SQL 同一行为 → COMPARE（它们是表达方式，不是互斥语义）；MySQL 示例迁到 SQLite/Postgres → VERSION_CONTEXT；FK/session/model boundaries → DEEPEN。Wonderful SQL 有个别不准确/方言特定说明，关键规则由 DB 官方文档与本地运行校正。\n补充/比较：5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。\n暂不学：SQL 面试题、窗口函数、存储过程、索引调优、数据库内部原理、多数据库部署、异步 ORM。索引在测量到慢查询后再进；迁移工具在 schema 需要升级时再进。\n小实践：1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELEC",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.ai.fullstack.f5:0",
+          "fragment_index": 0,
+          "fragment_count": 3,
+          "original_guidance": "前置：前置：能够描述实体字段及关联；API 至少有内存 CRUD。\n重复关系：重复处理/校正：SQL 课程重复介绍 CRUD → REVIEW 但需做题；ORM 和手写 SQL 同一行为 → COMPARE（它们是表达方式，不是互斥语义）；MySQL 示例迁到 SQLite/Postgres → VERSION_CONTEXT；FK/session/model boundaries → DEEPEN。Wonderful SQL 有个别不准确/方言特定说明，关键规则由 DB 官方文档与本地运行校正。\n补充/比较：5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。\n暂不学：SQL 面试题、窗口函数、存储过程、索引调优、数据库内部原理、多数据库部署、异步 ORM。索引在测量到慢查询后再进；迁移工具在 schema 需要升级时再进。\n小实践：1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。\n小实践：手写三表 ERD workspace(id)、source(id, workspace_id)、message(id, conversation_id, role, content, created_at)；写 SELECT（where/order/limit）、insert source、update title、delete message、JOIN 查会话中的消息。运行前对 UPDATE/DELETE 确认 where 条件。\n载体与增量：项目增量：把内存 list 换 SQLite/SQLModel；保存资料、生成摘要、会话和消息。至少验证重启服务数据仍在，删除资源时外键/级联策略有意图。\n出口：出口：在空白表上写基础 CRUD/inner join；能解释主键、外键、nullable/unique、input/table/public model 和 per-request session；知道 SQLModel 教程不是完整 SQL 教程。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/3）",
+          "concepts": [
+            "主读顺序：\n1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session ",
+            "dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。"
+          ],
+          "guidance": "T、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。\n小实践：手写三表 ERD workspace(id)、source(id, workspace_id)、message(id, conversation_id, role, content, created_at)；写 SELECT（where/order/limit）、insert source、update title、delete message、JOIN 查会话中的消息。运行前对 UPDATE/DELETE 确认 where 条件。\n载体与增量：项目增量：把内",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.ai.fullstack.f5:0",
+          "fragment_index": 1,
+          "fragment_count": 3
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续3/3）",
+          "concepts": [
+            "主读顺序：\n1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session ",
+            "dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。"
+          ],
+          "guidance": "存 list 换 SQLite/SQLModel；保存资料、生成摘要、会话和消息。至少验证重启服务数据仍在，删除资源时外键/级联策略有意图。\n出口：出口：在空白表上写基础 CRUD/inner join；能解释主键、外键、nullable/unique、input/table/public model 和 per-request session；知道 SQLModel 教程不是完整 SQL 教程。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 2,
+          "fragment_group": "stage.v62.ai.fullstack.f5:0",
+          "fragment_index": 2,
+          "fragment_count": 3
         },
         {
           "topic": "贯穿评价与证据",
@@ -768,7 +891,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 3
         }
       ],
       "learning_guidance": {
@@ -779,7 +902,8 @@
           "node.v62.ai.fullstack.f5"
         ],
         "learning_focus": [
-          "主读顺序：\n1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。"
+          "主读顺序：\n1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session ",
+          "dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。"
         ],
         "comparison_focus": [],
         "reading_prerequisites": [
@@ -841,9 +965,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_ai_fullstack_v2_v62_openai-provider-api",
+          "source_ref": "src_ai_fullstack_v2_v62_2e4f7deee51c99bdf3af",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_openai-provider-api_26133a50d3"
+            "sec_ai_fullstack_v2_v62_0d10f1da36166e9aa2c3"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -853,9 +977,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_fastapi-api-spine",
+          "source_ref": "src_ai_fullstack_v2_v62_6c3a14594050c78b78b6",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_b54759281b"
+            "sec_ai_fullstack_v2_v62_edaa9e405106be112988"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -865,9 +989,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_ai_fullstack_v2_v62_mdn-http-mental-model",
+          "source_ref": "src_ai_fullstack_v2_v62_c0a2aeb32833a36f7511",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_mdn-http-mental-model_31de9d17e0"
+            "sec_ai_fullstack_v2_v62_69082e4fae0ac9007db6"
           ],
           "source_version": 1,
           "order_index": 2,
@@ -877,7 +1001,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_ai_fullstack_v2_v62_case_openai-responses-starter-app",
+          "source_ref": "src_ai_fullstack_v2_v62_142873488a1389cac69a",
           "section_refs": [],
           "source_version": 1,
           "order_index": 3,
@@ -1023,9 +1147,9 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_ai_fullstack_v2_v62_fastapi-api-spine",
+          "source_ref": "src_ai_fullstack_v2_v62_6c3a14594050c78b78b6",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_1cea04db61"
+            "sec_ai_fullstack_v2_v62_a7127dec6d10a8e3ef3d"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1035,11 +1159,11 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_openai-provider-api",
+          "source_ref": "src_ai_fullstack_v2_v62_2e4f7deee51c99bdf3af",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_openai-provider-api_ed129d234f",
-            "sec_ai_fullstack_v2_v62_openai-provider-api_b34a84c073",
-            "sec_ai_fullstack_v2_v62_openai-provider-api_63dafe2251"
+            "sec_ai_fullstack_v2_v62_ee18babad338d1ba5a24",
+            "sec_ai_fullstack_v2_v62_dbfbba0f353d87566f91",
+            "sec_ai_fullstack_v2_v62_fea87056ac02abd32477"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1150,11 +1274,11 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_ai_fullstack_v2_v62_fastapi-api-spine",
+          "source_ref": "src_ai_fullstack_v2_v62_6c3a14594050c78b78b6",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_6e93c42342",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_ac3b765f43",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_0d3a7487b8"
+            "sec_ai_fullstack_v2_v62_3154fac5ed6377c1cd54",
+            "sec_ai_fullstack_v2_v62_e512c4870cfeea29e87a",
+            "sec_ai_fullstack_v2_v62_62010ae084177aeef70c"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1164,9 +1288,9 @@
         },
         {
           "role": "comparison",
-          "source_ref": "src_ai_fullstack_v2_v62_oauth-security-rfc9700",
+          "source_ref": "src_ai_fullstack_v2_v62_cded392aaf89b27e58c6",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_oauth-security-rfc9700_37b29eee69"
+            "sec_ai_fullstack_v2_v62_603998e0059ef34964c3"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1181,14 +1305,35 @@
           "concepts": [
             "教程读法：FastAPI [Security First Steps](https://fastapi.tiangolo.com/zh/tutorial/security/first-steps/) 与 [Get Current User](https://fastapi.tiangolo.com/zh/tutorial/security/get-current-user/) 学 Depends 和 Bearer 接口形态；[OAuth2/JWT](https://fastapi.tiangolo.com/zh/tutorial/security/oauth2-jwt/) 选读哈希/过期/校验/异常部分，并和 [RFC 9700 §2.4](https://www.rfc-editor.org/rfc/rfc9700.html#section-2.4) 比较 password grant。"
           ],
-          "guidance": "前置：前置：SQL FK 和查询习惯；测试会做；HTTP cookie/header 基本概念。若工作台始终本地个人使用，可跳过这一步。\n重复关系：NEW：新增能力；已有者以诊断证据 REVIEW，框架差异按 COMPARE。\n补充/比较：前置：SQL FK 和查询习惯；测试会做；HTTP cookie/header 基本概念。若工作台始终本地个人使用，可跳过这一步。\n教程读法：FastAPI [Security First Steps](https://fastapi.tiangolo.com/zh/tutorial/security/first-steps/) 与 [Get Current User](https://fastapi.tiangolo.com/zh/tutorial/security/get-current-user/) 学 Depends 和 Bearer 接口形态；[OAuth2/JWT](https://fastapi.tiangolo.com/zh/tutorial/security/oauth2-jwt/) 选读哈希/过期/校验/异常部分，并和 [RFC 9700 §2.4](https://www.rfc-editor.org/rfc/rfc9700.html#section-2.4) 比较 password grant。\n小实践：小实践：两测试用户 A/B，各自建立 workspace/source；同一 GET /sources/{id} 和修改/删除在跨用户访问时拒绝且不泄露对象存在细节。\n载体与增量：项目增量：加 workspace memberships/role（先只 owner/member），所有查询从已验证 user 的 membership 范围筛选；模型 provider key 始终用服务端 project secret，跟用户 token 隔离。\n出口：出口：A 无法列出/读取/更改 B 的资源；所有关键 route permission 测试通过；理解“登录成功”和“有权访问该 workspace”是不同检查。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "guidance": "前置：前置：SQL FK 和查询习惯；测试会做；HTTP cookie/header 基本概念。若工作台始终本地个人使用，可跳过这一步。\n重复关系：NEW：新增能力；已有者以诊断证据 REVIEW，框架差异按 COMPARE。\n补充/比较：前置：SQL FK 和查询习惯；测试会做；HTTP cookie/header 基本概念。若工作台始终本地个人使用，可跳过这一步。\n教程读法：FastAPI [Security First Steps](https://fastapi.tiangolo.com/zh/tutorial/security/first-steps/) 与 [Get Current User](https://fastapi.tiangolo.com/zh/tutorial/security/get-current-user/) 学 Depends 和 Bearer 接口形态；[OAuth2/JWT](https://fastapi.tiangolo.com/zh/tutorial/security/oauth2-jwt/) 选读哈希/过期/校验/异常部分，并和 [RFC 9700 §2.4](https://www.rfc-editor.org/rfc/rfc9700.html#section-2.4) 比较 password grant。\n小实践：小实践：两测试用户 A/B，各自建立 workspace/source；同一 GET /sources/{id} 和修改/删除在跨用户访问时拒绝且不泄露对象存在细节。\n载体与增量：项目增量：加 workspace memberships/role（先只 owner/member），所有查询从已验证 user 的 membership 范围筛选；模型 provider key 始终用服务端 project secret，跟用户 token 隔离。\n出口：出口：A 无法列出/读取/更改 B 的资源；所有关键 rout",
           "links": [],
           "search_hints": [],
           "thinking_prompts": [
             "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
           ],
           "required": false,
-          "order_index": 0
+          "order_index": 0,
+          "fragment_group": "stage.v62.ai.fullstack.f8:0",
+          "fragment_index": 0,
+          "fragment_count": 2,
+          "original_guidance": "前置：前置：SQL FK 和查询习惯；测试会做；HTTP cookie/header 基本概念。若工作台始终本地个人使用，可跳过这一步。\n重复关系：NEW：新增能力；已有者以诊断证据 REVIEW，框架差异按 COMPARE。\n补充/比较：前置：SQL FK 和查询习惯；测试会做；HTTP cookie/header 基本概念。若工作台始终本地个人使用，可跳过这一步。\n教程读法：FastAPI [Security First Steps](https://fastapi.tiangolo.com/zh/tutorial/security/first-steps/) 与 [Get Current User](https://fastapi.tiangolo.com/zh/tutorial/security/get-current-user/) 学 Depends 和 Bearer 接口形态；[OAuth2/JWT](https://fastapi.tiangolo.com/zh/tutorial/security/oauth2-jwt/) 选读哈希/过期/校验/异常部分，并和 [RFC 9700 §2.4](https://www.rfc-editor.org/rfc/rfc9700.html#section-2.4) 比较 password grant。\n小实践：小实践：两测试用户 A/B，各自建立 workspace/source；同一 GET /sources/{id} 和修改/删除在跨用户访问时拒绝且不泄露对象存在细节。\n载体与增量：项目增量：加 workspace memberships/role（先只 owner/member），所有查询从已验证 user 的 membership 范围筛选；模型 provider key 始终用服务端 project secret，跟用户 token 隔离。\n出口：出口：A 无法列出/读取/更改 B 的资源；所有关键 route permission 测试通过；理解“登录成功”和“有权访问该 workspace”是不同检查。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。"
+        },
+        {
+          "topic": "本阶段章级练习与教学边界（续2/2）",
+          "concepts": [
+            "教程读法：FastAPI [Security First Steps](https://fastapi.tiangolo.com/zh/tutorial/security/first-steps/) 与 [Get Current User](https://fastapi.tiangolo.com/zh/tutorial/security/get-current-user/) 学 Depends 和 Bearer 接口形态；[OAuth2/JWT](https://fastapi.tiangolo.com/zh/tutorial/security/oauth2-jwt/) 选读哈希/过期/校验/异常部分，并和 [RFC 9700 §2.4](https://www.rfc-editor.org/rfc/rfc9700.html#section-2.4) 比较 password grant。"
+          ],
+          "guidance": "e permission 测试通过；理解“登录成功”和“有权访问该 workspace”是不同检查。\n优先用户已有合适项目；过大时裁成纵切面，无项目才建议默认候选。不自然适配时保留独立 Micro Exercise；允许更换实现，保留问题、接口、数据、测试与验证证据。",
+          "links": [],
+          "search_hints": [],
+          "thinking_prompts": [
+            "解释一条正常与一条失败路径，说明证据如何支持退出条件。"
+          ],
+          "required": false,
+          "order_index": 1,
+          "fragment_group": "stage.v62.ai.fullstack.f8:0",
+          "fragment_index": 1,
+          "fragment_count": 2
         },
         {
           "topic": "贯穿评价与证据",
@@ -1204,7 +1349,7 @@
             "本阶段哪个结果必须用环境状态或测试证明？"
           ],
           "required": false,
-          "order_index": 1
+          "order_index": 2
         }
       ],
       "learning_guidance": {
@@ -1284,12 +1429,12 @@
       "resources": [
         {
           "role": "primary",
-          "source_ref": "src_ai_fullstack_v2_v62_fastapi-api-spine",
+          "source_ref": "src_ai_fullstack_v2_v62_6c3a14594050c78b78b6",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_020ba065d2",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_e6169e958b",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_9b0d3cd241",
-            "sec_ai_fullstack_v2_v62_fastapi-api-spine_74a883a037"
+            "sec_ai_fullstack_v2_v62_3d0a59d46355c12e9c7b",
+            "sec_ai_fullstack_v2_v62_368de32234b43c9c404d",
+            "sec_ai_fullstack_v2_v62_7f28a7856a113ac9a232",
+            "sec_ai_fullstack_v2_v62_cb3ae40bac689b7403bf"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1299,10 +1444,10 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_vite-build-deploy",
+          "source_ref": "src_ai_fullstack_v2_v62_642a663a2f1e39eda66f",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_vite-build-deploy_bdd254b65b",
-            "sec_ai_fullstack_v2_v62_vite-build-deploy_4c19eecd5a"
+            "sec_ai_fullstack_v2_v62_1c33627200725c5eb803",
+            "sec_ai_fullstack_v2_v62_c9cab803464178cbe914"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1312,7 +1457,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_ai_fullstack_v2_v62_case_full-stack-fastapi-template",
+          "source_ref": "src_ai_fullstack_v2_v62_ede5d2ba0db924f2643c",
           "section_refs": [],
           "source_version": 1,
           "order_index": 2,
@@ -1458,9 +1603,9 @@
       "resources": [
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_microsoft-genai-beginners",
+          "source_ref": "src_ai_fullstack_v2_v62_5258f3381d9514f7f82d",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_10d557a8c8"
+            "sec_ai_fullstack_v2_v62_961b6bab8ff8bb671550"
           ],
           "source_version": 1,
           "order_index": 0,
@@ -1470,9 +1615,9 @@
         },
         {
           "role": "supplement",
-          "source_ref": "src_ai_fullstack_v2_v62_openai-provider-api",
+          "source_ref": "src_ai_fullstack_v2_v62_2e4f7deee51c99bdf3af",
           "section_refs": [
-            "sec_ai_fullstack_v2_v62_openai-provider-api_f3ea183d70"
+            "sec_ai_fullstack_v2_v62_2c6816fa727f16d5e91c"
           ],
           "source_version": 1,
           "order_index": 1,
@@ -1482,7 +1627,7 @@
         },
         {
           "role": "case_study",
-          "source_ref": "src_ai_fullstack_v2_v62_case_open-webui",
+          "source_ref": "src_ai_fullstack_v2_v62_0ff66fdbca0434e411bb",
           "section_refs": [],
           "source_version": 1,
           "order_index": 2,
@@ -1671,8 +1816,8 @@
         "node.v62.ai.fullstack.f2"
       ],
       "objectives": [
-        "主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- ",
-        "[Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。"
+        "主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response ",
+        "Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- [Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。"
       ],
       "scope": "主读：沿 FastAPI [Tutorial](https://fastapi.tiangolo.com/zh/tutorial/) 依序选读：\n- [First Steps](https://fastapi.tiangolo.com/zh/tutorial/first-steps/) → 用 /docs 调 GET /health 与简单 route。\n- [Path Parameters](https://fastapi.tiangolo.com/zh/tutorial/path-params/) → /sources/{source_id}。\n- [Query Parameters](https://fastapi.tiangolo.com/zh/tutorial/query-params/) → search/limit/offset。\n- [Request Body](https://fastapi.tiangolo.com/zh/tutorial/body/) → SourceCreate/SourceUpdate JSON。\n- [Query validation](https://fastapi.tiangolo.com/zh/tutorial/query-params-str-validations/) → 字符长度、分页范围；[Path/Numeric validation](https://fastapi.tiangolo.com/zh/tutorial/path-params-numeric-validations/) → ID 范围。\n- [Response Model](https://fastapi.tiangolo.com/zh/tutorial/response-model/) → 输出 DTO；[Status Codes](https://fastapi.tiangolo.com/zh/tutorial/response-status-code/) → 201/204；[Handling Errors](https://fastapi.tiangolo.com/zh/tutorial/handling-errors/) → 404/422/业务冲突与通用服务器异常。\n- [Dependencies](https://fastapi.tiangolo.com/zh/tutorial/dependencies/) → request-level shared policy；复杂组合以后再学。",
       "acceptance": [
@@ -1702,7 +1847,8 @@
         "node.v62.ai.fullstack.f3"
       ],
       "objectives": [
-        "主读顺序：\n1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。"
+        "主读顺序：\n1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session ",
+        "dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。"
       ],
       "scope": "主读顺序：\n1. 中文概念练习：[Wonderful SQL ch01](https://github.com/datawhalechina/wonderful-sql/blob/main/ch01_%E5%88%9D%E8%AF%86%E6%95%B0%E6%8D%AE%E5%BA%93.md) 的表/行/列、类型、NOT NULL、主键、建表、插入/更新/删除；只做到能理解结构。\n2. [ch02](https://github.com/datawhalechina/wonderful-sql/blob/main/ch02_%E5%9F%BA%E7%A1%80%E6%9F%A5%E8%AF%A2%E4%B8%8E%E6%8E%92%E5%BA%8F.md) 的 SELECT、WHERE、排序/limit、聚合/分组；先在自己的小表里运行，再用其练习题检验。\n3. [PostgreSQL 官方教程 JOIN](https://www.postgresql.org/docs/current/tutorial-join.html) 与 [Table Expressions](https://www.postgresql.org/docs/current/queries-table-expressions.html) 对照 inner/left join；先明确列名并写 ON。\n4. [FastAPI SQL Databases](https://fastapi.tiangolo.com/zh/tutorial/sql-databases/) 使用 SQLModel + SQLite 创建 table、session dependency、Create/Read/Update/Delete；读 input/table/public models 区别。\n5. 需要更多中文 join 讲解时再读 [Wonderful SQL ch04](https://github.com/datawhalechina/wonderful-sql/blob/main/ch04_%E9%9B%86%E5%90%88%E8%BF%90%E7%AE%97.md) 4.2；暂不学 Natural Join。",
       "acceptance": [
@@ -1947,7 +2093,7 @@
   ],
   "resources": [
     {
-      "source_id": "src_ai_fullstack_v2_v62_mdn-javascript-jit",
+      "source_id": "src_ai_fullstack_v2_v62_52b28ed9059b07b228ef",
       "canonical_url": "https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Scripting",
       "title": "MDN Learn Web Development: JavaScript Scripting",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -1959,7 +2105,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_mdn-javascript-jit_959e14ca6b",
+          "section_id": "sec_ai_fullstack_v2_v62_0dce9c22684e5ece3fa1",
           "title": "JSON/Fetch网络请求诊断",
           "url": "https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Scripting",
           "anchor": "",
@@ -1975,7 +2121,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_mdn-javascript-jit_654ae7e54a",
+          "section_id": "sec_ai_fullstack_v2_v62_578f2569584f55b1f31a",
           "title": "Fetch GET/POST与response.ok",
           "url": "https://developer.mozilla.org/zh-CN/docs/Learn_web_development/Core/Scripting",
           "anchor": "",
@@ -2109,7 +2255,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read module overview, prerequisites, ordered chapter index and selected正文/examples for network requests, JSON, asynchronous JavaScript, promises, form submission, errors, and debugging. The module itself names basic HTML/CSS as prerequisite. Did not read every exercise end-to-end."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_javascript-info-supplement",
+      "source_id": "src_ai_fullstack_v2_v62_345ee28e1db4813cbc09",
       "canonical_url": "https://javascript.info/",
       "title": "javascript.info (English tutorial; Chinese translation available)",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -2121,7 +2267,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_javascript-info-supplement_ab61d6d139",
+          "section_id": "sec_ai_fullstack_v2_v62_97439e68b0cbf5257368",
           "title": "Fetch/Promise chaining/async-await按缺口",
           "url": "https://javascript.info/",
           "anchor": "",
@@ -2137,7 +2283,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_javascript-info-supplement_c67c6cba7b",
+          "section_id": "sec_ai_fullstack_v2_v62_e8150a7ed5d329301205",
           "title": "Fetch response.ok",
           "url": "https://javascript.info/",
           "anchor": "",
@@ -2267,7 +2413,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Opened the three-part tutorial index and read selected Fetch, Promise chaining and async/await page bodies/examples; checked Chinese translation entry and current chapter organization. Did not read all advanced JavaScript chapters."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_mdn-http-mental-model",
+      "source_id": "src_ai_fullstack_v2_v62_c0a2aeb32833a36f7511",
       "canonical_url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview",
       "title": "MDN: Overview of HTTP",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -2279,7 +2425,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_mdn-http-mental-model_6c8e8926c7",
+          "section_id": "sec_ai_fullstack_v2_v62_ccf93880e9fa5b456ee0",
           "title": "Client/server",
           "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview",
           "anchor": "",
@@ -2295,7 +2441,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_mdn-http-mental-model_931eecbdc7",
+          "section_id": "sec_ai_fullstack_v2_v62_4b62c72eabe425b4e5b8",
           "title": "HTTP flow",
           "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview",
           "anchor": "",
@@ -2311,7 +2457,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_mdn-http-mental-model_6c38cc533a",
+          "section_id": "sec_ai_fullstack_v2_v62_5a9881927d83409f3a87",
           "title": "Requests/Responses/status",
           "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview",
           "anchor": "",
@@ -2327,7 +2473,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_mdn-http-mental-model_31de9d17e0",
+          "section_id": "sec_ai_fullstack_v2_v62_69082e4fae0ac9007db6",
           "title": "HTTP APIs/SSE单向事件",
           "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview",
           "anchor": "",
@@ -2458,7 +2604,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read正文 sections for client/server, stateless vs session, HTTP flow, request/response structure, status, fetch API and SSE. Overview says the browser initiates requests, response has status/headers/body, and SSE is a one-way server-to-client event mechanism."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_react-learn-spine",
+      "source_id": "src_ai_fullstack_v2_v62_b7fceb2f15132c3e4434",
       "canonical_url": "https://zh-hans.react.dev/learn",
       "title": "React Learn (official Simplified Chinese documentation)",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -2470,7 +2616,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_328908a832",
+          "section_id": "sec_ai_fullstack_v2_v62_2169726b651227b09b4a",
           "title": "Quick Start",
           "url": "https://zh-hans.react.dev/learn",
           "anchor": "",
@@ -2486,7 +2632,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_6067f0fdfe",
+          "section_id": "sec_ai_fullstack_v2_v62_5553877d2f5020b7b801",
           "title": "Describing the UI",
           "url": "https://zh-hans.react.dev/learn",
           "anchor": "",
@@ -2502,7 +2648,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_303cb77a31",
+          "section_id": "sec_ai_fullstack_v2_v62_8b497a87c9a2e939285f",
           "title": "Thinking in React",
           "url": "https://zh-hans.react.dev/learn",
           "anchor": "",
@@ -2518,7 +2664,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_29079714c9",
+          "section_id": "sec_ai_fullstack_v2_v62_51088a0cea99aa0ffb54",
           "title": "Adding Interactivity",
           "url": "https://zh-hans.react.dev/learn",
           "anchor": "",
@@ -2534,7 +2680,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_e02aedc24f",
+          "section_id": "sec_ai_fullstack_v2_v62_cf13b5b31a2e1c40dd7d",
           "title": "Managing State",
           "url": "https://zh-hans.react.dev/learn",
           "anchor": "",
@@ -2550,7 +2696,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_b22b9ef2b7",
+          "section_id": "sec_ai_fullstack_v2_v62_5e31d675c5715a9ec1b4",
           "title": "You Might Not Need an Effect",
           "url": "https://zh-hans.react.dev/learn",
           "anchor": "",
@@ -2566,7 +2712,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_react-learn-spine_ab4214483c",
+          "section_id": "sec_ai_fullstack_v2_v62_8615ed2c58ba6530108b",
           "title": "Synchronizing with Effects",
           "url": "https://zh-hans.react.dev/learn",
           "anchor": "",
@@ -2703,7 +2849,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read Quick Start plus selected body and code examples from Describing the UI, Thinking in React, Adding Interactivity, Managing State, You Might Not Need an Effect, and Synchronizing with Effects. Not every Learn topic was read."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_vite-build-deploy",
+      "source_id": "src_ai_fullstack_v2_v62_642a663a2f1e39eda66f",
       "canonical_url": "https://vite.dev/guide/",
       "title": "Vite Guide: build and static deployment",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -2715,7 +2861,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_vite-build-deploy_3eb938f866",
+          "section_id": "sec_ai_fullstack_v2_v62_e1c20f5cdcb88c86339e",
           "title": "Guide/create/development server",
           "url": "https://vite.dev/guide/",
           "anchor": "",
@@ -2731,7 +2877,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_vite-build-deploy_bdd254b65b",
+          "section_id": "sec_ai_fullstack_v2_v62_1c33627200725c5eb803",
           "title": "Build",
           "url": "https://vite.dev/guide/",
           "anchor": "",
@@ -2747,7 +2893,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_vite-build-deploy_4c19eecd5a",
+          "section_id": "sec_ai_fullstack_v2_v62_c9cab803464178cbe914",
           "title": "Static Deploy",
           "url": "https://vite.dev/guide/",
           "anchor": "",
@@ -2871,7 +3017,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Opened current guide, production build and static deployment pages; read build output and Vite preview/static-host examples. Did not inspect all plugins/configuration chapters."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_fastapi-api-spine",
+      "source_id": "src_ai_fullstack_v2_v62_6c3a14594050c78b78b6",
       "canonical_url": "https://fastapi.tiangolo.com/zh/tutorial/",
       "title": "FastAPI Tutorial / User Guide (official Simplified Chinese pages)",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -2883,7 +3029,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_a07a7da3d0",
+          "section_id": "sec_ai_fullstack_v2_v62_d3a0990cb627d83ba389",
           "title": "First Steps",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2899,7 +3045,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_52393d8fca",
+          "section_id": "sec_ai_fullstack_v2_v62_01df8439cc02d70be7bd",
           "title": "Path Parameters",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2915,7 +3061,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_2867b24f4c",
+          "section_id": "sec_ai_fullstack_v2_v62_c26fe6c1323bae2d6831",
           "title": "Query Parameters",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2931,7 +3077,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_ff5c0686b2",
+          "section_id": "sec_ai_fullstack_v2_v62_85762750731fc2d3d940",
           "title": "Request Body",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2947,7 +3093,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_60851ed19d",
+          "section_id": "sec_ai_fullstack_v2_v62_8cf6184cd3c5cdf684e9",
           "title": "Response Model",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2963,7 +3109,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_9a64564844",
+          "section_id": "sec_ai_fullstack_v2_v62_93b0544fe89ec6a440cc",
           "title": "Handling Errors",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2979,7 +3125,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_2e41b118eb",
+          "section_id": "sec_ai_fullstack_v2_v62_617338cf32615f010086",
           "title": "Dependencies",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -2995,7 +3141,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_fdd4938853",
+          "section_id": "sec_ai_fullstack_v2_v62_a8283d23cc6f7c270c03",
           "title": "Query/Path validation（待明确正文审读）",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3011,7 +3157,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_3892f50f52",
+          "section_id": "sec_ai_fullstack_v2_v62_d2f1c20dae71804a8be8",
           "title": "Status Codes（待明确正文审读）",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3027,7 +3173,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_b54759281b",
+          "section_id": "sec_ai_fullstack_v2_v62_edaa9e405106be112988",
           "title": "Server-Sent Events（版本边界）",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3043,7 +3189,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_1cea04db61",
+          "section_id": "sec_ai_fullstack_v2_v62_a7127dec6d10a8e3ef3d",
           "title": "Testing/TestClient/pytest",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3059,7 +3205,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_6e93c42342",
+          "section_id": "sec_ai_fullstack_v2_v62_3154fac5ed6377c1cd54",
           "title": "Security First Steps",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3075,7 +3221,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_ac3b765f43",
+          "section_id": "sec_ai_fullstack_v2_v62_e512c4870cfeea29e87a",
           "title": "Get Current User",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3091,7 +3237,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_0d3a7487b8",
+          "section_id": "sec_ai_fullstack_v2_v62_62010ae084177aeef70c",
           "title": "OAuth2/JWT概念（非生产方案）",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3107,7 +3253,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_020ba065d2",
+          "section_id": "sec_ai_fullstack_v2_v62_3d0a59d46355c12e9c7b",
           "title": "Deployment Concepts",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3123,7 +3269,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_e6169e958b",
+          "section_id": "sec_ai_fullstack_v2_v62_368de32234b43c9c404d",
           "title": "Docker",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3139,7 +3285,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_9b0d3cd241",
+          "section_id": "sec_ai_fullstack_v2_v62_7f28a7856a113ac9a232",
           "title": "CORS",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3155,7 +3301,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-api-spine_74a883a037",
+          "section_id": "sec_ai_fullstack_v2_v62_cb3ae40bac689b7403bf",
           "title": "Settings",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/",
           "anchor": "",
@@ -3301,7 +3447,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read tutorial TOC and selected full sections/examples: First Steps, path/query params, request body, response model, errors, dependencies, SQL databases, testing, CORS, security first steps/JWT, settings, SSE, deployment concepts/docker. This is selected-section review, not whole tutorial audit."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_python-en-jit",
+      "source_id": "src_ai_fullstack_v2_v62_9bb327b753e81170d9b3",
       "canonical_url": "https://docs.python.org/3/tutorial/",
       "title": "Python Tutorial (Python 3.14 documentation)",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -3313,7 +3459,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_python-en-jit_b598a23dc3",
+          "section_id": "sec_ai_fullstack_v2_v62_47a1302f514aa79d8800",
           "title": "4.1/4.2/4.8/5.1/5.5/8.2–8.4按缺口",
           "url": "https://docs.python.org/3/tutorial/",
           "anchor": "",
@@ -3442,7 +3588,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read official scope warning and TOC; opened正文/examples for control flow, data structures and errors/exceptions. The tutorial states it is designed for programmers new to Python, not people new to programming."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_microsoft-genai-beginners",
+      "source_id": "src_ai_fullstack_v2_v62_5258f3381d9514f7f82d",
       "canonical_url": "https://github.com/microsoft/generative-ai-for-beginners",
       "title": "Microsoft Generative AI for Beginners",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -3454,7 +3600,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_af79503cdb",
+          "section_id": "sec_ai_fullstack_v2_v62_c439eba6f57f17505254",
           "title": "01 GenAI/token/局限",
           "url": "https://github.com/microsoft/generative-ai-for-beginners",
           "anchor": "",
@@ -3470,7 +3616,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_2c0a17e076",
+          "section_id": "sec_ai_fullstack_v2_v62_4ba172ee3b2cc3762d79",
           "title": "04 Prompt概念",
           "url": "https://github.com/microsoft/generative-ai-for-beginners",
           "anchor": "",
@@ -3486,7 +3632,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_a6529b93e5",
+          "section_id": "sec_ai_fullstack_v2_v62_acf7e2398363f6c3cfef",
           "title": "06 服务端Text Generation",
           "url": "https://github.com/microsoft/generative-ai-for-beginners",
           "anchor": "",
@@ -3502,7 +3648,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_microsoft-genai-beginners_10d557a8c8",
+          "section_id": "sec_ai_fullstack_v2_v62_961b6bab8ff8bb671550",
           "title": "08 Search/15 RAG仅概念",
           "url": "https://github.com/microsoft/generative-ai-for-beginners",
           "anchor": "",
@@ -3638,7 +3784,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read repository overview/lesson catalog and selected body/code from lessons 01, 04, 06, 07, 08, 13, 14 and 15. Lesson 04 includes prompt-engineering explanations and notebook/API-key setup; lesson 06 contains text generation app code and provider/API notes. Did not execute every notebook."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_openai-provider-api",
+      "source_id": "src_ai_fullstack_v2_v62_2e4f7deee51c99bdf3af",
       "canonical_url": "https://developers.openai.com/api/docs/guides/text",
       "title": "OpenAI API text, structured output, streaming, rate limit, error and production guides",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -3650,7 +3796,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_6fb43e75d8",
+          "section_id": "sec_ai_fullstack_v2_v62_854a76875d901a096983",
           "title": "Responses Text",
           "url": "https://developers.openai.com/api/docs/guides/text",
           "anchor": "",
@@ -3666,7 +3812,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_13f33299df",
+          "section_id": "sec_ai_fullstack_v2_v62_6291087d66ee95737094",
           "title": "Structured Outputs/refusal/incomplete",
           "url": "https://developers.openai.com/api/docs/guides/text",
           "anchor": "",
@@ -3682,7 +3828,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_26133a50d3",
+          "section_id": "sec_ai_fullstack_v2_v62_0d10f1da36166e9aa2c3",
           "title": "Streaming created/delta/completed/error",
           "url": "https://developers.openai.com/api/docs/guides/text",
           "anchor": "",
@@ -3698,7 +3844,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_ed129d234f",
+          "section_id": "sec_ai_fullstack_v2_v62_ee18babad338d1ba5a24",
           "title": "Rate Limits",
           "url": "https://developers.openai.com/api/docs/guides/text",
           "anchor": "",
@@ -3714,7 +3860,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_b34a84c073",
+          "section_id": "sec_ai_fullstack_v2_v62_dbfbba0f353d87566f91",
           "title": "Error Codes",
           "url": "https://developers.openai.com/api/docs/guides/text",
           "anchor": "",
@@ -3730,7 +3876,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_63dafe2251",
+          "section_id": "sec_ai_fullstack_v2_v62_fea87056ac02abd32477",
           "title": "Production Best Practices",
           "url": "https://developers.openai.com/api/docs/guides/text",
           "anchor": "",
@@ -3746,7 +3892,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_openai-provider-api_f3ea183d70",
+          "section_id": "sec_ai_fullstack_v2_v62_2c6816fa727f16d5e91c",
           "title": "Structured Outputs/Streaming/provider比较按目标",
           "url": "https://developers.openai.com/api/docs/guides/text",
           "anchor": "",
@@ -3884,7 +4030,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Opened/read selected bodies of text generation, structured outputs, streaming responses, rate limits, error codes and production best practices. Read Responses API recommendation; JSON Schema/Pydantic examples and refusal/truncation edge cases; stream lifecycle event names; Retry-After/backoff rules and server key handling. Did not audit the complete API reference or execute snippets."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_wonderful-sql-practice",
+      "source_id": "src_ai_fullstack_v2_v62_eae4bc02343a85ba3340",
       "canonical_url": "https://github.com/datawhalechina/wonderful-sql",
       "title": "Wonderful SQL (Datawhale China)",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -3896,7 +4042,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_wonderful-sql-practice_9080c2d45b",
+          "section_id": "sec_ai_fullstack_v2_v62_da769811ae49c00839e2",
           "title": "ch01 表/约束/CRUD",
           "url": "https://github.com/datawhalechina/wonderful-sql",
           "anchor": "",
@@ -3912,7 +4058,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_wonderful-sql-practice_39d59e5489",
+          "section_id": "sec_ai_fullstack_v2_v62_fd6ea2b63cb6f39159be",
           "title": "ch02 SELECT/WHERE/order/aggregate",
           "url": "https://github.com/datawhalechina/wonderful-sql",
           "anchor": "",
@@ -3928,7 +4074,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_wonderful-sql-practice_b540652f93",
+          "section_id": "sec_ai_fullstack_v2_v62_4e8c32ba29a6a84df429",
           "title": "ch04/4.2 JOIN（按需）",
           "url": "https://github.com/datawhalechina/wonderful-sql",
           "anchor": "",
@@ -4064,7 +4210,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read the repo overview/TOC and selected body of ch01, ch02 aggregation/grouping and ch04 joins; checked ch05 window-function TOC/selected section. Repository says it teaches MySQL 8.0 and has practice tasks/materials."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_postgresql-sql-semantics",
+      "source_id": "src_ai_fullstack_v2_v62_0c9d4209b31cc12d26b4",
       "canonical_url": "https://www.postgresql.org/docs/current/tutorial.html",
       "title": "PostgreSQL official SQL tutorial and query reference",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -4076,7 +4222,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_postgresql-sql-semantics_000f5aa3ae",
+          "section_id": "sec_ai_fullstack_v2_v62_332a7551156da0e72be1",
           "title": "JOIN/ON/explicit columns",
           "url": "https://www.postgresql.org/docs/current/tutorial.html",
           "anchor": "",
@@ -4092,7 +4238,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_postgresql-sql-semantics_10ff00f667",
+          "section_id": "sec_ai_fullstack_v2_v62_e12c0e008458358c7b19",
           "title": "Table Expressions",
           "url": "https://www.postgresql.org/docs/current/tutorial.html",
           "anchor": "",
@@ -4218,7 +4364,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Opened official current tutorial and selected JOIN example plus official Table Expressions references. Reviewed explicit JOIN/ON example and guidance to name columns rather than SELECT *; did not read every tutorial chapter."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge",
+      "source_id": "src_ai_fullstack_v2_v62_5bb388f4602a13cdb3a5",
       "canonical_url": "https://fastapi.tiangolo.com/zh/tutorial/sql-databases/",
       "title": "FastAPI SQL Databases / SQLModel examples",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -4230,7 +4376,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge_27e6e7622b",
+          "section_id": "sec_ai_fullstack_v2_v62_f005a388254cdaaf33c2",
           "title": "Engine/models",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/sql-databases/",
           "anchor": "",
@@ -4246,7 +4392,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge_9dcbbf5abb",
+          "section_id": "sec_ai_fullstack_v2_v62_50e7c2a7cb92a0c854dc",
           "title": "Session dependency",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/sql-databases/",
           "anchor": "",
@@ -4262,7 +4408,7 @@
           "runtime_validation": "not_run"
         },
         {
-          "section_id": "sec_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge_f8e90bfea5",
+          "section_id": "sec_ai_fullstack_v2_v62_a7e78bfa40f8e6434333",
           "title": "CRUD/input-table-public",
           "url": "https://fastapi.tiangolo.com/zh/tutorial/sql-databases/",
           "anchor": "",
@@ -4393,7 +4539,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read the selected tutorial body/examples for SQLModel + SQLite table creation, per-request session dependency, CRUD and separate base/table/public/create/update models."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_oauth-security-rfc9700",
+      "source_id": "src_ai_fullstack_v2_v62_cded392aaf89b27e58c6",
       "canonical_url": "https://www.rfc-editor.org/rfc/rfc9700.html",
       "title": "RFC 9700: Best Current Practice for OAuth 2.0 Security",
       "creator": "原始官方/作者来源，见catalog审读记录",
@@ -4405,7 +4551,7 @@
       "checked_at": "2026-10-03T00:00:00+08:00",
       "sections": [
         {
-          "section_id": "sec_ai_fullstack_v2_v62_oauth-security-rfc9700_37b29eee69",
+          "section_id": "sec_ai_fullstack_v2_v62_603998e0059ef34964c3",
           "title": "2.4 Password grant禁用与原因",
           "url": "https://www.rfc-editor.org/rfc/rfc9700.html",
           "anchor": "",
@@ -4526,7 +4672,7 @@
       "review_note": "原研究快照范围，未在本轮重审或执行：Read search-discovered Section 2.4 statement on Resource Owner Password Credentials grant and related rationale. Did not review the entire OAuth security BCP."
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_case_full-stack-fastapi-template",
+      "source_id": "src_ai_fullstack_v2_v62_ede5d2ba0db924f2643c",
       "canonical_url": "https://github.com/fastapi/full-stack-fastapi-template",
       "title": "1. 可控全栈项目：FastAPI Full Stack Template 的一个 CRUD 闭环",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -4550,7 +4696,7 @@
       }
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_case_openai-responses-starter-app",
+      "source_id": "src_ai_fullstack_v2_v62_142873488a1389cac69a",
       "canonical_url": "https://github.com/openai/openai-responses-starter-app",
       "title": "2. AI 产品样例：OpenAI Responses Starter App 的一个对话切片",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -4574,7 +4720,7 @@
       }
     },
     {
-      "source_id": "src_ai_fullstack_v2_v62_case_open-webui",
+      "source_id": "src_ai_fullstack_v2_v62_0ff66fdbca0434e411bb",
       "canonical_url": "https://github.com/open-webui/open-webui",
       "title": "3. 大型产品目标切片：Open WebUI 的一个子系统",
       "creator": "已核对原包项目身份；未新增源码/网页审核",
@@ -4599,22 +4745,22 @@
     }
   ],
   "resource_refs": [
-    "src_ai_fullstack_v2_v62_mdn-javascript-jit",
-    "src_ai_fullstack_v2_v62_javascript-info-supplement",
-    "src_ai_fullstack_v2_v62_mdn-http-mental-model",
-    "src_ai_fullstack_v2_v62_react-learn-spine",
-    "src_ai_fullstack_v2_v62_vite-build-deploy",
-    "src_ai_fullstack_v2_v62_fastapi-api-spine",
-    "src_ai_fullstack_v2_v62_python-en-jit",
-    "src_ai_fullstack_v2_v62_microsoft-genai-beginners",
-    "src_ai_fullstack_v2_v62_openai-provider-api",
-    "src_ai_fullstack_v2_v62_wonderful-sql-practice",
-    "src_ai_fullstack_v2_v62_postgresql-sql-semantics",
-    "src_ai_fullstack_v2_v62_fastapi-sqlmodel-bridge",
-    "src_ai_fullstack_v2_v62_oauth-security-rfc9700",
-    "src_ai_fullstack_v2_v62_case_full-stack-fastapi-template",
-    "src_ai_fullstack_v2_v62_case_openai-responses-starter-app",
-    "src_ai_fullstack_v2_v62_case_open-webui"
+    "src_ai_fullstack_v2_v62_52b28ed9059b07b228ef",
+    "src_ai_fullstack_v2_v62_345ee28e1db4813cbc09",
+    "src_ai_fullstack_v2_v62_c0a2aeb32833a36f7511",
+    "src_ai_fullstack_v2_v62_b7fceb2f15132c3e4434",
+    "src_ai_fullstack_v2_v62_642a663a2f1e39eda66f",
+    "src_ai_fullstack_v2_v62_6c3a14594050c78b78b6",
+    "src_ai_fullstack_v2_v62_9bb327b753e81170d9b3",
+    "src_ai_fullstack_v2_v62_5258f3381d9514f7f82d",
+    "src_ai_fullstack_v2_v62_2e4f7deee51c99bdf3af",
+    "src_ai_fullstack_v2_v62_eae4bc02343a85ba3340",
+    "src_ai_fullstack_v2_v62_0c9d4209b31cc12d26b4",
+    "src_ai_fullstack_v2_v62_5bb388f4602a13cdb3a5",
+    "src_ai_fullstack_v2_v62_cded392aaf89b27e58c6",
+    "src_ai_fullstack_v2_v62_ede5d2ba0db924f2643c",
+    "src_ai_fullstack_v2_v62_142873488a1389cac69a",
+    "src_ai_fullstack_v2_v62_0ff66fdbca0434e411bb"
   ],
   "required_node_keys": [
     "node.v62.ai.fullstack.f0",

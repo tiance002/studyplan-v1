@@ -4,7 +4,16 @@ import json
 from pathlib import Path
 
 import pytest
+from app.api.v1.schemas import (
+    KnowledgeExtensionView,
+    OrderedSection,
+    PracticeTaskView,
+    StageDetail,
+    StageResourceAssignmentView,
+)
 from app.domain.domain_packs.validation import validate_seed
+from app.domain.planning.intent import GoalSpec
+from app.domain.planning.semantic_content import adapt_semantic_pack
 
 ROOT = Path(__file__).resolve().parents[3]
 RESEARCH = ROOT / 'docs/research/semantic-corrected-2026-10-04'
@@ -156,3 +165,42 @@ def test_directory_only_and_recommended_only_details_are_candidates():
                 if any(s['section_id'] in resource['section_refs'] for s in candidates):
                     assert resource['role'] != 'primary'
     assert report['section_qualification_limits']
+
+
+def assert_consumer_dtos(pack):
+    for source in pack['resources']:
+        for section in source['sections']:
+            OrderedSection.model_validate(section)
+    sources = {s['source_id']: s for s in pack['resources']}
+    for stage in pack['stage_blueprints']:
+        StageDetail.model_validate({**stage, 'stage_id': 'dto-stage', 'order_index': 0})
+        for extension in stage['extensions']:
+            KnowledgeExtensionView.model_validate({**extension, 'extension_id': 'dto-extension', 'stage_id': 'dto-stage'})
+        for assignment in stage['resources']:
+            source = sources[assignment['source_ref']]
+            selected = [s for ref in assignment['section_refs'] for s in source['sections'] if s['section_id'] == ref]
+            StageResourceAssignmentView.model_validate({**assignment, 'assignment_id': 'dto-assignment',
+                'stage_id': 'dto-stage', 'creator': source['creator'], 'ordered_sections': selected})
+    for practice in pack['practice_blueprints']:
+        PracticeTaskView.model_validate({**practice, 'task_id': 'dto-task', 'practice_project_id': 'dto-project',
+                                        'status': 'pending'})
+
+
+def test_all_public_and_private_carrier_views_obey_real_consumer_bounds():
+    packs, _ = mapped()
+    for pack in packs:
+        assert_consumer_dtos(pack)
+        goal = GoalSpec(target='recipe:rag recipe:coding recipe:workflow recipe:browser recipe:evaluation '
+                       'recipe:agentic_rl 参数训练 部署 SSE 认证 Kubernetes IaC 可观测 自动发布 备份恢复',
+                        starting_point='用户项目：' + '客' * 100)
+        assert_consumer_dtos(adapt_semantic_pack(pack, goal.target, goal))
+
+
+def test_extension_chunks_preserve_exact_guidance_without_truncation():
+    packs, _ = mapped()
+    chunks = [e for p in packs for s in p['stage_blueprints'] for e in s['extensions'] if e.get('fragment_count', 1) > 1]
+    assert chunks
+    for first in (e for e in chunks if e['fragment_index'] == 0):
+        group = [e for e in chunks if e['fragment_group'] == first['fragment_group']]
+        assert ''.join(e['guidance'] for e in group) == first['original_guidance']
+        assert len(group) == first['fragment_count']
