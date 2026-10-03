@@ -113,9 +113,25 @@ def validate_seed(raw):
         for key in nodes:
             visit(key)
         sources = _keys(data['resources'], 'source_id')
+        semantic = (data.get('semantic_policy') or {}).get('version') == 1
+        first_semantic = {'agent.application': 5, 'ai.fullstack': 2, 'cloud.services': 2}
+        if data.get('pack_key') in first_semantic and data['version'] >= first_semantic[data['pack_key']] and not semantic:
+            raise ValueError('Semantic pack versions require their publication policy')
         _refs(data['resource_refs'], sources)
         all_sections = set()
         for source in sources.values():
+            if semantic:
+                if source.get('public_seed_status', '').startswith('hold_'):
+                    raise ValueError('Semantic Seed must not publish hold content')
+                depths = {'metadata_only': 0, 'toc_checked': 1, 'selected_sections_read': 2, 'deep_reviewed': 3}
+                depth = source.get('review_depth')
+                if depth not in depths:
+                    raise ValueError('Semantic source requires original review depth')
+                original = (source.get('review_evidence') or source.get('source_review_record') or {}).get('review_depth')
+                if depths[depth] >= 2 and original not in depths:
+                    raise ValueError('Semantic body review requires original reading evidence')
+                if original in depths and depths[depth] > depths[original]:
+                    raise ValueError('Semantic source review depth must not be upgraded')
             _texts(source, ('canonical_url', 'title', 'creator', 'media_type', 'language'), empty=('creator',))
             if type(source['source_version']) is not int or source['source_version'] < 1:
                 raise ValueError('Source version must be a positive integer')
@@ -126,6 +142,10 @@ def validate_seed(raw):
             if any(type(i) is not int or i < 0 for i in orders) or orders != sorted(set(orders)):
                 raise ValueError('Sections need unique increasing nonnegative ordering')
             for key, section in sections.items():
+                if semantic and (section.get('review_depth', depth) not in depths or depths[section.get('review_depth', depth)] > depths[depth]):
+                    raise ValueError('Semantic section review depth must not exceed its source')
+                if semantic and section.get('verification_status') == 'reviewed' and section.get('review_depth', depth) not in {'selected_sections_read', 'deep_reviewed'}:
+                    raise ValueError('Reviewed section cannot upgrade metadata or directory review depth')
                 _texts(section, ('title', 'url'))
                 if key in all_sections:
                     raise ValueError('Section IDs must be unique across sources')
@@ -149,6 +169,11 @@ def validate_seed(raw):
                 if assignment['role'] not in {role.value for role in StageResourceRole}:
                     raise ValueError('Invalid resource role')
                 source = sources[assignment['source_ref']]
+                if semantic and assignment['role'] == 'primary' and (
+                    source.get('review_depth') not in {'selected_sections_read', 'deep_reviewed'}
+                    or source.get('content_access') not in {'free_public', 'free_account'}
+                ):
+                    raise ValueError('Primary requires sufficient original content review and verified reading access')
                 if assignment['source_ref'] not in data['resource_refs'] or assignment['source_version'] != source['source_version']:
                     raise ValueError('Invalid source reference/version')
                 sections = _keys(source['sections'], 'section_id')

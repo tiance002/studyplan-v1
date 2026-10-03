@@ -29,19 +29,17 @@ def test_specific_outcome_routing(goal, key):
     assert domain_pack.pack_key_for_goal(goal) == key
 
 
-@pytest.mark.parametrize("goal,filename", [
-    ("RAG Agent", "agent-knowledge-rag-v1.json"),
-    ("Coding Agent", "agent-coding-v1.json"),
-    ("Workflow Agent", "agent-workflow-automation-v1.json"),
-])
-def test_file_selection_uses_exact_direction(monkeypatch, goal, filename):
+@pytest.mark.parametrize("goal", ["RAG Agent", "Coding Agent", "Workflow Agent"])
+def test_runtime_recipes_share_current_spine_without_deleting_legacy_direction(monkeypatch, goal):
+    filename = domain_pack.CURRENT_PACKS['agent.application']
     calls = []
     monkeypatch.setattr(domain_pack, "load_pack", lambda name: calls.append(name) or {"filename": name})
     assert domain_pack.select_domain_pack(goal) == {"filename": filename}
     assert calls == [filename]
 
 
-def test_ambiguous_goal_has_no_silent_generic_or_python_fallback():
+def test_multiple_agent_recipes_use_reviewed_spine_instead_of_python_or_generic():
     selected = domain_pack.select_domain_pack("Python Coding Agent 和 RAG Agent")
-    assert selected["resource_support"] == "search_only"
-    assert not selected["resources"]
+    assert selected['pack_key'] == 'agent.application'
+    assert selected["resource_support"] == "reviewed_index"
+    assert selected['resources']

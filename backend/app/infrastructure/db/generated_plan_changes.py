@@ -8,6 +8,7 @@ from app.domain.domain_packs.validation import seed_digest, validate_seed
 from app.domain.generated_plan_changes import added_topic_route, compose_generated_draft
 from app.domain.planning.intent import goal_spec_payload
 from app.domain.planning.models import revision_from_draft
+from app.domain.planning.semantic_content import adapt_semantic_pack
 from app.infrastructure.db.learning_exposures import _json
 from app.infrastructure.db.plan_changes import PgPlanChanges
 from app.infrastructure.db.plan_repository import PgPlanRepository
@@ -71,11 +72,16 @@ class PgGeneratedPlanChanges(PgPlanChanges):
                 if not selected or not selected.get('stage_blueprints') or selected.get('resource_support') == 'search_only':
                     raise ConflictError('当前公共模板不足，不能把未知目标作为正式全路线变更')
                 pack = self._published_pack(conn, selected['pack_key'], selected['version'])
+                # Fence the immutable public Seed, while freezing the same
+                # private selection used by ordinary new-goal generation.
+                public_pack_hash = seed_digest(pack)
+                pack = adapt_semantic_pack(pack, goal, spec)
                 retained = []
                 after = [s['stable_key'] for s in pack['stage_blueprints']]
             else:
                 goal, spec = current.goal_snapshot, current.goal_spec
                 pack = self._published_pack(conn, current.source_pack_key, current.source_pack_version)
+                public_pack_hash = seed_digest(pack)
                 available = {s['stable_key'] for s in pack['stage_blueprints']}
                 if not set(before) <= available:
                     raise ConflictError('当前路线不能映射到受控课程')
@@ -86,6 +92,7 @@ class PgGeneratedPlanChanges(PgPlanChanges):
                     raise ConflictError('当前路线没有可以重新生成的受控未来阶段')
                 else:
                     retained, after = before[:boundary + 1], before
+                pack = adapt_semantic_pack(pack, goal, spec, stage_keys=after)
             # Only exact keys and immutable IDs are frozen. No Summary/Prompt/Outcome/private body leaves PG.
             rows = conn.execute('''SELECT DISTINCT n.stable_key,n.node_id,n.content_version FROM plan_unit_links p
                 JOIN plan_stages s USING(project_id,plan_id,stage_id)
@@ -106,7 +113,7 @@ class PgGeneratedPlanChanges(PgPlanChanges):
                     retained_stage_keys=retained, node_reuse=reuse,
                     protected_through=boundary,
                     before_goal=current.goal_snapshot, before_stages=[_json(asdict(s)) for s in current.stages],
-                    source_pack_key=pack['pack_key'], source_pack_version=pack['version'], pack_hash=seed_digest(pack))
+                    source_pack_key=pack['pack_key'], source_pack_version=pack['version'], pack_hash=public_pack_hash)
             if additions:
                 metadata.update(topic_keys=list(command.topic_keys), added_node_keys=list(additions['added_node_keys']),
                                 added_stage_keys=list(additions['added_stage_keys']),

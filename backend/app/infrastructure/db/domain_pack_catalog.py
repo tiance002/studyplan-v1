@@ -3,7 +3,7 @@ import psycopg
 from app.core.errors import DependencyUnavailableError
 from app.domain.domain_packs.validation import seed_digest, validate_seed
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
-from app.infrastructure.domain_pack import pack_key_for_goal, unsupported_domain_pack
+from app.infrastructure.domain_pack import runtime_pack_key_for_goal, unsupported_domain_pack
 
 
 class DomainPackUnavailableError(DependencyUnavailableError):
@@ -15,7 +15,7 @@ class PgDomainPackCatalog:
         self.dsn = to_psycopg_dsn(dsn)
 
     def select(self, goal: str) -> dict:
-        key = pack_key_for_goal(goal)
+        key = runtime_pack_key_for_goal(goal)
         if key is None:
             return unsupported_domain_pack()
         with psycopg.connect(self.dsn) as conn:

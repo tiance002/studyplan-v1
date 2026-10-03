@@ -52,7 +52,8 @@ function ProjectStudyContent({ title, repoUrl, whyNow, depth, avoid, extension, 
     }
   }
   return <section className="panel project-study-card" aria-label="项目源码学习">
-    <p className="eyebrow">项目学习</p><h2>{title}</h2>
+    <p className="eyebrow">项目案例（可选）</p><h2>{title}</h2>
+    <p className="form-note">可由自己的真实项目替换；无需选择或安装此项目案例。</p>
     <a href={repoUrl} target="_blank" rel="noreferrer">{repoUrl} ↗</a>
     {whyNow && <p>为什么现在：{whyNow}</p>}
     <h3>学习重点</h3><ul>{(extension.concepts || []).map(focus => <li key={focus}>{focus}</li>)}</ul>

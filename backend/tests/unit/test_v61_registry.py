@@ -15,7 +15,8 @@ def test_conservative_primary_and_preserved_specialized_routes(goal, key):
     assert domain_pack.pack_key_for_goal(goal) == key
     selected = domain_pack.select_domain_pack(goal)
     if key:
-        assert selected == domain_pack.load_pack(domain_pack.CURRENT_PACKS[key])
+        runtime_key = 'agent.application' if key.startswith('agent.') else key
+        assert selected == domain_pack.load_pack(domain_pack.CURRENT_PACKS[runtime_key])
     else:
         assert selected["resource_support"] == "search_only"
 

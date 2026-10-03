@@ -82,6 +82,7 @@ from app.domain.planning.models import (
     PlanStage,
     revision_from_draft,
 )
+from app.domain.planning.semantic_content import adapt_semantic_pack
 from app.domain.resources.curation import ResolvedSection, StageResourceAssignment
 from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
@@ -237,6 +238,8 @@ class PlanService:
         selected = (prepared_change['pack'] if prepared_change else
                     self._domain_pack_selector(goal_spec.target if goal_spec else goal) if self._domain_pack_selector else None)
         pack: dict[str, Any] = dict(selected) if isinstance(selected, Mapping) else {}
+        if not prepared_change:
+            pack = adapt_semantic_pack(pack, goal, goal_spec)
         binding = self._binding_resolver(scope, project_id)
         manifest = freeze_manifest(
             pack=pack, policy=binding.budget_policy, model_ref=binding.model_ref, goal_spec=goal_spec,

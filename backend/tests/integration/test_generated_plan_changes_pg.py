@@ -7,6 +7,7 @@ from app.composition import build_container
 from app.core.config import get_settings
 from app.core.ids import new_id
 from app.infrastructure.db.learning_resources import PgLearningResources
+from app.infrastructure.domain_pack import load_pack
 from app.main import create_app
 from app.ports.llm import LLMDispatchUnknownError
 from app.tools.seed_b3 import seed_reviewed_pack
@@ -27,21 +28,22 @@ def generated_route(migrated_db, request):
         next(s for s in pack['stage_blueprints'] if s['stable_key'] == 'stage.mcp')['inclusion'] = 'optional'
         pack['required_node_keys'] = [k for k in pack['required_node_keys'] if not k.startswith('node.mcp')]
         next(n for n in pack['knowledge_blueprints'] if n['stable_key'] == 'node.reliability')['prerequisite_keys'].remove('node.mcp')
-    pack['version'] = 13 if optional else 14
+    # These exercise the legacy protocol, before v5 introduces semantic policy.
+    # Keep synthetic legacy snapshots in the legacy version range.
+    pack['version'] = 3 if optional else 4
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
         seed_reviewed_pack(conn, pack)
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider='fake',
                        local_session_token='', planning_worker_admission_mode='trusted_server',
                        allow_origins=('http://127.0.0.1:5178',))
     container = build_container(settings)
-    if optional:
-        # Distinct immutable synthetic fixture version; optional cases explicitly
-        # select it even when later tests publish other versions in the owned DB.
-        select = container.plan_service._domain_pack_selector
-        def optional_fixture(goal):
-            selected = select(goal)
-            return pack if selected.get('pack_key') == pack['pack_key'] else selected
-        container.plan_service._domain_pack_selector = optional_fixture
+    # Freeze this historical protocol fixture even after a test publishes v5.
+    # Current semantic publication/selection has its own real PG acceptance.
+    select = container.plan_service._domain_pack_selector
+    def legacy_fixture(goal):
+        selected = select(goal)
+        return pack if selected.get('pack_key') == pack['pack_key'] else selected
+    container.plan_service._domain_pack_selector = legacy_fixture
     with TestClient(create_app(container)) as client:
         auth = client.post('/api/v1/auth/register', json={'username': '重规划' + new_id('usr')[-10:],
                                                         'password': 'Test-pass1!'})
@@ -307,8 +309,7 @@ def test_change_goal_freezes_pack_and_context_without_exporting_private_body(gen
     assert client.post('/api/v1/plan-changes/generate', params={'project_id': 'other'}, headers=headers,
                        json=body).status_code == 403
     # A later published version does not change the queued model contract or route.
-    pack = repeated_guided_pack()
-    pack['version'] = 15
+    pack = load_pack('agent-application-v5.json')
     with psycopg.connect(db.migrator_dsn) as conn:
         seed_reviewed_pack(conn, pack)
     assert container.planning_worker.tick()
@@ -318,7 +319,7 @@ def test_change_goal_freezes_pack_and_context_without_exporting_private_body(gen
     preview = client.get(url, params=params).json()
     assert preview['draft']['goal_snapshot'] == body['goal']
     assert preview['before_goal'] == old['goal_snapshot'] and preview['after_goal'] == body['goal']
-    assert preview['retained_stage_keys'] == [] and preview['draft']['source_pack_version'] == 14
+    assert preview['retained_stage_keys'] == [] and preview['draft']['source_pack_version'] == 4
     outgoing = json.dumps(captured, ensure_ascii=False)
     assert 'PRIVATE_BODY_NEVER_SEND' not in outgoing and 'private-route-fixture' not in outgoing
     assert old['plan_id'] not in outgoing

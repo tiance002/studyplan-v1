@@ -587,7 +587,7 @@ export function PlanningPage({
             </button>
           </div>
         </form>
-        <p className="form-note">可选择 AI 全栈应用、Agent 应用开发或云服务，也保留 RAG、Coding、Workflow 专项及 Python 基础。一次先确定一个方向；不明确时请补充目标。新方向资料先核对教程入口，详细章节范围会如实标注。</p>
+        <p className="form-note">可围绕 AI 全栈应用、Agent 应用开发或云服务提出目标，能力可跨方向组合；RAG、Coding、Workflow、Browser 是可组合专项。已有项目优先，默认项目候选可替换。新方向资料先核对教程入口，详细章节范围会如实标注。</p>
       </section>
       {pendingRunId && !run && <div className="run-banner" role="status">
         <strong>运行编号已保存，待读回</strong>
@@ -762,11 +762,18 @@ export function PlanningPage({
               <LearningGuidance guidance={s.learning_guidance} />
               {(draft.extensions ?? []).filter(extension => extension.stage_id === s.stage_id && extension.topic.startsWith('项目学习：')).slice(0, 1).map(extension => (
                 <details key={extension.extension_id} aria-label="项目学习安排">
-                  <summary>{extension.topic}</summary>
+                  <summary>项目案例（可选）：{extension.topic.slice('项目学习：'.length)}</summary>
                   <p style={{whiteSpace:'pre-line'}}>{extension.guidance}</p>
                   <ul>{(extension.concepts ?? []).map(concept => <li key={concept}>{concept}</li>)}</ul>
                   <p className="form-note">确认路线后，可在学习阶段复制项目学习 Prompt 给外部 AI。</p>
                 </details>
+              ))}
+              {(draft.extensions ?? []).filter(extension => extension.stage_id === s.stage_id && (extension.topic.startsWith('资料缺口：') || extension.topic === '持续成果载体与可组合专项')).map(extension => (
+                <section key={extension.extension_id} aria-label={extension.topic.startsWith('资料缺口：') ? '资料缺口' : '项目与可组合专项'}>
+                  <h3>{extension.topic}</h3>
+                  <p style={{whiteSpace:'pre-line'}}>{extension.guidance}</p>
+                  <ul>{(extension.concepts ?? []).map(concept => <li key={concept}>{concept}</li>)}</ul>
+                </section>
               ))}
               <Resources
                 items={(draft.stage_resources ?? []).filter(

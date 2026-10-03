@@ -23,7 +23,7 @@ pytestmark = pytest.mark.postgres
 @pytest.fixture
 def loop_container(migrated_db):
     pack = guided_pack()
-    pack['version'] = 40  # controlled, immutable synthetic acceptance pack
+    pack['version'] = 2  # controlled legacy acceptance, distinct from versions 3/4
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
         seed_reviewed_pack(conn, pack)
     settings = replace(get_settings(), database_url=migrated_db.app_dsn, llm_provider='fake',

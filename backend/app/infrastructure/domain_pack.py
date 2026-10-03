@@ -8,9 +8,9 @@ from app.domain.domain_packs.models import DomainPack
 from app.domain.enums import DomainPackStatus
 
 CURRENT_PACKS = {
-    "ai.fullstack": "ai-fullstack-v1.json",
-    "agent.application": "agent-application-v4.json",
-    "cloud.services": "cloud-services-v1.json",
+    "ai.fullstack": "ai-fullstack-v2.json",
+    "agent.application": "agent-application-v5.json",
+    "cloud.services": "cloud-services-v2.json",
     "python.engineering": "python-engineering-v2.json",
     "agent.knowledge_rag": "agent-knowledge-rag-v1.json",
     "agent.coding": "agent-coding-v1.json",
@@ -39,10 +39,27 @@ def load_pack(filename: str) -> dict:
 
 def select_domain_pack(goal: str) -> dict:
     """Conservative, deterministic scope routing; never use Python as a fallback."""
-    key = pack_key_for_goal(goal)
+    key = runtime_pack_key_for_goal(goal)
     if key in CURRENT_PACKS:
         return load_pack(CURRENT_PACKS[key])
     return unsupported_domain_pack()
+
+
+def runtime_pack_key_for_goal(goal: str) -> str | None:
+    """Current Agent planning composes recipes inside its published spine.
+
+    Legacy direction keys remain addressable for old snapshots and controlled
+    content tests; they no longer enforce an exclusive specialization choice.
+    """
+    key = pack_key_for_goal(goal)
+    text = unicodedata.normalize('NFKC', goal).casefold()
+    if key and key.startswith('agent.'):
+        return 'agent.application'
+    if key is None and re.search(r'(?<![a-z])agents?(?![a-z])|智能体', text) and not re.search(r'全栈|云服务', text):
+        return 'agent.application'
+    if key is None and re.search(r'\b(?:api|node\.?js|go|java)\b|服务', text) and re.search(r'部署|监控|自动发布|恢复|运维', text):
+        return 'cloud.services'
+    return key
 
 
 def pack_key_for_goal(goal: str) -> str | None:

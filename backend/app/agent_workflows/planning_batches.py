@@ -580,6 +580,12 @@ def merge_batches(
                 continue
             seen_task.add(key)
             saved_task = deepcopy(task)
+            if pack.get('semantic_context') and task_index == 0:
+                curated: dict = next((p for p in pack.get('practice_blueprints', []) if p.get('section_key') == stage_key), {})
+                if curated:
+                    saved_task['goal'] = curated['goal']
+                    for field in ('in_scope', 'out_scope', 'acceptance'):
+                        saved_task[field] = list(dict.fromkeys([*(curated.get(field) or []), *(saved_task.get(field) or [])]))
             if manifest and stage_key == stage_order[-1] and task_index == 0:
                 outputs = purpose_requirements(goal_spec_from_payload(manifest.get("goal_spec")))
                 if outputs:
@@ -613,8 +619,9 @@ def merge_batches(
         "relations": relations,
         "practice_proposal": {
             "stable_key": "practice.route",
-            "title": (pack.get("title") or "学习路线") + "实践",
-            "idea": (pack.get("title") or ""),
+            "title": (("用户项目：" if pack['semantic_context']['carrier_kind'] == 'user_project' else "默认项目候选（可替换）：")
+                      + pack['semantic_context']['carrier_title']) if pack.get('semantic_context') else (pack.get("title") or "学习路线") + "实践",
+            "idea": pack['semantic_context']['carrier_slice'] if pack.get('semantic_context') else (pack.get("title") or ""),
             "tasks": tasks,
             "task_knowledge_links": task_links,
         },
