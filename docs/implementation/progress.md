@@ -1,5 +1,15 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 RC续接：恢复副本三包实际生成/发布及Chrome补证PASS，原账号消费仍NOT RUN
+
+用户现在新增能做什么：5179只读入口继续保留，正常账号可私下登录看已有历史；本回合没有开放业务保存或切正式入口。上一回合完成恢复/审计/commit为progress；本回合同一8024/5179进程与exec handle核实仍活跃，没有因超时重启。
+
+在既有真实产品数据恢复副本中分别新建合成账号，普通Auth/CSRF、精确新actor allowlist/Fake有界tick、确认/PG工作区/新容器登录回读，Agent5/AI2/Cloud2三项PASS。实际阶段13/7/9，资料36/17/9、extensions29/21/25、tasks13/7/9。旧业务行摘要多重集合子集全部保留，旧Run/Job/Attempt/unknown不动；原库全表snapshot及archive/hash、原函数owner/security/ACL/definition只读复核PASS。
+
+Agent另走真实Chrome5179→8024，无API Mock，章节/optional RAGFlow卡/纯Prompt/刷新/重登录精确Plan与Workspace PASS，生成POST0，已退出自有浏览器，PNG已看。此为真实数据恢复环境中的**新合成写路径**，不代替原账号历史消费。[完整增量证据](../acceptance/v6-3-rc-closure-2026-10-04.md)。合成登录的metadata第6–18行排除；原actor新会话聚合0、其后login200计数0，原账号consumer NOT RUN，仍需本人私下登录。
+
+收费0，模型23/50、搜索6/1000、unknown1不变；Fake不是收费代表。本回合无tracked业务/测试代码变化，已有unit/contract/PG/Auth/前端结果输入不变复用，不重复宽套件。`.env.example`已正确8192，本机.env8000冲突仅待正式staging配置；不改原.env。RAG待用户指定实例；STAGING_BLOCKED/NOT_READY、Goal不标complete。下一最小动作仍为原正常账号在副本登录/历史/刷新重登录。
+
 ## 2026-10-04 最新：v6.1续接审计PASS，RC真实副本基础演练PASS，STAGING_BLOCKED / NOT_READY
 
 用户现在新增能做什么：在 [5179只读副本](http://127.0.0.1:5179/) 用原正常账号登录，查看恢复的学习空间/路线/历史、刷新/重新登录；当前不开放生成/确认/保存。真实产品库未修改、正式日常入口未切换。当前源码三方向/纯Prompt/已有项目优先/Recipe/当前UI与自动阶段完成均复用，不重新开发已通过能力。

@@ -19,11 +19,15 @@
 | 旧Plan/归属/Run/历史不变 | PASS | 除公开catalog与migration外的旧表全部count/hash不变；源库最终snapshot不变 |
 | app role实际PG catalog/章节指导消费 | PASS | 三新包catalog校验digest与publication、manifest/private selection；`catalog-and-paid-budget.json` |
 | hold资格 | PASS | 受控Seed/catalog校验；发布sources无hold；复用v6.2内容资格门禁，不提升TOC/候选为深审 |
+| 恢复副本中新合成账号实际生成/发布/重登录 | PASS | 三包各一次；Agent13/AI7/Cloud9阶段，actor allowlist有界tick；原业务行摘要子集仍完整 |
+| 恢复副本新合成Agent的Chrome实际消费 | PASS | 章节、optional项目卡/Prompt、刷新/重新登录精确Plan/Workspace；没有Mock或生成重派；不替代原账号 |
 | 当前frontend+copyAPI匿名Chrome | PASS | `anonymous-copy-smoke.json/png`：正常登录页、真实proxy、401、业务写403，无Mock；已查看PNG |
 | 真实用户普通登录/当前与历史/刷新重登录 | NOT RUN | 已邀请用户在副本私下登录；不获取密码/伪会话/重置散列 |
 | 原库写入/正式切换/收费 | NOT RUN | 实际模型/搜索新增0，Worker OFF，旧unknown不重派 |
 
 源中Summary/Prompt/Submissions/AcceptanceReview均0，空数据已恢复相等；没有伪造非空用户原文。非空历史主链的Synthetic PG/Chrome证据另列v6.2，不替代本副本普通账号体验。
+
+导入后的初始旧表整体摘要匹配是当时证据；后续允许的新合成账号/Plan会增加副本行数。已用旧业务行摘要多重集合子集逐表确认所有原业务行保留，含Run/Job/Attempt。副本正常Auth会更新/清理运行会话及限流元数据，原产品库未变化。详细新增证据见 [RC检查点](../acceptance/v6-3-rc-closure-2026-10-04.md)。
 
 ## 当前可访问的副本
 
