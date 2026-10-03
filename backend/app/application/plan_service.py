@@ -548,6 +548,14 @@ class PlanService:
 
     # -------------------------------------------------------------- 读取视图
 
+    def cancel_generation(self, *, scope: AuthContext, project_id: str, run_id: str,
+                          expected_version: int, idempotency_key: str) -> RunRecord:
+        scope.require_project(project_id)
+        if self._planning_jobs is None:
+            raise ValidationAppError("规划后台 Worker 未装配")
+        return self._planning_jobs.cancel_run(actor_id=scope.actor_id, project_id=project_id,
+            run_id=run_id, expected_version=expected_version, idempotency_key=idempotency_key)
+
     def list_runs(self, *, scope: AuthContext, project_id: str, limit: int = 10) -> tuple[RunRecord, ...]:
         scope.require_project(project_id)
         if not 1 <= limit <= 20:
@@ -764,7 +772,8 @@ class PlanService:
             )
 
         return PlanningNodes(
-            llm=_ScopedLLM(llm if llm is not None else self._llm, project_id, guard),
+            llm=_ScopedLLM(llm if llm is not None else self._llm, project_id, guard,
+                           write_fence=write_fence),
             save_draft=save_draft,
             # 短生成在保存草案后结束，以下回调不会被执行；
             # 决策路径由本服务的 decide() 负责，**不**重复实现第二套规则。
@@ -912,14 +921,26 @@ class PlanService:
 
 
 class _ScopedLLM:
-    """The server adds project context for the durable attempt ledger."""
-    def __init__(self, llm: LLMPort, project_id: str, guard: Callable[[], None] = lambda: None):
+    """Carry server scope and its transient claim to the durable dispatch guard."""
+    def __init__(self, llm: LLMPort, project_id: str, guard: Callable[[], None] = lambda: None,
+                 *, write_fence: PlanningWriteFence | None = None):
         self.llm = llm
         self.project_id = project_id
         self.guard = guard
+        self.write_fence = write_fence
 
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
         self.guard()
+        context = {key: value for key, value in payload.items() if key != "_planning_claim"}
+        context["_project_id"] = self.project_id
+        if self.write_fence is not None:
+            context["_planning_claim"] = {
+                "job_id": self.write_fence.job_id,
+                "run_id": self.write_fence.run_id,
+                "project_id": self.write_fence.project_id,
+                "actor_id": self.write_fence.actor_id,
+                "lease_token": self.write_fence.lease_token,
+            }
         return self.llm.generate_structured(purpose=purpose,
-            payload={**payload,"_project_id":self.project_id},schema_name=schema_name,
+            payload=context,schema_name=schema_name,
             run_id=run_id,attempt_id=attempt_id)

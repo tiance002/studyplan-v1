@@ -3552,6 +3552,68 @@
         }
       }
     },
+    "/api/v1/runs/{run_id}/cancel": {
+      "post": {
+        "summary": "取消活动规划；可能已派发的请求保留待核对状态",
+        "operationId": "cancel_planning_run",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunCancelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/plans/drafts/{draft_id}": {
       "get": {
         "summary": "读取草案（含已核验资源）",
@@ -10481,6 +10543,28 @@
           "candidate_id"
         ],
         "title": "ResourceSelectionRequest"
+      },
+      "RunCancelRequest": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "idempotency_key"
+        ],
+        "title": "RunCancelRequest"
       },
       "RunProgress": {
         "properties": {

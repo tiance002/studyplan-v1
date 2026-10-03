@@ -2,17 +2,29 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import datetime
 from typing import Any
 
 import psycopg
-from app.core.errors import ConflictError, ForbiddenError, ValidationAppError
+from app.agent_workflows.planning_batches import SHORT_GENERATION_VERSION
+from app.core.errors import (
+    ConflictError,
+    ForbiddenError,
+    IdempotencyConflictError,
+    NotFoundError,
+    ValidationAppError,
+    VersionConflictError,
+)
 from app.core.ids import new_id
 from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
-from app.infrastructure.db.planning_fence import lock_planning_write
+from app.infrastructure.db.planning_fence import lock_plan_version, lock_planning_write
+from app.infrastructure.db.run_repository import _run_from
 from app.ports.planning_jobs import JobClaim, PlanningLeaseLostError
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
@@ -48,6 +60,89 @@ class PgPlanningJobRepository:
                 (actor_id, project_id),
             )
             yield conn
+
+    def cancel_run(self, *, actor_id: str, project_id: str, run_id: str,
+                   expected_version: int, idempotency_key: str) -> RunRecord:
+        """Fence dispatch, result writes and pending publication atomically.
+
+        Durable dispatch can precede HTTP start; retain possibly-sent Attempts
+        for reconciliation rather than promise that the network was aborted.
+        """
+        if (type(expected_version) is not int or expected_version < 1
+                or not isinstance(idempotency_key, str) or not idempotency_key.strip()
+                or len(idempotency_key) > 128):
+            raise ValidationAppError("取消请求的版本或幂等键无效")
+        key_hash = hashlib.sha256(idempotency_key.encode()).hexdigest()
+        fingerprint = hashlib.sha256(json.dumps(
+            [actor_id, project_id, run_id, expected_version], ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode()).hexdigest()
+        with self._tx(actor_id=actor_id, project_id=project_id) as conn:
+            conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))",
+                         (f"studyplan:plan-budget:{run_id}",))
+            lock_plan_version(conn, project_id, None)
+            row = conn.execute(
+                """SELECT r.*, j.status AS job_status FROM ai_jobs j
+                JOIN ai_runs r USING(run_id) JOIN learning_projects p ON p.project_id=r.project_id
+                WHERE r.run_id=%s AND r.project_id=%s AND r.actor_id=%s
+                  AND p.owner_actor_id=%s AND p.archived_at IS NULL
+                FOR UPDATE OF j,r,p""", (run_id, project_id, actor_id, actor_id),
+            ).fetchone()
+            if row is None:
+                raise NotFoundError("规划运行不存在或不属于当前账户")
+            receipt = conn.execute(
+                """SELECT detail FROM ai_run_events WHERE run_id=%s
+                AND status='cancel_request' AND detail->>'kind'='planning_cancel'
+                AND detail->>'key_hash'=%s ORDER BY event_id LIMIT 1""", (run_id, key_hash),
+            ).fetchone()
+            if receipt is not None:
+                detail = receipt["detail"]
+                if detail["body_fingerprint"] != fingerprint:
+                    raise IdempotencyConflictError("此取消幂等键已用于其他请求内容")
+                snapshot = dict(detail["response"])
+                for field in ("created_at", "updated_at"):
+                    if snapshot.get(field):
+                        snapshot[field] = datetime.fromisoformat(snapshot[field])
+                return _run_from(snapshot)
+            if (row["kind"] != "plan_generate" or row["graph_version"] != SHORT_GENERATION_VERSION
+                    or row["status"] not in {"queued", "running"}
+                    or row["job_status"] not in {"pending", "running"}):
+                raise ConflictError("只能取消当前协议的活动规划；旧运行和待核对记录保留",
+                                    reason="planning_cancel_not_active")
+            if row["version"] != expected_version:
+                raise VersionConflictError(expected_version=expected_version, actual_version=row["version"])
+            drafts = conn.execute(
+                "SELECT draft_id,status FROM plan_drafts WHERE project_id=%s AND run_id=%s FOR UPDATE",
+                (project_id, run_id),
+            ).fetchall()
+            if any(draft["status"] == "approved" for draft in drafts):
+                raise ConflictError("草案已经确认，不能撤销已发布事实", reason="planning_cancel_published")
+            possible_dispatch = conn.execute(
+                "SELECT 1 FROM ai_provider_attempts WHERE run_id=%s "
+                "AND status IN ('dispatched','reconciliation_required') LIMIT 1", (run_id,),
+            ).fetchone() is not None
+            status = "reconciliation_required" if possible_dispatch else "cancelled"
+            next_action = "reconcile" if possible_dispatch else "none"
+            cancelled = conn.execute(
+                """UPDATE plan_drafts SET status='cancelled',updated_at=clock_timestamp()
+                WHERE project_id=%s AND run_id=%s AND status IN ('pending','awaiting_approval')
+                RETURNING draft_id""", (project_id, run_id),
+            ).fetchall()
+            conn.execute("UPDATE ai_jobs SET status=%s,lease_token=NULL,lease_expires_at=NULL WHERE run_id=%s",
+                         (status, run_id))
+            updated = conn.execute(
+                """UPDATE ai_runs SET status=%s,next_action=%s,version=version+1,
+                error_class=%s,updated_at=clock_timestamp() WHERE run_id=%s RETURNING *""",
+                (status, next_action, "provider_dispatch_unknown" if possible_dispatch else None, run_id),
+            ).fetchone()
+            assert updated is not None
+            snapshot = {key: value.isoformat() if isinstance(value, datetime) else value
+                        for key, value in updated.items()}
+            conn.execute("INSERT INTO ai_run_events(run_id,status,detail) VALUES (%s,'cancel_request',%s)",
+                (run_id, Jsonb(dict(kind="planning_cancel", key_hash=key_hash,
+                    body_fingerprint=fingerprint, response=snapshot,
+                    cancelled_draft_ids=[draft["draft_id"] for draft in cancelled]))))
+            return _run_from(updated)
 
     def enqueue(self, run: RunRecord, initial: dict[str, object], manifest: dict[str, object]) -> None:
         """Write run, one submission event, and one queue row in one transaction."""

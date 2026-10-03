@@ -30,6 +30,7 @@ from app.api.v1.schemas import (
     PlanGenerateRequest,
     PlanGenerateResponse,
     PlanView,
+    RunCancelRequest,
     RunView,
 )
 from app.api.v1.views import (
@@ -120,6 +121,25 @@ def get_run(
     以及分批生成的业务进度 ``progress``（无图内部字段）。"""
     bundle = service.get_run(scope=scope, project_id=project_id, run_id=run_id)
     return run_view(bundle.run, bundle.progress)
+
+
+@router.post(
+    "/runs/{run_id}/cancel",
+    response_model=RunView,
+    operation_id="cancel_planning_run",
+    summary="取消活动规划；可能已派发的请求保留待核对状态",
+)
+def cancel_planning_run(
+    run_id: str,
+    payload: RunCancelRequest,
+    project_id: str = ProjectId,
+    scope: AuthContext = Depends(get_auth_context),
+    service: PlanService = Depends(get_plan_service),
+) -> RunView:
+    run = service.cancel_generation(scope=scope, project_id=project_id, run_id=run_id,
+                                    expected_version=payload.expected_version,
+                                    idempotency_key=payload.idempotency_key)
+    return run_view(run)
 
 
 @router.get(

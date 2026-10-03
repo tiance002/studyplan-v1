@@ -7,6 +7,7 @@ from dataclasses import asdict
 
 import psycopg
 from app.agent_workflows.planning_batches import (
+    SHORT_GENERATION_VERSION,
     allowed_attempt_keys,
     attempt_purpose,
     attempt_stage,
@@ -51,7 +52,10 @@ class PgAttemptLLM:
         batch catalog.
         """
         if self.manifest is None:
-            return "run_manifest_violation" if purpose in REVIEW_PROTOCOLS else None
+            if purpose in REVIEW_PROTOCOLS:
+                return "run_manifest_violation"
+            conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (f"studyplan:plan-budget:{run_id}",))
+            return None
         if purpose in REVIEW_PROTOCOLS or self.manifest.get("protocol") in {SUMMARY_PROTOCOL, PROMPT_PROTOCOL}:
             protocol, valid, _, suffix, _ = REVIEW_PROTOCOLS.get(purpose, (None, lambda value: False, None, "", None))
             if (not valid(self.manifest)
@@ -98,7 +102,10 @@ class PgAttemptLLM:
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
         project_id = str(payload.get("_project_id") or "")
         request_options = self.provider.request_options(purpose)
-        semantic_payload = {k: v for k, v in payload.items() if k != REVIEW_PROTOCOLS[purpose][2]} if purpose in REVIEW_PROTOCOLS else payload
+        transient_keys = {"_planning_claim"}
+        if purpose in REVIEW_PROTOCOLS:
+            transient_keys.add(REVIEW_PROTOCOLS[purpose][2])
+        semantic_payload = {k: v for k, v in payload.items() if k not in transient_keys}
         identity = [purpose,semantic_payload,schema_name,self.provider.model,self.provider.prompt_version,
                     self.provider.domain_pack,request_options,self.provider.budget_policy.as_dict()]
         fingerprint = hashlib.sha256(json.dumps([*identity,self.provider.base_url,self.provider.configuration_ref], sort_keys=True, ensure_ascii=False).encode()).hexdigest()
@@ -111,6 +118,29 @@ class PgAttemptLLM:
             rejection = self._budget_rejection(conn, run_id=run_id, attempt_id=attempt_id, purpose=purpose)
             if rejection is not None:
                 return LLMFailure(rejection, "Run budget or manifest guard rejected this dispatch")
+            if purpose not in REVIEW_PROTOCOLS:
+                retained = conn.execute("SELECT * FROM ai_provider_attempts WHERE attempt_id=%s", (attempt_id,)).fetchone()
+                if retained is not None:
+                    # Reading an already retained receipt needs no live lease.
+                    # Business writes still require their own live write fence.
+                    return self._retained_result(retained, run_id, fingerprint, legacy_fingerprint)
+                run = conn.execute(
+                    "SELECT kind,graph_version,EXISTS(SELECT 1 FROM ai_jobs j WHERE j.run_id=r.run_id) AS has_job "
+                    "FROM ai_runs r WHERE r.run_id=%s", (run_id,),
+                ).fetchone()
+                if run is None or run["kind"] != "plan_generate":
+                    return LLMFailure("run_manifest_violation", "Planning run protocol mismatch")
+                if run["has_job"] or run["graph_version"] == SHORT_GENERATION_VERSION:
+                    raw_fence = payload.get("_planning_claim")
+                    fields = {"job_id", "run_id", "project_id", "actor_id", "lease_token"}
+                    if (not isinstance(raw_fence, dict) or set(raw_fence) != fields
+                            or any(not isinstance(value, str) or not value for value in raw_fence.values())):
+                        return LLMFailure("planning_claim_missing", "Planning dispatch requires its exact live server claim")
+                    fence = PlanningWriteFence(**raw_fence)
+                    # Cancellation uses this same order: budget advisory, project
+                    # decision advisory, then live job/run/project row locks.
+                    lock_plan_version(conn, project_id, None)
+                    lock_planning_write(conn, project_id=project_id, run_id=run_id, fence=fence)
             if purpose in REVIEW_PROTOCOLS:
                 protocol, _, claim_key, _, kind = REVIEW_PROTOCOLS[purpose]
                 raw_fence = payload.get(claim_key)
@@ -129,22 +159,11 @@ class PgAttemptLLM:
                 (attempt_id,run_id,self.provider.model,self.provider.prompt_version,fingerprint,schema_name)).fetchone()
             if not inserted:
                 row = conn.execute("SELECT * FROM ai_provider_attempts WHERE attempt_id=%s", (attempt_id,)).fetchone()
-                compatible = (row is not None and row["run_id"] == run_id and (
-                    row["request_fingerprint"] == fingerprint or
-                    (self.provider.configuration_ref == "deployment" and row["request_fingerprint"] == legacy_fingerprint)
-                ))
-                if not compatible:
-                    return LLMFailure("attempt_conflict", "Attempt identity mismatch")
-                if row["status"] == "succeeded":
-                    return LLMResult(**row["response_payload"])
-                if row["status"] in {"dispatched","reconciliation_required"}:
-                    return LLMFailure("attempt_dispatch_unknown", "Reconcile before another dispatch", dispatch_unknown=True)
-                if row["response_payload"]:
-                    return LLMFailure(**row["response_payload"])
-                return LLMFailure(row["error_class"] or "attempt_failed", "Retained failed attempt")
+                return self._retained_result(row, run_id, fingerprint, legacy_fingerprint)
         # Connection commits 'dispatched' BEFORE the external network request.
+        provider_payload = {key: value for key, value in payload.items() if key != "_planning_claim"}
         try:
-            result = self.provider.generate_structured(purpose=purpose,payload=payload,schema_name=schema_name,run_id=run_id,attempt_id=attempt_id)
+            result = self.provider.generate_structured(purpose=purpose,payload=provider_payload,schema_name=schema_name,run_id=run_id,attempt_id=attempt_id)
         except LLMNotDispatchedError:
             result = LLMFailure("endpoint_preflight_rejected","No provider request was sent")
             cause = None
@@ -170,3 +189,18 @@ class PgAttemptLLM:
         if cause:
             raise LLMDispatchUnknownError("Provider outcome unknown") from cause
         return result
+
+    def _retained_result(self, row, run_id, fingerprint, legacy_fingerprint):
+        compatible = (row is not None and row["run_id"] == run_id and (
+            row["request_fingerprint"] == fingerprint or
+            (self.provider.configuration_ref == "deployment" and row["request_fingerprint"] == legacy_fingerprint)
+        ))
+        if not compatible:
+            return LLMFailure("attempt_conflict", "Attempt identity mismatch")
+        if row["status"] == "succeeded":
+            return LLMResult(**row["response_payload"])
+        if row["status"] in {"dispatched", "reconciliation_required"}:
+            return LLMFailure("attempt_dispatch_unknown", "Reconcile before another dispatch", dispatch_unknown=True)
+        if row["response_payload"]:
+            return LLMFailure(**row["response_payload"])
+        return LLMFailure(row["error_class"] or "attempt_failed", "Retained failed attempt")

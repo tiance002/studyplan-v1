@@ -84,7 +84,7 @@ def test_prompt_revision_and_exports_are_owner_scoped_http(prompt_scenario):
         export = client.post(exports_url, params=query, headers=headers,
             json={"format": "raw", "idempotency_key": "owner-export"}).json()
         registration = client.post("/api/v1/auth/register", json={"username": "PromptOther" + scope.actor_id[-10:],
-            "password": "isolated prompt second account passphrase"})
+            "password": "Test-pass1!"})
         assert registration.status_code == 200
         other_headers = {"X-CSRF-Token": registration.json()["csrf_token"]}
         for path in ("/api/v1/prompts/history", "/api/v1/prompts/revisions/" + revision["revision_id"],

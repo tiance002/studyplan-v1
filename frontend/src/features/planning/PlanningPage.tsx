@@ -120,6 +120,8 @@ function RunProgressPanel({ progress }: { progress: DTO["RunProgress"] }) {
   );
 }
 
+type PendingCancellation = { run_id: string; body: DTO['RunCancelRequest']; conflict?: boolean };
+
 export function PlanningPage({
   project,
   actorKey,
@@ -145,6 +147,15 @@ export function PlanningPage({
     [error, setError] = useState(""),
     [conflict, setConflict] = useState(false),
     [notice, setNotice] = useState("");
+  const cancelStorage = `studyplan-cancel:${JSON.stringify([actorKey, project])}`;
+  const [pendingCancellation, setPendingCancellation] = useState<PendingCancellation | null>(null);
+  const cancellationRef = useRef<PendingCancellation | null>(null);
+  function rememberCancellation(value: PendingCancellation | null) {
+    cancellationRef.current = value;
+    setPendingCancellation(value);
+    if (value) localStorage.setItem(cancelStorage, JSON.stringify(value));
+    else localStorage.removeItem(cancelStorage);
+  }
   const generating = useRef(false);
   const loadedDraft = useRef<string | null>(null);
   const detailScope = JSON.stringify([actorKey, project]);
@@ -184,6 +195,8 @@ export function PlanningPage({
     actionSequence.current++;
     generating.current = false;
     loadedDraft.current = null;
+    cancellationRef.current = null;
+    setPendingCancellation(null);
     setRun(null);
     setDraft(null);
     setStages([]);
@@ -197,7 +210,7 @@ export function PlanningPage({
     setNotice('');
     setError('');
   }, [detailScope]);
-  const generationLifecycleBlocked = busy || acceptedRun || !canStartNewRun(run) || fake === null ||
+  const generationLifecycleBlocked = busy || !!pendingCancellation || acceptedRun || !canStartNewRun(run) || fake === null ||
     pendingPlanChange || planChangeSubmitting ||
     draft?.status === "awaiting_approval" ||
     run?.status === "queued" || run?.status === "running" ||
@@ -253,6 +266,9 @@ export function PlanningPage({
       throw e;
     }
     if (!isCurrent()) return;
+    const pending = cancellationRef.current;
+    if (pending?.run_id === id && (pending.conflict || r.version !== pending.body.expected_version ||
+        !['queued', 'running'].includes(r.status) || runNeedsCheck(r))) rememberCancellation(null);
     setRun(r);
     setPendingRunId(null);
     const readingResult = !runNeedsCheck(r) && !!r.result_ref &&
@@ -309,6 +325,7 @@ export function PlanningPage({
     return labels[status] ?? '未知状态，需要核对';
   }
   function runBlocksHistorySwitch(candidateId: string): boolean {
+    if (pendingCancellation && pendingCancellation.run_id !== candidateId) return true;
     if (pendingRunId && !run && pendingRunId !== candidateId) return true;
     if (run?.run_id === candidateId) return false;
     if (draft?.status === 'awaiting_approval') return true;
@@ -379,6 +396,14 @@ export function PlanningPage({
   }
   useEffect(() => {
     const id = localStorage.getItem(`studyplan-run:${project}`);
+    try {
+      const saved = JSON.parse(localStorage.getItem(cancelStorage) || 'null') as PendingCancellation | null;
+      if (saved?.run_id === id && Number.isInteger(saved.body?.expected_version) && saved.body.expected_version > 0 &&
+          typeof saved.body.idempotency_key === 'string' && saved.body.idempotency_key.length > 0 && saved.body.idempotency_key.length <= 128) {
+        cancellationRef.current = saved;
+        setPendingCancellation(saved);
+      }
+    } catch { /* Keep restoring the Run when a local request record is unreadable. */ }
     if (id) {
       setPendingRunId(id);
       setAcceptedRun(true);
@@ -386,14 +411,45 @@ export function PlanningPage({
     }
   }, [detailScope]);
   useEffect(() => {
-    if (!run || runNeedsCheck(run) || run.next_action !== "wait" || !["queued", "running"].includes(run.status)) return;
+    if (pendingCancellation || !run || runNeedsCheck(run) || run.next_action !== "wait" || !["queued", "running"].includes(run.status)) return;
     const timer = setTimeout(
       () => loadRun(run.run_id).catch((e) => setError(e.message))
         .finally(() => setPollAttempt(n => n + 1)),
       document.hidden ? 30000 : Math.min(10000, 1500 * 1.5 ** pollAttempt),
     );
     return () => clearTimeout(timer);
-  }, [run, pollAttempt]);
+  }, [run, pollAttempt, pendingCancellation]);
+  async function cancelGeneration(retry = false) {
+    if (busy || !run || runNeedsCheck(run) || run.next_action !== 'wait' || !['queued', 'running'].includes(run.status)) return;
+    const scope = detailScope;
+    const previous = cancellationRef.current;
+    if (previous && (!retry || previous.conflict || previous.run_id !== run.run_id)) return;
+    const pending: PendingCancellation = previous ?? {
+      run_id: run.run_id, body: { expected_version: run.version, idempotency_key: crypto.randomUUID() },
+    };
+    runReadSequence.current++;
+    draftReadSequence.current++;
+    rememberCancellation(pending);
+    await act(async () => {
+      let result: DTO['RunView'];
+      try {
+        result = await api.cancelRun(project, pending.run_id, pending.body);
+      } catch (failure) {
+        if (!mounted.current || currentDetailScope.current !== scope) return;
+        runReadSequence.current++;
+        if (failure instanceof ApiError && failure.status === 409) rememberCancellation({ ...pending, conflict: true });
+        throw failure;
+      }
+      if (!mounted.current || currentDetailScope.current !== scope) return;
+      runReadSequence.current++;
+      rememberCancellation(null);
+      setRun(result);
+      setAcceptedRun(!canStartNewRun(result));
+      setNotice(result.status === 'reconciliation_required'
+        ? '取消已登记，但已有请求可能发出，请核对运行结果；不能再次生成。'
+        : '生成已取消。再次生成将创建一条新的运行。');
+    });
+  }
   async function act(fn: () => Promise<void>) {
     const scope = detailScope;
     const sequence = ++actionSequence.current;
@@ -565,6 +621,16 @@ export function PlanningPage({
           {runNeedsCheck(run) && <p className="form-note">服务返回了当前页面无法安全处理的运行状态或下一步操作。运行编号 {run.run_id} 已保留；请手动刷新状态核对，不会自动重试、重放或启动新运行。</p>}
           {run.status === "failed" && !runNeedsCheck(run) && <p className="form-note">再次生成会创建一条新运行，不会恢复或重派这条失败运行。</p>}
           {run.error && <p>{run.error.message}</p>}
+          {!runNeedsCheck(run) && run.next_action === 'wait' && ['queued', 'running'].includes(run.status) && !pendingCancellation && <>
+            <p className="form-note">取消后停止后续生成并保留记录；已经发出的请求可能仍返回结果，需要核对。</p>
+            <button className="btn quiet" disabled={busy} onClick={() => void cancelGeneration()}>取消生成</button>
+          </>}
+          {pendingCancellation?.run_id === run.run_id && <>
+            <p className="form-note">{pendingCancellation.conflict
+              ? '取消未确认，运行版本或状态可能已变化。请刷新运行状态后再决定。'
+              : '取消结果尚未确认，运行编号和原请求已保存。请刷新状态核对，或明确重试同一次取消；不会自动提交。'}</p>
+            {!pendingCancellation.conflict && <button className="btn quiet" disabled={busy} onClick={() => void cancelGeneration(true)}>重试同一次取消</button>}
+          </>}
           <button
             className="text-button"
             disabled={busy}

@@ -18,6 +18,7 @@ from contextlib import contextmanager
 from typing import Any
 
 import psycopg
+from app.agent_workflows.planning_batches import SHORT_GENERATION_VERSION
 from app.core.errors import ConflictError, ValidationAppError
 from app.domain.enums import AiRunNextAction, AiRunStatus
 from app.domain.runs.fencing import PlanningWriteFence
@@ -163,7 +164,23 @@ class PgRunRepository:
     ) -> RunRecord:
         with self._tx(project_id) as conn:
             if expected_plan_version is not None:
-                lock_plan_version(conn, project_id, expected_plan_version)
+                lock_plan_version(conn, project_id, None)
+                # A user may publish the saved draft before the Worker records
+                # completion. Its own atomic publication advances the base
+                # revision; that fact must not turn this successful Run failed.
+                published_result = None
+                if status == "succeeded" and next_action == "none" and result_ref:
+                    published_result = conn.execute(
+                        """SELECT 1 FROM plan_drafts d JOIN ai_runs r USING(run_id)
+                        WHERE d.project_id=%s AND r.project_id=%s AND r.run_id=%s
+                          AND d.draft_id=%s AND d.status='approved'
+                          AND r.kind='plan_generate' AND r.graph_version=%s
+                          AND EXISTS(SELECT 1 FROM plan_publications p
+                              WHERE p.project_id=d.project_id AND p.draft_hash=d.content_hash)""",
+                        (project_id, project_id, run_id, result_ref, SHORT_GENERATION_VERSION),
+                    ).fetchone()
+                if published_result is None:
+                    lock_plan_version(conn, project_id, expected_plan_version)
             if write_fence is not None:
                 lock_planning_write(conn, project_id=project_id, run_id=run_id, fence=write_fence)
             cursor = conn.execute(

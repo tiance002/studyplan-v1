@@ -150,6 +150,8 @@ export const api = {
     request<DTO['PlanGenerateResponse']>(`/plan-changes/generate${scope(project)}`, body),
   run: (project: string, id: string) =>
     request<DTO["RunView"]>(`/runs/${encodeURIComponent(id)}${scope(project)}`),
+  cancelRun: (project: string, id: string, body: DTO['RunCancelRequest']) =>
+    request<DTO['RunView']>(`/runs/${encodeURIComponent(id)}/cancel${scope(project)}`, body),
   runs: (project: string, limit = 10) =>
     request<DTO['RunView'][]>(`/runs${scope(project)}&limit=${limit}`),
   draft: (project: string, id: string) =>

@@ -25,7 +25,7 @@ def test_new_user_requires_no_actor_whitelist_and_status_url_survives_relogin(mi
                        local_session_token="", planning_worker_admission_mode="trusted_server",
                        planning_worker_actor_ids=())
     container = build_container(settings)
-    credentials = {"username": "新用户纵向切片", "password": "我的学习口令😀" * 3}
+    credentials = {"username": "新用户纵向切片", "password": "我的学习口令😀"}
     with TestClient(create_app(container)) as client:
         registered = client.post("/api/v1/auth/register", json=credentials)
         assert registered.status_code == 200, registered.text
@@ -74,7 +74,7 @@ def test_new_user_requires_no_actor_whitelist_and_status_url_survives_relogin(mi
         assert restarted.get(handle["status_url"]).status_code == 200
     with TestClient(create_app(build_container(settings))) as outsider:
         registered = outsider.post("/api/v1/auth/register", json={
-            "username": "另一个纵向用户", "password": "different long learning passphrase",
+            "username": "另一个纵向用户", "password": "Test-pass1!",
         })
         assert registered.status_code == 200, registered.text
         assert outsider.get(handle["status_url"]).status_code == 403

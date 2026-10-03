@@ -119,6 +119,13 @@ class RunView(BaseModel):
     )
 
 
+class RunCancelRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    expected_version: int = Field(..., ge=1, strict=True)
+    idempotency_key: str = Field(..., min_length=1, max_length=128)
+
+
 class GoalSpec(BaseModel):
     model_config = ConfigDict(extra="forbid", from_attributes=True)
 
@@ -434,6 +441,7 @@ V1_SCHEMAS: tuple[type[BaseModel], ...] = (
     PrefsSnapshot,
     RunProgress,
     RunView,
+    RunCancelRequest,
     PlanGenerateRequest,
     PlanGenerateResponse,
     StageDetail,

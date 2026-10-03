@@ -4,6 +4,7 @@ import psycopg
 import pytest
 from app.composition import build_container
 from app.core.config import get_settings
+from app.core.ids import new_id
 from app.infrastructure.domain_pack import load_pack, load_python_pack
 from app.main import create_app
 from fastapi.testclient import TestClient
@@ -179,9 +180,14 @@ def test_failed_provider_usage_is_retained_and_replayed_without_dispatch(migrate
     container = build_container(settings)
     client = TestClient(create_app(container))
     session = client.post("/api/v1/auth/register", json={"username": "失败用量留存", "password": "Test-pass1!"}).json()
-    draft, _, _, _ = route(client, session, "Agent开发")
+    # Provider-accounting fixture is explicitly legacy/jobless. A succeeded
+    # ordinary SHORT Run cannot authorize a fresh, unfenced provider Attempt.
+    run_id = new_id("usage")
+    scope = container.browser_auth.resolve(client.cookies.get(settings.session_cookie_name))
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
-        run_id = conn.execute("SELECT run_id FROM plan_drafts WHERE draft_id=%s", (draft["draft_id"],)).fetchone()[0]
+        conn.execute("""INSERT INTO ai_runs(run_id,actor_id,project_id,kind,graph_name,graph_version,status,next_action)
+            VALUES (%s,%s,%s,'plan_generate','planning','1','queued','wait')""",
+            (run_id, scope.actor_id, session["project_ids"][0]))
     calls = []
     def reply(request):
         calls.append(request)
