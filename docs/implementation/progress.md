@@ -1,5 +1,23 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-05 用户追加产品模型额度：累计200，已用88，剩余112
+
+用户明确新增100次产品模型调用授权，覆盖上一版Delivery Goal“本轮产品真实模型请求0”的额度限制；同一授权重复发送仅追加一次，不算两份100。previous_cap=100 / additional_authorization=100 / new_cumulative_cap=200 / used_before_authorization=88 / remaining_after_authorization=112。已在同一权威账本追加 `.git/v2-paid-quota-20261001/authorization-delivery-20261005-cap-200.json`，旧authorization-v610与88request/result/receipt字节保持，不重置账本、不更改全局配置；本次模型实际新增0，当前88/200。
+
+继续原顺序与门禁：A6确定性修复→原response/Fake/ownedPG零收费回放→A6/46-slot/canonical/practice/Draft/Plan/Edge全部PASS→仅全新Acceptance/Run/owned两库的完整paid代表，37normal+repair最多2=39；每笔append-only计量，unknown立即STOP，首份完整PASS停止继续收费，独立FAIL先停止收费并离线定位/修复再决定第二份。当前A6已定位但10.1原冻结仅legacy_index/toc_checked，与现Agent教学章节资格合同冲突；非fallback门禁FAIL，扩额不授权升资格/改旧冻结，因此依赖的PG确认/Edge/paid仍NOT RUN并STOP。正文审读/下一不可变版本或TOC reference消费合同需明确裁决，详见下方本批报告。
+
+原产品库/正式入口/正式Worker/部署/push/merge/全局配置/来源canonical任务预算安全放宽/历史failed unknown重派均未获授权；原搜索/下载/外部RAG0限制保持。下方88/100等是本次扩额前的历史时点，不覆盖本条最新200上限。
+
+
+## 2026-10-05 Delivery Acceleration：A6 冻结资格矛盾，BLOCKED / STOP
+
+用户现在新增能做什么：审阅[A6首次降级、完整原响应离线回放与正式操作剩余](../acceptance/delivery-acceleration-2026-10-05.md)。没有新体验入口/Draft/Plan。进入分支feat/n1-resource-discovery，HEAD与核实远端均9fef887af21dd5ff2a60aef306a6b9b02d176f5f；保留已提交组合v6.11/v6.12/v6.13/GR/F2成果，tracked原干净，仅两保护目录未跟踪，未操作。业务/包/资格/API/DTO/迁移/provider/全局配置差异0；本批只写ignored诊断/证据与本报告和progress顶部。
+
+原冻结submission与38body/response/receipt绑定精确复核PASS；新memory fake/replay compiled graph按51–88原序列、58normal→59knownrepair，未改原内容/manifest/pack。18stage/16canonical/58unit/18task/37extensions和全部46原slot经merge/独立checked_projection保留；首次清空是restrict_pack_resources，45保留1降级。A6 reference order0 source reviewed/version1但10.1 section为legacy_index/toc_checked，原注释明确正文审读10.2/10.5.1、10.1仅chapter structure/summary；身份/版本/归属/适用键正确，非selected_scope_pending。既有Agent合同要求该未深审参考剥离引用并fallback；validate_seed允许候选入包不等于审核章节消费。原冻结74section引用含1目录级，消费73；非fallback门禁RED1FAIL保留，资格诊断最终8不同PASS（首轮7PASS1测试seamFAIL保留、仅ignored诊断修正），一次Sol6.1xhigh组合复核PASS。按活动Goal§4.2 STOP来源修复及依赖PG/Edge，未改冻结资格追绿、未新增落库断言或UI链接伪修复。
+
+本轮真实PG只读角色预检PASS，新owned业务/checkpoint/确认/Edge/Prompt总结成果变更闭环/build NOT RUN；没有数据库/服务/Worker新建或启动。921旧历史/已完成F2/.env/账本文件保护；原F2 Run/Draft不连接业务写入、不确认、不重派、不改原FAIL。产品模型新增0，88/100/余12保持；搜索新增0（旧6/1000）、正文/外部RAG0，本轮unknown0，历史unknown保留。日常Worker默认trusted_server与100验收wrapper不同；静态runtime ledger未传manifest，实际预算绑定须非收费核实后才可开正式Worker，未扩大为本轮修复。无新收费申请（旧v6.7下一代表已由v6.8完成，不能据历史下一动作重复申请39）。下一准确缺口为10.1正文审读依据/下一不可变版本，或明确带资格限制的TOC reference消费合同；原Agent7和旧Run/Plan保持。原库/正式入口/正式Worker/RAG/push/merge未动；A6_SOURCE_QUALIFICATION_BLOCKED，整体STAGING_BLOCKED/NOT_READY并STOP。请求root/复核Sol6.1xhigh、独立机械Lunamedium，actual均NOT OBSERVABLE。以下历史进度正文原字节保留。
+
+
 ## 2026-10-04 F2-negative-extra-task：修复PASS，唯一新代表来源FAIL，BLOCKED / STOP
 
 用户现在新增能做什么：合法“不要求照搬其工程结构或新增工程任务”在structure/repair不再误判；正向/混合义务仍保护。最新路由已同步AGENTS与model-routing-policy：Luna low/medium机械提取；Solmedium有界代码/常规测试；Solxhigh安全/预算/引用/有证据升级；同问题测试与复核合并，不重复读长历史，actual均NOT OBSERVABLE。详见[本轮合同/教学/真实用量与STOP审计](../acceptance/f2-negative-extra-task-2026-10-04.md)。
