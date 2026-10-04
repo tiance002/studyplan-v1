@@ -1,3 +1,13 @@
+## 2026-10-05 本人RC普通生成：已知JSON失败 / STOP，累计160/200
+
+- 用户现在新增能做什么：`tiance7` 唯一普通提交已执行并终止，可在RC刷新读取failed历史；本次无Draft/Plan，不能进入新路线学习。API8034/UI5194保留，临时one-shot Worker已退出，不自动再收费。
+- 产品源码不改，执行基线003423da16aabb0feaf119f7f5d0ce3fd8b2104f；复用P1/P2/P3技术PASS。新Run `run_ba6527a948294cf0bbe9aab1ebc8c729`，Acceptance `rc-user-tiance7-cebbca03153c`，仅原RC owned业务/checkpoint。没有第二生成POST/Run，没有confirm用户Draft。
+- 实际冻结Agent8/18stage/37normal+repair2≤39/output241664；free binding/DNS/TLS PASS，exact meter MockTransport离线8 PASS，13项安全复核PASS，actual DSN名精确核对。harness GoalSpec合法purpose acceptance比较与mock字段修正，生产权威不改，原fixture FAIL保留。请求root/预算复核Sol6.1 xhigh，actual NOT OBSERVABLE。
+- 首outline真实3671input/1319output/stop，JSON/keys/PG账本PASS，209998基线下降98.25188811%、无length。18structure+15成功practice逐阶段canonical/task保护PASS；G6 practice失败，GR/GT practice NOT RUN，不宣称全生成保护通过。
+- 累计第160笔/本次第35笔G6 HTTP200/stop，provider_invalid_json；原content4177chars，JSON Expecting comma line113 col5 offset3506。实报2581input1534output，known FAIL非unknown/截断。generate_practice_batch的LLMFailure进入generation_errors，无parsed batch供localrepair，故35normal0repair/unknown0，Run failed，无Draft/Plan。旧failed不可恢复重派，未补用repair/另开Run。
+- request/result126–160与PG/rawbody hash一致，34success1fail，费用reconciliation PASS；累计125→160/200、剩40；75617input+32927output=108544tokens，金额NOT OBSERVABLE。新FAIL completion同账本append-only，旧125账/1217证据/.env保持。产品search/RAG0；原库/正式入口/正式Worker/push/merge/全局配置 NOT RUN。
+- 证据和下一准确门禁：[rc-user-plan-2026-10-05.md](../acceptance/rc-user-plan-2026-10-05.md)。需以原响应做离线fixture评审严格JSON拒绝与已知JSON失败的有界repair衔接，不改原失败结论、不自动使用剩40。本批USER_RC_GENERATION_FAIL / STOP，本人接受NOT RUN，整体STAGING_BLOCKED / NOT_READY；下方125/200是此前技术准备时点。
+
 ## 2026-10-05 正式运行收口：P1/P2/P3技术 PASS，P4授权包准备并STOP
 
 - 用户新增能做什么：可访问 `http://127.0.0.1:5194/`，用本人正常账号登录本轮最新native restored/migrated/imported owned副本，读取旧项目/历史并体验页面。普通规划提交保持，Worker held，不会自动收费生成。本人目标、一次计量生成与主观接受仍NOT RUN；整体STAGING_BLOCKED / NOT_READY。
