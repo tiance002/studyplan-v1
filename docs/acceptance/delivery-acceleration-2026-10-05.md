@@ -1,3 +1,96 @@
+# 2026-10-05 A6 来源与交付收口：最终记录
+
+## 用户现在新增能做什么
+
+未来新 Agent 路线可保留获得正文审读依据的 MCP 10.1 来源；合法冻结资源若在保存前再次丢失，会明确拒绝保存。新 owned 合成 Plan 已通过真实 Edge 的学习单元、源码候选、Prompt、总结、成果、完成推导、变更与历史闭环。正式入口尚未开放。
+
+**局部修复、保留响应回放、owned PG/Edge：PASS。新收费代表完整生成与独立合同/来源审计：PASS。整体：STAGING_BLOCKED / NOT_READY。**
+
+用户后续授权覆盖本文件下方原中间 STOP：仅同一教程10.1正文审读及下一不可变版本；模型累计上限100→200。原 STOP、原45/46 FAIL和旧账本保留，不倒改旧事实。剩余额度不触发再次生成。
+
+## 1. 实际代码、冻结范围与来源依据
+
+- 分支 `feat/n1-resource-discovery`，进入本批本地/已核实远端均为 `9fef887af21dd5ff2a60aef306a6b9b02d176f5f`；保留后继 `c0237d2415e1e77bc216e6f087da5ab53158cf9c`。实现提交 `859db09f4d154b0397ad763146d34561e5af404a`；最终文档提交及实际HEAD见 `var/delivery-20261005/final-invariants-complete.json`。未 reset、切分支、push 或 merge。
+- 改动：`plan_resources.assert_frozen_resource_projection`；`PlanService._persist_draft` 的 normalize后/save前调用；CURRENT_PACKS Agent8；新 `map_mcp101_review.py` 和不可变 `agent-application-v8.json`；一个新同因测试文件及旧 current-pack 断言7→8。无 DTO/API/schema/migration/UI/prompt/cap/model 改动。
+- 首次丢失在 `restrict_pack_resources`：旧10.1仅 `legacy_index/toc_checked`，不是正文审核；原行为对旧资格正确。用户随后批准实际正文审读，形成 **agent.application/8**。只有第十章 source和四section身份替换、source_version=2；仅10.1新增审读依据，其他三节和其他来源资格继承。canonical、任务、路线、guidance、GR binding不变。
+- 新source `src_mcp101_a7ca881ee83ac722491299cd`；10.1新section `sec_mcp101_18e647c993d34f4e0eb316e5`。新ID由既有ID与精确审读摘要生成，不按标题或URL模糊合并。旧source/section及immutable历史保持。
+- 10.1实际审读范围：10.1.1–10.1.4，工具集成问题、MCP/A2A/ANP职责比较、protocol/Tool/Agent三层封装和静态示例。实际正文为英文；图片/外链未读，代码未执行，SDK互通/高级认证/transport运行验证 **NOT RUN**，不扩大必做任务。
+- 来源：[原仓库第十章](https://github.com/datawhalechina/hello-agents/tree/main/docs/chapter10)，[实际采集正文](https://raw.githubusercontent.com/datawhalechina/hello-agents/main/docs/chapter10/Chapter10-Agent-Communication-Protocols.md)。观察Git blob `98b0700c4adf3259efc1842a307c9b2c2238fc9b`，未声称repository commit pin。原正文98277bytes，SHA256 `e68e510739fc08527f994eac7ab4104b5abc38f4b51c3e788d2fa9ef2111a60d`。抽取10.1的LF口径13346bytes/SHA `97ff3dbbab2119cb15c85d072cbe534b58f8abcb60d69fc63eaf8dbc68220e4d`；Windows捕获文件13551bytes/SHA `ddbb8acb2a13eca2ac1293138e393c15809d45c7c01251018f7853837d9201e4`。两个frame明确记录，原采集记录未改。
+
+冻结代表范围为 A0–A8、G0–G6、GR、GT，共18阶段；16 canonical、18正式任务、37 extensions、46资源安排、25个实际选中source identity、74有序章节refs。完整Agent主线保留Framework/MCP，Pi小型源码、专项RAG教程、成熟目标切片和迁移验证分开。
+
+| 教学验收 | 当前证据 | 状态 |
+|---|---|---|
+| A0–A4基础、工具/RAG/上下文 | canonical全字段、适用知识、原教学标题/目标/focus精确落库，普通学习页可见多单元 | PASS |
+| A5 Framework | 完整有状态/恢复学习指导与正式任务；没有回退成可省略阶段 | PASS |
+| A6 MCP | 10.1来源version2、ordered section/role/order/nodeIDs保持且非fallback；同域错版本/跨来源/跨知识等仍拒绝或合法降级 | PASS |
+| A7系统评价与A8 Pi | 原canonical/任务与小型源码指导保持，不使用万能A8或额外强制小项目 | PASS |
+| G0–G6详细RAG | 完整长guidance、阶段任务和Prompt上下文；不接入或修改外部RAG服务 | PASS |
+| GR成熟切片 | RAGFlow、WeKnora各一张稳定来源绑定卡/链接/指导/Prompt，metadata-only合法空章节，两仓库不合并；仍一项任选任务 | PASS |
+| GT迁移验证 | 既有指导/任务/验收保持，未新增教学平台或知识键 | PASS |
+| 合法教学细分 | 回放原58单元、A2原5单元完整保持；新模型原生53单元（A2为2个），逐标题/目标/ref读回，无代码截短或固定数量回填 | PASS |
+
+## 2. RED→GREEN与受影响验证
+
+- 原冻结资格反例 **FAIL / exit1** 保留；actual `_persist_draft` guard进程内no-op反例 **FAIL / exit1**，证明后置normalize丢失能被检测。未回退源码作RED。
+- 新35个不同案例 **PASS**：34项组合＋1已有用户修订兼容；合法资源source/version/refs/role/order/nodeIDs、missing/duplicate、hold/未审核/错版本/错归属/不适用、真实legacy/pending、metadata-only repo，以及实际save入口都覆盖。已有用户编辑Draft重用先返回，未覆盖合法修订。
+- 原同次执行的197项 F1–F4/F2/语义/内容保护用例 **PASS**，复用执行结果；从原XML提取有明确 provenance 的PASS子集，**不是重跑**。首轮新测试错误读取异常 `.reason` 的11项 **FAIL** 原XML保留，修正新测试使用 `.details['reason']` 后35项组合通过；不把测试错误称业务RED。
+- budget/contract31例 **PASS**；独立费用AST/mock7项 **PASS**；前端GR/Prompt16例 **PASS**；`npm run build` **PASS / exit0**。不累加重复运行，不用总数替代逐项教学验收。
+- 命令与XML：`pytest ...test_mcp101_reviewed_successor.py` → `mcp101/root-guard.xml`（34PASS/exit0）；兼容单例 → `existing-user-edit-compatibility.xml`（1PASS/exit0）；`pytest ...test_batched_budget.py ...test_reviewed_structure_contract.py` → `budget-contract.xml`（31PASS/exit0）。原组合命令/FAIL及197个实际PASS归因见 `affected-first.xml` / `affected-preserved-provenance.json`。
+
+| 证据层 | 状态 | 具体结论 |
+|---|---|---|
+| 原F2真实response/receipt | FAIL | 原45/46来源审计结论保持；未重派、恢复或确认旧Draft |
+| 当前离线编译图/Fake replay | PASS | 保留51–88共38份原body/content，原normal58→repair59；仅测试包装6处exact来源alias，新身份差异逐path记录，无live fallback |
+| 当前真实owned PG/checkpoint | PASS | 新正常API/受控图保存，38个新fake receipts未复制旧真实receipt；46slots74refs、canonical/practice/17关系边、完整guidance，旧Agent7/8 rows保持；新Draft普通synthetic confirm与fresh读回 |
+| 当前真实Edge/API/PG | PASS | 23组合checks；Prompt原文两版/指定raw+实施export/未保存保护；真实summary409恢复；synthetic external补充/USER决定；阶段完成推导、一次非收费资源diff/confirm/revision2/旧历史、refresh/logout/relogin；无Knowledge VERIFIED |
+| 新鲜真实模型代表 | PASS | 一个全新Acceptance/Run/owned业务及CP库；37normal/0repair/unknown0，独立CP/PG/receipt/原body/冻结来源与public service view精确一致 |
+| 新收费Draft confirm / published Plan /其Edge | NOT RUN | 当前仅回放Draft获synthetic confirm许可；新收费Draft保留awaiting_approval，Plan0，不扩大额度授权 |
+| 原用户非空Plan内容/体验接受 | NOT RUN | 合成USER接受不替代负责人或原用户接受 |
+
+## 3. 新计划、费用与历史
+
+- 回放Run `run_fc8ca606ec0d446f805541901c7149ee`，初版Plan `pln_e77d2d89bedb41348b27b1c3bca4bc2f`；Edge显式非收费资源调整后当前Plan `pln_8397681c34e5415a9524886ed7cbe3f5`（revision2），初版superseded及Prompt/总结/成果历史仍可读。该合法用户修订不要求回写原冻结资源。
+- 唯一新收费Acceptance `delivery-agent8-rag-synthetic-3c602f0ab1bc` / Run `run_96778f62c994478bb68f9df1ad5a67d3` / Draft `drf_08160109502b5c978d4f772ce0dd4aff`。Run succeeded+none；Draft awaiting_approval、Plan0。实际53单元，模型侧原样保存；不强行与旧回放58相等。
+- v6.5 outline input **209998** → 本轮真实 **3673**（下降 **98.25093572319736%**），output **1400**，finish_reason **stop**；JSON/18stage keys/PG账本门禁先于structure通过，无length/truncation。
+- 单次actual manifest上界：37normal＋最多2repair＝39，output上界241664tokens；本次实际37normal、0repair。总provider input81562、output37412、total118974。请求数与美元费用分开，未编造货币金额。
+- 用户追加授权事实已在同一账本append-only记录一次：previous_cap=100、additional_authorization=100、new_cumulative_cap=200、used_before_authorization=88、remaining_after_authorization=112。实际37次新request/result/原body/receipt/usage append-only，累计 **125/200**、剩 **75**；达到第一份代表PASS即停止收费，不因余额重复生成。
+- 当前产品搜索/Tavily/GitHub discovery **0**，外部RAG **0**；授权正文采集仅同章directory1/body1，非搜索/模型调用。历史搜索6/1000保持；unknown本批0，历史failed/unknown不重派。
+- 921个旧保护文件（含.env、旧账本/response/evidence）哈希保持。旧F2库再次scoped read-only核对：旧Draft awaiting_approval、Plan0、原source audit45/46 FAIL保持。原Run技术投影succeeded与来源FAIL分别记录，未倒改结论。
+- 首轮free脚本未加载provider环境而使用默认Fake，门禁 **FAIL** 且派发0；用新独立launcher只加载现有LLM/SESSION安全配置、清除产品DSN后free binding/DNS/TLS **PASS**。未改模型/密钥/全局配置。原库首次默认配置探测失败不是其可用性证据；随后实际.env只读事务核对 **PASS**：schema0023、仅Agent1/Python1发布版本，写入0。
+
+## 4. 证据、归属和回滚
+
+主要证据均在 `var/delivery-20261005/`：`replay/result.json`、`pg/pg-result.json`、`pg/46-source-slots.json`、`mcp101/combined-review-new.json`、`edge/checks-final.json`、`edge/execution-report.json`、`nonpaid-gate.json`、`free-preflight.json`、`paid/independent-draft-result.json`、`paid/independent-slots-readback.json`、`paid/reconciliation-final.json`、`old-f2-readonly.json`、`original-configured-readonly.json`。费用grant和completion在原 `.git/v2-paid-quota-20261001/`。秘密仅private文件，不写tracked文档。
+
+本轮回放业务/CP两库及新收费业务/CP两库全部保留；名称与身份见证据，DSN不公开。受控API PID16356/UI42484及Edge已关闭，8033/5193释放；正式Worker/入口、原库写入、部署、RAG、push/merge **NOT RUN**。API relay实际指向owned8033；清理期间一次默认Vite8000尾随GET被拒绝连接，未触达原库，已登记并限定未来启动target8033。
+
+回滚仅撤销本轮白名单差异/提交，不reset或整树restore。旧Run/Plan继续按原快照；新Agent8源/section身份的已生成owned历史不得删除。回退CURRENT_PACKS时保留已使用版本读取能力；原/本轮证据、失败、unknown和账本始终保留。
+
+开发路由：有界实现/PG/Edge请求Sol6.1 medium，来源/预算关键复核请求Sol6.1 xhigh，机械提取Luna medium。实际解析无法核实均 **NOT OBSERVABLE**。不修改全局配置；单一业务authority负责人，子任务文件独立，没有重复全仓调查。
+
+## 5. 正式交付短差异表与一次授权包
+
+| 承诺 | 当前组合证据 | 真正剩余阻断 / 下一准确动作 |
+|---|---|---|
+| 生成、草案、确认、完整来源 | 当前回放Plan/真实模型Draft/46slot/费用PG PASS | 原用户非空Draft由本人确认、体验接受；新收费Draft没有扩大确认许可 |
+| AI/Agent/Cloud/Python与专项范围 | 原有效证据复用，Agent8当前完整路线PASS，未缩范围 | 原库尚未导入当前AI4/Agent8/Cloud4；最新真实副本restore/import演练后才评审写入 |
+| 学习、Prompt、总结、成果、完成、历史 | 当前新Plan真实Edge23checks PASS | 用户主观教学/体验接受仍独立，不以synthetic USER替代 |
+| 非收费资源/实践变更、旧历史 | 当前resource revision2与不可变旧历史PASS；未改路径沿用有效测试 | 正式数据/入口演练与用户接受；无需新变更平台 |
+| 身份隔离、取消、unknown与恢复 | 现有保护/实际CP/read-only旧Run/current scoped PG PASS | 正式Worker开启前明确allowlist/admission和expired/unknown不claim；不恢复旧失败 |
+| 来源发现、审读身份 | 当前10.1正文/immutable/hold/metadata-only边界PASS | 产品GitHub私有OAuth未接线等维持原状态，不以手动URL替代 |
+| 构建、正常启动、备份恢复 | 当前build/owned服务PASS；历史native restore证据复用范围有限 | 原库0023而owned0024；当前新内容不同于旧演练，需要fresh native backup→new owned restore→forward0024→AI4/Agent8/Cloud4演练 |
+| 日常模型预算 | 本轮wrapper累计200及durable perRun manifest绑定PASS | 常规PlanningRuntimeFactory仍构造PgAttemptLLM时未绑定manifest，且wrapper200不是日常全局预算；需限定非收费运行验证/必要局部修复后才能开启正式Worker |
+| 独立RAG及私有OAuth | 保留原合同/边界，未操作 | RAG实例/auth/tenant/dataset/纯检索/citation合同缺口未解除F17；不改成可选、不宣称READY |
+
+**下一授权需一次明确覆盖：**先限定日常Worker预算/admission非收费收口和当前副本native备份恢复/0024＋AI4/Agent8/Cloud4导入演练；演练成功后，若批准正式操作，明确原库forward/seed、实际服务实例/端口/运行账号/启动动作及关闭回滚脚本、仅允许actor范围与旧failed/unknown排除策略、是否需要push/merge/部署分别授权。原用户Plan确认与内容接受仍由用户作出；独立RAG实例及合同另提供明确外部条件。原库写入/正式入口/正式Worker/部署/push/merge没有执行。本轮收费代表已PASS，不再请求重复收费，也不消费剩75。
+
+**STOP于上述正式操作边界，整体保持 STAGING_BLOCKED / NOT_READY。**
+
+---
+
+## 以下为保留的授权续接前中间记录（历史，不覆盖上方最终结论）
+
 # 2026-10-05 Delivery Acceleration：A6 冻结资格矛盾，BLOCKED / STOP
 
 ## 后续额度授权追加（2026-10-05）

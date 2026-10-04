@@ -1,3 +1,15 @@
+## 2026-10-05 A6 来源/当前闭环及唯一新收费代表收口：PASS / 正式操作 STOP
+
+- 用户新增能做什么：新Agent8保留有正文依据的MCP10.1；后置合法冻结资源丢失拒绝保存；新owned Plan已实证学习/GR/Prompt/总结/成果/完成/变更/历史/refresh/relogin。正式入口未开放，整体 STAGING_BLOCKED / NOT_READY。
+- 实现SHA `859db09f4d154b0397ad763146d34561e5af404a`，进入本批本地/已核实远端 `9fef887af21dd5ff2a60aef306a6b9b02d176f5f` 的后继；无reset/回退/push/merge。仅10.1授权正文审读和新immutable Agent8/sourceV2，第十章source/section新ID；canonical、任务、F1–F4/F2/GR/教学结构/其他资格不变。
+- 原事实STOP/旧45of46 FAIL保留。原目录级10.1不足正文资格；新实际10.1.1–10.1.4英文静态正文已审，runtime/图片/外链验证 NOT RUN。actual save-entry normalize后冻结合法资源断言、legacy与合法用户修订兼容 PASS。
+- 新35同因边界PASS、旧同次执行197项PASS复用（有提取provenance，非重跑）、budget/contract31PASS、费用AST/mock7PASS、前端16PASS/buildPASS。原RED与11个新测试字段误读FAIL都保留，不以计数替代内容验收。
+- 38原响应compiled replay、owned真实PostgresSaver/业务PG/新fake receipts/synthetic confirm/fresh readback PASS：18stage/16canonical/58units/18tasks/37extensions/46slots74refs；测试包装6处精确source alias，原响应不改；A2原5units仍同canonical1task。真实Edge23checks PASS，GR2卡2仓库1task、完整guidance、Prompt原文修订/指定export/未保存保护、summary409、synthetic external/USER决定、阶段完成无KnowledgeVERIFIED、一次资源diff/confirm/newrevision/旧history与refresh/relogin。回放新Run `run_fc8ca606ec0d446f805541901c7149ee`，当前Plan `pln_8397681c34e5415a9524886ed7cbe3f5` revision2，服务已关闭、库保留。
+- 全非收费PASS后free binding/DNS/TLS PASS，唯一全新paid Acceptance `delivery-agent8-rag-synthetic-3c602f0ab1bc` / Run `run_96778f62c994478bb68f9df1ad5a67d3` succeeded/none，真实outline3673 input/1400 output/stop、209998基线下降98.25093572319736%、无length。18structure/18practice逐阶段canonical保护及独立readonlyPG/CP/receipt/source审计 PASS；实际53units原生保存（A2为2），46slots/16canonical/18tasks/37extensions保持。Draft `drf_08160109502b5c978d4f772ce0dd4aff` awaiting_approval、Plan0；新收费Draft确认/发布/其Edge NOT RUN（只回放Draft获syntheticconfirm许可）。
+- 同账本append-only扩额previous_cap=100/additional_authorization=100/new_cumulative_cap=200/used_before_authorization=88/remaining_after_authorization=112已记录一次。本轮37normal/0repair/unknown0，最终125/200、剩75；81562input+37412output=118974实报tokens。首份代表PASS后不再收费；历史failed/unknown不重派。产品search/RAG0，授权同章目录1/body1；旧6/1000及921保护文件/.env/账本/response保持。
+- 原F2库fresh scoped readonly：旧Draft awaiting、Plan0、45/46 FAIL保持。原实际配置库readonly PASS：schema0023，已发布仅Agent1/Python1；写入0。正式Worker预算/admission运行收口、latest native副本恢复forward0024/AI4-Agent8-Cloud4导入演练、原库/入口/Worker正式授权、用户非空Plan接受及独立RAG合同仍待。原库写入/部署/RAG/push/merge NOT RUN。
+- 最终报告 `docs/acceptance/delivery-acceleration-2026-10-05.md`，证据 `var/delivery-20261005/`，账本 `.git/v2-paid-quota-20261001/`。当前Goal完成并STOP于正式操作边界，不因剩余额度再开Run。
+
 ## 2026-10-05 A6 正文授权续接 / Agent8 不可变版本（执行中）
 
 - 用户明确授权仅同一教程 10.1 正文审读及下一不可变内容版本；覆盖先前冻结资格不足 STOP，仅此范围。原 Agent7/旧 F2 Run/Draft/response/receipt 不改。
