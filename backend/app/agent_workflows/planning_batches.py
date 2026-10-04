@@ -8,7 +8,7 @@ Core ideas (design spec §数据与流程, §输出预算与模型适配, §失�
 
 - **Frozen manifest**: at submission time the reviewed domain pack, per-purpose
   budgets, batch list and request/output caps are frozen into an immutable JSON
-  manifest. The model may personalise titles/objectives and fill extra nodes, but
+  manifest. The model may personalise stage titles/objectives and fill unreviewed nodes, but
   it can never re-key, re-assign or replace authoritative facts.
 - **One request per node**: the graph dispatches exactly one model request per
   node (outline, each structure batch, each practice batch, bounded repairs).
@@ -29,6 +29,7 @@ from copy import deepcopy
 from dataclasses import replace
 from typing import Any
 
+from app.agent_workflows.planning_outline import STAGE_SKELETON_V1, frozen_pack_is_intact
 from app.agent_workflows.state import PlanningState
 from app.application.planning_budget import BudgetPolicy
 from app.domain.enums import TaskKnowledgeRole
@@ -89,6 +90,8 @@ def freeze_manifest(
     generic_stage_count: int = DEFAULT_GENERIC_STAGE_COUNT,
     goal_spec: GoalSpec | None = None,
     route_change_hash: str = '',
+    *,
+    outline_input_format: str | None = None,
 ) -> dict[str, Any]:
     """Freeze the reviewed pack + budget into an immutable execution manifest.
 
@@ -96,6 +99,14 @@ def freeze_manifest(
     directions fall back to ``search_only`` generic stage slots whose count is a
     fixed batch/request budget boundary, **not** a claim of domain coverage.
     """
+    if outline_input_format is not None and outline_input_format != STAGE_SKELETON_V1:
+        raise ValueError("unsupported outline_input_format")
+    if outline_input_format == STAGE_SKELETON_V1:
+        # Existing PlanTaskLink has no optional completion-gate semantics.
+        # Reject unsupported blueprint semantics before a Run can be submitted.
+        if any(p.get("optional") is True or p.get("required") is False
+               for p in pack.get("practice_blueprints") or []):
+            raise ValueError("optional practice blueprint is unsupported by the completion gate")
     stages = deepcopy(pack.get("stage_blueprints") or [])
     reviewed = bool(stages) and pack.get("resource_support") != "search_only"
     blueprints = {b.get("stable_key"): b for b in (pack.get("knowledge_blueprints") or [])}
@@ -183,6 +194,8 @@ def freeze_manifest(
         "max_requests": max_requests,
         "max_output_budget": max_output_budget,
     }
+    if outline_input_format is not None:
+        manifest["outline_input_format"] = outline_input_format
     manifest["manifest_hash"] = _canonical_hash(manifest)
     return manifest
 
@@ -466,7 +479,7 @@ def validate_practice_batch(
 # ---------------------------------------------------------------------------
 
 
-def merge_batches(
+def _merge_batches_legacy(
     outline: dict[str, Any],
     structure_batches: list[dict[str, Any]],
     practice_batches: list[dict[str, Any]],
@@ -611,6 +624,233 @@ def merge_batches(
             errors.append(f"阶段缺少实践任务：{stage_key}")
 
     reviewed = (pack.get("resource_support") or "") != "search_only" and bool(pack.get("stage_blueprints"))
+    return {
+        "errors": errors,
+        "outline": outline,
+        "nodes": nodes,
+        "units": units,
+        "relations": relations,
+        "practice_proposal": {
+            "stable_key": "practice.route",
+            "title": (("用户项目：" if pack['semantic_context']['carrier_kind'] == 'user_project' else "默认项目候选（可替换）：")
+                      + pack['semantic_context']['carrier_title']) if pack.get('semantic_context') else (pack.get("title") or "学习路线") + "实践",
+            "idea": pack['semantic_context']['carrier_slice'] if pack.get('semantic_context') else (pack.get("title") or ""),
+            "tasks": tasks,
+            "task_knowledge_links": task_links,
+        },
+        "route_scope": "reviewed" if reviewed else "search_only",
+        "route_status": "reviewed" if reviewed else "generic_unverified",
+        "resource_support": "reviewed_index" if reviewed else "needs_resource_review",
+    }
+
+
+
+def merge_batches(
+    outline: dict[str, Any],
+    structure_batches: list[dict[str, Any]],
+    practice_batches: list[dict[str, Any]],
+    pack: dict[str, Any],
+    *,
+    manifest: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Merge validated batches in skeleton order into the legacy projection shape.
+
+    Rejects duplicate business keys, missing stages and missing required nodes.
+    The returned ``errors`` list is non-empty when the merge must fail.
+    """
+    if manifest and (("manifest_hash" in manifest or "outline_input_format" in manifest) and not manifest_is_intact(manifest)
+                     or "outline_input_format" in manifest and manifest["outline_input_format"] != STAGE_SKELETON_V1
+                     or manifest.get("outline_input_format") == STAGE_SKELETON_V1 and not frozen_pack_is_intact(pack, manifest)):
+        return {"errors": ["冻结清单或内容完整性校验失败"], "outline": {}, "nodes": [], "units": [],
+                "relations": [], "practice_proposal": {"tasks": [], "task_knowledge_links": []}}
+    if (manifest or {}).get("outline_input_format") != STAGE_SKELETON_V1:
+        return _merge_batches_legacy(outline, structure_batches, practice_batches, pack, manifest=manifest)
+    errors: list[str] = []
+    outline = deepcopy(outline)
+    sections = list((outline or {}).get("sections") or [])
+    blueprints = {s["stable_key"]: s for s in pack.get("stage_blueprints", [])}
+    for index, section in enumerate(sections):
+        blueprint = blueprints.get(section.get("stable_key"))
+        # The model cannot invent previously learned relationships or source proof.
+        section.pop("learning_guidance", None)
+        if blueprint is not None:
+            allowed_sources = set(pack.get("resource_refs") or [])
+            for resource in section.get("resources") or []:
+                if resource.get("source_ref") and resource["source_ref"] not in allowed_sources:
+                    errors.append("资源来源未在受审核清单中：" + str(resource["source_ref"]))
+            # Curated facts survive omitted/rewritten model output. Personal
+            # titles/objectives remain; model-authored material cannot replace
+            # the pack's primary/comparison/case study or extension instructions.
+            section["section_kind"] = blueprint.get("section_kind", "core")
+            section["resources"] = deepcopy(blueprint.get("resources") or [])
+            section["extensions"] = deepcopy(blueprint.get("extensions") or [])
+            previous = blueprints.get(sections[index - 1].get("stable_key")) if index else None
+            frozen: dict[str, Any] = next((s for s in (manifest or {}).get("stages", [])
+                           if s["stage_key"] == section.get("stable_key")), {})
+            section["learning_guidance"] = deepcopy(frozen.get("learning_guidance")) or guidance_payload(stage_guidance(pack, blueprint, previous))
+    stage_order = [section.get("stable_key") for section in sections]
+
+    by_stage_structure = {b.get("stage_key"): b for b in structure_batches}
+    by_stage_practice = {b.get("stage_key"): b for b in practice_batches}
+    node_blueprints = {n["stable_key"]: n for n in pack.get("knowledge_blueprints", [])}
+    reviewed = (pack.get("resource_support") or "") != "search_only" and bool(blueprints)
+
+    nodes: list[dict[str, Any]] = []
+    units: list[dict[str, Any]] = []
+    relations: list[dict[str, Any]] = []
+    tasks: list[dict[str, Any]] = []
+    task_links: list[dict[str, Any]] = []
+
+    seen_node: set[str] = set()
+    seen_unit: set[str] = set()
+    seen_task: set[str] = set()
+    node_stage: dict[str, str] = {}
+    seen_relation: set[tuple[str, str, str]] = set()
+
+    for stage_key in stage_order:
+        structure = by_stage_structure.get(stage_key)
+        if structure is None:
+            errors.append(f"缺少结构批次：{stage_key}")
+            continue
+        blueprint = blueprints.get(stage_key) or {}
+        guidance = blueprint.get("learning_guidance") or {}
+        declared_repeats = set(guidance.get("knowledge_keys") or []) & set(blueprint.get("node_keys") or [])
+        repeat_keys: set[str] = set()
+        for node in structure.get("nodes") or []:
+            key = str(node.get("stable_key", ""))
+            if key in seen_node:
+                # Exact stable-key reuse is allowed only by curated per-exposure
+                # relationships. This is not semantic deduplication of tutorials.
+                if (pack.get("resource_support") != "search_only" and key in node_blueprints
+                        and node_stage[key] != stage_key and key in declared_repeats
+                        and guidance.get("exposure_relation") in {"review", "compare", "deepen", "version_context"}):
+                    repeat_keys.add(key)
+                    continue
+                errors.append(f"知识节点重复：{key}")
+                continue
+            seen_node.add(key)
+            node_stage[key] = stage_key
+            canonical = deepcopy(node)
+            if reviewed and key in node_blueprints:
+                # Every reviewed definition is local authority, even if it has
+                # only one exposure. Missing optional canonical fields cannot
+                # be supplied by the model as new truth.
+                for field in ("title", "node_type", "objectives", "scope", "acceptance",
+                              "parent_key", "prerequisite_keys"):
+                    if field in node_blueprints[key]:
+                        canonical[field] = deepcopy(node_blueprints[key][field])
+                    else:
+                        canonical.pop(field, None)
+            nodes.append(canonical)
+        for unit in structure.get("units") or []:
+            key = str(unit.get("stable_key", ""))
+            if key in seen_unit:
+                errors.append(f"学习单元重复：{key}")
+                continue
+            seen_unit.add(key)
+            units.append(deepcopy(unit))
+        for relation in structure.get("relations") or []:
+            identity = (relation.get("from_stable_key", ""), relation.get("to_stable_key", ""), relation.get("relation_type", ""))
+            if identity in seen_relation and identity[1] in repeat_keys:
+                continue
+            seen_relation.add(identity)
+            relations.append(deepcopy(relation))
+
+        practice = by_stage_practice.get(stage_key)
+        if practice is None:
+            errors.append(f"缺少实践批次：{stage_key}")
+            continue
+        payload = practice.get("payload") or {}
+        curated_tasks = [p for p in pack.get("practice_blueprints", [])
+                         if p.get("section_key") == stage_key] if reviewed else []
+        stage_tasks = payload.get("tasks") or []
+        stage_links = payload.get("task_knowledge_links") or []
+        if curated_tasks:
+            # Blueprint identity/count and completion gates are authoritative.
+            # Extra model tasks cannot become an alternative completion gate.
+            supplied = {t.get("stable_key"): t for t in stage_tasks}
+            stage_tasks, stage_links = [], []
+            for curated in curated_tasks:
+                key = curated["stable_key"]
+                candidate = supplied.get(key) or {}
+                saved = {field: deepcopy(candidate[field]) for field in ("description", "hints")
+                         if field in candidate}
+                saved.update(stable_key=key, section_key=stage_key,
+                             title=curated.get("title") or blueprint.get("title", ""),
+                             goal=curated.get("goal") or blueprint.get("objective", ""),
+                             in_scope=deepcopy(curated.get("in_scope") or [curated.get("goal") or blueprint.get("objective", "")]),
+                             out_scope=deepcopy(curated.get("out_scope") or []),
+                             acceptance=deepcopy(curated.get("acceptance") or []))
+                for field in ("required", "optional", "deliverable", "required_deliverable", "scope"):
+                    if field in curated:
+                        saved[field] = deepcopy(curated[field])
+                links = deepcopy(curated.get("knowledge_links")) if "knowledge_links" in curated else [
+                    {"node_stable_key": key, "role": TaskKnowledgeRole.CORE.value}
+                    for key in curated.get("node_keys") or []]
+                saved["knowledge_links"] = links
+                stage_tasks.append(saved)
+                stage_links.extend({**link, "task_stable_key": key} for link in links)
+        for task_index, task in enumerate(stage_tasks):
+            key = str(task.get("stable_key", ""))
+            if key in seen_task:
+                errors.append(f"实践任务重复：{key}")
+                continue
+            seen_task.add(key)
+            saved_task = deepcopy(task)
+            if manifest and stage_key == stage_order[-1] and task_index == 0:
+                outputs = purpose_requirements(goal_spec_from_payload(manifest.get("goal_spec")))
+                if outputs:
+                    saved_task["acceptance"] = list(dict.fromkeys([*(saved_task.get("acceptance") or []), *outputs]))
+            tasks.append(saved_task)
+        task_links.extend(deepcopy(stage_links))
+
+    if reviewed:
+        # Incoming parent/prerequisite edges are canonical node facts. Model
+        # edges must not strengthen or erase the reviewed dependency graph.
+        canonical_keys = seen_node & set(node_blueprints)
+        relations = [r for r in relations if not (
+            r.get("to_stable_key") in canonical_keys
+            and r.get("relation_type") in {"contains", "prerequisite"})]
+        for key in sorted(canonical_keys):
+            source = node_blueprints[key]
+            if source.get("parent_key"):
+                relations.append({"from_stable_key": source["parent_key"], "to_stable_key": key,
+                                  "relation_type": "contains"})
+            relations.extend({"from_stable_key": dependency, "to_stable_key": key,
+                              "relation_type": "prerequisite"}
+                             for dependency in source.get("prerequisite_keys") or [])
+
+    # Re-order units and tasks deterministically by skeleton order.
+    for index, unit in enumerate(units):
+        unit["order_index"] = index
+    for index, task in enumerate(tasks):
+        task["order_index"] = index
+
+    if reviewed:
+        for unit in units:
+            # Keep full canonical facts through existing catalog persistence:
+            # knowledge_nodes has no scope/acceptance columns; units.rubric is
+            # versioned JSONB already saved with the owned catalog snapshot.
+            unit["rubric"] = {
+                "canonical_knowledge": {key: deepcopy(node_blueprints[key])
+                    for key in unit.get("node_keys") or [] if key in node_blueprints},
+                "canonical_practice": {task["stable_key"]: {
+                    field: deepcopy(value) for field, value in task.items()
+                    if field not in {"description", "hints"}} for task in tasks
+                    if task.get("section_key") == unit.get("section_key")},
+            }
+
+    required = set((manifest or {}).get("required_node_keys") or pack.get("required_node_keys") or [])
+    missing = required - seen_node
+    if missing:
+        errors.append("缺少必要知识节点：" + ", ".join(sorted(missing)))
+
+    for stage_key in stage_order:
+        if not any(u.get("section_key") == stage_key for u in units):
+            errors.append(f"阶段缺少学习单元：{stage_key}")
+        if not any(t.get("section_key") == stage_key for t in tasks):
+            errors.append(f"阶段缺少实践任务：{stage_key}")
+
     return {
         "errors": errors,
         "outline": outline,

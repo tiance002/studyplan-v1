@@ -244,6 +244,7 @@ class PlanService:
         manifest = freeze_manifest(
             pack=pack, policy=binding.budget_policy, model_ref=binding.model_ref, goal_spec=goal_spec,
             route_change_hash=content_hash(prepared_change['metadata']) if prepared_change else '',
+            outline_input_format="stage_skeleton_v1",
         )
         current = self._repo.get_current(project_id=project_id)
         if prefs_snapshot is None and self._preference_resolver is not None:

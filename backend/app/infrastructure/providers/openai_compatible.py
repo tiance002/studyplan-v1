@@ -7,6 +7,13 @@ from typing import Any
 from urllib.parse import urlsplit
 
 import httpx
+from app.agent_workflows.planning_outline import (
+    CONTEXT_FIELDS,
+    OUTLINE_SHAPE,
+    OUTLINE_SYSTEM,
+    STAGE_SKELETON_V1,
+    outline_message_ceiling,
+)
 from app.application.planning_budget import OFFICIAL_DEEPSEEK_FLASH_OUTPUT_CAP, BudgetPolicy
 from app.core.errors import AppError
 from app.domain.prompts import PROMPT_PROTOCOL, PROMPT_PURPOSE
@@ -170,6 +177,16 @@ class OpenAICompatibleLLM:
         message = {"purpose": purpose, "schema": schema_name, "field_shape": shape, "context": context}
         if "domain_pack" in payload:
             message["domain_pack"] = payload["domain_pack"]
+        outline_format = payload.get("_outline_input_format")
+        if purpose == "planning.outline" and outline_format is not None:
+            if outline_format != STAGE_SKELETON_V1:
+                return LLMFailure("outline_format_invalid", "Unknown frozen outline format")
+            system = OUTLINE_SYSTEM
+            context = {k: payload[k] for k in CONTEXT_FIELDS if k in payload}
+            message = {"purpose": purpose, "schema": schema_name, "field_shape": OUTLINE_SHAPE, "context": context}
+            chars = len(system) + len(json.dumps(message, ensure_ascii=False))
+            if chars > outline_message_ceiling(context):
+                return LLMFailure("outline_payload_too_large", "Frozen outline projection exceeds structural size guard")
         body = dict(model=options["model"], messages=[{"role":"system","content":system},
                     {"role":"user","content":json.dumps(message,ensure_ascii=False)}],
                     response_format={"type":"json_object"}, max_tokens=options["max_tokens"])

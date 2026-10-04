@@ -187,6 +187,11 @@ def _repair_output(payload):
 def selected_output(purpose, payload):
     """Exercise the existing graph using reviewed blueprints, with no cloud call."""
     # ---- b3f2-batch-v1 local payloads ----
+    if purpose == "planning.outline" and payload.get("_outline_input_format") == "stage_skeleton_v1":
+        return {"outline_ref": "fake-skeleton-v1", "sections": [
+            {"stable_key": stage["stable_key"], "title": stage["title"],
+             "objective": stage["objective"] or f"围绕{payload.get('goal') or '学习目标'}完成{stage['title']}"}
+            for stage in payload["frozen_stages"]]}
     if "target" in payload and "context" in payload:
         return _repair_output(payload)
     if "stage" in payload and "structure" in payload:

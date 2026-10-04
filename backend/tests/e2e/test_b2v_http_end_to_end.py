@@ -295,6 +295,12 @@ def _outline_handler(purpose: str, payload: dict[str, object]) -> dict[str, obje
         "stage.foundation": f"基础准备·{goal[:8]}",
         "stage.core": f"核心实现·{goal[:8]}",
     }
+    if payload.get("_outline_input_format") == "stage_skeleton_v1":
+        return {"outline_ref": "b2v-skeleton", "sections": [{
+            "stable_key": s["stable_key"],
+            "title": titles.get(s["stable_key"], s["title"]),
+            "objective": s["objective"],
+        } for s in payload["frozen_stages"]]}
     resources = {
         "stage.foundation": [
             {

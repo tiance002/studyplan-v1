@@ -14,6 +14,7 @@ Rules that still hold:
 """
 from __future__ import annotations
 
+import json
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from typing import Any
@@ -26,8 +27,10 @@ from app.agent_workflows.planning_batches import (
     SHORT_GENERATION_VERSION,
     build_batched_planning_graph,
     build_short_planning_graph,
+    manifest_is_intact,
     recursion_limit,
 )
+from app.agent_workflows.planning_outline import STAGE_SKELETON_V1, frozen_pack_is_intact
 from app.agent_workflows.runtime import Command, PostgresSaver
 from app.agent_workflows.state import PlanningState
 from app.ports.graph_runner import GraphRecoveryError
@@ -103,6 +106,16 @@ class PgPlanningExecutor:
             guard()
             existing = graph.get_state(config)
             if existing.values:
+                stored_manifest = existing.values.get("manifest")
+                if isinstance(stored_manifest, dict):
+                    if ("manifest_hash" in stored_manifest or "outline_input_format" in stored_manifest) and not manifest_is_intact(stored_manifest):
+                        raise GraphRecoveryError("Checkpoint frozen manifest integrity mismatch")
+                    if isinstance(manifest, dict) and json.dumps(stored_manifest, sort_keys=True, ensure_ascii=False) != json.dumps(manifest, sort_keys=True, ensure_ascii=False):
+                        raise GraphRecoveryError("Checkpoint frozen manifest mismatch")
+                    if stored_manifest.get("outline_input_format") == STAGE_SKELETON_V1 and not frozen_pack_is_intact(existing.values.get("domain_pack") or {}, stored_manifest):
+                        raise GraphRecoveryError("Checkpoint frozen pack integrity mismatch")
+                elif isinstance(manifest, dict) and manifest.get("outline_input_format") == STAGE_SKELETON_V1:
+                    raise GraphRecoveryError("Checkpoint frozen manifest missing")
                 stored_version = existing.values.get("graph_version")
                 if stored_version is not None and stored_version != graph_version:
                     raise GraphRecoveryError("Checkpoint graph version mismatch")

@@ -43,12 +43,14 @@ from app.agent_workflows.planning_batches import (
     REPAIR_PURPOSE,
     STRUCTURE_PURPOSE,
     attempt_key,
+    manifest_is_intact,
     merge_batches,
     practice_payload,
     structure_payload,
     validate_practice_batch,
     validate_structure_batch,
 )
+from app.agent_workflows.planning_outline import STAGE_SKELETON_V1, frozen_pack_is_intact, outline_payload
 from app.agent_workflows.state import PlanningState
 from app.agent_workflows.validators import (
     MAX_REPAIR_ATTEMPTS,
@@ -550,15 +552,19 @@ class PlanningNodes:
     def generate_skeleton(self, state: PlanningState) -> dict[str, Any]:
         """生成完整路线骨架；阶段稳定键必须与冻结清单一致。"""
         manifest = state.get("manifest") or {}
+        try:
+            if ("manifest_hash" in manifest or "outline_input_format" in manifest) and not manifest_is_intact(manifest):
+                raise ValueError("Frozen outline manifest changed")
+            if manifest.get("outline_input_format") == STAGE_SKELETON_V1 and not frozen_pack_is_intact(state.get("domain_pack") or {}, manifest):
+                raise ValueError("Frozen outline pack changed")
+            request_payload = outline_payload(state)
+        except (ValueError, KeyError):
+            return _with_aggregate(_extend_generation_errors(state, {
+                "generation_errors": ["骨架生成失败：冻结格式或清单不合法"], "outline": {},
+            }), state)
         result = self.llm.generate_structured(
             purpose=OUTLINE_PURPOSE,
-            payload={
-                "goal": state.get("goal"),
-                "prefs": state.get("prefs_snapshot"),
-                "manifest": manifest,
-                "goal_spec": manifest.get("goal_spec"),
-                **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {}),
-            },
+            payload=request_payload,
             schema_name="OutlineV1",
             run_id=state.get("run_id", ""),
             attempt_id=attempt_key(state.get("run_id", ""), OUTLINE_PURPOSE, "", 0, 0),
@@ -608,6 +614,8 @@ class PlanningNodes:
         sections = _as_list(payload.get("sections"))
         keys = [s.get("stable_key") for s in sections if isinstance(s, dict)]
         expected = [spec["stage_key"] for spec in (manifest.get("stages") or [])]
+        if manifest.get("outline_input_format") == STAGE_SKELETON_V1 and any(not isinstance(key, str) for key in keys):
+            return ["骨架阶段稳定键不合法"]
         if keys != expected:
             errors.append("骨架阶段与冻结清单不一致")
         if len(set(keys)) != len(keys):
@@ -615,6 +623,13 @@ class PlanningNodes:
         for section in sections:
             if not isinstance(section, dict) or not str(section.get("title", "")).strip():
                 errors.append("骨架阶段缺少标题")
+            if manifest.get("outline_input_format") == STAGE_SKELETON_V1 and isinstance(section, dict):
+                if not isinstance(section.get("title"), str) or not isinstance(section.get("objective"), str) or not section["objective"].strip():
+                    errors.append("骨架阶段标题/目标不合法")
+                if set(section) - {"stable_key", "title", "objective"}:
+                    errors.append("骨架包含越权阶段字段")
+        if manifest.get("outline_input_format") == STAGE_SKELETON_V1 and set(payload) - {"outline_ref", "sections"}:
+            errors.append("骨架包含越权字段")
         return errors
 
     def generate_structure_batch(self, state: PlanningState) -> dict[str, Any]:
