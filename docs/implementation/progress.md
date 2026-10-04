@@ -1,5 +1,15 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 v6.4网络门禁：PROVIDER_NETWORK_READY，整体NOT_READY，STOP
+
+用户现在新增能做什么：正式配置加载链的DeepSeek网络解析/endpoint guard/部署binding与免费TLS均通过；本轮没有开放模型生成、正式入口或Worker。最新[v6.4 Goal](STUDYPLAN_V6_4_PROVIDER_NETWORK_GATE_2026-10-04.md)已执行至STOP，源码能力与v6.2内容继续保留，不扩实现。
+
+基线0d65a1e、feat/n1-resource-discovery，tracked clean；OS/Python修前同为198.18.0.161、2001:2::9a，Meta TUN与core fake-IP运行证据确认B1 LOCAL_PROXY_FAKE_IP。dns_config.yaml里已有域名但GUI DNS覆写false，实际core没有filter；不是上游异常/hosts/容器差异。仅在当前订阅实际option.merge对应profiles/mxAo9JFl7Wm5.yaml追加dns.fake-ip-filter=[api.deepseek.com]，生成配置同一字段对应修正，本机实际production named pipe现有secret重载204；基本runtime全字段不变，未开控制端口/改SAFE_PATHS/提升权限。受限本机原配置备份与hash已保留。
+
+修后OS/正式Python DNS为119.188.175.46、123.125.246.121，全部公网；真实guard/bind_submission PASS。HTTPX实际从Windows注册表发现127.0.0.1:7900代理，经同一路径CONNECT后TLS1.3与certifi证书链/hostname PASS；未发送provider HTTP/API key/chat/completion。14unsafe URL+14混合DNS拒绝PASS；endpoint/binding/budget/provider Mock unit PASS24，0FAIL/NOT RUN。正式链runtime8192、structure/repair8192与outline/practice4096不变，原.env/guard/hosts/GUI编辑DNS/profiles引用哈希不变；23/50账本和旧journal全部hash不变、unknown新增0、收费0。
+
+没有业务/测试源码或依赖改变、没有产品库写入/migration/Seed、正式API/入口/Worker/付费/RAG。Goal精确归档、审计文档与progress更新；最终SHA提交后动态报告，不推送/合并，两禁目录不操作。[完整网络审计/证据/限制/rollback](../reviews/2026-10-04-v6-4-provider-dns-audit.md)。网络门禁READY与全产品STAGING_BLOCKED/NOT_READY分开；下一唯一最小动作另行审批既有收费代表方案，本轮不执行。以下DNS FAIL等为历史时点。
+
 ## 2026-10-04 staging单项配置修正：runtime8192与预算PASS，真实端点binding FAIL，仍STAGING_BLOCKED
 
 用户现在新增能做什么：后续获批正式staging启动时实际读取8192，不再因8000阻塞structure/repair预算。唯一事实源D:\studyplan\.env的LLM_MAX_OUTPUT_TOKENS，单值8000→8192；其它行hash、其它runtime Settings摘要保持，provider/model/purpose预算/计量不变。基线3f302346、feat/n1-resource-discovery；没有业务/测试源码或启动脚本改动。

@@ -2,6 +2,8 @@
 
 ## 当前续接入口（2026-10-02）
 
+2026-10-04 最新单项 [v6.4 Provider Network Gate](docs/implementation/STUDYPLAN_V6_4_PROVIDER_NETWORK_GATE_2026-10-04.md) 已执行到STOP：仅修当前Clash Verge订阅的DeepSeek域名fake-ip-filter，真实Windows/Python公网DNS、原endpoint guard、部署binding、免费TLS及安全回归PASS，PROVIDER_NETWORK_READY。上一单项明确授权已将正式.env cap8000→8192、runtime预算PASS；两项不扩大产品费用/原库/入口/Worker/RAG权限。全产品仍STAGING_BLOCKED/NOT_READY；按唯一progress续接，禁止把网络READY当收费/部署授权。下方8000候选、DNS未配置等保留历史时点，不覆盖最新事实；模型路由与并发规则不变。
+
 2026-10-04 当前续接已进入 [v6.3 RC 收口 Goal](docs/implementation/STUDYPLAN_V6_3_RC_CLOSURE_GOAL_2026-10-04.md)。用户再次要求核对 v6.1 N0/P0时复用最新HEAD/既有v6.2，不回退重做。真实产品只读备份→新owned副本恢复/forward/三包导入已完成；原库写入、正式入口切换、收费模型、RAG修改仍STOP。只修 release blocker/确定性 stale fixture，不扩课程/Recipe/项目卡；唯一progress记录实际门禁，正常账号副本消费及用户接受未完成前保持STAGING_BLOCKED/NOT_READY。当前cap8000与structure/repair8192冲突已明确登记；只提出staging候选，不自动改原.env。最多3活动代理/2业务writer、单一契约/事务负责人及既有模型路由不变。
 
 2026-10-04 用户批准 [v6.2 语义内容落地 Goal](docs/implementation/STUDYPLAN_V6_2_SEMANTIC_CONTENT_GOAL_2026-10-04.md) 为最新入口。先已完成最新 HEAD 只读 N0/schema映射，保留v6.1能力；把语义校正版23份研究证据映射为AI2/Agent5/Cloud2下一版本，用户项目优先、Starter仅fallback、开放0..N Recipe、未命中补审、项目案例optional、4hold排除。新内容默认无迁移/DTO/API/Graph重写/clone/index，不覆写旧包或已冻结Run，持续按授权实施。产品写入和真实费用门禁保持，详见审计与唯一progress。
