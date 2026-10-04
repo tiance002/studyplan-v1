@@ -22,7 +22,8 @@
 | 恢复副本中新合成账号实际生成/发布/重登录 | PASS | 三包各一次；Agent13/AI7/Cloud9阶段，actor allowlist有界tick；原业务行摘要子集仍完整 |
 | 恢复副本新合成Agent的Chrome实际消费 | PASS | 章节、optional项目卡/Prompt、刷新/重新登录精确Plan/Workspace；没有Mock或生成重派；不替代原账号 |
 | 当前frontend+copyAPI匿名Chrome | PASS | `anonymous-copy-smoke.json/png`：正常登录页、真实proxy、401、业务写403，无Mock；已查看PNG |
-| 真实用户普通登录/当前与历史/刷新重登录 | NOT RUN | 已邀请用户在副本私下登录；不获取密码/伪会话/重置散列 |
+| 真实用户普通登录/空状态/刷新重登录 | PASS | 用户反馈正常；原账号1项目0Plan，源/副本范围相等；2次正常登录与退出的metadata补证；未获取密码/会话 |
+| 非空原账号当前/历史/资源消费 | NOT RUN | 当前体验账号源中无Plan；不以其它账号/合成账号替代 |
 | 原库写入/正式切换/收费 | NOT RUN | 实际模型/搜索新增0，Worker OFF，旧unknown不重派 |
 
 源中Summary/Prompt/Submissions/AcceptanceReview均0，空数据已恢复相等；没有伪造非空用户原文。非空历史主链的Synthetic PG/Chrome证据另列v6.2，不替代本副本普通账号体验。
@@ -51,4 +52,4 @@
 
 代码兼容当前schema时正常revert；保留已发布新包/计划的读取兼容，不删数据。schema/data恢复采用经过验证的native backup→另一个全新owned recovery库→一致性核对→用户批准入口切换；禁止先drop/restore原库、禁止历史downgrade。确认正式切换后再决定旧入口处置，不清理未知目录或别的服务。
 
-当前阻塞：真实用户副本消费NOT RUN；正式配置cap冲突待staging窗口修正；RAG实例/契约和付费代表另有STOP。后两者不能让独立已完成恢复证据失效，也不能宣称全产品READY。下一最小动作：完成副本正常账号只读检查；不切正式入口。
+当前阻塞：正式配置cap冲突待staging窗口修正；非空原账号历史消费缺样本；RAG实例/契约和付费代表另有STOP。用户本次正常登录/原有空状态/刷新重登录已反馈正常并获只读聚合补证，不再等待此项。独立恢复证据保持，但全产品仍NOT_READY。本轮到达RC Goal第14节STOP报告点。下一最小门禁动作：批准正式staging配置修正8000→8192并验证绑定预算；该动作不授权原库升级/入口切换/Worker/收费。

@@ -1,5 +1,17 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 RC最终STOP报告：原账号认证/空状态PASS，STAGING_BLOCKED / NOT_READY
+
+用户现在新增能做什么：可继续在5179副本用原账号只读体验；本次本人反馈“一切正常”，已核实其登录/退出/重新登录及原有空状态，无需重复要求登录。尚未开放业务保存或正式入口。源/副本的用户提供账号tiance均1项目0Plan；只读新有效原actor聚合唯一对应该账号。排除自有合成Chrome第6–18行后login200两次/logout200两次/session200一次/workspace404三次；frontend404映射空状态，符合无正式Plan。认证与可执行空状态PASS；非空原账号Plan/Summary/Prompt/Practice/Outcome/资源/extensions消费NOT RUN，不能将全库12Plan或合成workspace200冒充本人验收。
+
+本轮已到[v6.3第14节STOP报告点](STUDYPLAN_V6_3_RC_CLOSURE_GOAL_2026-10-04.md)，审计/备份恢复/副本forward三包/必要fixture修复/三包实际PG与Chrome/RAG状态/收费方案/体验清单均已报告；结束本轮RC执行，不自动进入产品操作。完整12步用户接受未完成，STAGING_BLOCKED/NOT_READY保持。正式cap8000<structure/repair8192为配置阻塞，候选8192离线PASS；非空原账号历史缺样本、RAG实例/契约和收费代表继续门禁。
+
+本回合没有业务/测试代码改动；复用此前PASS840/NOT RUN2 unit、PASS59相邻PG、PASS10 Auth、PASS13 frontend/build与三包PG/Chrome，未重跑宽套件。新增认证/范围聚合及最终源snapshot/归档/原函数保全只读检查PASS；首轮误用系统Python缺psycopg检查FAIL，工程.venv重跑PASS，不安装依赖。服务仍同一5179/8024 PID33136/20012，Worker OFF、业务写403；原库及.env未改。模型/搜索新增0，历史23/50、6/1000、unknown1保留，无新外部私有正文或凭据读取。
+
+本地实施/既有证据提交341b7b5、c703655；最终文档提交后实际HEAD动态报告，当前feat/n1-resource-discovery，无push/master/develop集成，两禁目录不处理。[完整证据/风险/回滚](../acceptance/v6-3-rc-closure-2026-10-04.md)。下一唯一最小门禁动作：批准正式staging配置修正8000→8192并验证绑定预算；不包含原库升级、入口切换、Worker或收费。
+
+以下保留此前各时点记录，NOT RUN/等待状态不覆盖本节最新认证结果。
+
 ## 2026-10-04 RC续接：恢复副本三包实际生成/发布及Chrome补证PASS，原账号消费仍NOT RUN
 
 用户现在新增能做什么：5179只读入口继续保留，正常账号可私下登录看已有历史；本回合没有开放业务保存或切正式入口。上一回合完成恢复/审计/commit为progress；本回合同一8024/5179进程与exec handle核实仍活跃，没有因超时重启。
