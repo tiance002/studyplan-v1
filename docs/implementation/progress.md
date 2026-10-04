@@ -1,3 +1,17 @@
+## 2026-10-05 正式运行收口：P1/P2/P3技术 PASS，P4授权包准备并STOP
+
+- 用户新增能做什么：可访问 `http://127.0.0.1:5194/`，用本人正常账号登录本轮最新native restored/migrated/imported owned副本，读取旧项目/历史并体验页面。普通规划提交保持，Worker held，不会自动收费生成。本人目标、一次计量生成与主观接受仍NOT RUN；整体STAGING_BLOCKED / NOT_READY。
+- 新 Goal `STUDYPLAN_RC_RUNTIME_CLOSURE_GOAL_2026-10-05.md`；基线 HEAD `8a28b17f7e019b93240343a5c6f071edf5af082e`、feat/n1-resource-discovery、tracked clean；1217历史文件/.env/receipt/账本 SHA 保存在 `var/rc-runtime-20261005/baseline.json`，不操作保护未跟踪目录。
+- 实现SHA `954242a6e783cf5645cf477f6a11610081b57055`；普通PlanService两入口传独立frozen manifest，factory校验hash/model_ref后deepcopy，ledger实际purpose/key/output cap与Run repair2检查，modern新dispatch缺manifest拒绝/真正legacy与known replay保留。allowlist排除dispatched/reconciliation_required，与原trusted_server0020一致；published migration不改。
+- P1全部13门禁PASS，组合unit/contract+ownedPG27、受影响fence/budget33、个人模型realadapter/MockTransport1，共61PASS；deployment binding另3PASS。普通Worker实际PGcheckpoint/Draft和独立submission对照；restart为runtime/ledger重建，OS kill NOT RUN。旧RED及fixture/diagnostic FAIL保留，只修fixture，不降来源权威；旧大套/本批UI build NOT RUN（复用前批有效证据）。证据p1-gate.json。
+- P2源今日0023/61tables1517rows（13users18projects12Plans16Drafts26Runs），仅Agent1/Python1。PG16.4/client16.15；READ ONLY exported snapshot/nativecustom backup485041bytes SHA `a321631380f9dd1af32fbad0a09d3e77f4d9e68dcf80a25514e45aaa91d0a88d`，p2/private/source-20261005.dump。新owned business `studyplan_test_rc_p2_native_f482d3a3`/CP `studyplan_test_rc_p2_checkpoint_123aace8`，迁移前row/ACL/RLS/policies/columns/index/sequences/6函数精确PASS；已有0023→0024与Agent7+CURRENT AI4/Agent8/Cloud4/Python2/3依赖导入PASS，旧行/版本保持、10.1sourceV2、幂等/异体拒绝/nohalf PASS。harness UTC/tuple比较FAIL保留，从既有副本续接未重复dump/migrate。
+- P2普通认证/app-roleRLS/admission/Fake bounded/真实PostgresSaver/Draft/syntheticconfirm/freshPlan-workspace/relogin/终态不重派3路线PASS：Agent8 18stage37Fake、AI4 8stage17Fake、Cloud4 11stage23Fake。仅本批3新synthetic Draft确认。副本63tables2922rows，旧私人/catalog业务行hash保持；1旧auth throttle临时行按正常认证过期，源全快照不变。原库写入0/globalroles0。
+- P3真实Edge/API/PG Agent/AI/Cloud技术PASS：实际A2 3units1canonical1task、A5/A6/A8、小型/专项/成熟/迁移、GR2卡、A6 V2/10.1非fallback、catalog/fullguidance/Prompt/Node连续项目、refresh/relogin exact。首轮AI DOM whitespace FAIL原证据保留，仅harness normalization后继续AI/Cloud，Agent不重复。API8034 PID34332/session52961，UI5194 PID36476/session73794，健康200/200，owned-processes记录account/parents，服务保留，Worker held。settings/caps保持8192和4096/8192/4096/8192，modelceiling0为未指定，trusted_server正常。
+- P1/P2 真实模型请求0；账本125/200、剩75保持。只有 P1/P2 PASS 后本人 RC 一次正常新生成才可使用既有最多37normal+2repair39授权；不会再开 synthetic paid representative。原库写入/正式入口/正式Worker/push/merge/全局配置 NOT RUN。
+- RAG F17 BLOCKED：已识别本机PersonalRAGfrontend/DB归属E:/RAG quention；未见APIcontainer，static OpenAPI无pure retrieve/auth security contract。检索/隔离/citation/错误/无命中NOT RUN；未启动/修改RAG。GitHub OAuth当前未见完整配置/路由，真实验收NOT RUN，不与普通auth混淆。
+- 请求root/预算安全复核Sol6.1 xhigh，独立P2/P3有界执行Sol6.1 medium，实际解析均NOT OBSERVABLE；不改全局配置，合并反例/复核、不重复大套。1217历史保护/.env/receipt/账本最终hash核对另存，历史failed/unknown、旧F2、Agent7保持。
+- 唯一正式操作授权包：[rc-runtime-closure-2026-10-05.md](../acceptance/rc-runtime-closure-2026-10-05.md)。Gitrange/target、原库0024/import写表与私人保护、backup/rollback、API/UI/Worker命令/profile/ports/PID/stop、admission/费用、RAG/OAuth及本人动作集中列明。P4准备后STOP，不自动正式切换/push/merge；本人先提交真实目标，既有一次≤39授权仍有效，不另造synthetic paid代表。
+
 ## 2026-10-05 A6 来源/当前闭环及唯一新收费代表收口：PASS / 正式操作 STOP
 
 - 用户新增能做什么：新Agent8保留有正文依据的MCP10.1；后置合法冻结资源丢失拒绝保存；新owned Plan已实证学习/GR/Prompt/总结/成果/完成/变更/历史/refresh/relogin。正式入口未开放，整体 STAGING_BLOCKED / NOT_READY。
