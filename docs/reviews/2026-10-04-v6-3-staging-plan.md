@@ -2,6 +2,8 @@
 
 状态：**STAGING_BLOCKED**，整体 **NOT_READY**。原库升级/Seed写入、正式入口切换、收费调用仍STOP；本轮只完成方案和隔离副本。
 
+后续单项授权补充：用户已批准仅修正正式.env cap8000→8192，已完成runtime/预算/隔离binding PASS；真实endpoint binding因api.deepseek.com DNS非公网FAIL。其它参数与额度未改，未执行下文正式升级/切换/Worker/收费步骤。[配置修正报告](2026-10-04-staging-output-cap-correction.md)为此项最新事实；下文8000候选说明保留原RC时点。
+
 ## 已执行的真实产品数据演练
 
 源：`.env`实际 `studyplan_b3_local_48fb59cc`、0023、61表/1517行。目标：本轮新建owned `studyplan_test_v63_realcopy_a798a903`，明确与源不同、独立命名。没有使用合成fixture冒充真实产品数据恢复。

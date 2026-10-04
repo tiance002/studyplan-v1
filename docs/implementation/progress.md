@@ -1,5 +1,15 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 staging单项配置修正：runtime8192与预算PASS，真实端点binding FAIL，仍STAGING_BLOCKED
+
+用户现在新增能做什么：后续获批正式staging启动时实际读取8192，不再因8000阻塞structure/repair预算。唯一事实源D:\studyplan\.env的LLM_MAX_OUTPUT_TOKENS，单值8000→8192；其它行hash、其它runtime Settings摘要保持，provider/model/purpose预算/计量不变。基线3f302346、feat/n1-resource-discovery；没有业务/测试源码或启动脚本改动。
+
+实际scripts/b3f1-dev.ps1加载语句AST在新隔离进程执行→get_settings/build_llm/bind_submission：runtime8192、structure8192/repair8192预算与隔离binding PASS，outline/practice4096不变；6阶段synthetic冻结manifest15请求/94208输出/repair2、超请求/超输出拒绝PASS。真实绑定FAIL：api.deepseek.com DNS非公网被现有安全policy拒绝，不绕过/改代理。隔离DNS的binding PASS明确与真实结果分开，不宣称正式API/Worker已重启。
+
+现有受控50次账本23/50、所有request/result哈希不变；原reserve_request AST仅在临时合成目录执行第50允许/51拒绝、failed计量、unknown/缺失回执停止PASS。该50总额度是现有受控验收wrapper保护，普通API全局自动计数未集成/未验证；本次不扩大实现。正式Worker、费用仍STOP。原库snapshot/归档/函数保全只读复核PASS，收费/外部HTTP0，无旧unknown重派。
+
+最小unit回归PASS65/NOT RUN2（symlink权限）；原PG budget PASS3/FAIL2为固定旧stage.tools/21的stale fixture；保留原FAIL、原测试不改，复制至ignored var的当前manifest隔离PG边界PASS5。backend/scripts/.env.example diff空；两禁目录保留。完整报告含证据/限制/单值rollback：[staging cap修正](../reviews/2026-10-04-staging-output-cap-correction.md)。本项完成后STOP；cap配置阻塞已解除，DNS/非空原账号历史/RAG/真实模型及完整用户接受仍待门禁，STAGING_BLOCKED/NOT_READY保持。不自动进入下一门禁。以下此前记录均为历史时点。
+
 ## 2026-10-04 RC最终STOP报告：原账号认证/空状态PASS，STAGING_BLOCKED / NOT_READY
 
 用户现在新增能做什么：可继续在5179副本用原账号只读体验；本次本人反馈“一切正常”，已核实其登录/退出/重新登录及原有空状态，无需重复要求登录。尚未开放业务保存或正式入口。源/副本的用户提供账号tiance均1项目0Plan；只读新有效原actor聚合唯一对应该账号。排除自有合成Chrome第6–18行后login200两次/logout200两次/session200一次/workspace404三次；frontend404映射空状态，符合无正式Plan。认证与可执行空状态PASS；非空原账号Plan/Summary/Prompt/Practice/Outcome/资源/extensions消费NOT RUN，不能将全库12Plan或合成workspace200冒充本人验收。
