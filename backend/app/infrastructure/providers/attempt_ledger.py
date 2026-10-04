@@ -7,6 +7,7 @@ from dataclasses import asdict
 
 import psycopg
 from app.agent_workflows.planning_batches import (
+    REPAIR_PURPOSE,
     SHORT_GENERATION_VERSION,
     allowed_attempt_keys,
     attempt_purpose,
@@ -55,6 +56,17 @@ class PgAttemptLLM:
             if purpose in REVIEW_PROTOCOLS:
                 return "run_manifest_violation"
             conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", (f"studyplan:plan-budget:{run_id}",))
+            retained = conn.execute(
+                "SELECT 1 FROM ai_provider_attempts WHERE attempt_id=%s AND run_id=%s",
+                (attempt_id, run_id),
+            ).fetchone()
+            if retained is None:
+                run = conn.execute(
+                    "SELECT graph_version,EXISTS(SELECT 1 FROM ai_jobs j WHERE j.run_id=r.run_id) AS has_job "
+                    "FROM ai_runs r WHERE r.run_id=%s", (run_id,),
+                ).fetchone()
+                if run is not None and (run["has_job"] or run["graph_version"] == SHORT_GENERATION_VERSION):
+                    return "run_manifest_violation"
             return None
         if purpose in REVIEW_PROTOCOLS or self.manifest.get("protocol") in {SUMMARY_PROTOCOL, PROMPT_PROTOCOL}:
             protocol, valid, _, suffix, _ = REVIEW_PROTOCOLS.get(purpose, (None, lambda value: False, None, "", None))
@@ -75,6 +87,8 @@ class PgAttemptLLM:
             return "run_manifest_violation"
         if attempt_id not in allowed_attempt_keys(run_id, self.manifest):
             return "run_manifest_violation"
+        if attempt_purpose(attempt_id) != purpose:
+            return "run_manifest_violation"
         conn.execute(
             "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
             (f"studyplan:plan-budget:{run_id}",),
@@ -85,10 +99,18 @@ class PgAttemptLLM:
         ).fetchone()
         if existing is not None:
             return None  # Replay: counted once, never charged twice.
+        options = self.provider.request_options(purpose)
+        output_cap = output_budget_for(self.manifest, purpose)
+        if type(options.get("max_tokens")) is not int or not 0 < options["max_tokens"] <= output_cap:
+            return "run_budget_exhausted"
         rows = conn.execute(
             "SELECT attempt_id FROM ai_provider_attempts WHERE run_id=%s", (run_id,)
         ).fetchall()
         keys = {str(row["attempt_id"]) for row in rows}
+        if purpose == REPAIR_PURPOSE and sum(
+            attempt_purpose(key) == REPAIR_PURPOSE for key in keys
+        ) >= int(self.manifest["max_repairs"]):
+            return "run_budget_exhausted"
         reserved = sum(output_budget_for(self.manifest, attempt_purpose(key)) for key in keys)
         reserved += output_budget_for(self.manifest, purpose)
         return budget_violation(

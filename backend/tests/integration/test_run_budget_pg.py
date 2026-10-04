@@ -117,9 +117,10 @@ def test_over_cap_dispatch_is_rejected_without_a_provider_call(budget_db: PgTest
     insert_run(budget_db, run_id)
     manifest = _manifest()
     keys = sorted(allowed_attempt_keys(run_id, manifest))
-    target = attempt_key(run_id, STRUCTURE_PURPOSE, "stage.tools", 2, 0)
+    batch = manifest["structure_batches"][0]
+    target = attempt_key(run_id, STRUCTURE_PURPOSE, batch["stage_key"], batch["batch_index"], 0)
     assert target in keys
-    seed_attempts(budget_db, run_id, [k for k in keys if k != target][:21])
+    seed_attempts(budget_db, run_id, [k for k in keys if k != target][:manifest["max_requests"]])
 
     provider = CountingProvider()
     llm = PgAttemptLLM(budget_db.app_dsn, provider, manifest=manifest)
@@ -194,8 +195,9 @@ def test_unknown_or_dispatched_attempts_still_occupy_the_budget(budget_db: PgTes
     insert_run(budget_db, run_id)
     manifest = _manifest()
     keys = sorted(allowed_attempt_keys(run_id, manifest))
-    target = attempt_key(run_id, STRUCTURE_PURPOSE, "stage.tools", 2, 0)
-    seed_attempts(budget_db, run_id, [k for k in keys if k != target][:21],
+    batch = manifest["structure_batches"][0]
+    target = attempt_key(run_id, STRUCTURE_PURPOSE, batch["stage_key"], batch["batch_index"], 0)
+    seed_attempts(budget_db, run_id, [k for k in keys if k != target][:manifest["max_requests"]],
                   status="reconciliation_required")
     provider = CountingProvider()
     llm = PgAttemptLLM(budget_db.app_dsn, provider, manifest=manifest)

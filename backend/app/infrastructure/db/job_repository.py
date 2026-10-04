@@ -256,9 +256,9 @@ class PgPlanningJobRepository:
                       AND (r.kind='plan_generate' OR ((r.kind='summary_review' AND r.graph_version='summary-review-v1'
                         AND EXISTS(SELECT 1 FROM summary_review_bindings b WHERE b.run_id=r.run_id AND b.project_id=r.project_id AND b.actor_id=r.actor_id)
                         OR r.kind='prompt_review' AND r.graph_version='prompt-review-v1'
-                        AND EXISTS(SELECT 1 FROM prompt_review_bindings b WHERE b.run_id=r.run_id AND b.project_id=r.project_id AND b.actor_id=r.actor_id))
-                        AND NOT EXISTS(SELECT 1 FROM ai_provider_attempts a WHERE a.run_id=r.run_id
-                            AND a.status IN('dispatched','reconciliation_required'))))
+                        AND EXISTS(SELECT 1 FROM prompt_review_bindings b WHERE b.run_id=r.run_id AND b.project_id=r.project_id AND b.actor_id=r.actor_id))))
+                      AND NOT EXISTS(SELECT 1 FROM ai_provider_attempts a WHERE a.run_id=r.run_id
+                          AND a.status IN('dispatched','reconciliation_required'))
                       AND (j.status='pending' OR (j.status='running' AND j.lease_expires_at < now()))
                       AND j.available_at <= now() AND j.attempts < %s
                     ORDER BY j.created_at,j.job_id

@@ -404,7 +404,7 @@ class PlanService:
                     raise ConflictError('路线变更与冻结清单不一致')
                 self._route_changes.validate_generation(scope, route_change)
             runtime = (
-                self._runtime_factory(scope, project_id, run_id, model_ref)
+                self._runtime_factory(scope, project_id, run_id, model_ref, manifest=manifest)
                 if self._runtime_factory
                 else None
             )
@@ -494,7 +494,7 @@ class PlanService:
         selected_pack = initial.get("domain_pack")
         try:
             runtime = (
-                self._runtime_factory(scope, project_id, run_id, _manifest.get("model_ref", ""))
+                self._runtime_factory(scope, project_id, run_id, _manifest.get("model_ref", ""), manifest=_manifest)
                 if self._runtime_factory
                 else None
             )

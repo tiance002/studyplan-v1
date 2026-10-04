@@ -223,15 +223,17 @@ def test_scoped_payload_cannot_supply_claim_without_server_fence(jobs_db):
     assert attempts(jobs_db, run) == []
 
 
-def test_unknown_attempt_replays_after_token_change_without_redispatch(jobs_db):
+def test_unknown_attempt_is_not_reclaimed_but_retained_outcome_remains_readable(jobs_db):
     provider = RecordingProvider(LLMFailure("transport_unknown", "unknown", dispatch_unknown=True))
     repo, run, fence, provider, ledger = scenario(jobs_db, provider=provider)
     assert call(ledger, run, fence).dispatch_unknown
     with psycopg.connect(jobs_db.migrator_dsn) as conn:
         conn.execute("UPDATE ai_jobs SET lease_expires_at=clock_timestamp()-interval '1 second' WHERE run_id=%s", (run.run_id,))
     replacement = repo.claim(run.project_id, "replacement", 60)
-    assert replacement is not None
-    replay = call(ledger, run, PlanningWriteFence(**asdict(replacement)))
+    assert replacement is None
+    # Retained receipt reads do not require a replacement live lease. They must
+    # never authorize another dispatch or a business write.
+    replay = call(ledger, run, fence)
     assert isinstance(replay, LLMFailure) and replay.dispatch_unknown
     assert replay.error_class == "attempt_dispatch_unknown"
     assert provider.calls == 1
@@ -297,8 +299,9 @@ def test_cancel_first_budget_lock_serializes_manifestless_dispatch(jobs_db):
             cancellation.execute("UPDATE ai_runs SET status='cancelled' WHERE run_id=%s", (run.run_id,))
         finally:
             cancellation.commit()
-        with pytest.raises(PlanningLeaseLostError):
-            pending.result(timeout=5)
+        rejected = pending.result(timeout=5)
+        assert isinstance(rejected, LLMFailure)
+        assert rejected.error_class == "run_manifest_violation"
     assert provider.calls == 0
     assert attempts(jobs_db, run) == []
 

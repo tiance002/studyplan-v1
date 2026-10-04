@@ -8,9 +8,11 @@ frozen revision fails loudly instead.
 """
 import hashlib
 import json
+from copy import deepcopy
 from dataclasses import replace
 from typing import cast
 
+from app.agent_workflows.planning_batches import manifest_is_intact
 from app.application.model_binding import SubmissionBinding
 from app.application.planning_budget import budget_policy_for_model
 from app.core.errors import ValidationAppError
@@ -124,8 +126,14 @@ class PersonalPlanningRuntimeFactory:
         provider.configuration_ref = "deployment"
         return provider
 
-    def __call__(self, scope, project_id, run_id, model_ref="") -> PlanningRuntime:
+    def __call__(self, scope, project_id, run_id, model_ref="", *, manifest=None) -> PlanningRuntime:
         scope.require_project(project_id)
+        frozen_manifest = deepcopy(manifest)
+        if frozen_manifest is not None and (
+            not manifest_is_intact(frozen_manifest)
+            or frozen_manifest.get("model_ref") != model_ref
+        ):
+            raise ValidationAppError("冻结规划清单或模型绑定不一致，拒绝派发")
         if model_ref:
             provider = self.for_bound_run(scope, project_id, run_id, model_ref)
         else:
@@ -138,6 +146,6 @@ class PersonalPlanningRuntimeFactory:
                 if not self.settings.llm_api_key or not self.settings.llm_model_id:
                     raise ValidationAppError("Configure a personal model before generation")
                 provider = self._deployment_provider()
-        ledger = PgAttemptLLM(self.settings.database_url, provider)
+        ledger = PgAttemptLLM(self.settings.database_url, provider, manifest=frozen_manifest)
         executor = PgPlanningExecutor(self.settings.checkpoint_database_url, llm=ledger)
         return PlanningRuntime(ledger, executor)

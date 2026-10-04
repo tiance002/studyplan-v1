@@ -210,6 +210,8 @@ def test_personal_settings_drive_http_real_graph_without_shared_provider(db, che
         _outline_handler,
         _practice_handler,
         _structure_handler,
+        _select_test_pack,
+        MISSING_SOURCE,
     )
     repo = PgModelSettings(db.app_dsn,Fernet.generate_key().decode())
     old = repo.get(ACTOR_A1)
@@ -220,13 +222,37 @@ def test_personal_settings_drive_http_real_graph_without_shared_provider(db, che
         calls.append(request)
         assert request.headers["Authorization"] == "Bearer personal-request-key"
         content = json.loads(json.loads(request.content)["messages"][1]["content"])
-        payload = handlers[content["purpose"]](content["purpose"],content["context"])
+        # The outline wire carries the projected frozen_stages, without internal
+        # protocol markers. Select the matching local fixture contract explicitly.
+        if content["purpose"] == "planning.outline" and "frozen_stages" in content["context"]:
+            content["context"]["_outline_input_format"] = "stage_skeleton_v1"
+        if content["schema"] == "ReviewedStructureV1":
+            from app.infrastructure.providers.planning_demo import selected_output
+            # The reviewed wire accepts presentation units only. Reuse the
+            # current deterministic fixture rather than legacy node proposals.
+            context = {**content["context"], "_structure_input_format": "reviewed_structure_v1"}
+            payload = selected_output(content["purpose"], context)
+        else:
+            payload = handlers[content["purpose"]](content["purpose"],content["context"])
         return httpx.Response(200,json={"choices":[{"message":{"content":json.dumps(payload)}}]})
     def provider(**kwargs):
         return OpenAICompatibleLLM(**{**kwargs,"endpoint_guard":lambda url:url},client=httpx.Client(transport=httpx.MockTransport(reply)))
     monkeypatch.setattr(module,"OpenAICompatibleLLM",provider)
     container = _container(db)
     base = container.plan_service
+    def consistent_test_pack(goal):
+        pack = _select_test_pack(goal)
+        # This case exercises model binding, not loss of a frozen reviewed
+        # source. Its intentionally absent catalog source is genuinely unverified.
+        for source in pack["resources"]:
+            if source["source_id"] == MISSING_SOURCE:
+                source["verification_status"] = "unverified"
+                source["checked_at"] = None
+                for section in source.get("sections") or []:
+                    section["verification_status"] = "unverified"
+                    section["checked_at"] = None
+        return pack
+    base._domain_pack_selector = consistent_test_pack
     base._runtime_factory = module.PersonalPlanningRuntimeFactory(replace(container.settings,database_url=db.app_dsn,
         checkpoint_database_url=checkpoint_db.migrator_dsn,llm_model_max_output_tokens=8192),repo)
     # Enqueue must freeze the same configuration the runtime will later resolve.
