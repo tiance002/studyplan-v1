@@ -22,3 +22,7 @@ N0：跟踪文件干净，仅两个禁操作目录未跟踪；本机无 v6.9 实
 以归档用例的用户期望为 expected，不从 selector 输出倒推。新样本明确标 Fake/确定性或真实 provider；全产品继续 NOT_READY。历史与冻结协议回归；搜索新增必须为 0。最终记录起始 39、新增授权 50、总上限 100、本轮实际请求/repair/unknown 与各组验证目的。本地代码可普通 revert；未来新格式/内容快照须保留读取兼容，不能修改旧 Plan。证据保存在 ignored `var/v610`，安全报告保存 `docs/reviews`；不提交私有运行数据。
 
 请求 root Sol6.1/high，前端 Sol6.1/medium，内容定位 Luna/high；实际解析 NOT OBSERVABLE。
+
+## 最终状态
+
+BLOCKED，STOP；详见 [验收与账本审计](../acceptance/v6-10-planning-alignment-2026-10-04.md)、[三条 Fake/owned PG/Edge 新样本](../acceptance/v6-10-planning-alignment-samples-2026-10-04.md)及唯一 [progress](progress.md)。非收费链路通过；真实7stage代表在A2越出冻结目录，两次repair后失败，未产生新真实Plan。起始39，新增授权50，上限100，实际新增6（4正常+2repair），最终45/100，unknown0，搜索新增0；历史哈希与reconciliation PASS。真实A8/practice/确认/Plan Edge NOT RUN，不自动派发第二Run、push/merge/部署。

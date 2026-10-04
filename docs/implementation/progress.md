@@ -1,5 +1,19 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 v6.10 Planning Alignment：BLOCKED，STOP
+
+用户现在新增能做什么：查看[三条新 Fake/owned PG/Edge 教学样本](../acceptance/v6-10-planning-alignment-samples-2026-10-04.md)与[逐用例/账本/真实失败审计](../acceptance/v6-10-planning-alignment-2026-10-04.md)。完整 Agent 有 A8 Pi whole_core 的实际知识/任务/资源/Prompt及后续组合路径；窄 MCP 仅四阶段；Node API 使用自己的载体，明确隔离 Micro Exercise 与云商/语言/DB 待审边界。新源码候选 Agent6/AI3/Cloud3 仅在 owned catalog 验证，正式目录未导入。基础本机为ff3b6c42c16b0ec2b634b45441251cb8dc1e3249/feat/n1-resource-discovery，没有v6.9实施内容；复用v6.7/v6.8，不reset/回退。实施本地提交817b17b，无push/merge。
+
+用户明确只覆盖产品模型调用0/禁止收费验证：原受控历史39次保持，同scope总上限50→100，新增授权50、理论初余61；搜索新增仍0。权威账本沿用.git/v2-paid-quota-20261001，追加authorization-v610审计，不新建全局计费系统、不改.env cap8192。先离线/Fake/unit/owned PG/Edge通过才执行唯一新Acceptance v610-agent6-synthetic-c5c4af9fb8f8 / Run run_9c00403807ee4ccb817529611e44efa6，仅新owned业务/checkpoint两库。
+
+非收费验证：完整unit/contract **898 PASS、2 NOT RUN**（Windows symlink权限，exit0）；最新规划/canonical定向58 PASS；owned PG教学/发布/长文本8 PASS；marker/真实checkpoint/失败不重派7 PASS；语义/hold/旧snapshot/digest/未来route9 PASS；前端16 PASS/build PASS。实际Edge三条普通认证→生成→合成确认→workspace→刷新→退出重登录PASS，系统7stage/7task/A8node1、MCP4stage/4task、Node9stage/9task/4独立练习；页面error0/externalattempt0/额外generate0。双候选与>850有序指导另由组件Edge及独立owned PG合成v7夹具验证，不覆盖CURRENT Agent6。
+
+免费实际绑定、public DNS、原endpoint guard、direct TLS及输入隔离PASS；新7stage manifest上界15normal+2repair=17，output106496。短outline4653chars/6460bytes，真实首请求1516input/413output/stop，7keys与PG账本门禁PASS。真实A0/A1 structure与逐阶段canonical恢复PASS；A2新增6个未审核知识键，repair1缺必需nodes/units/relations，repair2仍新增相同键，2次repair耗尽，Run failed无Draft/Plan。因此真实代表FAIL，A8/practice/真实确认/真实Plan Edge **NOT RUN**；MCP/已有项目收费代表NOT RUN。不以HTTP200或Fake链路替代真实Plan验收，不追加第二Run或放宽schema/canonical。
+
+**起始39；本轮新增授权50；总上限100；实际新增6（正常4+repair2）；最终45/100；本轮unknown0；理论剩余55；搜索0增量（旧6/1000保持）。** 六笔完整回执/PG request6/unresolved0一致，失败Run新进程不可claim，无重派；188受保护文件含历史39对receipt、旧包、v6.8 Plan/Acceptance/evidence及.env哈希PASS。新失败账本及owned两库保留；正式库连接/正式入口切换/正式Worker/RAG/外部项目写入0。源码协议、公开DTO/API/迁移、安全与repair2门禁保持；root Sol6.1/high、前端Sol6.1/medium、内容Luna/high请求，实际解析NOT OBSERVABLE。完整原始输入哈希归档及RED/中途FAIL保留，未宣称全方向真实provider通过。
+
+BLOCKED后STOP，整体STAGING_BLOCKED/NOT_READY。当前阻塞是A2冻结知识键集合与真实structure/repair输出不匹配；后续须定位精确生成/repair契约、先做非收费验证，再评审新的代表，不删A8、接纳未审节点、增repair或改旧真实Plan。55次剩余授权记录保留，不因还有额度自动派发。以下均为历史时点。
+
 ## 2026-10-04 v6.8单一真实代表：PAID_REPRESENTATIVE_PATCH_PASS，STOP
 
 用户现在新增能做什么：已有一个真实provider生成、合成确认并在owned PG/获准Edge刷新重登录消费通过的完整Agent5 Plan，可评审内容与体验；正式入口/原产品库/正式Worker未启用，全产品仍STAGING_BLOCKED/NOT_READY。[批准Goal](STUDYPLAN_V6_8_PAID_PROJECTION_GOAL_2026-10-04.md)精确归档，[完整审计/逐笔用量/保护/浏览器/风险](../reviews/2026-10-04-v6-8-paid-projection-representative.md)。起点2ed6485e3cb1b52e199e9c8aeb04f99e3f3cc2b1、feat/n1-resource-discovery、tracked clean，v6.7 patch在祖先链；本轮业务源码/.env/cap/model/API/DTO/迁移/Seed未改。
