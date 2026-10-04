@@ -1,5 +1,17 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 v6.5单一收费代表：PAID_REPRESENTATIVE_FAIL，STOP
+
+用户现在新增能做什么：未生成可用真实Plan，现有副本体验保持；新增实际证据证明DeepSeek网络/envelope可用，但当前Common Core outline在4096下截断，真实生成代表不通过。基线a2c9435785687ce7d908fd5b13b9980d542a7bca、feat/n1-resource-discovery、tracked clean；业务源码/正式.env/预算未改，无reset/push/merge。[批准Goal](STUDYPLAN_V6_5_PAID_REPRESENTATIVE_GOAL_2026-10-04.md)精确归档，[审计/用量/风险/回滚](../reviews/2026-10-04-v6-5-paid-representative.md)。
+
+17项首费预检PASS：公网DNS119.188.175.46/123.125.246.121、原guard/真实binding、与产品trust_env=False相同的直接TLS1.3/证书链/hostname；proxy配置与旧账hash不变，正式脚本加载runtime8192、outline/practice4096、structure/repair8192，Agent5 publication digest与实际冻结6阶段manifest精确一致，normal13+repair2=15/94208输出。新Acceptance v65-agent5-synthetic-7a1040c10f15、新owned business studyplan_test_v65_business_b6a8ba0f与checkpoint studyplan_test_v65_checkpoint_6959d5a8；仅synthetic目标/默认偏好+公共审核包，原产品库不连接。两处验收脚本首轮检查FAIL（回执名称拼错/不存在plans表）已修正后检查PASS，非产品修复/非收费重跑，原失败保留。
+
+唯一Run run_cecd033d2fed4a3190a77df32a3cb382，唯一outline正常请求1、repair0。真实HTTP200/envelope PASS，finish_reason=length/content12858chars；provider_output_truncated→Run failed/result_ref null，无第二Run/重发。实际input209998/output4097/total214095/cachehit0/cachemiss209998；requested max_tokens4096但provider报告4097，多1原样保留，不伪造严格cap，也不放宽预算。模型受控账23→24/50、失败计量、本轮unknown0；旧其他scope unknown1保留，搜索仍6/1000、新GitHub/Tavily0。
+
+最终owned app-role+actor/project只读1Run/1failed attempt/unresolved0/0draft/0plan_revisions；请求/result/Acceptance journal及evidence完整，旧quota/journal逐字节hash不变，failed persistence PASS。成功outline FAIL；structure/practice/repair、真实内容保护、synthetic confirm、成功Plan PG消费与Chrome refresh/relogin均NOT RUN；终止后新请求0。无正式Worker/入口/原库/用户私有外发/RAG/推送；业务回归Fake/宽PG本批NOT RUN（无业务变动），ignored harness语法PASS。主协调路由请求Sol6.1/high、实际NOT OBSERVABLE，无子代理/Astra/全局变动。
+
+PAID_REPRESENTATIVE_FAIL后STOP，不自动修业务/改cap或收费再验；全产品STAGING_BLOCKED/NOT_READY。新明确blocker真实outline截断；下一唯一最小动作另开有界离线审查outline输入209998的组成与最小受保护上下文/输出职责，不使用本次Acceptance重发。新owned库/受限本机证据保留，收费不可回滚、账本不可清零；本提交最终SHA交付时实际读取。以下为历史时点。
+
 ## 2026-10-04 v6.4网络门禁：PROVIDER_NETWORK_READY，整体NOT_READY，STOP
 
 用户现在新增能做什么：正式配置加载链的DeepSeek网络解析/endpoint guard/部署binding与免费TLS均通过；本轮没有开放模型生成、正式入口或Worker。最新[v6.4 Goal](STUDYPLAN_V6_4_PROVIDER_NETWORK_GATE_2026-10-04.md)已执行至STOP，源码能力与v6.2内容继续保留，不扩实现。
