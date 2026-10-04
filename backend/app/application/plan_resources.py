@@ -30,6 +30,7 @@ from app.domain.resources.curation import (
     resolve_assignment_output,
 )
 from app.ports.public_resources import PublicResourceCatalogPort
+from app.core.errors import ConflictError
 
 __all__ = [
     "StageResourceView",
@@ -81,6 +82,72 @@ def restrict_pack_resources(state: Mapping[str, Any], pack: Mapping[str, Any]) -
             if len(extension["links"]) != len(links):
                 extension["search_hints"] = extension.get("search_hints") or [extension.get("topic", stage["title"]) + " 官方文档"]
     return result
+
+
+def assert_frozen_resource_projection(
+    *, state: Mapping[str, Any], pack: Mapping[str, Any],
+    assignments: Sequence[StageResourceAssignment],
+    stage_ids: Mapping[str, str], node_ids: Mapping[str, str],
+) -> None:
+    """Reject loss of eligible frozen slots after catalog normalization.
+
+    The caller supplies the independently checked generation, before restrict,
+    and its immutable pack. Ineligible entries retain the existing fallback
+    behavior; metadata-only repository case studies need no fixed chapters.
+    Existing user revisions and genuine legacy runs do not call this guard.
+    """
+    sources = {s["source_id"]: s for s in pack.get("resources", [])}
+    frozen_stages = {s["stable_key"]: s for s in pack.get("stage_blueprints", [])}
+    actual: dict[tuple[str, str, int], list[StageResourceAssignment]] = {}
+    for assignment in assignments:
+        key = (assignment.stage_id, assignment.role.value, assignment.order_index)
+        actual.setdefault(key, []).append(assignment)
+    pending = (pack.get("curriculum_review") or {}).get("review_status") == "selected_scope_pending"
+    for stage in (state.get("outline") or {}).get("sections", []):
+        stable_key = stage["stable_key"]
+        frozen = frozen_stages.get(stable_key)
+        if frozen is None:
+            raise ConflictError("Frozen resource stage missing", reason="frozen_resource_projection_invalid")
+        stage_nodes = {key for unit in state.get("units", [])
+                       if unit.get("section_key") == stable_key for key in unit.get("node_keys", [])}
+        for item in frozen.get("resources", []):
+            source = sources.get(item.get("source_ref"))
+            if source is None or item.get("source_version") != source.get("source_version"):
+                continue
+            sections = {s["section_id"]: s for s in source.get("sections", [])}
+            refs = item.get("section_refs", [])
+            if any(ref not in sections for ref in refs):
+                continue
+            root_case = (source.get("media_type") == "repo" and item.get("role") == "case_study"
+                         and not refs and source.get("verification_status") == "legacy_index")
+            indexed = (pending and source.get("verification_status") == "legacy_index"
+                       and source.get("checked_at") and all(
+                           sections[ref].get("verification_status") == "legacy_index"
+                           and sections[ref].get("checked_at") for ref in refs))
+            reviewed = (source.get("verification_status") == "reviewed" and source.get("checked_at")
+                        and all(sections[ref].get("verification_status") == "reviewed"
+                                and sections[ref].get("checked_at") for ref in refs))
+            if not (refs or root_case) or not (root_case or indexed or reviewed):
+                continue
+            linked = set(item.get("node_keys") or stage_nodes) & stage_nodes
+            if pack.get("pack_key") == "agent.application" and not root_case and not indexed:
+                applicable = {key for ref in refs for key in sections[ref].get("applicable_node_keys", [])}
+                linked &= applicable
+                if not linked:
+                    continue
+            if stable_key not in stage_ids or any(key not in node_ids for key in linked):
+                raise ConflictError("Frozen resource catalog identity missing", reason="frozen_resource_projection_invalid")
+            expected_nodes = {node_ids[key] for key in linked}
+            key = (stage_ids[stable_key], item["role"], item["order_index"])
+            matches = actual.get(key, [])
+            if len(matches) != 1:
+                raise ConflictError("Frozen resource slot missing or duplicated", reason="frozen_resource_projection_invalid")
+            assignment = matches[0]
+            if (assignment.source_ref != item["source_ref"]
+                    or assignment.source_version != item["source_version"]
+                    or tuple(assignment.section_refs) != tuple(refs)
+                    or set(assignment.node_ids) != expected_nodes):
+                raise ConflictError("Eligible frozen resource changed before save", reason="frozen_resource_projection_invalid")
 
 
 @dataclass(frozen=True, slots=True)

@@ -1,3 +1,11 @@
+## 2026-10-05 A6 正文授权续接 / Agent8 不可变版本（执行中）
+
+- 用户明确授权仅同一教程 10.1 正文审读及下一不可变内容版本；覆盖先前冻结资格不足 STOP，仅此范围。原 Agent7/旧 F2 Run/Draft/response/receipt 不改。
+- 新 Agent8 仅第十章来源与四章节获得新身份，source_version=2；仅10.1新增正文依据，其他审读资格、canonical、教学、practice、Framework/MCP/GR不变。全文98277bytes SHA256 e68e510739fc08527f994eac7ab4104b5abc38f4b51c3e788d2fa9ef2111a60d；英文静态正文审读，不宣称运行验证。
+- 保存前从独立 checked_projection 与冻结 blueprint 校验合法资源来源/版本/章节/role/order/nodeIDs；normalize后丢失拒绝保存，legacy和合法已有用户修订不改。root新34例 PASS；附加已有修订兼容1例 PASS；budget/contract31例 PASS；前端 build PASS。首次组合中的11项测试错误保留（错误读取异常reason字段），已由新增组合修正，未改业务保护。
+- 新 owned PG 编译图38份保留响应回放/1repair、46slots74refs/18阶段16canonical58单元18任务37extensions PASS；仅测试包装层6处精确来源身份别名，旧原文不变。新Run run_fc8ca606ec0d446f805541901c7149ee 已 synthetic confirm/freshPG/API/checkpoint读回 PASS；仅本轮新合成Draft。
+- Edge当前闭环进行中；新收费代表 NOT RUN，累计88/200、剩余112、unknown0（本批）。本次正文公开目录读取1、同章正文读取1，产品搜索/外部RAG0。原产品库/正式入口/正式Worker/RAG/push/merge NOT RUN；整体 STAGING_BLOCKED / NOT_READY。
+
 # V2.0实施进度（唯一当前检查点）
 
 ## 2026-10-05 用户追加产品模型额度：累计200，已用88，剩余112

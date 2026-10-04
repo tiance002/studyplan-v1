@@ -61,6 +61,7 @@ from app.application.project_candidate_binding import frozen_candidate_url
 from app.application.plan_resources import (
     StageResourceView,
     normalize_stage_resources,
+    assert_frozen_resource_projection,
     resolve_stage_resources,
     restrict_pack_resources,
 )
@@ -828,6 +829,7 @@ class PlanService:
             authority={'initial':deepcopy(self._generation_inputs.get(run_id)),
                        'receipts':deepcopy(self._generation_receipts.get(run_id, []))}
         initial=authority['initial']
+        frozen_resource_state = None
         if new_structure_signal((initial or state).get('manifest')):
             if initial is None:
                 raise ConflictError('Independent frozen submission missing',reason='planning_submission_invalid')
@@ -837,6 +839,7 @@ class PlanService:
             if selected_pack is not None and selected_pack!=initial.get('domain_pack'):
                 raise ConflictError('Frozen source snapshot mismatch',reason='planning_submission_invalid')
             selected_pack=deepcopy(initial.get('domain_pack'))
+            frozen_resource_state = deepcopy(state)
         if selected_pack is not None:
             state = restrict_pack_resources(state, selected_pack)  # type: ignore[assignment]
         base_version = state.get("expected_version")
@@ -893,6 +896,13 @@ class PlanService:
             catalog=self._resources,
             stage_titles={s.stage_id: s.title for s in draft.stages},
         )
+        if frozen_resource_state is not None and selected_pack is not None:
+            assert_frozen_resource_projection(
+                state=frozen_resource_state, pack=selected_pack,
+                assignments=draft.stage_resources,
+                stage_ids={s.stable_key: s.stage_id for s in draft.stages},
+                node_ids=catalog_ids.node_ids,
+            )
         if route_change and self._route_changes:
             draft = self._route_changes.save_generated(scope, route_change, draft, write_fence)
         else:

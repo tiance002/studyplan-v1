@@ -24,7 +24,7 @@ def test_only_changed_direction_gets_new_version_and_no_new_canonical_keys():
     new = build_targeted_alignment_pack()
     assert validate_seed(new) == new
     assert {n['stable_key'] for n in old['knowledge_blueprints']} == {n['stable_key'] for n in new['knowledge_blueprints']}
-    assert CURRENT_PACKS['agent.application'] == 'agent-application-v7.json'
+    assert CURRENT_PACKS['agent.application'] == 'agent-application-v8.json'
     assert CURRENT_PACKS['ai.fullstack'] == 'ai-fullstack-v4.json'
     assert CURRENT_PACKS['cloud.services'] == 'cloud-services-v4.json'
 
