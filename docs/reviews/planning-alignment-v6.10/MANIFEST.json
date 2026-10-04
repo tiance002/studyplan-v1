@@ -1,0 +1,12 @@
+{
+  "reviewed_repository": "tiance002/studyplan-v1",
+  "reviewed_branch": "feat/n1-resource-discovery",
+  "reviewed_sha": "ff3b6c42c16b0ec2b634b45441251cb8dc1e3249",
+  "scope": "read-only source review and proposed instructions; no repository tests executed here",
+  "files": {
+    "PLANNING_CODE_REVIEW_2026-10-04.md": "42ff07426d1927f97a1b09decf0b9feefcf8de72f0fa0158c2bd6ee2ce0053dc",
+    "CODEX_GOAL_v6.10_PLANNING_ALIGNMENT.md": "526f55930e3f12588e084ab1629275269dece1e2e0a38dd16b4d894b6a7ebfc4",
+    "PLANNING_ACCEPTANCE_CASES_v6.10.md": "780e774c8b8d2bb80211bc18e3b3348128d701b00979c062ee1d81c2cdeb8c6a",
+    "README.md": "1d6aeba415b54ab7cbfba486c4d1fce759deae08399fbd2625d0fe650585d1b0"
+  }
+}

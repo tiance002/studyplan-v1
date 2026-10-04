@@ -38,6 +38,9 @@ def _user_project(text):
 
 def adapt_semantic_pack(pack, goal, goal_spec, *, stage_keys=None):
     policy = pack.get('semantic_policy') or {}
+    if policy.get('version') == 2:
+        from app.domain.planning.alignment import adapt_alignment_pack
+        return adapt_alignment_pack(pack, goal, goal_spec, stage_keys=stage_keys)
     if policy.get('version') != 1:
         return pack
     result = deepcopy(pack)

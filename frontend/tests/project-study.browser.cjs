@@ -2,7 +2,7 @@ const { chromium } = require('playwright-core');
 const assert = require('node:assert/strict');
 
 (async () => {
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const browser = await chromium.launch({ channel: process.env.STUDYPLAN_BROWSER_CHANNEL || 'msedge', headless: true });
   try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     const errors = [];
@@ -18,14 +18,25 @@ const assert = require('node:assert/strict');
     stages[1].tasks = [{ task_id: 'restore', practice_project_id: 'own-project', stable_key: 'restore', title: '工作台失败恢复',
       goal: '检索失败可重试', acceptance: ['失败后状态可检查'], status: 'pending' }];
     for (const item of stages.slice(1)) item.resources = [{ assignment_id: `repo-${item.stage.stage_id}`, stage_id: item.stage.stage_id,
-      role: 'case_study', media_type: 'repo', title: item.stage.title, ordered_sections: [], source_ref: 'reviewed', source_version: 1 }];
+      role: 'case_study', media_type: 'repo', title: item.stage.title,
+      ordered_sections: [{ section_id: `repo-${item.stage.stage_id}`, title: '仓库', order_index: 0, url: `https://github.com/example/${item.stage.stage_id}` }], source_ref: 'reviewed', source_version: 1 }];
     const extension = (id, title, focus) => ({ extension_id: `e-${id}`, stage_id: id, topic: `项目学习：${title}`,
       concepts: [focus, '<img src=x onerror="window.injected=true">'], guidance: '为什么现在：先有自己的最小项目，再比较运行机制。\n学习深度：理解关键机制\n暂不涉及：训练系统',
-      thinking_prompts: ['两种实现如何处理错误？', '可迁移哪一项机制？'], links: [`https://github.com/example/${id}`] });
+      thinking_prompts: ['两种实现如何处理错误？', '可迁移哪一项机制？'], links: [`https://github.com/example/${id}`], order_index: 0, required: false });
     const workspace = { plan: { plan_id: 'study-plan', project_id: 'project', revision: 1, goal_snapshot: '构建资料工作台',
       goal_spec: { target: '工作台', scope: ['重点 RAG'], desired_depth: 'applied' }, source_pack_key: 'agent.application',
       stages: stages.map(item => item.stage), extensions: [extension('runtime', '运行时', '状态恢复'), extension('cloud', '云服务', '手工部署')] },
       stages, total_units: 0, completed_units: 0 };
+    const longGuidance = '学习方式：whole_core\n为什么现在：对照真实运行机制。\n' + '检查状态边界与恢复证据。'.repeat(95) + '\n预期产出：完整机制对照表；迁移：一项可检查的恢复机制。';
+    workspace.plan.extensions[0].guidance = longGuidance.slice(0, 850);
+    workspace.plan.extensions.push({ ...extension('runtime', '运行时（续2/2）', '状态恢复'), extension_id: 'runtime-continuation',
+      guidance: longGuidance.slice(850), order_index: 1 });
+    stages[1].resources.push({ ...stages[1].resources[0], assignment_id: 'second-repo', title: '另一候选',
+      ordered_sections: [{ section_id: 'second-repo', title: '仓库', order_index: 0, url: 'https://github.com/example/second/tree/main' }] });
+    workspace.plan.extensions.push({ ...extension('runtime', '另一候选', '目标切片'), extension_id: 'second-candidate',
+      links: ['https://github.com/example/second'], guidance: '学习方式：targeted_deep_dive\n只比较目标切片', order_index: 2 });
+    workspace.plan.extensions.push({ ...extension('runtime', '待选参考项目', '明确学习目标'), extension_id: 'pending-candidate',
+      links: [], guidance: '先确认参考项目；保留输出与迁移目标。', order_index: 3 });
     workspace.plan.extensions.push({ extension_id: 'comparison', stage_id: 'runtime', topic: '对比学习：Tool Calling', concepts: ['错误处理对照'],
       guidance: '已学：最小 Agent\n本次新增：恢复策略\n关系：COMPARE / DEEPEN', thinking_prompts: ['两种实现的重试边界在哪里？'] });
     await page.route('**/*', route => {
@@ -41,13 +52,23 @@ const assert = require('node:assert/strict');
     await page.goto((process.env.STUDYPLAN_URL || 'http://127.0.0.1:5173') + '/#path', { waitUntil: 'domcontentloaded', timeout: 30000 });
     assert.equal(await page.getByRole('button', { name: '课程改进建议', exact: true }).count(), 0);
     await page.locator('.timeline-stage').nth(1).getByRole('button', { name: '进入学习 →' }).click();
-    const card = page.getByRole('region', { name: '项目源码学习' });
+    const cards = page.getByRole('region', { name: '项目源码学习' });
+    const card = cards.first();
     await card.waitFor();
-    assert.equal(await card.count(), 1);
+    assert.equal(await cards.count(), 3);
+    assert.equal(await cards.nth(1).getByRole('link').getAttribute('href'), 'https://github.com/example/second');
+    const secondPrompt = await cards.nth(1).getByRole('textbox', { name: '源码学习 Prompt' }).inputValue();
+    assert.ok(secondPrompt.includes('只比较目标切片'));
+    assert.ok(secondPrompt.includes('targeted_deep_dive'));
+    assert.ok(!secondPrompt.includes(longGuidance));
+    assert.equal(await cards.nth(2).getByRole('link').count(), 0);
+    assert.ok((await cards.nth(2).innerText()).includes('参考项目待确认'));
+    assert.ok((await card.innerText()).includes(longGuidance));
     assert.equal(await card.locator('img').count(), 0);
     assert.equal(await card.getByRole('link').getAttribute('href'), 'https://github.com/example/runtime');
-    const prompt = page.getByRole('textbox', { name: '源码学习 Prompt' });
+    const prompt = card.getByRole('textbox', { name: '源码学习 Prompt' });
     const initial = await prompt.inputValue();
+    assert.ok(initial.includes(longGuidance));
     assert.ok(initial.includes('工具调用知识'));
     assert.ok(initial.includes('工作台失败恢复：检索失败可重试；验收：失败后状态可检查'));
     assert.ok(initial.includes('Agent 应用开发'));
@@ -89,9 +110,9 @@ const assert = require('node:assert/strict');
     await page.goto((process.env.STUDYPLAN_URL || 'http://127.0.0.1:5173') + '/#path', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.locator('.timeline-stage').first().getByRole('button', { name: '进入学习 →' }).click();
     await page.getByRole('heading', { name: '工具调用', exact: true }).waitFor();
-    assert.equal(await card.count(), 0, 'ordinary stages do not create synthetic project cards');
+    assert.equal(await cards.count(), 0, 'ordinary stages do not create synthetic project cards');
     assert.deepEqual(errors, []);
     assert.deepEqual(unexpected, [], 'copy and learning do not send new APIs or external requests');
-    console.log('PASS: project-study root/fields, escaped text, prior/future knowledge, real clipboard, denied fallback, stage/revision reset, 390px, production-route entry');
+    console.log('PASS: project-study exact roots, dual candidates, >850 ordered guidance, pending reference, study modes, escaped text, prior/future knowledge, real clipboard, denied fallback, stage/revision reset, 390px, production-route entry');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

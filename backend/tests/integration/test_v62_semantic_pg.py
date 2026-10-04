@@ -97,7 +97,7 @@ def semantic_db(migrated_db):
         for key in OLD:
             data = load_pack(CURRENT_PACKS[key])
             assert data["version"] > load_pack(OLD[key])["version"]
-            assert data.get("semantic_policy", {}).get("version") == 1
+            assert data.get("semantic_policy", {}).get("version") in {1, 2}
             seed_reviewed_pack(conn, data)
             seed_reviewed_pack(conn, data)
     yield migrated_db, username, params, old_plan

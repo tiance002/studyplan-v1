@@ -8,9 +8,9 @@ from app.domain.domain_packs.models import DomainPack
 from app.domain.enums import DomainPackStatus
 
 CURRENT_PACKS = {
-    "ai.fullstack": "ai-fullstack-v2.json",
-    "agent.application": "agent-application-v5.json",
-    "cloud.services": "cloud-services-v2.json",
+    "ai.fullstack": "ai-fullstack-v3.json",
+    "agent.application": "agent-application-v6.json",
+    "cloud.services": "cloud-services-v3.json",
     "python.engineering": "python-engineering-v2.json",
     "agent.knowledge_rag": "agent-knowledge-rag-v1.json",
     "agent.coding": "agent-coding-v1.json",
@@ -55,7 +55,7 @@ def runtime_pack_key_for_goal(goal: str) -> str | None:
     text = unicodedata.normalize('NFKC', goal).casefold()
     if key and key.startswith('agent.'):
         return 'agent.application'
-    if key is None and re.search(r'(?<![a-z])agents?(?![a-z])|智能体', text) and not re.search(r'全栈|云服务', text):
+    if key is None and re.search(r'(?<![a-z])agents?(?![a-z])|智能体', text) and not re.search(r'全栈|full\s*stack|云服务|云计算|云平台|\b(?:cloud|aws|azure)\b', text):
         return 'agent.application'
     if key is None and re.search(r'\b(?:api|node\.?js|go|java)\b|服务', text) and re.search(r'部署|监控|自动发布|恢复|运维', text):
         return 'cloud.services'
@@ -66,6 +66,13 @@ def pack_key_for_goal(goal: str) -> str | None:
     text = unicodedata.normalize("NFKC", goal).casefold()
     ai = bool(re.search(r"(?<![a-z])ai(?![a-z])|人工智能|全栈.*(?:模型|智能)|(?:模型|智能).*全栈", text))
     cloud = bool(re.search(r"云服务|云计算|云平台|(?<![a-z])(?:cloud|azure|aws)(?![a-z])", text))
+    agent = bool(re.search(r'(?<![a-z])agents?(?![a-z])|智能体', text))
+    fullstack = bool(re.search(r'全栈|full\s*stack', text))
+    if agent and (cloud or fullstack):
+        return None
+    if agent:
+        # Explicit target object outranks the generic modifier "AI".
+        ai = False
     if ai and cloud:
         return None
     if ai:

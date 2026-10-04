@@ -258,7 +258,9 @@ def test_real_checkpoint_resumes_frozen_format_rejecting_altered_manifest(checkp
     from langgraph.errors import GraphRecursionError
 
     goal = "零基础系统学习 Agent 应用开发，先做一个最小应用。"
-    pack = adapt_semantic_pack(load_pack(CURRENT_PACKS["agent.application"]), goal, None)
+    # This is the historical six-stage checkpoint protocol representative.
+    # Keep its old published content explicit as CURRENT_PACKS evolves.
+    pack = adapt_semantic_pack(load_pack("agent-application-v5.json"), goal, None)
     manifest = freeze_manifest(pack, DEFAULT_BUDGET, "fake:planning-demo", outline_input_format=format_marker)
     assert len(manifest["stages"]) == 6
     version = SHORT_GENERATION_VERSION if format_marker else PROTOCOL_VERSION

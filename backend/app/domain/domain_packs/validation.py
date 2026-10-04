@@ -113,7 +113,7 @@ def validate_seed(raw):
         for key in nodes:
             visit(key)
         sources = _keys(data['resources'], 'source_id')
-        semantic = (data.get('semantic_policy') or {}).get('version') == 1
+        semantic = (data.get('semantic_policy') or {}).get('version') in {1, 2}
         first_semantic = {'agent.application': 5, 'ai.fullstack': 2, 'cloud.services': 2}
         if data.get('pack_key') in first_semantic and data['version'] >= first_semantic[data['pack_key']] and not semantic:
             raise ValueError('Semantic pack versions require their publication policy')
