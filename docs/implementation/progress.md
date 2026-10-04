@@ -1,5 +1,19 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 v6.6离线outline审计：MULTIPLE_CAUSES_CONFIRMED，STOP
+
+用户现在新增能做什么：可以据精确请求重建/组成表评审局部outline投影patch；本轮未新增真实Plan或改正式行为。[批准Goal](STUDYPLAN_V6_6_OUTLINE_OFFLINE_AUDIT_GOAL_2026-10-04.md)已精确归档，[118组件/Top20/15检查/预算/保护缺口/唯一patch建议](../reviews/2026-10-04-v6-6-outline-token-attribution.md)。起点3074432f4cff2b71507ea0460f75aa46d6fd56ee、feat/n1-resource-discovery、tracked clean；无reset/业务修改/付费/DB/网络。
+
+当前生产normalize→generate_skeleton→scope wrapper→adapter capture重建messages578108chars（system2559/user575549）、httpx离线JSON816500bytes，SHA2564e38d9b03efd39f5d511497c21faac0d560e1e84b37d76043dafba794073cdb6；原wire未保留，不能声明与原wire逐字节对比PASS。Agent5 publication digest/v6.5 frozen保持；v6.5原209998input/4097output/length/failed从receipt重新读取。无可用本地DeepSeek tokenizer且禁止下载；沿用char/4估计144527，较实报少65471/31.18%，Fake直接payload repr143784另列，不把估计伪装精确token。
+
+根因：6阶段蓝图裁剪正确（public61→6），但resources402175chars/57source/179审核目录项保留，其中45未选source267928chars、144未选sections；publication_evidence132909chars夹带14完整教学Markdown，含AI/Cloud/项目卡/RL/未选Recipes。没有179份下载教程正文或递归dump；197组>=80chars相同叶子额外44456JSONchars，6stage guide4756chars在pack/manifest各一份，Eval117chars六份。outline原样注入整pack/manifest且要求生成后被merge覆写的resources/extensions；实际截断正文未存，输出token组成不猜。
+
+两候选原型只在ignored var：Option1冻结骨架4112chars/1028 estimatedtokens，同比减少99.29%；Option2加现有focus投影5634chars/1408.5，同比减少99.03%。对209998按字符比例校准1493.69/2046.55仅辅助，不是真实tokenizer。保留本地full Seed/frozen事实、6stage/6requiredkeys/18arrangements/35refs/13extensions/6首实践；该Common Core实际project-study/case-study0，其他场景optional语义另测。现有structure5481–6237chars仍局部、不转移全包；practice5403–5542chars明确结构fixture，非真实服务。outline4096、structure/repair8192不改。
+
+最终Fake/contract PASS21/exit0（归因7+回填14）：精确accounting、scope过滤、未选全文隔离、sectionID唯一/重复审计、最小skeleton与恶意事实防护、stage-local输入不膨胀、travel/no-project/Voice/NodeCloud/AIexistingproject语义/hold/开放Recipe/Starter/user-project规则。诊断证实既有保护FAIL两类：唯一知识title/objectives可被structure改写并通过validator、scope/acceptance未回填；次级任务强制Starter/首实践冲突额外acceptance可存活。PASS测试发现FAIL能力，不宣布全保护绿；真实PG/catalog消费/Chrome/收费/tokenizer NOT RUN。首轮审计脚本错误/20PASS1FAIL保留，纠正后21PASS；未改生产掩盖。
+
+唯一推荐下一patch：未来新提交manifest冻结outline格式marker；旧Run/旧fingerprint保留legacy；局部pure skeleton projection与outline专用system/shape，复用现有merge，不全局换prompt_version/新planner/API/迁移/模型阶段。不实施该patch，不自动续收费。模型quota24/50、搜索6/1000、本轮真实HTTP/模型/DB0，旧unknown不重派，env/Seed/ledger/历史evidence hash保持；UI/阶段规则不变。root请求Sol6.1/high、独立回填Sol6.1/medium，实际NOT OBSERVABLE，无Astra/全局配置。全产品STAGING_BLOCKED/NOT_READY、STOP；最终文档SHA交付时动态读取。以下为历史时点。
+
 ## 2026-10-04 v6.5单一收费代表：PAID_REPRESENTATIVE_FAIL，STOP
 
 用户现在新增能做什么：未生成可用真实Plan，现有副本体验保持；新增实际证据证明DeepSeek网络/envelope可用，但当前Common Core outline在4096下截断，真实生成代表不通过。基线a2c9435785687ce7d908fd5b13b9980d542a7bca、feat/n1-resource-discovery、tracked clean；业务源码/正式.env/预算未改，无reset/push/merge。[批准Goal](STUDYPLAN_V6_5_PAID_REPRESENTATIVE_GOAL_2026-10-04.md)精确归档，[审计/用量/风险/回滚](../reviews/2026-10-04-v6-5-paid-representative.md)。

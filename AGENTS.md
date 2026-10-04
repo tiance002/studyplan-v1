@@ -2,6 +2,8 @@
 
 ## 当前续接入口（2026-10-02）
 
+2026-10-04 最新 [v6.6 Outline Offline Audit](docs/implementation/STUDYPLAN_V6_6_OUTLINE_OFFLINE_AUDIT_GOAL_2026-10-04.md) 已到STOP，MULTIPLE_CAUSES_CONFIRMED：生产节点/adapter离线重建578108字符；6阶段仍带57sources/179目录审核sections及14份全局教学文档（含AI/Cloud/未选Recipe），另有审核leaf和guide重复。原209998为provider实报，本地char/4估计144527，差31.18%，不假称精确tokenizer。21离线测试PASS；最小skeleton回填18资源安排/35refs/13extensions，但唯一知识正文与次级/冲突practice两类既有保护FAIL明确登记。只建议未来新Run冻结格式标记的局部outline骨架projection/专用shape，未实施生产patch/改cap/新模型调用；quota保持24/50、全产品STAGING_BLOCKED/NOT_READY。不自动进入下一门禁。
+
 2026-10-04 最新 [v6.5 单一收费代表 Goal](docs/implementation/STUDYPLAN_V6_5_PAID_REPRESENTATIVE_GOAL_2026-10-04.md) 已执行到STOP：新owned业务/checkpoint两库、单一Agent5 synthetic Run，免费预检PASS；首个outline HTTP200/finish_reason=length，现有适配器明确截断失败，无repair/重发/第二Run。请求1次、quota23→24/50、本轮unknown0；structure/practice/content protection/confirm/Chrome NOT RUN。最终PAID_REPRESENTATIVE_FAIL、全产品STAGING_BLOCKED/NOT_READY；唯一progress与审计记录为准。授权已消费，不自动追加收费、改预算或进入正式库/入口/Worker/RAG/推送；网络READY保留。
 
 2026-10-04 最新单项 [v6.4 Provider Network Gate](docs/implementation/STUDYPLAN_V6_4_PROVIDER_NETWORK_GATE_2026-10-04.md) 已执行到STOP：仅修当前Clash Verge订阅的DeepSeek域名fake-ip-filter，真实Windows/Python公网DNS、原endpoint guard、部署binding、免费TLS及安全回归PASS，PROVIDER_NETWORK_READY。上一单项明确授权已将正式.env cap8000→8192、runtime预算PASS；两项不扩大产品费用/原库/入口/Worker/RAG权限。全产品仍STAGING_BLOCKED/NOT_READY；按唯一progress续接，禁止把网络READY当收费/部署授权。下方8000候选、DNS未配置等保留历史时点，不覆盖最新事实；模型路由与并发规则不变。
