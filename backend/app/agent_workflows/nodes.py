@@ -51,13 +51,20 @@ from app.agent_workflows.planning_batches import (
     validate_structure_batch,
 )
 from app.agent_workflows.planning_outline import STAGE_SKELETON_V1, frozen_pack_is_intact, outline_payload
+from app.agent_workflows.planning_structure import (
+    REVIEWED_STRUCTURE_V1,
+    STRUCTURE_SCHEMA,
+    presentation_entry,
+    uses_reviewed_structure,
+    validate_presentation_entry,
+)
 from app.agent_workflows.state import PlanningState
 from app.agent_workflows.validators import (
     MAX_REPAIR_ATTEMPTS,
     validate_plan_structure,
     validate_route_structure,
 )
-from app.ports.llm import LLMDispatchUnknownError, LLMFailure, LLMPort
+from app.ports.llm import LLMDispatchUnknownError, LLMFailure, LLMPort, LLMResult
 
 #: 路由目标常量。
 ROUTE_COMMIT = "commit_plan_idempotently"
@@ -176,6 +183,40 @@ class PlanningNodes:
     """
 
     llm: LLMPort
+    frozen_input: dict[str, Any] | None = field(default=None, kw_only=True)
+    load_receipts: Callable[[], list[dict[str, Any]]] | None = field(default=None, kw_only=True)
+    _raw_receipts: list[dict[str, Any]] = field(default_factory=list, repr=False, init=False)
+
+    def _dispatch(self, **kwargs):
+        # Enforce the same local message bounds with Fake, before adapters can
+        # reserve attempts or invoke any provider.
+        if kwargs['payload'].get('_structure_input_format') == REVIEWED_STRUCTURE_V1:
+            from app.agent_workflows.planning_structure import presentation_preflight
+            error, measured, limit = presentation_preflight(
+                kwargs['payload'], repair=kwargs['purpose'] == REPAIR_PURPOSE)
+            if error:
+                return LLMFailure(error_class=error, message='Local reviewed message bound rejected', details={
+                    'dispatched': False, 'measured': measured, 'limit': limit})
+        check = getattr(self.llm, 'preflight', None)
+        if check:
+            rejected = check(purpose=kwargs['purpose'],payload=kwargs['payload'],schema_name=kwargs['schema_name'])
+            if rejected is not None:
+                return rejected
+        result = self.llm.generate_structured(**kwargs)
+        if isinstance(result, LLMResult):
+            self._raw_receipts.append({'run_id': kwargs['run_id'], 'attempt_id': kwargs['attempt_id'],
+                                      'schema_name': kwargs['schema_name'], 'payload': deepcopy(result.payload)})
+        return result
+
+    def check_projection(self, state, *, final=False, pending_repair=False):
+        from app.agent_workflows.planning_projection import checked_projection
+        receipts = self.load_receipts() if self.load_receipts else deepcopy(self._raw_receipts)
+        return checked_projection(state, self.frozen_input, receipts, final=final,
+                                  pending_repair=pending_repair)
+
+    def _check_frozen(self, state):
+        from app.agent_workflows.planning_projection import check_submission
+        check_submission(state, self.frozen_input)
     #: 保存草案投影（写业务草案表）—— 由应用层注入，图不自行 SQL。
     #: 返回草案引用字符串，或 ``{"draft_ref", "draft_hash"}`` mapping。
     save_draft: Callable[[PlanningState], Any] = field(default=lambda s: "")
@@ -224,7 +265,7 @@ class PlanningNodes:
 
         失败必须写入 ``generation_errors``，**不得**返回空纲要假装成功。
         """
-        result = self.llm.generate_structured(
+        result = self._dispatch(
             purpose="planning.outline",
             payload={"goal": state.get("goal"), "prefs": state.get("prefs_snapshot"),
                      **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {})},
@@ -268,7 +309,7 @@ class PlanningNodes:
     def build_dependencies_and_units(self, state: PlanningState) -> dict[str, Any]:
         """基于纲要产出知识节点、关系与学习单元。"""
         outline = state.get("outline") or {}
-        result = self.llm.generate_structured(
+        result = self._dispatch(
             purpose="planning.structure",
             payload={"goal": state.get("goal"), "outline": outline,
                      **({"domain_pack": state["domain_pack"]} if "domain_pack" in state else {})},
@@ -318,7 +359,7 @@ class PlanningNodes:
 
         设计 §1：用户可提供想法或从候选中选；**可延后选择**（不阻断结构生成）。
         """
-        result = self.llm.generate_structured(
+        result = self._dispatch(
             purpose="planning.practice",
             payload={"goal": state.get("goal"), "units": state.get("units") or [],
                      "outline": state.get("outline") or {}, "nodes": state.get("nodes") or [],
@@ -372,7 +413,7 @@ class PlanningNodes:
         """
         attempt = int(state.get("repair_count", 0)) + 1
         attempt_id = f"{state.get('run_id', '')}:repair:{attempt}"
-        result = self.llm.generate_structured(
+        result = self._dispatch(
             purpose="planning.repair",
             payload={
                 "goal": state.get("goal"),
@@ -444,7 +485,8 @@ class PlanningNodes:
         重新写回新草案（B1.2 §二）。若 ``save_draft`` 同时返回 ``draft_hash``，
         则一并更新，使后续 approve 必须使用**新**草案的 hash。
         """
-        coerced = _coerce_draft_result(self.save_draft(state))
+        validated = self.check_projection(state, final=True)
+        coerced = _coerce_draft_result(self.save_draft(validated))
         delta: dict[str, Any] = {"draft_ref": coerced["draft_ref"]}
         if coerced["draft_hash"]:
             delta["draft_hash"] = coerced["draft_hash"]
@@ -553,6 +595,7 @@ class PlanningNodes:
         """生成完整路线骨架；阶段稳定键必须与冻结清单一致。"""
         manifest = state.get("manifest") or {}
         try:
+            self._check_frozen(state)
             if ("manifest_hash" in manifest or "outline_input_format" in manifest) and not manifest_is_intact(manifest):
                 raise ValueError("Frozen outline manifest changed")
             if manifest.get("outline_input_format") == STAGE_SKELETON_V1 and not frozen_pack_is_intact(state.get("domain_pack") or {}, manifest):
@@ -562,7 +605,7 @@ class PlanningNodes:
             return _with_aggregate(_extend_generation_errors(state, {
                 "generation_errors": ["骨架生成失败：冻结格式或清单不合法"], "outline": {},
             }), state)
-        result = self.llm.generate_structured(
+        result = self._dispatch(
             purpose=OUTLINE_PURPOSE,
             payload=request_payload,
             schema_name="OutlineV1",
@@ -634,15 +677,21 @@ class PlanningNodes:
 
     def generate_structure_batch(self, state: PlanningState) -> dict[str, Any]:
         """生成当前结构批次（单个阶段）。"""
+        try:
+            self._check_frozen(state)
+        except ValueError:
+            return _with_aggregate(_extend_generation_errors(state, {
+                'generation_errors': ['结构生成失败：冻结格式或清单不合法'],
+            }), state)
         manifest = state["manifest"]
         index = int(state.get("current_structure_index", 0))
         spec = manifest["structure_batches"][index]
         stage_key = spec["stage_key"]
         payload = structure_payload(state, spec)
-        result = self.llm.generate_structured(
+        result = self._dispatch(
             purpose=STRUCTURE_PURPOSE,
             payload=payload,
-            schema_name="KnowledgeStructureV1",
+            schema_name=STRUCTURE_SCHEMA if uses_reviewed_structure(manifest, spec) else "KnowledgeStructureV1",
             run_id=state.get("run_id", ""),
             attempt_id=attempt_key(state.get("run_id", ""), STRUCTURE_PURPOSE, stage_key, index, 0),
         )
@@ -659,6 +708,8 @@ class PlanningNodes:
         produced = result.payload
         batches = list(state.get("structure_batches") or [])
         entry = {**deepcopy(produced), "stage_key": stage_key, "batch_index": index}
+        if uses_reviewed_structure(manifest, spec):
+            entry = presentation_entry(produced, state, spec)
         if index < len(batches):
             batches[index] = entry
         else:
@@ -673,7 +724,15 @@ class PlanningNodes:
         if index >= len(batches):
             return _with_aggregate({"structure_errors": ["结构批次缺失"]}, state)
         spec = manifest["structure_batches"][index]
-        errors = validate_structure_batch(batches[index], spec, state.get("domain_pack") or {})
+        try:
+            self._check_frozen(state)
+            errors = (validate_presentation_entry(batches[index], state, spec)
+                      if uses_reviewed_structure(manifest, spec) else [])
+            errors.extend(validate_structure_batch(batches[index], spec, state.get("domain_pack") or {}))
+        except ValueError:
+            return _with_aggregate(_extend_generation_errors(state, {
+                'generation_errors': ['结构校验失败：冻结格式或清单不合法'],
+            }), state)
         if errors:
             return _with_aggregate({
                 "structure_errors": errors,
@@ -683,11 +742,17 @@ class PlanningNodes:
 
     def generate_practice_batch(self, state: PlanningState) -> dict[str, Any]:
         """生成当前实践批次（单个阶段）。"""
+        try:
+            self._check_frozen(state)
+        except ValueError:
+            return _with_aggregate(_extend_generation_errors(state, {
+                'generation_errors': ['实践生成失败：冻结格式或清单不合法'],
+            }), state)
         manifest = state["manifest"]
         index = int(state.get("current_practice_index", 0))
         stage_key = manifest["practice_batches"][index]["stage_key"]
         payload = practice_payload(state, stage_key)
-        result = self.llm.generate_structured(
+        result = self._dispatch(
             purpose=PRACTICE_PURPOSE,
             payload=payload,
             schema_name="PracticeProposalV1",
@@ -733,7 +798,17 @@ class PlanningNodes:
 
     def repair_batch(self, state: PlanningState) -> dict[str, Any]:
         """有界局部修复：只重发当前无效批次，共享整次两次配额。"""
+        try:
+            self._check_frozen(state)
+        except ValueError:
+            return _with_aggregate(_extend_generation_errors(state, {
+                'generation_errors': ['修复失败：冻结格式或清单不合法'],
+            }), state)
         manifest = state["manifest"]
+        if int(state.get('repair_count', 0)) >= manifest['max_repairs']:
+            return _with_aggregate(_extend_generation_errors(state, {
+                'generation_errors': ['整 Run 修复次数已达到冻结上限'],
+            }), state)
         target = dict(state.get("repair_target") or {})
         kind = target.get("kind")
         index = int(target.get("batch_index", 0))
@@ -742,6 +817,9 @@ class PlanningNodes:
             context = structure_payload(state, manifest["structure_batches"][index])
             failed_batch = deepcopy((state.get("structure_batches") or [])[index])
             schema_name = "KnowledgeStructureV1"
+            if uses_reviewed_structure(manifest, manifest['structure_batches'][index]):
+                schema_name = STRUCTURE_SCHEMA
+                failed_batch = deepcopy(failed_batch.get('_reviewed_presentation'))
             key_index = index
         else:
             context = practice_payload(state, stage_key)
@@ -752,7 +830,7 @@ class PlanningNodes:
             # offset past the structure batches in the frozen attempt catalog.
             key_index = len(manifest["structure_batches"]) + index
         repair_index = int(state.get("repair_count", 0)) + 1
-        result = self.llm.generate_structured(
+        result = self._dispatch(
             purpose=REPAIR_PURPOSE,
             payload={
                 "goal": state.get("goal"),
@@ -762,6 +840,10 @@ class PlanningNodes:
                 "batch": failed_batch,
                 "context": context,
                 "errors": list(state.get("structure_errors") or []),
+                **({'_structure_input_format': REVIEWED_STRUCTURE_V1}
+                   if schema_name == STRUCTURE_SCHEMA else {}),
+                **({'_structure_focus_format': context['_structure_focus_format']}
+                   if schema_name == STRUCTURE_SCHEMA and '_structure_focus_format' in context else {}),
             },
             schema_name=schema_name,
             run_id=state.get("run_id", ""),
@@ -773,7 +855,7 @@ class PlanningNodes:
             return _with_aggregate(
                 _extend_generation_errors(state, {
                     "generation_errors": [f"修复失败：{result.error_class}"],
-                    "repair_count": repair_index,
+                    "repair_count": (int(state.get('repair_count',0)) if result.details.get('dispatched') is False else repair_index),
                 }),
                 state,
             )
@@ -781,6 +863,8 @@ class PlanningNodes:
         if kind == "structure":
             batches = list(state.get("structure_batches") or [])
             batches[index] = {**deepcopy(produced), "stage_key": stage_key, "batch_index": index}
+            if schema_name == STRUCTURE_SCHEMA:
+                batches[index] = presentation_entry(produced, state, manifest['structure_batches'][index])
             delta: dict[str, Any] = {"structure_batches": batches, "repair_count": repair_index}
         else:
             batches = list(state.get("practice_batches") or [])
@@ -792,7 +876,9 @@ class PlanningNodes:
         """确定性合并批次并做全局校验；通过后才是完整草案。"""
         pack = state.get("domain_pack") or {}
         structure_batches = [{"stage_key": b["stage_key"], "nodes": b.get("nodes") or [],
-                              "units": b.get("units") or [], "relations": b.get("relations") or []}
+                              "units": b.get("units") or [], "relations": b.get("relations") or [],
+                              **({'_reviewed_presentation': deepcopy(b.get('_reviewed_presentation'))}
+                                 if (state.get('manifest') or {}).get('structure_input_format') == REVIEWED_STRUCTURE_V1 else {})}
                              for b in (state.get("structure_batches") or [])]
         practice_batches = [{"stage_key": b["stage_key"], "payload": b.get("payload") or {}}
                             for b in (state.get("practice_batches") or [])]

@@ -5,7 +5,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 (async () => {
-  const directory = path.resolve(__dirname, '../../var/v610');
+  const directory = process.env.STUDYPLAN_PAID_EVIDENCE_DIR
+    ? path.resolve(process.env.STUDYPLAN_PAID_EVIDENCE_DIR)
+    : path.resolve(__dirname, '../../var/v610');
   assert.equal(JSON.parse(fs.readFileSync(path.join(directory, 'paid-and-pg.json'), 'utf8')).status, 'PASS', 'Confirmed real Plan is required before read-only Edge acceptance');
   const credentials = JSON.parse(fs.readFileSync(path.join(directory, 'private/browser.json'), 'utf8'));
   const expectedPlan = JSON.parse(fs.readFileSync(path.join(directory, 'plan.json'), 'utf8'));

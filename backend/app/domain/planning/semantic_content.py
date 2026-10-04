@@ -40,7 +40,10 @@ def adapt_semantic_pack(pack, goal, goal_spec, *, stage_keys=None):
     policy = pack.get('semantic_policy') or {}
     if policy.get('version') == 2:
         from app.domain.planning.alignment import adapt_alignment_pack
-        return adapt_alignment_pack(pack, goal, goal_spec, stage_keys=stage_keys)
+        selected = adapt_alignment_pack(pack, goal, goal_spec, stage_keys=stage_keys)
+        if policy.get('alignment_version') == 'v6.12' and pack.get('pack_key') == 'agent.application':
+            return _targeted_reference_route(selected)
+        return selected
     if policy.get('version') != 1:
         return pack
     result = deepcopy(pack)
@@ -160,3 +163,56 @@ def adapt_semantic_pack(pack, goal, goal_spec, *, stage_keys=None):
                 'links': [], 'search_hints': [], 'thinking_prompts': ['需要哪项能力和哪些可检查的资料证据？'], 'required': False,
             })
     return result
+
+
+def _targeted_reference_route(pack):
+    """Order source-bound entry exposures before the selected small core.
+
+    This runs before freezing; old published versions/Run snapshots are untouched.
+    """
+    stages = pack['stage_blueprints']
+    context = pack['semantic_context']
+    recipes = set(context['recipe_refs'])
+    core = next((s for s in stages if s.get('stage_code') == 'A8'), None)
+    if not core:
+        return pack
+    if 'browser' in recipes and 'coding' not in recipes:
+        # The same generic Runtime capability is taught through a different
+        # actual candidate. Only already reviewed documentation is assigned.
+        source = next(r for r in pack['resources'] if r['title'] == 'browser-use Agent, Browser and Examples references')
+        sections = [s for s in source['sections'] if s['title'] == 'Agent/Browser/History/Examples']
+        for section in sections:
+            section['applicable_node_keys'] = list(dict.fromkeys([*section['applicable_node_keys'], *core['node_keys']]))
+        core['title'] = 'A8 小型开源核心学习：browser-use 的观察、动作与历史主链'
+        core['resources'] = [dict(role='case_study', source_ref=source['source_id'],
+            section_refs=[s['section_id'] for s in sections], source_version=source['source_version'],
+            order_index=0, node_keys=core['node_keys'][:])]
+        core['extensions'] = [e for e in core['extensions'] if not e['topic'].startswith('项目学习：')]
+        core['extensions'].append(dict(topic='项目学习：browser-use 小型核心（可替换）',
+            concepts=['观察', '动作', '历史', '停止与失败'],
+            guidance='学习方式：whole_core（有界核心整体）\n前置：Playwright B0/B1/B2 的页面、定位、等待与 async 入场。'
+                '\n沿当前公开源码定位 Agent/Browser/History 的一次观察→动作→结果→下一轮与失败链；只研究足够解释核心的范围。'
+                '\n比较自己的工具loop；当前资料为 selected_sections_read 文档，实际源码阅读与运行 NOT RUN，不认证全仓已审。'
+                '\n产物：核心地图、正常/失败证据与一项小验证；不读全部Cloud/CLI/部署。'
+                '\n外部Coding Agent先检查已有未提交修改，再定位当前源码并记录版本；不得覆盖/reset。候选可替换，与持续用户项目分开。',
+            links=['https://github.com/browser-use/browser-use'], search_hints=[],
+            thinking_prompts=['观察何时过期，失败何时终止？'], required=False))
+        core['learning_guidance']['learning_focus'] = ['whole_core：browser-use 的观察、动作与历史主链；必要页面/异步入场先于源码，后续专门失败问题才深化。']
+        entries = [s for s in stages if s.get('stage_code') in {'B0', 'B1', 'B2'}]
+        core['learning_guidance']['reading_prerequisites'] = [s['title'] for s in entries]
+        node = next(n for n in pack['knowledge_blueprints'] if n['stable_key'] in core['node_keys'])
+        node['prerequisite_keys'] = list(dict.fromkeys([*node.get('prerequisite_keys', []), *[k for s in entries for k in s['node_keys']]]))
+        preceding = [s for s in stages if s.get('stage_code', '').startswith('A') and s is not core]
+        pack['stage_blueprints'] = preceding + entries + [core] + [s for s in stages if s not in preceding and s not in entries and s is not core]
+        core['learning_guidance']['previous_relation'] = 'COMPARE：先补 Playwright/async 最小入场，再看核心；B3/B5/B6/BR 后续研究新的动态、权限、评价问题。'
+        for practice in pack['practice_blueprints']:
+            if practice['section_key'] == core['stable_key']:
+                practice['goal'] = '任选一个适合的 Browser 小型核心参考，追观察→动作→结果的一条正常与失败链；比较现有工具loop并做自控页面的小验证。无需新建毕业Demo。'
+    elif 'coding' in recipes:
+        core['learning_guidance']['reading_prerequisites'] = ['先在已审 Pi SDK 示例检查函数/对象、Promise/事件与工具调用的最小阅读能力；不足先补，不要求完整C组先通关。']
+        core['extensions'].append(dict(topic='Pi 核心阅读的最小语言入场', concepts=['Promise', '事件', '工具接口'],
+            guidance='先用已审 SDK lifecycle/storage/prompting/events 示例辨认工具函数、对象、Promise和事件顺序。'
+                '这是源码阅读入场检查，未绑定独立TypeScript语法课程；不能通过检查时语言教程仍 needs_research_or_review，先补齐再进入核心。'
+                'A8只读工具/会话主链，C组后续深化上下文、任务与取消；不把一段SDK阅读当完整Coding专项。',
+            links=[], search_hints=[], thinking_prompts=['能解释示例中一次异步调用与事件的先后吗？'], required=False))
+    return pack

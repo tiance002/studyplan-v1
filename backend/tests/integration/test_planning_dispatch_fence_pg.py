@@ -188,6 +188,14 @@ def test_nodes_use_server_claim_and_ignore_payload_scope_spoof(jobs_db):
     _, run, fence, provider, ledger = scenario(jobs_db)
     service = PlanService.__new__(PlanService)
     service._llm = ledger
+    # This fixture deliberately tests only the scoped dispatch adapter. Supply
+    # its generation-authority dependencies explicitly instead of skipping the
+    # production save guard.
+    from types import SimpleNamespace
+    service._runs = SimpleNamespace(get_run=lambda **_: run)
+    service._planning_jobs = None
+    service._generation_inputs = {}
+    service._generation_receipts = {}
     nodes = service._build_nodes(
         project_id=run.project_id, run_id=run.run_id, goal=AGENT_GOAL, write_fence=fence,
     )

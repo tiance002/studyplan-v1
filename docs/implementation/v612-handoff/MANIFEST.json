@@ -1,0 +1,54 @@
+{
+  "package": "StudyPlan_v6.12_Targeted_Alignment",
+  "created_date": "2026-10-04",
+  "artifact_status": "proposed_instructions_not_implemented",
+  "source_boundary": {
+    "github_ref": "ff3b6c42c16b0ec2b634b45441251cb8dc1e3249",
+    "local_v610_source": "user_uploaded_reports_not_full_commit_source"
+  },
+  "files": [
+    {
+      "path": "00_README.md",
+      "bytes": 2884,
+      "sha256": "b791944b401f89c858891282d0fc0219ee8a25adda5eab3f3c863784d161fa86"
+    },
+    {
+      "path": "01_PRODUCT_DECISIONS.md",
+      "bytes": 9533,
+      "sha256": "7c53c5b8f71bafbfc250e4a5adb9aac02a66cc06e80f154f2e42d1770b036374"
+    },
+    {
+      "path": "02_SOURCE_REVIEW.md",
+      "bytes": 8844,
+      "sha256": "66e715123a07fc0aba4b41d67ab23d8661093f51434e98bf4d7a393df34e960d"
+    },
+    {
+      "path": "03_CODEX_GOAL_v6.12.md",
+      "bytes": 16813,
+      "sha256": "5a45c7676f3ee15161c727cc90452361a80c41e5f9fe4b0a442618f04a85c390"
+    },
+    {
+      "path": "04_ROUTE_AND_UNIT_EXAMPLES.md",
+      "bytes": 11055,
+      "sha256": "1218374680657ad508aa6b801fee4a5976ce2c2193e68d9b734275a4bc1ce396"
+    },
+    {
+      "path": "05_ACCEPTANCE_CASES.json",
+      "bytes": 17679,
+      "sha256": "74a31f9961c3e98b96cd909bcf509834c24563f37b08ec0a632df88f836563d7"
+    },
+    {
+      "path": "06_USER_REVIEW_CHECKLIST.md",
+      "bytes": 2963,
+      "sha256": "e7af0abc80f916576abd7cd6ee1e723fa474bb7b8ae0df15b9ca5782de4f8eef"
+    }
+  ],
+  "checks": {
+    "utf8": "PASS",
+    "fenced_code_blocks": "PASS",
+    "acceptance_json": "PASS",
+    "unique_case_ids": 31,
+    "project_tests": "NOT_RUN",
+    "provider_calls": 0
+  }
+}

@@ -1,5 +1,56 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 F2-negative-extra-task：修复PASS，唯一新代表来源FAIL，BLOCKED / STOP
+
+用户现在新增能做什么：合法“不要求照搬其工程结构或新增工程任务”在structure/repair不再误判；正向/混合义务仍保护。最新路由已同步AGENTS与model-routing-policy：Luna low/medium机械提取；Solmedium有界代码/常规测试；Solxhigh安全/预算/引用/有证据升级；同问题测试与复核合并，不重复读长历史，actual均NOT OBSERVABLE。详见[本轮合同/教学/真实用量与STOP审计](../acceptance/f2-negative-extra-task-2026-10-04.md)。
+
+实际起止HEAD 1a3262e85296c95d3dfb4349d0d4ef83438f17da、feat/n1-resource-discovery，组合工作树未提交、不回退。67候选+binarypatch+692unique历史与路由原文受限备份CRC/SHA PASS；唯一业务差异planning_structure文字门禁/helper，F1/F3/F4/GR/3pack/任务/来源资格不改。保留旧A1 normal48/repair49/50精确fixture，RED62PASS41FAIL→GREEN117PASS；173不同unit/contract PASS、28收费harness离线安全反例PASS、4新ownedPG教学/compiled checkpoint/Fake PASS。原GR/System/MCP/Node/long refresh/relogin Edge通过94消费者hash复用，本轮新paid Edge NOT RUN。
+
+免费binding/DNS/TLS PASS后只开新Acceptance f2-negative-task-agent7-rag-synthetic-48ea731e4a48 / Run run_9f6db411f8d1415a818e7d3f69e14ab8。实际18stage/16knowledge/58units/18tasks/46resources/37extensions，A2五单元单canonical/任务，A5Framework/A6MCP/A8Pi/G0–G6/GR两候选一任务/GT保持。真实outline3673input/1396output/stop，较v65 209998下降98.25093572%，JSON18keys与PGledger门禁PASS后才继续；18structure+18practice逐阶段canonical PASS。37normal+1A6已知顶层shape localrepair=38requests，quota50→88/100、unknown本轮0、input85528/output42965、38known stop，生成后收费增量0、搜索新增0。
+
+完整生成技术succeeded且Draft drf_aa6f1f8b3478527185cdb1f2c009fb22 awaiting_approval，但独立教学来源精确复核46slot为45PASS1FAIL：A6首reference丢失已冻结MCP10.1 source/section，实际Draft及只读ownedPG空source/version0/空章节fallback；这是新独立缺口，按用户规则STOP，不修/不补来源/不放宽，不确认、不创建第二Run。approved Plan/publications0，nodes16/units58/tasks18保留，job completed保留terminal lease token、无runningjob。确认/PG消费/Edge服务仅准备NOT RUN，原库/正式入口/正式Worker/RAG/push/merge未动。692历史/.env/旧50receipt字节保持，旧失败/unknown永不重派，新Draft与两owned库/38response+receipt保留。F2_PATCH_PASS；PAID_REPRESENTATIVE_PATCH_FAIL；STAGING_BLOCKED/NOT_READY；下一须新Goal有界定位A6来源落盘缺口，剩12不自动派发。
+
+
+## 2026-10-04 GR Project Candidate binding：非收费PASS，真实代表FAIL，BLOCKED / STOP
+
+用户现在新增能做什么：普通学习页面能把RAGFlow与WeKnora各显示为一张绑定冻结来源的候选卡，各自完整guidance/仓库链接/targeted Prompt保持，GR仍只有一个任选案例证明相同能力的正式任务。详见[本批来源/教学/用量及STOP审计](../acceptance/gr-project-candidate-binding-2026-10-04.md)。最新用户授权仅修GR消费，保留组合v6.11/v6.12/v6.13候选，不改F1–F4/Agent7/canonical/任务/资格。起始/停止HEAD均1a3262e85296c95d3dfb4349d0d4ef83438f17da、feat/n1-resource-discovery；未提交，无reset/restore/切分支/push/merge。55候选+binarypatch与563历史受限备份、SHA/CRC PASS。
+
+实际Edge RED复现4重复pending卡；freshPG证明同Plan已有assignment/source_ref/version/source.source_id/version/canonical_url及对应冻结extension links，metadata-only sections=[]合法。独立评审确认持久化足够，必要最小增量为既有资源DTO可选只读canonical_url（无新endpoint/schema/迁移）；仅同Plan匹配frozen来源输出，身份/版本/资格/warnings冲突null，不当前catalog补齐。consumer经审评unique规范化exact repo对应，最终key使用assignment/source/version，title仅display；显式null不得legacy降级，歧义unbound不补重复fallback，资格legacy_index保持。PlanService仅_resolve消费AST变化，保存与F1–F4逻辑/其他锁文件和3pack字节保持。
+
+后端15PASS、相邻合同134PASS、前端27PASS/buildPASS；未来新ownedFakeRAG生成/确认/读回1PASS（37Fake/真实0，新测试库回收），GR2资源1任务/空章节/原资格/canonical rubric/3单元1canonical1task保持。真实Auth/API/ownedPG/Edge五场景PASS：GR恰2卡各562/556guidance与targetedPrompt/复制；A5Framework/A6MCP/A8smallcore、G0–G6/GRGT；long两片1119chars完整；System/MCP/Node及五场景refresh/logout/relogin精确GET。233HTTP/auth10+5/business写及generation/confirm/model/Worker/external0，自有服务已停。旧v68 live Plan与v610 live failed Run只读PASS；v610历史FakeDB不存在单列NOT RUN，不造替代/重派；旧PG/证据hash保持。
+
+免费actualbinding/DNS/原guard/TLS PASS；实际Agent7v7全RAG manifest18stage/18structure/18practice、37normal+2repair39/output241664，起始45/100理论最坏84。仅一个新Acceptance gr-binding-agent7-rag-synthetic-329770a29268 / Run run_5141feb22038497cabfaac09b14ba8ee，仅新owned两库。首笔outline真实input3673/output1189/stop、JSON18keys/PG账本PASS后才继续；相对v65 input209998下降98.2509357232%，无length/truncation。A0canonicalPASS，A1normal+两repair仍被合同拒绝，Run failed，无Draft/Plan。5provider回执均known成功stop，freshPG1Run/5receipt/unresolved0/无业务物化或活动租约PASS。
+
+新增3normal+2repair=5真实请求，最终50/100/余50/50对receipt/本scopeunknown0；实报总input15414/output5038；搜索新增0，旧6/1000保持。A2及后续structure、全部practice、paidconfirm/Edge NOT RUN。原5body bytes/JSON保留；最后repair独立纯离线归因PASS：否定句“不要求…新增工程任务”被extra_required正向regex误判，否定规则未覆盖新增；仅诊断副本去该句完整validator1→0，原响应及生产未改。这是新F2变体；latest明确不改F1–F4，所以STOP不修、repair不增、不第二Run，不复用failed/unknown。绑定与非收费教学PASS≠真实完整路线PASS；整体STAGING_BLOCKED/NOT_READY。原库/入口/正式Worker/RAG/部署未操作，563历史/.env/旧账保持。root/review请求Sol6.1high，独立实施/PG/Edge/准备medium，actual全部NOT OBSERVABLE。下一仅审阅保留A1/repair及独立失败归因，后续F2实施或收费需新Goal，不自动续跑。以下为历史时点。
+
+
+
+## 2026-10-04 v6.13 Contract Closure：BLOCKED，STOP
+
+用户现在新增能做什么：审阅[F1–F4合同修复/真实PG与STOP审计](../acceptance/v6-13-contract-closure-2026-10-04.md)、[新Agent7 Fake/ownedPG Plan及实际教学消费](../acceptance/v6-13-plan-and-teaching-2026-10-04.md)和[27定向+原31项矩阵](../acceptance/v6-13-acceptance-cases-2026-10-04.md)。执行用户批准v6.13而非重规划；HEAD起始/停止均1a3262e85296c95d3dfb4349d0d4ef83438f17da/feat/n1-resource-discovery，继承v6.11/v6.12+本轮候选尚未提交。38相关文件/425历史已受限ignored备份，无法精确拆旧批次则保留组合基线，无reset/整树restore/push/merge；425hash/.env/45对旧账/继承Agent7AI4Cloud4与UI字节保持。
+
+F1新增共享纯重建/比对：独立server planning_submission+同Run/stage/attempt原成功响应→确定性hydration/merge→比对全部拟持久化投影，实际executor与PlanService物化前共用，差异拒绝同一验证副本；raw和normalized一起伪造不能自证。F2所选focus正向许可/比较/排除与GoalSpec明确负约束分离，合法Cloud实践及不相关约束保留。F3normal/output/repair分离JSON字符/UTF8上界，11058反例完整Mock repair，超大预检SQL/HTTP/Fake0、实际repair_count0；caps/repair2保持。F4独立完整合同识别阻止单项/全部marker删除、null/unknown及perbatch降级，真legacy和短outline旧structure保持。只读review定位repairreceipt先提交checkpoint滞后时序，局部精确pending known-replay处理，真实checkpoint+SQL回执MockHTTP0，final不能例外。
+
+最终unit/contract1018PASS2NOT RUN（Windows symlink）；ownedPG21独立PASS（主轮18PASS1PythonSeed夹具FAIL，修夹具定向3PASS；历史FAIL保留）；兼容PG60PASS1裸fixtureFAIL+显式依赖修正单项1PASS、route/concurrency7PASS。F1–F4保护与独立源码复核PASS；本轮frontend unit/build NOT RUN复用字节未变的v6.12有效证据。新RAGPlan pln_8173fe1c0c7a49ada2a0cc589dfe4b2a/Run run_f9d2da474bb04ed39fb07b493fdaf41f、Agent7/18stage16canonical20unit18task46安排73可读refs37extensions，A2three/one/one。系统9、MCP4、Node11及Browser/Coding/旅行/Voice/AI/Python/search-only非收费PG持久化PASS；原源资格不升级。
+
+实际普通Auth→API→ownedPG→Edge初始准确读回/A2三单元/A5A6A8/G0–G6/GRGT/whole_core Prompt PASS，GR真实卡片FAIL：RAGFlow/WeKnora各重复两张共4，全pending无仓库链接；两case_study/repo资源ordered_sections=[]而两extensions有rootURLs，既有分组缺可信绑定后补fallback卡。独立新消费结构根因触发最新用户及Goal§0/§12 STOP，未修UI/DTO/来源资格或改Plan追绿。剩余RAG刷新重登录/system/MCP/Node/long Edge、旧版本livePG、免费真实binding/DNS/TLS与paid代表NOT RUN。自有API8031/Vite5191关，62HTTP/authPOST2/业务写0/provider+Worker尝试0；清理代理8000连接拒绝记录保留，仅harness薄清理修正NOT RUN。
+
+合同源码PASS不等于合同整体闭合：CONTRACT_CLOSURE_BLOCKED、PEDAGOGY_AND_UNITS_BLOCKED；真实代表NOT RUN，真实新增0，权威45/100/余55/该scopeunknown0、搜索新增0（旧6/1000）。37+2=39/output241664/理论84≤100未执行实际binding门禁；无本轮paidAcceptance或第二Run，不重派历史failed/unknown。请求root/reviewSol6.1high、独立测试/PG/Edge/准备Sol6.1medium，实际NOT OBSERVABLE。原产品库/正式入口/正式Worker/RAG/公开DTO/API/迁移未改；整体STAGING_BLOCKED/NOT_READY并STOP。下一仅评审GR来源消费身份绑定最小修复范围，不自动进入后续阶段。以下为历史时点。
+
+## 2026-10-04 v6.12 Targeted Alignment：BLOCKED，STOP
+
+用户现在新增能做什么：审阅[来源明确的新完整Agent+RAG Fake/owned PG计划](../acceptance/v6-12-fake-plan-review-2026-10-04.md)、[31项教学验收与缺层](../acceptance/v6-12-acceptance-cases-2026-10-04.md)及[本批审计](../acceptance/v6-12-targeted-alignment-2026-10-04.md)。以用户批准的交接包01产品决定/03Goal为语义与授权；真实本机HEAD起点/停止均1a3262e85296c95d3dfb4349d0d4ef83438f17da、feat/n1-resource-discovery，ff3b6c4祖先PASS，复用v6.10与已有v6.11未提交候选，无reset/回退/新格式平台。工作树候选与审计尚未提交，不称已接受版本。
+
+N0公共Agent6 canonical61阶段与旧失败私有7阶段分别导出；旧v610 failed Run仅owned PG READ ONLY查证三次已保存parsed原响应一致，原HTTP wire未存。6新增key中5项是受审范围教学细分，timeout-audit完整实施证据不足；不接纳新知识key。旧原fixture字节保留，legacy三次仍失败1/9/1，不重派failed/unknown。
+
+候选复用reviewed_structure_v1并冻结stage_focus_v1、逐批次canonical eligibility、完整units四字段及local focus/short boundaries，原始响应与本地canonical回填分层。Agent7/AI4/Cloud4分开受审教程/小型源码/成熟切片；新完整Fake路线A0–A8含A5 Framework/A6 MCP→G0–G6详细RAG→GR目标切片→GT迁移，18stage/16canonical/18task，A2三单元同canonical/一task。RAGFlow/WeKnora可替换案例只一任务；Node11stage自己的API连续；窄MCP四阶段、专项待选Agent9阶段。旧包/已冻Plan未改，资料深度/runtime资格不升级；独立已审TypeScript课程仍缺。页面在普通主区显示unit顺序/标题/目标/关联知识，无API/DTO/迁移或新完成门禁。
+
+最终unit/contract951 PASS、2 NOT RUN（symlink），内容定向69 PASS，owned PG/Fake10 PASS（4条新合成确认Plan与checkpoint批次保护），frontend16 PASS/build PASS，真实Edge renderer+Mock API多单元/项目卡PASS。实际owned Plan Edge NOT RUN，真实provider/free preflight/paid代表/paid确认NOT RUN。中途FAIL与修正前证据保留。
+
+只读合同复核发现四项FAIL且均未修：F1 save_draft_projection前checkpoint顶层canonical/teaching rubric篡改绕过恢复检查，实际compiled graph+内存saver保存回调一次收到篡改值，恢复新增Fake0（真实PG越权保存未验证）；F2否定K8s说明被当许可；F3repair完整失败对象输入上界提前拒绝并消耗local repair_count；F4外层marker+hash同时删除后直接批次走legacy（正式恢复/merge仍拒绝）。按Goal§0“新的结构性问题STOP”停止实施与Edge/收费派发，PEDAGOGY_AND_UNITS_READY未建立，最终BLOCKED/STOP；已有PASS不覆盖这四项。
+
+真实模型新增0，权威45/100、45对回执/该scope unknown0、剩余55；搜索新增0、旧6/1000保持。18阶段Fake manifest37normal+2repair=39、output241664、45+39=84≤100；真实binding门禁NOT RUN，不自动消费剩余额度。335受保护历史文件/.env/旧账/旧Plan证据hash PASS，新Fake owned库与private账号保留无服务开放，未新建本轮paid Acceptance/Run。正式库/入口/Worker/RAG/push/merge/reset/两受保护目录未操作，整体STAGING_BLOCKED/NOT_READY。下一仅评审F1有界恢复/保存防护方案，不自动进入下一开发阶段。以下为历史时点。
+
 ## 2026-10-04 v6.10 Planning Alignment：BLOCKED，STOP
 
 用户现在新增能做什么：查看[三条新 Fake/owned PG/Edge 教学样本](../acceptance/v6-10-planning-alignment-samples-2026-10-04.md)与[逐用例/账本/真实失败审计](../acceptance/v6-10-planning-alignment-2026-10-04.md)。完整 Agent 有 A8 Pi whole_core 的实际知识/任务/资源/Prompt及后续组合路径；窄 MCP 仅四阶段；Node API 使用自己的载体，明确隔离 Micro Exercise 与云商/语言/DB 待审边界。新源码候选 Agent6/AI3/Cloud3 仅在 owned catalog 验证，正式目录未导入。基础本机为ff3b6c42c16b0ec2b634b45441251cb8dc1e3249/feat/n1-resource-discovery，没有v6.9实施内容；复用v6.7/v6.8，不reset/回退。实施本地提交817b17b，无push/merge。

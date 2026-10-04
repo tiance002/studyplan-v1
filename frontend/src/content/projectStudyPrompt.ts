@@ -45,6 +45,8 @@ export type ProjectStudyGroup = {
   title: string;
   repoUrl?: string;
   referenceState: 'matched' | 'pending';
+  source?: DTO['StageResourceAssignmentView'];
+  bindingWarnings: string[];
   extension: DTO['KnowledgeExtensionView'];
 };
 
@@ -53,16 +55,33 @@ export function projectStudyGroups(stageId: string, resources: DTO['StageResourc
   extensions: DTO['KnowledgeExtensionView'][]): ProjectStudyGroup[] {
   const candidates = resources.filter(resource => resource.stage_id === stageId
     && resource.role === 'case_study' && resource.media_type === 'repo');
-  const roots = new Set(candidates.flatMap(resource => (resource.ordered_sections || [])
-    .map(section => resourceRepositoryRoot(section.url)).filter((root): root is string => !!root)));
+  const bindings = candidates.map((resource, index) => {
+    const sectionRoots = [...new Set((resource.ordered_sections || []).map(section => resourceRepositoryRoot(section.url)))];
+    const canonical = resource.canonical_url ? repositoryRootUrl(resource.canonical_url) : undefined;
+    const root = Object.prototype.hasOwnProperty.call(resource, 'canonical_url')
+      ? canonical && sectionRoots.every(sectionRoot => sectionRoot === canonical) ? canonical : undefined
+      : sectionRoots.length === 1 ? sectionRoots[0] : undefined;
+    const stable = !!resource.assignment_id?.trim() && !!resource.source_ref?.trim()
+      && Number.isInteger(resource.source_version) && resource.source_version > 0;
+    const qualified = ['reviewed', 'legacy_index'].includes(resource.verification_status) && !resource.warnings?.length;
+    return { resource, index, root, stable, qualified,
+      key: `${stageId}:resource:${resource.assignment_id}:${resource.source_ref}:${resource.source_version}` };
+  });
   const groups = new Map<string, ProjectStudyGroup>();
+  const represented = new Set<number>();
   const projectExtensions = extensions.filter(item => item.stage_id === stageId && item.topic.startsWith('项目学习：'))
     .sort((a, b) => a.order_index - b.order_index);
   for (const item of projectExtensions) {
     const title = item.topic.slice('项目学习：'.length).replace(/[（(]续\d+(?:\/\d+)?[）)]\s*$/, '').trim();
-    const itemRoots = [...new Set((item.links || []).map(repositoryRootUrl).filter((root): root is string => !!root))].sort();
-    // Never use a neighbouring project's resource to complete missing identity.
-    const identity = `${stageId}:${title}:${itemRoots.join('|')}`;
+    const rawRoots = (item.links || []).map(repositoryRootUrl);
+    const itemRoots = [...new Set(rawRoots.filter((root): root is string => !!root))];
+    const matching = bindings.filter(binding => !!binding.root && itemRoots.includes(binding.root));
+    matching.forEach(binding => represented.add(binding.index));
+    const identified = rawRoots.length > 0 && rawRoots.every(Boolean) && itemRoots.length === 1
+      && matching.length === 1 && matching[0].stable ? matching[0] : undefined;
+    const binding = identified?.qualified ? identified : undefined;
+    // The immutable assignment/source/version identifies a card; labels cannot create or join an identity.
+    const identity = identified?.key || `${stageId}:unbound-extension:${item.extension_id}`;
     const existing = groups.get(identity);
     if (existing) {
       existing.extension.guidance += item.guidance;
@@ -70,18 +89,23 @@ export function projectStudyGroups(stageId: string, resources: DTO['StageResourc
       existing.extension.thinking_prompts = [...new Set([...(existing.extension.thinking_prompts || []), ...(item.thinking_prompts || [])])];
       existing.extension.search_hints = [...new Set([...(existing.extension.search_hints || []), ...(item.search_hints || [])])];
     } else {
-      const repoUrl = itemRoots.length === 1 && roots.has(itemRoots[0]) ? itemRoots[0] : undefined;
+      const repoUrl = binding?.root;
       groups.set(identity, { key: identity, title, repoUrl, referenceState: repoUrl ? 'matched' : 'pending',
+        source: binding?.resource || (matching.length === 1 ? matching[0].resource : undefined),
+        bindingWarnings: binding ? [] : ['本阶段参考源码尚未唯一绑定到具有来源与版本记录的资源；请先核对来源，不据此开展源码学习。'],
         extension: { ...item, topic: `项目学习：${title}`, concepts: [...(item.concepts || [])], thinking_prompts: [...(item.thinking_prompts || [])] } });
     }
   }
-  for (const resource of candidates) {
-    const repoUrl = (resource.ordered_sections || []).map(section => resourceRepositoryRoot(section.url)).find(Boolean);
-    if (repoUrl && [...groups.values()].some(group => group.repoUrl === repoUrl)) continue;
-    const key = `${stageId}:resource:${resource.assignment_id}`;
-    groups.set(key, { key, title: resource.title, repoUrl, referenceState: 'pending', extension: {
+  for (const binding of bindings) {
+    const { resource, index, root, stable } = binding;
+    if (represented.has(index) || (projectExtensions.length > 0 && !root)) continue;
+    const unique = root && bindings.filter(candidate => candidate.root === root).length === 1;
+    const repoUrl = stable && unique && binding.qualified ? root : undefined;
+    const key = stable ? binding.key : `${stageId}:unbound-resource:${index}`;
+    groups.set(key, { key, title: resource.title, repoUrl, source: resource, referenceState: 'pending',
+      bindingWarnings: ['此来源尚未绑定本阶段的项目学习指导；请先确认学习目标、范围与验收产出。'], extension: {
       extension_id: key, stage_id: stageId, topic: `项目学习：${resource.title}`, order_index: groups.size,
-      guidance: '此候选尚缺本阶段的项目学习指导。请先确认学习目标、重点和验收产出，再开展源码学习。',
+      guidance: '',
       links: repoUrl ? [repoUrl] : [], concepts: [], thinking_prompts: [], required: false,
     } });
   }

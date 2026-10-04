@@ -1,0 +1,418 @@
+{
+  "version": "v6.13",
+  "basis": "User supplied v6.12 reports; cases are specifications, not executed tests.",
+  "original_31_case_matrix": "v6-12-acceptance-cases-2026-10-04.md",
+  "cases": [
+    {
+      "id": "C01",
+      "group": "F1",
+      "scenario": "原pre-save仅改顶层canonical/teaching rubric",
+      "required_layers": [
+        "compiled_graph",
+        "in_memory_checkpoint"
+      ],
+      "expected": [
+        "save_callback_count=0",
+        "新增Fake/provider=0",
+        "保留字段级拒绝证据"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C02",
+      "group": "F1",
+      "scenario": "相同反例使用真Postgres checkpoint与owned业务PG",
+      "required_layers": [
+        "compiled_graph",
+        "postgres_checkpoint",
+        "owned_pg"
+      ],
+      "expected": [
+        "拒绝恢复保存",
+        "新增Draft/Plan/目录内容污染=0",
+        "允许已有失败审计写入"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C03",
+      "group": "F1",
+      "scenario": "直接应用保存入口，不经过executor",
+      "required_layers": [
+        "application",
+        "owned_pg"
+      ],
+      "expected": [
+        "保存前独立重建/比对",
+        "无部分业务物化",
+        "不能只信state内hash"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C04",
+      "group": "F1",
+      "scenario": "normalized batch与顶层同时替换，或伪造原始presentation",
+      "required_layers": [
+        "unit",
+        "owned_pg"
+      ],
+      "expected": [
+        "独立Run/receipt绑定不匹配拒绝",
+        "不能由待校验数据自证"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C05",
+      "group": "F1",
+      "scenario": "同数量但资源refs/roles、guidance、unit links或task acceptance变更",
+      "required_layers": [
+        "unit",
+        "owned_pg"
+      ],
+      "expected": [
+        "精确字段拒绝",
+        "顺序/章节/任务门槛均保护",
+        "不以数量相等判PASS"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C06",
+      "group": "F1",
+      "scenario": "没有篡改的正常生成和post-merge恢复",
+      "required_layers": [
+        "compiled_graph",
+        "postgres_checkpoint",
+        "owned_pg"
+      ],
+      "expected": [
+        "正常保存/确认",
+        "相同输入重建幂等",
+        "恢复不额外请求模型"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C07",
+      "group": "F1",
+      "scenario": "合法编辑、资源替换、任务变更、未来路线保留前缀",
+      "required_layers": [
+        "application",
+        "owned_pg"
+      ],
+      "expected": [
+        "采用合法修订依据",
+        "不覆盖回初始模型结果",
+        "旧历史与完成位置保持"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C08",
+      "group": "F1",
+      "scenario": "取消/租约过期/并发重复确认",
+      "required_layers": [
+        "owned_pg"
+      ],
+      "expected": [
+        "保留既有fence/锁顺序/幂等",
+        "未授权发布拒绝",
+        "旧结果不可重派"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C09",
+      "group": "F4",
+      "scenario": "删外层structure marker与hash，残留focus/batch marker",
+      "required_layers": [
+        "unit",
+        "direct_node",
+        "mock_transport"
+      ],
+      "expected": [
+        "派发前拒绝",
+        "Fake/provider调用=0"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C10",
+      "group": "F4",
+      "scenario": "删全部checkpoint新marker/hash，Run冻结记录仍为新合同",
+      "required_layers": [
+        "executor",
+        "postgres_checkpoint"
+      ],
+      "expected": [
+        "与独立原提交不符拒绝",
+        "不能进入legacy"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C11",
+      "group": "F4",
+      "scenario": "unknown/null/空值/outer-batch冲突或其他run/stage合同",
+      "required_layers": [
+        "unit",
+        "direct_node"
+      ],
+      "expected": [
+        "拒绝降级",
+        "修复入口同样拒绝",
+        "没有新派发"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C12",
+      "group": "F4",
+      "scenario": "真正legacy与短outline+旧structure历史",
+      "required_layers": [
+        "golden",
+        "owned_pg"
+      ],
+      "expected": [
+        "原合法wire/fingerprint和读回保持",
+        "无新marker回填",
+        "不误强制focus"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C13",
+      "group": "F4",
+      "scenario": "混合reviewed/search_only及无固定目录旧Python",
+      "required_layers": [
+        "unit",
+        "fake",
+        "owned_pg"
+      ],
+      "expected": [
+        "按冻结batch eligibility分派",
+        "通用路径仍可规划",
+        "非闭集目标不变为公共白名单"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C14",
+      "group": "F2",
+      "scenario": "W6原句不默认学K8s＋合法ref要求Must deploy a Kubernetes cluster",
+      "required_layers": [
+        "unit",
+        "fake"
+      ],
+      "expected": [
+        "返回越界错误",
+        "不新增正式任务/门槛"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C15",
+      "group": "F2",
+      "scenario": "同主题中文强制、禁止性解释、comparison-only、其他未选focus提及",
+      "required_layers": [
+        "unit"
+      ],
+      "expected": [
+        "强制越界拒绝",
+        "合法否定/比较允许",
+        "未选ref不授权"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C16",
+      "group": "F2",
+      "scenario": "Cloud合法Kubernetes实践正例",
+      "required_layers": [
+        "unit",
+        "fake"
+      ],
+      "expected": [
+        "合法实施内容保留",
+        "不靠全局禁词破坏课程"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C17",
+      "group": "F2",
+      "scenario": "node/ref合法但目标内新增费用或外部副作用义务",
+      "required_layers": [
+        "unit",
+        "content_review"
+      ],
+      "expected": [
+        "不扩展用户授权或阶段正式验收",
+        "不声称全面自然语言理解"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C18",
+      "group": "F3",
+      "scenario": "A2原11058字符/六objective1807/额外acceptance失败对象",
+      "required_layers": [
+        "adapter_mock"
+      ],
+      "expected": [
+        "完整失败对象与字段errors可见",
+        "repair能到达MockTransport",
+        "输出/repair上界分别记录"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C19",
+      "group": "F3",
+      "scenario": "转义/Unicode/接近上界的完整失败对象与错误列表",
+      "required_layers": [
+        "unit",
+        "adapter_mock"
+      ],
+      "expected": [
+        "使用实际序列化预算",
+        "不截断原证据",
+        "字符/bytes与token估计区分"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C20",
+      "group": "F3",
+      "scenario": "真正超大失败对象或本地预算配置不成立",
+      "required_layers": [
+        "unit",
+        "direct_node",
+        "ledger"
+      ],
+      "expected": [
+        "HTTP0/收费0",
+        "不伪报已派发repair",
+        "明确本地失败且无无限预检循环"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C21",
+      "group": "F3",
+      "scenario": "repair返回partial/仍非法/发生unknown",
+      "required_layers": [
+        "fake",
+        "ledger"
+      ],
+      "expected": [
+        "仍最多2次实际repair",
+        "unknown停止不重发",
+        "失败保守计量不改旧账"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C22",
+      "group": "PG_EDGE",
+      "scenario": "Agent+RAG18阶段真实owned Plan消费",
+      "required_layers": [
+        "fake",
+        "owned_pg",
+        "real_api",
+        "edge"
+      ],
+      "expected": [
+        "A5/A6/A8/G0-G6/GR/GT可见",
+        "A2三单元/一canonical/一正式任务",
+        "不Mock API"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C23",
+      "group": "PG_EDGE",
+      "scenario": "GR替代候选/长guidance/两类项目Prompt",
+      "required_layers": [
+        "owned_pg",
+        "real_api",
+        "edge"
+      ],
+      "expected": [
+        "每个候选完整可读且一个能力任务",
+        "两类Prompt职责不同",
+        "无付费/clone请求"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C24",
+      "group": "PG_EDGE",
+      "scenario": "窄MCP、已有Node服务代表",
+      "required_layers": [
+        "fake",
+        "owned_pg",
+        "real_api",
+        "edge"
+      ],
+      "expected": [
+        "必要前置而非全课程",
+        "Node不强制改语言/Starter",
+        "刷新重登录无新模型调用"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C25",
+      "group": "COMPAT",
+      "scenario": "Browser/Coding/Voice/旅行组合/AI已有项目及旧版本代表",
+      "required_layers": [
+        "unit",
+        "fake",
+        "owned_pg"
+      ],
+      "expected": [
+        "按31项原所需层补证",
+        "教学顺序/前置/缺口不退化",
+        "旧Plan和用户合法修订保持"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C26",
+      "group": "BUDGET",
+      "scenario": "真实代表前的manifest实际预算与账本",
+      "required_layers": [
+        "free_preflight"
+      ],
+      "expected": [
+        "总累计不超过100",
+        "若仍45+39则最多84",
+        "caps与repair2不变",
+        "0真实请求直至全部非收费门通过"
+      ],
+      "status": "NOT RUN"
+    },
+    {
+      "id": "C27",
+      "group": "REAL",
+      "scenario": "唯一全新Agent+RAG完整真实代表",
+      "required_layers": [
+        "provider_real",
+        "owned_pg",
+        "real_api",
+        "edge"
+      ],
+      "expected": [
+        "完整生成/一次合成确认/回读",
+        "全部单元目标有界内容审查",
+        "读取与确认新增模型0",
+        "不得用Fake或Mock替代",
+        "失败/unknown后无第二Run"
+      ],
+      "status": "NOT RUN"
+    }
+  ]
+}

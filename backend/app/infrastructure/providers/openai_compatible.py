@@ -14,6 +14,16 @@ from app.agent_workflows.planning_outline import (
     STAGE_SKELETON_V1,
     outline_message_ceiling,
 )
+from app.agent_workflows.planning_structure import (
+    FOCUS_FORMAT,
+    FOCUS_SHAPE,
+    FOCUS_SYSTEM,
+    PRESENTATION_SHAPE,
+    PRESENTATION_SYSTEM,
+    REVIEWED_STRUCTURE_V1,
+    STRUCTURE_SCHEMA,
+    presentation_preflight,
+)
 from app.application.planning_budget import OFFICIAL_DEEPSEEK_FLASH_OUTPUT_CAP, BudgetPolicy
 from app.core.errors import AppError
 from app.domain.prompts import PROMPT_PROTOCOL, PROMPT_PURPOSE
@@ -102,7 +112,24 @@ class OpenAICompatibleLLM:
             options["thinking"] = {"type": "disabled"}
         return options
 
+    def preflight(self, *, purpose, payload, schema_name):
+        if '_structure_input_format' not in payload:
+            return None
+        if (payload.get('_structure_input_format') != REVIEWED_STRUCTURE_V1
+                or schema_name != STRUCTURE_SCHEMA
+                or purpose not in {'planning.structure', 'planning.repair'}
+                or '_structure_focus_format' in payload and payload['_structure_focus_format'] != FOCUS_FORMAT):
+            return LLMFailure('structure_format_invalid', 'Invalid frozen structure format', details={'dispatched': False})
+        error, measured, limit = presentation_preflight(payload, repair=purpose == 'planning.repair')
+        if error:
+            return LLMFailure(error, 'Local structure preflight rejected; no dispatch',
+                              details={'dispatched': False, 'measured': measured, 'limit': limit})
+        return None
+
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
+        rejected = self.preflight(purpose=purpose, payload=payload, schema_name=schema_name)
+        if rejected is not None:
+            return rejected
         if purpose not in SHAPES:
             return LLMFailure("unsupported_purpose", "Unsupported generation purpose")
         try:
@@ -178,6 +205,22 @@ class OpenAICompatibleLLM:
         if "domain_pack" in payload:
             message["domain_pack"] = payload["domain_pack"]
         outline_format = payload.get("_outline_input_format")
+        structure_format = payload.get('_structure_input_format')
+        if structure_format is not None:
+            if (structure_format != REVIEWED_STRUCTURE_V1 or schema_name != STRUCTURE_SCHEMA
+                    or purpose not in {'planning.structure', 'planning.repair'}):
+                return LLMFailure('structure_format_invalid', 'Unknown frozen structure contract')
+            shape = PRESENTATION_SHAPE
+            system = PRESENTATION_SYSTEM
+            focus_format = payload.get('_structure_focus_format')
+            if focus_format is not None:
+                if focus_format != FOCUS_FORMAT:
+                    return LLMFailure('structure_format_invalid', 'Unknown frozen teaching focus contract')
+                shape, system = FOCUS_SHAPE, FOCUS_SYSTEM
+            message = {'purpose': purpose, 'schema': schema_name, 'field_shape': shape, 'context': context}
+            chars = len(system) + len(json.dumps(message, ensure_ascii=False))
+            # Reviewed normal/output/repair bounds were checked before any
+            # ledger reservation/HTTP. The exact same serializer is used here.
         if purpose == "planning.outline" and outline_format is not None:
             if outline_format != STAGE_SKELETON_V1:
                 return LLMFailure("outline_format_invalid", "Unknown frozen outline format")
@@ -277,7 +320,7 @@ class OpenAICompatibleLLM:
         missing = sorted(set(shape) - set(parsed)) if isinstance(parsed, dict) else sorted(shape)
         # Batch schema completeness belongs to deterministic planning validation.
         # Preserve partial objects (including repair output) for bounded local repair.
-        batch_content = schema_name in {"KnowledgeStructureV1", "PracticeProposalV1"} and purpose in {
+        batch_content = schema_name in {"KnowledgeStructureV1", "PracticeProposalV1", STRUCTURE_SCHEMA} and purpose in {
             "planning.structure", "planning.practice", "planning.repair",
         }
         if not isinstance(parsed, dict) or (missing and not batch_content):

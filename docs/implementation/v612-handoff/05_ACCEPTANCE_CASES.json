@@ -1,0 +1,665 @@
+{
+  "schema_version": 1,
+  "artifact_type": "acceptance_spec_not_executed",
+  "date": "2026-10-04",
+  "project": "studyplan-v1",
+  "goal_version": "v6.12",
+  "cases": [
+    {
+      "id": "B01",
+      "group": "baseline",
+      "input_or_setup": "当前本机HEAD与远端ff3b6c4不同",
+      "must": [
+        "从本机最新已授权工作树续接",
+        "记录v6.10/v6.11已完成差异"
+      ],
+      "must_not": [
+        "reset到远端旧代码",
+        "把报告当作已读新源码"
+      ],
+      "evidence_layers": [
+        "SOURCE",
+        "REPORT"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "B02",
+      "group": "baseline",
+      "input_or_setup": "导出Agent当前公共包与v6.10失败Run冻结内容",
+      "must": [
+        "分别导出公共与私有适配后字段",
+        "A2原始新增key/标题与错误可读",
+        "缺证据字段明确缺失"
+      ],
+      "must_not": [
+        "用手写示例补齐实际JSON",
+        "私人正文和凭据进入Git"
+      ],
+      "evidence_layers": [
+        "SOURCE",
+        "OFFLINE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "U01",
+      "group": "structure",
+      "input_or_setup": "有明确A2 canonical目录，生成若干范围内单元",
+      "must": [
+        "至少一个代表同canonical关联多个具体LearningUnit",
+        "canonical知识与依赖完整不变",
+        "任务门槛数不随unit增加"
+      ],
+      "must_not": [
+        "新增公共知识key",
+        "用一条空泛unit证明已拆课"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG",
+        "EDGE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "U02",
+      "group": "structure",
+      "input_or_setup": "新units合同输出包含nodes或relations",
+      "must": [
+        "拒绝越权输出或按明确已冻结错误协议处理",
+        "原响应保留"
+      ],
+      "must_not": [
+        "默默吞掉字段后宣称模型完全遵守合同"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "U03",
+      "group": "structure",
+      "input_or_setup": "unit引用未知node、其他stage或伪造focus",
+      "must": [
+        "派发后的错误进入既有known局部修复",
+        "修复未成功则不发布"
+      ],
+      "must_not": [
+        "默认关联第一个合法node以通过",
+        "增repair次数"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "U04",
+      "group": "structure",
+      "input_or_setup": "unit的key合法但文本要求范围外K8s训练或新增强制任务",
+      "must": [
+        "区分引用校验和教学内容审查",
+        "范围外内容不得成为必修或完成门槛"
+      ],
+      "must_not": [
+        "把合法node引用等同全文已审"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "CONTENT_REVIEW"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "U05",
+      "group": "structure",
+      "input_or_setup": "保存v6.10 A2三次真实失败响应作离线fixture",
+      "must": [
+        "原合同仍重现错误",
+        "分别定位key越界与partial repair",
+        "人工构造新合同fixture明确标Fake"
+      ],
+      "must_not": [
+        "修改原响应消除失败",
+        "自动把六个新增node全转unit"
+      ],
+      "evidence_layers": [
+        "OFFLINE",
+        "UNIT"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "U06",
+      "group": "repair",
+      "input_or_setup": "reviewed_units_v1 repair收到partial对象",
+      "must": [
+        "同原批次合同完整返回units",
+        "包含具体字段错误和当前allowed范围",
+        "整Run repair上限2"
+      ],
+      "must_not": [
+        "回退要求nodes/relations",
+        "新增隐藏LLM预处理"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "U07",
+      "group": "compatibility",
+      "input_or_setup": "旧无marker及已存在新outline marker的Run",
+      "must": [
+        "旧fingerprint/manifest/恢复语义不改",
+        "新structure模式对未来Run冻结",
+        "marker/hash篡改被拒绝"
+      ],
+      "must_not": [
+        "回填旧marker",
+        "重派failed或unknown"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "PG"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "U08",
+      "group": "open_goal",
+      "input_or_setup": "search_only或无固定知识目录的通用/旧Python路径",
+      "must": [
+        "保留合法AI草稿编排",
+        "不自动升级公共已审状态"
+      ],
+      "must_not": [
+        "因不在Agent公共节点池拒绝全部生成"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "U09",
+      "group": "persistence",
+      "input_or_setup": "生成后保存含多unit与教学说明的Plan",
+      "must": [
+        "merge保留允许教学字段",
+        "canonical命名空间只本地写",
+        "confirm/refresh/relogin回读相同版本"
+      ],
+      "must_not": [
+        "保存后被canonical rubric覆盖丢课",
+        "GET重新生成"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "PG",
+        "EDGE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "U10",
+      "group": "payload",
+      "input_or_setup": "当前stage结构生成及repair",
+      "must": [
+        "仅当前阶段和必要前置/受控范围",
+        "size guard按规模生效",
+        "旧publication_evidence和全resource池不再进入"
+      ],
+      "must_not": [
+        "把outline膨胀转移到structure",
+        "把字符估计写成provider tokens"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "OFFLINE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R01",
+      "group": "complete",
+      "input_or_setup": "从零系统学习Agent应用开发，专项暂未选",
+      "must": [
+        "Framework一深多浅实际章节/实践",
+        "MCP使用与最小server实际范围",
+        "whole_core真实参考学习",
+        "专项待选清晰"
+      ],
+      "must_not": [
+        "删A5/A6因为没关键词",
+        "声称已含所有高级专项",
+        "用自己的Demo替代参考项目"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG",
+        "EDGE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R02",
+      "group": "complete",
+      "input_or_setup": "系统学Agent，主目标知识问答，希望深入RAG并学习成熟工程",
+      "must": [
+        "公共核心→小型核心源码→RAG多阶段教程→成熟目标切片→迁移可见",
+        "各段真实资源/问题/产物绑定",
+        "高级GraphRAG仅按需"
+      ],
+      "must_not": [
+        "一个A8吞全部后段",
+        "只用未来可学段落代替已选专项",
+        "为省token丢后段"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG",
+        "EDGE",
+        "REAL"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R03",
+      "group": "narrow",
+      "input_or_setup": "我只想学习MCP；我已有/没有Tool与JSON基础两种输入",
+      "must": [
+        "按起点安排必要前置",
+        "已有框架不强制换一套",
+        "MCP真实协议与mock区分"
+      ],
+      "must_not": [
+        "强塞完整RAG/小大项目路线",
+        "删除MCP实践只留定义"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG",
+        "EDGE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R04",
+      "group": "framework",
+      "input_or_setup": "已会一个框架，希望系统提升Agent能力",
+      "must": [
+        "等价基础复习/差异检查",
+        "比较其他框架而非每个做一次",
+        "专项复用已学状态/工具知识"
+      ],
+      "must_not": [
+        "所有人强制LangGraph从安装起重学",
+        "把比较页访问当熟练掌握"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "CONTENT_REVIEW"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R05",
+      "group": "browser",
+      "input_or_setup": "希望系统学Browser Agent，以browser-use为小型核心参考",
+      "must": [
+        "必要Playwright/async入场在源码之前",
+        "small whole_core与后续动态/会话/评估深化分开",
+        "未选大项目不造repo"
+      ],
+      "must_not": [
+        "把整个browser-use仓库当必须全懂",
+        "把所有Browser高级课塞成先修"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "CONTENT_REVIEW"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R06",
+      "group": "coding",
+      "input_or_setup": "希望学Coding Agent，先理解Pi核心再深入工程",
+      "must": [
+        "最小语言/工具前置",
+        "Pi whole_core在合理入场后",
+        "LCC已学段REVIEW，深层C组分段",
+        "大型隔离项目只有目标需要才进入"
+      ],
+      "must_not": [
+        "强制先学完所有C1-C10才首次看Pi",
+        "另造强制中型项目层"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "CONTENT_REVIEW"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R07",
+      "group": "composition",
+      "input_or_setup": "已有旅行Agent；主学可恢复Workflow，辅以Browser/RAG",
+      "must": [
+        "用户项目持续使用",
+        "参考源码不被用户Demo取消",
+        "按各能力深度选范围",
+        "Workflow A5重复内容标对照/深化"
+      ],
+      "must_not": [
+        "三个专项全部完整复制",
+        "三个强制参考仓库"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R08",
+      "group": "exclusion",
+      "input_or_setup": "系统学习Agent但明确不学RAG、只重点工作流",
+      "must": [
+        "显式排除优先且冲突清楚提示",
+        "能以Tool Agent提供框架入场",
+        "不从依赖闭包偷偷重开排除专项"
+      ],
+      "must_not": [
+        "无声覆盖用户范围",
+        "以完整默认规则强加RAG"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R09",
+      "group": "unknown",
+      "input_or_setup": "希望学Voice Agent，目前无已审Voice recipe",
+      "must": [
+        "复用公共核心",
+        "专项缺口与私人候选状态清晰",
+        "不强分到RAG/Coding闭集"
+      ],
+      "must_not": [
+        "编造章节或仓库",
+        "将缺公共Seed视为所有规划fatal"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R10",
+      "group": "fullstack",
+      "input_or_setup": "已有React电商后台，希望增加AI商品文案/客服",
+      "must": [
+        "按已有基础裁剪",
+        "对应AI教程先于AI源码",
+        "小型源码与后续产品专项分开",
+        "任务实体属于电商"
+      ],
+      "must_not": [
+        "重做资料工作台",
+        "完整GenAI课成为Agent通用前置"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "R11",
+      "group": "cloud",
+      "input_or_setup": "已有Node API，学习部署、监控、自动发布和恢复",
+      "must": [
+        "复用Node服务",
+        "手工部署与CI/IaC前置合理",
+        "明确云商/DB待选操作",
+        "成熟平台仅按需"
+      ],
+      "must_not": [
+        "强制重写FastAPI/TaskService",
+        "强制K8s毕业",
+        "把本地练习标生产恢复完成"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "FAKE",
+        "PG",
+        "EDGE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "P01",
+      "group": "project_card",
+      "input_or_setup": "同stage两个可替换候选，长guidance多续片",
+      "must": [
+        "沿v6.10精确stage/root/topic配对",
+        "全文不丢失",
+        "任选一个完成同能力任务"
+      ],
+      "must_not": [
+        "第一卡吞第二卡",
+        "两个可选仓库变两个必做门槛"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "PG",
+        "EDGE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "P02",
+      "group": "project_prompt",
+      "input_or_setup": "小型核心和成熟切片各一份Prompt",
+      "must": [
+        "小型核心地图/正常失败链/前置与比较",
+        "大型限定目标与候选切片、一次一个",
+        "外部AI定位当前源码",
+        "clone前检查已有未提交修改"
+      ],
+      "must_not": [
+        "固定公共commit/path/function",
+        "平台自动clone",
+        "未授权外发私人代码"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "CONTENT_REVIEW",
+        "EDGE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "P03",
+      "group": "depth",
+      "input_or_setup": "同一个Pi/browser-use在两个学习段出现",
+      "must": [
+        "后次明确新问题/深度/复习关系",
+        "旧练习证据用于复习不冒充新能力完成"
+      ],
+      "must_not": [
+        "复制同一卡同一任务充当深化"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "CONTENT_REVIEW"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "V01",
+      "group": "version",
+      "input_or_setup": "新Pack发布与旧v6.8/v6.10数据同时存在",
+      "must": [
+        "下一合法版本只改必要内容",
+        "旧Plan/receipt/manifest/hash保持",
+        "后继阶段不原位重解释旧A8"
+      ],
+      "must_not": [
+        "修改旧JSON求兼容",
+        "提升级别伪造已审"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "PG",
+        "OFFLINE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "V02",
+      "group": "completion",
+      "input_or_setup": "一个阶段多units和附加建议练习",
+      "must": [
+        "仍按现有阶段总结+正式任务证据规则",
+        "附加建议不增加完成门槛",
+        "不新增unit每日总结/打分"
+      ],
+      "must_not": [
+        "unit数等于required task数",
+        "阅读自动标mastery"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "PG"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "C01",
+      "group": "budget",
+      "input_or_setup": "最终Stage数改变",
+      "must": [
+        "用manifest计算1+S+P+2和token上界",
+        "当前累积+上界<=100才收费",
+        "失败不退额度"
+      ],
+      "must_not": [
+        "沿用7阶段17次常量",
+        "削掉MCP或大项目以适应上界"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "OFFLINE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "C02",
+      "group": "real",
+      "input_or_setup": "所有非收费门禁通过后单一全新Agent+RAG代表",
+      "must": [
+        "一次包含公共核心/whole_core/专项教程/成熟切片",
+        "新Acceptance/Run/两owned库",
+        "逐purpose回执完整",
+        "只允许既有两次repair",
+        "成功后confirm/PG/Edge模型增量0"
+      ],
+      "must_not": [
+        "第二Run刷成功",
+        "使用原用户私有数据",
+        "访问正式DB/RAG",
+        "把Fake样本标真实"
+      ],
+      "evidence_layers": [
+        "REAL",
+        "PG",
+        "EDGE"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    },
+    {
+      "id": "C03",
+      "group": "stop",
+      "input_or_setup": "paid异常或预算/未知状态",
+      "must": [
+        "unknown保守计入且停止派发",
+        "同类合同问题未修复则停止",
+        "原错误和raw receipt保留"
+      ],
+      "must_not": [
+        "重发不确定请求",
+        "清除旧unknown或移动scope绕过"
+      ],
+      "evidence_layers": [
+        "UNIT",
+        "PG",
+        "REAL"
+      ],
+      "note": "",
+      "execution_status": "NOT_RUN"
+    }
+  ],
+  "implementation_notes": [
+    "按语义断言而非强锁阶段总数",
+    "CONTENT_REVIEW不能用ID子集校验冒充",
+    "REAL只执行一个统一代表，其他REAL项由该Run观测或明确NOT_RUN",
+    "文件中占位范围不作为正式source/key导入",
+    "所有原始失败证据保留"
+  ]
+}

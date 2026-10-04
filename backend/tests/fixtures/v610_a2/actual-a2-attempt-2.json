@@ -1,0 +1,225 @@
+{
+  "source_database": "studyplan_test_v610_business_da34544a",
+  "source_table": "public.ai_provider_attempts",
+  "status": "succeeded",
+  "model_id": "deepseek-flash",
+  "schema_name": "KnowledgeStructureV1",
+  "attempt_id": "run_9c00403807ee4ccb817529611e44efa6:b3f2-batch-v1:planning.repair:stage.v62.agent.application.a2:2:2",
+  "response_payload_sha256": "79c6379eda2cbc1934cfa269e6a438066f47bd18ad641124b5d63608130d0545",
+  "response_payload": {
+    "payload": {
+      "nodes": [
+        {
+          "title": "A2 组件化与受控行动",
+          "node_type": "concept",
+          "objectives": [
+            "能定义和派发工具，校验参数与权限，保留未知工具和执行失败的证据。",
+            "能说明 Tool、registry、LLM 三者在 Agent 行动链路中的职责边界。"
+          ],
+          "stable_key": "node.v62.agent.application.a2"
+        },
+        {
+          "title": "工具契约与参数 schema",
+          "node_type": "concept",
+          "objectives": [
+            "能用名称、描述、参数 schema 定义工具契约。",
+            "能判断参数缺失、类型错误和越界时的处理方式。"
+          ],
+          "stable_key": "node.v62.agent.application.a2.tool-contract"
+        },
+        {
+          "title": "工具注册表与派发",
+          "node_type": "concept",
+          "objectives": [
+            "能把工具注册到注册表并按名称查找。",
+            "能根据 LLM 返回的工具名与参数完成一次派发。"
+          ],
+          "stable_key": "node.v62.agent.application.a2.registry"
+        },
+        {
+          "title": "权限校验与审批拒绝",
+          "node_type": "concept",
+          "objectives": [
+            "能在执行前做权限检查，拒绝时返回明确原因。",
+            "能保证审批拒绝不会被绕过而仍执行工具。"
+          ],
+          "stable_key": "node.v62.agent.application.a2.permission"
+        },
+        {
+          "title": "统一错误与失败证据",
+          "node_type": "concept",
+          "objectives": [
+            "能为未知工具和执行失败返回统一错误结构。",
+            "能保留错误位置、输入摘要和工具名等可追溯证据。"
+          ],
+          "stable_key": "node.v62.agent.application.a2.error-evidence"
+        },
+        {
+          "title": "超时控制与审计记录",
+          "node_type": "concept",
+          "objectives": [
+            "能为工具调用设置超时并处理超时结果。",
+            "能记录每次工具调用的关键审计字段。"
+          ],
+          "stable_key": "node.v62.agent.application.a2.timeout-audit"
+        },
+        {
+          "title": "Tool/registry/LLM 职责分离",
+          "node_type": "concept",
+          "objectives": [
+            "能解释 LLM 只负责提议工具与参数，registry 只负责查找与派发。",
+            "能解释权限与执行由受控代码决定，而非由 LLM 决定。"
+          ],
+          "stable_key": "node.v62.agent.application.a2.responsibility-separation"
+        }
+      ],
+      "units": [
+        {
+          "title": "工具契约与注册",
+          "rubric": {
+            "node.v62.agent.application.a2.registry": "注册后能用名称查找并返回同一工具定义。",
+            "node.v62.agent.application.a2.tool-contract": "工具契约包含名称、描述、参数 schema，且能被 schema 校验。"
+          },
+          "node_keys": [
+            "node.v62.agent.application.a2",
+            "node.v62.agent.application.a2.tool-contract",
+            "node.v62.agent.application.a2.registry"
+          ],
+          "objectives": [
+            "能定义一个带名称、描述和参数 schema 的工具。",
+            "能把该工具注册到 registry 并按名称查找到。"
+          ],
+          "stable_key": "unit.v62.agent.application.a2.contract",
+          "order_index": 0,
+          "section_key": "stage.v62.agent.application.a2"
+        },
+        {
+          "title": "受控派发与参数校验",
+          "rubric": {
+            "node.v62.agent.application.a2.registry": "派发使用 registry 查找，未知工具不会进入执行。",
+            "node.v62.agent.application.a2.permission": "权限或审批拒绝时工具不执行，返回明确原因。",
+            "node.v62.agent.application.a2.responsibility-separation": "能用自己的话说清 LLM 只提议、registry 只查找派发、权限由受控代码判定。"
+          },
+          "node_keys": [
+            "node.v62.agent.application.a2",
+            "node.v62.agent.application.a2.registry",
+            "node.v62.agent.application.a2.permission",
+            "node.v62.agent.application.a2.responsibility-separation"
+          ],
+          "objectives": [
+            "能根据 LLM 建议的工具名和参数完成一次派发。",
+            "能在派发前校验参数并在不合规时拒绝执行。",
+            "能说明 LLM、registry、Tool 在执行链路中的职责。"
+          ],
+          "stable_key": "unit.v62.agent.application.a2.controlled-dispatch",
+          "order_index": 1,
+          "section_key": "stage.v62.agent.application.a2"
+        },
+        {
+          "title": "失败证据与审计",
+          "rubric": {
+            "node.v62.agent.application.a2.timeout-audit": "超时被捕获并记录，审计字段覆盖调用时间、工具名和结果状态。",
+            "node.v62.agent.application.a2.error-evidence": "未知工具与执行失败都返回统一的错误结构，包含工具名和原因。"
+          },
+          "node_keys": [
+            "node.v62.agent.application.a2",
+            "node.v62.agent.application.a2.error-evidence",
+            "node.v62.agent.application.a2.timeout-audit"
+          ],
+          "objectives": [
+            "能为未知工具和执行失败生成统一错误结构。",
+            "能为工具调用增加超时控制和审计记录。",
+            "能保留失败时可追溯的工具名、输入摘要与错误位置。"
+          ],
+          "stable_key": "unit.v62.agent.application.a2.failure-evidence",
+          "order_index": 2,
+          "section_key": "stage.v62.agent.application.a2"
+        }
+      ],
+      "relations": [
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.v62.agent.application.a2",
+          "from_stable_key": "node.v62.agent.application.a1"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.v62.agent.application.a2.tool-contract",
+          "from_stable_key": "node.v62.agent.application.a2"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.v62.agent.application.a2.registry",
+          "from_stable_key": "node.v62.agent.application.a2"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.v62.agent.application.a2.permission",
+          "from_stable_key": "node.v62.agent.application.a2"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.v62.agent.application.a2.error-evidence",
+          "from_stable_key": "node.v62.agent.application.a2"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.v62.agent.application.a2.timeout-audit",
+          "from_stable_key": "node.v62.agent.application.a2"
+        },
+        {
+          "relation_type": "contains",
+          "to_stable_key": "node.v62.agent.application.a2.responsibility-separation",
+          "from_stable_key": "node.v62.agent.application.a2"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.v62.agent.application.a2.registry",
+          "from_stable_key": "node.v62.agent.application.a2.tool-contract"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.v62.agent.application.a2.permission",
+          "from_stable_key": "node.v62.agent.application.a2.registry"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.v62.agent.application.a2.error-evidence",
+          "from_stable_key": "node.v62.agent.application.a2.permission"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.v62.agent.application.a2.timeout-audit",
+          "from_stable_key": "node.v62.agent.application.a2.error-evidence"
+        },
+        {
+          "relation_type": "prerequisite",
+          "to_stable_key": "node.v62.agent.application.a2.responsibility-separation",
+          "from_stable_key": "node.v62.agent.application.a2.registry"
+        }
+      ]
+    },
+    "attempts": 1,
+    "model_id": "deepseek-flash",
+    "provider": "openai_compatible",
+    "latency_ms": 4975,
+    "cost_micros": null,
+    "diagnostics": {
+      "schema": "KnowledgeStructureV1",
+      "purpose": "planning.repair",
+      "model_id": "deepseek-flash",
+      "thinking": {
+        "type": "disabled"
+      },
+      "max_tokens": 8192,
+      "content_chars": 4759,
+      "finish_reason": "stop",
+      "reasoning_chars": null,
+      "requested_model": "deepseek-flash",
+      "missing_top_level_fields": []
+    },
+    "input_tokens": 3662,
+    "finish_reason": "stop",
+    "output_tokens": 1525
+  }
+}

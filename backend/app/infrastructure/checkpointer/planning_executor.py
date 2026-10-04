@@ -31,6 +31,7 @@ from app.agent_workflows.planning_batches import (
     recursion_limit,
 )
 from app.agent_workflows.planning_outline import STAGE_SKELETON_V1, frozen_pack_is_intact
+from app.agent_workflows.planning_structure import check_structure_checkpoint
 from app.agent_workflows.runtime import Command, PostgresSaver
 from app.agent_workflows.state import PlanningState
 from app.ports.graph_runner import GraphRecoveryError
@@ -97,6 +98,9 @@ class PgPlanningExecutor:
         a crash simply re-derives progress from the checkpoint instead of losing it.
         """
         builder = builder_for_version(graph_version)
+        if nodes.frozen_input is None and initial is not None:
+            from copy import deepcopy
+            nodes.frozen_input = deepcopy(initial)
         manifest = (initial or {}).get("manifest")
         with self._saver(thread_id) as saver:
             graph = builder(nodes, checkpointer=saver)
@@ -106,6 +110,12 @@ class PgPlanningExecutor:
             guard()
             existing = graph.get_state(config)
             if existing.values:
+                try:
+                    check_structure_checkpoint(existing.values)
+                    nodes.check_projection(existing.values, final=existing.next == ('save_draft_projection',),
+                                           pending_repair=existing.next == ('repair_batch',))
+                except ValueError as exc:
+                    raise GraphRecoveryError(str(exc)) from exc
                 stored_manifest = existing.values.get("manifest")
                 if isinstance(stored_manifest, dict):
                     if ("manifest_hash" in stored_manifest or "outline_input_format" in stored_manifest) and not manifest_is_intact(stored_manifest):

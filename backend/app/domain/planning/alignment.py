@@ -11,13 +11,14 @@ from app.domain.planning.guidance import guidance_payload, stage_guidance
 from app.domain.planning.intent import required_module_closure
 
 SIGNALS = {
-    'rag': r'\brag\b|知识检索|知识库|知识助手|文档问答|检索增强|证据回答',
-    'workflow': r'\bworkflow\b|工作流|可恢复|恢复规划|审批|流程自动化',
-    'browser': r'\bbrowser\b|网页|浏览器|动态页面|信息获取',
-    'coding': r'\bcoding\b|编程(?:智能体|助手)|代码(?:智能体|助手)|软件任务',
+    'rag': r'(?<![a-z])rag(?![a-z])|知识检索|知识库|知识助手|文档问答|资料问答|检索增强|证据回答',
+    'workflow': r'(?<![a-z])workflow(?![a-z])|工作流|可恢复|恢复规划|审批|流程自动化',
+    'browser': r'(?<![a-z])browser(?![a-z])|网页|浏览器|动态页面|信息获取',
+    'coding': r'(?<![a-z])coding(?![a-z])|编程(?:智能体|助手)|代码(?:智能体|助手)|软件任务',
     'evaluation': r'\bevaluation\b|系统评估|系统评价|模型评测',
     'agentic_rl': r'(?<![a-z])(?:rl|ppo|grpo)(?![a-z])|强化学习|参数训练|训练模型',
-    'mcp': r'\bmcp\b|远程工具|外部协议',
+    'mcp': r'(?<![a-z])mcp(?![a-z])|远程工具|外部协议',
+    'framework': r'framework|框架',
 }
 NEGATIVE = r'不(?:需要|要求|做|学|进行|想|打算)|无需|排除|不要|暂不'
 
@@ -59,6 +60,7 @@ def adapt_alignment_pack(pack, goal, goal_spec, *, stage_keys=None):
 
     result = deepcopy(pack)
     policy = result['semantic_policy']
+    targeted = policy.get('alignment_version') == 'v6.12'
     target = goal_spec.target if goal_spec else goal
     scope = list(goal_spec.scope) if goal_spec else []
     constraints = list(goal_spec.constraints) if goal_spec else []
@@ -86,6 +88,9 @@ def adapt_alignment_pack(pack, goal, goal_spec, *, stage_keys=None):
     if re.search(r'语音|\bvoice\b|\bspeech\b', positive):
         gaps.add('voice')
     requested &= available
+    secondary = set()
+    if targeted and re.search(r'主(?:学|要|目标).*workflow|主(?:学|要|目标).*工作流', positive) and re.search(r'辅以|辅助|辅助.*能力', positive):
+        secondary = requested & {'rag', 'browser'}
     carrier = _user_project(target) or _user_project(goal) or _user_project(starting)
     carrier_kind = 'user_project' if carrier else 'starter_candidate'
     carrier = carrier or policy['starter_title']
@@ -107,10 +112,16 @@ def adapt_alignment_pack(pack, goal, goal_spec, *, stage_keys=None):
                     include |= code in {'C1', 'C2'}
                 if 'browser' in requested:
                     include |= code in {'B0', 'B1'}
-            elif code == 'A8':
+            elif code == 'A8' or (targeted and code in {'A5', 'A6'}):
                 include = True
-            if depth == 'foundation' and recipe:
+            if depth == 'foundation' and recipe and not (targeted and recipe in requested):
                 include = False
+            if targeted and scope_mode == 'narrow' and stage.get('pedagogical_role') in {'mature_slice', 'transfer_validation'}:
+                include = False
+            if targeted and code in {'CR', 'CT'} and not re.search(r'隔离|workspace|工作区|服务化|成熟|深入工程', positive):
+                include = False
+            if targeted and recipe in secondary:
+                include = code in ({'G0', 'G1', 'G2', 'G3'} if recipe == 'rag' else {'B0', 'B1', 'B2'})
             if code == 'A3' and 'rag' in excluded:
                 include = False
         if excluded & capabilities or recipe in excluded:
@@ -124,7 +135,8 @@ def adapt_alignment_pack(pack, goal, goal_spec, *, stage_keys=None):
     nodes = result['knowledge_blueprints']
     roots = [n for s in stages if s['stable_key'] in selected for n in s['node_keys']]
     closure = set(required_module_closure(nodes, roots))
-    chosen = [s for s in stages if s['stable_key'] in selected or closure.intersection(s['node_keys'])]
+    chosen = [s for s in stages if s['stable_key'] in selected or (
+        closure.intersection(s['node_keys']) and not (targeted and s.get('pedagogical_role') in {'mature_slice', 'transfer_validation'}))]
     if not chosen:
         raise ValidationAppError('当前已审内容没有匹配本次专题范围，请明确目标或选用基础路线。')
     selected = {s['stable_key'] for s in chosen}
@@ -146,13 +158,18 @@ def adapt_alignment_pack(pack, goal, goal_spec, *, stage_keys=None):
     for stage in chosen:
         code = stage.get('stage_code', '')
         node = next(n for n in nodes if n['stable_key'] == stage['node_keys'][0])
-        stage['objective'] = '；'.join(node['objectives'])
+        # New exposure stages teach different problems through one protected
+        # canonical capability. Retain their authored stage objective; the
+        # capability objectives remain the local canonical authority.
+        if not targeted:
+            stage['objective'] = '；'.join(node['objectives'])
         if pack['pack_key'] == 'cloud.services' and code == 'S3':
             # Inherited S2 primary container reading is useful here. Its Todo
             # case study belongs to S2's paired extension, not S3's scope.
             stage['resources'] = [r for r in stage.get('resources', []) if r['role'] != 'case_study']
         review = reports_known and (
             (code in {'A0', 'A1', 'A2'} and re.search(r'tool|工具|agent.*基础', positive_diagnostic))
+            or (targeted and code == 'A5' and re.search(r'框架|framework|langgraph|state|branch', positive_diagnostic))
             or (code in {'F0', 'F1', 'F2'} and re.search(r'react|\bjs\b|javascript', positive_diagnostic))
             or (code == 'F5' and 'sql' in positive_diagnostic))
         guide = guidance_payload(stage_guidance(result, stage))
@@ -239,6 +256,10 @@ def adapt_alignment_pack(pack, goal, goal_spec, *, stage_keys=None):
         'desired_depth': depth, 'review_stage_keys': review_keys,
         'evaluation': '横切工具、状态与结果；自述和打开资料不代表已核验掌握'}
     result['semantic_context'] = context
+    if targeted and pack['pack_key'] == 'agent.application':
+        context['specialty_status'] = 'selected' if requested & {'rag', 'coding', 'workflow', 'browser'} else '专项待选'
+        if context['specialty_status'] == '专项待选':
+            context['pending_specialties'] = ['rag', 'coding', 'workflow', 'browser']
     first = chosen[0]
     later = ('后续专项：RAG / Coding / Workflow / MCP / Browser / 深入 Evaluation 可按目标组合；RL 为另选可选专题。未选专项没有自动生成或完成。'
              '匹配的大型成熟项目在对应前置满足后按3–8个目标相关 slice 学习，一次一个，不要求全仓掌握。'

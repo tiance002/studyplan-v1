@@ -190,6 +190,8 @@ class StageResourceAssignmentView(BaseModel):
     creator: str = Field(default="", max_length=200, description="主线作者/机构")
     source_ref: str = Field(default="", max_length=64, description="公共资源来源 source_id")
     source_version: int = Field(default=0, ge=0)
+    canonical_url: str | None = Field(default=None, max_length=2000,
+        description="仅来自同一路线匹配的冻结仓库来源身份；不改变审核资格，缺失或冲突为null")
     ordered_sections: list[OrderedSection] = Field(default_factory=list)
     fallback_search_terms: list[str] = Field(default_factory=list)
     node_ids: list[str] = Field(default_factory=list)

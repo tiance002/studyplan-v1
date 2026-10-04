@@ -1,5 +1,9 @@
 # Repository Workflow
 
+## 2026-10-04 最新开发路由优化
+
+用户最新决定覆盖下方旧默认档位：Luna用于日志/测试提取、哈希/清单、报告整理和明确符号定位，默认low/medium；Sol6.1 medium用于有界代码修改及常规测试；Sol6.1 xhigh用于安全、预算、引用等关键逻辑及普通档无法解决的问题。Sol max禁用、6Astra停用保持；无法核实实际解析记NOT OBSERVABLE，不修改全局配置。合并同一问题边界测试与复核，复用fixture/反例矩阵/共享Evidence Packet，避免每修一例再审一次或多个会话重复读长历史。并发/所有权与产品费用门禁保持，全文见[当前路由规则](docs/execution/model-routing-policy.md)。当前进度与最近STOP以唯一progress为准；下方较早v6.10等记录不覆盖已续接的GR binding及F2-negative-extra-task Goal。
+
 ## 当前续接入口（2026-10-02）
 
 2026-10-04 最新 [v6.10 Planning Alignment](docs/acceptance/v6-10-planning-alignment-2026-10-04.md) 已到STOP，**BLOCKED**：基于本机v6.8复用既有成果（无v6.9实施内容），不reset/回退；新源码候选Agent6/AI3/Cloud3、目标路由/窄专题/排除与前置/A8绑定/具体任务适配/项目卡多候选续片落地。unit/contract898PASS2NOT RUN、规划保护58PASS、owned PG教学8PASS/marker-checkpoint7PASS/语义历史9PASS、前端16PASS/build、Edge普通系统Agent/MCP/Node三路线PASS。用户仅覆盖模型0限制：历史39保持、追加50，总上限100；同权威账本追加授权审计。唯一新Acceptance v610-agent6-synthetic-c5c4af9fb8f8 / Run run_9c00403807ee4ccb817529611e44efa6仅新owned两库：7stage manifest15+2=17/output106496，真实outline1516input/413output/stop/7keys、A0/A1 canonical PASS；A2新增6未审知识键，2repair仍失败，Run failed无Draft/Plan；真实A8/practice/confirm/Edge NOT RUN。因此本轮6请求（4normal+2repair），最终45/100、unknown0、剩余55，reconciliation PASS，不新开第二Run。搜索新增0，原6/1000保持；188历史文件/39对receipt/旧v6.8 Plan证据/.env hash PASS。原库/正式入口/正式Worker/RAG/公开DTO/API/迁移/外部项目写入/push/merge均未操作。失败新Run及账本/owned两库保留，不重派unknown/failed、不放宽schema/canonical/repair2。唯一progress与审计为准，整体STAGING_BLOCKED/NOT_READY；STOP后续需定位A2生成/repair契约再评审新代表，剩余额度不自动派发。下方旧额度/入口记录保留历史溯源，不覆盖本条。

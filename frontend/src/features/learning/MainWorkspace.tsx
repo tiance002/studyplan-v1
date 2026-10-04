@@ -8,6 +8,44 @@ import { PreferencePanel } from './PreferencePanel';
 import { ResourceChangePanel } from './ResourceChangePanel';
 import { LearningGuidance } from './LearningGuidance';
 import { ProjectStudyCard } from './ProjectStudyCard';
+import './MainWorkspace.css';
+
+export function LearningUnits({ units, nodes, selectNode }: {
+  units: StageWorkspace['units'];
+  nodes: StageWorkspace['nodes'];
+  selectNode: (nodeId: string, unitId: string) => void;
+}) {
+  return <section className="panel learning-units" aria-label="本阶段学习单元">
+    <div className="section-heading"><h2>本阶段学习单元</h2><span className="muted">按计划顺序学习</span></div>
+    {units.length ? <ol className="learning-unit-list">{units.map((unit, index) => (
+      <li key={unit.unit_id} className="learning-unit" data-unit-id={unit.unit_id}>
+        <p className="eyebrow">学习单元 {String(index + 1).padStart(2, '0')}</p>
+        <h3>{unit.title}</h3>
+        <h4>单元学习目标</h4>
+        {unit.objectives?.length ? <ul>{unit.objectives.map((objective, objectiveIndex) => <li key={objectiveIndex}>{objective}</li>)}</ul>
+          : <p className="muted">计划未提供补充单元目标，可参照关联知识的目标。</p>}
+        <h4>关联知识</h4>
+        <div className="chips">{unit.node_ids?.length ? unit.node_ids.map(id => {
+          const linkedNode = nodes.find(node => node.node_id === id);
+          return linkedNode ? <button className="btn" key={id} onClick={() => selectNode(id, unit.unit_id)}>{linkedNode.title}</button>
+            : <span className="muted" key={id}>关联知识暂不可用</span>;
+        }) : <span className="muted">计划未提供知识关联。</span>}</div>
+      </li>
+    ))}</ol> : <p className="muted">本阶段尚无学习单元。</p>}
+    <p className="form-note">多个单元可以学习同一受控知识。阶段完成由阶段总结及现有实践完成记录自动计算；它不代表知识掌握核验。</p>
+  </section>;
+}
+
+function stageLearningRole(stage: StageWorkspace, plan?: DTO['PlanView']) {
+  // Only use explicit saved presentation facts; do not classify a repository by size or popularity.
+  if (/成熟工程[：:]/.test(stage.stage.title)) return '成熟工程 · 目标切片';
+  if (/专项教程/.test(stage.stage.title)) return '专项教程';
+  const guidance = [...(plan?.extensions || [])
+    .filter(extension => extension.stage_id === stage.stage.stage_id && extension.topic.startsWith('项目学习：'))
+    .map(extension => extension.guidance || '')].join('\n');
+  if (/whole_core|whole_system/.test(guidance)) return '小型源码 · 核心整体学习';
+  return '';
+}
 export function KnowledgeNodeView({
   node,
   allNodes,
@@ -108,6 +146,7 @@ export function MainWorkspace({
       <p className="lede">
         {stage?.stage.objective || "确认一条学习路线后，开始当前阶段的学习。"}
       </p>
+      {stage && stageLearningRole(stage, plan) && <p className="form-note" aria-label="阶段学习类型">{stageLearningRole(stage, plan)}</p>}
       {!stage ? (
         <div className="panel empty">
           <p>暂无可学习阶段。</p>
@@ -118,6 +157,7 @@ export function MainWorkspace({
       ) : (
         <>
           <dl className="learning-meta"><div><dt>进入本阶段之前</dt><dd>{entryPrerequisites.length ? entryPrerequisites.map(id => {const prerequisite=allNodes.find(n=>n.node_id===id);return prerequisite ? <button key={id} className="prereq-link" onClick={()=>selectNode(id)}>{prerequisite.title}</button> : <span key={id}>关联前置知识暂不可用</span>;}) : '正式计划未声明前置知识。'}</dd></div><div><dt>本阶段实践</dt><dd>{stage.tasks.map(t=>t.title).join('、') || '本阶段尚无正式实践任务。'}</dd></div></dl>
+          <LearningUnits units={stage.units} nodes={stage.nodes} selectNode={(id, selectedUnitId) => {setUnitChoice(selectedUnitId); selectNode(id);}} />
           <LearningGuidance key={`${projectId}:${planId}:${planRevision}:${stage.stage.stage_id}`} guidance={stage.stage.learning_guidance} />
           {plan && <ProjectStudyCard key={`project-study:${projectId}:${planId}:${planRevision}:${stage.stage.stage_id}`} stage={stage} plan={plan}
             priorNodes={allNodes.filter(node => introducedNodeIds.includes(node.node_id))}
@@ -187,20 +227,6 @@ export function MainWorkspace({
           </ResourceDialog>
           {!!stage.tasks.length && <section className="practice-preview"><p className="eyebrow">把知识用到项目中</p>{stage.tasks.map(t=><article key={t.task_id}><h2>{t.title}</h2><p className="muted">{t.goal}</p><p>验收要求：{t.acceptance?.join('；') || '暂无补充条目'}</p></article>)}{practice && <button className="btn primary" onClick={practice}>查看任务与验收要求 →</button>}</section>}
           {summary && <div className="next-step"><div><strong>整理这个阶段的理解与证据</strong><p className="muted">保留还没验证的部分，便于继续学习。</p></div><button className="btn" onClick={summary}>写阶段总结</button></div>}
-          <div className="section-heading">
-            <h2>学习单元</h2>
-          </div>
-          <section className="panel">
-            {stage.units.map((u) => (
-              <div className="task-row" key={u.unit_id}>
-                <span className="task-circle" />
-                <strong>{u.title}</strong>
-              </div>
-            ))}
-            <p className="form-note">
-              阶段完成由阶段总结及现有实践完成记录自动计算；它不代表知识掌握核验。
-            </p>
-          </section>
         </>
       )}
     </div>

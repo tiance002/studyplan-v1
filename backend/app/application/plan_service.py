@@ -37,6 +37,7 @@
 from __future__ import annotations
 
 import logging
+from copy import deepcopy
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from typing import Any, Callable, Mapping, Sequence, cast
@@ -52,9 +53,11 @@ from app.agent_workflows.planning_batches import (
     freeze_manifest,
     run_batched_planning_graph,
 )
+from app.agent_workflows.planning_structure import has_canonical_inventory
 from app.agent_workflows.state import PlanningState
 from app.application.draft_projection import project_draft
 from app.application.model_binding import SubmissionBinding
+from app.application.project_candidate_binding import frozen_candidate_url
 from app.application.plan_resources import (
     StageResourceView,
     normalize_stage_resources,
@@ -89,7 +92,7 @@ from app.domain.runs.models import RunRecord
 from app.domain.workspace.models import AuthContext
 from app.ports.generated_plan_changes import GeneratedPlanChangesPort
 from app.ports.graph_runner import PlanningExecutorPort, PlanningRuntime
-from app.ports.llm import LLMDispatchUnknownError, LLMPort
+from app.ports.llm import LLMDispatchUnknownError, LLMPort, LLMResult
 from app.ports.planning_jobs import JobClaim, PlanningJobsPort, PlanningLeaseLostError
 from app.ports.public_resources import PublicResourceCatalogPort
 from app.ports.runs import PlanningCatalogPort, RunRepositoryPort
@@ -215,6 +218,10 @@ class PlanService:
         self._binding_resolver = binding_resolver or _unbound_submission
         self._preference_resolver = preference_resolver
         self._route_changes = route_changes
+        # Only synchronous Fake/in-process generation lacks durable jobs. Its
+        # caller-owned submission and receipts live outside the graph state.
+        self._generation_inputs = {}
+        self._generation_receipts = {}
 
     # ------------------------------------------------------------------ 生成
 
@@ -245,6 +252,7 @@ class PlanService:
             pack=pack, policy=binding.budget_policy, model_ref=binding.model_ref, goal_spec=goal_spec,
             route_change_hash=content_hash(prepared_change['metadata']) if prepared_change else '',
             outline_input_format="stage_skeleton_v1",
+            structure_input_format='reviewed_structure_v1' if has_canonical_inventory(pack) else None,
         )
         current = self._repo.get_current(project_id=project_id)
         if prefs_snapshot is None and self._preference_resolver is not None:
@@ -266,6 +274,8 @@ class PlanService:
             initial['route_change'] = prepared_change['metadata']
         if pack:
             initial["domain_pack"] = pack
+        if self._planning_jobs is None:
+            self._generation_inputs[run_id] = deepcopy(initial)
         return run_id, thread_id, initial, manifest
 
     def submit_generation(
@@ -407,6 +417,7 @@ class PlanService:
                 guard=guard,
                 write_fence=write_fence,
                 route_change=route_change,
+                frozen_input=initial,
             )
             trace = (
                 self._run_executor(executor, nodes, initial, run.thread_id, run.graph_version, guard, progress)
@@ -488,7 +499,8 @@ class PlanService:
             )
             executor = runtime.executor if runtime else self._executor
             nodes = self._build_nodes(project_id=project_id, run_id=run_id, goal=cleaned_goal,
-                                      llm=runtime.llm if runtime else None, selected_pack=selected_pack)
+                                      llm=runtime.llm if runtime else None, selected_pack=selected_pack,
+                                      frozen_input=initial)
             trace = (
                 self._run_executor(executor, nodes, initial, thread_id, self._graph_version, lambda: None)
                 if executor is not None
@@ -764,7 +776,8 @@ class PlanService:
                      selected_pack: Mapping[str, Any] | None = None,
                      guard: Callable[[], None] = lambda: None,
                      write_fence: PlanningWriteFence | None = None,
-                     route_change: dict[str, Any] | None = None) -> PlanningNodes:
+                     route_change: dict[str, Any] | None = None,
+                     frozen_input: dict[str, Any] | None = None) -> PlanningNodes:
         """装配图节点，并把「保存草案」接回应用层的投影 + 物化 + 仓储。"""
 
         def save_draft(state: PlanningState) -> dict[str, str]:
@@ -775,9 +788,23 @@ class PlanService:
                 route_change=route_change,
             )
 
+        run = self._runs.get_run(project_id=project_id, run_id=run_id)
+        def load_authority():
+            if self._planning_jobs is not None and run is not None:
+                return self._planning_jobs.read_generation_authority(run.actor_id, project_id, run_id)
+            return {'initial': deepcopy(self._generation_inputs.get(run_id)),
+                    'receipts': deepcopy(self._generation_receipts.get(run_id, []))}
+        def record_result(receipt, result):
+            self._generation_receipts.setdefault(run_id, []).append(deepcopy(receipt))
+            if (isinstance(result, LLMResult) and result.provider == 'fake'
+                    and self._planning_jobs is not None and run is not None):
+                self._planning_jobs.record_fake_generation_result(run.actor_id, project_id, run_id,
+                                                                  receipt, write_fence)
         return PlanningNodes(
             llm=_ScopedLLM(llm if llm is not None else self._llm, project_id, guard,
-                           write_fence=write_fence),
+                           write_fence=write_fence, record_result=record_result),
+            frozen_input=deepcopy(frozen_input),
+            load_receipts=lambda: load_authority()['receipts'],
             save_draft=save_draft,
             # 短生成在保存草案后结束，以下回调不会被执行；
             # 决策路径由本服务的 decide() 负责，**不**重复实现第二套规则。
@@ -793,6 +820,23 @@ class PlanService:
         route_change: dict[str, Any] | None = None,
     ) -> dict[str, str]:
         """把图产物投影为 ``PlanDraft`` 并持久化（B2-V §三 §五）。"""
+        from app.agent_workflows.planning_projection import checked_projection, new_structure_signal
+        run = self._runs.get_run(project_id=project_id, run_id=run_id)
+        if self._planning_jobs is not None and run is not None:
+            authority=self._planning_jobs.read_generation_authority(run.actor_id, project_id, run_id)
+        else:
+            authority={'initial':deepcopy(self._generation_inputs.get(run_id)),
+                       'receipts':deepcopy(self._generation_receipts.get(run_id, []))}
+        initial=authority['initial']
+        if new_structure_signal((initial or state).get('manifest')):
+            if initial is None:
+                raise ConflictError('Independent frozen submission missing',reason='planning_submission_invalid')
+            if initial.get('run_id')!=run_id or initial.get('project_id')!=project_id or initial.get('goal')!=goal:
+                raise ConflictError('Frozen generation identity mismatch',reason='planning_submission_invalid')
+            state=checked_projection(state,initial,authority['receipts'],final=True)
+            if selected_pack is not None and selected_pack!=initial.get('domain_pack'):
+                raise ConflictError('Frozen source snapshot mismatch',reason='planning_submission_invalid')
+            selected_pack=deepcopy(initial.get('domain_pack'))
         if selected_pack is not None:
             state = restrict_pack_resources(state, selected_pack)  # type: ignore[assignment]
         base_version = state.get("expected_version")
@@ -869,8 +913,13 @@ class PlanService:
         )
         by_id = {view.assignment_id: replace(view, warnings=(*view.warnings,
             "此旧记录未保存当时来源元数据；当前目录值仅供参考")) if legacy else view for view in dynamic}
+        assignments_by_id = {a.assignment_id: a for a in assignments}
+        snapshots_by_id = {item.get("assignment_id"): item for item in snapshots}
         for identifier, value in frozen.items():
+            if identifier not in assignments_by_id:
+                continue
             data = dict(value)
+            data["canonical_url"] = frozen_candidate_url(assignments_by_id[identifier], snapshots_by_id[identifier])
             data["role"] = StageResourceRole(data["role"])
             data["ordered_sections"] = tuple(ResolvedSection(**item) for item in data["ordered_sections"])
             for field in ("fallback_search_terms", "warnings", "node_ids"):
@@ -927,11 +976,16 @@ class PlanService:
 class _ScopedLLM:
     """Carry server scope and its transient claim to the durable dispatch guard."""
     def __init__(self, llm: LLMPort, project_id: str, guard: Callable[[], None] = lambda: None,
-                 *, write_fence: PlanningWriteFence | None = None):
+                 *, write_fence: PlanningWriteFence | None = None, record_result=None):
         self.llm = llm
         self.project_id = project_id
         self.guard = guard
         self.write_fence = write_fence
+        self.record_result = record_result
+
+    def preflight(self, *, purpose, payload, schema_name):
+        check=getattr(self.llm,'preflight',None)
+        return check(purpose=purpose,payload=payload,schema_name=schema_name) if check else None
 
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
         self.guard()
@@ -945,6 +999,10 @@ class _ScopedLLM:
                 "actor_id": self.write_fence.actor_id,
                 "lease_token": self.write_fence.lease_token,
             }
-        return self.llm.generate_structured(purpose=purpose,
+        result = self.llm.generate_structured(purpose=purpose,
             payload=context,schema_name=schema_name,
             run_id=run_id,attempt_id=attempt_id)
+        if isinstance(result, LLMResult) and self.record_result is not None:
+            self.record_result({'run_id':run_id,'attempt_id':attempt_id,'schema_name':schema_name,
+                                'payload':deepcopy(result.payload)},result)
+        return result

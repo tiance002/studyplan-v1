@@ -8,9 +8,9 @@ from app.domain.domain_packs.models import DomainPack
 from app.domain.enums import DomainPackStatus
 
 CURRENT_PACKS = {
-    "ai.fullstack": "ai-fullstack-v3.json",
-    "agent.application": "agent-application-v6.json",
-    "cloud.services": "cloud-services-v3.json",
+    "ai.fullstack": "ai-fullstack-v4.json",
+    "agent.application": "agent-application-v7.json",
+    "cloud.services": "cloud-services-v4.json",
     "python.engineering": "python-engineering-v2.json",
     "agent.knowledge_rag": "agent-knowledge-rag-v1.json",
     "agent.coding": "agent-coding-v1.json",

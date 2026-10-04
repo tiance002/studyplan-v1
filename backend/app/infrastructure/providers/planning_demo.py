@@ -128,6 +128,23 @@ def _skeleton_output(payload):
 
 
 def _structure_output(payload):
+    if payload.get('_structure_input_format') == 'reviewed_structure_v1':
+        stage = payload['stage']
+        focus = payload.get('allowed_teaching_focus')
+        if focus is not None:
+            if stage['stage_key'].endswith('.a2'):
+                titles = ('工具契约与注册派发', '权限拒绝与职责边界', '未知工具与执行失败证据')
+                objectives = ('解释工具定义、参数校验与按名称派发；比较 Tool 与 registry 职责',
+                              '解释执行前权限检查与拒绝以后不能继续动作的原因',
+                              '区分未知工具和执行失败，指出支持结论的记录')
+                return {'units': [{'title': title, 'node_keys': list(payload['allowed_node_keys']),
+                                  'focus_refs': [focus[index % len(focus)]['ref']], 'objectives': [objectives[index]]}
+                                 for index, title in enumerate(titles)]}
+            return {'units': [{'title': stage['title'], 'node_keys': list(payload['allowed_node_keys']),
+                               'focus_refs': [f['ref'] for f in focus if not f['ref'].startswith('source:')][:2],
+                               'objectives': [stage['objective'] or '解释阶段能力与失败边界']}]}
+        return {'units': [{'title': stage['title'], 'node_keys': list(payload['allowed_node_keys']),
+                           'objectives': [stage['objective'] or '解释阶段能力与失败边界']}]}
     stage = payload["stage"]
     blueprints = payload.get("node_blueprints") or []
     nodes, relations = [], []
@@ -194,6 +211,8 @@ def selected_output(purpose, payload):
             for stage in payload["frozen_stages"]]}
     if "target" in payload and "context" in payload:
         return _repair_output(payload)
+    if payload.get('_structure_input_format') == 'reviewed_structure_v1':
+        return _structure_output(payload)
     if "stage" in payload and "structure" in payload:
         return _practice_output(payload)
     if "stage" in payload and "node_blueprints" in payload:

@@ -100,6 +100,9 @@ class PgAttemptLLM:
         )
 
     def generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
+        rejected = self.preflight(purpose=purpose,payload=payload,schema_name=schema_name)
+        if rejected is not None:
+            return rejected
         project_id = str(payload.get("_project_id") or "")
         request_options = self.provider.request_options(purpose)
         transient_keys = {"_planning_claim"}
@@ -189,6 +192,10 @@ class PgAttemptLLM:
         if cause:
             raise LLMDispatchUnknownError("Provider outcome unknown") from cause
         return result
+
+    def preflight(self, *, purpose, payload, schema_name):
+        check=getattr(self.provider,'preflight',None)
+        return check(purpose=purpose,payload=payload,schema_name=schema_name) if check else None
 
     def _retained_result(self, row, run_id, fingerprint, legacy_fingerprint):
         compatible = (row is not None and row["run_id"] == run_id and (

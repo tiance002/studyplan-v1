@@ -102,6 +102,8 @@ class StageResourceView:
     language: str = ""
     documentation_version: str = ""
     verification_status: str = "unverified"
+    # Populated only from matching frozen Plan metadata at consumption time.
+    canonical_url: str | None = None
 
     @property
     def degraded(self) -> bool:

@@ -3680,6 +3680,11 @@ export interface components {
              * @default 0
              */
             source_version: number;
+            /**
+             * Canonical Url
+             * @description 仅来自同一路线匹配的冻结仓库来源身份；不改变审核资格，缺失或冲突为null
+             */
+            canonical_url?: string | null;
             /** Ordered Sections */
             ordered_sections?: components["schemas"]["OrderedSection"][];
             /** Fallback Search Terms */

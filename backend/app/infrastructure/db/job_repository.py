@@ -392,6 +392,40 @@ class PgPlanningJobRepository:
             raise ConflictError("规划提交归属与 Run 不一致", reason="planning_submission_ambiguous")
         return detail
 
+    def read_generation_authority(self, actor_id, project_id, run_id):
+        with self._tx(actor_id=actor_id, project_id=project_id) as conn:
+            run=conn.execute('SELECT actor_id,project_id FROM ai_runs WHERE run_id=%s AND project_id=%s AND actor_id=%s',
+                             (run_id,project_id,actor_id)).fetchone()
+            if run is None:
+                raise ConflictError('Frozen Run scope mismatch', reason='planning_submission_invalid')
+            submissions=conn.execute("SELECT detail FROM ai_run_events WHERE run_id=%s AND status='submission' "
+                                     "AND detail->>'kind'='planning_submission' ORDER BY event_id",(run_id,)).fetchall()
+            if len(submissions)!=1:
+                raise ConflictError('Independent frozen submission missing', reason='planning_submission_invalid')
+            detail=submissions[0]['detail']
+            if detail.get('actor_id')!=actor_id or detail.get('project_id')!=project_id:
+                raise ConflictError('Frozen submission owner mismatch', reason='planning_submission_invalid')
+            rows=conn.execute("SELECT attempt_id,run_id,schema_name,response_payload FROM ai_provider_attempts "
+                              "WHERE run_id=%s AND status='succeeded'",(run_id,)).fetchall()
+            receipts=[{'run_id':r['run_id'],'attempt_id':r['attempt_id'],'schema_name':r['schema_name'],
+                       'payload':r['response_payload']['payload']} for r in rows]
+            fake=conn.execute("SELECT detail FROM ai_run_events WHERE run_id=%s AND status='generation_result' "
+                              "AND detail->>'kind'='fake_generation_result' ORDER BY event_id",(run_id,)).fetchall()
+            receipts.extend(r['detail']['receipt'] for r in fake)
+            return {'initial':detail['initial'],'receipts':receipts}
+
+    def record_fake_generation_result(self, actor_id, project_id, run_id, receipt, fence=None):
+        with self._tx(actor_id=actor_id,project_id=project_id) as conn:
+            if fence is not None:
+                lock_plan_version(conn,project_id,None)
+                lock_planning_write(conn,project_id=project_id,run_id=run_id,fence=fence)
+            run=conn.execute('SELECT actor_id FROM ai_runs WHERE run_id=%s AND project_id=%s', (run_id,project_id)).fetchone()
+            if run is None or run['actor_id']!=actor_id or receipt.get('run_id')!=run_id:
+                raise ConflictError('Fake generation result scope mismatch',reason='planning_submission_invalid')
+            conn.execute("INSERT INTO ai_run_events(run_id,node_name,attempt_id,status,detail) "
+                         "VALUES (%s,NULL,%s,'generation_result',%s)",
+                         (run_id,receipt['attempt_id'],Jsonb({'kind':'fake_generation_result','receipt':receipt})))
+
     def read_claim_submission(self, claim: JobClaim) -> dict[str, object]:
         """Read only the live claim's submission under its exact RLS scope."""
         with self._tx(actor_id=claim.actor_id, project_id=claim.project_id) as conn:

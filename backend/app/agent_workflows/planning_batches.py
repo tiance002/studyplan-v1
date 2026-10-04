@@ -30,6 +30,15 @@ from dataclasses import replace
 from typing import Any
 
 from app.agent_workflows.planning_outline import STAGE_SKELETON_V1, frozen_pack_is_intact
+from app.agent_workflows.planning_structure import (
+    FOCUS_FORMAT,
+    REVIEWED_STRUCTURE_V1,
+    has_canonical_inventory,
+    presentation_payload,
+    reviewed_stage_keys,
+    uses_reviewed_structure,
+    validate_presentation_entry,
+)
 from app.agent_workflows.state import PlanningState
 from app.application.planning_budget import BudgetPolicy
 from app.domain.enums import TaskKnowledgeRole
@@ -92,6 +101,7 @@ def freeze_manifest(
     route_change_hash: str = '',
     *,
     outline_input_format: str | None = None,
+    structure_input_format: str | None = None,
 ) -> dict[str, Any]:
     """Freeze the reviewed pack + budget into an immutable execution manifest.
 
@@ -101,6 +111,10 @@ def freeze_manifest(
     """
     if outline_input_format is not None and outline_input_format != STAGE_SKELETON_V1:
         raise ValueError("unsupported outline_input_format")
+    if structure_input_format is not None and structure_input_format != REVIEWED_STRUCTURE_V1:
+        raise ValueError('unsupported structure_input_format')
+    if structure_input_format is not None and not has_canonical_inventory(pack):
+        raise ValueError('reviewed structure requires a complete frozen knowledge catalog')
     if outline_input_format == STAGE_SKELETON_V1:
         # Existing PlanTaskLink has no optional completion-gate semantics.
         # Reject unsupported blueprint semantics before a Run can be submitted.
@@ -158,6 +172,8 @@ def freeze_manifest(
             "scope": "stage",
             "node_keys": list(spec["node_keys"]),
             "declared_external_prerequisite_keys": sorted(external),
+            **({'structure_input_format': REVIEWED_STRUCTURE_V1}
+               if structure_input_format and spec['stage_key'] in reviewed_stage_keys(pack) else {}),
         })
 
     practice_batches = [{"batch_index": index, "stage_key": spec["stage_key"]}
@@ -196,6 +212,9 @@ def freeze_manifest(
     }
     if outline_input_format is not None:
         manifest["outline_input_format"] = outline_input_format
+    if structure_input_format is not None:
+        manifest['structure_input_format'] = structure_input_format
+        manifest['structure_focus_format'] = FOCUS_FORMAT
     manifest["manifest_hash"] = _canonical_hash(manifest)
     return manifest
 
@@ -235,6 +254,8 @@ def structure_payload(state: PlanningState, batch: dict[str, Any]) -> dict[str, 
     """Local context for one structure batch: this stage only, plus declared deps."""
     manifest = state["manifest"]
     spec = stage_spec(manifest, batch["stage_key"])
+    if uses_reviewed_structure(manifest, batch):
+        return presentation_payload(state, batch, spec)
     pack = state.get("domain_pack") or {}
     owned = set(spec.get("node_keys") or [])
     blueprints = []
@@ -660,12 +681,21 @@ def merge_batches(
     """
     if manifest and (("manifest_hash" in manifest or "outline_input_format" in manifest) and not manifest_is_intact(manifest)
                      or "outline_input_format" in manifest and manifest["outline_input_format"] != STAGE_SKELETON_V1
+                     or 'structure_input_format' in manifest and manifest['structure_input_format'] != REVIEWED_STRUCTURE_V1
+                     or manifest.get('structure_input_format') == REVIEWED_STRUCTURE_V1 and not frozen_pack_is_intact(pack, manifest)
                      or manifest.get("outline_input_format") == STAGE_SKELETON_V1 and not frozen_pack_is_intact(pack, manifest)):
         return {"errors": ["冻结清单或内容完整性校验失败"], "outline": {}, "nodes": [], "units": [],
                 "relations": [], "practice_proposal": {"tasks": [], "task_knowledge_links": []}}
     if (manifest or {}).get("outline_input_format") != STAGE_SKELETON_V1:
         return _merge_batches_legacy(outline, structure_batches, practice_batches, pack, manifest=manifest)
     errors: list[str] = []
+    if (manifest or {}).get('structure_input_format') == REVIEWED_STRUCTURE_V1:
+        state = {'manifest': manifest, 'domain_pack': pack}
+        for batch in manifest['structure_batches']:
+            if not uses_reviewed_structure(manifest, batch):
+                continue
+            entry = next((s for s in structure_batches if s.get('stage_key') == batch['stage_key']), {})
+            errors.extend(validate_presentation_entry(entry, state, batch))
     outline = deepcopy(outline)
     sections = list((outline or {}).get("sections") or [])
     blueprints = {s["stable_key"]: s for s in pack.get("stage_blueprints", [])}
@@ -831,7 +861,9 @@ def merge_batches(
             # Keep full canonical facts through existing catalog persistence:
             # knowledge_nodes has no scope/acceptance columns; units.rubric is
             # versioned JSONB already saved with the owned catalog snapshot.
+            teaching = deepcopy((unit.get('rubric') or {}).get('teaching'))
             unit["rubric"] = {
+                **({'teaching': teaching} if teaching and (manifest or {}).get('structure_focus_format') == FOCUS_FORMAT else {}),
                 "canonical_knowledge": {key: deepcopy(node_blueprints[key])
                     for key in unit.get("node_keys") or [] if key in node_blueprints},
                 "canonical_practice": {task["stable_key"]: {
@@ -1110,6 +1142,9 @@ def run_batched_planning_graph(
     from app.agent_workflows.graphs import PlanningTrace  # local import avoids a cycle
 
     state = _initial_state(initial, manifest)
+    # Bind caller-supplied frozen input outside the mutable interpreter state.
+    if getattr(nodes, 'frozen_input', None) is None:
+        nodes.frozen_input = deepcopy(state)
     frozen = state["manifest"]  # type: ignore[typeddict-item]
     visited: list[str] = []
 
