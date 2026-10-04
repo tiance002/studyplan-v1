@@ -1,5 +1,19 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 v6.8单一真实代表：PAID_REPRESENTATIVE_PATCH_PASS，STOP
+
+用户现在新增能做什么：已有一个真实provider生成、合成确认并在owned PG/获准Edge刷新重登录消费通过的完整Agent5 Plan，可评审内容与体验；正式入口/原产品库/正式Worker未启用，全产品仍STAGING_BLOCKED/NOT_READY。[批准Goal](STUDYPLAN_V6_8_PAID_PROJECTION_GOAL_2026-10-04.md)精确归档，[完整审计/逐笔用量/保护/浏览器/风险](../reviews/2026-10-04-v6-8-paid-projection-representative.md)。起点2ed6485e3cb1b52e199e9c8aeb04f99e3f3cc2b1、feat/n1-resource-discovery、tracked clean，v6.7 patch在祖先链；本轮业务源码/.env/cap/model/API/DTO/迁移/Seed未改。
+
+唯一新Acceptance v68-agent5-synthetic-67ca1224a56f、Run run_3170cfe33c3f4b71b9dd7746b228443f，新owned业务studyplan_test_v68_business_f064eec7/独立checkpoint studyplan_test_v68_checkpoint_a598073d，仅公共Agent5与同v6.5可比零基础synthetic目标。17硬预检PASS、实际提交stage_skeleton_v1/hash绑定、4112chars/5239bytes、当前公网DNS/原guard/directTLS1.3与13+2预算PASS。v6.5旧Acceptance/Run永不复用。
+
+首个outline HTTP200、LLMResult/JSON/shape/冻结6keys/ledger PASS，真实input209998→1351（减少99.35666054%），output4097/length→603/stop，无截断；latency实际16222→3020ms。total1954、cachehit0/miss1351。持久化outline回执和unknown0门禁后才继续structure。6structure+6practice+2local repair完成；A1先缺结构顶层字段，再修复引入未声明子键，第二次repair校验通过，原known失败及绑定保留。normal13/repair2/总15，不再有本轮费用授权。
+
+真实token totals：outline1351/603、structure10114/4336、practice10956/6815、repair6929/1737；总input29350/output13491/total42841；15响应均stop，美元费用NOT OBSERVABLE。12逐阶段canonical门禁PASS；完整Draft与已发布PG逐项核对6stage/6knowledge/18安排/35refs/13extensions/all guidance，canonical知识完整rubric/实践实体、5依赖边/6task知识links/6completion gates精确PASS，额外required task/extension0。无强制Starter或冲突验收。Common Core无project-study/case-study安排，其可替换载体extension正常；用户项目/开放Recipe/RL optional等复用v6.7未变语义证据。
+
+最终owned PG1succeeded Run/15attempt/1approved Draft/1PlanRevision/unresolved0；唯一synthetic confirm、fresh container PG读回/退出/重登录PASS。Chrome工具不可用后用户明确“允许改用Edge”；Edge登录、路线35章节、guidance/extensions/practice、刷新/退出/重登录PASS，Chrome本轮NOT RUN。浏览器一次401登录/403注册保留，注册guard拒绝无副作用；两次登录200/退出200，未打开外部资源链接/模型按钮。生成后模型请求增量0。受控API8028/前端5188验收后关闭，正式Worker OFF。
+
+quota24→39/50、本轮unknown0、搜索新增0/最新6/1000；起始48账本/旧Acceptance/9份v6.5证据/正式.env hash保持，旧unknown不重派。原库/真实用户/RAG/AI2/Cloud2/正式入口/Worker/merge/push均未操作。隔离脚本编码/DTO字段/可选默认/候选topic/login额外字段及最终审计错误保留，纠正后消费与审计PASS，没有模型重发、第二Run或重复confirm。宽unit/frontend build NOT RUN，复用v6.7有效结果；root请求Sol6.1/high、实际NOT OBSERVABLE，无子代理或全局设置修改。普通文档提交SHA动态报告；费用不可回滚、两owned库及证据保留。PAID_REPRESENTATIVE_PATCH_PASS后STOP，整体仍NOT_READY；唯一下一动作是用户验收本轮合成Plan内容与体验。以下为历史时点。
+
 ## 2026-10-04 v6.7 outline投影与内容保护：OUTLINE_PROJECTION_PATCH_READY，STOP
 
 用户现在新增能做什么：未来新提交使用冻结 `stage_skeleton_v1` outline短契约，并确定性保留reviewed知识和practice事实；可据离线与owned PG证据评审下一单一收费代表。本批没有真实模型Plan，正式入口/Worker未启用，全产品仍STAGING_BLOCKED/NOT_READY。[批准Goal](STUDYPLAN_V6_7_OUTLINE_PROJECTION_PATCH_GOAL_2026-10-04.md)逐字节归档，[完整审计/测试/用量/风险/回滚](../reviews/2026-10-04-v6-7-outline-projection-patch.md)。基线df10870add16d658cd706ec26e021d276db0932d、feat/n1-resource-discovery；续接现有成果，不reset/切分支/merge/push。
