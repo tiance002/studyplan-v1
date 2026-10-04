@@ -2,6 +2,8 @@
 
 ## 当前续接入口（2026-10-02）
 
+2026-10-04 最新 [v6.7 Outline Projection Patch](docs/implementation/STUDYPLAN_V6_7_OUTLINE_PROJECTION_PATCH_GOAL_2026-10-04.md) 已到STOP，OUTLINE_PROJECTION_PATCH_READY：未来新提交冻结stage_skeleton_v1并hash绑定，outline短契约4112chars/5239bytes（六阶段离线证据）；完整reviewed事实保留本地并确定性回填。新格式canonical知识title/objectives/scope/acceptance/parent/prerequisites与practice身份/数量/目标/验收/links受到保护；显式optional canonical task超出现有completion契约时冻结前拒绝，optional项目extensions保持。无marker旧Run保持legacy，不回填或重派v6.5；生成/merge/checkpoint恢复前拒绝marker/digest/pack篡改。unit/contract878PASS2NOT RUN，新测试38PASS，owned PG/真实checkpoint7PASS；相邻PG21PASS1FAIL、force-kill单项新owned库复核1PASS，原FAIL与时序风险保留。真实模型请求0、quota24/50、搜索6/1000，未改cap/model/API/DTO/迁移/Seed/正式入口/Worker/RAG；全产品STAGING_BLOCKED/NOT_READY。唯一progress与审计为准，不自动进入收费下一门禁。
+
 2026-10-04 最新 [v6.6 Outline Offline Audit](docs/implementation/STUDYPLAN_V6_6_OUTLINE_OFFLINE_AUDIT_GOAL_2026-10-04.md) 已到STOP，MULTIPLE_CAUSES_CONFIRMED：生产节点/adapter离线重建578108字符；6阶段仍带57sources/179目录审核sections及14份全局教学文档（含AI/Cloud/未选Recipe），另有审核leaf和guide重复。原209998为provider实报，本地char/4估计144527，差31.18%，不假称精确tokenizer。21离线测试PASS；最小skeleton回填18资源安排/35refs/13extensions，但唯一知识正文与次级/冲突practice两类既有保护FAIL明确登记。只建议未来新Run冻结格式标记的局部outline骨架projection/专用shape，未实施生产patch/改cap/新模型调用；quota保持24/50、全产品STAGING_BLOCKED/NOT_READY。不自动进入下一门禁。
 
 2026-10-04 最新 [v6.5 单一收费代表 Goal](docs/implementation/STUDYPLAN_V6_5_PAID_REPRESENTATIVE_GOAL_2026-10-04.md) 已执行到STOP：新owned业务/checkpoint两库、单一Agent5 synthetic Run，免费预检PASS；首个outline HTTP200/finish_reason=length，现有适配器明确截断失败，无repair/重发/第二Run。请求1次、quota23→24/50、本轮unknown0；structure/practice/content protection/confirm/Chrome NOT RUN。最终PAID_REPRESENTATIVE_FAIL、全产品STAGING_BLOCKED/NOT_READY；唯一progress与审计记录为准。授权已消费，不自动追加收费、改预算或进入正式库/入口/Worker/RAG/推送；网络READY保留。

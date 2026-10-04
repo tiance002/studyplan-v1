@@ -1,5 +1,17 @@
 # V2.0实施进度（唯一当前检查点）
 
+## 2026-10-04 v6.7 outline投影与内容保护：OUTLINE_PROJECTION_PATCH_READY，STOP
+
+用户现在新增能做什么：未来新提交使用冻结 `stage_skeleton_v1` outline短契约，并确定性保留reviewed知识和practice事实；可据离线与owned PG证据评审下一单一收费代表。本批没有真实模型Plan，正式入口/Worker未启用，全产品仍STAGING_BLOCKED/NOT_READY。[批准Goal](STUDYPLAN_V6_7_OUTLINE_PROJECTION_PATCH_GOAL_2026-10-04.md)逐字节归档，[完整审计/测试/用量/风险/回滚](../reviews/2026-10-04-v6-7-outline-projection-patch.md)。基线df10870add16d658cd706ec26e021d276db0932d、feat/n1-resource-discovery；续接现有成果，不reset/切分支/merge/push。
+
+新marker进入manifest_hash与既有attempt语义指纹；无marker保持legacy hash/wire/merge/恢复语义，不改历史Run/checkpoint或重派v6.5。新outline只携带短目标/起点/偏好/语义及阶段和知识键、顺序、必要前置；完整resources/章节/guidance/extensions/practice/project-study仍在本地权威数据，structure/practice局部输入未膨胀。独立短system/shape，不全局升级prompt_version/cap/model。六阶段实际adapter离线messages578108→4112chars（减少99.29%）、HTTP816500→5239bytes；真实tokenizer/收费tokens NOT RUN，不把char/4估计当实报。精确回填18安排/35refs/13extensions及全部guidance，五语义路线PASS。
+
+新格式唯一及重复知识恢复title/objectives/scope/acceptance/parent/prerequisites；实践按reviewed身份/数量/目标/范围/交付物/验收/links重建，额外次级任务、强制Starter和冲突acceptance移除，不任意union。现有rubric JSONB持久化完整canonical事实，无迁移/API/DTO或阶段完成规则改变；当前契约不支持显式optional canonical task，新冻结对此fail-closed，optional项目/Starter extensions保持。review发现删除/置空marker可绕过格式门禁，RED确认后在生成/merge/真实checkpoint恢复前补强digest与pack检查；规范JSON比较兼容tuple/array。
+
+本批新unit/Fake PASS38；完整unit/contract PASS878、NOT RUN2（已有symlink权限），exit0。owned业务PG+真实PostgresSaver/checkpoint PASS7，覆盖普通Auth/CSRF新提交、持久化重建、Fake Draft/显式synthetic confirm/Plan回读、新旧恢复、失败不重派与篡改拒绝。相邻恢复PG最终21PASS/1FAIL；force-kill时序单项新owned库复核1PASS，原FAIL保留，未宣称一次全绿或根因完全定位。Ruff/diff PASS；Chrome/frontend build/真实provider/正式发布 NOT RUN。所有RED和中途fixture FAIL保留于var/v67。
+
+本轮真实模型请求0、GitHub/Tavily0，quota24/50与搜索最新6/1000不变；48账本/26Acceptance/9份v6.5证据/正式.env哈希保持，旧unknown不重派。仅owned隔离测试库写入，产品库0、无正式Worker/入口/RAG修改。root请求Sol6.1/high、两个独立worker请求Sol6.1/medium、review请求Sol6.1/high，实际解析均NOT OBSERVABLE；无Astra/Sol max/全局配置修改。普通本地提交后最终SHA动态报告。代码可局部revert；未来已有新格式Run时须保留两格式读取与保护，不改冻结manifest。OUTLINE_PROJECTION_PATCH_READY后STOP；下一最小动作须另行明确授权全新单一Agent5 synthetic收费代表，本轮不自动执行。以下为历史时点。
+
 ## 2026-10-04 v6.6离线outline审计：MULTIPLE_CAUSES_CONFIRMED，STOP
 
 用户现在新增能做什么：可以据精确请求重建/组成表评审局部outline投影patch；本轮未新增真实Plan或改正式行为。[批准Goal](STUDYPLAN_V6_6_OUTLINE_OFFLINE_AUDIT_GOAL_2026-10-04.md)已精确归档，[118组件/Top20/15检查/预算/保护缺口/唯一patch建议](../reviews/2026-10-04-v6-6-outline-token-attribution.md)。起点3074432f4cff2b71507ea0460f75aa46d6fd56ee、feat/n1-resource-discovery、tracked clean；无reset/业务修改/付费/DB/网络。
