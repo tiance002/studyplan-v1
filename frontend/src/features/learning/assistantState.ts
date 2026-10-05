@@ -13,12 +13,12 @@ export function assistantTargetTitle(c:Pick<Conversation,'mode'|'title'|'context
   return c.title.replace(/^(阶段总结|总结辅导|实践辅导|实践 Prompt|Prompt 辅导)\s*[·：:]\s*/,'');
 }
 export const assistantModeLabel = (mode:string) => mode==='summary'?'阶段总结':'实践辅导';
-export function assistantListStatus(c:Pick<Conversation,'has_formal_save'> & Partial<Pick<Conversation,'messages'|'formal_saves'>>):string {
+export function assistantListStatus(c:Pick<Conversation,'has_formal_save'> & Partial<Pick<Conversation,'messages'|'formal_saves'>>):'已保存'|'待确认'|'未保存'|null {
+  if(!c.messages)return null;
   if(c.has_formal_save||c.formal_saves?.length)return '已保存';
-  if(!c.messages)return '未加载';
   return c.messages.some(m=>m.role==='assistant'&&m.status==='ready_to_draft'&&m.proposal)?'待确认':'未保存';
 }
-export const assistantPreview = (c:Partial<Pick<Conversation,'messages'>>) => c.messages?.at(-1)?.content || (c.messages?'还没有消息':'最近消息暂未加载');
+export const assistantPreview = (c:Partial<Pick<Conversation,'messages'>>) => c.messages?.at(-1)?.content || (c.messages?'还没有消息':'');
 export function assistantMatches(c:Pick<Conversation,'mode'|'title'|'context'> & Partial<Pick<Conversation,'messages'>>,mode:string,query:string):boolean {
   return (mode==='全部'||mode==='all'||c.mode===mode)&&`${assistantTargetTitle(c)} ${assistantPreview(c)} ${assistantModeLabel(c.mode)}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());
 }

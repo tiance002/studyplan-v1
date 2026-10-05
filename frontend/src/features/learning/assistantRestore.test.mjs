@@ -9,6 +9,7 @@ const api=url('export const assistantApi={list:(...args)=>globalThis.restoreApi.
 const client=url('export class ApiError extends Error{constructor(status,message){super(message);this.status=status;}};');
 const {ApiError}=await import(client);
 const state=url(compile('./assistantState.ts'));
+const {assistantListStatus,assistantMatches}=await import(state);
 const source=compile('./useAssistant.ts').replace("'react'",JSON.stringify(react)).replace("'../../api/client'",JSON.stringify(client)).replace("'../../api/assistantClient'",JSON.stringify(api)).replace("'./assistantState'",JSON.stringify(state));
 const {useAssistant}=await import(url(source));
 function harness() {
@@ -58,6 +59,14 @@ test('one list page hydrates details with at most four GETs and no mutation',asy
 test('failed detail remains unloaded while other summaries/details are usable',async()=>{
  const h=harness();globalThis.restoreApi={list:async()=>({items:[{conversation_id:'loaded'},{conversation_id:'failed'}],next_cursor:null}),read:async(project,id)=>{if(id==='failed')throw Error('PRIVATE_PROVIDER_TRACE');return {conversation_id:id,plan_id:'plan',messages:[],formal_saves:[],formal_version:0};}};
  h.render();h.effects();let a=h.render();await a.list();a=h.render();assert.equal(a.items.length,2);assert.ok(a.listDetails.loaded);assert.equal(a.listDetails.failed,undefined);assert.equal(a.listError,'');assert.equal(a.listLoaded,true);
+});
+test('detail failure preserves summary fields without guessing status, then GET recovery restores exact states',async()=>{
+ const h=harness(),date=new Date().toISOString();let failure=true,sends=0;
+ const items=['saved','proposal','empty'].map(id=>({conversation_id:id,mode:id==='saved'?'summary':'practice',title:id,context:{},created_at:date,last_activity_at:date,has_formal_save:id==='saved',read_only:id==='saved'}));
+ globalThis.restoreApi={list:async()=>({items,next_cursor:null}),read:async(project,id)=>{if(failure)throw Error('unavailable');return {...items.find(i=>i.conversation_id===id),plan_id:'plan',formal_version:id==='saved'?1:0,formal_saves:id==='saved'?[{save_id:'s'}]:[],messages:id==='proposal'?[{message_id:'m',sequence:1,role:'assistant',status:'ready_to_draft',proposal:'候选',content:'最近内容'}]:[]};},send(){sends++;assert.fail('list recovery must not send');},create(){assert.fail('list recovery must not create');}};
+ h.render();h.effects();let a=h.render();await a.list();a=h.render();assert.deepEqual(a.items,items);assert.deepEqual(a.listDetails,{});
+ for(const item of a.items){assert.equal(assistantListStatus(item),null);assert.equal(assistantMatches(item,item.mode,item.title),true);assert.equal(item.last_activity_at,date);}
+ failure=false;await a.list();a=h.render();assert.deepEqual(items.map(i=>assistantListStatus(a.listDetails[i.conversation_id])),['已保存','待确认','未保存']);assert.equal(a.listDetails.saved.read_only,true);assert.equal(sends,0);
 });
 test('account switch during detail hydration discards private result and stops remaining GETs',async()=>{
  const h=harness(),pending=deferred(),reads=[];globalThis.restoreApi={list:async()=>({items:Array.from({length:8},(_,i)=>({conversation_id:`private${i}`})),next_cursor:null}),read:(project,id)=>{reads.push(id);return pending.promise;}};

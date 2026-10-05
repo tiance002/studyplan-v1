@@ -64,12 +64,21 @@ for(const length of [50,2000,19960])test(`proposal ${length} characters renders 
 
 const listSource=ts.transpileModule(readFileSync(new URL('./SupportingPages.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.React}}).outputText.replace(/export \{.*?\} from .*?;/g,'').replace("'react'",JSON.stringify(reactUrl)).replace("'./assistantState'",JSON.stringify(moduleUrl(compile('./assistantState.ts'))));
 const {ConversationList}=await import(moduleUrl(`import React from ${JSON.stringify(reactUrl)};\n${listSource}`));
-test('formal conversation list renders local search/filters, detail previews and honest unloaded states',()=>{
+test('formal conversation list renders three business states only after detail hydration',()=>{
  const date=new Date().toISOString(),items=['saved','proposal','draft','missing'].map(id=>({conversation_id:id,mode:'summary',title:'阶段总结 · '+id,context:{},has_formal_save:id==='saved',created_at:date,last_activity_at:date}));
  const listDetails=Object.fromEntries(items.slice(0,3).map(item=>[item.conversation_id,{...item,messages:[{...message(item.conversation_id,1,'assistant','reply','最近消息 '+item.conversation_id),status:item.conversation_id==='proposal'?'ready_to_draft':'continue',proposal:item.conversation_id==='proposal'?'候选':null}]}]));
  const html=renderToStaticMarkup(React.createElement(ConversationList,{controller:{items,listDetails,listReady:true,listScope:'scope',listLoaded:true,listLoading:false,list(){},resume(){},open:true,conversation:listDetails.proposal}}));
- for(const copy of ['搜索标题、最近消息或类型','全部','阶段总结','实践辅导','今天','最近消息 saved','待确认','已保存','未保存','未加载','最近消息暂未加载'])assert.ok(html.includes(copy),copy);
+ for(const copy of ['搜索标题、最近消息或类型','全部','阶段总结','实践辅导','今天','最近消息 saved','待确认','已保存','未保存'])assert.ok(html.includes(copy),copy);
+ assert.doesNotMatch(html,/未加载/);
  assert.match(html,/conversation-row selected/);assert.doesNotMatch(html,/刷新会话列表|重新读取状态|打开历史只读取|不请求模型|CONVERSATIONS/);
+});
+test('unhydrated summaries never guess a business status, including saved summary hints',()=>{
+ for(const has_formal_save of [false,true])assert.equal(state.assistantListStatus({has_formal_save}),null);
+ const date=new Date().toISOString();
+ const item={conversation_id:'detail-unavailable',mode:'practice',title:'实践辅导 · 保留卡片标题',context:{},has_formal_save:true,read_only:true,created_at:date,last_activity_at:date};
+ const html=renderToStaticMarkup(React.createElement(ConversationList,{controller:{items:[item],listDetails:{},listReady:true,listScope:'scope',listLoaded:true,listLoading:false,list(){},resume(){}}}));
+ assert.match(html,/保留卡片标题/);assert.match(html,/实践辅导/);assert.match(html,/<time dateTime=/);assert.match(html,/历史路线只读/);
+ assert.doesNotMatch(html,/未加载|conversation-row-status|未保存|待确认|已保存/);
 });
 test('unknown turn renders readonly reconciliation and does not expose technical error classes',()=>{
  const conversation={...base(),mode:'practice',title:'任务',context:{},messages:[{...message('u',1),run_id:'r',run_status:'unknown',error_class:'PRIVATE_TRACE'}]};

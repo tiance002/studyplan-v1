@@ -1,3 +1,12 @@
+## 2026-10-05 Learning Assistant User Acceptance Prep：PRE_USER_ACCEPTANCE_READY / STOP
+
+- 用户现在新增能做什么：我的会话 detail 尚未读取/GET 失败时不再显示第四状态，也不猜未保存；卡片标题/类型/时间保持，成功读取才显示已保存/待确认/未保存。隔离本人入口 http://127.0.0.1:5205/ 已准备，等待本人体验。
+- 开始 HEAD bd6912268cfe33f545b62105c2c7d1f829368d4e、feat/n1-resource-discovery；本地小后继 SHA 见 var/assistant-user-acceptance-prep-20261005/final-audit.json 及答复。仅4个前端源码/测试文件；后端/迁移/API/DTO/OpenAPI diff0，0025保持；原detail hydration及UI/教学合同保持。[本批报告](../acceptance/assistant-user-acceptance-prep-2026-10-05.md)。
+- 前端定向51PASS、原套件27PASS、TypeScript/build PASS；真实安装Edge+ownedAPI首屏无第四状态、单条GET失败保卡且不猜状态、恢复三态、搜索/筛选/selected/助手/历史只读 PASS；截图路径在报告。扩展连接仍通信失败，采用现有Playwright-core驱动本机Edge，未冒称扩展恢复。backend full suite NOT RUN（后端无改动）。
+- 新owned business_a5c03344/checkpoint_36c74c9c复制已有合成库；6既有历史会话两种模式/三态齐全、仍只读，当前revision3可由本人开始新总结/实践。API8050/UI5205/owned normal Worker运行，启动队列可派发0；本人Send才允许新assistant.coach，记录既有全局append-only账本，cap280，unknown STOP，无自动retry/repair/历史重派。准备未新建聊天内容或收费Acceptance。
+- 免费binding/DNS/TLS/dispatch guards PASS；本批新增产品请求0，实际174/280余106；650历史/config/reference文件哈希及12类源owned核心表精确保持；两保护目录未操作。原产品库/正式入口/正式Worker/RAG/WeKnora/部署/push/merge未操作。本轮真实模型 NOT RUN，本人接受 NOT RUN。
+- PRE_USER_ACCEPTANCE_READY仅表示入口与小修准备通过；既有LEARNING_ASSISTANT_CORE_PASS保持，整体STAGING_BLOCKED / NOT_READY。已STOP，下一仅本人体验与明确反馈，不自动使用余额或进入新开发。
+
 ## 2026-10-05 Learning Assistant Final Closure：LEARNING_ASSISTANT_CORE_PASS / STOP
 
 - 用户现在新增能做什么：批准HTML已落正式React，我的会话轻量搜索/分类/三态/最近消息/时间/选中；Chat助手无intent/逐消息consent/内部ID，候选折叠展开、采用/改稿后原服务保存。历史路线只读和既有窄屏保持。新Practice final冻结practice_teach_with_proposal，精确remaining且必须完整非空候选，server ready_to_draft；旧171成功/教学FAIL不改。
