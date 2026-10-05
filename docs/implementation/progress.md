@@ -1,3 +1,13 @@
+## 2026-10-05 Known Invalid JSON → 有界 Batch Repair：非收费 PASS / STOP
+
+- 用户现在新增能做什么：未来新Run的structure/practice在严格JSON失败、已知非截断响应、usage及durable failed attempt证明齐全时，可消耗原planning.repair；新deterministic attempt、Run repair2/request/output预算、完整canonical/task validator保持。没有新本人Run或新路线，本人原第一次生成仍FAIL。
+- 基线88eb3b3492de7dff80ed812011cd09268075e38d、feat/n1-resource-discovery、tracked clean；只读核对/保留1416历史文件与160 request/result SHA，不操作保护目录，不reset/回退/切分支/push/merge。授权原文[本批Goal](STUDYPLAN_KNOWN_INVALID_JSON_REPAIR_GOAL_2026-10-05.md)，具体源码、边界与验收[本批报告](../acceptance/known-invalid-json-repair-2026-10-05.md)。
+- adapter严格parser保持，仅增加HTTP200返回事实；ledger在failed事务commit后返回绑定证明，retained只接受实际failed且error/input/output列一致，冲突拒绝；batch显式失败占位由原validator→repair接手。独立failure receipt无payload/原文，checkpoint精确重建且final不能保存占位；成功batch包括null在内的失败marker拒绝。整批复核闭合failed-row及marker同调用链边界，不修改F1–F4成功语义或公开契约。
+- 原真实G6 body7068bytes/SHA ffffffa319a2217bd889dca2f4c9416d21fc37d78903cbf4a090ccb3bf8d901c：严格parse FAIL事实保持；原冻结18stage/G6 index15未来离线副本→Fake repair1→practice validator PASS，坏原文不进checkpoint。新规则/compiled Fake/受影响unit与contract243 PASS（新58、contract31），negative matrix/budget/admission PASS。原RED和夹具字段/语法/tuple FAIL全部留存。
+- 新owned business/checkpoint真实PG16定向案例PASS：两类完整Draft路径、normal/repair receipt-before-checkpoint恢复零新增Mock HTTP、unknown reconciliation/failed不claim、request/output/repair2、四类durable行冲突。标准owned Worker→PlanService success为succeeded/none/Draft1Plan0，非法repair failed/Draft0，unknown reconciliation/Draft0/repair0，后续均不领取；全部MockTransport/Fake，非真实provider。新临时库回收，全局角色修改0，PG初轮2 fixture FAIL保留，复用有效7项并定向修正2项+扩展7项。
+- 原本人Run run_ba6527a948294cf0bbe9aab1ebc8c729 实际RC owned PG只读PASS：failed、34 succeeded+1 failed=35normal、repair0、Draft0/Plan0，禁止恢复/重派；history/usage/receipt/checkpoint保留。产品真实模型0，产品search/外部RAG0，quota160/200、剩40，原37normal+repair2≤39不变。新真实代表、浏览器/本人内容验收、正式操作NOT RUN。
+- root/关键复核请求Sol6.1 xhigh、PG有界实现medium，actual均NOT OBSERVABLE，不改全局配置。KNOWN_INVALID_JSON_BATCH_REPAIR_PASS / STOP；只有用户下一明确批准才可新Acceptance/新本人Run，余额不自动授权。整体STAGING_BLOCKED / NOT_READY。下节保留原本人真实FAIL事实，不用fixture PASS覆盖。
+
 ## 2026-10-05 本人RC普通生成：已知JSON失败 / STOP，累计160/200
 
 - 用户现在新增能做什么：`tiance7` 唯一普通提交已执行并终止，可在RC刷新读取failed历史；本次无Draft/Plan，不能进入新路线学习。API8034/UI5194保留，临时one-shot Worker已退出，不自动再收费。

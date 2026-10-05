@@ -273,6 +273,7 @@ class OpenAICompatibleLLM:
             return LLMFailure("provider_http_rejected", "Provider rejected the request",
                               details={**diagnostics, "status":response.status_code},
                               latency_ms=int((time.monotonic()-started)*1000))
+        diagnostics.update({'http_status': 200, 'dispatched': True, 'response_received': True})
         failure: dict[str, Any] = {
             "latency_ms": int((time.monotonic()-started)*1000),
             "input_tokens": None,

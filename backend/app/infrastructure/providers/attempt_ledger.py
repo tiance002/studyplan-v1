@@ -6,6 +6,7 @@ import json
 from dataclasses import asdict
 
 import psycopg
+from app.agent_workflows.known_json_failure import attest_failure
 from app.agent_workflows.planning_batches import (
     REPAIR_PURPOSE,
     SHORT_GENERATION_VERSION,
@@ -213,7 +214,7 @@ class PgAttemptLLM:
             raise LLMDispatchUnknownError("Attempt outcome persistence failed") from exc
         if cause:
             raise LLMDispatchUnknownError("Provider outcome unknown") from cause
-        return result
+        return attest_failure(result, run_id, attempt_id) if status == 'failed' else result
 
     def preflight(self, *, purpose, payload, schema_name):
         check=getattr(self.provider,'preflight',None)
@@ -231,5 +232,12 @@ class PgAttemptLLM:
         if row["status"] in {"dispatched", "reconciliation_required"}:
             return LLMFailure("attempt_dispatch_unknown", "Reconcile before another dispatch", dispatch_unknown=True)
         if row["response_payload"]:
-            return LLMFailure(**row["response_payload"])
+            result = LLMFailure(**row['response_payload'])
+            if result.error_class == 'provider_invalid_json':
+                if (row['status'] != 'failed' or row.get('error_class') != result.error_class
+                        or row.get('input_tokens') != result.input_tokens
+                        or row.get('output_tokens') != result.output_tokens):
+                    return LLMFailure('attempt_receipt_conflict', 'Known failed receipt facts mismatch')
+                return attest_failure(result, run_id, row['attempt_id'])
+            return result
         return LLMFailure(row["error_class"] or "attempt_failed", "Retained failed attempt")

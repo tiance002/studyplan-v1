@@ -7,6 +7,8 @@ draft edits use their existing revision/hash workflow.
 
 import json
 from copy import deepcopy
+from app.agent_workflows.known_json_failure import failed_entry, known_invalid_json
+from app.ports.llm import LLMFailure
 
 from app.agent_workflows.planning_structure import (
     check_frozen_structure,
@@ -153,7 +155,23 @@ def checked_projection(state, initial, receipts, *, final=False, pending_repair=
     if pending is not None:
         by_id.pop(pending, None)
 
-    def raw(purpose, stage, index, schema):
+    def receipt_value(value, purpose, stage, index, schema):
+        if value.get('schema_name') != schema:
+            raise ValueError('Retained response schema binding mismatch: ' + stage)
+        if 'failure' in value:
+            kind = {'planning.structure': 'structure', 'planning.practice': 'practice'}.get(purpose)
+            try:
+                failure = LLMFailure(**value['failure'])
+            except (TypeError, ValueError):
+                raise ValueError('Invalid known failure receipt') from None
+            if (kind is None or final or any(k in state for k in ('nodes', 'units', 'relations', 'practice_proposal'))
+                    or state.get('current_' + kind + '_index', 0) != index
+                    or not known_invalid_json(failure, run_id, value['attempt_id'])):
+                raise ValueError('Known failure cannot supply successful projection: ' + stage)
+            return {}, value['attempt_id']
+        return deepcopy(value['payload']), None
+
+    def raw(purpose, stage, index, schema, *, with_failure=False):
         keys = [attempt_key(run_id, purpose, stage, index, 0)]
         if purpose != OUTLINE_PURPOSE:
             keys += [
@@ -163,10 +181,8 @@ def checked_projection(state, initial, receipts, *, final=False, pending_repair=
         retained = [by_id[k] for k in keys if k in by_id]
         if not retained:
             raise ValueError("Independent retained response missing: " + purpose + "/" + stage)
-        value = retained[-1]
-        if value.get("schema_name") != schema:
-            raise ValueError("Retained response schema binding mismatch: " + stage)
-        return deepcopy(value["payload"])
+        produced, failed = receipt_value(retained[-1], purpose, stage, index, schema)
+        return (produced, failed) if with_failure else produced
 
     if state.get("outline") and not any(
         k in state for k in ("nodes", "units", "relations", "practice_proposal")
@@ -183,17 +199,25 @@ def checked_projection(state, initial, receipts, *, final=False, pending_repair=
         if batch is None or any(s["stage_key"] == key for s in structures):
             raise ValueError("Structure stage membership mismatch")
         reviewed = uses_reviewed_structure(manifest, batch)
-        produced = raw(
+        produced, failed = raw(
             STRUCTURE_PURPOSE,
             key,
             batch["batch_index"],
             "ReviewedStructureV1" if reviewed else "KnowledgeStructureV1",
+            with_failure=True,
         )
         expected = (
             presentation_entry(produced, trusted, batch)
             if reviewed
             else {**produced, "stage_key": key, "batch_index": batch["batch_index"]}
         )
+        if failed is not None:
+            expected = failed_entry('structure', trusted, batch['batch_index'], failed)
+            path = difference(json_copy(saved), json_copy(expected), 'failed_structure.' + key)
+            if path:
+                raise ValueError('Derived failure placeholder mismatch: ' + path)
+        elif '_known_invalid_json_attempt' in saved:
+            raise ValueError('Stale failure marker on successful structure: ' + key)
         if saved.get("batch_index") != batch["batch_index"]:
             raise ValueError("Structure batch index mismatch: " + key)
         for field in ("_reviewed_presentation", "nodes", "units", "relations"):
@@ -222,11 +246,20 @@ def checked_projection(state, initial, receipts, *, final=False, pending_repair=
         retained = [by_id[k] for k in keys if k in by_id]
         if not retained or retained[-1].get("schema_name") != "PracticeProposalV1":
             raise ValueError("Independent practice response missing or incompatible: " + key)
+        produced, failed = receipt_value(retained[-1], PRACTICE_PURPOSE, key,
+                                        batch['batch_index'], 'PracticeProposalV1')
         expected = {
             "stage_key": key,
             "batch_index": batch["batch_index"],
-            "payload": deepcopy(retained[-1]["payload"]),
+            "payload": produced,
         }
+        if failed is not None:
+            expected = failed_entry('practice', trusted, batch['batch_index'], failed)
+            path = difference(json_copy(saved), json_copy(expected), 'failed_practice.' + key)
+            if path:
+                raise ValueError('Derived failure placeholder mismatch: ' + path)
+        elif '_known_invalid_json_attempt' in saved:
+            raise ValueError('Stale failure marker on successful practice: ' + key)
         if saved.get("batch_index") != batch["batch_index"]:
             raise ValueError("Practice batch index mismatch: " + key)
         path = difference(

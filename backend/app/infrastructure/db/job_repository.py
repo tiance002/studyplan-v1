@@ -409,6 +409,21 @@ class PgPlanningJobRepository:
                               "WHERE run_id=%s AND status='succeeded'",(run_id,)).fetchall()
             receipts=[{'run_id':r['run_id'],'attempt_id':r['attempt_id'],'schema_name':r['schema_name'],
                        'payload':r['response_payload']['payload']} for r in rows]
+            from app.agent_workflows.known_json_failure import attest_failure, failure_receipt
+            from app.ports.llm import LLMFailure
+            failed=conn.execute("SELECT attempt_id,run_id,schema_name,response_payload,input_tokens,output_tokens "
+                                "FROM ai_provider_attempts WHERE run_id=%s AND status='failed' "
+                                "AND error_class='provider_invalid_json'", (run_id,)).fetchall()
+            for row in failed:
+                if not isinstance(row['response_payload'], dict):
+                    continue
+                result = LLMFailure(**row['response_payload'])
+                if (result.input_tokens, result.output_tokens) != (row['input_tokens'], row['output_tokens']):
+                    raise ConflictError('Known failure usage mismatch', reason='planning_submission_invalid')
+                receipt = failure_receipt(attest_failure(result, run_id, row['attempt_id']),
+                                          run_id, row['attempt_id'], row['schema_name'])
+                if receipt is not None:
+                    receipts.append(receipt)
             fake=conn.execute("SELECT detail FROM ai_run_events WHERE run_id=%s AND status='generation_result' "
                               "AND detail->>'kind'='fake_generation_result' ORDER BY event_id",(run_id,)).fetchall()
             receipts.extend(r['detail']['receipt'] for r in fake)

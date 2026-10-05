@@ -1015,4 +1015,9 @@ class _ScopedLLM:
         if isinstance(result, LLMResult) and self.record_result is not None:
             self.record_result({'run_id':run_id,'attempt_id':attempt_id,'schema_name':schema_name,
                                 'payload':deepcopy(result.payload)},result)
+        elif self.record_result is not None:
+            from app.agent_workflows.known_json_failure import failure_receipt
+            receipt = failure_receipt(result, run_id, attempt_id, schema_name)
+            if receipt is not None:
+                self.record_result(receipt, result)
         return result

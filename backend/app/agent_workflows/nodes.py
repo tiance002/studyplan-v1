@@ -51,6 +51,7 @@ from app.agent_workflows.planning_batches import (
     validate_structure_batch,
 )
 from app.agent_workflows.planning_outline import STAGE_SKELETON_V1, frozen_pack_is_intact, outline_payload
+from app.agent_workflows.known_json_failure import failure_receipt, failed_entry, known_invalid_json
 from app.agent_workflows.planning_structure import (
     REVIEWED_STRUCTURE_V1,
     STRUCTURE_SCHEMA,
@@ -206,7 +207,22 @@ class PlanningNodes:
         if isinstance(result, LLMResult):
             self._raw_receipts.append({'run_id': kwargs['run_id'], 'attempt_id': kwargs['attempt_id'],
                                       'schema_name': kwargs['schema_name'], 'payload': deepcopy(result.payload)})
+        else:
+            receipt = failure_receipt(result, kwargs['run_id'], kwargs['attempt_id'], kwargs['schema_name'])
+            if receipt is not None:
+                self._raw_receipts.append(receipt)
         return result
+
+    def _invalid_json_batch(self, state, result, kind, index, attempt_id):
+        if not known_invalid_json(result, state.get('run_id', ''), attempt_id):
+            return None
+        batches = list(state.get(kind + '_batches') or [])
+        entry = failed_entry(kind, state, index, attempt_id)
+        if index < len(batches):
+            batches[index] = entry
+        else:
+            batches.append(entry)
+        return _with_aggregate({kind + '_batches': batches, 'structure_errors': []}, state)
 
     def check_projection(self, state, *, final=False, pending_repair=False):
         from app.agent_workflows.planning_projection import checked_projection
@@ -698,6 +714,10 @@ class PlanningNodes:
         if isinstance(result, LLMFailure):
             if result.dispatch_unknown:
                 raise LLMDispatchUnknownError(result.error_class)
+            invalid = self._invalid_json_batch(state, result, 'structure', index,
+                attempt_key(state.get('run_id', ''), STRUCTURE_PURPOSE, stage_key, index, 0))
+            if invalid is not None:
+                return invalid
             return _with_aggregate(
                 _extend_generation_errors(state, {
                     "generation_errors": [f"知识结构生成失败：{result.error_class}"],
@@ -729,6 +749,8 @@ class PlanningNodes:
             errors = (validate_presentation_entry(batches[index], state, spec)
                       if uses_reviewed_structure(manifest, spec) else [])
             errors.extend(validate_structure_batch(batches[index], spec, state.get("domain_pack") or {}))
+            if '_known_invalid_json_attempt' in batches[index]:
+                errors.append('已知 JSON 语法失败：结构批次必须有界修复')
         except ValueError:
             return _with_aggregate(_extend_generation_errors(state, {
                 'generation_errors': ['结构校验失败：冻结格式或清单不合法'],
@@ -762,6 +784,10 @@ class PlanningNodes:
         if isinstance(result, LLMFailure):
             if result.dispatch_unknown:
                 raise LLMDispatchUnknownError(result.error_class)
+            invalid = self._invalid_json_batch(state, result, 'practice', index,
+                attempt_key(state.get('run_id', ''), PRACTICE_PURPOSE, stage_key, index, 0))
+            if invalid is not None:
+                return invalid
             return _with_aggregate(
                 _extend_generation_errors(state, {
                     "generation_errors": [f"实践任务生成失败：{result.error_class}"],
@@ -789,6 +815,8 @@ class PlanningNodes:
         structure = next((b for b in (state.get("structure_batches") or [])
                           if b.get("stage_key") == stage_key), {})
         errors = validate_practice_batch(batches[index]["payload"], stage_key, structure)
+        if '_known_invalid_json_attempt' in batches[index]:
+            errors.append('已知 JSON 语法失败：实践批次必须有界修复')
         if errors:
             return _with_aggregate({
                 "structure_errors": errors,
