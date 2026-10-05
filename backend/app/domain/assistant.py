@@ -52,7 +52,7 @@ def validate_reply(value):
     return []
 
 
-def build_input(mode, context, draft, trigger, history, *, natural=False, completed_rounds=None):
+def build_input(mode, context, draft, trigger, history, *, natural=False, completed_rounds=None, teaching_state=None):
     # Only completed turns from this conversation enter history. Immutable
     # identities let us remove duplication without comparing private text.
     omitted = {trigger["message_id"]}
@@ -66,6 +66,10 @@ def build_input(mode, context, draft, trigger, history, *, natural=False, comple
         result["dialogue_contract"] = NATURAL_CHAT
         # One whole-conversation count; never introduce per-issue counters.
         result["completed_rounds"] = completed_rounds if completed_rounds is not None else sum(m["role"] == "assistant" for m in history)
+    if teaching_state is not None:
+        from app.domain.assistant_teaching import TEACHING_CONTRACT
+        result['teaching_contract']=TEACHING_CONTRACT
+        result['teaching_state']=teaching_state
     if len(json.dumps(result, ensure_ascii=False)) > INPUT_LIMIT:
         raise ValidationAppError("本轮原文、工作稿和上下文超过输入上限；请明确缩短后再发送")
     return result

@@ -2,6 +2,7 @@
 from app.agent_workflows.graphs import run_review_graph
 from app.core.errors import AppError, DependencyUnavailableError, ForbiddenError, ValidationAppError
 from app.domain.assistant import ASSISTANT_PURPOSE, assistant_manifest, validate_message, validate_reply
+from app.domain.assistant_teaching import TEACHING_CONTRACT, project_teaching
 from app.domain.prompts import PromptSaveCommand
 from app.domain.summaries import SummarySaveCommand
 from app.ports.llm import LLMDispatchUnknownError, LLMFailure
@@ -115,6 +116,10 @@ class AssistantService:
             return {"review": result.payload}
 
         def validate(value):
+            if turn['payload'].get('teaching_contract')==TEACHING_CONTRACT:
+                try: project_teaching(value,turn['payload']['teaching_state'],turn['payload']['mode'])
+                except ValidationAppError: raise _ReplyFailure('assistant_teaching_invalid') from None
+                return []
             if validate_reply(value):
                 raise _ReplyFailure("assistant_reply_invalid")
             return []

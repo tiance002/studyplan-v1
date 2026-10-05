@@ -1,3 +1,13 @@
+## 2026-10-05 Assistant Teaching State Closure：非收费 PASS / 真实完整链 FAIL / STOP
+
+- 用户现在新增能做什么：未来新自然会话冻结issue-ledger-v1，服务器ID与确定轮次，成功turn/receipt独立重建；第二轮只展示remaining、两轮后只teach unresolved，Summary本地重新表达0请求，候选明确采用/修改后原正式保存。UI/DTO/API/0025无变动，旧自然/显式legacy不回填。真实Summary4轮+正式保存PASS，真实Practice未产生最终Prompt，不能标LEARNING_ASSISTANT_CORE_PASS。
+- 保留HEAD09c8242b1df64f9dc641f67981d2ff967162b210及feat/n1-resource-discovery后继；最终实际SHA见答复/git-final.json。新Goal[原文](STUDYPLAN_ASSISTANT_TEACHING_STATE_CLOSURE_2026-10-05.md)，[分层报告](../acceptance/assistant-teaching-state-closure-2026-10-05.md)。最小状态复用immutable payload/成功attempt，事件独立marker防降级、context/trigger/result_ref/receipt绑定、分页/恢复、resolved不回退、本轮新resolved交叉复问拒绝；破链fail-closed。
+- 163/164原body与派生fixture边界PASS，新unit51/相邻unit-contract183 PASS；owned PG新11/相邻47 PASS；API+Worker MockTransport Summary4/Practice3+采用/改稿/幂等PASS。Frontend61/build输入SHA无变化复用PASS。native new restore精确14消息/7turn/8正式关联/4Summary4Prompt、0025、服务重建ledger/public view PASS。PG3条Windows UTF8 reader warning及初轮fixture/harness FAIL原输出保留，未改保护追绿。
+- Edge actual owned Plan/API PASS：两mode服务器自然渲染、无ID、remaining/teach/本地重新表达/Practice候选、明确采用/自定保存、主区正式版/我的会话/refresh/logout/relogin；恢复/保存新增请求0，provider仅Mock。beforeunload NOT RUN按用户留本人验收。全部非收费+free binding/DNS/TLS PASS才执行新收费。
+- 唯一Acceptance assistant-teaching-closure-synthetic-94c37d3ce90a，新owned两库/合成Plan/账号/两会话，无planner Run。真实165–168 Summary四轮与原服务显式保存1 PASS。169–171 Practice首轮4问、二轮i1 resolved消失/remaining3、三轮只teach i2/i3/i4 PASS，但第171笔proposal=null/statuscontinue，最终Prompt链FAIL即STOP；应用合同目前允许此null分支，无第8次/重试/repair/第二Acceptance。真实Practice保存/paid Edge NOT RUN，7 provider/JSON/Run均succeeded事实保持。
+- 全局append-only165–171/PG/receipt usage reconciliation PASS；累计164→171/280余109，本轮7、repair0、unknown0；13648input+1960output=15608tokens，金额NOT OBSERVABLE。407旧文件/.env SHA保持，163/164原教学结论不改。paid14消息7turn1Summary0Prompt、taskpending无完成污染。搜索/RAG0，原库/正式入口/正式Worker/部署/push/merge/全局配置 NOT RUN。临时owned8045/Worker与5202已关闭，库/备份保留。
+- 请求root关键Sol6.1xhigh、有界测试Sol6.1medium、机械fixtureLunamedium，actual NOT OBSERVABLE。CORE FAIL，整体STAGING_BLOCKED / NOT_READY，已STOP。下一仅新有界Practice teach强制候选合同评审/离线反例与PG，未实施；不能用余额自动补发或重派历史。
+
 ## 2026-10-05 Learning Assistant V1.1：非收费 PASS / 真实教学 FAIL / STOP
 
 - 用户现在新增能做什么：简洁自然聊天、本地固定欢迎0调用、默认恢复精确位置最近会话、菜单新建；候选Summary/Prompt明确采用或修改后交给原正式保存服务，主区刷新正式结果。会话与正式产物分离，完成/canonical/source/task门禁保持。教学prompt已实现，但实际第二轮遵守失败，不能宣称真实教学闭环通过。

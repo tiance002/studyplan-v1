@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from app.core.errors import ConflictError, IdempotencyConflictError, NotFoundError, ValidationAppError, VersionConflictError
 from app.core.ids import content_hash, new_id
 from app.domain.assistant import ASSISTANT_PROTOCOL, build_input, manifest_intact, validate_message, validate_reply, project_reply
+from app.domain.assistant_teaching import TEACHING_CONTRACT, initial_state, project_teaching, advance_state
 from app.domain.prompts import prompt_review_context
 from app.domain.summaries import review_rubric_context
 from app.infrastructure.db.learning_exposures import PgLearningExposures, _json
@@ -19,6 +20,71 @@ class PgAssistant(PgSummaries):
     receipt_table = "assistant_receipts"
 
     @staticmethod
+    def _teaching_binding(row):
+        return {k:row[k] for k in ('conversation_id','project_id','actor_id','plan_id','plan_revision','stage_id','task_id','context_hash')}
+
+    @staticmethod
+    def _bound_record(conn, project, identifier, message):
+        return conn.execute("""SELECT a.response_payload,t.payload,t.payload_hash,t.manifest,t.context_hash,t.actor_id
+            FROM assistant_messages m
+            JOIN assistant_turns t ON t.run_id=m.run_id AND t.conversation_id=m.conversation_id
+                AND t.project_id=m.project_id AND t.trigger_message_id=m.trigger_message_id
+                AND t.draft_message_id IS NOT DISTINCT FROM m.draft_message_id
+            JOIN ai_runs r ON r.run_id=m.run_id AND r.result_ref=m.message_id AND r.project_id=t.project_id AND r.actor_id=t.actor_id
+            JOIN ai_provider_attempts a ON a.run_id=m.run_id AND a.attempt_id=m.run_id||':assistant_reply:1'
+            WHERE m.project_id=%s AND m.conversation_id=%s AND m.message_id=%s AND m.role='assistant'
+            AND r.kind='assistant_reply' AND r.graph_version=%s AND r.status='succeeded'
+            AND a.status='succeeded' AND a.prompt_version=%s AND a.schema_name='AssistantReplyV1'""",
+            (project,identifier,message['message_id'],ASSISTANT_PROTOCOL,ASSISTANT_PROTOCOL)).fetchone()
+
+    def _teaching_history(self,conn,row):
+        """Rebuild from immutable successful turn/receipt pairs, including pagination.
+
+        First frozen turn chooses legacy or this contract; failures do not advance
+        it. Nothing is written to an old conversation, manifest, or receipt.
+        """
+        project,identifier=row['project_id'],row['conversation_id']
+        turns=conn.execute("""SELECT t.*,r.status,r.result_ref,m.sequence,m.content,m.intent,m.draft_message_id trigger_draft
+            FROM assistant_turns t JOIN ai_runs r ON r.run_id=t.run_id
+            JOIN assistant_messages m ON m.message_id=t.trigger_message_id AND m.conversation_id=t.conversation_id
+            WHERE t.project_id=%s AND t.conversation_id=%s ORDER BY m.sequence""",(project,identifier)).fetchall()
+        state=initial_state(self._teaching_binding(row));projections={}
+        if not turns:return state,projections,None
+        marker=turns[0]['payload'].get('teaching_contract')
+        if marker is None:
+            if (any('teaching_contract' in t['payload'] for t in turns)
+                    or conn.execute("SELECT 1 FROM ai_run_events e JOIN assistant_turns t USING(run_id) WHERE t.conversation_id=%s AND e.status='submission' AND e.detail ? 'teaching_contract' LIMIT 1",(identifier,)).fetchone()):
+                raise ConflictError('冻结教学协议不能降级或静默升级')
+            return state,projections,False
+        if marker!=TEACHING_CONTRACT:raise ConflictError('未知冻结教学协议')
+        for turn in turns:
+            payload=turn['payload']
+            expected_event=dict(kind='assistant_reply_submission',actor_id=row['actor_id'],project_id=project,
+                conversation_id=identifier,trigger_message_id=turn['trigger_message_id'],manifest=turn['manifest'],payload_hash=turn['payload_hash'])
+            expected_event['teaching_contract']=TEACHING_CONTRACT
+            events=conn.execute("SELECT detail FROM ai_run_events WHERE run_id=%s AND status='submission'",(turn['run_id'],)).fetchall()
+            if (payload.get('teaching_contract')!=TEACHING_CONTRACT or payload.get('teaching_state')!=state
+                    or content_hash(payload)!=turn['payload_hash'] or not manifest_intact(turn['manifest'])
+                    or turn['actor_id']!=row['actor_id'] or turn['context_hash']!=row['context_hash']
+                    or payload.get('context')!=row['context'] or payload.get('mode')!=row['mode']
+                    or payload.get('current_message')!=dict(message_id=turn['trigger_message_id'],intent=turn['intent'],content=turn['content'])
+                    or turn['trigger_draft']!=turn['draft_message_id']
+                    or len(events)!=1 or events[0]['detail']!=expected_event):
+                raise ConflictError('教学问题来源或冻结状态不一致')
+            if turn['status']!='succeeded':continue
+            message=conn.execute('SELECT * FROM assistant_messages WHERE message_id=%s AND conversation_id=%s',(turn['result_ref'],identifier)).fetchone()
+            record=self._bound_record(conn,project,identifier,message) if message else None
+            if not record:raise ConflictError('成功教学回执绑定缺失')
+            try: projection=project_teaching(record['response_payload']['payload'],state,row['mode'])
+            except (ValidationAppError,KeyError,TypeError):raise ConflictError('成功教学回执合同不一致') from None
+            if projection['reply']!=message['content']:raise ConflictError('教学消息与来源回执不一致')
+            projections[message['message_id']]=projection
+            state=advance_state(state,projection,dict(run_id=turn['run_id'],message_id=message['message_id'],trigger_message_id=turn['trigger_message_id']))
+        if conn.execute("SELECT count(*) n FROM assistant_messages WHERE conversation_id=%s AND role='assistant'",(identifier,)).fetchone()['n']!=len(projections):
+            raise ConflictError('教学消息来源缺失')
+        return state,projections,True
+
+    @staticmethod
     def _conversation(conn, project, identifier):
         row = conn.execute("SELECT * FROM assistant_conversations WHERE project_id=%s AND conversation_id=%s", (project,identifier)).fetchone()
         if not row: raise NotFoundError("学习会话不存在")
@@ -30,21 +96,14 @@ class PgAssistant(PgSummaries):
         plan = PgLearningExposures._plan(conn,row["project_id"],row["plan_id"],current=True)
         if plan["revision"] != row["plan_revision"]: raise ConflictError("会话路线版本已改变，只能阅读旧会话")
 
-    @staticmethod
-    def _proposal(conn, project, identifier, message):
+    def _proposal(self,conn, project, identifier, message):
         # Successful server-bound message + exact durable attempt. Never accept
         # identity or proposal supplied by a client/provider extra field.
-        record=conn.execute("""SELECT a.response_payload FROM assistant_messages m
-            JOIN assistant_turns t ON t.run_id=m.run_id AND t.conversation_id=m.conversation_id
-                AND t.project_id=m.project_id AND t.trigger_message_id=m.trigger_message_id
-                AND t.draft_message_id IS NOT DISTINCT FROM m.draft_message_id
-            JOIN ai_runs r ON r.run_id=m.run_id AND r.result_ref=m.message_id AND r.project_id=t.project_id AND r.actor_id=t.actor_id
-            JOIN ai_provider_attempts a ON a.run_id=m.run_id AND a.attempt_id=m.run_id||':assistant_reply:1'
-            WHERE m.project_id=%s AND m.conversation_id=%s AND m.message_id=%s AND m.role='assistant'
-            AND r.kind='assistant_reply' AND r.graph_version=%s AND r.status='succeeded'
-            AND a.status='succeeded' AND a.prompt_version=%s AND a.schema_name='AssistantReplyV1'""",
-            (project,identifier,message['message_id'],ASSISTANT_PROTOCOL,ASSISTANT_PROTOCOL)).fetchone()
+        record=self._bound_record(conn,project,identifier,message)
         if not record: return None
+        if 'teaching_contract' in record['payload']:
+            row=self._conversation(conn,project,identifier)
+            return self._teaching_history(conn,row)[1].get(message['message_id'])
         try: projection=project_reply(record['response_payload']['payload'])
         except (ValidationAppError,KeyError,TypeError): return None
         if projection['reply'] != message['content']: return None
@@ -62,12 +121,13 @@ class PgAssistant(PgSummaries):
         result['messages_truncated']=len(messages)>120
         result['message_cursor']=messages[119]['sequence'] if len(messages)>120 else None
         result['messages']=list(reversed(messages[:120]))
+        _,teaching_projections,modern=self._teaching_history(conn,row)
         if include_messages and before_sequence is None and row['current_draft_message_id'] and not any(m['message_id']==row['current_draft_message_id'] for m in result['messages']):
             draft=conn.execute("""SELECT m.*,r.status AS run_status,r.version AS run_version,r.error_class FROM assistant_messages m LEFT JOIN ai_runs r USING(run_id)
                 WHERE m.message_id=%s AND m.conversation_id=%s""",(row['current_draft_message_id'],identifier)).fetchone()
             if draft: result['messages'].insert(0,draft)
         for message in result['messages']:
-            projection=self._proposal(conn,project,identifier,message) if message['role']=='assistant' else None
+            projection=(teaching_projections.get(message['message_id']) if modern else self._proposal(conn,project,identifier,message)) if message['role']=='assistant' else None
             message['status']=projection['status'] if projection else None
             message['proposal']=projection['proposal'] if projection else None
         result['last_activity_at']=conn.execute('SELECT coalesce(max(created_at),%s) AS stamp FROM assistant_messages WHERE project_id=%s AND conversation_id=%s',(row['created_at'],project,identifier)).fetchone()['stamp']
@@ -177,7 +237,11 @@ class PgAssistant(PgSummaries):
                 original=next(m for m in messages if m['message_id']==reply['trigger_message_id'])
                 pairs.extend((original,reply))
             projected_draft={k:draft[k] for k in ('message_id','content')} if draft else None
-            try: payload=build_input(row['mode'],row['context'],projected_draft,trigger,pairs,natural=natural,completed_rounds=sum(m['role']=='assistant' for m in messages))
+            teaching_state,_,modern=self._teaching_history(conn,row)
+            teaching_state=teaching_state if modern or modern is None and natural else None
+            if teaching_state is not None and teaching_state['step']=='manual_revision':
+                raise ConflictError('本会话直接教学已到上限；仍可从主页面非AI保存原文，或明确新建会话')
+            try: payload=build_input(row['mode'],row['context'],projected_draft,trigger,pairs,natural=natural or modern is True,completed_rounds=sum(m['role']=='assistant' for m in messages),teaching_state=teaching_state)
             except ValidationAppError:
                 error='assistant_input_too_large'; payload=None
             seq=max((m['sequence'] for m in messages),default=0)+1
@@ -194,6 +258,7 @@ class PgAssistant(PgSummaries):
                 (run_id,project,scope.actor_id,identifier,message_id,draft['message_id'] if draft else None,row['context_hash'],Jsonb(manifest),Jsonb(payload),content_hash(payload)))
             if intent=='work_draft': conn.execute('UPDATE assistant_conversations SET current_draft_message_id=%s WHERE conversation_id=%s',(message_id,identifier))
             submission=dict(kind='assistant_reply_submission',actor_id=scope.actor_id,project_id=project,conversation_id=identifier,trigger_message_id=message_id,manifest=manifest,payload_hash=content_hash(payload))
+            if teaching_state is not None:submission['teaching_contract']=TEACHING_CONTRACT
             conn.execute("INSERT INTO ai_run_events(run_id,status,detail) VALUES(%s,'submission',%s)",(run_id,Jsonb(submission)))
             conn.execute("INSERT INTO ai_jobs(job_id,run_id,job_key,status) VALUES(%s,%s,%s,'pending')",(new_id('job'),run_id,'assistant:'+run_id))
             self._record(conn,scope,project,key,'message',fingerprint,dict(run_id=run_id,message_id=message_id))
@@ -207,6 +272,7 @@ class PgAssistant(PgSummaries):
             events=conn.execute("SELECT detail FROM ai_run_events WHERE run_id=%s AND status='submission'",(claim.run_id,)).fetchall()
             expected=dict(kind='assistant_reply_submission',actor_id=claim.actor_id,project_id=claim.project_id,
                 conversation_id=row['conversation_id'],trigger_message_id=row['trigger_message_id'],manifest=row['manifest'],payload_hash=row['payload_hash'])
+            if 'teaching_contract' in row['payload']:expected['teaching_contract']=row['payload']['teaching_contract']
             if len(events)!=1 or events[0]['detail']!=expected: raise ValidationAppError('助手独立冻结提交不一致')
             trigger=conn.execute("SELECT * FROM assistant_messages WHERE message_id=%s AND conversation_id=%s AND project_id=%s AND role='user'",(row['trigger_message_id'],row['conversation_id'],claim.project_id)).fetchone()
             if not trigger or row['payload']['current_message']!={k:trigger[k] for k in ('message_id','intent','content')} or trigger['draft_message_id']!=row['draft_message_id']: raise ValidationAppError('助手触发原文不一致')
@@ -216,6 +282,7 @@ class PgAssistant(PgSummaries):
             elif row['payload']['work_draft'] is not None: raise ValidationAppError('助手工作稿绑定不一致')
             convo=self._conversation(conn,claim.project_id,row['conversation_id'])
             if row['context_hash']!=convo['context_hash'] or row['payload']['context']!=convo['context']: raise ValidationAppError('助手冻结上下文不一致')
+            self._teaching_history(conn,convo)
             return row
 
     def finish(self,claim,turn,reply=None,error=None,unknown=False):
@@ -228,11 +295,15 @@ class PgAssistant(PgSummaries):
                 self._conversation(conn,claim.project_id,turn['conversation_id'])
             identifier=None
             if reply is not None:
-                if validate_reply(reply): raise ValidationAppError('助手回复格式无效')
+                if turn['payload'].get('teaching_contract')==TEACHING_CONTRACT:
+                    projection=project_teaching(reply,turn['payload']['teaching_state'],turn['payload']['mode'])
+                else:
+                    if validate_reply(reply): raise ValidationAppError('助手回复格式无效')
+                    projection=project_reply(reply)
                 identifier=new_id('amsg')
                 seq=conn.execute('SELECT coalesce(max(sequence),0)+1 AS n FROM assistant_messages WHERE conversation_id=%s',(turn['conversation_id'],)).fetchone()['n']
                 conn.execute("""INSERT INTO assistant_messages(message_id,project_id,conversation_id,sequence,role,intent,content,run_id,draft_message_id,trigger_message_id)
-                    VALUES(%s,%s,%s,%s,'assistant','reply',%s,%s,%s,%s)""",(identifier,claim.project_id,turn['conversation_id'],seq,reply['reply'],claim.run_id,turn['draft_message_id'],turn['trigger_message_id']))
+                    VALUES(%s,%s,%s,%s,'assistant','reply',%s,%s,%s,%s)""",(identifier,claim.project_id,turn['conversation_id'],seq,projection['reply'],claim.run_id,turn['draft_message_id'],turn['trigger_message_id']))
             status='succeeded' if identifier else ('reconciliation_required' if unknown else 'failed')
             conn.execute("UPDATE ai_runs SET status=%s,next_action=%s,result_ref=%s,error_class=%s,version=version+1,updated_at=clock_timestamp() WHERE run_id=%s",(status,'reconcile' if unknown else 'none',identifier,error,claim.run_id))
             conn.execute('UPDATE ai_jobs SET status=%s,lease_token=NULL,lease_expires_at=NULL WHERE job_id=%s',('completed' if identifier else ('reconciliation_required' if unknown else 'failed'),claim.job_id))

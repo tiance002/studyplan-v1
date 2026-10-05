@@ -38,7 +38,9 @@ def _start(client, query, headers, cmd, *, mode="summary", force_new=False, key=
 
 
 def _send(client, query, headers, conversation, text, *, key=None, **fields):
-    body = dict(content=text, idempotency_key=key or new_id("send"), **fields)
+    # Existing V1.1 cases preserve the genuine explicit-intent legacy contract.
+    # New natural issue-ledger turns are covered by teaching_state_pg separately.
+    body = dict(intent=fields.pop('intent','work_draft'),content=text, idempotency_key=key or new_id("send"), **fields)
     response = client.post(BASE + "/" + conversation + "/messages", params=query, headers=headers, json=body)
     assert response.status_code == 202, response.text
     return response.json(), body
@@ -50,9 +52,9 @@ def _outcome(provider, reply, status="continue", proposal=None, **extras):
 
 
 def _round(client, query, headers, container, provider, conversation, text, reply,
-           *, status="continue", proposal=None, **extras):
+           *, status="continue", proposal=None, natural=False, **extras):
     _outcome(provider, reply, status, proposal, **extras)
-    queued, request = _send(client, query, headers, conversation, text)
+    queued, request = _send(client, query, headers, conversation, text, intent=None if natural else 'work_draft')
     run = queued["messages"][-1]["run_id"]
     assert container.planning_worker.tick()
     response = client.get(BASE + "/" + conversation, params=query)
@@ -107,9 +109,9 @@ def test_scripted_batched_teaching_then_proposal_adopt_and_custom_save(setup, mo
                 message_id="model-fake-message", conversation_id="model-fake-conversation", run_id="model-fake-run",
                 role="system", actor_id="model-fake-actor", project_id="model-fake-project", task_id="model-fake-task",
                 metadata={"accepted": True, "verified": True}, unrelated=["ignored"])
-            assert "intent" not in body and "consent_to_model" not in body
+            assert body['intent']=='work_draft' and "consent_to_model" not in body
             frozen = provider.calls[-1]["payload"]
-            assert frozen["dialogue_contract"] == NATURAL_CHAT and frozen["completed_rounds"] == index
+            assert 'teaching_contract' not in frozen
             assert frozen["current_message"]["content"] == text
             assert message["message_id"] != "model-fake-message" and message["run_id"] != "model-fake-run"
             assert view["conversation_id"] == conversation and view["stage_id"] == cmd.stage_id
@@ -156,7 +158,7 @@ def test_good_initial_input_can_be_ready_without_forced_rounds(setup, mode):
         view, ready, _ = _round(client, q, headers, container, provider, view["conversation_id"],
             "输入与授权边界、失败回执和验收条件已经明确。", "初稿符合当前要求，可以整理。",
             status="ready_to_draft", proposal="只整理已经讨论的当前要求。")
-        assert provider.calls[0]["payload"]["completed_rounds"] == 0 and len(provider.calls) == 1
+        assert 'teaching_contract' not in provider.calls[0]['payload'] and len(provider.calls) == 1
         assert ready["status"] == "ready_to_draft" and _formal_counts(db, cmd.project_id) == (0, 0, 0)
 
 
@@ -322,8 +324,9 @@ def test_whole_conversation_completed_rounds_survives_six_round_history_window(s
         headers = login(client, db, scope)
         view, _ = _start(client, q, headers, cmd)
         for index in range(8):
-            _round(client, q, headers, container, provider, view["conversation_id"], f"自然消息 {index}", f"继续解释 {index}")
-            assert provider.calls[-1]["payload"]["completed_rounds"] == index
+            _round(client, q, headers, container, provider, view["conversation_id"], f"自然消息 {index}", f"继续解释 {index}",natural=index>0)
+            if index:assert provider.calls[-1]["payload"]["completed_rounds"] == index
+            assert 'teaching_contract' not in provider.calls[-1]['payload']
             assert len(provider.calls[-1]["payload"]["history"]) <= 12
         assert provider.calls[-1]["payload"]["completed_rounds"] == 7
         assert len(provider.calls[-1]["payload"]["history"]) == 12
