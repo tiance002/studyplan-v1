@@ -1,3 +1,20 @@
+## 2026-10-05 Learning Assistant Final Closure：LEARNING_ASSISTANT_CORE_PASS / STOP
+
+- 用户现在新增能做什么：批准HTML已落正式React，我的会话轻量搜索/分类/三态/最近消息/时间/选中；Chat助手无intent/逐消息consent/内部ID，候选折叠展开、采用/改稿后原服务保存。历史路线只读和既有窄屏保持。新Practice final冻结practice_teach_with_proposal，精确remaining且必须完整非空候选，server ready_to_draft；旧171成功/教学FAIL不改。
+- 基线31e739f5d395c312042bf9799ddfa37523e8f94d、feat/n1-resource-discovery后继保留；最终actual HEAD见var/assistant-core-closure-20261005/git-final.json及本批答复。migration0025保持、无API/DTO/schema变化。批准[Goal](STUDYPLAN_ASSISTANT_CORE_CLOSURE_2026-10-05.md)，[分层验收/来源文件/七类截图](../acceptance/assistant-core-closure-2026-10-05.md)。reference绝对路径与SHA在报告；555旧文件/config/ledger/reference bytes保持，两保护目录未操作。
+- 非收费unit/contract1356PASS2NOT RUN（Windows未提权目录symlink创建不可用）；包含定向177PASS；owned PG/API/standardWorker74PASS；Fake Summary4/Practice3+采用/自定保存/恢复PASS；frontend52+原27PASS/buildPASS。Edge实际ownedAPI+Fake消费、133/2000/19960字末行/操作/composer、展开收起锚定与首行重置、inline known/unknown、选中/搜索/三态、refresh/logout/relogin、close/reopen、旧Plan只读、390px与截图人工结构对照PASS。不是以总数代替教学/视觉证据。
+- 非收费全门禁及免费binding/DNS/TLS/security guard PASS后，唯一Acceptance assistant-core-closure-synthetic-f95d70a84a6c、新owned business_f1af4a11/checkpoint_ab386e2c/合成Plan与Practice会话；无新本人规划Run。真实172(1237in/209out)、173(1998/290)、174(2511/1171)均stop/provider/application/teaching PASS：集中4问→i2 resolved仅问i1/i3/i4→只teach remaining且772字最终Prompt，server ready_to_draft。原正式保存version1/PG/API/main页面/我的会话已保存PASS，保存/消费增量0。
+- 全局append-only171→174/280余106，本轮3、unknown0、duplicate0、repair0；5746input+1670output，金额NOT OBSERVABLE。本批真实Summary NOT RUN，165–168原PASS保持；历史163–171/旧failed/unknown未重派改写。taskpending、无verified或阶段完成污染；原库写入0，正式入口/正式Worker/RAG/启动数据/部署/push/merge NOT RUN。
+- 临时owned8046/8047/5203/5204无监听/对应进程，库/证据保留。浏览器连接在已保存实际消费截图后断开，临时viewport reset NOT RUN，不冒称已清理；本人后续验收再连接。root请求Sol6.1xhigh、有界前端/PG medium，actual NOT OBSERVABLE。
+- 核心LEARNING_ASSISTANT_CORE_PASS，整体STAGING_BLOCKED / NOT_READY。已STOP，下一仅本人对正式React/学习助手的体验接受及另行正式操作授权；不因余106自动收费或进入下一开发阶段。
+
+## 2026-10-05 Learning Assistant Final Closure：启动记录（历史时点，已由下方最终记录续接）
+
+- 用户现在新增能做什么：本批批准HTML正式落React、Practice两轮后强制最终候选合同；正在非收费验收，尚未声明核心PASS。
+- 启动实际HEAD31e739f5d395c312042bf9799ddfa37523e8f94d、feat/n1-resource-discovery、tracked clean；0025保持。唯一批准[Goal](STUDYPLAN_ASSISTANT_CORE_CLOSURE_2026-10-05.md)，reference/hash/555历史保护在var/assistant-core-closure-20261005/baseline.json。两保护目录不操作。
+- 账本实际171/280余109；非收费门禁全部PASS后才唯一新Acceptance至多3次Practice，repair0，无Summary收费。旧171provider/application成功与教学FAIL保持，不重派或回改。原库/正式入口/Worker/RAG/部署/push/merge禁止，整体STAGING_BLOCKED / NOT_READY。
+- root关键合同/预算请求Sol6.1xhigh，独立frontend/PG有界Sol6.1medium，actual NOT OBSERVABLE；同问题反例一次整合，无重复长历史调查。当前新ownedFake全链PASS，最终分层与Edge仍进行中。
+
 ## 2026-10-05 Assistant Teaching State Closure：非收费 PASS / 真实完整链 FAIL / STOP
 
 - 用户现在新增能做什么：未来新自然会话冻结issue-ledger-v1，服务器ID与确定轮次，成功turn/receipt独立重建；第二轮只展示remaining、两轮后只teach unresolved，Summary本地重新表达0请求，候选明确采用/修改后原正式保存。UI/DTO/API/0025无变动，旧自然/显式legacy不回填。真实Summary4轮+正式保存PASS，真实Practice未产生最终Prompt，不能标LEARNING_ASSISTANT_CORE_PASS。

@@ -1,0 +1,124 @@
+{
+  "provenance": {
+    "source_body": "var/assistant-teaching-closure-20261005/paid/responses/171.body",
+    "source_body_sha256": "88fc1b4a18f9daa3a708d197a35ddbb2294f6f916db465c39571f0ad292a1209",
+    "source_receipt_sha256": "004446ea1135b8b0651a5656e630f58c5cce319fcc30ec1caaf74eb5c5e8e816",
+    "original_provider_and_application_result": "succeeded",
+    "historical_teaching_result": "FAIL"
+  },
+  "original_provider_payload": {
+    "phase": "teach",
+    "reply": "你的疑问集中在超时证据、验收含义和任务范围上，下面逐项说明。",
+    "evaluation": [
+      {
+        "issue_id": "i1",
+        "state": "resolved"
+      },
+      {
+        "issue_id": "i2",
+        "state": "unresolved"
+      },
+      {
+        "issue_id": "i3",
+        "state": "unresolved"
+      },
+      {
+        "issue_id": "i4",
+        "state": "unresolved"
+      }
+    ],
+    "teaching": [
+      {
+        "issue_id": "i2",
+        "explanation": "超时不能当作成功。验收要求超时返回可检查错误，所以超时后应返回一个明确的状态或错误标记（例如 status=timeout 或 error=timeout），并附带可检查的说明信息，让用户能据此判断这次调用是超时而非正常答案。只返回一个普通答案会让用户无法区分成功和超时，因此不满足验收。"
+      },
+      {
+        "issue_id": "i3",
+        "explanation": "本任务的范围内只有两项：校验输入、处理超时。部署和收款属于 out_scope，明确排除，不应在本任务中实施，也不应产生任何外部副作用。把它们顺便做进来会超出既定范围，无法通过对本任务的验收。"
+      },
+      {
+        "issue_id": "i4",
+        "explanation": "正常时输出应当是答案本身，结构清晰、可直接读取。发生空输入拒绝或超时时，输出不能只包含答案，而应包含可检查的错误标记或状态字段，让用户能区分正常结果与错误结果。也就是说，正常答案与错误结果的结构应当分开：正常给答案；拒绝或超时给带错误标记的结果。"
+      }
+    ],
+    "proposal": null
+  },
+  "frozen_teaching_state": {
+    "step": "resolve",
+    "issues": [
+      {
+        "state": "resolved",
+        "topic": "输入校验",
+        "issue_id": "i1",
+        "question": "验收标准要求空输入被拒绝，但你的描述说“输入不用检查”。请说明：对空输入以及不合法输入，助手应该分别返回什么可检查的结果？",
+        "followup_question": null
+      },
+      {
+        "state": "unresolved",
+        "topic": "超时处理",
+        "issue_id": "i2",
+        "question": "验收标准要求超时返回可检查错误，但你的描述说“超时当成功”。请说明：超时后应当返回什么错误信息或状态，用户如何判断这次调用是超时而非成功？",
+        "followup_question": "你仍写超时当成功，但验收要求超时返回可检查错误。请明确：超时后返回什么状态或错误标记，用户如何判断这是超时而非成功答案？"
+      },
+      {
+        "state": "unresolved",
+        "topic": "范围边界",
+        "issue_id": "i3",
+        "question": "你提到“顺便部署和收款”，但这不在本任务范围内。请确认：本任务是否只包括校验输入与处理超时这两项，部署和收款是否应明确排除？",
+        "followup_question": "你仍提到部署和收款，但这不在本任务范围内。请确认：本任务是否只包括校验输入与处理超时，部署和收款是否明确排除且不产生任何外部副作用？"
+      },
+      {
+        "state": "unresolved",
+        "topic": "输出内容",
+        "issue_id": "i4",
+        "question": "你要求“只返回答案即可”。请说明：在发生空输入拒绝或超时错误时，输出是否仍然只包含答案，还是应包含可检查的错误标记？正常答案与错误结果的结构分别是什么？",
+        "followup_question": "空输入拒绝已有说明，但超时或拒绝时输出是否仍只包含答案？请分别说明正常答案与错误结果的结构，错误时是否需要可检查的错误标记？"
+      }
+    ],
+    "binding": {
+      "plan_id": "pln_f4bbf9e7648947e89e19ab77c901119d",
+      "task_id": "task-lpr_9583df3ea67348fd87e66f52db3022c4",
+      "actor_id": "usr_a5d5f69025f148efa590ceb564c40d9d",
+      "stage_id": "stg_74695c3d4eb24c1a822bda182981fa36",
+      "project_id": "lpr_9583df3ea67348fd87e66f52db3022c4",
+      "context_hash": "ef47589693a12ba74d224b2caea1973f23acee2ef4710588e2e32ca368c15d60",
+      "plan_revision": 2,
+      "conversation_id": "aconv_f014d1a87bd2405ebea7b381ecf5f4f6"
+    },
+    "contract": "issue-ledger-v1",
+    "previous": {
+      "run_id": "run_30c1d18fb55444fc827a6a34897571ea",
+      "message_id": "amsg_60e107adf3fd4a4ab75d3ef88112b7a6",
+      "trigger_message_id": "amsg_031805cfd3ef44048c57ad662d6ee638"
+    },
+    "ledger_source": {
+      "run_id": "run_272905f310a3468690a89b9c2eab7eb7",
+      "message_id": "amsg_326c59245db84285a906ba90acf93484",
+      "trigger_message_id": "amsg_47e2f3a0eca24f0b9c0ca28b6a9995a6"
+    },
+    "teaching_count": 0
+  },
+  "frozen_context": {
+    "goal": "对用户问题返回答案并记录失败证据",
+    "title": "实现有边界的知识助手",
+    "in_scope": [
+      "校验输入",
+      "处理超时"
+    ],
+    "out_scope": [
+      "不增加部署或付款任务"
+    ],
+    "acceptance": [
+      "空输入被拒绝",
+      "超时返回可检查错误"
+    ],
+    "knowledge_links": [
+      {
+        "role": "core",
+        "title": "Subject",
+        "stable_key": "node.subject",
+        "content_version": 1
+      }
+    ]
+  }
+}

@@ -6,7 +6,7 @@ from types import SimpleNamespace
 from app.core.errors import ConflictError, IdempotencyConflictError, NotFoundError, ValidationAppError, VersionConflictError
 from app.core.ids import content_hash, new_id
 from app.domain.assistant import ASSISTANT_PROTOCOL, build_input, manifest_intact, validate_message, validate_reply, project_reply
-from app.domain.assistant_teaching import TEACHING_CONTRACT, initial_state, project_teaching, advance_state
+from app.domain.assistant_teaching import TEACHING_CONTRACT, initial_state, project_frozen_teaching, validate_expected_kind, advance_state
 from app.domain.prompts import prompt_review_context
 from app.domain.summaries import review_rubric_context
 from app.infrastructure.db.learning_exposures import PgLearningExposures, _json
@@ -62,6 +62,10 @@ class PgAssistant(PgSummaries):
             expected_event=dict(kind='assistant_reply_submission',actor_id=row['actor_id'],project_id=project,
                 conversation_id=identifier,trigger_message_id=turn['trigger_message_id'],manifest=turn['manifest'],payload_hash=turn['payload_hash'])
             expected_event['teaching_contract']=TEACHING_CONTRACT
+            if 'expected_response_kind' in payload:
+                expected_event['expected_response_kind'] = payload['expected_response_kind']
+            try: validate_expected_kind(payload)
+            except (ValidationAppError,KeyError,TypeError): raise ConflictError('冻结响应种类不一致') from None
             events=conn.execute("SELECT detail FROM ai_run_events WHERE run_id=%s AND status='submission'",(turn['run_id'],)).fetchall()
             if (payload.get('teaching_contract')!=TEACHING_CONTRACT or payload.get('teaching_state')!=state
                     or content_hash(payload)!=turn['payload_hash'] or not manifest_intact(turn['manifest'])
@@ -75,7 +79,7 @@ class PgAssistant(PgSummaries):
             message=conn.execute('SELECT * FROM assistant_messages WHERE message_id=%s AND conversation_id=%s',(turn['result_ref'],identifier)).fetchone()
             record=self._bound_record(conn,project,identifier,message) if message else None
             if not record:raise ConflictError('成功教学回执绑定缺失')
-            try: projection=project_teaching(record['response_payload']['payload'],state,row['mode'])
+            try: projection=project_frozen_teaching(record['response_payload']['payload'],payload)
             except (ValidationAppError,KeyError,TypeError):raise ConflictError('成功教学回执合同不一致') from None
             if projection['reply']!=message['content']:raise ConflictError('教学消息与来源回执不一致')
             projections[message['message_id']]=projection
@@ -259,6 +263,7 @@ class PgAssistant(PgSummaries):
             if intent=='work_draft': conn.execute('UPDATE assistant_conversations SET current_draft_message_id=%s WHERE conversation_id=%s',(message_id,identifier))
             submission=dict(kind='assistant_reply_submission',actor_id=scope.actor_id,project_id=project,conversation_id=identifier,trigger_message_id=message_id,manifest=manifest,payload_hash=content_hash(payload))
             if teaching_state is not None:submission['teaching_contract']=TEACHING_CONTRACT
+            if 'expected_response_kind' in payload:submission['expected_response_kind']=payload['expected_response_kind']
             conn.execute("INSERT INTO ai_run_events(run_id,status,detail) VALUES(%s,'submission',%s)",(run_id,Jsonb(submission)))
             conn.execute("INSERT INTO ai_jobs(job_id,run_id,job_key,status) VALUES(%s,%s,%s,'pending')",(new_id('job'),run_id,'assistant:'+run_id))
             self._record(conn,scope,project,key,'message',fingerprint,dict(run_id=run_id,message_id=message_id))
@@ -273,6 +278,8 @@ class PgAssistant(PgSummaries):
             expected=dict(kind='assistant_reply_submission',actor_id=claim.actor_id,project_id=claim.project_id,
                 conversation_id=row['conversation_id'],trigger_message_id=row['trigger_message_id'],manifest=row['manifest'],payload_hash=row['payload_hash'])
             if 'teaching_contract' in row['payload']:expected['teaching_contract']=row['payload']['teaching_contract']
+            if 'expected_response_kind' in row['payload']:expected['expected_response_kind']=row['payload']['expected_response_kind']
+            validate_expected_kind(row['payload'])
             if len(events)!=1 or events[0]['detail']!=expected: raise ValidationAppError('助手独立冻结提交不一致')
             trigger=conn.execute("SELECT * FROM assistant_messages WHERE message_id=%s AND conversation_id=%s AND project_id=%s AND role='user'",(row['trigger_message_id'],row['conversation_id'],claim.project_id)).fetchone()
             if not trigger or row['payload']['current_message']!={k:trigger[k] for k in ('message_id','intent','content')} or trigger['draft_message_id']!=row['draft_message_id']: raise ValidationAppError('助手触发原文不一致')
@@ -296,7 +303,7 @@ class PgAssistant(PgSummaries):
             identifier=None
             if reply is not None:
                 if turn['payload'].get('teaching_contract')==TEACHING_CONTRACT:
-                    projection=project_teaching(reply,turn['payload']['teaching_state'],turn['payload']['mode'])
+                    projection=project_frozen_teaching(reply,turn['payload'])
                 else:
                     if validate_reply(reply): raise ValidationAppError('助手回复格式无效')
                     projection=project_reply(reply)

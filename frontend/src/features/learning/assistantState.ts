@@ -12,6 +12,23 @@ export function assistantTargetTitle(c:Pick<Conversation,'mode'|'title'|'context
   if(snapshot&&typeof snapshot==='object'&&'title' in snapshot&&typeof snapshot.title==='string')return snapshot.title;
   return c.title.replace(/^(阶段总结|总结辅导|实践辅导|实践 Prompt|Prompt 辅导)\s*[·：:]\s*/,'');
 }
+export const assistantModeLabel = (mode:string) => mode==='summary'?'阶段总结':'实践辅导';
+export function assistantListStatus(c:Pick<Conversation,'has_formal_save'> & Partial<Pick<Conversation,'messages'|'formal_saves'>>):string {
+  if(c.has_formal_save||c.formal_saves?.length)return '已保存';
+  if(!c.messages)return '未加载';
+  return c.messages.some(m=>m.role==='assistant'&&m.status==='ready_to_draft'&&m.proposal)?'待确认':'未保存';
+}
+export const assistantPreview = (c:Partial<Pick<Conversation,'messages'>>) => c.messages?.at(-1)?.content || (c.messages?'还没有消息':'最近消息暂未加载');
+export function assistantMatches(c:Pick<Conversation,'mode'|'title'|'context'> & Partial<Pick<Conversation,'messages'>>,mode:string,query:string):boolean {
+  return (mode==='全部'||mode==='all'||c.mode===mode)&&`${assistantTargetTitle(c)} ${assistantPreview(c)} ${assistantModeLabel(c.mode)}`.toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());
+}
+export function assistantDateGroup(value:string,now=new Date()):string {
+  const date=new Date(value);if(Number.isNaN(date.getTime()))return '更早';
+  const day=new Date(now.getFullYear(),now.getMonth(),now.getDate()),previous=new Date(day);previous.setDate(previous.getDate()-1);
+  const dateDay=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+  if(dateDay.getTime()===day.getTime())return '今天';if(dateDay.getTime()===previous.getTime())return '昨天';
+  return `${date.getFullYear()===now.getFullYear()?'':`${date.getFullYear()}年`}${date.getMonth()+1}月${date.getDate()}日`;
+}
 export function finishProposalEdit(edits:Record<string,string>|undefined,id:string|undefined,saved:string):Record<string,string> {
   const result={...edits};if(id&&result[id]===saved)delete result[id];return result;
 }

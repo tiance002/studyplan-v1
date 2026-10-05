@@ -67,9 +67,11 @@ def build_input(mode, context, draft, trigger, history, *, natural=False, comple
         # One whole-conversation count; never introduce per-issue counters.
         result["completed_rounds"] = completed_rounds if completed_rounds is not None else sum(m["role"] == "assistant" for m in history)
     if teaching_state is not None:
-        from app.domain.assistant_teaching import TEACHING_CONTRACT
+        from app.domain.assistant_teaching import TEACHING_CONTRACT, expected_response_kind
         result['teaching_contract']=TEACHING_CONTRACT
         result['teaching_state']=teaching_state
+        if mode == 'practice':
+            result['expected_response_kind'] = expected_response_kind(teaching_state, mode)
     if len(json.dumps(result, ensure_ascii=False)) > INPUT_LIMIT:
         raise ValidationAppError("本轮原文、工作稿和上下文超过输入上限；请明确缩短后再发送")
     return result
@@ -86,9 +88,9 @@ def manifest_intact(value):
     if not (review_manifest_intact(value, protocol=ASSISTANT_PROTOCOL)
             and value.get("input_limit") == INPUT_LIMIT):
         return False
-    from app.application.planning_budget import BudgetPolicy
-    try:
-        policy = BudgetPolicy(**value["budget_policy"])
-    except (KeyError, TypeError, ValidationAppError):
+    policy = value.get('budget_policy')
+    fields = {'outline', 'structure', 'practice', 'repair', 'deployment_cap', 'model_cap'}
+    if (not isinstance(policy, dict) or set(policy) != fields
+            or any(type(v) is not int or v < 1 for v in policy.values())):
         return False
-    return value["output_cap"] == min(policy.practice, policy.deployment_cap, policy.model_cap)
+    return value["output_cap"] == min(policy['practice'], policy['deployment_cap'], policy['model_cap'])

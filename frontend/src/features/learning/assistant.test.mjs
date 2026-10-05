@@ -9,7 +9,7 @@ const {formalRefreshPolicy}=await import(moduleUrl(compile('./artifactRefresh.ts
 const React=await import('react');
 const {renderToStaticMarkup}=await import('react-dom/server');
 const panelSource=ts.transpileModule(readFileSync(new URL('../../components/LearningAssistantPanel.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.React}}).outputText;
-const panelModules=panelSource.replace("from 'react'","from 'react'").replace("'../features/learning/assistantState'",JSON.stringify(moduleUrl(compile('./assistantState.ts')))).replace("'./assistantFocus'",JSON.stringify(moduleUrl(compile('../../components/assistantFocus.ts'))));
+const panelModules=panelSource.replace("from 'react'","from 'react'").replace("'../features/learning/assistantState'",JSON.stringify(moduleUrl(compile('./assistantState.ts')))).replace("'./assistantFocus'",JSON.stringify(moduleUrl(compile('../../components/assistantFocus.ts')))).replace("'./assistantProposalScroll'",JSON.stringify(moduleUrl(compile('../../components/assistantProposalScroll.ts'))));
 // Bare React imports resolve through an explicit file URL from this workspace.
 const {createRequire}=await import('node:module');const {pathToFileURL}=await import('node:url');const require=createRequire(import.meta.url);
 const reactUrl=pathToFileURL(require.resolve('react')).href;
@@ -49,4 +49,38 @@ test('GET refresh/list only read; POST body preserves exact content and same ide
 test('V1.1 natural send and proposal save transport only user content and frozen operation fields',async()=>{
  const original=globalThis.fetch,calls=[];globalThis.fetch=async(url,options)=>{calls.push({url,body:options.body?JSON.parse(options.body):null});return {ok:true,status:200,json:async()=>base()};};
  try{await assistantApi.send('p','c',{content:'  natural question\n',idempotency_key:'turn'});await assistantApi.save('p','c',{content:'custom proposal',proposal_message_id:'server-assistant-message',expected_version:2,idempotency_key:'formal'});await assistantApi.create('p',{plan_id:'plan',stage_id:'stage',task_id:null,mode:'summary',force_new:true,idempotency_key:'new'});assert.deepEqual(calls[0].body,{content:'  natural question\n',idempotency_key:'turn'});assert.equal(calls[1].body.proposal_message_id,'server-assistant-message');assert.equal('draft_message_id' in calls[1].body,false);assert.equal('intent' in calls[0].body,false);assert.equal('consent_to_model' in calls[0].body,false);assert.equal(calls[2].body.force_new,true);}finally{globalThis.fetch=original;}
+});
+
+test('conversation list presentation derives saved/proposal/draft and local search/date groups',()=>{
+ const c={...base(),mode:'summary',title:'阶段总结 · 核心概念',context:{},created_at:'2026-10-05T09:00:00+08:00',last_activity_at:'2026-10-05T09:00:00+08:00',has_formal_save:false,messages:[{...message('a',1,'assistant','reply','最近消息'),proposal:'候选',status:'ready_to_draft'}]};
+ assert.equal(state.assistantListStatus(c),'待确认');assert.equal(state.assistantListStatus({...c,has_formal_save:true}),'已保存');assert.equal(state.assistantListStatus({...c,messages:[]}),'未保存');
+ assert.equal(state.assistantMatches(c,'全部','最近消息'),true);assert.equal(state.assistantMatches(c,'practice',''),false);assert.equal(state.assistantMatches(c,'summary','阶段总结'),true);
+ assert.equal(state.assistantDateGroup(c.last_activity_at,new Date('2026-10-05T12:00:00+08:00')),'今天');assert.equal(state.assistantDateGroup('2026-10-04T09:00:00+08:00',new Date('2026-10-05T12:00:00+08:00')),'昨天');assert.equal(state.assistantDateGroup('2026-10-02T09:00:00+08:00',new Date('2026-10-05T12:00:00+08:00')),'10月2日');
+});
+for(const length of [50,2000,19960])test(`proposal ${length} characters renders collapsed six-line body and expansion control`,()=>{
+ const conversation={...base(),mode:'practice',title:'任务',context:{},messages:[{...message('p',1,'assistant','reply','说明'),status:'ready_to_draft',proposal:'字'.repeat(length)}]};
+ const html=renderToStaticMarkup(React.createElement(LearningAssistantPanel,{close(){},controller:{conversation,buffer:{text:'',busy:false},blocked:false,update(){},send(){},save(){}}}));assert.match(html,/assistant-proposal-body clamped/);assert.match(html,/aria-expanded="false"/);assert.match(html,/展开全文/);assert.doesNotMatch(html,/重新读取状态/);
+});
+
+const listSource=ts.transpileModule(readFileSync(new URL('./SupportingPages.tsx',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.React}}).outputText.replace(/export \{.*?\} from .*?;/g,'').replace("'react'",JSON.stringify(reactUrl)).replace("'./assistantState'",JSON.stringify(moduleUrl(compile('./assistantState.ts'))));
+const {ConversationList}=await import(moduleUrl(`import React from ${JSON.stringify(reactUrl)};\n${listSource}`));
+test('formal conversation list renders local search/filters, detail previews and honest unloaded states',()=>{
+ const date=new Date().toISOString(),items=['saved','proposal','draft','missing'].map(id=>({conversation_id:id,mode:'summary',title:'阶段总结 · '+id,context:{},has_formal_save:id==='saved',created_at:date,last_activity_at:date}));
+ const listDetails=Object.fromEntries(items.slice(0,3).map(item=>[item.conversation_id,{...item,messages:[{...message(item.conversation_id,1,'assistant','reply','最近消息 '+item.conversation_id),status:item.conversation_id==='proposal'?'ready_to_draft':'continue',proposal:item.conversation_id==='proposal'?'候选':null}]}]));
+ const html=renderToStaticMarkup(React.createElement(ConversationList,{controller:{items,listDetails,listReady:true,listScope:'scope',listLoaded:true,listLoading:false,list(){},resume(){},open:true,conversation:listDetails.proposal}}));
+ for(const copy of ['搜索标题、最近消息或类型','全部','阶段总结','实践辅导','今天','最近消息 saved','待确认','已保存','未保存','未加载','最近消息暂未加载'])assert.ok(html.includes(copy),copy);
+ assert.match(html,/conversation-row selected/);assert.doesNotMatch(html,/刷新会话列表|重新读取状态|打开历史只读取|不请求模型|CONVERSATIONS/);
+});
+test('unknown turn renders readonly reconciliation and does not expose technical error classes',()=>{
+ const conversation={...base(),mode:'practice',title:'任务',context:{},messages:[{...message('u',1),run_id:'r',run_status:'unknown',error_class:'PRIVATE_TRACE'}]};
+ const html=renderToStaticMarkup(React.createElement(LearningAssistantPanel,{close(){},controller:{conversation,buffer:{text:'保留输入',busy:false,send:{content:'保留输入',idempotency_key:'x'}},blocked:true,update(){},read(){},send(){},save(){}}}));
+ assert.match(html,/状态正在核对，暂时不能重新发送/);assert.match(html,/<button class="text-button">核对发送结果<\/button>/);assert.doesNotMatch(html,/PRIVATE_TRACE|再次发送|重试/);assert.match(html,/disabled="" aria-label="发送"/);
+});
+
+test('assistant header shows saved/proposal/unsaved state and inline read recovery is available',()=>{
+ for(const [status,patch] of [['已保存',{has_formal_save:true}],['待确认',{}],['未保存',{messages:[]}]]){
+ const conversation={...base(),mode:'summary',title:'目标',context:{},messages:[{...message('p',1,'assistant'),status:'ready_to_draft',proposal:'候选'}],...patch};
+ const html=renderToStaticMarkup(React.createElement(LearningAssistantPanel,{close(){},controller:{conversation,buffer:{text:'local',busy:false,error:'暂时无法读取会话，你的输入仍保留。'},blocked:false,update(){},read(){},send(){},save(){}}}));
+ assert.match(html,new RegExp(`assistant-header-status[^>]*>• ${status}`));assert.match(html,/<button class="text-button">重新连接<\/button>/);
+ }
 });
