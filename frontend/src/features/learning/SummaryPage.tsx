@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import {formalRefreshPolicy} from './artifactRefresh';
 import { api, ApiError } from '../../api/client';
 import type { SummaryAttempt, SummaryCancelBody, SummaryReviewBody, SummarySaveBody, SummaryTarget, SummaryThread } from '../../api/client';
 import type { DTO } from '../../api/types';
@@ -68,8 +69,8 @@ function LegacyFeedback({attempt}: {attempt: SummaryAttempt}) {
   </section>;
 }
 
-export function SummaryPage({project, workspace, initialStage, active = true, onStageChange, onSaved}: {
-  project: string; workspace: DTO['LearningWorkspaceView']|null; initialStage: string; active?: boolean; onStageChange?:(id:string)=>void; onSaved?:()=>Promise<void>|void;
+export function SummaryPage({project, workspace, initialStage, active = true, onStageChange, onSaved, onStart, assistantBusy, artifactRefreshVersion=0}: {
+  artifactRefreshVersion?:number; onStart?:(stageId:string)=>void; assistantBusy?:boolean; project: string; workspace: DTO['LearningWorkspaceView']|null; initialStage: string; active?: boolean; onStageChange?:(id:string)=>void; onSaved?:()=>Promise<void>|void;
 }) {
   const [stageChoice, setStageChoice] = useState(initialStage);
   const stage = workspace?.stages.find(s => s.stage.stage_id === (onStageChange ? initialStage : stageChoice)) || workspace?.stages[0];
@@ -101,7 +102,7 @@ export function SummaryPage({project, workspace, initialStage, active = true, on
     setTargets(old => old[k] ? old : {...old, [k]: {target: currentTarget,
       label: `路线 ${workspace!.plan.revision} · ${stage.stage.title} · 阶段总结`}});
   }, [currentTarget?.plan_id, currentTarget?.stage_id]);
-  async function read(k: string, t: SummaryTarget, initial = false) {
+  async function read(k: string, t: SummaryTarget, initial = false, artifactRefresh=false) {
     const ticket = sequence.current[k] = (sequence.current[k] || 0) + 1;
     const edit = buffersRef.current[k]?.edit || 0;
     try {
@@ -109,16 +110,20 @@ export function SummaryPage({project, workspace, initialStage, active = true, on
       if (!alive.current || sequence.current[k] !== ticket) return;
       update(k, old => {
         const last = thread.attempts.at(-1);
-        const adopt = initial && !old.initialized && old.edit === edit;
-        return {...old, thread: mergeThread(old.thread, thread), initialized: true, selected: old.selected || last?.attempt_id,
-          ...(adopt ? {text: last?.content || '', baseline: last?.content || ''} : {}),
-          conflict: false, error: '', ...(old.conflict ? {pending: undefined} : {})};
+        const merged=mergeThread(old.thread,thread);
+        const policy=formalRefreshPolicy(old,merged.version,edit,initial,artifactRefresh);
+        const latestSelection=artifactRefresh&&(!old.selected||old.selected===old.thread?.attempts.at(-1)?.attempt_id);
+        return {...old, thread:{...merged,version:policy.version}, initialized: true, selected: latestSelection?last?.attempt_id:old.selected || last?.attempt_id,
+          ...(policy.adoptText ? {text: last?.content || '', baseline: last?.content || ''} : {}),
+          ...(policy.clearConflict?{conflict:false,error:'',...(old.conflict?{pending:undefined}:{})}:{})};
       });
     } catch(e) {if (sequence.current[k] === ticket) update(k, old => ({...old, error: message(e)}));}
   }
   useEffect(() => {
     if (key && target && active && !buffersRef.current[key]?.initialized) void read(key, target, true);
   }, [key, active]);
+  const artifactReads=useRef<Record<string,number>>({});
+  useEffect(()=>{if(!artifactRefreshVersion||!key||!target||!active||b.busy||b.pending||(artifactReads.current[key]||0)>=artifactRefreshVersion)return;artifactReads.current[key]=artifactRefreshVersion;void read(key,target,false,true);},[artifactRefreshVersion,key,active,b.busy,b.pending]);
   const dirty = Object.values(buffers).some(value => value.text !== value.baseline);
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {if (dirty) {e.preventDefault(); e.returnValue = '';}};
@@ -209,8 +214,9 @@ export function SummaryPage({project, workspace, initialStage, active = true, on
         <option value="">当前所选位置</option>{Object.entries(targets).map(([id,t]) => <option key={id} value={id}>{t.label}</option>)}</select></label>
     </div>
     {isHistory && <p className="note-callout">正在查看旧路线位置；原文和当时要求保留在旧版本，不会移到当前路线。</p>}
+    {onStart&&stage&&<button className="btn primary" disabled={assistantBusy||isHistory} onClick={()=>onStart(stage.stage.stage_id)}>开始总结</button>}
     <div className="summary-layout">
-      <section className="panel summary-editor" aria-label="总结编辑">
+      <details className="panel summary-editor" aria-label="总结编辑"><summary>直接编辑正式总结（不请求 AI）</summary>
         <h2>{historicKey ? targets[historicKey]?.label : `${stage?.stage.title} · 我的阶段总结`}</h2>
         {historicKey ? <><p className="form-note">正在编辑已访问位置的文字。学习要求来自该位置保存时的快照。</p>{(selected || b.thread?.attempts.at(-1)) && <Snapshot value={(selected || b.thread!.attempts.at(-1))!.rubric_snapshot}/>}</>
           : <p className="muted">本阶段知识：{stage?.nodes.map(n => n.title).join("、") || "暂无关联知识"}</p>}
@@ -225,7 +231,7 @@ export function SummaryPage({project, workspace, initialStage, active = true, on
           <button className="btn" onClick={() => void navigator.clipboard.writeText(b.text).then(() => update(key, old => ({...old, error: '已复制本地文字。'}))).catch(() => update(key, old => ({...old, error: '复制未完成，请选中编辑框文字手动复制。'})))}>复制本地文字</button>
         </div>
         {b.error && <p role="alert">{b.error} {b.conflict ? '请读取最新保存记录；编辑文字会保留，核对后再保存。' : b.pending ? '保存结果尚未确认，请使用原保存重试，避免重复新增。' : ''}</p>}
-      </section>
+      </details>
       <aside className="summary-history panel" aria-label="总结历史与反馈">
         <h2>保存记录</h2>
         {b.thread?.history_truncated && <p>这里显示最近 20 次保存。更早的版本可在项目总结历史中查看。</p>}
@@ -236,7 +242,7 @@ export function SummaryPage({project, workspace, initialStage, active = true, on
           <h3>第 {selected.attempt_no} 次保存的原文</h3><pre className="summary-original">{selected.content}</pre>
           <LegacyFeedback attempt={selected}/>
           <details><summary>当时的学习要求与资料安排</summary><Snapshot value={selected.rubric_snapshot}/></details>
-          <h3>这次原文的反馈</h3>
+          <details><summary>查看历史反馈</summary><h3>这次原文的反馈</h3>
           {selected.review ? <div aria-label="已保存反馈"><strong>{{satisfied:'达到当时要求', needs_revision:'建议修订', misconception:'存在需要澄清的理解'}[selected.review.conclusion]}</strong>
             {([['已覆盖', selected.review.covered], ['待补充', selected.review.gaps], ['需要澄清', selected.review.misconceptions], ['继续思考', selected.review.questions]] as const).map(([title, items]) => <div key={title}><h4>{title}</h4>{items.length ? <ul>{items.map((v,i) => <li key={i}>{v}</li>)}</ul> : <p>没有额外条目。</p>}</div>)}</div>
           : selected.run_status && !terminal.has(selected.run_status) ? <p role="status">正在为第 {selected.attempt_no} 次原文生成反馈。你可以继续编辑。</p>
@@ -251,6 +257,7 @@ export function SummaryPage({project, workspace, initialStage, active = true, on
             {run_id: selected.run_id!, expected_version: b.runVersion!.version, idempotency_key: crypto.randomUUID()})}>取消这次反馈</button>}
           {b.cancelPending?.id === selected.attempt_id && <button className="btn" disabled={b.cancelling} onClick={() => void cancel(key, selected, b.cancelPending!.body)}>重试原取消请求</button>}
           <button className="text-button" onClick={() => void api.summaryAttempt(project, selected.attempt_id).then(value => updateAttempt(key, value)).catch(e => update(key, old => ({...old, error: message(e)})))}>核对这次反馈</button>
+          </details>
         </>}
       </aside>
     </div>

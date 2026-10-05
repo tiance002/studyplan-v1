@@ -29,6 +29,7 @@ from app.application.prompts import PromptService
 from app.application.resource_changes import ResourceChangeService
 from app.application.resource_preferences import ResourcePreferenceService
 from app.application.summaries import SummaryService
+from app.application.assistant import AssistantService
 from app.core.config import Settings
 from app.ports.browser_auth import BrowserAuthPort
 from app.ports.planning_jobs import PlanningWorkerPort
@@ -59,6 +60,7 @@ class AppContainer:
     preference_service: ResourcePreferenceService | None = None
     resource_change_service: ResourceChangeService | None = None
     summary_service: SummaryService | None = None
+    assistant_service: AssistantService | None = None
     prompt_service: PromptService | None = None
     practice_change_service: PracticeChangeService | None = None
     practice_submission_service: PracticeSubmissionService | None = None

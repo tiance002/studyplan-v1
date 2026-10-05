@@ -1,3 +1,15 @@
+## 2026-10-05 Learning Assistant V1：非收费 PASS / 真实代表 FAIL / STOP
+
+- 用户现在新增能做什么：开始总结/精确task开始实践创建冻结会话并打开右侧助手；工作稿/追问分离、多轮反馈、用户明确保存原Summary/Prompt服务、主区正式版本刷新与我的会话恢复。聊天不写完成事实；主区任务/正式历史/导出/成果/USER保留。源码与[本批报告](../acceptance/learning-assistant-v1-2026-10-05.md)同一本地提交，最终实际SHA见最终答复与var git-final审计；基线af2f3ae3fad226509ef6d149455a507acce49663，无reset/回退/push/merge。新迁移head0025，0024保持。
+- 最终unit/contract156PASS、owned PG/API/普通Worker34PASS、前端51PASS/build PASS；非收费Edge两mode三轮+明确正式保存+主区消费、scope/409、close/refresh/logout/relogin、读取断连、旧Plan只读、无模型原文保存、760x860/Escape PASS。原生owned恢复精确行哈希与普通app-role消息/稿件/正式关联回读PASS，旧RC owned副本0024→0025旧行保持PASS。原154/33与初轮FAIL保留不重复计数。
+- 新Acceptance assistant-v1-synthetic-bdeb680f4573，仅新owned两库/合成账号/Plan/两会话；免费binding/publicDNS/endpoint guard/TLS PASS后真实2次。第161笔summary初稿587input665output/stop内容PASS；第162笔追问1297input887output/stop，多出message_id，严格assistant_reply_invalid，应用Run failed、原文保留、无成功回复/正式产物。provider两笔receipt均succeeded，不能把provider成功当业务PASS。unknown0、repair0；后4次NOT RUN，未重发/新Acceptance/第二批收费。原response/receipt/失败Run保留并入fixture；提示明确禁止输出标识，同因离线回归PASS，真实效果NOT RUN。
+- 本授权只登记一次 previous_cap200/additional80/new_cap280/used_before160/remaining120；本轮2，累计162/280余118；1884input+1552output=3436tokens，金额NOT OBSERVABLE。old160账/.env hash、PG/provider/rawbody reconciliation PASS；search/RAG0，无本人规划/旧failed unknown恢复/旧Draft确认/原库/正式入口Worker/deploy/全局config操作。
+- 所有本批临时8041/8042/5198/5199已确证归属并停止，owned库/备份保留；无Worker保留回执入口5199的准确启动/合成登录/停止方式见报告。IMPLEMENTED/非收费PASS，PAID FAIL，USER ACCEPTED/DEPLOYED/F17 NOT RUN；不能标LEARNING_ASSISTANT_CORE_PASS，整体STAGING_BLOCKED / NOT_READY。下一只离线审阅与新有界验收评审，本批STOP不消费余额。
+
+### 本批启动授权记录（历史时点）
+
+用户授权按已冻结 Goal 连续实现总结/实践多轮助手与明确正式保存。基线 `af2f3ae3fad226509ef6d149455a507acce49663`，保留后继。原账本核对160请求/160结果；本授权只登记一次：previous_cap=200、additional_authorization=80、new_cumulative_cap=280、used_before_authorization=160、remaining_after_authorization=120。非收费门禁通过后至多6次新助手回复；本人规划、旧failed/unknown、原库/正式入口/Worker、部署、push/merge、RAG不在授权。整体STAGING_BLOCKED / NOT_READY。
+
 ## 2026-10-05 Known Invalid JSON → 有界 Batch Repair：非收费 PASS / STOP
 
 - 用户现在新增能做什么：未来新Run的structure/practice在严格JSON失败、已知非截断响应、usage及durable failed attempt证明齐全时，可消耗原planning.repair；新deterministic attempt、Run repair2/request/output预算、完整canonical/task validator保持。没有新本人Run或新路线，本人原第一次生成仍FAIL。

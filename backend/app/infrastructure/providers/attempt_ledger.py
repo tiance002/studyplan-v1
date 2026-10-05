@@ -26,7 +26,10 @@ from app.ports.llm import LLMDispatchUnknownError, LLMFailure, LLMNotDispatchedE
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
+from app.domain.assistant import ASSISTANT_PROTOCOL, ASSISTANT_PURPOSE, manifest_intact as assistant_manifest_intact
+
 REVIEW_PROTOCOLS = {
+    ASSISTANT_PURPOSE: (ASSISTANT_PROTOCOL, assistant_manifest_intact, "_assistant_claim", ":assistant_reply:1", "assistant_reply"),
     SUMMARY_PURPOSE: (SUMMARY_PROTOCOL, summary_manifest_intact, "_summary_claim", ":summary_review:1", "summary_review"),
     PROMPT_PURPOSE: (PROMPT_PROTOCOL, prompt_manifest_intact, "_prompt_claim", ":prompt_review:1", "prompt_review"),
 }
@@ -69,7 +72,7 @@ class PgAttemptLLM:
                 if run is not None and (run["has_job"] or run["graph_version"] == SHORT_GENERATION_VERSION):
                     return "run_manifest_violation"
             return None
-        if purpose in REVIEW_PROTOCOLS or self.manifest.get("protocol") in {SUMMARY_PROTOCOL, PROMPT_PROTOCOL}:
+        if purpose in REVIEW_PROTOCOLS or self.manifest.get("protocol") in {SUMMARY_PROTOCOL, PROMPT_PROTOCOL, ASSISTANT_PROTOCOL}:
             protocol, valid, _, suffix, _ = REVIEW_PROTOCOLS.get(purpose, (None, lambda value: False, None, "", None))
             if (not valid(self.manifest)
                     or attempt_id != run_id + suffix

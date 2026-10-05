@@ -3,6 +3,7 @@ import type { ReactNode, CSSProperties } from "react";
 import type { DTO, Page } from "../api/types";
 import { GlobalNavigation } from "./GlobalNavigation";
 import { LearningPlanSidebar } from "./LearningPlanSidebar";
+import type {AssistantController} from "../features/learning/useAssistant";
 import { LearningAssistantPanel } from "./LearningAssistantPanel";
 import { ResizableDivider } from "./ResizableDivider";
 import { fitPanels, initialPanels, togglePanel, panelWidths } from "./panels";
@@ -19,6 +20,7 @@ const titles: Record<Page, string> = {
 };
 export function AppShell({
   page,
+  assistant,
   navigate,
   session,
   workspace,
@@ -31,6 +33,7 @@ export function AppShell({
   children,
 }: {
   page: Page;
+  assistant: AssistantController;
   navigate: (p: Page) => void;
   session: DTO["SessionView"];
   workspace: DTO["LearningWorkspaceView"] | null;
@@ -62,9 +65,9 @@ export function AppShell({
     () => localStorage.setItem("studyplan-panels", JSON.stringify(panels)),
     [panels],
   );
-  const visible = fitPanels(panels, width),
+  const visible = fitPanels({...panels,assistant:assistant.open}, width),
     toggle = (panel: "nav" | "plan" | "assistant") =>
-      setPanels((s) => togglePanel(s, panel, width));
+      panel === "assistant" ? assistant.setOpen(!assistant.open) : setPanels((s) => togglePanel(s, panel, width));
   const stage = workspace?.stages.find((s) => s.stage.stage_id === stageId);
   const node = stage?.nodes.find((n) => n.node_id === nodeId) || stage?.nodes[0];
   const currentGoal = node?.objectives?.join("；") || stage?.stage.objective || workspace?.plan.goal_snapshot || "";
@@ -112,13 +115,13 @@ export function AppShell({
             </button>
             <button
               className="btn quiet"
-              onClick={() =>
+              onClick={() => { assistant.setOpen(false);
                 setPanels((s) => ({
                   ...s,
                   nav: false,
                   plan: false,
                   assistant: false,
-                }))
+                }));}
               }
             >
               专注阅读
@@ -155,7 +158,7 @@ export function AppShell({
           />
           <LearningAssistantPanel
             close={() => toggle("assistant")}
-            stageTitle={stage?.stage.title || ""}
+            controller={assistant}
           />
         </>
       )}

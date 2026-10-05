@@ -1612,3 +1612,11 @@ h3 {
 .resource-dialog-body .btn { white-space:normal; }
 .resource-evidence { overflow-wrap:anywhere; }
 @media(max-width:600px) { .resource-dialog-header,.resource-dialog-body {padding:16px;} .resource-dialog-body .panel {padding:14px;} .resource-dialog-body .resource-grid {grid-template-columns:1fr;} }
+
+.assistant-message {padding:12px;border:1px solid var(--line);border-radius:8px;margin-bottom:12px;}
+.assistant-message.user {background:#edf2f5;}
+.assistant-message pre {white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;}
+.assistant-compose label {width:100%;font-size:12px;}
+.assistant-compose textarea,.assistant-scroll textarea {width:100%;}
+.assistant-compose input[type=checkbox] {width:auto;}
+@media(max-width:959px) {.assistant-panel {position:fixed;right:0;top:0;bottom:0;width:min(100vw,460px);z-index:20;box-shadow:-8px 0 40px #0003;}.resize-divider {display:none;}}

@@ -189,6 +189,21 @@ def build_container(settings: Settings) -> AppContainer:
         actor_ids=settings.planning_worker_actor_ids,
     )
 
+    from app.application.assistant import AssistantService
+    from app.infrastructure.db.assistant import PgAssistant
+    from app.domain.assistant import ASSISTANT_PROTOCOL
+
+    def assistant_provider(scope, project_id, run_id, model_ref, manifest):
+        from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
+        provider = runtime_factory.for_bound_run(scope, project_id, run_id, model_ref)
+        provider.prompt_version = ASSISTANT_PROTOCOL
+        return PgAttemptLLM(dsn, provider, manifest=manifest)
+
+    assistant_service = AssistantService(PgAssistant(dsn), summary_service, prompt_service,
+        bind_submission=runtime_factory.bind_submission if runtime_factory else None,
+        provider_resolver=assistant_provider if runtime_factory else None,
+        admission_mode=settings.planning_worker_admission_mode, actor_ids=settings.planning_worker_actor_ids)
+
     def execute_job(project_id, run_id, *, guard, claim):
         from app.core.errors import ValidationAppError
 
@@ -199,6 +214,8 @@ def build_container(settings: Settings) -> AppContainer:
             return plan_service.execute_generation(project_id, run_id, guard=guard, claim=claim)
         if kind == "summary_review_submission":
             return summary_service.execute_review(project_id, run_id, guard=guard, claim=claim)
+        if kind == "assistant_reply_submission":
+            return assistant_service.execute_reply(project_id=project_id, run_id=run_id, guard=guard, claim=claim)
         if kind == "prompt_review_submission":
             return prompt_service.execute_review(project_id, run_id, guard=guard, claim=claim)
         raise ValidationAppError("后台任务提交协议不可识别")
@@ -217,7 +234,7 @@ def build_container(settings: Settings) -> AppContainer:
                         workspace_reader=workspace_reader, planning_worker=planning_worker,
                         resource_service=resource_service, exposure_service=exposure_service,
                         preference_service=preference_service, resource_change_service=resource_change_service,
-                        summary_service=summary_service, prompt_service=prompt_service,
+                        summary_service=summary_service, prompt_service=prompt_service, assistant_service=assistant_service,
                         practice_change_service=practice_change_service,
                         practice_submission_service=practice_submission_service,
                         plan_change_service=plan_change_service)

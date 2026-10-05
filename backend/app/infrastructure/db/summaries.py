@@ -325,7 +325,7 @@ class PgSummaries:
                 if attempt[self.snapshot_column].get("snapshot_status") != "frozen":
                     raise ValidationAppError(f"旧{self.subject_label}没有当时评分依据，请先保存新的{self.subject_label}修订")
                 active = conn.execute("SELECT count(*) AS n FROM ai_runs WHERE project_id=%s AND actor_id=%s "
-                    "AND kind IN('summary_review','prompt_review') AND status IN('queued','running','reconciliation_required')",
+                    "AND kind IN('summary_review','prompt_review','assistant_reply') AND status IN('queued','running','reconciliation_required')",
                     (project_id, scope.actor_id)).fetchone()["n"]
                 if active >= 3:
                     raise ConflictError("当前学习空间最多保留三个待处理总结反馈，请先处理已有任务")

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import {formalRefreshPolicy} from './artifactRefresh';
 import { api, ApiError } from '../../api/client';
 import { promptApi } from '../../api/promptClient';
 import type { PromptCancelBody, PromptExport, PromptExportBody, PromptReviewBody, PromptRevision, PromptSaveBody, PromptTarget, PromptTask, PromptThread } from '../../api/promptClient';
@@ -48,7 +49,7 @@ function LegacyReview({revision}: {revision: PromptRevision}) {
   return <section><h4>历史反馈原文</h4><p>以下按旧格式保留，没有补写新的结论。</p>{[...new Set(collect(revision.legacy_review))].map((v,i)=><p className="prompt-original" key={i}>{v}</p>)}</section>;
 }
 
-export function PromptPage({project,workspace,initialStage,active=true,onPublished,onStageChange,taskIntent}: {project:string;workspace:DTO['LearningWorkspaceView']|null;initialStage:string;active?:boolean;onPublished?:()=>Promise<void>|void;onStageChange?:(id:string)=>void;taskIntent?:PracticeTaskIntent}) {
+export function PromptPage({project,workspace,initialStage,active=true,onPublished,onStageChange,taskIntent,onStart,assistantBusy,artifactRefreshVersion=0}: {artifactRefreshVersion?:number;onStart?:(stageId:string,taskId:string)=>void;assistantBusy?:boolean;project:string;workspace:DTO['LearningWorkspaceView']|null;initialStage:string;active?:boolean;onPublished?:()=>Promise<void>|void;onStageChange?:(id:string)=>void;taskIntent?:PracticeTaskIntent}) {
   const [stageChoice,setStageChoice]=useState(initialStage), [taskChoice,setTaskChoice]=useState('');
   const stage=workspace?.stages.find(s=>s.stage.stage_id===(onStageChange?initialStage:stageChoice))||workspace?.stages[0];
   const appliedTaskIntent = useRef(0);
@@ -68,23 +69,27 @@ export function PromptPage({project,workspace,initialStage,active=true,onPublish
   const buffersRef=useRef(buffers);buffersRef.current=buffers;
   const sequence=useRef<Record<string,number>>({}), alive=useRef(true);
   const [selected,setSelected]=useState(''), [history,setHistory]=useState<string[]>([]), [cursor,setCursor]=useState<string|null>(null), [historyBusy,setHistoryBusy]=useState(false), [historyError,setHistoryError]=useState('');
+  const selectedRef=useRef(selected);selectedRef.current=selected;
   function choose(id:string){selectionSequence.current++;setSelected(id);}
   const b=buffers[key]||fresh();
   function update(k:string, fn:(old:Buffer)=>Buffer) {if(alive.current)setBuffers(old=>{const next={...old,[k]:fn(old[k]||fresh())};buffersRef.current=next;return next;});}
   function put(values:PromptRevision[]) {if(alive.current)setRevisions(old=>{const next={...old};for(const v of values)next[v.revision_id]=keepRevision(old[v.revision_id],v);return next;});}
   useEffect(()=>{alive.current=true;return()=>{alive.current=false;};},[]);
-  async function read(k:string,t:PromptTarget,initial=false) {
+  async function read(k:string,t:PromptTarget,initial=false,artifactRefresh=false) {
     const ticket=sequence.current[k]=(sequence.current[k]||0)+1, edit=buffersRef.current[k]?.edit||0, selectionTicket=selectionSequence.current;
     try {const thread=await promptApi.thread(project,t);if(!alive.current||sequence.current[k]!==ticket)return;
       const old=buffersRef.current[k];if(old?.thread && old.thread.version>thread.version)return;
-      put(thread.revisions);update(k,prev=>({...prev,thread,initialized:true,error:'',conflict:false,
-        ...(initial && !prev.initialized && prev.edit===edit ? {text:thread.revisions.at(-1)?.user_draft||'',baseline:thread.revisions.at(-1)?.user_draft||''}:{}),
-        ...(prev.conflict ? {pending:undefined}: {})}));
+      put(thread.revisions);update(k,prev=>{const policy=formalRefreshPolicy(prev,thread.version,edit,initial,artifactRefresh);return {...prev,thread:{...thread,version:policy.version},initialized:true,...(policy.clearConflict?{error:'',conflict:false}:{}),
+        ...(policy.adoptText ? {text:thread.revisions.at(-1)?.user_draft||'',baseline:thread.revisions.at(-1)?.user_draft||''}:{}),
+        ...(policy.clearConflict&&prev.conflict ? {pending:undefined}: {})};});
+      if(artifactRefresh&&thread.revisions.length&&currentKey.current===k&&selectionSequence.current===selectionTicket&&(!selectedRef.current||selectedRef.current===old?.thread?.revisions.at(-1)?.revision_id))choose(thread.revisions.at(-1)!.revision_id);
       if(initial && thread.revisions.length && currentKey.current===k && selectionSequence.current===selectionTicket)choose(thread.revisions.at(-1)!.revision_id);
     } catch(e){if(sequence.current[k]===ticket)update(k,old=>({...old,error:errorText(e)}));}
   }
   useEffect(()=>{if(key)choose(buffersRef.current[key]?.thread?.revisions.at(-1)?.revision_id||'');},[key]);
   useEffect(()=>{if(key&&target&&active&&!buffersRef.current[key]?.initialized)void read(key,target,true);},[key,active]);
+  const artifactReads=useRef<Record<string,number>>({});
+  useEffect(()=>{if(!artifactRefreshVersion||!key||!target||!active||b.busy||b.pending||(artifactReads.current[key]||0)>=artifactRefreshVersion)return;artifactReads.current[key]=artifactRefreshVersion;void read(key,target,false,true);},[artifactRefreshVersion,key,active,b.busy,b.pending]);
   const dirty=Object.values(buffers).some(v=>v.text!==v.baseline);
   useEffect(()=>{const warn=(e:BeforeUnloadEvent)=>{if(dirty){e.preventDefault();e.returnValue='';}};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[dirty]);
   async function save(k:string,body:PromptSaveBody) {
@@ -112,14 +117,15 @@ export function PromptPage({project,workspace,initialStage,active=true,onPublish
     {!target||!task ? <p>当前阶段没有正式计划关联的实践任务。请选择其他阶段。</p> : <>
       <section className="panel prompt-context" aria-label="当前实践要求"><h2>路线中的主项目</h2>{b.thread ? <><h3>{b.thread.practice_project.title}</h3><p>{b.thread.practice_project.idea}</p><Requirements task={b.thread.task}/></> : <><h3>{task.title}</h3><p>{task.goal}</p><p>正在读取主项目与完整任务要求。</p></>}
         <p className="form-note">这些要求来自当前批准路线。保存与模型建议不会改变任务、学习进度或验收结果。</p></section>
-      <section className="panel prompt-editor" aria-label="方案编辑"><h2>我的方案与 Prompt</h2><label>方案与 Prompt 原文<textarea aria-label="方案与 Prompt 原文" rows={12} value={b.text} onChange={e=>update(key,old=>({...old,text:e.target.value,edit:old.edit+1,position:{planId:workspace.plan.plan_id,revision:workspace.plan.revision,taskTitle:task.title}}))}/></label>
+      {onStart&&stage&&<button className="btn primary" disabled={assistantBusy} onClick={()=>onStart(stage.stage.stage_id,task.task_id)}>开始实践</button>}
+      <details className="panel prompt-editor" aria-label="方案编辑"><summary>直接编辑正式方案与 Prompt（不请求 AI）</summary><h2>我的方案与 Prompt</h2><label>方案与 Prompt 原文<textarea aria-label="方案与 Prompt 原文" rows={12} value={b.text} onChange={e=>update(key,old=>({...old,text:e.target.value,edit:old.edit+1,position:{planId:workspace.plan.plan_id,revision:workspace.plan.revision,taskTitle:task.title}}))}/></label>
         <p className="form-note">{chars} / 40000 字符。保留空白行与原格式；短方案也能保存。</p><p aria-live="polite">{b.text!==b.baseline?'有未保存文字，请保存或复制后再刷新。':'编辑文字与保存记录同步。'} 未保存文字仅保留在本次打开的页面，切换阶段、任务和栏目仍会保留；刷新或退出后不会恢复。</p>
         <div className="chips"><button className="btn primary" disabled={!b.thread||b.busy||!!b.pending||!b.text.trim()||chars>40000} onClick={()=>void save(key,{...target,user_draft:b.text,expected_version:b.thread!.version,idempotency_key:crypto.randomUUID()})}>保存方案与 Prompt</button>
           {b.pending&&!b.conflict&&<button className="btn" disabled={b.busy} onClick={()=>void save(key,b.pending!)}>重试原保存</button>}
           <button className="btn" disabled={b.busy} onClick={()=>void read(key,target)}>读取最新保存版本</button>
           <button className="btn" onClick={()=>void navigator.clipboard.writeText(b.text).then(()=>update(key,old=>({...old,error:'已复制本地原文。'}))).catch(()=>update(key,old=>({...old,error:'复制未完成，请选中原文手动复制。'})))}>复制本地原文</button></div>
         {b.error&&<p role="alert">{b.error} {b.conflict?'请读取最新保存版本；编辑文字会保留。':b.pending?'结果尚未确认，请用原保存重试。':''}</p>}
-      </section>
+      </details>
     </>}
       <SubmissionPanel project={project} target={target} currentPlanId={workspace.plan.plan_id} active={active} onChanged={onPublished}/>
       <OutcomeArchive project={project}/>
@@ -160,7 +166,7 @@ function RevisionPanel({project,revision:r,active,onChange}: {project:string;rev
   function exportRevision(body:PromptExportBody){setExportPending(body);void work(()=>promptApi.export(project,r.revision_id,body),value=>{if(value.revision_id!==r.revision_id||value.format!==body.format)throw new Error('导出版本未能核对，请保留原文并重新读取。');setExported(value);setExportPending(null);});}
   function download(){if(!exported)return;const url=URL.createObjectURL(new Blob([exported.export_text],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`studyplan-prompt-v${exported.revision_no}-${exported.format}.txt`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   return <article aria-label={`已保存方案第 ${r.revision_no} 版`}><h3>第 {r.revision_no} 版原文</h3><pre className="prompt-original">{r.user_draft}</pre><details><summary>保存时的主项目与任务要求</summary><Snapshot value={r.task_snapshot}/></details>
-    <h3>这版原文的反馈</h3>{r.review?<div>{([['优点',r.review.strengths],['待补充',r.review.gaps],['建议',r.review.suggestions]] as const).map(([label,items])=><div key={label}><h4>{label}</h4>{items.length?<ul>{items.map((v,i)=><li key={i}>{v}</li>)}</ul>:<p>没有额外条目。</p>}</div>)}</div>
+    <details><summary>查看历史反馈</summary><h3>这版原文的反馈</h3>{r.review?<div>{([['优点',r.review.strengths],['待补充',r.review.gaps],['建议',r.review.suggestions]] as const).map(([label,items])=><div key={label}><h4>{label}</h4>{items.length?<ul>{items.map((v,i)=><li key={i}>{v}</li>)}</ul>:<p>没有额外条目。</p>}</div>)}</div>
     : r.run_id?<p role="status">{terminal.has(r.run_status||'')?(['unknown','reconciliation_required'].includes(r.run_status||'')?'反馈结果未知，请先核对，不会自动重新发起。':'本次反馈已结束；原文保留。'):'正在为这版已保存原文生成反馈，你可以继续编辑。'}</p>:<p>尚未请求反馈。</p>}
     <LegacyReview revision={r}/>
     {!r.review&&!r.run_id&&<><label className="prompt-consent"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/>同意将这版已保存的方案 / Prompt 原文和对应任务、知识要求发送给已配置模型</label><button className="btn" disabled={!consent||busy||!!reviewPending} onClick={()=>review({consent_to_model:true,idempotency_key:crypto.randomUUID()})}>请求这版原文反馈</button></>}
@@ -168,7 +174,7 @@ function RevisionPanel({project,revision:r,active,onChange}: {project:string;rev
     {r.run_id&&['queued','running'].includes(r.run_status||'')&&<button className="btn" disabled={busy||runVersion===null||!!cancelPending} onClick={()=>cancel({run_id:r.run_id!,expected_version:runVersion!,idempotency_key:crypto.randomUUID()})}>取消这版反馈</button>}
     {cancelPending&&<button className="btn" disabled={busy} onClick={()=>cancel(cancelPending)}>重试原取消请求</button>}
     <button className="text-button" onClick={()=>void read()}>核对这版反馈</button>
-    <h3>导出所选保存版本</h3><p>导出不调用模型，也不包含编辑框中尚未保存的文字。</p><label>导出内容<select aria-label="导出内容" value={format} onChange={e=>setFormat(e.target.value as typeof format)}><option value="raw">原文</option><option value="implementation">实施 Prompt（含当时要求）</option></select></label>
+    </details><h3>导出所选保存版本</h3><p>导出不调用模型，也不包含编辑框中尚未保存的文字。</p><label>导出内容<select aria-label="导出内容" value={format} onChange={e=>setFormat(e.target.value as typeof format)}><option value="raw">原文</option><option value="implementation">实施 Prompt（含当时要求）</option></select></label>
     <button className="btn" disabled={busy||!!exportPending} onClick={()=>exportRevision({format,idempotency_key:crypto.randomUUID()})}>生成这版导出</button>
     {exportPending&&<button className="btn" disabled={busy} onClick={()=>exportRevision(exportPending)}>重试原导出请求</button>}
     {exported&&<section aria-label="所选保存版本导出"><p>已生成第 {exported.revision_no} 版{exported.format==='raw'?'原文':'实施 Prompt'}导出。</p><pre className="prompt-original">{exported.export_text}</pre><div className="chips"><button className="btn" onClick={()=>void navigator.clipboard.writeText(exported.export_text).then(()=>setError('已复制所选版本导出。')).catch(()=>setError('复制失败，请选择导出文字手动复制。'))}>复制这版导出</button><button className="btn" onClick={download}>下载这版导出</button><button className="btn" disabled={busy} onClick={()=>void work(()=>promptApi.savedExport(project,exported.export_id),value=>{if(value.revision_id===r.revision_id)setExported(value);})}>读取已保存导出</button></div></section>}

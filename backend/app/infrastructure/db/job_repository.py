@@ -252,8 +252,8 @@ class PgPlanningJobRepository:
                     """SELECT j.job_id,j.run_id,r.actor_id
                     FROM ai_jobs j JOIN ai_runs r ON r.run_id=j.run_id
                     WHERE r.project_id=%s AND r.actor_id=%s AND r.status IN ('queued','running')
-                      AND r.kind IN ('plan_generate','summary_review','prompt_review')
-                      AND (r.kind='plan_generate' OR ((r.kind='summary_review' AND r.graph_version='summary-review-v1'
+                      AND r.kind IN ('plan_generate','summary_review','prompt_review','assistant_reply')
+                      AND (r.kind='plan_generate' OR (r.kind='assistant_reply' AND r.graph_version='assistant-coaching-v1' AND EXISTS(SELECT 1 FROM assistant_turns b WHERE b.run_id=r.run_id AND b.project_id=r.project_id AND b.actor_id=r.actor_id)) OR ((r.kind='summary_review' AND r.graph_version='summary-review-v1'
                         AND EXISTS(SELECT 1 FROM summary_review_bindings b WHERE b.run_id=r.run_id AND b.project_id=r.project_id AND b.actor_id=r.actor_id)
                         OR r.kind='prompt_review' AND r.graph_version='prompt-review-v1'
                         AND EXISTS(SELECT 1 FROM prompt_review_bindings b WHERE b.run_id=r.run_id AND b.project_id=r.project_id AND b.actor_id=r.actor_id))))
@@ -448,7 +448,7 @@ class PgPlanningJobRepository:
                 raise ConflictError("规划租约已失效", reason="planning_claim_stale")
             rows = conn.execute(
                 "SELECT detail FROM ai_run_events WHERE run_id=%s AND status='submission' "
-                "AND detail->>'kind' IN('planning_submission','summary_review_submission','prompt_review_submission') ORDER BY event_id", (claim.run_id,),
+                "AND detail->>'kind' IN('planning_submission','summary_review_submission','prompt_review_submission','assistant_reply_submission') ORDER BY event_id", (claim.run_id,),
             ).fetchall()
             run = conn.execute("SELECT kind,graph_version FROM ai_runs WHERE run_id=%s", (claim.run_id,)).fetchone()
         if len(rows) != 1 or not isinstance(rows[0]["detail"], dict):
@@ -456,7 +456,7 @@ class PgPlanningJobRepository:
         detail = rows[0]["detail"]
         if detail.get("actor_id") != claim.actor_id or detail.get("project_id") != claim.project_id:
             raise ConflictError("规划提交归属与 Run 不一致", reason="planning_submission_ambiguous")
-        expected_kind = {"plan_generate": "planning_submission", "summary_review": "summary_review_submission", "prompt_review": "prompt_review_submission"}.get(run["kind"] if run else "")
+        expected_kind = {"plan_generate": "planning_submission", "summary_review": "summary_review_submission", "prompt_review": "prompt_review_submission", "assistant_reply": "assistant_reply_submission"}.get(run["kind"] if run else "")
         if expected_kind is None or detail.get("kind") != expected_kind:
             raise ValidationAppError("Worker 提交种类与 Run 不一致")
         return detail

@@ -16,6 +16,7 @@ import {
 import { PlanningPage } from "./features/planning/PlanningPage";
 import { ModelSettings } from "./ModelSettings";
 import "./style.css";
+import {useAssistant} from "./features/learning/useAssistant";
 import {stagePage} from "./components/learningNavigation";
 import type {PracticeTaskIntent} from "./components/learningNavigation";
 
@@ -42,6 +43,7 @@ function App() {
       : "dashboard",
   );
   const [position, setPosition] = useState({ stage: "", node: "", storageKey: "" });
+  const [artifactRefreshVersion,setArtifactRefreshVersion]=useState(0);
   const [taskIntent, setTaskIntent] = useState<PracticeTaskIntent>();
   const [fake, setFake] = useState<boolean | null>(null);
   const stageId = position.stage, nodeId = position.node;
@@ -102,6 +104,7 @@ function App() {
         JSON.stringify({ stage: stageId, node: nodeId }),
       );
   }, [stageId, nodeId, workspace, positionKey, position.storageKey]);
+  const assistant = useAssistant(project, session?.username || session?.csrf_token || "", async()=>{setArtifactRefreshVersion(v=>v+1);await refresh();}, workspace?.plan.plan_id);
   const stage = workspace?.stages.find((s) => s.stage.stage_id === stageId);
   function selectStage(id: string, external = false) {
     setPosition({ storageKey: positionKey, stage: id,
@@ -123,6 +126,7 @@ function App() {
     try {
       await api.logout();
       clearResourceBuffers();
+      assistant.clear();
       setSession(null);
       setWorkspace(null);
       setCsrfToken("");
@@ -146,6 +150,7 @@ function App() {
   return (
     <AppShell
       page={page}
+      assistant={assistant}
       navigate={navigate}
       session={session}
       workspace={workspace}
@@ -208,14 +213,15 @@ function App() {
           allNodes={workspace?.stages.flatMap((s) => s.nodes) || []}
           selectNode={selectNode}
           create={() => navigate("planning")}
-          practice={() => navigate("practice")} summary={() => navigate("summary")}
+          practice={() => navigate("practice")} summary={() => {if(workspace&&stage)void assistant.start({plan_id:workspace.plan.plan_id,stage_id:stage.stage.stage_id,mode:"summary",task_id:null});}}
+          startPractice={taskId=>{if(workspace&&stage)void assistant.start({plan_id:workspace.plan.plan_id,stage_id:stage.stage.stage_id,mode:"practice",task_id:taskId});}}
         />
       )}
       <div hidden={page !== 'summary'}><SummaryDetail key={project} project={project}
-        workspace={workspace} initialStage={stageId} onStageChange={selectStage} active={page === 'summary'} onSaved={refresh}/></div>
+        workspace={workspace} artifactRefreshVersion={artifactRefreshVersion} initialStage={stageId} onStageChange={selectStage} active={page === 'summary'} onSaved={refresh} onStart={id=>{if(workspace)void assistant.start({plan_id:workspace.plan.plan_id,stage_id:id,mode:'summary',task_id:null});}} assistantBusy={assistant.starting||!!assistant.startPending}/></div>
       <div hidden={page !== 'practice'}><PracticeDetail key={project} project={project}
-        workspace={workspace} initialStage={stageId} onStageChange={selectStage} active={page === 'practice'} onPublished={refresh} taskIntent={taskIntent}/></div>
-      {page === "conversations" && <ConversationList />}
+        workspace={workspace} artifactRefreshVersion={artifactRefreshVersion} initialStage={stageId} onStageChange={selectStage} active={page === 'practice'} onPublished={refresh} taskIntent={taskIntent} onStart={(stageId,taskId)=>{if(workspace)void assistant.start({plan_id:workspace.plan.plan_id,stage_id:stageId,mode:'practice',task_id:taskId});}} assistantBusy={assistant.starting||!!assistant.startPending}/></div>
+      {page === "conversations" && <ConversationList controller={assistant} />}
       {page === "settings" && (
         <div className="content">
           <p className="eyebrow">MODEL SETTINGS</p>

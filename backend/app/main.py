@@ -32,6 +32,7 @@ from app.api.v1.session_routes import router as session_router
 from app.api.v1.submission_routes import outcomes_router
 from app.api.v1.submission_routes import router as submission_router
 from app.api.v1.summary_routes import router as summary_router
+from app.api.v1.assistant_routes import router as assistant_router
 from app.api.v1.workspace_routes import router as workspace_router
 from app.application.container import AppContainer
 from app.composition import build_container
@@ -164,6 +165,7 @@ def create_app(container: AppContainer | None = None) -> FastAPI:
     application.include_router(preference_router)
     application.include_router(resource_change_router)
     application.include_router(summary_router)
+    application.include_router(assistant_router)
     application.include_router(prompt_router)
     application.include_router(practice_change_router)
     application.include_router(plan_change_router)

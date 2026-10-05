@@ -61,7 +61,7 @@ export function fitPanels(state: Panels, width: number): Panels {
   if (remaining() < 600) s.plan = false;
   if (s.assistant)
     s.assistantWidth = Math.max(280, Math.min(s.assistantWidth, width - 662));
-  if (width < 960) s.assistant = false;
+  if (width < 960 && s.assistant) s.assistantWidth = Math.min(width, 460);
   if (width < 760) s.plan = false;
   return s;
 }

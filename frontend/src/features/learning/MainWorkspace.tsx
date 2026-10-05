@@ -111,7 +111,7 @@ export function MainWorkspace({
   planId,
   planRevision,
   onPublished,
-  practice, summary,
+  practice, summary, startPractice,
   plan, introducedNodeIds = [],
 }: {
   stage: StageWorkspace | undefined;
@@ -124,7 +124,7 @@ export function MainWorkspace({
   planId: string;
   planRevision: number;
   onPublished: () => Promise<void>;
-  practice?: () => void; summary?: () => void;
+  practice?: () => void; summary?: () => void; startPractice?: (taskId:string)=>void;
   plan?: DTO['PlanView'];
   introducedNodeIds?: string[];
 }) {
@@ -225,8 +225,8 @@ export function MainWorkspace({
                 target={{plan_id:planId,stage_id:stage.stage.stage_id,unit_id:unitId,...(validNodeId ? {node_id:validNodeId} : {})}} />
             </>}
           </ResourceDialog>
-          {!!stage.tasks.length && <section className="practice-preview"><p className="eyebrow">把知识用到项目中</p>{stage.tasks.map(t=><article key={t.task_id}><h2>{t.title}</h2><p className="muted">{t.goal}</p><p>验收要求：{t.acceptance?.join('；') || '暂无补充条目'}</p></article>)}{practice && <button className="btn primary" onClick={practice}>查看任务与验收要求 →</button>}</section>}
-          {summary && <div className="next-step"><div><strong>整理这个阶段的理解与证据</strong><p className="muted">保留还没验证的部分，便于继续学习。</p></div><button className="btn" onClick={summary}>写阶段总结</button></div>}
+          {!!stage.tasks.length && <section className="practice-preview"><p className="eyebrow">把知识用到项目中</p>{stage.tasks.map(t=><article key={t.task_id}><h2>{t.title}</h2><p className="muted">{t.goal}</p><p>验收要求：{t.acceptance?.join('；') || '暂无补充条目'}</p>{startPractice&&<button className="btn" onClick={()=>startPractice(t.task_id)}>开始实践</button>}</article>)}{practice && <button className="btn primary" onClick={practice}>查看任务与验收要求 →</button>}</section>}
+          {summary && <div className="next-step"><div><strong>整理这个阶段的理解与证据</strong><p className="muted">保留还没验证的部分，便于继续学习。</p></div><button className="btn" onClick={summary}>开始总结</button></div>}
         </>
       )}
     </div>

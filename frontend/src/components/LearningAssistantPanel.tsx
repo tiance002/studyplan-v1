@@ -1,48 +1,23 @@
-export function LearningAssistantPanel({
-  close,
-  stageTitle,
-}: {
-  close: () => void;
-  stageTitle: string;
-}) {
-  return (
-    <aside className="assistant-panel" aria-label="学习助手">
-      <div className="assistant-top">
-        <span className="tutor-mark">✧</span>
-        <div>
-          <strong>学习助手</strong>
-          <small>陪你理解，帮助你实践</small>
-        </div>
-        <button
-          className="icon-button"
-          aria-label="关闭学习助手"
-          onClick={close}
-        >
-          ×
-        </button>
-      </div>
-      <div className="assistant-context">
-        <span className="pill">{stageTitle || "当前学习空间"}</span>
-      </div>
-      <div className="assistant-scroll">
-        <p className="eyebrow">即将开放</p>
-        <h3>把疑问留在学习现场</h3>
-        <p className="muted">
-          学习助手尚未开放。你可以先浏览学习节点、资源与实践要求。
-        </p>
-        <p className="muted">在学习过程中整理问题，后续可以与助手交流。</p>
-      </div>
-      <div className="assistant-compose">
-        <textarea
-          aria-label="助手输入框（尚未开放）"
-          placeholder="学习助手尚未开放"
-          disabled
-        />
-        <button className="btn" disabled>
-          发送
-        </button>
-        <small>会话功能暂未开放</small>
-      </div>
-    </aside>
-  );
+import {useEffect,useRef} from 'react';
+import type {AssistantController} from '../features/learning/useAssistant';
+const failureReasons:Record<string,string>={assistant_binding_unavailable:'模型配置不可用，请先核对模型设置。',assistant_worker_unavailable:'辅导服务暂不可用，请先核对服务。',assistant_input_too_large:'本次输入超出辅导上下文上限，请缩短工作稿或问题。',assistant_reply_invalid:'模型回复不符合要求，未作为成功反馈保存；你的原文保留。',provider_invalid_json:'模型回复格式不完整，未作为成功反馈保存；你的原文保留。'};
+const statuses:Record<string,string>={queued:'原文已保存，待反馈',running:'正在生成建议',succeeded:'回复完成',failed:'反馈失败，原文保留',cancelled:'反馈已取消',reconciliation_required:'结果待核对，请勿重新发送',unknown:'结果待核对，请勿重新发送'};
+export function LearningAssistantPanel({close,controller:a}:{close:()=>void;controller:AssistantController}) {
+  const input=useRef<HTMLTextAreaElement>(null),panel=useRef<HTMLElement>(null);
+  useEffect(()=>{const previous=document.activeElement as HTMLElement|null;input.current?.focus();return()=>{if(previous?.isConnected)previous.focus();};},[]);
+  const c=a.conversation,b=a.buffer;
+  return <aside ref={panel} className="assistant-panel" aria-label="学习助手" onKeyDown={e=>{if(e.key==='Escape'){e.stopPropagation();close();}if(e.key==='Tab'&&window.innerWidth<960){const elements=panel.current?.querySelectorAll<HTMLElement>('button:not(:disabled),textarea:not(:disabled),select,input:not(:disabled)');if(elements?.length){const first=elements[0],last=elements[elements.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}}}>
+    <div className="assistant-top"><span className="tutor-mark">✧</span><div><strong>学习助手</strong><small>总结与实践 Prompt 辅导</small></div><button className="icon-button" aria-label="关闭学习助手" onClick={close}>×</button></div>
+    {c&&a.listError&&<p role="alert">{a.listError}</p>}{c&&a.startPending&&<button className="btn" disabled={a.starting} onClick={()=>void a.start(a.startPending!)}>核对原开始操作</button>}
+    {c?<><div className="assistant-context"><strong>{c.title}</strong><p>{c.mode==='summary'?'阶段总结':'实践 Prompt'} · 路线第 {c.plan_revision} 版</p><small>固定阶段：{c.stage_id}{c.task_id?` · 任务：${c.task_id}`:''}</small>{c.read_only&&<p role="status">旧路线会话，只读。可复制原文并在新路线明确开始。</p>}</div>
+    <div className="assistant-scroll"><p className="muted">写下完整工作稿，或切换为追问。建议不会改变正式任务或完成状态。</p>
+      {c.messages_truncated&&c.message_cursor!==null&&<button className="btn" disabled={b.historyBusy} onClick={()=>void a.earlier()}>{b.historyBusy?'正在读取较早消息…':'读取较早消息'}</button>}
+      {c.messages.map(m=><article className={`assistant-message ${m.role}`} key={m.message_id}><strong>{m.role==='assistant'?'助手':m.intent==='work_draft'?'我的工作稿':'我的追问'}</strong><small> 消息 {m.sequence}{m.draft_message_id?` · 所评稿 ${m.draft_message_id}`:''}</small><pre>{m.content}</pre>{m.role==='user'&&(m.run_id||m.run_status)&&<p role="status">{statuses[m.run_status||'']||'正在核对反馈状态'}{m.error_class?` · ${failureReasons[m.error_class]||m.error_class}`:''}{m.run_status==='failed'?' 原文已保留，可直接正式保存。':''}</p>}</article>)}
+      {c.formal_saves.map(s=><p className="notice" key={s.save_id}>已保存为正式{c.mode==='summary'?'阶段总结':'任务 Prompt'} · 第 {s.formal_version} 版</p>)}
+      <details><summary>明确保存为{c.mode==='summary'?'阶段总结':'任务 Prompt'}</summary><p>默认使用你的工作稿。确认文字后保存，不调用模型；保存 Prompt 不代表完成实践。</p><p aria-label="当前正式版本">当前正式版本：{c.formal_version>0?`第 ${c.formal_version} 版`:'尚未保存'}</p><p className="form-note">如发生版本冲突，请先明确点击「刷新会话状态」核对当前版本，再确认是否保存本地稿。读取不会自动保存。</p><textarea aria-label="正式保存原文" rows={6} value={b.formal} onChange={e=>a.update({formal:e.target.value,formalDirty:true})}/><button className="btn primary" disabled={c.read_only||b.busy||!!b.save||b.saveConflict||!c.current_draft_message_id||!b.formal.trim()||Array.from(b.formal).length>(c.mode==='summary'?20000:40000)} onClick={()=>void a.save({content:b.formal,draft_message_id:c.current_draft_message_id!,expected_version:c.formal_version,idempotency_key:crypto.randomUUID()})}>保存为{c.mode==='summary'?'阶段总结':'任务 Prompt'}</button>{b.save&&<button className="btn" disabled={b.busy||c.read_only} onClick={()=>void a.save(b.save!)}>核对原保存操作</button>}</details>
+      {b.error&&<p role="alert">{b.error}</p>}<button className="text-button" onClick={()=>void a.read()}>刷新会话状态（仅读取）</button>
+      {a.run?.run_id&&['queued','running'].includes(a.run.run_status||'')&&<button className="btn" disabled={b.busy||a.run.run_version===null||!!b.cancel} onClick={()=>void a.cancel({run_id:a.run!.run_id!,expected_version:a.run!.run_version!,idempotency_key:crypto.randomUUID()})}>取消本次反馈</button>}{b.cancel&&<button className="btn" disabled={b.busy} onClick={()=>void a.cancel(b.cancel!)}>核对原取消操作</button>}
+    </div><div className="assistant-compose"><label>消息意图<select aria-label="消息意图" value={b.intent} onChange={e=>a.update({intent:e.target.value as 'work_draft'|'question'})}><option value="work_draft">提交／更新完整工作稿</option><option value="question">追问（保留当前工作稿）</option></select></label><textarea ref={input} aria-label="助手输入框" rows={4} value={b.text} onChange={e=>a.update({text:e.target.value})} placeholder="输入你的工作稿或问题"/><label><input type="checkbox" checked={b.consent} onChange={e=>a.update({consent:e.target.checked})}/>同意将本次消息、当前工作稿、固定阶段／任务要求和限定同会话历史发给已配置模型</label><button className="btn primary" disabled={b.busy||a.blocked||!!b.send||!b.consent||!b.text.trim()||(b.intent==='question'&&!c.current_draft_message_id)} onClick={()=>void a.send({content:b.text,intent:b.intent,consent_to_model:true,idempotency_key:crypto.randomUUID()})}>{b.busy?'正在保存原文…':'发送并获取建议'}</button>{b.send&&<button className="btn" disabled={b.busy||a.blocked} onClick={()=>void a.send(b.send!)}>核对原发送操作</button>}<small>收起和切换页面会保留未发送文字；刷新或退出前请复制保管。回复不代表已读资料全文或已执行项目。</small></div></>
+    :<div className="assistant-scroll"><h3>开始一段学习辅导</h3><p>在阶段点击「开始总结」，或在具体任务点击「开始实践」。也可从「我的会话」恢复已有讨论。</p>{a.listError&&<p role="alert">{a.listError}</p>}{a.startPending&&<button className="btn" disabled={a.starting} onClick={()=>void a.start(a.startPending!)}>核对原开始操作</button>}</div>}
+  </aside>;
 }

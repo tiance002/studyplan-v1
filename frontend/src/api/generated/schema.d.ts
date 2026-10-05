@@ -383,6 +383,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/assistant/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** History */
+        get: operations["list_assistant_conversations"];
+        put?: never;
+        /** Create */
+        post: operations["create_assistant_conversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assistant/conversations/{conversation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get */
+        get: operations["get_assistant_conversation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assistant/conversations/{conversation_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send */
+        post: operations["send_assistant_message"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assistant/conversations/{conversation_id}/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save */
+        post: operations["save_assistant_formal_artifact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assistant/conversations/{conversation_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel */
+        post: operations["cancel_assistant_reply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/prompts": {
         parameters: {
             query?: never;
@@ -1065,6 +1151,211 @@ export interface components {
          * @enum {string}
          */
         AiRunStatus: "queued" | "running" | "waiting_user" | "succeeded" | "failed" | "cancelled" | "reconciliation_required";
+        /** AssistantCancelRequest */
+        AssistantCancelRequest: {
+            /** Run Id */
+            run_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** AssistantConversationSummary */
+        AssistantConversationSummary: {
+            /** Conversation Id */
+            conversation_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string;
+            /** Plan Revision */
+            plan_revision: number;
+            /** Stage Id */
+            stage_id: string;
+            /** Task Id */
+            task_id: string | null;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "summary" | "practice";
+            /** Title */
+            title: string;
+            /** Context */
+            context: {
+                [key: string]: unknown;
+            };
+            /** Context Hash */
+            context_hash: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Read Only */
+            read_only: boolean;
+            /** Current Draft Message Id */
+            current_draft_message_id: string | null;
+            /** Formal Version */
+            formal_version: number;
+        };
+        /** AssistantConversationView */
+        AssistantConversationView: {
+            /** Conversation Id */
+            conversation_id: string;
+            /** Project Id */
+            project_id: string;
+            /** Plan Id */
+            plan_id: string;
+            /** Plan Revision */
+            plan_revision: number;
+            /** Stage Id */
+            stage_id: string;
+            /** Task Id */
+            task_id: string | null;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "summary" | "practice";
+            /** Title */
+            title: string;
+            /** Context */
+            context: {
+                [key: string]: unknown;
+            };
+            /** Context Hash */
+            context_hash: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Read Only */
+            read_only: boolean;
+            /** Current Draft Message Id */
+            current_draft_message_id: string | null;
+            /** Formal Version */
+            formal_version: number;
+            /** Messages Truncated */
+            messages_truncated: boolean;
+            /** Message Cursor */
+            message_cursor: number | null;
+            /** Messages */
+            messages: components["schemas"]["AssistantMessageView"][];
+            /** Formal Saves */
+            formal_saves: components["schemas"]["AssistantFormalSaveView"][];
+        };
+        /** AssistantCreateRequest */
+        AssistantCreateRequest: {
+            /** Plan Id */
+            plan_id: string;
+            /** Stage Id */
+            stage_id: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "summary" | "practice";
+            /** Task Id */
+            task_id?: string | null;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
+        /** AssistantFormalSaveView */
+        AssistantFormalSaveView: {
+            /** Save Id */
+            save_id: string;
+            /** Draft Message Id */
+            draft_message_id: string;
+            /** Content */
+            content: string;
+            /** Artifact Id */
+            artifact_id: string;
+            /**
+             * Artifact Type
+             * @enum {string}
+             */
+            artifact_type: "summary" | "prompt";
+            /** Formal Version */
+            formal_version: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** AssistantHistoryView */
+        AssistantHistoryView: {
+            /** Items */
+            items: components["schemas"]["AssistantConversationSummary"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+        };
+        /** AssistantMessageRequest */
+        AssistantMessageRequest: {
+            /**
+             * Intent
+             * @enum {string}
+             */
+            intent: "work_draft" | "question";
+            /** Content */
+            content: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /**
+             * Consent To Model
+             * @default false
+             */
+            consent_to_model: boolean;
+        };
+        /** AssistantMessageView */
+        AssistantMessageView: {
+            /** Message Id */
+            message_id: string;
+            /** Sequence */
+            sequence: number;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+            /**
+             * Intent
+             * @enum {string}
+             */
+            intent: "work_draft" | "question" | "reply";
+            /** Content */
+            content: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Run Id */
+            run_id: string | null;
+            /** Run Status */
+            run_status: string | null;
+            /** Run Version */
+            run_version: number | null;
+            /** Draft Message Id */
+            draft_message_id: string | null;
+            /** Trigger Message Id */
+            trigger_message_id: string | null;
+            /** Error Class */
+            error_class: string | null;
+        };
+        /** AssistantSaveRequest */
+        AssistantSaveRequest: {
+            /** Content */
+            content: string;
+            /** Draft Message Id */
+            draft_message_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
         /** ChapterEvidence */
         ChapterEvidence: {
             /** Path */
@@ -5074,6 +5365,225 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SummaryReviewRunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_assistant_conversations: {
+        parameters: {
+            query: {
+                cursor?: string | null;
+                limit?: number;
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantHistoryView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_assistant_conversation: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_assistant_conversation: {
+        parameters: {
+            query: {
+                before_sequence?: number | null;
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_assistant_message: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantMessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_assistant_formal_artifact: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantSaveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_assistant_reply: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantCancelRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConversationView"];
                 };
             };
             /** @description Validation Error */
