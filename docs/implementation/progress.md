@@ -1,3 +1,14 @@
+## 2026-10-05 Learning Assistant V1.1：非收费 PASS / 真实教学 FAIL / STOP
+
+- 用户现在新增能做什么：简洁自然聊天、本地固定欢迎0调用、默认恢复精确位置最近会话、菜单新建；候选Summary/Prompt明确采用或修改后交给原正式保存服务，主区刷新正式结果。会话与正式产物分离，完成/canonical/source/task门禁保持。教学prompt已实现，但实际第二轮遵守失败，不能宣称真实教学闭环通过。
+- 保留基线HEAD91750cbb345c7f428dd17809affcf4b50da2865b、feat/n1-resource-discovery；最终实际SHA见本批答复/git-final.json，不reset/回退。源码与所有新owned库migration0025，没有新迁移。新Goal[原文](STUDYPLAN_LEARNING_ASSISTANT_V11_GOAL_2026-10-05.md)，[最终分层证据](../acceptance/learning-assistant-v11-2026-10-05.md)。
+- 仅助手projection reply/status/proposal；任意extra无ID/role/保存权威，原162failed不改不重派。proposal由server message/turn/result_ref/精确成功receipt/schema/protocol重建，6破链拒绝；既有FK与原Summary/Prompt CAS/幂等保持，不回改0025。无assistant repair/retry。
+- Unit/contract183PASS；PG/API53唯一有效PASS（46组合+1fixture定向修正+6相邻；原FAIL保留）；frontend61唯一有效PASS（57+1限长+3焦点）/build PASS。真实owned普通API/Worker+MockTransport总结4轮/实践3轮、采用+改稿、幂等/恢复PASS；native fresh restore精确行hash/app角色14消息/7turn/4正式关联PASS。Fake不代表真实provider教学通过。
+- Edge实际Plan/API PASS：简洁布局/两mode教学与保存、CAS409、close/reopen缓冲、refresh/logout/relogin/我的会话、430px桌面/760px全屏焦点循环、旧Plan只读、known失败原文/synthetic unknown不重发。首开Escape焦点FAIL最小修复后实际PASS，原FAIL保留；原生beforeunload弹窗自动化NOT RUN，未冒称浏览器通过。免费binding/publicDNS/securityguard/TLS PASS后收费。
+- 唯一Acceptance assistant-v11-synthetic-c133125757c9，新owned business_da7d56f6/checkpoint_464a0019/合成账号/Plan/两会话。真实163初稿1016input401output/stop，4项集中诊断PASS；164部分回答1507input617output/stop，重复已答对输入/执行问题、第二轮提前教学，教学FAIL即STOP。provider/严格JSON/两应用Run均PASS，不能倒改成Run failed；后5回复/真实候选保存/Practice NOT RUN。正确completed_rounds1与明确不重复指令已入原wire，证据保留。
+- 本授权280只一次；request/result累计162→164/280余116，本批2、repair0、unknown0；2523input+1018output=3541tokens，金额NOT OBSERVABLE。全局账/PG/rawreceipt reconciliation PASS，391旧文件/.env hash保持，唯一completion追加。新paid4消息2turn0正式产物，学习状态未污染。产品search/RAG0；原库/正式入口/正式Worker/deploy/push/merge NOT RUN。
+- 请求root/关键复核Sol6.1 xhigh、前端有界medium，actual NOT OBSERVABLE。LEARNING_ASSISTANT_CORE_PASS条件FAIL，整体STAGING_BLOCKED / NOT_READY。当前STOP；下一仅新的有界离线教学合同定位/验收Goal，余额不自动授权重跑。
+
 ## 2026-10-05 Learning Assistant V1：非收费 PASS / 真实代表 FAIL / STOP
 
 - 用户现在新增能做什么：开始总结/精确task开始实践创建冻结会话并打开右侧助手；工作稿/追问分离、多轮反馈、用户明确保存原Summary/Prompt服务、主区正式版本刷新与我的会话恢复。聊天不写完成事实；主区任务/正式历史/导出/成果/USER保留。源码与[本批报告](../acceptance/learning-assistant-v1-2026-10-05.md)同一本地提交，最终实际SHA见最终答复与var git-final审计；基线af2f3ae3fad226509ef6d149455a507acce49663，无reset/回退/push/merge。新迁移head0025，0024保持。

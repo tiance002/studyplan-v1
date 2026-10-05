@@ -29,7 +29,7 @@ class AssistantService:
         return self.repository.list(scope, project, cursor, limit)
 
     def send(self, scope, project, identifier, body):
-        validate_message(body["intent"], body["content"])
+        validate_message(body.get("intent") or "work_draft", body["content"])
         if body.get("consent_to_model") is not True:
             raise ValidationAppError("发送模型前需要明确同意")
         prior = self.repository.message_receipt(scope, project, identifier, body)

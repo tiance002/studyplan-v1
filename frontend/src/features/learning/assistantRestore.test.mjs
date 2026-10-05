@@ -5,7 +5,7 @@ import ts from 'typescript';
 const compile = path => ts.transpileModule(readFileSync(new URL(path,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
 const url = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
 const react=url(`export const useState=(...args)=>globalThis.restoreHooks.useState(...args);export const useRef=(...args)=>globalThis.restoreHooks.useRef(...args);export const useEffect=(...args)=>globalThis.restoreHooks.useEffect(...args);`);
-const api=url('export const assistantApi={list:(...args)=>globalThis.restoreApi.list(...args),read:(...args)=>globalThis.restoreApi.read(...args),save:(...args)=>globalThis.restoreApi.save(...args)};');
+const api=url('export const assistantApi={list:(...args)=>globalThis.restoreApi.list(...args),read:(...args)=>globalThis.restoreApi.read(...args),save:(...args)=>globalThis.restoreApi.save(...args),create:(...args)=>globalThis.restoreApi.create(...args),send:(...args)=>globalThis.restoreApi.send(...args)};');
 const client=url('export class ApiError extends Error{constructor(status,message){super(message);this.status=status;}};');
 const {ApiError}=await import(client);
 const state=url(compile('./assistantState.ts'));
@@ -38,4 +38,10 @@ test('failed first read is not an empty success and clear removes readiness/priv
 test('formal CAS conflict preserves exact edited text and only explicit GET unlocks save',async()=>{
   const h=harness();const c={conversation_id:'c',plan_id:'plan',messages:[],formal_saves:[],formal_version:2,current_draft_message_id:null,read_only:false};globalThis.restoreApi={read:async()=>c,save:async()=>{throw new ApiError(409,'version conflict');}};
   h.render();h.effects();let a=h.render();await a.resume('c');a=h.render();a.update({formal:'  local\n',formalDirty:true});a=h.render();await a.save({content:'  local\n',draft_message_id:'draft',expected_version:1,idempotency_key:'save'});a=h.render();assert.equal(a.buffer.saveConflict,true);assert.equal(a.buffer.formal,'  local\n');await a.read('c',false);a=h.render();assert.equal(a.buffer.saveConflict,true);assert.equal(a.buffer.formal,'  local\n');await a.read('c');a=h.render();assert.equal(a.buffer.saveConflict,false);assert.equal(a.buffer.formal,'  local\n');assert.equal(a.conversation.formal_version,2);
+});
+test('normal start delegates recent restore while explicit new start sends force_new',async()=>{
+ const h=harness(),bodies=[];const c={conversation_id:'c',plan_id:'plan',messages:[],formal_saves:[],formal_version:0,current_draft_message_id:null,read_only:false};globalThis.restoreApi={create:async(project,body)=>{bodies.push(body);return c;}};h.render();h.effects();let a=h.render();const target={plan_id:'plan',stage_id:'stage',mode:'summary',task_id:null};await a.start(target);a=h.render();assert.equal(a.conversation.conversation_id,'c');assert.equal(bodies[0].force_new,false);await a.start({...target,force_new:true});assert.equal(bodies[1].force_new,true);
+});
+test('unconfirmed create blocks fresh operation keys and uses the original key for explicit recovery',async()=>{
+ const h=harness(),bodies=[];const c={conversation_id:'c',plan_id:'plan',messages:[],formal_saves:[],formal_version:0,current_draft_message_id:null,read_only:false};globalThis.restoreApi={create:async(project,body)=>{bodies.push(body);if(bodies.length===1)throw new Error('response lost');return c;}};h.render();h.effects();let a=h.render();const target={plan_id:'plan',stage_id:'stage',mode:'summary',task_id:null};await a.start(target);a=h.render();await a.start({...target,force_new:true});assert.equal(bodies.length,1);await a.start(a.startPending);assert.equal(bodies.length,2);assert.deepEqual(bodies[0],bodies[1]);a=h.render();assert.equal(a.startPending,null);
 });

@@ -1198,6 +1198,16 @@ export interface components {
             current_draft_message_id: string | null;
             /** Formal Version */
             formal_version: number;
+            /**
+             * Has Formal Save
+             * @default false
+             */
+            has_formal_save: boolean;
+            /**
+             * Last Activity At
+             * Format: date-time
+             */
+            last_activity_at: string;
         };
         /** AssistantConversationView */
         AssistantConversationView: {
@@ -1237,6 +1247,16 @@ export interface components {
             current_draft_message_id: string | null;
             /** Formal Version */
             formal_version: number;
+            /**
+             * Has Formal Save
+             * @default false
+             */
+            has_formal_save: boolean;
+            /**
+             * Last Activity At
+             * Format: date-time
+             */
+            last_activity_at: string;
             /** Messages Truncated */
             messages_truncated: boolean;
             /** Message Cursor */
@@ -1261,6 +1281,11 @@ export interface components {
             task_id?: string | null;
             /** Idempotency Key */
             idempotency_key: string;
+            /**
+             * Force New
+             * @default false
+             */
+            force_new: boolean;
         };
         /** AssistantFormalSaveView */
         AssistantFormalSaveView: {
@@ -1268,6 +1293,8 @@ export interface components {
             save_id: string;
             /** Draft Message Id */
             draft_message_id: string;
+            /** Proposal Message Id */
+            proposal_message_id?: string | null;
             /** Content */
             content: string;
             /** Artifact Id */
@@ -1294,18 +1321,15 @@ export interface components {
         };
         /** AssistantMessageRequest */
         AssistantMessageRequest: {
-            /**
-             * Intent
-             * @enum {string}
-             */
-            intent: "work_draft" | "question";
+            /** Intent */
+            intent?: ("work_draft" | "question") | null;
             /** Content */
             content: string;
             /** Idempotency Key */
             idempotency_key: string;
             /**
              * Consent To Model
-             * @default false
+             * @default true
              */
             consent_to_model: boolean;
         };
@@ -1344,13 +1368,19 @@ export interface components {
             trigger_message_id: string | null;
             /** Error Class */
             error_class: string | null;
+            /** Status */
+            status?: ("continue" | "ready_to_draft") | null;
+            /** Proposal */
+            proposal?: string | null;
         };
         /** AssistantSaveRequest */
         AssistantSaveRequest: {
             /** Content */
             content: string;
             /** Draft Message Id */
-            draft_message_id: string;
+            draft_message_id?: string | null;
+            /** Proposal Message Id */
+            proposal_message_id?: string | null;
             /** Expected Version */
             expected_version: number;
             /** Idempotency Key */

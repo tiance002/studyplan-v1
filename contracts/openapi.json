@@ -4566,6 +4566,16 @@
           "formal_version": {
             "type": "integer",
             "title": "Formal Version"
+          },
+          "has_formal_save": {
+            "type": "boolean",
+            "title": "Has Formal Save",
+            "default": false
+          },
+          "last_activity_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Activity At"
           }
         },
         "type": "object",
@@ -4583,7 +4593,8 @@
           "created_at",
           "read_only",
           "current_draft_message_id",
-          "formal_version"
+          "formal_version",
+          "last_activity_at"
         ],
         "title": "AssistantConversationSummary"
       },
@@ -4665,6 +4676,16 @@
             "type": "integer",
             "title": "Formal Version"
           },
+          "has_formal_save": {
+            "type": "boolean",
+            "title": "Has Formal Save",
+            "default": false
+          },
+          "last_activity_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Activity At"
+          },
           "messages_truncated": {
             "type": "boolean",
             "title": "Messages Truncated"
@@ -4711,6 +4732,7 @@
           "read_only",
           "current_draft_message_id",
           "formal_version",
+          "last_activity_at",
           "messages_truncated",
           "message_cursor",
           "messages",
@@ -4758,6 +4780,11 @@
             "maxLength": 128,
             "minLength": 1,
             "title": "Idempotency Key"
+          },
+          "force_new": {
+            "type": "boolean",
+            "title": "Force New",
+            "default": false
           }
         },
         "additionalProperties": false,
@@ -4779,6 +4806,17 @@
           "draft_message_id": {
             "type": "string",
             "title": "Draft Message Id"
+          },
+          "proposal_message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal Message Id"
           },
           "content": {
             "type": "string",
@@ -4849,10 +4887,17 @@
       "AssistantMessageRequest": {
         "properties": {
           "intent": {
-            "type": "string",
-            "enum": [
-              "work_draft",
-              "question"
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "work_draft",
+                  "question"
+                ]
+              },
+              {
+                "type": "null"
+              }
             ],
             "title": "Intent"
           },
@@ -4871,13 +4916,12 @@
           "consent_to_model": {
             "type": "boolean",
             "title": "Consent To Model",
-            "default": false
+            "default": true
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "intent",
           "content",
           "idempotency_key"
         ],
@@ -4984,6 +5028,32 @@
               }
             ],
             "title": "Error Class"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "continue",
+                  "ready_to_draft"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "proposal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal"
           }
         },
         "type": "object",
@@ -5012,10 +5082,30 @@
             "title": "Content"
           },
           "draft_message_id": {
-            "type": "string",
-            "maxLength": 512,
-            "minLength": 1,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Draft Message Id"
+          },
+          "proposal_message_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 512,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Proposal Message Id"
           },
           "expected_version": {
             "type": "integer",
@@ -5033,7 +5123,6 @@
         "type": "object",
         "required": [
           "content",
-          "draft_message_id",
           "expected_version",
           "idempotency_key"
         ],

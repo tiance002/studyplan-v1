@@ -126,7 +126,7 @@ export function AppShell({
             >
               专注阅读
             </button>
-            <button className="btn" onClick={() => toggle("assistant")}>
+            <button className="btn" data-assistant-entry aria-label="学习助手入口" aria-expanded={visible.assistant} onClick={() => toggle("assistant")}>
               ✧ {visible.assistant ? "收起助手" : "学习助手"}
             </button>
           </div>
@@ -150,7 +150,7 @@ export function AppShell({
             onResize={(w) =>
               setPanels((s) =>
                 fitPanels(
-                  { ...s, assistantWidth: Math.max(280, Math.min(800, w)) },
+                  { ...s, assistantWidth: Math.max(420, Math.min(480, w)) },
                   width,
                 ),
               )

@@ -3,6 +3,18 @@ export const terminalAssistant = new Set(['succeeded','failed','cancelled','canc
 export const latestAssistantRun = (c?:Conversation) => c?.messages.filter(m=>m.run_id).at(-1);
 export const assistantBlocked = (c?:Conversation) => !!c?.read_only || !!c?.messages.some(m => m.run_id && (!terminalAssistant.has(m.run_status || '') || ['unknown','reconciliation_required'].includes(m.run_status || '')));
 export const currentAssistantDraft = (c:Conversation) => c.messages.find(m=>m.message_id===c.current_draft_message_id && m.role==='user')?.content || '';
+export const summaryWelcome = {title:'把你对本阶段的总结发给我。',checks:['核心知识是否覆盖；','关键概念之间的关系是否讲清楚；','有没有明显误解或遗漏；','是否能用自己的话说明本阶段重点。']};
+export const practiceWelcome = {title:'把你准备交给 AI / Codex 的 Prompt 发给我。',checks:['任务目标是否明确；','修改范围和约束是否清楚；','输入与输出要求是否完整；','验收标准是否能真正证明任务完成；','有没有容易让 AI 扩大范围或误解任务的地方。']};
+export function assistantTargetTitle(c:Pick<Conversation,'mode'|'title'|'context'>):string {
+  const direct=c.context[c.mode==='summary'?'stage_title':'task_title'];
+  if(typeof direct==='string'&&direct.trim())return direct;
+  const snapshot=c.context[c.mode==='summary'?'stage':'task'];
+  if(snapshot&&typeof snapshot==='object'&&'title' in snapshot&&typeof snapshot.title==='string')return snapshot.title;
+  return c.title.replace(/^(阶段总结|总结辅导|实践辅导|实践 Prompt|Prompt 辅导)\s*[·：:]\s*/,'');
+}
+export function finishProposalEdit(edits:Record<string,string>|undefined,id:string|undefined,saved:string):Record<string,string> {
+  const result={...edits};if(id&&result[id]===saved)delete result[id];return result;
+}
 export function mergeConversation(old:Conversation|undefined,next:Conversation):Conversation {
   if (old && (old.messages.at(-1)?.sequence || 0) > (next.messages.at(-1)?.sequence || 0)) return old;
   const messages=[...next.messages,...(old?.messages.filter(m=>!next.messages.some(n=>n.message_id===m.message_id))||[])].sort((a,b)=>a.sequence-b.sequence).map(m=>{

@@ -29,7 +29,7 @@ def test_input_overflow_fails_before_dispatch_and_never_truncates_latest():
                     {"message_id":"m","intent":"question","content":"exact"}, [])
 
 
-@pytest.mark.parametrize("value", [{}, {"reply":""}, {"reply":" \n"}, {"reply":"x"*16001}, {"reply":"ok","score":1}, {"reply":False}])
+@pytest.mark.parametrize("value", [{}, {"reply":""}, {"reply":" \n"}, {"reply":"x"*16001}, {"reply":"ok","status":"VERIFIED"}, {"reply":False}])
 def test_invalid_reply_fails_without_planning_repair(value):
     assert validate_reply(value)
 
@@ -47,7 +47,7 @@ def test_frozen_single_request_manifest_integrity():
     assert not manifest_intact(dict(manifest,protocol="summary-review-v1"))
 
 
-def test_retained_paid_extra_message_identity_is_rejected_without_mutating_fixture():
+def test_retained_paid_extra_message_identity_is_non_authoritative_without_mutating_fixture():
     import json
     from pathlib import Path
     raw = (Path(__file__).parents[1]/"fixtures/assistant_v1/known_extra_message_id.json").read_bytes()
@@ -55,8 +55,10 @@ def test_retained_paid_extra_message_identity_is_rejected_without_mutating_fixtu
     value = json.loads(fixture["content"])
     assert fixture["finish_reason"] == "stop"
     assert set(value) == {"reply", "message_id"}
-    assert validate_reply(value)
-    assert json.loads(fixture["content"]) == value  # No field stripping or repair.
+    assert validate_reply(value) == []
+    from app.domain.assistant import project_reply
+    assert project_reply(value)==dict(reply=value['reply'],status='continue',proposal=None)
+    assert json.loads(fixture["content"]) == value  # Original receipt/failed Run unchanged.
 
 
 def test_coaching_wire_explicitly_forbids_output_id_fields_without_other_purpose_changes():

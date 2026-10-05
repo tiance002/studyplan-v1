@@ -11,20 +11,22 @@ class AssistantCreateRequest(BaseModel):
     mode: Literal['summary','practice']
     task_id: Identifier | None = None
     idempotency_key: Key
+    force_new: bool = False
 
 
 class AssistantMessageRequest(BaseModel):
     model_config=ConfigDict(extra="forbid")
-    intent: Literal['work_draft','question']
+    intent: Literal['work_draft','question'] | None = None
     content: str = Field(min_length=1,max_length=20000)
     idempotency_key: Key
-    consent_to_model: bool = False
+    consent_to_model: bool = True
 
 
 class AssistantSaveRequest(BaseModel):
     model_config=ConfigDict(extra="forbid")
     content: str = Field(min_length=1,max_length=20000)
-    draft_message_id: Identifier
+    draft_message_id: Identifier | None = None
+    proposal_message_id: Identifier | None = None
     expected_version: int = Field(ge=0,strict=True)
     idempotency_key: Key
 
@@ -49,11 +51,14 @@ class AssistantMessageView(BaseModel):
     draft_message_id: str | None
     trigger_message_id: str | None
     error_class: str | None
+    status: Literal['continue','ready_to_draft'] | None = None
+    proposal: str | None = None
 
 
 class AssistantFormalSaveView(BaseModel):
     save_id: str
     draft_message_id: str
+    proposal_message_id: str | None = None
     content: str
     artifact_id: str
     artifact_type: Literal['summary','prompt']
@@ -76,6 +81,8 @@ class AssistantConversationSummary(BaseModel):
     read_only: bool
     current_draft_message_id: str | None
     formal_version: int
+    has_formal_save: bool = False
+    last_activity_at: datetime
 
 
 class AssistantConversationView(AssistantConversationSummary):

@@ -36,8 +36,8 @@ def setup(prompt_scenario):
     service.provider_resolver=lambda scope,project,run,ref,manifest: PgAttemptLLM(db.app_dsn,provider,manifest=manifest)
     return db,scope,cmd,container,current,provider
 
-def start(client,query,headers,cmd,mode='summary',key='begin'):
-    body=dict(plan_id=cmd.plan_id,stage_id=cmd.stage_id,mode=mode,task_id=cmd.task_id if mode=='practice' else None,idempotency_key=key)
+def start(client,query,headers,cmd,mode='summary',key='begin',force_new=False):
+    body=dict(plan_id=cmd.plan_id,stage_id=cmd.stage_id,mode=mode,task_id=cmd.task_id if mode=='practice' else None,idempotency_key=key,force_new=force_new)
     r=client.post(BASE,params=query,headers=headers,json=body)
     assert r.status_code==200,r.text
     return r.json(),body
@@ -103,7 +103,7 @@ def test_known_invalid_unknown_strict_json_no_retry_no_repair(setup,outcome,expe
         assert len(v['messages'])==1 and v['messages'][0]['run_status']==expected
         assert not container.planning_worker.tick() and len(provider.calls)==1
         if expected=='reconciliation_required':
-            other,_=start(c,q,h,cmd,key='another')
+            other,_=start(c,q,h,cmd,key='another',force_new=True)
             assert c.post(BASE+'/'+other['conversation_id']+'/messages',params=q,headers=h,json=dict(b,idempotency_key='new-unknown')).status_code==409
 
 

@@ -75,7 +75,7 @@ def _reply_response(content='{"reply":"请结合当前稿件补充边界。"}'):
         "usage": {"prompt_tokens": 17, "completion_tokens": 9}})
 
 
-def test_retained_known_paid_extra_id_fails_closed_without_repair_or_formal_write(setup):
+def test_retained_extra_id_fixture_projects_future_turn_without_rewriting_history(setup):
     from pathlib import Path
     fixture=json.loads((Path(__file__).parents[1]/"fixtures/assistant_v1/known_extra_message_id.json").read_text(encoding="utf-8"))
     db,scope,cmd,container,_,_=setup
@@ -89,8 +89,9 @@ def test_retained_known_paid_extra_id_fails_closed_without_repair_or_formal_writ
             view,_=send(api,q,headers,view["conversation_id"],"已保留原稿：输入是数据，超时需要核对证据。")
             assert container.planning_worker.tick()
             result=api.get(BASE+"/"+view["conversation_id"],params=q).json()
-            assert len(result["messages"])==1 and result["messages"][0]["run_status"]=="failed"
-            assert result["messages"][0]["error_class"]=="assistant_reply_invalid"
+            assert len(result["messages"])==2 and result["messages"][0]["run_status"]=="succeeded"
+            assert result["messages"][-1]["status"]=="continue" and result["messages"][-1]["proposal"] is None
+            assert result["messages"][-1]["message_id"]!=json.loads(fixture["content"])["message_id"]
             assert result["formal_version"]==0 and result["formal_saves"]==[]
             assert not container.planning_worker.tick() and len(calls)==1
         with psycopg.connect(db.app_dsn) as conn:
@@ -180,7 +181,7 @@ def test_expired_dispatched_same_scope_new_conversation_cannot_redispatch(setup,
                 (claim.run_id + ":assistant_reply:1", claim.run_id, ASSISTANT_PROTOCOL))
             conn.execute("UPDATE ai_jobs SET lease_expires_at=clock_timestamp()-interval '1 second' WHERE job_id=%s",
                          (claim.job_id,))
-        other, _ = start(client, q, headers, cmd, key="same-scope-new-conversation")
+        other, _ = start(client, q, headers, cmd, key="same-scope-new-conversation",force_new=True)
         rejected = client.post(BASE + "/" + other["conversation_id"] + "/messages", params=q,
                                headers=headers, json=dict(body, idempotency_key="different-send-key"))
         assert rejected.status_code == 409, rejected.text

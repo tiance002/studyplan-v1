@@ -1620,3 +1620,26 @@ h3 {
 .assistant-compose textarea,.assistant-scroll textarea {width:100%;}
 .assistant-compose input[type=checkbox] {width:auto;}
 @media(max-width:959px) {.assistant-panel {position:fixed;right:0;top:0;bottom:0;width:min(100vw,460px);z-index:20;box-shadow:-8px 0 40px #0003;}.resize-divider {display:none;}}
+
+/* Learning assistant V1.1: a quiet conversation beside the learning content. */
+.assistant-chat .assistant-top {min-height:72px;padding:16px 20px;position:relative;}
+.assistant-chat .assistant-top>div {flex:1;min-width:0;}
+.assistant-chat .assistant-top small {font-size:12px;margin-top:5px;overflow-wrap:anywhere;}
+.assistant-chat .icon-button {margin-left:0;}
+.assistant-chat .assistant-scroll {padding:20px;scroll-behavior:smooth;}
+.assistant-chat .assistant-message {border:0;border-radius:0;background:transparent;padding:0;margin:0 0 24px;}
+.assistant-chat .assistant-message.user {margin-left:28px;padding:12px 15px;background:#edf2f5;border-radius:14px 14px 3px 14px;}
+.assistant-speaker {display:block;font-size:11px;color:var(--muted);margin-bottom:7px;}
+.assistant-message-text {white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;font-size:14px;}
+.assistant-welcome strong {font-size:15px;line-height:1.6;}
+.assistant-welcome p {margin:12px 0 5px;}.assistant-welcome ul {padding-left:20px;line-height:1.9;margin-top:0;font-size:13px;}
+.assistant-proposal {border-left:3px solid var(--accent);padding:14px 15px;background:#f2f5f7;border-radius:0 9px 9px 0;margin-top:15px;}
+.assistant-proposal h3 {font-size:14px;margin:0 0 10px;}.assistant-proposal .chips {margin-top:14px;}
+.assistant-proposal-editor {margin-top:14px;}.assistant-proposal-editor textarea {width:100%;margin-bottom:10px;resize:vertical;}
+.assistant-inline-state {font-size:12px;color:var(--muted);line-height:1.6;margin:10px 0;}
+.assistant-menu {position:absolute;right:16px;top:68px;z-index:3;display:flex;flex-direction:column;padding:8px;border:1px solid var(--line);background:white;border-radius:8px;box-shadow:0 6px 18px #0001;}
+.assistant-panel.assistant-chat {position:relative;}
+.assistant-chat .assistant-compose {flex-shrink:0;display:flex;align-items:flex-end;flex-wrap:nowrap;padding:14px 16px;background:#fbfcfe;}
+.assistant-chat .assistant-compose textarea {height:84px;flex:1;min-width:0;resize:vertical;max-height:180px;}
+.assistant-chat .assistant-compose button {flex-shrink:0;}
+@media(max-width:959px) {.assistant-panel.assistant-chat {position:fixed;inset:0;width:100vw;max-width:none;}.assistant-chat .assistant-top {padding-top:max(16px,env(safe-area-inset-top));}.assistant-chat .assistant-compose {padding-bottom:max(14px,env(safe-area-inset-bottom));}}
