@@ -30,6 +30,12 @@ from app.core.errors import AppError, ValidationAppError
 from app.domain.assistant import ASSISTANT_PROTOCOL, ASSISTANT_PURPOSE, INPUT_LIMIT, NATURAL_CHAT
 from app.domain.prompts import PROMPT_PROTOCOL, PROMPT_PURPOSE
 from app.domain.summaries import SUMMARY_PROTOCOL, SUMMARY_PURPOSE
+from app.infrastructure.providers.goal_requirement_contract import (
+    GOAL_REQUIREMENT_PURPOSE,
+    GOAL_REQUIREMENT_SHAPE,
+    GOAL_REQUIREMENT_SYSTEM,
+    valid_goal_requirement_input,
+)
 from app.ports.llm import LLMFailure, LLMNotDispatchedError, LLMResult
 
 # Explicit shapes used by the existing deterministic validators/projection.
@@ -46,6 +52,7 @@ SHAPES[SUMMARY_PURPOSE] = {"conclusion": "needs_revision", "covered": [], "gaps"
                           "misconceptions": [], "questions": []}
 SHAPES[ASSISTANT_PURPOSE] = {"reply": "非空 Markdown 反馈", "status": "continue 或 ready_to_draft", "proposal": None}
 SHAPES[PROMPT_PURPOSE] = {"strengths": [], "gaps": [], "suggestions": []}
+SHAPES[GOAL_REQUIREMENT_PURPOSE] = GOAL_REQUIREMENT_SHAPE
 
 RESOURCE_ROLE_CONTRACT = (
     "Resource role must be exactly primary (主线), supplement (补充/补缺), "
@@ -109,13 +116,18 @@ class OpenAICompatibleLLM:
         self.configuration_ref = "deployment"
 
     def request_options(self, purpose: str) -> dict[str, object]:
-        cap = min(self.budget_policy.practice, self.budget_policy.deployment_cap, self.budget_policy.model_cap) if purpose in {SUMMARY_PURPOSE, PROMPT_PURPOSE, ASSISTANT_PURPOSE} else self.budget_policy.for_purpose(purpose)
+        cap = min(self.budget_policy.practice, self.budget_policy.deployment_cap, self.budget_policy.model_cap) if purpose in {SUMMARY_PURPOSE, PROMPT_PURPOSE, ASSISTANT_PURPOSE, GOAL_REQUIREMENT_PURPOSE} else self.budget_policy.for_purpose(purpose)
         options: dict[str, object] = {"model": self.model, "max_tokens": cap}
         if (urlsplit(self.base_url).hostname or "").lower() == "api.deepseek.com" and self.model == "deepseek-flash":
             options["thinking"] = {"type": "disabled"}
         return options
 
     def preflight(self, *, purpose, payload, schema_name):
+        if purpose == GOAL_REQUIREMENT_PURPOSE:
+            if not valid_goal_requirement_input(payload, schema_name):
+                return LLMFailure("goal_requirement_input_invalid", "Goal requirement input contract rejected",
+                                  details={"dispatched": False})
+            return None
         if purpose == ASSISTANT_PURPOSE:
             visible = {k:v for k,v in payload.items() if not k.startswith('_')}
             if (schema_name != "AssistantReplyV1" or self.prompt_version != ASSISTANT_PROTOCOL
@@ -292,6 +304,8 @@ class OpenAICompatibleLLM:
                                'phase/status/evaluation可以省略；若保留phase只能teach、status只能ready_to_draft，'
                                'evaluation必须保持原问题状态。服务器确定ready_to_draft，不能降级。')
         context = {k:v for k,v in payload.items() if not k.startswith("_") and k != "domain_pack"}
+        if purpose == GOAL_REQUIREMENT_PURPOSE:
+            system = GOAL_REQUIREMENT_SYSTEM
         message = {"purpose": purpose, "schema": schema_name, "field_shape": shape, "context": context}
         if "domain_pack" in payload:
             message["domain_pack"] = payload["domain_pack"]

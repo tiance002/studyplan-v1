@@ -5919,6 +5919,18 @@
             "type": "array",
             "maxItems": 20,
             "title": "Constraints"
+          },
+          "project_context": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Context"
           }
         },
         "additionalProperties": false,

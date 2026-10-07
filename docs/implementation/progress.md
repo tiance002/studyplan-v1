@@ -1,3 +1,12 @@
+## 2026-10-07 Planning V2 Item 1：PLANNING_V2_ITEM1_GOAL_REQUIREMENT_ANALYSIS_COMPLETE / ITEM2_NOT_STARTED / STOP
+
+- 基线 `31513e960723414645e4d3332c29718b603c96bd`、`feat/n1-resource-discovery`，与指定HEAD相同、tracked clean。上位[Architecture Contract](../planning-v2/PLANNING_V2_ARCHITECTURE_CONTRACT.md)原文保持；本地提交消息 `feat(planning): add v2 goal requirement analysis`，final SHA见答复与 `var/planning-v2-item1-20261007/final.json`；不push/merge/deploy。
+- 新增单次Analyzer、冻结Profile与严格Validator、专用purpose/schema/prompt；结构化用户事实确定性保留，ID/hash由服务端canonical payload生成，无课程/能力/资源决策。GoalSpec最小可空project_context，空省略保旧六字段hash；OpenAPI/生成TS同步，Planning placeholder及所有UI组件保持。没有生产Analyzer接线，普通generate继续scope后503。
+- 新增92项PASS；既有必需回归181项PASS（包含GoalSpec/intent5PASS、JSON/truncation/unknown、auth/scope/current-read、DTO），复用最新XML去重有效273PASS，不累加重复。初轮2个基线stale intent FAIL与中间1FAIL保留；仅迁现代冻结/Fake setup、一处旧字段断言对齐实际learner投影并补完整manifest/practice事实校验，hash/最终用途保护保持。额外旧partial markerless20FAIL已有baseline/hash/调用前拒绝证据，未改该suite/未放宽保护，不声称全backend regression PASS。
+- backend collection2049PASS、类型生成/tsc/Ruff/diff PASS；独立Item1审查及同次intent测试差异复核PASS。真实语义代表/PG/checkpoint/产品端到端NOT RUN；poisoned MCP结构合法仍SEMANTIC_EVAL_REQUIRED，不用黑名单冒充语义证明。详细[A–F审计、代码边界、测试与限制](../planning-v2/ITEM1_GOAL_REQUIREMENT_ANALYSIS.md)，证据 `var/planning-v2-item1-20261007/`。
+- 新Run0/Job0/provider0/PlanMutation0为依赖访问前spy/HTTP门禁证据，非真实PG行计数；产品模型0、搜索0、DB写入0、migration0，0025/架构合同/placeholder/.env等28文件hash保持。未接Worker/ledger/Reader/WeKnora，不改Seed/正式入口/全局配置/两保护目录，不消费余额或恢复历史failed/unknown。
+- 主协调请求Sol6.1high，机械Lunamedium，有界Provider/测试/独立review Sol6.1medium，actual均NOT OBSERVABLE，无HARD升级。Item1实现无BLOCKER，无架构偏差；完整Planning V2尚未实现，全产品STAGING_BLOCKED/NOT_READY。STOP等待单项审查，不自动进入Item2或真实模型验收。
+
 ## 2026-10-07 Planning V2 Residual Cleanup：PLANNING_V2_RESIDUAL_CLEANUP_COMPLETE / PLANNING_V2_NOT_IMPLEMENTED / STOP
 
 - 用户现在新增能做什么：学习计划主区只有指定不可用占位；旧生成/Run恢复/路线变更UI与19个旧浏览器helper移除。既有非规划能力保留，未实现V2。

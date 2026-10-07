@@ -1710,6 +1710,8 @@ export interface components {
             outcome_purpose: "learn" | "interview" | "portfolio" | "internship" | "production";
             /** Constraints */
             constraints?: string[];
+            /** Project Context */
+            project_context?: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {

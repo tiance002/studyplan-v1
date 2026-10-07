@@ -14,10 +14,15 @@ from app.api.v1.schemas import PlanGenerateRequest
 from app.core.errors import ValidationAppError
 from app.domain.enums import OutlineSectionKind
 from app.domain.planning.guidance import guidance_from_payload, guidance_payload
-from app.domain.planning.intent import GoalSpec, goal_spec_from_payload, required_module_closure
+from app.domain.planning.intent import (
+    GoalSpec,
+    goal_spec_from_payload,
+    goal_spec_payload,
+    required_module_closure,
+)
 from app.domain.planning.models import PlanDraft, PlanStage, revision_from_draft
 
-from tests.helpers.batched_planning import ScriptedLLM
+from tests.helpers.planning_responses import build_planning_demo
 from tests.unit.test_learning_guidance import guided_pack
 
 
@@ -55,13 +60,21 @@ def test_frozen_context_reaches_batches_and_is_in_draft_revision_hash():
     pack = guided_pack()
     original = deepcopy(pack)
     spec = GoalSpec(target="Agent工具实现", outcome_purpose="interview", starting_point="基础Python")
-    manifest = freeze_manifest(pack, DEFAULT_BUDGET, "fake", goal_spec=spec)
+    manifest = freeze_manifest(pack, DEFAULT_BUDGET, "fake", goal_spec=spec,
+                               outline_input_format="stage_skeleton_v1",
+                               structure_input_format="reviewed_structure_v1")
     assert pack == original
     assert manifest["goal_spec"]["outcome_purpose"] == "interview"
+    assert manifest["goal_spec"] == goal_spec_payload(spec)
     assert set(manifest["required_node_keys"]) >= set(pack["required_node_keys"])
     state = {"domain_pack": pack, "manifest": manifest, "goal": "Agent", "structure_batches": []}
-    assert structure_payload(state, manifest["structure_batches"][0])["goal_spec"] == manifest["goal_spec"]
+    # Current presentation consumes learner facts; complete GoalSpec remains
+    # frozen and is passed to the practice consumer, not duplicated in structure.
+    assert structure_payload(state, manifest["structure_batches"][0])["learner"] == {
+        key: manifest["goal_spec"][key] for key in ("starting_point", "constraints", "desired_depth")
+    }
     final_key = manifest["stages"][-1]["stage_key"]
+    assert practice_payload(state, final_key)["goal_spec"] == manifest["goal_spec"]
     assert "2分钟" in " ".join(practice_payload(state, final_key)["required_outputs"])
     assert practice_payload(state, manifest["stages"][0]["stage_key"])["required_outputs"] == []
     stage = PlanStage.create(stable_key="tools", title="Tools", section_kind=OutlineSectionKind.CORE, order_index=0)
@@ -76,11 +89,14 @@ def test_frozen_context_reaches_batches_and_is_in_draft_revision_hash():
 def test_purpose_requirements_survive_generation_merge_and_only_affect_final_practice():
     pack = guided_pack()
     spec = GoalSpec(target="Agent", outcome_purpose="interview")
-    manifest = freeze_manifest(pack, DEFAULT_BUDGET, "fake", goal_spec=spec)
-    llm = ScriptedLLM(pack)
-    nodes = PlanningNodes(llm=llm, save_draft=lambda state: {"draft_ref": "fixture", "draft_hash": "fixture"})
-    trace = run_batched_planning_graph(nodes, {"goal": "Agent", "run_id": "intent-fixture", "domain_pack": pack,
-                                            "manifest": manifest})
+    manifest = freeze_manifest(pack, DEFAULT_BUDGET, "fake", goal_spec=spec,
+                               outline_input_format="stage_skeleton_v1",
+                               structure_input_format="reviewed_structure_v1")
+    initial = {"goal": "Agent", "run_id": "intent-fixture", "domain_pack": pack, "manifest": manifest}
+    llm = build_planning_demo()
+    nodes = PlanningNodes(llm=llm, frozen_input=deepcopy(initial),
+                          save_draft=lambda state: {"draft_ref": "fixture", "draft_hash": "fixture"})
+    trace = run_batched_planning_graph(nodes, initial)
     assert trace.state.get("draft_ref") == "fixture"
     last = trace.state["outline"]["sections"][-1]
     assert "2分钟" in " ".join(last["learning_guidance"]["practice_delta"]["validation"])

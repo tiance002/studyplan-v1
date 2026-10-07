@@ -16,6 +16,7 @@ class GoalSpec:
     starting_point: str = ""
     outcome_purpose: Purpose = "learn"
     constraints: tuple[str, ...] = ()
+    project_context: str | None = None
 
     def __post_init__(self):
         if not isinstance(self.target, str) or not self.target.strip() or len(self.target) > 2000:
@@ -35,10 +36,20 @@ class GoalSpec:
             object.__setattr__(self, name, tuple(v.strip() for v in values))
         object.__setattr__(self, "target", self.target.strip())
         object.__setattr__(self, "starting_point", self.starting_point.strip())
+        if self.project_context is not None:
+            if not isinstance(self.project_context, str) or len(self.project_context) > 2000:
+                raise ValidationAppError("项目背景最多2000字符")
+            object.__setattr__(self, "project_context", self.project_context.strip() or None)
 
 
 def goal_spec_payload(spec):
-    return asdict(spec) if spec is not None else None
+    if spec is None:
+        return None
+    payload = asdict(spec)
+    # Absence remains byte-compatible with every pre-V2 persisted GoalSpec/hash.
+    if payload["project_context"] is None:
+        payload.pop("project_context")
+    return payload
 
 
 def goal_spec_from_payload(raw):

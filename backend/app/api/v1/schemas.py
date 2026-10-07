@@ -135,6 +135,7 @@ class GoalSpec(BaseModel):
     starting_point: str = Field(default="", max_length=1000)
     outcome_purpose: Purpose = "learn"
     constraints: list[Annotated[str, Field(min_length=1, max_length=300)]] = Field(default_factory=list, max_length=20)
+    project_context: str | None = Field(default=None, max_length=2000)
 
 
 class PlanGenerateRequest(BaseModel):
