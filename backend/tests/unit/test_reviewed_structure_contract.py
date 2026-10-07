@@ -17,14 +17,14 @@ from app.agent_workflows.planning_structure import (
     presentation_entry,
     validate_presentation,
 )
-from app.domain.planning.semantic_content import adapt_semantic_pack
 from app.infrastructure.domain_pack import load_pack
+from tests.helpers.reviewed_content import reviewed_fixture
 from app.infrastructure.providers.fake import FakeLLM
 
 
 def state():
     goal = "零基础系统学习 Agent 应用开发，先做一个最小应用。"
-    pack = adapt_semantic_pack(load_pack("agent-application-v6.json"), goal, None)
+    pack = reviewed_fixture("agent-application-v6.json", tuple("stage.v62.agent.application." + key for key in ("a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8")))
     manifest = freeze_manifest(
         pack,
         DEFAULT_BUDGET,

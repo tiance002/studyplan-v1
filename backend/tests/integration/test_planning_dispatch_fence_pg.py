@@ -59,7 +59,7 @@ class RecordingProvider(CountingProvider):
 
 def scenario(db, *, run_id="dispatch_run", short=True, job=True, provider=None):
     run = replace(queued_run(run_id), graph_version=SHORT_GENERATION_VERSION if short else "b3f2-batch-v1")
-    manifest = freeze_manifest(domain_pack.select_domain_pack(AGENT_GOAL), POLICY, "mock:1")
+    manifest = freeze_manifest(domain_pack.load_pack("agent-application-v1.json"), POLICY, "mock:1")
     repo = PgPlanningJobRepository(db.app_dsn, actor_ids=("jobs_a1", "jobs_a2"))
     if job:
         repo.enqueue(run, {"goal": AGENT_GOAL}, manifest)

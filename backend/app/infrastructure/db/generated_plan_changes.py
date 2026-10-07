@@ -2,13 +2,11 @@
 from dataclasses import asdict, replace
 from uuid import NAMESPACE_URL, uuid5
 
-from app.core.errors import ConflictError, IdempotencyConflictError, ValidationAppError, VersionConflictError
+from app.core.errors import ConflictError, DependencyUnavailableError, IdempotencyConflictError, ValidationAppError, VersionConflictError
 from app.core.ids import content_hash
 from app.domain.domain_packs.validation import seed_digest, validate_seed
-from app.domain.generated_plan_changes import added_topic_route, compose_generated_draft
-from app.domain.planning.intent import goal_spec_payload
+from app.domain.generated_plan_changes import compose_generated_draft
 from app.domain.planning.models import revision_from_draft
-from app.domain.planning.semantic_content import adapt_semantic_pack
 from app.infrastructure.db.learning_exposures import _json
 from app.infrastructure.db.plan_changes import PgPlanChanges
 from app.infrastructure.db.plan_repository import PgPlanRepository
@@ -56,71 +54,10 @@ class PgGeneratedPlanChanges(PgPlanChanges):
             raise ConflictError('受控课程版本校验失败') from exc
         return pack
 
-    def prepare(self, scope, command, select_pack):
-        with self._connection(scope, command.project_id, write=True) as conn:
-            current = PgPlanRepository(self.dsn, connection=conn).get_current(project_id=command.project_id)
-            if current is None or current.plan_id != command.plan_id or current.version != command.expected_version:
-                raise VersionConflictError('当前路线已变化，请刷新后重新发起变更')
-            basis, boundary, _, _, _, _ = self._basis(conn, current)
-            before = [s.stable_key for s in sorted(current.stages, key=lambda s: s.order_index)]
-            additions = {}
-            if command.operation == 'change_goal':
-                goal, spec = command.goal, command.goal_spec
-                if goal == current.goal_snapshot and spec == current.goal_spec:
-                    raise ValidationAppError('目标与上下文没有变化；如需更新内容，请明确重新生成未来路线')
-                selected = select_pack(spec.target if spec else goal) if select_pack else None
-                if not selected or not selected.get('stage_blueprints') or selected.get('resource_support') == 'search_only':
-                    raise ConflictError('当前公共模板不足，不能把未知目标作为正式全路线变更')
-                pack = self._published_pack(conn, selected['pack_key'], selected['version'])
-                # Fence the immutable public Seed, while freezing the same
-                # private selection used by ordinary new-goal generation.
-                public_pack_hash = seed_digest(pack)
-                pack = adapt_semantic_pack(pack, goal, spec)
-                retained = []
-                after = [s['stable_key'] for s in pack['stage_blueprints']]
-            else:
-                goal, spec = current.goal_snapshot, current.goal_spec
-                pack = self._published_pack(conn, current.source_pack_key, current.source_pack_version)
-                public_pack_hash = seed_digest(pack)
-                available = {s['stable_key'] for s in pack['stage_blueprints']}
-                if not set(before) <= available:
-                    raise ConflictError('当前路线不能映射到受控课程')
-                if command.operation == 'add_topic':
-                    additions = added_topic_route(pack, before, command.topic_keys, boundary)
-                    retained, after = before, list(additions['after_stage_keys'])
-                elif boundary >= len(before) - 1:
-                    raise ConflictError('当前路线没有可以重新生成的受控未来阶段')
-                else:
-                    retained, after = before[:boundary + 1], before
-                pack = adapt_semantic_pack(pack, goal, spec, stage_keys=after)
-            # Only exact keys and immutable IDs are frozen. No Summary/Prompt/Outcome/private body leaves PG.
-            rows = conn.execute('''SELECT DISTINCT n.stable_key,n.node_id,n.content_version FROM plan_unit_links p
-                JOIN plan_stages s USING(project_id,plan_id,stage_id)
-                JOIN unit_node_links u USING(project_id,unit_id) JOIN knowledge_nodes n USING(project_id,node_id)
-                WHERE p.project_id=%s AND p.plan_id=%s AND s.stable_key=ANY(%s)''',
-                (command.project_id, current.plan_id, retained)).fetchall()
-            reuse = {}
-            known = {n['stable_key'] for n in pack.get('knowledge_blueprints', [])}
-            for row in rows:
-                key = row['stable_key']
-                if key not in known or (key in reuse and reuse[key]['node_id'] != row['node_id']):
-                    raise ConflictError('保留阶段的知识身份无法精确映射到受控课程')
-                reuse[key] = dict(node_id=row['node_id'], content_version=row['content_version'])
-            metadata = dict(actor_id=scope.actor_id, project_id=command.project_id,
-                    base_plan_id=current.plan_id, base_revision=current.revision,
-                    base_version=current.version, basis_hash=basis, input_hash=self._input_hash(command),
-                    operation=command.operation, before_stage_keys=before, after_stage_keys=after,
-                    retained_stage_keys=retained, node_reuse=reuse,
-                    protected_through=boundary,
-                    before_goal=current.goal_snapshot, before_stages=[_json(asdict(s)) for s in current.stages],
-                    source_pack_key=pack['pack_key'], source_pack_version=pack['version'], pack_hash=public_pack_hash)
-            if additions:
-                metadata.update(topic_keys=list(command.topic_keys), added_node_keys=list(additions['added_node_keys']),
-                                added_stage_keys=list(additions['added_stage_keys']),
-                                topic_titles={node['stable_key']: node['title'] for node in pack['knowledge_blueprints']
-                                              if node['stable_key'] in additions['added_node_keys']})
-            return dict(run_id=self._run_id(scope, command), goal=goal, goal_spec=goal_spec_payload(spec),
-                        pack=pack, metadata=metadata)
+    def prepare(self, scope, command):
+        """Generated route changes are unavailable until new planning is implemented."""
+        scope.require_project(command.project_id)
+        raise DependencyUnavailableError("学习计划生成正在升级，当前暂不可创建新路线。")
 
     def _current(self, conn, scope, metadata):
         if metadata.get('actor_id') != scope.actor_id:

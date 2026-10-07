@@ -18,8 +18,6 @@ from app.agent_workflows.planning_structure import (
     FOCUS_FORMAT,
     FOCUS_SHAPE,
     FOCUS_SYSTEM,
-    PRESENTATION_SHAPE,
-    PRESENTATION_SYSTEM,
     REVIEWED_STRUCTURE_V1,
     STRUCTURE_SCHEMA,
     presentation_preflight,
@@ -300,13 +298,9 @@ class OpenAICompatibleLLM:
             if (structure_format != REVIEWED_STRUCTURE_V1 or schema_name != STRUCTURE_SCHEMA
                     or purpose not in {'planning.structure', 'planning.repair'}):
                 return LLMFailure('structure_format_invalid', 'Unknown frozen structure contract')
-            shape = PRESENTATION_SHAPE
-            system = PRESENTATION_SYSTEM
-            focus_format = payload.get('_structure_focus_format')
-            if focus_format is not None:
-                if focus_format != FOCUS_FORMAT:
-                    return LLMFailure('structure_format_invalid', 'Unknown frozen teaching focus contract')
-                shape, system = FOCUS_SHAPE, FOCUS_SYSTEM
+            if payload.get('_structure_focus_format') != FOCUS_FORMAT:
+                return LLMFailure('structure_format_invalid', 'Incomplete frozen teaching focus contract')
+            shape, system = FOCUS_SHAPE, FOCUS_SYSTEM
             message = {'purpose': purpose, 'schema': schema_name, 'field_shape': shape, 'context': context}
             chars = len(system) + len(json.dumps(message, ensure_ascii=False))
             # Reviewed normal/output/repair bounds were checked before any

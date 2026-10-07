@@ -63,7 +63,7 @@ __all__ = ["GraphRecoveryError", "GraphRunnerPort", "PlanningRuntime", "ResumeRe
 
 
 class PlanningExecutorPort(Protocol):
-    """Generation and acknowledgment of already committed business decisions."""
+    """Current frozen generation execution and recovery."""
 
     def execute(self, nodes: Any, initial: Any, thread_id: str) -> Any: ...
 
@@ -85,8 +85,6 @@ class PlanningExecutorPort(Protocol):
         """
         ...
 
-    def finish(self, *, thread_id: str, graph_version: str, decision: str,
-               result_id: str, draft_hash: str) -> None: ...
 @dataclass(frozen=True)
 class PlanningRuntime:
     llm: LLMPort

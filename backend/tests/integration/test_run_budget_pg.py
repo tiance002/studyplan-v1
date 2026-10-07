@@ -109,7 +109,7 @@ def seed_attempts(db: PgTestDatabase, run_id: str, keys, status: str = "succeede
 
 
 def _manifest() -> dict:
-    return freeze_manifest(domain_pack.select_domain_pack(AGENT_GOAL), POLICY, "mock:1")
+    return freeze_manifest(domain_pack.load_pack("agent-application-v1.json"), POLICY, "mock:1")
 
 
 def test_over_cap_dispatch_is_rejected_without_a_provider_call(budget_db: PgTestDatabase) -> None:

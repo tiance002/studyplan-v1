@@ -127,7 +127,6 @@ def build_container(settings: Settings) -> AppContainer:
         executor = PgPlanningExecutor(to_psycopg_dsn(settings.checkpoint_database_url),llm=llm)
         runtime_factory = PersonalPlanningRuntimeFactory(settings,model_repository)
     from app.agent_workflows.planning_batches import PROTOCOL_VERSION
-    from app.infrastructure.db.domain_pack_catalog import PgDomainPackCatalog
     planning_jobs = PgPlanningJobRepository(
         dsn,
         actor_ids=settings.planning_worker_actor_ids,
@@ -143,7 +142,7 @@ def build_container(settings: Settings) -> AppContainer:
         resources=PgPublicResourceCatalog(dsn),
         llm=llm,
         graph_version=settings.graph_version or PROTOCOL_VERSION,
-        planning_executor=executor,domain_pack_selector=PgDomainPackCatalog(dsn).select,
+        planning_executor=executor,
         runtime_factory=runtime_factory,
         planning_jobs=planning_jobs,
         worker_actor_ids=settings.planning_worker_actor_ids,

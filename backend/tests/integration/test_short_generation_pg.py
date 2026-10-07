@@ -107,31 +107,6 @@ def test_completed_checkpoint_recovery_reads_result_without_redispatch(service):
     assert len(service._llm.calls) == calls
 
 
-def test_legacy_waiting_draft_approval_needs_no_checkpoint_resume(service):
-    run_id, _, initial, _ = service._freeze_submission(scope=scope(), project_id=PROJECT_P1, goal=GOAL_A)
-    initial["graph_version"] = PROTOCOL_VERSION
-    thread = graph_thread_id(run_id=run_id, graph_version=PROTOCOL_VERSION)
-    service._runs.create_run(RunRecord(run_id=run_id, actor_id=ACTOR_A1, project_id=PROJECT_P1,
-        kind="plan_generate", graph_name="planning", graph_version=PROTOCOL_VERSION,
-        status=AiRunStatus.RUNNING, next_action=AiRunNextAction.WAIT, thread_id=thread))
-    nodes = service._build_nodes(project_id=PROJECT_P1, run_id=run_id, goal=GOAL_A,
-                                  selected_pack=initial["domain_pack"])
-    trace = service._executor.execute_or_resume(nodes, initial, thread, PROTOCOL_VERSION, lambda: None)
-    assert trace.stopped_at == "await_approval"
-    service._update_run(project_id=PROJECT_P1, run_id=run_id, status=AiRunStatus.WAITING_USER,
-        next_action=AiRunNextAction.REVIEW_DRAFT, result_ref=trace.state["draft_ref"])
-    run = service._runs.get_run(project_id=PROJECT_P1, run_id=run_id)
-    before = checkpoint(service, run)
-    draft = service.get_draft(scope=scope(), project_id=PROJECT_P1, draft_id=run.result_ref).draft
-    calls = len(service._llm.calls)
-    service._executor.finish = lambda **kwargs: pytest.fail("legacy business approval resumed Graph")
-    result = decision(service, draft, DraftDecision.APPROVE)
-    assert result.plan is not None
-    assert service._runs.get_run(project_id=PROJECT_P1, run_id=run_id).status == AiRunStatus.SUCCEEDED
-    assert checkpoint(service, run) == before
-    assert len(service._llm.calls) == calls
-
-
 @pytest.mark.parametrize("kind", [DraftDecision.EDIT, DraftDecision.CANCEL])
 def test_edit_and_cancel_reject_stale_version_and_hash(service, kind):
     _, draft = generated(service)

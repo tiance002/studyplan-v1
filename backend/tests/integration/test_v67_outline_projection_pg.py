@@ -13,7 +13,6 @@ from app.agent_workflows.planning_batches import DEFAULT_BUDGET, freeze_manifest
 from app.composition import build_container
 from app.core.ids import new_id
 from app.domain.enums import AiRunNextAction, AiRunStatus
-from app.domain.planning.semantic_content import adapt_semantic_pack
 from app.domain.runs.models import RunRecord
 from app.infrastructure.domain_pack import CURRENT_PACKS, load_pack
 from app.main import create_app
@@ -176,7 +175,7 @@ def test_markerless_owned_historical_submission_recovers_legacy(projection_db):
     first = build_container(settings)
     with TestClient(create_app(first)) as client:
         username, params, _ = register(client, "v67legacy")
-    pack = adapt_semantic_pack(load_pack(CURRENT_PACKS["agent.application"]), GOAL, None)
+    pack = load_pack(CURRENT_PACKS["agent.application"])
     manifest = freeze_manifest(pack, DEFAULT_BUDGET, "fake:planning-demo")
     assert "outline_input_format" not in manifest and manifest_is_intact(manifest)
     with psycopg.connect(db.migrator_dsn) as conn:
@@ -260,7 +259,7 @@ def test_real_checkpoint_resumes_frozen_format_rejecting_altered_manifest(checkp
     goal = "零基础系统学习 Agent 应用开发，先做一个最小应用。"
     # This is the historical six-stage checkpoint protocol representative.
     # Keep its old published content explicit as CURRENT_PACKS evolves.
-    pack = adapt_semantic_pack(load_pack("agent-application-v5.json"), goal, None)
+    pack = load_pack("agent-application-v5.json")
     manifest = freeze_manifest(pack, DEFAULT_BUDGET, "fake:planning-demo", outline_input_format=format_marker)
     assert len(manifest["stages"]) == 6
     version = SHORT_GENERATION_VERSION if format_marker else PROTOCOL_VERSION
@@ -350,7 +349,7 @@ def test_tampered_stored_checkpoint_marker_refused_before_dispatch(checkpoint_db
     from langgraph.errors import GraphRecursionError
 
     goal = "零基础系统学习 Agent 应用开发，先做一个最小应用。"
-    pack = adapt_semantic_pack(load_pack(CURRENT_PACKS["agent.application"]), goal, None)
+    pack = load_pack(CURRENT_PACKS["agent.application"])
     manifest = freeze_manifest(pack, DEFAULT_BUDGET, "fake:planning-demo", outline_input_format="stage_skeleton_v1")
     initial = dict(goal=goal, run_id=new_id("run"), graph_version=SHORT_GENERATION_VERSION, domain_pack=pack, manifest=manifest)
     initial = json.loads(json.dumps(initial, ensure_ascii=False))

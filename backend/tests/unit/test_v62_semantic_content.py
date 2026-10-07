@@ -13,7 +13,6 @@ from app.api.v1.schemas import (
 )
 from app.domain.domain_packs.validation import validate_seed
 from app.domain.planning.intent import GoalSpec
-from app.domain.planning.semantic_content import adapt_semantic_pack
 
 ROOT = Path(__file__).resolve().parents[3]
 RESEARCH = ROOT / 'docs/research/semantic-corrected-2026-10-04'
@@ -186,14 +185,10 @@ def assert_consumer_dtos(pack):
                                         'status': 'pending'})
 
 
-def test_all_public_and_private_carrier_views_obey_real_consumer_bounds():
+def test_reviewed_content_views_obey_real_consumer_bounds():
     packs, _ = mapped()
     for pack in packs:
         assert_consumer_dtos(pack)
-        goal = GoalSpec(target='recipe:rag recipe:coding recipe:workflow recipe:browser recipe:evaluation '
-                       'recipe:agentic_rl 参数训练 部署 SSE 认证 Kubernetes IaC 可观测 自动发布 备份恢复',
-                        starting_point='用户项目：' + '客' * 100)
-        assert_consumer_dtos(adapt_semantic_pack(pack, goal.target, goal))
 
 
 def test_extension_chunks_preserve_exact_guidance_without_truncation():

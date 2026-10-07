@@ -30,8 +30,8 @@ def loop_container(migrated_db):
         local_session_token='', planning_worker_admission_mode='trusted_server',
         allow_origins=('http://127.0.0.1:5178',))
     container = build_container(settings)
-    select = container.plan_service._domain_pack_selector
-    container.plan_service._domain_pack_selector = lambda goal: pack if select(goal).get('pack_key') == pack['pack_key'] else select(goal)
+    from tests.helpers.frozen_planning import install_frozen_generation
+    install_frozen_generation(container.plan_service, pack)
     return container
 
 

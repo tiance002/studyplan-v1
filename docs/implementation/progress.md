@@ -1,3 +1,12 @@
+## 2026-10-07 Planning Legacy Removal：PLANNING_LEGACY_REMOVAL_COMPLETE / NEW_PLANNING_NOT_IMPLEMENTED / STOP
+
+- 用户现在可继续消费非规划基础服务；新计划生成/生成式路线变更在scope校验后503，在Run/Job/model binding/provider前关闭，无替代规划实现。
+- 起点8921a680fabe8f75ee5f95c231b1eca8c9273216，feat/n1-resource-discovery；保留参考bd691226后继。本地annotated checkpoint/pre-open-planning-refactor，最终SHA见本批答复与var/planning-legacy-removal-20261007/final.json。未reset/push/merge。
+- 删除alignment/semantic_content/PG goal selector、旧domain pack目标路由、markerless/三字段/旧batch approval兼容与旧waiting Run改写、旧Plan无snapshot的动态目录fallback。公开生成及route preparation明确fail-closed。保留frozen/canonical/source/预算/repair2/unknown/Worker/RLS/CAS/发布事务与已审核内容、助手全部合同；[具体文件/删除测试/保留保护/验证](../acceptance/planning-legacy-removal-2026-10-07.md)。
+- Pythoncompile/APIboot与10个fail-closed边界PASS；核心/助手/contract245PASS、当前结构65PASS、JSONrepair/预算68PASS、F2/MCP85+35PASS；全部backend collection与frontend buildPASS。真实PG/浏览器/provider、废弃semantic acceptance NOT RUN。依赖旧生成准备的9条generated-change与旧图fixture保护测试保留NOT RUN，不假称全套PASS。
+- generate新增Run0/Job0/provider0/Plan修改0（依赖访问前拒绝证据，非PG计数）；本批产品模型0，账本174/280余106，search/RAG0。434文件SHA保持，迁移0025，内容JSON/语义资料/助手/.workbuddy/design-preview/旧证据未变，无DBreset/原库写入/正式入口Worker/部署/全局配置操作。
+- 旧指定runtime/test符号引用0。整体STAGING_BLOCKED / NOT_READY，STOP等待下一份Planning设计，不自动实现。
+
 ## 2026-10-05 Learning Assistant User Acceptance Prep：PRE_USER_ACCEPTANCE_READY / STOP
 
 - 用户现在新增能做什么：我的会话 detail 尚未读取/GET 失败时不再显示第四状态，也不猜未保存；卡片标题/类型/时间保持，成功读取才显示已保存/待确认/未保存。隔离本人入口 http://127.0.0.1:5205/ 已准备，等待本人体验。

@@ -1,17 +1,4 @@
-"""Persist short-generation checkpoints without reinterpreting legacy threads.
-
-New ``b3f2-short-v2`` threads end after saving the draft. The historical
-``b3f2-batch-v1`` builder remains frozen for existing checkpoint interpretation.
-
-Rules that still hold:
-
-- a thread's checkpoint is only ever resumed, never re-explained by a different
-  protocol;
-- a terminal or waiting-for-user checkpoint is never regenerated;
-- the ``guard`` revalidates the lease and Run status before each step and before
-  every paid dispatch;
-- business progress is emitted only after a checkpoint has been committed.
-"""
+"""Persist current short-generation checkpoints with lease and integrity guards."""
 from __future__ import annotations
 
 import json
@@ -23,16 +10,14 @@ import psycopg
 from app.agent_workflows.graphs import PlanningTrace
 from app.agent_workflows.nodes import PlanningNodes
 from app.agent_workflows.planning_batches import (
-    PROTOCOL_VERSION,
     SHORT_GENERATION_VERSION,
-    build_batched_planning_graph,
     build_short_planning_graph,
     manifest_is_intact,
     recursion_limit,
 )
 from app.agent_workflows.planning_outline import STAGE_SKELETON_V1, frozen_pack_is_intact
 from app.agent_workflows.planning_structure import check_structure_checkpoint
-from app.agent_workflows.runtime import Command, PostgresSaver
+from app.agent_workflows.runtime import PostgresSaver
 from app.agent_workflows.state import PlanningState
 from app.ports.graph_runner import GraphRecoveryError
 from psycopg.rows import dict_row
@@ -41,20 +26,10 @@ __all__ = ["PgPlanningExecutor", "builder_for_version"]
 
 
 def builder_for_version(graph_version: str) -> Any:
-    """Select the explicitly frozen builder; refuse unknown protocols.
-
-    A legacy or unknown version is **never** guessed from the current default:
-    re-explaining an old thread with the new protocol would silently change what
-    the stored checkpoint means. Refusing is the safe outcome.
-    """
-    if graph_version == PROTOCOL_VERSION:
-        return build_batched_planning_graph
+    """Only the current frozen protocol is executable; never reinterpret old threads."""
     if graph_version == SHORT_GENERATION_VERSION:
         return build_short_planning_graph
-    raise GraphRecoveryError(
-        f"不支持的图协议版本，拒绝按当前默认版本解释：{graph_version!r}；"
-        f"支持的协议为 {PROTOCOL_VERSION!r} 与 {SHORT_GENERATION_VERSION!r}"
-    )
+    raise GraphRecoveryError(f"不支持的图协议版本，拒绝执行：{graph_version!r}")
 
 
 class PgPlanningExecutor:
@@ -73,7 +48,7 @@ class PgPlanningExecutor:
         """Run a thread that carries no stored version (synchronous callers)."""
         return self.execute_or_resume(
             nodes, initial, thread_id,
-            graph_version=str((initial or {}).get("graph_version") or PROTOCOL_VERSION),
+            graph_version=str((initial or {}).get("graph_version") or ""),
             guard=lambda: None,
         )
 
@@ -130,11 +105,8 @@ class PgPlanningExecutor:
                 if stored_version is not None and stored_version != graph_version:
                     raise GraphRecoveryError("Checkpoint graph version mismatch")
                 if not existing.next:
-                    if graph_version == SHORT_GENERATION_VERSION:
-                        # A crash after the final checkpoint but before the Run
-                        # projection committed must read its result, not dispatch.
-                        return PlanningTrace([], existing.values, None)
-                    raise GraphRecoveryError("Checkpoint 已到终态，拒绝重新生成")
+                    # Recover committed result without another provider request.
+                    return PlanningTrace([], existing.values, None)
                 if existing.next == ("await_approval",):
                     raise GraphRecoveryError("Checkpoint 等待用户确认，Worker 不得自动续跑")
                 guard()
@@ -142,8 +114,6 @@ class PgPlanningExecutor:
             else:
                 self._stream(graph, initial, config, progress)
             snapshot = graph.get_state(config)
-            if snapshot.next == ("await_approval",):
-                return PlanningTrace([], snapshot.values, "await_approval")
             if not snapshot.next:
                 return PlanningTrace([], snapshot.values, None)
             return PlanningTrace([], snapshot.values, "failed_validation")
@@ -166,24 +136,3 @@ class PgPlanningExecutor:
         for state in graph.stream(payload, config, stream_mode="values"):
             if isinstance(state, dict):
                 progress(state)  # type: ignore[arg-type]
-
-    def finish(self, *, thread_id, graph_version, decision, result_id, draft_hash) -> None:
-        # Business publish/cancel already committed. These callbacks acknowledge its
-        # durable result and never repeat the business operation or a model call.
-        nodes = PlanningNodes(llm=self.llm, commit_plan=lambda s: result_id)
-        builder = builder_for_version(graph_version)
-        with self._saver(thread_id) as saver:
-            graph = builder(nodes, checkpointer=saver)
-            config = {"configurable": {"thread_id": thread_id}, "recursion_limit": 1000}
-            snapshot = graph.get_state(config)
-            if snapshot.values.get("graph_version") != graph_version:
-                raise GraphRecoveryError("Graph version mismatch")
-            if not snapshot.next:
-                if snapshot.values.get("decision") != decision or str(snapshot.values.get("result_id") or "") != result_id:
-                    raise GraphRecoveryError("Checkpoint result mismatch")
-                return
-            if snapshot.next != ("await_approval",):
-                raise GraphRecoveryError("Checkpoint is not waiting for approval")
-            graph.invoke(Command(resume={"decision": decision, "draft_hash": draft_hash}), config)
-            if graph.get_state(config).next:
-                raise GraphRecoveryError("Graph did not finish")

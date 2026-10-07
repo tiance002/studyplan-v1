@@ -2,7 +2,7 @@
 
 Batch generation and repair keep their ``b3f2-batch-v1`` content protocol.
 The ``b3f2-short-v2`` lifecycle reuses those nodes and ends at saved draft;
-the legacy builder retains its user interrupt for historical checkpoints.
+the current builder completes without a user interrupt.
 
 Core ideas (design spec §数据与流程, §输出预算与模型适配, §失败、修复与恢复):
 
@@ -33,6 +33,7 @@ from app.agent_workflows.planning_outline import STAGE_SKELETON_V1, frozen_pack_
 from app.agent_workflows.planning_structure import (
     FOCUS_FORMAT,
     REVIEWED_STRUCTURE_V1,
+    check_frozen_structure,
     has_canonical_inventory,
     presentation_payload,
     reviewed_stage_keys,
@@ -252,6 +253,7 @@ def attempt_key(
 
 def structure_payload(state: PlanningState, batch: dict[str, Any]) -> dict[str, Any]:
     """Local context for one structure batch: this stage only, plus declared deps."""
+    check_frozen_structure(state)
     manifest = state["manifest"]
     spec = stage_spec(manifest, batch["stage_key"])
     if uses_reviewed_structure(manifest, batch):
@@ -500,172 +502,6 @@ def validate_practice_batch(
 # ---------------------------------------------------------------------------
 
 
-def _merge_batches_legacy(
-    outline: dict[str, Any],
-    structure_batches: list[dict[str, Any]],
-    practice_batches: list[dict[str, Any]],
-    pack: dict[str, Any],
-    *,
-    manifest: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Merge validated batches in skeleton order into the legacy projection shape.
-
-    Rejects duplicate business keys, missing stages and missing required nodes.
-    The returned ``errors`` list is non-empty when the merge must fail.
-    """
-    errors: list[str] = []
-    outline = deepcopy(outline)
-    sections = list((outline or {}).get("sections") or [])
-    blueprints = {s["stable_key"]: s for s in pack.get("stage_blueprints", [])}
-    for index, section in enumerate(sections):
-        blueprint = blueprints.get(section.get("stable_key"))
-        # The model cannot invent previously learned relationships or source proof.
-        section.pop("learning_guidance", None)
-        if blueprint is not None:
-            allowed_sources = set(pack.get("resource_refs") or [])
-            for resource in section.get("resources") or []:
-                if resource.get("source_ref") and resource["source_ref"] not in allowed_sources:
-                    errors.append("资源来源未在受审核清单中：" + str(resource["source_ref"]))
-            # Curated facts survive omitted/rewritten model output. Personal
-            # titles/objectives remain; model-authored material cannot replace
-            # the pack's primary/comparison/case study or extension instructions.
-            section["section_kind"] = blueprint.get("section_kind", "core")
-            section["resources"] = deepcopy(blueprint.get("resources") or [])
-            section["extensions"] = deepcopy(blueprint.get("extensions") or [])
-            previous = blueprints.get(sections[index - 1].get("stable_key")) if index else None
-            frozen: dict[str, Any] = next((s for s in (manifest or {}).get("stages", [])
-                           if s["stage_key"] == section.get("stable_key")), {})
-            section["learning_guidance"] = deepcopy(frozen.get("learning_guidance")) or guidance_payload(stage_guidance(pack, blueprint, previous))
-    stage_order = [section.get("stable_key") for section in sections]
-
-    by_stage_structure = {b.get("stage_key"): b for b in structure_batches}
-    by_stage_practice = {b.get("stage_key"): b for b in practice_batches}
-    node_blueprints = {n["stable_key"]: n for n in pack.get("knowledge_blueprints", [])}
-    occurrences: dict[str, int] = {}
-    for blueprint in blueprints.values():
-        for key in set(blueprint.get("node_keys") or []):
-            occurrences[key] = occurrences.get(key, 0) + 1
-
-    nodes: list[dict[str, Any]] = []
-    units: list[dict[str, Any]] = []
-    relations: list[dict[str, Any]] = []
-    tasks: list[dict[str, Any]] = []
-    task_links: list[dict[str, Any]] = []
-
-    seen_node: set[str] = set()
-    seen_unit: set[str] = set()
-    seen_task: set[str] = set()
-    node_stage: dict[str, str] = {}
-    seen_relation: set[tuple[str, str, str]] = set()
-
-    for stage_key in stage_order:
-        structure = by_stage_structure.get(stage_key)
-        if structure is None:
-            errors.append(f"缺少结构批次：{stage_key}")
-            continue
-        blueprint = blueprints.get(stage_key) or {}
-        guidance = blueprint.get("learning_guidance") or {}
-        declared_repeats = set(guidance.get("knowledge_keys") or []) & set(blueprint.get("node_keys") or [])
-        repeat_keys: set[str] = set()
-        for node in structure.get("nodes") or []:
-            key = str(node.get("stable_key", ""))
-            if key in seen_node:
-                # Exact stable-key reuse is allowed only by curated per-exposure
-                # relationships. This is not semantic deduplication of tutorials.
-                if (pack.get("resource_support") != "search_only" and key in node_blueprints
-                        and node_stage[key] != stage_key and key in declared_repeats
-                        and guidance.get("exposure_relation") in {"review", "compare", "deepen", "version_context"}):
-                    repeat_keys.add(key)
-                    continue
-                errors.append(f"知识节点重复：{key}")
-                continue
-            seen_node.add(key)
-            node_stage[key] = stage_key
-            canonical = deepcopy(node)
-            if occurrences.get(key, 0) > 1 and key in node_blueprints:
-                # Shared knowledge has one definition; each exposure owns its focus.
-                for field in ("title", "node_type", "objectives"):
-                    if field in node_blueprints[key]:
-                        canonical[field] = deepcopy(node_blueprints[key][field])
-            nodes.append(canonical)
-        for unit in structure.get("units") or []:
-            key = str(unit.get("stable_key", ""))
-            if key in seen_unit:
-                errors.append(f"学习单元重复：{key}")
-                continue
-            seen_unit.add(key)
-            units.append(deepcopy(unit))
-        for relation in structure.get("relations") or []:
-            identity = (relation.get("from_stable_key", ""), relation.get("to_stable_key", ""), relation.get("relation_type", ""))
-            if identity in seen_relation and identity[1] in repeat_keys:
-                continue
-            seen_relation.add(identity)
-            relations.append(deepcopy(relation))
-
-        practice = by_stage_practice.get(stage_key)
-        if practice is None:
-            errors.append(f"缺少实践批次：{stage_key}")
-            continue
-        payload = practice.get("payload") or {}
-        for task_index, task in enumerate(payload.get("tasks") or []):
-            key = str(task.get("stable_key", ""))
-            if key in seen_task:
-                errors.append(f"实践任务重复：{key}")
-                continue
-            seen_task.add(key)
-            saved_task = deepcopy(task)
-            if pack.get('semantic_context') and task_index == 0:
-                curated: dict = next((p for p in pack.get('practice_blueprints', []) if p.get('section_key') == stage_key), {})
-                if curated:
-                    saved_task['goal'] = curated['goal']
-                    for field in ('in_scope', 'out_scope', 'acceptance'):
-                        saved_task[field] = list(dict.fromkeys([*(curated.get(field) or []), *(saved_task.get(field) or [])]))
-            if manifest and stage_key == stage_order[-1] and task_index == 0:
-                outputs = purpose_requirements(goal_spec_from_payload(manifest.get("goal_spec")))
-                if outputs:
-                    saved_task["acceptance"] = list(dict.fromkeys([*(saved_task.get("acceptance") or []), *outputs]))
-            tasks.append(saved_task)
-        task_links.extend(deepcopy(payload.get("task_knowledge_links") or []))
-
-    # Re-order units and tasks deterministically by skeleton order.
-    for index, unit in enumerate(units):
-        unit["order_index"] = index
-    for index, task in enumerate(tasks):
-        task["order_index"] = index
-
-    required = set((manifest or {}).get("required_node_keys") or pack.get("required_node_keys") or [])
-    missing = required - seen_node
-    if missing:
-        errors.append("缺少必要知识节点：" + ", ".join(sorted(missing)))
-
-    for stage_key in stage_order:
-        if not any(u.get("section_key") == stage_key for u in units):
-            errors.append(f"阶段缺少学习单元：{stage_key}")
-        if not any(t.get("section_key") == stage_key for t in tasks):
-            errors.append(f"阶段缺少实践任务：{stage_key}")
-
-    reviewed = (pack.get("resource_support") or "") != "search_only" and bool(pack.get("stage_blueprints"))
-    return {
-        "errors": errors,
-        "outline": outline,
-        "nodes": nodes,
-        "units": units,
-        "relations": relations,
-        "practice_proposal": {
-            "stable_key": "practice.route",
-            "title": (("用户项目：" if pack['semantic_context']['carrier_kind'] == 'user_project' else "默认项目候选（可替换）：")
-                      + pack['semantic_context']['carrier_title']) if pack.get('semantic_context') else (pack.get("title") or "学习路线") + "实践",
-            "idea": pack['semantic_context']['carrier_slice'] if pack.get('semantic_context') else (pack.get("title") or ""),
-            "tasks": tasks,
-            "task_knowledge_links": task_links,
-        },
-        "route_scope": "reviewed" if reviewed else "search_only",
-        "route_status": "reviewed" if reviewed else "generic_unverified",
-        "resource_support": "reviewed_index" if reviewed else "needs_resource_review",
-    }
-
-
-
 def merge_batches(
     outline: dict[str, Any],
     structure_batches: list[dict[str, Any]],
@@ -674,28 +510,28 @@ def merge_batches(
     *,
     manifest: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Merge validated batches in skeleton order into the legacy projection shape.
+    """Merge validated batches in skeleton order into the current projection shape.
 
     Rejects duplicate business keys, missing stages and missing required nodes.
     The returned ``errors`` list is non-empty when the merge must fail.
     """
-    if manifest and (("manifest_hash" in manifest or "outline_input_format" in manifest) and not manifest_is_intact(manifest)
-                     or "outline_input_format" in manifest and manifest["outline_input_format"] != STAGE_SKELETON_V1
-                     or 'structure_input_format' in manifest and manifest['structure_input_format'] != REVIEWED_STRUCTURE_V1
-                     or manifest.get('structure_input_format') == REVIEWED_STRUCTURE_V1 and not frozen_pack_is_intact(pack, manifest)
-                     or manifest.get("outline_input_format") == STAGE_SKELETON_V1 and not frozen_pack_is_intact(pack, manifest)):
+    if (not manifest or not manifest_is_intact(manifest)
+            or manifest.get("outline_input_format") != STAGE_SKELETON_V1
+            or not frozen_pack_is_intact(pack, manifest)):
         return {"errors": ["冻结清单或内容完整性校验失败"], "outline": {}, "nodes": [], "units": [],
                 "relations": [], "practice_proposal": {"tasks": [], "task_knowledge_links": []}}
-    if (manifest or {}).get("outline_input_format") != STAGE_SKELETON_V1:
-        return _merge_batches_legacy(outline, structure_batches, practice_batches, pack, manifest=manifest)
+    state = {'manifest': manifest, 'domain_pack': pack}
+    try:
+        check_frozen_structure(state)
+    except ValueError as exc:
+        return {"errors": [str(exc)], "outline": {}, "nodes": [], "units": [],
+                "relations": [], "practice_proposal": {"tasks": [], "task_knowledge_links": []}}
     errors: list[str] = []
-    if (manifest or {}).get('structure_input_format') == REVIEWED_STRUCTURE_V1:
-        state = {'manifest': manifest, 'domain_pack': pack}
-        for batch in manifest['structure_batches']:
-            if not uses_reviewed_structure(manifest, batch):
-                continue
-            entry = next((s for s in structure_batches if s.get('stage_key') == batch['stage_key']), {})
-            errors.extend(validate_presentation_entry(entry, state, batch))
+    for batch in manifest['structure_batches']:
+        if not uses_reviewed_structure(manifest, batch):
+            continue
+        entry = next((s for s in structure_batches if s.get('stage_key') == batch['stage_key']), {})
+        errors.extend(validate_presentation_entry(entry, state, batch))
     outline = deepcopy(outline)
     sections = list((outline or {}).get("sections") or [])
     blueprints = {s["stable_key"]: s for s in pack.get("stage_blueprints", [])}
@@ -978,19 +814,18 @@ def recursion_limit(manifest: dict[str, Any]) -> int:
       business progress projection);
     - each bounded repair re-runs ``repair_batch`` + ``validate_*_batch`` = 2;
     - fixed steps: ``normalize`` + ``generate_skeleton`` + ``merge_and_validate`` +
-      ``save_draft_projection`` + ``await_approval`` (the interrupt that ends the
-      initial run).
+      ``save_draft_projection`` (the saved draft ends the run).
 
     The interpreter (``run_batched_planning_graph``) uses its own ``max_steps``, so
     this cap only bounds the real framework path; keeping it derived (not the
-    default 25) is what lets a full 9-stage run reach ``await_approval``.
+    default 25) is what lets a full 9-stage run reach saved draft completion.
     """
     structure = len(manifest.get("structure_batches") or [])
     practice = len(manifest.get("practice_batches") or [])
     repairs = int(manifest.get("max_repairs", 0))
     batch_steps = 3 * (structure + practice)
     repair_steps = 2 * repairs
-    fixed = 5 + 10  # normalize/skeleton/merge/save/await + safety margin
+    fixed = 4 + 10  # normalize/skeleton/merge/save + safety margin
     return batch_steps + repair_steps + fixed
 
 
@@ -1112,9 +947,8 @@ def _initial_state(initial: PlanningState, manifest: dict[str, Any] | None) -> P
     if manifest is not None:
         state["manifest"] = manifest  # type: ignore[typeddict-unknown-key]
     if not state.get("manifest"):
-        state["manifest"] = freeze_manifest(  # type: ignore[typeddict-unknown-key]
-            state.get("domain_pack") or {}, DEFAULT_BUDGET, "mock:default"
-        )
+        raise ValueError("Current planning requires a frozen manifest")
+    check_frozen_structure(state)
     state.setdefault("protocol", PROTOCOL_VERSION)  # type: ignore[typeddict-item]
     return state
 
@@ -1130,9 +964,8 @@ def run_batched_planning_graph(
 ) -> Any:
     """Deterministic interpreter for the batched graph.
 
-    Mirrors ``build_batched_planning_graph`` node-for-node so routing can be
-    mechanically proven without a real framework. ``resume_decision`` behaves as
-    in the legacy interpreter: ``None`` stops at ``await_approval``.
+    Mirrors ``build_short_planning_graph`` node-for-node so routing can be
+    mechanically proven without a real framework. Completion stops at saved draft.
 
     ``progress`` is an optional ``Callable[[PlanningState], None]`` invoked only
     at stable points (after each committed batch / merge / draft), never
@@ -1245,26 +1078,16 @@ def run_batched_planning_graph(
         return fail()
     emit()
 
-    # ---- draft + await approval ----
+    # ---- draft completion ----
     guard_steps()
     visited.append("save_draft_projection")
     _merge_state(state, nodes.save_draft_projection(state))
     emit()
-    stopped_at = None if state.get("graph_version") == SHORT_GENERATION_VERSION else "await_approval"
-    return PlanningTrace(visited=visited, state=state, stopped_at=stopped_at)
-
-
-def build_batched_planning_graph(nodes: Any, *, checkpointer: Any = None) -> Any:
-    """Assemble the real ``b3f2-batch-v1`` StateGraph (requires langgraph)."""
-    return _build_batched_graph(nodes, checkpointer=checkpointer, short_generation=False)
+    return PlanningTrace(visited=visited, state=state, stopped_at=None)
 
 
 def build_short_planning_graph(nodes: Any, *, checkpointer: Any = None) -> Any:
     """Generate and persist a draft, then finish without a user interrupt."""
-    return _build_batched_graph(nodes, checkpointer=checkpointer, short_generation=True)
-
-
-def _build_batched_graph(nodes: Any, *, checkpointer: Any, short_generation: bool) -> Any:
     from app.agent_workflows.graphs import LANGGRAPH_AVAILABLE
     from app.agent_workflows.state import PlanningState as _PlanningState
 
@@ -1272,7 +1095,6 @@ def _build_batched_graph(nodes: Any, *, checkpointer: Any, short_generation: boo
         raise RuntimeError(
             "langgraph 未安装，无法装配 StateGraph；请使用 run_batched_planning_graph 解释器"
         )
-    from app.agent_workflows.nodes import route_after_decision  # local import avoids a cycle
     from langgraph.graph import END, START, StateGraph  # type: ignore[import-not-found]
 
     graph = StateGraph(_PlanningState)
@@ -1287,11 +1109,6 @@ def _build_batched_graph(nodes: Any, *, checkpointer: Any, short_generation: boo
     graph.add_node("repair_batch", nodes.repair_batch)
     graph.add_node("merge_and_validate", nodes.merge_and_validate)
     graph.add_node("save_draft_projection", nodes.save_draft_projection)
-    if not short_generation:
-        graph.add_node("await_approval", nodes.await_approval)
-        graph.add_node("apply_decision", nodes.apply_decision)
-        graph.add_node("commit_plan_idempotently", nodes.commit_plan_idempotently)
-        graph.add_node("cancel_draft", nodes.cancel_draft_node)
     graph.add_node("record_failure", nodes.record_failure_node)
 
     graph.add_edge(START, "normalize")
@@ -1320,16 +1137,7 @@ def _build_batched_graph(nodes: Any, *, checkpointer: Any, short_generation: boo
         ROUTE_GENERATE_PRACTICE: "generate_practice_batch", ROUTE_MERGE: "merge_and_validate"})
     graph.add_conditional_edges("merge_and_validate", route_after_merge,
                                 {ROUTE_DRAFT: "save_draft_projection", ROUTE_FAIL: "record_failure"})
-    if short_generation:
-        graph.add_edge("save_draft_projection", END)
-    else:
-        graph.add_edge("save_draft_projection", "await_approval")
-        graph.add_edge("await_approval", "apply_decision")
-        graph.add_conditional_edges("apply_decision", route_after_decision, {
-            "commit_plan_idempotently": "commit_plan_idempotently", "validate": "merge_and_validate",
-            "cancel_draft": "cancel_draft", ROUTE_FAIL: "record_failure"})
-        graph.add_edge("commit_plan_idempotently", END)
-        graph.add_edge("cancel_draft", END)
+    graph.add_edge("save_draft_projection", END)
     graph.add_edge("record_failure", END)
     return graph.compile(checkpointer=checkpointer)
 
@@ -1417,7 +1225,6 @@ __all__ = [
     "budget_violation",
     "derive_progress",
     "output_budget_for",
-    "build_batched_planning_graph",
     "build_short_planning_graph",
     "freeze_manifest",
     "manifest_is_intact",

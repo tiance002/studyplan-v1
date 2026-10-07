@@ -336,11 +336,10 @@ def prepared_successor_generation():
     from app.agent_workflows.planning_batches import (
         DEFAULT_BUDGET, SHORT_GENERATION_VERSION, freeze_manifest, run_batched_planning_graph,
     )
-    from app.domain.planning.semantic_content import adapt_semantic_pack
     from app.infrastructure.providers.planning_demo import build_planning_demo
 
     goal = "零基础系统学习 Agent 应用开发，先做一个最小应用。"
-    pack = adapt_semantic_pack(current(), goal, None)
+    pack = current()
     initial = {"goal": goal, "project_id": "p-mcp101-unit", "run_id": "r-mcp101-unit",
         "domain_pack": pack, "graph_version": SHORT_GENERATION_VERSION, "expected_version": 0,
         "prefs_snapshot": {"language": "zh"}, "manifest": freeze_manifest(

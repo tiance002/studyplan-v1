@@ -138,32 +138,6 @@ const path = require('node:path');
         await page.screenshot({ path: path.join(evidence, `${scenario}-a2-units.png`), fullPage: true });
         scenarioChecks.a2_multiunit_one_canonical_one_task = 'PASS';
       }
-      if (['rag', 'system'].includes(scenario)) {
-        for (const code of ['a5', 'a6', 'a8']) { const stage = markerFor(workspace, code); assert.ok(stage); await enter(stage); }
-        scenarioChecks.a5_a6_a8 = 'PASS';
-        scenarioChecks.small_core_cards = await cardsFor(markerFor(workspace, 'a8'), 'whole_core', 1);
-      }
-      if (scenario === 'rag') {
-        for (const code of ['g0','g1','g2','g3','g4','g5','g6','gr','gt']) { const stage = markerFor(workspace, code); assert.ok(stage); await enter(stage); }
-        scenarioChecks.specialty_mature_transfer = 'PASS';
-        const mature = markerFor(workspace, 'gr');
-        assert.equal(mature.tasks.length, 1, 'alternative repositories do not create two required tasks');
-        scenarioChecks.mature_alternative_cards = await cardsFor(mature, 'targeted_deep_dive', 2);
-      }
-      if (scenario === 'mcp') {
-        assert.ok(markerFor(workspace, 'a6'));
-        for (const code of ['a5','a8','g0','gr','gt']) assert.equal(markerFor(workspace, code), undefined);
-        await enter(markerFor(workspace, 'a6'));
-        scenarioChecks.narrow_mcp_closure = 'PASS';
-      }
-      if (scenario === 'node') {
-        const tasks = workspace.stages.flatMap(stage => stage.tasks);
-        assert.ok(tasks.every(task => /Node\.js API/.test(task.goal)));
-        assert.ok(tasks.every(task => !/FastAPI|TaskService/.test(task.goal)));
-        for (const stage of workspace.stages) { await enter(stage); for (const task of stage.tasks) await page.locator('.practice-preview').getByText(task.goal, { exact: true }).waitFor(); }
-        scenarioChecks.continuous_node_project = 'PASS';
-        await page.screenshot({ path: path.join(evidence, 'node-continuous-project.png'), fullPage: true });
-      }
       if (scenario === 'long') {
         const continuation = plan.extensions.find(extension => extension.topic.startsWith('项目学习：') && /[（(]续\d+(?:\/\d+)?[）)]\s*$/.test(extension.topic));
         assert.ok(continuation, 'independent owned P01 fixture contains actual saved continuation');

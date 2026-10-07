@@ -272,7 +272,7 @@ def test_interrupted_run_resumes_without_recalling_completed_batches(checkpoint_
     from app.agent_workflows.planning_batches import freeze_manifest
     from app.infrastructure import domain_pack
 
-    pack = domain_pack.select_domain_pack(AGENT_GOAL)
+    pack = domain_pack.load_pack("agent-application-v1.json")
     manifest = freeze_manifest(pack, _budget(), "fake:planning-demo")
     thread_id = f"e2e-recover::{PROTOCOL_VERSION}"
     initial = {
@@ -308,7 +308,7 @@ def test_waiting_user_checkpoint_is_not_auto_continued(checkpoint_db):
     from app.agent_workflows.planning_batches import freeze_manifest
     from app.infrastructure import domain_pack
 
-    pack = domain_pack.select_domain_pack(AGENT_GOAL)
+    pack = domain_pack.load_pack("agent-application-v1.json")
     manifest = freeze_manifest(pack, _budget(), "fake:planning-demo")
     thread_id = f"e2e-waiting::{PROTOCOL_VERSION}"
     llm = ScriptedLLM(pack)

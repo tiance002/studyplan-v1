@@ -1,37 +1,8 @@
-"""计划用例服务（B2-V §六）：把「生成 → 查看 → 编辑 → 重新校验 → 确认 → 发布」
-编排成一条**真实可跑**的业务链。
+"""Plan reads, draft decisions, publication and retained execution safeguards.
 
-## 职责边界
-
-本模块是**应用层**：它只做编排，不放业务规则。
-
-- 领域规则（发布原子性、草案哈希、结构指纹、状态机）在
-  :mod:`app.domain.planning.models` —— **只有一份**；
-- 持久化语义（单事务、状态条件、行数检查、RLS）在 ``PlanRepositoryPort``
-  的实现里；
-- 新生成由 ``b3f2-short-v2`` 图推进到草案持久化后结束；批次内容、
-  有界修复与模型 attempt 预算复用 ``b3f2-batch-v1``。
-
-## 为什么决策路径不重新驱动 Graph
-
-``await_approval`` 之后**没有任何模型调用**：它只是一次状态机迁移。
-设计文档明确「普通 CRUD 与状态机用应用服务，不包 Graph」。因此决策路径
-直接读**数据库里的草案**并调用 :class:`PlanPublicationService`：
-
-- **进程重启可恢复**：决策所需的一切（草案内容、哈希、状态、当前版本）
-  都在数据库里，不依赖任何内存状态或 checkpoint；
-- **发布语义只有一份**：不再出现「图内一套、服务里一套」的分叉。
-
-## 生成路径
-
-生成是**多步 + 有界修复**，属于设计文档允许用 Graph 的场景，因此
-``generate`` 保存持久化 ``PlanDraft`` 后完成，Run 的 result_ref 指向草案，
-状态为 succeeded + none。批准、编辑、取消独立走业务事务。
-
-## 历史协议保全
-
-新 Run 一律使用 ``b3f2-short-v2``；旧 ``b3f2-batch-v1`` waiting_user 草案
-仍可走业务确认，但不续跑或改写旧 checkpoint。未知协议版本一律明确拒绝。
+New planning and generated route preparation fail closed during the prerelease
+cleanup. Publication still delegates to the domain and repository transaction;
+worker execution retains receipt, scope, fence and immutable snapshot checks.
 """
 
 from __future__ import annotations
@@ -43,17 +14,14 @@ from datetime import datetime, timezone
 from typing import Any, Callable, Mapping, Sequence, cast
 from uuid import NAMESPACE_URL, uuid5
 
-from app.agent_workflows.graphs import graph_thread_id
 from app.agent_workflows.nodes import PlanningNodes
 from app.agent_workflows.planning_batches import (
     DEFAULT_BUDGET,
     PROTOCOL_VERSION,
     SHORT_GENERATION_VERSION,
     derive_progress,
-    freeze_manifest,
     run_batched_planning_graph,
 )
-from app.agent_workflows.planning_structure import has_canonical_inventory
 from app.agent_workflows.state import PlanningState
 from app.application.draft_projection import project_draft
 from app.application.model_binding import SubmissionBinding
@@ -65,8 +33,8 @@ from app.application.plan_resources import (
     resolve_stage_resources,
     restrict_pack_resources,
 )
-from app.core.errors import ConflictError, NotFoundError, ValidationAppError, VersionConflictError
-from app.core.ids import content_hash, new_id
+from app.core.errors import ConflictError, DependencyUnavailableError, NotFoundError, ValidationAppError, VersionConflictError
+from app.core.ids import content_hash
 from app.domain.enums import (
     AiRunKind,
     AiRunNextAction,
@@ -77,7 +45,7 @@ from app.domain.enums import (
     StageResourceRole,
 )
 from app.domain.generated_plan_changes import GeneratedPlanChangeCommand
-from app.domain.planning.intent import GoalSpec, goal_spec_from_payload, goal_spec_payload
+from app.domain.planning.intent import GoalSpec
 from app.domain.planning.models import (
     PlanDraft,
     PlanPublicationService,
@@ -86,7 +54,6 @@ from app.domain.planning.models import (
     PlanStage,
     revision_from_draft,
 )
-from app.domain.planning.semantic_content import adapt_semantic_pack
 from app.domain.resources.curation import ResolvedSection, StageResourceAssignment
 from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
@@ -185,7 +152,6 @@ class PlanService:
         source_pack_version: int = 0,
         planning_executor: PlanningExecutorPort | None = None,
         runtime_factory: Callable[...,PlanningRuntime] | None = None,
-        domain_pack_selector: Callable[[str], dict[str, Any]] | None = None,
         planning_jobs: PlanningJobsPort | None = None,
         worker_actor_ids: tuple[str, ...] = (),
         binding_resolver: Callable[[AuthContext, str], SubmissionBinding] | None = None,
@@ -210,7 +176,6 @@ class PlanService:
         self._source_pack_key = source_pack_key
         self._source_pack_version = source_pack_version
         self._publication = PlanPublicationService(repository)
-        self._domain_pack_selector = domain_pack_selector
         self._planning_jobs = planning_jobs
         self._worker_actor_ids = tuple(dict.fromkeys(worker_actor_ids))
         if planning_worker_admission_mode not in {"allowlist", "trusted_server"}:
@@ -226,59 +191,6 @@ class PlanService:
 
     # ------------------------------------------------------------------ 生成
 
-    def _freeze_submission(
-        self,
-        *,
-        scope: AuthContext,
-        project_id: str,
-        goal: str,
-        prefs_snapshot: Mapping[str, Any] | None = None,
-        goal_spec: GoalSpec | None = None,
-        prepared_change: dict[str, Any] | None = None,
-    ) -> tuple[str, str, PlanningState, dict[str, Any]]:
-        """Freeze protocol, model configuration and batch catalog for a new run.
-
-        Everything the run will later depend on is captured here, before the run
-        row exists, so a later settings change cannot alter what was submitted.
-        """
-        run_id = prepared_change['run_id'] if prepared_change else new_id("run")
-        thread_id = graph_thread_id(run_id=run_id, graph_version=self._graph_version)
-        selected = (prepared_change['pack'] if prepared_change else
-                    self._domain_pack_selector(goal_spec.target if goal_spec else goal) if self._domain_pack_selector else None)
-        pack: dict[str, Any] = dict(selected) if isinstance(selected, Mapping) else {}
-        if not prepared_change:
-            pack = adapt_semantic_pack(pack, goal, goal_spec)
-        binding = self._binding_resolver(scope, project_id)
-        manifest = freeze_manifest(
-            pack=pack, policy=binding.budget_policy, model_ref=binding.model_ref, goal_spec=goal_spec,
-            route_change_hash=content_hash(prepared_change['metadata']) if prepared_change else '',
-            outline_input_format="stage_skeleton_v1",
-            structure_input_format='reviewed_structure_v1' if has_canonical_inventory(pack) else None,
-        )
-        current = self._repo.get_current(project_id=project_id)
-        if prefs_snapshot is None and self._preference_resolver is not None:
-            preference = self._preference_resolver(scope, project_id)
-            prefs_snapshot = {"mode": preference.mode.value, "language": preference.language,
-                              "official_priority": preference.official_priority, "pace": preference.pace}
-        initial: PlanningState = {
-            "run_id": run_id,
-            "project_id": project_id,
-            "graph_version": self._graph_version,
-            "goal": goal,
-            **({"goal_spec": goal_spec_payload(goal_spec)} if goal_spec else {}),
-            "prefs_snapshot": dict(prefs_snapshot or {}),
-            "manifest": manifest,
-            "protocol": PROTOCOL_VERSION,
-            "expected_version": prepared_change['metadata']['base_version'] if prepared_change else current.version if current else 0,
-        }
-        if prepared_change:
-            initial['route_change'] = prepared_change['metadata']
-        if pack:
-            initial["domain_pack"] = pack
-        if self._planning_jobs is None:
-            self._generation_inputs[run_id] = deepcopy(initial)
-        return run_id, thread_id, initial, manifest
-
     def submit_generation(
         self,
         *,
@@ -289,56 +201,9 @@ class PlanService:
         goal_spec: GoalSpec | None = None,
         route_command: GeneratedPlanChangeCommand | None = None,
     ) -> str:
-        """Validate and durably enqueue one planning run; never invoke the model."""
+        """Reject new planning before binding, persistence or dispatch."""
         scope.require_project(project_id)
-        if self._planning_jobs is None:
-            raise ValidationAppError("规划后台 Worker 未装配")
-        if self._planning_worker_admission_mode != "trusted_server" and scope.actor_id not in self._worker_actor_ids:
-            from app.core.errors import ForbiddenError
-
-            raise ForbiddenError(
-                "当前账户尚未纳入本地规划 Worker 服务范围；开放注册云端 V1 需先完成免人工登记的 RLS 安全领取"
-            )
-        prepared = None
-        if route_command is not None:
-            if route_command.project_id != project_id or self._route_changes is None:
-                raise ValidationAppError('路线变更服务未装配或项目不一致')
-            existing = self._route_changes.existing_submission(scope, route_command)
-            if existing:
-                return existing
-            prepared = self._route_changes.prepare(scope, route_command, self._domain_pack_selector)
-            goal, goal_spec = prepared['goal'], goal_spec_from_payload(prepared['goal_spec'])
-        cleaned_goal = goal.strip()
-        if not cleaned_goal:
-            raise ValidationAppError("学习目标不能为空")
-
-        run_id, thread_id, initial, manifest = self._freeze_submission(
-            scope=scope, project_id=project_id, goal=cleaned_goal, prefs_snapshot=prefs_snapshot, goal_spec=goal_spec,
-            prepared_change=prepared,
-        )
-        run = RunRecord(
-            run_id=run_id,
-            actor_id=scope.actor_id,
-            project_id=project_id,
-            kind=AiRunKind.PLAN_GENERATE.value,
-            graph_name=GraphName.PLANNING.value,
-            graph_version=self._graph_version,
-            status=AiRunStatus.QUEUED,
-            next_action=AiRunNextAction.WAIT,
-            thread_id=thread_id,
-            version=1,
-        )
-        try:
-            self._planning_jobs.enqueue(run, dict(initial), manifest)
-        except ConflictError:
-            # A simultaneous identical submission returns the durable original,
-            # without rebinding settings or repeating provider dispatch.
-            if route_command and self._route_changes:
-                existing = self._route_changes.existing_submission(scope, route_command)
-                if existing:
-                    return existing
-            raise
-        return run_id
+        raise DependencyUnavailableError("学习计划生成正在升级，当前暂不可创建新路线。")
 
     def _progress_sink(self, claim: JobClaim | None) -> Callable[[PlanningState], None] | None:
         """Business-progress publisher for one fenced claim.
@@ -463,77 +328,18 @@ class PlanService:
         prefs_snapshot: Mapping[str, Any] | None = None,
         goal_spec: GoalSpec | None = None,
     ) -> str:
-        """发起一次规划生成，返回 ``run_id``。
-
-        先校验项目归属（``scope.require_project``），再创建运行投影，
-        然后推进短规划图并持久化草案，最后更新计算运行状态。
-        """
+        """Reject synchronous generation at the same boundary as queued generation."""
         scope.require_project(project_id)
-        cleaned_goal = goal.strip()
-        if not cleaned_goal:
-            raise ValidationAppError("学习目标不能为空")
-
-        run_id, thread_id, initial, _manifest = self._freeze_submission(
-            scope=scope, project_id=project_id, goal=cleaned_goal, prefs_snapshot=prefs_snapshot, goal_spec=goal_spec
-        )
-        self._runs.create_run(
-            RunRecord(
-                run_id=run_id,
-                actor_id=scope.actor_id,
-                project_id=project_id,
-                kind=AiRunKind.PLAN_GENERATE.value,
-                graph_name=GraphName.PLANNING.value,
-                graph_version=self._graph_version,
-                status=AiRunStatus.RUNNING,
-                next_action=AiRunNextAction.WAIT,
-                thread_id=thread_id,
-                version=1,
-            )
-        )
-
-        selected_pack = initial.get("domain_pack")
-        try:
-            runtime = (
-                self._runtime_factory(scope, project_id, run_id, _manifest.get("model_ref", ""), manifest=_manifest)
-                if self._runtime_factory
-                else None
-            )
-            executor = runtime.executor if runtime else self._executor
-            nodes = self._build_nodes(project_id=project_id, run_id=run_id, goal=cleaned_goal,
-                                      llm=runtime.llm if runtime else None, selected_pack=selected_pack,
-                                      frozen_input=initial)
-            trace = (
-                self._run_executor(executor, nodes, initial, thread_id, self._graph_version, lambda: None)
-                if executor is not None
-                else run_batched_planning_graph(nodes, initial)
-            )
-        except LLMDispatchUnknownError:
-            self._update_run(project_id=project_id, run_id=run_id,
-                             status=AiRunStatus.RECONCILIATION_REQUIRED,
-                             next_action=AiRunNextAction.RECONCILE,
-                             error_class="provider_dispatch_unknown")
-            if self._executor is not None:
-                return run_id
-            raise
-        except Exception:
-            self._update_run(project_id=project_id, run_id=run_id,
-                             status=AiRunStatus.FAILED, next_action=AiRunNextAction.RETRY,
-                             error_class=ERROR_PLANNING_FAILED)
-            if self._executor is not None:
-                return run_id
-            raise
-
-        self._complete_generation(project_id=project_id, run_id=run_id,
-                                  graph_version=self._graph_version, trace=trace)
-        return run_id
+        raise DependencyUnavailableError("学习计划生成正在升级，当前暂不可创建新路线。")
 
     def _complete_generation(self, *, project_id: str, run_id: str,
                              graph_version: str, trace: Any,
                              write_fence: PlanningWriteFence | None = None,
                              progress: Callable[[PlanningState], None] | None = None) -> None:
         """A successful computation must reference its persisted business draft."""
-        short = graph_version == SHORT_GENERATION_VERSION
-        expected_stop = None if short else "await_approval"
+        if graph_version != SHORT_GENERATION_VERSION:
+            raise ValidationAppError("不支持的规划生成协议")
+        expected_stop = None
         draft_id = str(trace.state.get("draft_ref") or "")
         draft = self._repo.get_draft(project_id=project_id, draft_id=draft_id) if draft_id else None
         if (trace.stopped_at == expected_stop and draft is not None
@@ -541,8 +347,8 @@ class PlanService:
                 and draft.content_hash == trace.state.get("draft_hash")):
             try:
                 self._update_run(project_id=project_id, run_id=run_id,
-                    status=AiRunStatus.SUCCEEDED if short else AiRunStatus.WAITING_USER,
-                    next_action=AiRunNextAction.NONE if short else AiRunNextAction.REVIEW_DRAFT,
+                    status=AiRunStatus.SUCCEEDED,
+                    next_action=AiRunNextAction.NONE,
                     result_ref=draft_id, write_fence=write_fence,
                     expected_plan_version=trace.state.get("expected_version"))
             except VersionConflictError:
@@ -612,7 +418,7 @@ class PlanService:
         return PlanBundle(
             revision=revision,
             resources=self._resolve(revision.stage_resources, revision.stages, revision.resource_snapshots,
-                                    legacy=not revision.resource_snapshots),
+                                    require_snapshot=True),
         )
 
     # ------------------------------------------------------------------ 决定
@@ -679,8 +485,7 @@ class PlanService:
             raise ConflictError("Published revision missing", reason="publication_inconsistent")
         plan_resources: tuple[StageResourceView, ...] = ()
         if plan is not None:
-            plan_resources = self._resolve(plan.stage_resources, plan.stages, plan.resource_snapshots)
-        self._finalize_run(draft=final_draft, decision="approve", result_ref=result.plan_id)
+            plan_resources = self._resolve(plan.stage_resources, plan.stages, plan.resource_snapshots, require_snapshot=True)
         return DecisionOutcome(
             run_id=final_draft.run_id,
             draft=final_draft,
@@ -751,7 +556,6 @@ class PlanService:
         )
         refreshed = self._repo.get_draft(project_id=project_id, draft_id=draft.draft_id)
         final_draft = refreshed or draft
-        self._finalize_run(draft=final_draft, decision="cancel")
         return DecisionOutcome(
             run_id=final_draft.run_id,
             draft=final_draft,
@@ -910,19 +714,20 @@ class PlanService:
         return {"draft_ref": draft.draft_id, "draft_hash": draft.content_hash}
 
     def _resolve(
-        self, assignments: Sequence[StageResourceAssignment], stages: Sequence[PlanStage], snapshots=(), *, legacy=False
+        self, assignments: Sequence[StageResourceAssignment], stages: Sequence[PlanStage], snapshots=(), *, require_snapshot=False
     ) -> tuple[StageResourceView, ...]:
         if not assignments:
             return ()
         frozen = {item.get("assignment_id"): item.get("view") for item in snapshots if item.get("view")}
         unresolved = [a for a in assignments if a.assignment_id not in frozen]
+        if require_snapshot and unresolved:
+            raise ConflictError("路线来源快照不完整，无法读取", reason="resource_snapshot_missing")
         dynamic = resolve_stage_resources(
             unresolved,
             catalog=self._resources,
             stage_titles={s.stage_id: s.title for s in stages},
         )
-        by_id = {view.assignment_id: replace(view, warnings=(*view.warnings,
-            "此旧记录未保存当时来源元数据；当前目录值仅供参考")) if legacy else view for view in dynamic}
+        by_id = {view.assignment_id: view for view in dynamic}
         assignments_by_id = {a.assignment_id: a for a in assignments}
         snapshots_by_id = {item.get("assignment_id"): item for item in snapshots}
         for identifier, value in frozen.items():
@@ -936,19 +741,6 @@ class PlanService:
                 data[field] = tuple(data.get(field, ()))
             by_id[identifier] = StageResourceView(**data)
         return tuple(by_id[a.assignment_id] for a in assignments)
-
-    def _finalize_run(self, *, draft: PlanDraft, decision: str, result_ref: str = "") -> None:
-        """Acknowledge legacy business decisions without altering checkpoints.
-
-        New computation Runs are already succeeded and continue to reference the
-        draft after edit/publish/cancel. Only historic waiting projections change.
-        """
-        run = self._runs.get_run(project_id=draft.project_id, run_id=draft.run_id)
-        if run is None or run.graph_version == SHORT_GENERATION_VERSION or run.is_terminal:
-            return
-        status = AiRunStatus.SUCCEEDED if decision == "approve" else AiRunStatus.CANCELLED
-        self._update_run(project_id=draft.project_id,run_id=draft.run_id,status=status,
-                         next_action=AiRunNextAction.NONE,result_ref=result_ref or None)
 
     def _update_run(
         self,

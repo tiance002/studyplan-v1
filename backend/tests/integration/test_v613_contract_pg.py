@@ -15,7 +15,6 @@ from app.agent_workflows.planning_structure import REVIEWED_STRUCTURE_V1
 from app.agent_workflows.runtime import PostgresSaver
 from app.composition import build_container
 from app.core.ids import new_id
-from app.domain.planning.semantic_content import adapt_semantic_pack
 from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor, builder_for_version
 from app.infrastructure.domain_pack import CURRENT_PACKS, load_pack
 from app.infrastructure.providers.planning_demo import build_planning_demo
@@ -400,32 +399,6 @@ def test_independent_pg_pre_save_projection_authority(reviewed_db,checkpoint_db,
     evidence('pg-projection-'+mutation,case_ids=['C06'] if mutation=='valid' else ['C02','C03','C04' if mutation=='dual_presentation' else 'C05'], database=reviewed_db.name,checkpoint_database=checkpoint_db.name,run_id=run_id,mutation=mutation, retained_receipts=len(independent['receipts']), additional_fake_calls=0, rejection_path=error_path,business_counts=project_counts(reviewed_db,project_id), independent_database_authority='PASS')
 
 
-@pytest.mark.parametrize('outline_marker',[None,'stage_skeleton_v1'],ids=['genuine-legacy','short-outline-old-structure'])
-def test_owned_genuine_legacy_generation_no_structure_retrofit(reviewed_db,outline_marker):
-    from app.domain.runs.models import RunRecord
-    from app.domain.enums import AiRunStatus,AiRunNextAction
-    container=build_container(settings_for(reviewed_db))
-    captured=capture(container.plan_service._llm)
-    with TestClient(create_app(container)) as client:
-        _,params,headers=register(client,'v613legacy')
-        with psycopg.connect(reviewed_db.migrator_dsn) as conn:
-            actor=conn.execute('SELECT owner_actor_id FROM learning_projects WHERE project_id=%s',(params['project_id'],)).fetchone()[0]
-        pack=adapt_semantic_pack(load_pack(CURRENT_PACKS['agent.application']),GOAL,None)
-        manifest=freeze_manifest(pack,DEFAULT_BUDGET,'fake:planning-demo',outline_input_format=outline_marker)
-        assert 'structure_input_format' not in manifest
-        run_id=new_id('run');initial=json.loads(json.dumps(dict(run_id=run_id,project_id=params['project_id'],goal=GOAL,graph_version=SHORT_GENERATION_VERSION,domain_pack=pack,manifest=manifest,protocol=manifest['protocol'],expected_version=0,prefs_snapshot={})))
-        run=RunRecord(run_id=run_id,actor_id=actor,project_id=params['project_id'],kind='plan_generate',graph_name='planning',graph_version=SHORT_GENERATION_VERSION,status=AiRunStatus.QUEUED,next_action=AiRunNextAction.WAIT,thread_id='legacy:'+run_id)
-        container.plan_service._planning_jobs.enqueue(run,initial,initial['manifest'])
-        before=container.plan_service._planning_jobs.read_generation_authority(actor,params['project_id'],run_id)['initial']
-        assert container.planning_worker.tick()
-        status=client.get('/api/v1/runs/'+run_id,params=params).json()
-        assert status['status']=='succeeded',status
-        url='/api/v1/plans/drafts/'+status['result_ref'];draft=client.get(url,params=params).json()
-        plan=confirm(client,params,headers,url,draft)
-        assert all('_structure_input_format' not in p for kind,p in captured if kind=='planning.structure')
-        after=container.plan_service._planning_jobs.read_generation_authority(actor,params['project_id'],run_id)['initial']
-        assert after==before and not container.planning_worker.tick()
-    evidence('pg-legacy-'+('outline' if outline_marker else 'full'),case_ids=['C12'],database=reviewed_db.name,run_id=run_id,plan_id=plan['plan_id'],frozen_legacy_unchanged='PASS')
 
 
 def test_legal_draft_edit_and_cancel_fence(reviewed_db):

@@ -28,8 +28,7 @@ def generated_route(migrated_db, request):
         next(s for s in pack['stage_blueprints'] if s['stable_key'] == 'stage.mcp')['inclusion'] = 'optional'
         pack['required_node_keys'] = [k for k in pack['required_node_keys'] if not k.startswith('node.mcp')]
         next(n for n in pack['knowledge_blueprints'] if n['stable_key'] == 'node.reliability')['prerequisite_keys'].remove('node.mcp')
-    # These exercise the legacy protocol, before v5 introduces semantic policy.
-    # Keep synthetic legacy snapshots in the legacy version range.
+    # Explicit immutable synthetic snapshots for lifecycle regression coverage.
     pack['version'] = 3 if optional else 4
     with psycopg.connect(migrated_db.migrator_dsn) as conn:
         seed_reviewed_pack(conn, pack)
@@ -37,13 +36,8 @@ def generated_route(migrated_db, request):
                        local_session_token='', planning_worker_admission_mode='trusted_server',
                        allow_origins=('http://127.0.0.1:5178',))
     container = build_container(settings)
-    # Freeze this historical protocol fixture even after a test publishes v5.
-    # Current semantic publication/selection has its own real PG acceptance.
-    select = container.plan_service._domain_pack_selector
-    def legacy_fixture(goal):
-        selected = select(goal)
-        return pack if selected.get('pack_key') == pack['pack_key'] else selected
-    container.plan_service._domain_pack_selector = legacy_fixture
+    from tests.helpers.frozen_planning import install_frozen_generation
+    install_frozen_generation(container.plan_service, pack)
     with TestClient(create_app(container)) as client:
         auth = client.post('/api/v1/auth/register', json={'username': '重规划' + new_id('usr')[-10:],
                                                         'password': 'Test-pass1!'})

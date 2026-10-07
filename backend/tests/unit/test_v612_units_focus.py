@@ -78,7 +78,7 @@ def test_repair_budget_is_enforced_at_dispatch_boundary():
     assert not fake.calls
 
 
-def test_mixed_batch_eligibility_and_old_marker_wire_preserved():
+def test_mixed_batch_eligibility_and_missing_current_marker_rejected():
     s = state()
     pack = deepcopy(s["domain_pack"])
     pack["stage_blueprints"][-1]["node_keys"] = []
@@ -89,30 +89,13 @@ def test_mixed_batch_eligibility_and_old_marker_wire_preserved():
     assert "_structure_input_format" not in structure_payload(
         {"manifest": m, "domain_pack": pack}, m["structure_batches"][-1]
     )
-    old = freeze_manifest(
-        s["domain_pack"], DEFAULT_BUDGET, "mock:old", structure_input_format=REVIEWED_STRUCTURE_V1
-    )
+    old = deepcopy(m)
     old.pop("structure_focus_format")
-    for b in old["structure_batches"]:
-        b.pop("structure_input_format", None)
     from app.agent_workflows.planning_batches import _canonical_hash
-
     old.pop("manifest_hash")
     old["manifest_hash"] = _canonical_hash(old)
-    payload = structure_payload({**s, "manifest": old}, old["structure_batches"][0])
-    assert "_structure_focus_format" not in payload and "allowed_teaching_focus" not in payload
-    raw = {
-        "units": [
-            {
-                "title": "旧候选组织",
-                "node_keys": old["structure_batches"][0]["node_keys"],
-                "objectives": ["解释当前阶段"],
-            }
-        ]
-    }
-    assert not presentation_entry(raw, {**s, "manifest": old}, old["structure_batches"][0])[
-        "_presentation_errors"
-    ]
+    with pytest.raises(ValueError):
+        structure_payload({"manifest": old, "domain_pack": pack}, old["structure_batches"][0])
 
 
 def test_scope_strings_not_character_slices_and_input_local():
@@ -126,15 +109,10 @@ def test_scope_strings_not_character_slices_and_input_local():
     assert all(x not in p for x in ("publication_evidence", "resources", "domain_pack"))
 
 
-def test_search_only_remains_open():
+def test_markerless_search_only_cannot_resume_current_structure():
     s = state()
     pack = deepcopy(s["domain_pack"])
     pack["resource_support"] = "search_only"
-    from app.agent_workflows.planning_structure import has_canonical_inventory
-
-    assert not has_canonical_inventory(pack)
     m = freeze_manifest(pack, DEFAULT_BUDGET, "mock:open")
-    assert "structure_input_format" not in m
-    assert "_structure_input_format" not in structure_payload(
-        {"manifest": m, "domain_pack": pack}, m["structure_batches"][0]
-    )
+    with pytest.raises(ValueError, match="Incomplete frozen structure contract"):
+        structure_payload({"manifest": m, "domain_pack": pack}, m["structure_batches"][0])

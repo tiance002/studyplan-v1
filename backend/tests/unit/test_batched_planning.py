@@ -40,7 +40,7 @@ def _pack(goal: str = AGENT_GOAL) -> dict:
         # Freeze the original 9-stage protocol stress case independently of
         # the current product direction registry. New packs have their own tests.
         return domain_pack.load_pack("agent-application-v1.json")
-    return domain_pack.select_domain_pack(goal)
+    return {"resource_support": "search_only", "resources": [], "stage_blueprints": [], "knowledge_blueprints": []}
 
 
 def _run(pack: dict, llm: ScriptedLLM, *, goal: str = AGENT_GOAL, run_id: str = "run"):

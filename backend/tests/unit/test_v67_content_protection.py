@@ -13,21 +13,22 @@ from app.agent_workflows.planning_batches import (
     structure_payload,
 )
 from app.domain.planning.intent import GoalSpec, purpose_requirements
-from app.domain.planning.semantic_content import adapt_semantic_pack
 from app.infrastructure.domain_pack import load_pack
+from tests.helpers.reviewed_content import reviewed_fixture
+from app.agent_workflows.planning_structure import presentation_entry
 from app.infrastructure.providers.planning_demo import selected_output
 
 
-def generated(pack=None, spec=None, *, legacy=False):
-    pack = pack or adapt_semantic_pack(load_pack('agent-application-v5.json'), '学习 Agent', None)
+def generated(pack=None, spec=None):
+    pack = pack or reviewed_fixture('agent-application-v5.json', tuple('stage.v62.agent.application.' + key for key in ('a0', 'a1', 'a2', 'a3', 'a4', 'a7')))
     manifest = freeze_manifest(pack, DEFAULT_BUDGET, 'mock:v67', goal_spec=spec,
-                               outline_input_format=None if legacy else 'stage_skeleton_v1')
+                               outline_input_format='stage_skeleton_v1', structure_input_format='reviewed_structure_v1')
     state = {'goal': '学习 Agent', 'domain_pack': pack, 'manifest': manifest, 'structure_batches': []}
     outline = {'sections': [{'stable_key': s['stage_key'], 'title': s['title'], 'objective': s['objective']}
                             for s in manifest['stages']]}
     for batch in manifest['structure_batches']:
         state['structure_batches'].append({'stage_key': batch['stage_key'],
-            **selected_output('planning.structure', structure_payload(state, batch))})
+            **presentation_entry(selected_output('planning.structure', structure_payload(state, batch)), state, batch)})
     practices = [{'stage_key': b['stage_key'], 'payload': selected_output('planning.practice',
                  practice_payload(state, b['stage_key']))} for b in manifest['practice_batches']]
     return pack, manifest, outline, state['structure_batches'], practices
@@ -90,7 +91,7 @@ def test_reviewed_practice_exact_tasks_and_links_remove_secondary_starter_and_co
     template.update(required=True, optional=False, deliverable='canonical artifact',
                     in_scope=['canonical scope'], out_scope=['canonical exclusion'])
     # Fixture blueprint changes precede freezing, as a real reviewed submission.
-    m.update(freeze_manifest(p, DEFAULT_BUDGET, 'mock:v67', outline_input_format='stage_skeleton_v1'))
+    m.update(freeze_manifest(p, DEFAULT_BUDGET, 'mock:v67', outline_input_format='stage_skeleton_v1', structure_input_format='reviewed_structure_v1'))
     first = practices[0]['payload']['tasks'][0]
     first.update(stable_key='forged-identity', goal='forced Starter', acceptance=['conflicting mandatory'],
                  in_scope=['forged'], out_scope=[], required=False, optional=True,
@@ -131,7 +132,7 @@ def test_multiple_reviewed_tasks_are_restored_by_identity_not_model_position():
     second.update(stable_key='practice.canonical.second', goal='second reviewed task',
                   acceptance=['second exact acceptance'], required=True, optional=False)
     p['practice_blueprints'].insert(1, second)
-    m.update(freeze_manifest(p, DEFAULT_BUDGET, 'mock:v67', outline_input_format='stage_skeleton_v1'))
+    m.update(freeze_manifest(p, DEFAULT_BUDGET, 'mock:v67', outline_input_format='stage_skeleton_v1', structure_input_format='reviewed_structure_v1'))
     candidate = deepcopy(practices[0]['payload']['tasks'][0])
     candidate.update(stable_key=second['stable_key'], goal='forced Starter', acceptance=['forged'], required=True)
     practices[0]['payload']['tasks'].insert(0, candidate)
@@ -158,17 +159,6 @@ def test_merge_does_not_mutate_any_frozen_or_provider_inputs():
     assert case == before
 
 
-def test_legacy_merge_matches_prepatch_golden_even_with_model_extra_content():
-    case = generated(legacy=True)
-    p, m, o, s, t = case
-    s[0]['nodes'][0].update(title='legacy-model-title', objectives=['legacy-model-objective'])
-    first = t[0]['payload']['tasks'][0]
-    first['acceptance'] = ['legacy-model-extra']
-    t[0]['payload']['tasks'].append(dict(first, stable_key='legacy-model-secondary', goal='legacy-secondary'))
-    result = merged(case)
-    digest = hashlib.sha256(json.dumps(result, sort_keys=True, ensure_ascii=False,
-                            separators=(',', ':')).encode()).hexdigest()
-    assert digest == 'bbcda7a40c90468a499b6aef98078e56d4712fe2ada74ff40421c3d04d9a7e21'
 
 
 def test_new_reviewed_unit_rubric_persists_all_canonical_knowledge_and_practice():

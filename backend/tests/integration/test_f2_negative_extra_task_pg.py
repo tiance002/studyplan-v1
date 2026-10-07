@@ -16,7 +16,6 @@ from app.agent_workflows.planning_structure import REVIEWED_STRUCTURE_V1
 from app.agent_workflows.runtime import PostgresSaver
 from app.composition import build_container
 from app.core.ids import new_id
-from app.domain.planning.semantic_content import adapt_semantic_pack
 from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor, builder_for_version
 from app.infrastructure.domain_pack import CURRENT_PACKS, load_pack
 from app.infrastructure.providers.planning_demo import build_planning_demo

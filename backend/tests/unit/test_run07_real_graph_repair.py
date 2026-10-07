@@ -8,7 +8,7 @@ import pytest
 from app.agent_workflows.nodes import PlanningNodes
 from app.agent_workflows.planning_batches import (
     DEFAULT_BUDGET,
-    build_batched_planning_graph,
+    build_short_planning_graph as build_fixture_graph,
     freeze_manifest,
     recursion_limit,
     route_after_batch_repair,
@@ -74,7 +74,7 @@ def _real_run(fake, pack):
     manifest = freeze_manifest(pack, DEFAULT_BUDGET, "mock:run07")
     nodes = PlanningNodes(llm=fake, save_draft=save,
                           on_failure=lambda state, errors: failures.append(list(errors)))
-    graph = build_batched_planning_graph(nodes, checkpointer=InMemorySaver())
+    graph = build_fixture_graph(nodes, checkpointer=InMemorySaver())
     config = {"configurable": {"thread_id": "offline-run07"}, "recursion_limit": recursion_limit(manifest)}
     initial = {"goal": GOAL, "run_id": "offline-run07", "domain_pack": pack, "manifest": manifest}
     updates = list(graph.stream(initial, config, stream_mode="updates"))
@@ -112,7 +112,7 @@ def test_real_stategraph_revalidates_practice_and_matches_interpreter(persistent
         assert fake.count(PRACTICE) == 2
         assert drafts == []
     else:
-        assert snapshot.next == ("await_approval",)
+        assert snapshot.next == ()
         assert snapshot.values["validation_errors"] == []
         assert snapshot.values["draft_ref"] == "offline-draft"
         assert len(drafts) == 1 and failures == []
@@ -123,7 +123,7 @@ def test_real_stategraph_revalidates_practice_and_matches_interpreter(persistent
     interpreter_fake = Run07Fake(pack, persistent=persistent)
     trace = run_batched_planning_graph(PlanningNodes(llm=interpreter_fake, save_draft=lambda state: "d"),
                                       {"goal": GOAL, "run_id": "offline-run07", "domain_pack": pack})
-    assert trace.stopped_at == ("failed" if persistent else "await_approval")
+    assert trace.stopped_at == ("failed" if persistent else None)
     assert trace.state["validation_errors"] == snapshot.values["validation_errors"]
     assert [c["attempt_id"] for c in fake.calls] == [c["attempt_id"] for c in interpreter_fake.calls]
 
@@ -134,16 +134,16 @@ def test_structure_repair_still_returns_to_structure_validator():
     snapshot, visited, drafts, failures = _real_run(fake, pack)
     index = visited.index("repair_batch")
     assert visited[index + 1] == "validate_structure_batch"
-    assert snapshot.next == ("await_approval",)
+    assert snapshot.next == ()
     assert fake.count(REPAIR) == 1 and fake.count() == 20
     assert len(drafts) == 1 and failures == []
 
 
-def test_normal_actual_stategraph_reaches_approval_in_nineteen_requests():
+def test_normal_actual_stategraph_saves_draft_in_nineteen_requests():
     pack = load_pack("agent-application-v1.json")
     fake = ScriptedLLM(pack)
     snapshot, _, drafts, failures = _real_run(fake, pack)
-    assert snapshot.next == ("await_approval",)
+    assert snapshot.next == ()
     assert fake.count() == 19 and fake.count(REPAIR) == 0
     assert len(drafts) == 1 and failures == []
 
@@ -160,7 +160,7 @@ def test_two_repairs_across_both_batch_kinds_share_the_same_cap():
 
     fake = MixedFake(pack, invalid_at=(STRUCTURE, 1))
     snapshot, visited, drafts, failures = _real_run(fake, pack)
-    assert snapshot.next == ("await_approval",)
+    assert snapshot.next == ()
     assert fake.count() == 21 and fake.count(REPAIR) == 2
     assert snapshot.values["repair_count"] == 2
     assert snapshot.values["manifest"]["max_requests"] == 21

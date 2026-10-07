@@ -1,7 +1,7 @@
 """Versioned presentation projection. Frozen reviewed knowledge stays local.
 
-Markerless runs retain the historical KnowledgeStructureV1 wire contract.
-This module never accepts legacy node/edge proposals as new reviewed truth.
+Only the current frozen structure and teaching focus contract is accepted.
+Model node/edge proposals never become reviewed truth.
 """
 
 import json
@@ -72,11 +72,11 @@ def reviewed_stage_keys(pack):
 
 
 def uses_reviewed_structure(manifest, batch):
-    if manifest.get("structure_input_format") != REVIEWED_STRUCTURE_V1:
-        return False
-    if manifest.get("structure_focus_format") == FOCUS_FORMAT:
-        return batch.get("structure_input_format") == REVIEWED_STRUCTURE_V1
-    return True  # Already frozen v6.11 candidates retain their three-field contract.
+    return (
+        manifest.get("structure_input_format") == REVIEWED_STRUCTURE_V1
+        and manifest.get("structure_focus_format") == FOCUS_FORMAT
+        and batch.get("structure_input_format") == REVIEWED_STRUCTURE_V1
+    )
 
 
 def has_canonical_inventory(pack):
@@ -84,40 +84,28 @@ def has_canonical_inventory(pack):
 
 
 def check_frozen_structure(state):
-    """Check before any resumed dispatch; marker deletion cannot choose legacy."""
+    """Reject missing current markers before any resumed dispatch or hydration."""
     from app.agent_workflows.planning_batches import manifest_is_intact
 
     manifest = state.get("manifest") or {}
-    signals = any(k in manifest for k in ("structure_input_format", "structure_focus_format")) or any(
-        "structure_input_format" in b for b in manifest.get("structure_batches") or []
-    )
-    if signals and (
-        manifest.get("structure_input_format") != REVIEWED_STRUCTURE_V1 or "manifest_hash" not in manifest
-    ):
+    if manifest.get("structure_input_format") != REVIEWED_STRUCTURE_V1:
         raise ValueError("Incomplete frozen structure contract")
-    if ("manifest_hash" in manifest or signals) and not manifest_is_intact(manifest):
+    if manifest.get("structure_focus_format") != FOCUS_FORMAT:
+        raise ValueError("Incomplete frozen teaching focus contract")
+    if not manifest_is_intact(manifest):
         raise ValueError("Frozen structure manifest changed")
-    if "structure_input_format" in manifest:
-        if manifest["structure_input_format"] != REVIEWED_STRUCTURE_V1:
-            raise ValueError("Unknown frozen structure format")
-        pack = state.get("domain_pack") or {}
-        if not frozen_pack_is_intact(pack, manifest) or not has_canonical_inventory(pack):
-            raise ValueError("Frozen canonical structure catalog changed")
-        focus = manifest.get("structure_focus_format")
-        if "structure_focus_format" in manifest and focus != FOCUS_FORMAT:
-            raise ValueError("Unknown frozen teaching focus format")
-        eligible = reviewed_stage_keys(pack)
-        if focus == FOCUS_FORMAT:
-            for batch in manifest["structure_batches"]:
-                if (
-                    "structure_input_format" in batch
-                    and batch["structure_input_format"] != REVIEWED_STRUCTURE_V1
-                ):
-                    raise ValueError("Unknown frozen per-stage structure format")
-                if uses_reviewed_structure(manifest, batch) != (batch["stage_key"] in eligible):
-                    raise ValueError("Frozen per-stage structure contract changed")
-        elif len(eligible) != len(pack["stage_blueprints"]):
-            raise ValueError("Legacy reviewed candidate requires a complete inventory")
+    pack = state.get("domain_pack") or {}
+    if not frozen_pack_is_intact(pack, manifest) or not has_canonical_inventory(pack):
+        raise ValueError("Frozen canonical structure catalog changed")
+    eligible = reviewed_stage_keys(pack)
+    for batch in manifest["structure_batches"]:
+        if (
+            "structure_input_format" in batch
+            and batch["structure_input_format"] != REVIEWED_STRUCTURE_V1
+        ):
+            raise ValueError("Unknown frozen per-stage structure format")
+        if uses_reviewed_structure(manifest, batch) != (batch["stage_key"] in eligible):
+            raise ValueError("Frozen per-stage structure contract changed")
 
 
 def _phrases(value, count=12, limit=300):
@@ -222,7 +210,6 @@ def presentation_payload(state, batch, spec):
     check_frozen_structure(state)
     nodes = {n["stable_key"]: n for n in state["domain_pack"]["knowledge_blueprints"]}
     goal_spec = state["manifest"].get("goal_spec") or {}
-    focused = state["manifest"].get("structure_focus_format") == FOCUS_FORMAT
     payload = {
         "_structure_input_format": REVIEWED_STRUCTURE_V1,
         "goal": state.get("goal"),
@@ -233,11 +220,7 @@ def presentation_payload(state, batch, spec):
                 "stable_key": key,
                 "title": str(nodes[key].get("title", ""))[:200],
                 "objectives": _phrases(nodes[key].get("objectives"), 6, 200),
-                "scope": (
-                    _phrases(nodes[key].get("scope"), 6, 200)
-                    if focused
-                    else [str(v)[:200] for v in (nodes[key].get("scope") or [])[:6]]
-                ),
+                "scope": _phrases(nodes[key].get("scope"), 6, 200),
             }
             for key in batch["node_keys"]
         ],
@@ -252,21 +235,20 @@ def presentation_payload(state, batch, spec):
             if k in ("language", "mode", "pace", "official_priority")
         },
     }
-    if state["manifest"].get("structure_focus_format") == FOCUS_FORMAT:
-        payload["_structure_focus_format"] = FOCUS_FORMAT
-        payload["allowed_teaching_focus"] = allowed_teaching_focus(state, batch)
-        payload["protected_boundaries"] = [
-            {
-                "node_key": key,
-                "acceptance": _phrases(nodes[key].get("acceptance")),
-                "prerequisite_keys": deepcopy(nodes[key].get("prerequisite_keys") or []),
-            }
-            for key in batch["node_keys"]
-        ]
-        payload["teaching_intent"] = deepcopy(
-            spec.get("learning_guidance", {}).get("exposure_relation", "deepen")
-        )
-        payload["external_prerequisite_keys"] = list(batch.get("declared_external_prerequisite_keys") or [])
+    payload["_structure_focus_format"] = FOCUS_FORMAT
+    payload["allowed_teaching_focus"] = allowed_teaching_focus(state, batch)
+    payload["protected_boundaries"] = [
+        {
+            "node_key": key,
+            "acceptance": _phrases(nodes[key].get("acceptance")),
+            "prerequisite_keys": deepcopy(nodes[key].get("prerequisite_keys") or []),
+        }
+        for key in batch["node_keys"]
+    ]
+    payload["teaching_intent"] = deepcopy(
+        spec.get("learning_guidance", {}).get("exposure_relation", "deepen")
+    )
+    payload["external_prerequisite_keys"] = list(batch.get("declared_external_prerequisite_keys") or [])
     return payload
 
 
@@ -310,11 +292,9 @@ def presentation_repair_message_ceiling(context, failed_object=None, errors=None
 
 def presentation_preflight(context, *, repair=False):
     local = context.get("context", context)
-    focused = (
-        context.get("_structure_focus_format") == FOCUS_FORMAT
-        or local.get("_structure_focus_format") == FOCUS_FORMAT
-    )
-    system, shape = (FOCUS_SYSTEM, FOCUS_SHAPE) if focused else (PRESENTATION_SYSTEM, PRESENTATION_SHAPE)
+    if local.get("_structure_focus_format") != FOCUS_FORMAT:
+        return "structure_focus_format_missing", {}, {}
+    system, shape = FOCUS_SYSTEM, FOCUS_SHAPE
     wire_context = {k: v for k, v in context.items() if not k.startswith("_") and k != "domain_pack"}
     message = {
         "purpose": "planning.repair" if repair else "planning.structure",
@@ -427,7 +407,7 @@ def _teaching_text_errors(unit, focus):
     return errors
 
 
-def validate_presentation(raw, batch, focus=None):
+def validate_presentation(raw, batch, focus):
     errors = []
     if not isinstance(raw, dict) or set(raw) != {"units"}:
         errors.append("ReviewedStructureV1 必须返回完整对象且仅含顶层 units；禁止 patch/nodes/relations")
@@ -436,7 +416,7 @@ def validate_presentation(raw, batch, focus=None):
         return [*errors, "ReviewedStructureV1 units 必须是 1..32 项完整列表"]
     allowed = set(batch["node_keys"])
     covered = set()
-    fields = {"title", "node_keys", "objectives"} | ({"focus_refs"} if focus is not None else set())
+    fields = {"title", "node_keys", "objectives", "focus_refs"}
     focus_by_ref = {f["ref"]: f for f in focus or []}
     for index, unit in enumerate(units):
         path = f"units[{index}]"
@@ -461,24 +441,23 @@ def validate_presentation(raw, batch, focus=None):
         if len(keys) != len(set(keys)) or set(keys) - allowed:
             errors.append("教学单元引用重复或冻结目录外知识键")
         covered.update(keys)
-        if focus is not None:
-            refs = unit.get("focus_refs")
-            if (
-                not isinstance(refs, list)
-                or not refs
-                or any(not isinstance(ref, str) or ref not in focus_by_ref for ref in refs)
-            ):
-                errors.append(f"{path}.focus_refs 必须引用冻结教学范围")
-            elif len(refs) != len(set(refs)) or any(
-                not set(focus_by_ref[ref]["node_keys"]) & set(keys) for ref in refs
-            ):
-                errors.append(f"{path}.focus_refs 与单元知识范围不匹配或重复")
-            if (
-                isinstance(title, str)
-                and isinstance(objectives, list)
-                and all(isinstance(v, str) for v in objectives)
-            ):
-                errors.extend(f"{path}: {e}" for e in _teaching_text_errors(unit, focus))
+        refs = unit.get("focus_refs")
+        if (
+            not isinstance(refs, list)
+            or not refs
+            or any(not isinstance(ref, str) or ref not in focus_by_ref for ref in refs)
+        ):
+            errors.append(f"{path}.focus_refs 必须引用冻结教学范围")
+        elif len(refs) != len(set(refs)) or any(
+            not set(focus_by_ref[ref]["node_keys"]) & set(keys) for ref in refs
+        ):
+            errors.append(f"{path}.focus_refs 与单元知识范围不匹配或重复")
+        if (
+            isinstance(title, str)
+            and isinstance(objectives, list)
+            and all(isinstance(v, str) for v in objectives)
+        ):
+            errors.extend(f"{path}: {e}" for e in _teaching_text_errors(unit, focus))
     if allowed - covered:
         errors.append("教学单元缺少冻结知识覆盖：" + ", ".join(sorted(allowed - covered)))
     return errors
@@ -487,23 +466,12 @@ def validate_presentation(raw, batch, focus=None):
 def presentation_entry(raw, state, batch):
     """Fail closed before hydration; no unauthorized value can reach a Plan."""
     check_frozen_structure(state)
-    focus = (
-        allowed_teaching_focus(state, batch)
-        if state["manifest"].get("structure_focus_format") == FOCUS_FORMAT
-        else None
-    )
+    focus = allowed_teaching_focus(state, batch)
     errors = validate_presentation(raw, batch, focus)
     context = presentation_payload(
         state, batch, next(s for s in state["manifest"]["stages"] if s["stage_key"] == batch["stage_key"])
     )
-    limit = (
-        presentation_output_ceiling(context)
-        if focus is not None
-        else {
-            "chars": presentation_message_ceiling(context),
-            "utf8_bytes": 4 * presentation_message_ceiling(context),
-        }
-    )
+    limit = presentation_output_ceiling(context)
     encoded = json.dumps(raw, ensure_ascii=False)
     if len(encoded) > limit["chars"] or len(encoded.encode("utf-8")) > limit["utf8_bytes"]:
         errors.append("ReviewedStructureV1 单元输出超过局部规模上界")
@@ -522,17 +490,16 @@ def presentation_entry(raw, state, batch):
     entry["nodes"] = [deepcopy(catalog[k]) for k in batch["node_keys"]]
     for index, unit in enumerate(raw["units"]):
         saved = {k: deepcopy(v) for k, v in unit.items() if k != "focus_refs"}
-        if focus is not None:
-            saved["rubric"] = {
-                "teaching": {
-                    "focus_refs": deepcopy(unit["focus_refs"]),
-                    "intent": presentation_payload(
-                        state,
-                        batch,
-                        next(s for s in state["manifest"]["stages"] if s["stage_key"] == batch["stage_key"]),
-                    )["teaching_intent"],
-                }
+        saved["rubric"] = {
+            "teaching": {
+                "focus_refs": deepcopy(unit["focus_refs"]),
+                "intent": presentation_payload(
+                    state,
+                    batch,
+                    next(s for s in state["manifest"]["stages"] if s["stage_key"] == batch["stage_key"]),
+                )["teaching_intent"],
             }
+        }
         entry["units"].append(
             {
                 **saved,
@@ -565,8 +532,6 @@ def validate_presentation_entry(entry, state, batch):
 def check_structure_checkpoint(state):
     check_frozen_structure(state)
     manifest = state.get("manifest") or {}
-    if manifest.get("structure_input_format") != REVIEWED_STRUCTURE_V1:
-        return
     batches = {b["stage_key"]: b for b in manifest["structure_batches"]}
     seen = set()
     for entry in state.get("structure_batches") or []:

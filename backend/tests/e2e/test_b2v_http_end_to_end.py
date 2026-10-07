@@ -164,7 +164,7 @@ def db(migrated_db: PgTestDatabase) -> PgTestDatabase:
 #
 # 本套用例验收的是「草案 → 确认 → 发布」链路，而不是领域包的规模。因此显式注入
 # 一个**两阶段**的受审核包，使生成的批次与断言一一对应；生产组合根仍使用
-# ``select_domain_pack``（Agent 方向为九阶段）。
+# explicit reviewed fixture（Agent 方向为九阶段）。
 # 当前契约由 stage_blueprints 冻结资源/扩展事实，模型纲要不能独自声明它们。
 #
 # ``MISSING_SOURCE`` 出现在受审核清单与本包 ``resources`` 中，但**不写入**测试库：
@@ -356,6 +356,9 @@ def _outline_handler(purpose: str, payload: dict[str, object]) -> dict[str, obje
 
 def _structure_handler(purpose: str, payload: dict[str, object]) -> dict[str, object]:
     """单个阶段的结构批次（一个请求只回答一个批次）。"""
+    if payload.get("_structure_input_format") == "reviewed_structure_v1":
+        from app.infrastructure.providers.planning_demo import selected_output
+        return selected_output(purpose, payload)
     stage = payload["stage"]
     if stage["stable_key"] == "stage.foundation":
         return {
@@ -469,7 +472,7 @@ def _fake_llm() -> FakeLLM:
 # ------------------------------------------------------------------ 装配
 
 
-def _container(db: PgTestDatabase, *, llm: FakeLLM | None = None) -> AppContainer:
+def _container(db: PgTestDatabase, *, llm: FakeLLM | None = None, pack=None) -> AppContainer:
     """按真实 PG 装配容器（模拟生产组合根，只是仓储指向临时库）。"""
     settings = get_settings()
     sessions = InMemorySessionStore(
@@ -502,18 +505,19 @@ def _container(db: PgTestDatabase, *, llm: FakeLLM | None = None) -> AppContaine
         graph_version=settings.graph_version,
         planning_jobs=jobs,
         worker_actor_ids=worker_actors,
-        domain_pack_selector=_select_test_pack,
     )
+    from tests.helpers.frozen_planning import install_frozen_generation
+    install_frozen_generation(service, _B2V_PACK if pack is None else pack)
     worker = PlanningWorker(jobs=jobs, execute=service.execute_generation,
                             actor_ids=worker_actors, lease_seconds=30)
     return AppContainer(settings=settings, sessions=sessions, plan_service=service, planning_worker=worker)
 
 
-def _client(db: PgTestDatabase, *, llm: FakeLLM | None = None, cookie: str = SESSION_A1):
+def _client(db: PgTestDatabase, *, llm: FakeLLM | None = None, cookie: str = SESSION_A1, pack=None):
     from app.main import create_app
     from fastapi.testclient import TestClient
 
-    app = create_app(_container(db, llm=llm))
+    app = create_app(_container(db, llm=llm, pack=pack))
     client = TestClient(app)
     client.cookies.set(COOKIE, cookie)
     return client
@@ -1152,9 +1156,6 @@ def test_regression_catalog_history_and_keys(db):
     before = snapshot()
     def changed_structure(purpose, payload):
         data = _structure_handler(purpose, payload)
-        for node in data["nodes"]:
-            node["title"] = "changed node"
-            node["objectives"] = ["changed objective"]
         for unit in data["units"]:
             unit["title"] = "changed unit"
         return data
@@ -1167,7 +1168,11 @@ def test_regression_catalog_history_and_keys(db):
     changed = FakeLLM(handlers={"planning.outline": _outline_handler,
                                "planning.structure": changed_structure,
                                "planning.practice": changed_practice})
-    _, second = _generate_to_draft(_client(db, llm=changed), goal=GOAL_B)
+    changed_pack = deepcopy(_B2V_PACK)
+    for node in changed_pack["knowledge_blueprints"]:
+        node["title"] = "changed node"
+        node["objectives"] = ["changed objective"]
+    _, second = _generate_to_draft(_client(db, llm=changed, pack=changed_pack), goal=GOAL_B)
     assert _decide(client, second["draft_id"], dict(decision="cancel", expected_version=1, draft_hash=second['draft_hash'])).status_code == 200
     after = snapshot()
     for table, rows in before.items():

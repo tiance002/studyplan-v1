@@ -288,7 +288,7 @@ def test_success_cannot_carry_null_failure_marker(kind):
 
 
 @pytest.mark.parametrize('purpose', ['planning.structure', 'planning.practice'])
-def test_new_unmarked_batch_contract_uses_same_repair_without_changing_legacy_markers(purpose):
+def test_unmarked_batch_is_rejected_before_dispatch_or_repair(purpose):
     from app.agent_workflows.planning_batches import run_batched_planning_graph
     from app.infrastructure.domain_pack import load_pack
     from tests.helpers.batched_planning import ScriptedLLM
@@ -301,10 +301,8 @@ def test_new_unmarked_batch_contract_uses_same_repair_without_changing_legacy_ma
             return super().generate_structured(**kw)
     fake = FutureUnmarkedFake(pack)
     nodes = PlanningNodes(llm=fake, save_draft=lambda s: 'offline-unmarked-draft')
-    trace = run_batched_planning_graph(nodes, {'run_id': 'offline-future-unmarked',
-        'goal': '从 Python 基础开始学习 Agent 应用开发', 'domain_pack': pack})
-    assert trace.stopped_at == 'await_approval' and trace.state['repair_count'] == 1
-    assert not trace.state['validation_errors']
-    assert 'outline_input_format' not in trace.state['manifest']
-    assert 'structure_input_format' not in trace.state['manifest']
-    assert fake.count('planning.repair') == 1 and fake.count() == 20
+    with pytest.raises(ValueError, match='requires a frozen manifest'):
+        run_batched_planning_graph(nodes, {'run_id': 'offline-future-unmarked',
+            'goal': '从 Python 基础开始学习 Agent 应用开发', 'domain_pack': pack})
+    assert fake.count() == 0
+    assert fake.count('planning.repair') == 0

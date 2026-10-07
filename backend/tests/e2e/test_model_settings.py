@@ -252,7 +252,8 @@ def test_personal_settings_drive_http_real_graph_without_shared_provider(db, che
                     section["verification_status"] = "unverified"
                     section["checked_at"] = None
         return pack
-    base._domain_pack_selector = consistent_test_pack
+    from tests.helpers.frozen_planning import install_frozen_generation
+    install_frozen_generation(base, consistent_test_pack("explicit-fixture"))
     base._runtime_factory = module.PersonalPlanningRuntimeFactory(replace(container.settings,database_url=db.app_dsn,
         checkpoint_database_url=checkpoint_db.migrator_dsn,llm_model_max_output_tokens=8192),repo)
     # Enqueue must freeze the same configuration the runtime will later resolve.

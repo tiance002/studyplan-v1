@@ -8,7 +8,7 @@ import pytest
 from app.agent_workflows.nodes import PlanningNodes
 from app.agent_workflows.planning_batches import (
     DEFAULT_BUDGET,
-    build_batched_planning_graph,
+    build_short_planning_graph as build_fixture_graph,
     freeze_manifest,
     merge_batches,
     recursion_limit,
@@ -158,7 +158,7 @@ def _real_run(fake, pack):
     manifest = freeze_manifest(pack, DEFAULT_BUDGET, "mock:run08")
     nodes = PlanningNodes(llm=fake, save_draft=save,
                           on_failure=lambda state, errors: failures.append(list(errors)))
-    graph = build_batched_planning_graph(nodes, checkpointer=InMemorySaver())
+    graph = build_fixture_graph(nodes, checkpointer=InMemorySaver())
     config = {"configurable": {"thread_id": "offline-run08"}, "recursion_limit": recursion_limit(manifest)}
     initial = {"goal": "从 Python 基础学习 Agent 应用开发", "run_id": "offline-run08",
                "domain_pack": pack, "manifest": manifest}
@@ -184,7 +184,7 @@ def test_real_graph_repairs_missing_edges_locally_and_obeys_shared_cap(persisten
         assert drafts == [] and "merge_and_validate" not in visited
         assert fake.count() == 5 and fake.count(STRUCTURE) == 2 and fake.count(PRACTICE) == 0
     else:
-        assert snapshot.next == ("await_approval",)
+        assert snapshot.next == ()
         assert snapshot.values["validation_errors"] == []
         assert len(drafts) == 1 and failures == []
         assert fake.count() == snapshot.values["manifest"]["max_requests"] == 21
@@ -194,7 +194,7 @@ def test_real_graph_repairs_missing_edges_locally_and_obeys_shared_cap(persisten
     trace = run_batched_planning_graph(PlanningNodes(llm=interpreter_fake, save_draft=lambda state: "d"),
                                       {"goal": "从 Python 基础学习 Agent 应用开发", "run_id": "offline-run08",
                                        "domain_pack": pack})
-    assert trace.stopped_at == ("failed" if persistent else "await_approval")
+    assert trace.stopped_at == ("failed" if persistent else None)
     assert trace.state["validation_errors"] == snapshot.values["validation_errors"]
     assert [c["attempt_id"] for c in fake.calls] == [c["attempt_id"] for c in interpreter_fake.calls]
 
@@ -203,7 +203,7 @@ def test_complete_saved_answers_need_only_nineteen_requests():
     pack = load_pack("agent-application-v1.json")
     fake = Run08Fake(pack, initially_correct=True)
     snapshot, _, drafts, failures = _real_run(fake, pack)
-    assert snapshot.next == ("await_approval",)
+    assert snapshot.next == ()
     assert snapshot.values["validation_errors"] == []
     assert fake.count() == 19 and fake.count(REPAIR) == 0
     assert len(drafts) == 1 and failures == []
