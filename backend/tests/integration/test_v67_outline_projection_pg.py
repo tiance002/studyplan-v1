@@ -252,7 +252,7 @@ def test_real_checkpoint_resumes_frozen_format_rejecting_altered_manifest(checkp
     from app.agent_workflows.planning_batches import PROTOCOL_VERSION, SHORT_GENERATION_VERSION
     from app.agent_workflows.runtime import PostgresSaver
     from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor, builder_for_version
-    from app.infrastructure.providers.planning_demo import build_planning_demo
+    from tests.helpers.planning_responses import build_planning_demo
     from app.ports.graph_runner import GraphRecoveryError
     from langgraph.errors import GraphRecursionError
 
@@ -344,7 +344,7 @@ def test_tampered_stored_checkpoint_marker_refused_before_dispatch(checkpoint_db
     from app.agent_workflows.planning_batches import SHORT_GENERATION_VERSION
     from app.agent_workflows.runtime import PostgresSaver
     from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor, builder_for_version
-    from app.infrastructure.providers.planning_demo import build_planning_demo
+    from tests.helpers.planning_responses import build_planning_demo
     from app.ports.graph_runner import GraphRecoveryError
     from langgraph.errors import GraphRecursionError
 

@@ -1,3 +1,12 @@
+## 2026-10-07 Planning V2 Residual Cleanup：PLANNING_V2_RESIDUAL_CLEANUP_COMPLETE / PLANNING_V2_NOT_IMPLEMENTED / STOP
+
+- 用户现在新增能做什么：学习计划主区只有指定不可用占位；旧生成/Run恢复/路线变更UI与19个旧浏览器helper移除。既有非规划能力保留，未实现V2。
+- 起点6f62b9e1687ce79b8b3ca4190c0b9b4974323272，feat/n1-resource-discovery，annotated checkpoint/pre-planning-v2-residual-cleanup；最终本地提交SHA见本批答复与var/planning-residual-cleanup-20261007/final.json，不reset/push/merge。
+- 旧长图生产builder/interpreter/interrupt wrapper删除；Fake demo移至测试夹具，组合根不再注册fallback。独有plan-changes/generate及request DTO/OpenAPI/TS删除；普通generate保留scope后503。混合outline/structure/batches/provider/source/JSON/预算/恢复/发布与public历史DTO逐函数HOLD，不为清理丢保护或拆大文件。[完整删除/迁移/HOLD/验收报告](../acceptance/planning-v2-residual-cleanup-2026-10-07.md)。
+- compile/import/APIboot/failclosed/非规划smoke/collection PASS；当前保护432、历史图57与adapter/content9（唯一498）PASS，生产markerless仍拒绝；初轮历史夹具31FAIL原输出保留，改测试callback隔离而非放宽生产校验。前端27PASS/build/genAPI PASS，实际Edge本地HTTP fixture八种缓存状态+reload/截图PASS、规划请求0；真实PG/provider NOT RUN。
+- 459受保护文件SHA保持，删除目标runtime/frontend/helper dangling refs0（HOLD和历史记录仍保留，不假称全旧字符串清零）。migration0025/新增0；generate Run0/Job0/provider0/PlanMutation0为依赖访问前证据、非PG计数。产品模型0，账本174/280余106，搜索/RAG0；原库/正式入口Worker/全局配置/两保护目录/旧历史未操作。
+- 整体STAGING_BLOCKED / NOT_READY；STOP，仅等待下一Planning V2正式Goal，不自动使用余额或开始实现。
+
 ## 2026-10-07 Planning Legacy Removal：PLANNING_LEGACY_REMOVAL_COMPLETE / NEW_PLANNING_NOT_IMPLEMENTED / STOP
 
 - 用户现在可继续消费非规划基础服务；新计划生成/生成式路线变更在scope校验后503，在Run/Job/model binding/provider前关闭，无替代规划实现。

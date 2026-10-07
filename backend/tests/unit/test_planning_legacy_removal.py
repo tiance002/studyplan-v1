@@ -142,4 +142,8 @@ def test_composition_still_wires_nonplanning_services_without_sql(monkeypatch):
     for name in ("plan_service", "browser_auth", "resource_service", "assistant_service",
                  "summary_service", "prompt_service", "practice_submission_service"):
         assert getattr(container, name) is not None
+    # No old planning demo is installed as a fallback by application composition.
+    from app.infrastructure.providers.fake import FakeLLM
+    assert isinstance(container.plan_service._llm, FakeLLM)
+    assert not container.plan_service._llm._handlers
     assert denied.calls == []

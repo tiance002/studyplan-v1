@@ -227,7 +227,7 @@ def test_personal_settings_drive_http_real_graph_without_shared_provider(db, che
         if content["purpose"] == "planning.outline" and "frozen_stages" in content["context"]:
             content["context"]["_outline_input_format"] = "stage_skeleton_v1"
         if content["schema"] == "ReviewedStructureV1":
-            from app.infrastructure.providers.planning_demo import selected_output
+            from tests.helpers.planning_responses import selected_output
             # The reviewed wire accepts presentation units only. Reuse the
             # current deterministic fixture rather than legacy node proposals.
             context = {**content["context"], "_structure_input_format": "reviewed_structure_v1"}

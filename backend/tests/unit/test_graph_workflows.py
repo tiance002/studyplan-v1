@@ -6,7 +6,7 @@
 - 「fake provider」
 - 「run 越权拒绝」（见 test_security_boundaries.py）
 
-**不依赖** langgraph（用 `graphs.run_planning_graph` 解释器）、
+**不依赖** langgraph（用 `tests.helpers.retained_planning_graph.run_planning_graph` 解释器）、
 **不依赖** Postgres、**不依赖**网络。
 
 解释器是**快速单元测试工具**；真实 StateGraph 的行为断言见
@@ -16,13 +16,10 @@
 
 from __future__ import annotations
 
-from app.agent_workflows.graphs import (
-    LANGGRAPH_AVAILABLE,
-    run_planning_graph,
-    run_review_graph,
-)
+from app.agent_workflows.graphs import LANGGRAPH_AVAILABLE, run_review_graph
+from tests.helpers.retained_planning_graph import run_planning_graph
+from tests.helpers.retained_planning_graph import TransitionNodes as PlanningNodes
 from app.agent_workflows.nodes import (
-    PlanningNodes,
     route_after_decision,
     route_after_generate,
     route_after_normalize,

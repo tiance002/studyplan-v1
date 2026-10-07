@@ -8,7 +8,7 @@ from app.agent_workflows.nodes import PlanningNodes
 from app.agent_workflows.planning_batches import SHORT_GENERATION_VERSION, build_short_planning_graph
 from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor
 from app.infrastructure.providers.fake import FakeLLM
-from app.infrastructure.providers.planning_demo import build_planning_demo
+from tests.helpers.planning_responses import build_planning_demo
 from app.ports.graph_runner import GraphRecoveryError
 from tests.unit.test_reviewed_structure_contract import state
 from app.agent_workflows.planning_projection import checked_projection

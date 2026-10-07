@@ -1,4 +1,7 @@
-"""Explicit local Fake LLM scenario. Never claims a cloud call or verified resource."""
+"""Test-only retained generation fixtures for content and reliability assertions.
+
+Not registered by application composition, never a planner fallback.
+"""
 
 from copy import deepcopy
 

@@ -125,7 +125,7 @@ def test_mock_http_provider_full_pg_graph_and_ledger(migrated_db, checkpoint_db)
     from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor
     from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
     from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
-    from app.infrastructure.providers.planning_demo import selected_output
+    from tests.helpers.planning_responses import selected_output
     from app.tools.seed_b3 import seed_reviewed_pack
 
     with psycopg.connect(migrated_db.migrator_dsn) as conn:

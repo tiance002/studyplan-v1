@@ -16,7 +16,7 @@ from app.domain.planning.intent import GoalSpec, purpose_requirements
 from app.infrastructure.domain_pack import load_pack
 from tests.helpers.reviewed_content import reviewed_fixture
 from app.agent_workflows.planning_structure import presentation_entry
-from app.infrastructure.providers.planning_demo import selected_output
+from tests.helpers.planning_responses import selected_output
 
 
 def generated(pack=None, spec=None):

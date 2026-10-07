@@ -32,12 +32,9 @@ L. Graph checkpoint 与业务草案不一致时，不得对外宣称可以确认
 from __future__ import annotations
 
 import pytest
-from app.agent_workflows.graphs import (
-    LANGGRAPH_AVAILABLE,
-    build_planning_graph,
-    graph_thread_id,
-)
-from app.agent_workflows.nodes import PlanningNodes
+from app.agent_workflows.graphs import LANGGRAPH_AVAILABLE, graph_thread_id
+from tests.helpers.retained_planning_graph import build_planning_graph
+from tests.helpers.retained_planning_graph import TransitionNodes as PlanningNodes
 from app.agent_workflows.validators import MAX_REPAIR_ATTEMPTS
 from app.infrastructure.providers.fake import FakeLLM
 
@@ -690,7 +687,7 @@ def test_L_stale_checkpoint_cannot_be_approved_silently() -> None:
 
 def test_real_graph_and_interpreter_agree_on_approve() -> None:
     """真实图与解释器在同一场景下的关键结论必须一致。"""
-    from app.agent_workflows.graphs import run_planning_graph
+    from tests.helpers.retained_planning_graph import run_planning_graph
 
     rec_i = Recorder()
     trace = run_planning_graph(_nodes(rec_i), _initial(), resume_decision="approve")
@@ -706,7 +703,7 @@ def test_real_graph_and_interpreter_agree_on_approve() -> None:
 
 
 def test_real_graph_and_interpreter_agree_on_cancel() -> None:
-    from app.agent_workflows.graphs import run_planning_graph
+    from tests.helpers.retained_planning_graph import run_planning_graph
 
     rec_i = Recorder()
     run_planning_graph(_nodes(rec_i), _initial(), resume_decision="cancel")

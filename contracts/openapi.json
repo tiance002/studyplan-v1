@@ -3125,59 +3125,6 @@
         }
       }
     },
-    "/api/v1/plan-changes/generate": {
-      "post": {
-        "summary": "Generate",
-        "operationId": "generate_plan_change",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 64,
-              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
-              "title": "Project Id"
-            },
-            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GeneratedPlanChangeRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PlanGenerateResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/plan-changes/{proposal_id}": {
       "get": {
         "summary": "Get Preview",
@@ -5851,71 +5798,6 @@
           "updated_at"
         ],
         "title": "ExposureView"
-      },
-      "GeneratedPlanChangeRequest": {
-        "properties": {
-          "plan_id": {
-            "type": "string",
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Plan Id"
-          },
-          "expected_version": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Expected Version"
-          },
-          "idempotency_key": {
-            "type": "string",
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Idempotency Key"
-          },
-          "operation": {
-            "type": "string",
-            "enum": [
-              "change_goal",
-              "regenerate_future_plan",
-              "add_topic"
-            ],
-            "title": "Operation"
-          },
-          "goal": {
-            "type": "string",
-            "maxLength": 2000,
-            "title": "Goal",
-            "default": ""
-          },
-          "goal_spec": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/GoalSpec"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "topic_keys": {
-            "items": {
-              "type": "string",
-              "maxLength": 200,
-              "minLength": 1
-            },
-            "type": "array",
-            "maxItems": 20,
-            "title": "Topic Keys"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "plan_id",
-          "expected_version",
-          "idempotency_key",
-          "operation"
-        ],
-        "title": "GeneratedPlanChangeRequest"
       },
       "GitHubRepository": {
         "properties": {

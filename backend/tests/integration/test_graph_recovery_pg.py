@@ -51,8 +51,9 @@ CHILD_SCRIPT = textwrap.dedent(
     import json, sys
     sys.path.insert(0, {backend!r})
 
-    from app.agent_workflows.graphs import build_planning_graph, graph_thread_id, LANGGRAPH_AVAILABLE
-    from app.agent_workflows.nodes import PlanningNodes
+    from app.agent_workflows.graphs import graph_thread_id, LANGGRAPH_AVAILABLE
+    from tests.helpers.retained_planning_graph import build_planning_graph
+    from tests.helpers.retained_planning_graph import TransitionNodes as PlanningNodes
     from app.infrastructure.providers.fake import FakeLLM
     from langgraph.checkpoint.postgres import PostgresSaver
 
@@ -119,8 +120,8 @@ CRASH_CHILD_SCRIPT = textwrap.dedent(
     import json, sys, time
     sys.path.insert(0, {backend!r})
 
-    from app.agent_workflows.graphs import build_planning_graph
-    from app.agent_workflows.nodes import PlanningNodes
+    from tests.helpers.retained_planning_graph import build_planning_graph
+    from tests.helpers.retained_planning_graph import TransitionNodes as PlanningNodes
     from app.infrastructure.providers.fake import FakeLLM
     from langgraph.checkpoint.postgres import PostgresSaver
 
@@ -212,8 +213,8 @@ def test_J_cross_process_recovery_of_waiting_user(checkpoint_db: PgTestDatabase,
     assert info["draft_ref"] == "draft:persisted"
 
     # ---- 阶段 2：主进程恢复（新进程，状态只可能来自 PG）----
-    from app.agent_workflows.graphs import build_planning_graph
-    from app.agent_workflows.nodes import PlanningNodes
+    from tests.helpers.retained_planning_graph import build_planning_graph
+    from tests.helpers.retained_planning_graph import TransitionNodes as PlanningNodes
     from app.infrastructure.providers.fake import FakeLLM
     from langgraph.checkpoint.postgres import PostgresSaver
     from langgraph.types import Command
@@ -296,8 +297,8 @@ def test_J2_forced_crash_recovery_of_waiting_user(checkpoint_db: PgTestDatabase,
             proc.kill()
 
     # ---- 阶段 2：新进程恢复（状态只可能来自 PG，且上一位进程未做任何清理）----
-    from app.agent_workflows.graphs import build_planning_graph
-    from app.agent_workflows.nodes import PlanningNodes
+    from tests.helpers.retained_planning_graph import build_planning_graph
+    from tests.helpers.retained_planning_graph import TransitionNodes as PlanningNodes
     from app.infrastructure.providers.fake import FakeLLM
     from langgraph.checkpoint.postgres import PostgresSaver
     from langgraph.types import Command
@@ -339,8 +340,8 @@ def test_J2_forced_crash_recovery_of_waiting_user(checkpoint_db: PgTestDatabase,
 
 def test_I_repeated_resume_no_duplicate_side_effects(checkpoint_db: PgTestDatabase) -> None:
     """I：对同一 thread 重复 resume 不得重复发布。"""
-    from app.agent_workflows.graphs import build_planning_graph
-    from app.agent_workflows.nodes import PlanningNodes
+    from tests.helpers.retained_planning_graph import build_planning_graph
+    from tests.helpers.retained_planning_graph import TransitionNodes as PlanningNodes
     from app.infrastructure.providers.fake import FakeLLM
     from langgraph.checkpoint.postgres import PostgresSaver
     from langgraph.types import Command
@@ -376,8 +377,8 @@ def test_I_repeated_resume_no_duplicate_side_effects(checkpoint_db: PgTestDataba
 
 def test_H_same_thread_recovers_and_isolated(checkpoint_db: PgTestDatabase) -> None:
     """H：同一 thread 恢复；不同 thread 相互隔离（真实 PG）。"""
-    from app.agent_workflows.graphs import build_planning_graph
-    from app.agent_workflows.nodes import PlanningNodes
+    from tests.helpers.retained_planning_graph import build_planning_graph
+    from tests.helpers.retained_planning_graph import TransitionNodes as PlanningNodes
     from app.infrastructure.providers.fake import FakeLLM
     from langgraph.checkpoint.postgres import PostgresSaver
 
@@ -414,8 +415,8 @@ def test_L_stale_draft_cannot_be_confirmed(checkpoint_db: PgTestDatabase) -> Non
     以"提交端口检测到草案 hash 不一致即抛冲突"模拟应用层契约：
     图必须把冲突**冒泡**出去，而不是吞掉冲突当作成功。
     """
-    from app.agent_workflows.graphs import build_planning_graph
-    from app.agent_workflows.nodes import PlanningNodes
+    from tests.helpers.retained_planning_graph import build_planning_graph
+    from tests.helpers.retained_planning_graph import TransitionNodes as PlanningNodes
     from app.infrastructure.providers.fake import FakeLLM
     from langgraph.checkpoint.postgres import PostgresSaver
     from langgraph.types import Command

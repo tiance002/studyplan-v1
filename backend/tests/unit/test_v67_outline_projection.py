@@ -167,7 +167,7 @@ def test_starting_point_constraints_prefs_semantics_allowlist():
 
 
 def test_real_worker_fake_answers_new_frozen_outline_contract():
-    from app.infrastructure.providers.planning_demo import build_planning_demo
+    from tests.helpers.planning_responses import build_planning_demo
     state = new_state()
     llm = build_planning_demo()
     result = PlanningNodes(llm=llm, save_draft=lambda _: "unused").generate_skeleton(state)
@@ -189,7 +189,7 @@ CASES = [
 
 def test_explicit_six_stage_fixture_preserves_all_resources_refs_extensions_guides():
     from app.agent_workflows.planning_batches import run_batched_planning_graph
-    from app.infrastructure.providers.planning_demo import build_planning_demo
+    from tests.helpers.planning_responses import build_planning_demo
     state = new_state()
     trace = run_batched_planning_graph(PlanningNodes(llm=build_planning_demo(), save_draft=lambda _: "fixture"), state)
     assert trace.stopped_at is None, trace.failed_errors
@@ -204,7 +204,7 @@ def test_explicit_six_stage_fixture_preserves_all_resources_refs_extensions_guid
 
 
 def test_markerless_search_only_rejects_before_provider_dispatch():
-    from app.infrastructure.providers.planning_demo import build_planning_demo
+    from tests.helpers.planning_responses import build_planning_demo
     state = {"goal": "学习未审核主题", "domain_pack": {}, "run_id": "generic-new", "manifest": freeze_manifest({}, DEFAULT_BUDGET, "mock:offline", outline_input_format=FORMAT)}
     llm = build_planning_demo()
     result = PlanningNodes(llm=llm, save_draft=lambda _: "unused").generate_skeleton(state)

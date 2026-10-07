@@ -15,7 +15,7 @@ from app.agent_workflows.planning_batches import (
 )
 from app.agent_workflows.planning_projection import checked_projection
 from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
-from app.infrastructure.providers.planning_demo import build_planning_demo
+from tests.helpers.planning_responses import build_planning_demo
 from app.ports.llm import LLMFailure, LLMDispatchUnknownError
 from tests.unit.test_reviewed_structure_contract import state
 

@@ -4,7 +4,6 @@ from threading import Event
 
 import pytest
 
-from tests.integration.test_generated_plan_changes_pg import _run_owned_route_browser
 from tests.integration.test_generated_plan_changes_pg import generated_route as generated_route
 from tests.integration.test_generated_plan_changes_pg import migrated_db as migrated_db
 
@@ -91,44 +90,3 @@ def test_cancel_after_draft_save_fences_late_completion_and_publication(generate
     assert client.get(queued['status_url']).json()['status'] == ('cancelled' if winner == 'cancel' else 'succeeded')
     current = client.get('/api/v1/plans/current', params=params).json()
     assert current['plan_id'] == (old['plan_id'] if winner == 'cancel' else approved.json()['plan']['plan_id'])
-
-
-def test_real_browser_running_cancel_reload_and_relogin(generated_route, monkeypatch):
-    import os
-    if os.environ.get('STUDYPLAN_GENERATED_ROUTE_BROWSER') != '1':
-        pytest.skip('real Chrome enabled only for owned browser acceptance')
-    _, container, client, params, headers, _ = generated_route
-    queued = submit(client, params, headers)
-    run_id = queued['run_id']
-    release = Event()
-    started = Event()
-    acknowledged = Event()
-    original_execute = container.plan_service.execute_generation
-    original_cancel = container.plan_service._planning_jobs.cancel_run
-    calls = len(container.plan_service._llm.calls)
-
-    def paused_execution(project_id, current_run_id, **kwargs):
-        if current_run_id == run_id:
-            started.set()
-            assert release.wait(60), 'owned browser cancellation timed out'
-            if not acknowledged.is_set():
-                from app.ports.planning_jobs import PlanningLeaseLostError
-                raise PlanningLeaseLostError('owned browser test ended before cancellation')
-        return original_execute(project_id, current_run_id, **kwargs)
-
-    def release_after_cancel(**kwargs):
-        result = original_cancel(**kwargs)
-        acknowledged.set()
-        release.set()
-        return result
-
-    monkeypatch.setattr(container.plan_service, 'execute_generation', paused_execution)
-    monkeypatch.setattr(container.plan_service._planning_jobs, 'cancel_run', release_after_cancel)
-    monkeypatch.setenv('STUDYPLAN_CANCEL_RUN', run_id)
-    try:
-        _run_owned_route_browser(generated_route, 'frontend/tests/planning-cancel-pg.browser.cjs')
-    finally:
-        release.set()
-    assert client.get(queued['status_url']).json()['status'] == 'cancelled'
-    assert started.is_set() and acknowledged.is_set()
-    assert len(container.plan_service._llm.calls) == calls

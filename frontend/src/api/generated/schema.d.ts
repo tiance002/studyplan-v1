@@ -708,23 +708,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/plan-changes/generate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Generate */
-        post: operations["generate_plan_change"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/plan-changes/{proposal_id}": {
         parameters: {
             query?: never;
@@ -1683,28 +1666,6 @@ export interface components {
             source_snapshot: components["schemas"]["ExposureSourceSnapshot"];
             /** Updated At */
             updated_at: string | null;
-        };
-        /** GeneratedPlanChangeRequest */
-        GeneratedPlanChangeRequest: {
-            /** Plan Id */
-            plan_id: string;
-            /** Expected Version */
-            expected_version: number;
-            /** Idempotency Key */
-            idempotency_key: string;
-            /**
-             * Operation
-             * @enum {string}
-             */
-            operation: "change_goal" | "regenerate_future_plan" | "add_topic";
-            /**
-             * Goal
-             * @default
-             */
-            goal: string;
-            goal_spec?: components["schemas"]["GoalSpec"] | null;
-            /** Topic Keys */
-            topic_keys?: string[];
         };
         /** GitHubRepository */
         GitHubRepository: {
@@ -6147,42 +6108,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PlanChangePreviewView"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    generate_plan_change: {
-        parameters: {
-            query: {
-                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
-                project_id: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GeneratedPlanChangeRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlanGenerateResponse"];
                 };
             };
             /** @description Validation Error */

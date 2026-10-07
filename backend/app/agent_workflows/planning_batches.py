@@ -1,14 +1,16 @@
-"""B3-F2 batched planning protocol.
+"""HOLD_FOR_V2: historical batch protocol mixed with manifest/hash, budget, receipt, repair and checkpoint reliability. New submissions are unavailable; this is not the V2 design.
+
+B3-F2 batched planning protocol.
 
 Batch generation and repair keep their ``b3f2-batch-v1`` content protocol.
 The ``b3f2-short-v2`` lifecycle reuses those nodes and ends at saved draft;
-the current builder completes without a user interrupt.
+the retained builder completes without a user interrupt.
 
 Core ideas (design spec §数据与流程, §输出预算与模型适配, §失败、修复与恢复):
 
 - **Frozen manifest**: at submission time the reviewed domain pack, per-purpose
   budgets, batch list and request/output caps are frozen into an immutable JSON
-  manifest. The model may personalise stage titles/objectives and fill unreviewed nodes, but
+  manifest. The retained protocol personalises presentation within frozen authority;
   it can never re-key, re-assign or replace authoritative facts.
 - **One request per node**: the graph dispatches exactly one model request per
   node (outline, each structure batch, each practice batch, bounded repairs).
@@ -19,6 +21,7 @@ Core ideas (design spec §数据与流程, §输出预算与模型适配, §失�
 - **Fail fast**: a model failure, truncation or empty result stops the run
   immediately; only localisable content errors may consume the shared repair
   budget (at most two repairs per run).
+
 """
 
 from __future__ import annotations

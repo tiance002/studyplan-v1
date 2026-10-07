@@ -1,7 +1,10 @@
-"""Versioned presentation projection. Frozen reviewed knowledge stays local.
+"""HOLD_FOR_V2: retained canonical/source and teaching guards (also consumed by Learning Assistant). New planning remains unavailable.
+
+Versioned presentation projection. Frozen reviewed knowledge stays local.
 
 Only the current frozen structure and teaching focus contract is accepted.
 Model node/edge proposals never become reviewed truth.
+
 """
 
 import json

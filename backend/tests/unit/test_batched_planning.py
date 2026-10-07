@@ -229,7 +229,7 @@ def test_forged_resource_source_is_rejected():
 
 
 def test_demo_provider_completes_the_batched_agent_route():
-    from app.infrastructure.providers.planning_demo import build_planning_demo
+    from tests.helpers.planning_responses import build_planning_demo
 
     pack = _pack()
     nodes = PlanningNodes(llm=build_planning_demo(),

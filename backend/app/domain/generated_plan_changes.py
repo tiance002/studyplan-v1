@@ -1,4 +1,7 @@
-"""Pure finite composition of controlled generated routes and protected history."""
+"""HOLD_FOR_V2: retained composition/closure is mixed with content validation and published revision history; not a specification for V2 replanning.
+
+Pure finite composition of controlled generated routes and protected history.
+"""
 
 from copy import deepcopy
 from dataclasses import dataclass, replace

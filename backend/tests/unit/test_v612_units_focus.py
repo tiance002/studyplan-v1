@@ -19,7 +19,7 @@ from app.agent_workflows.planning_structure import (
     uses_reviewed_structure,
 )
 from app.infrastructure.providers.fake import FakeLLM
-from app.infrastructure.providers.planning_demo import build_planning_demo
+from tests.helpers.planning_responses import build_planning_demo
 
 from tests.unit.test_reviewed_structure_contract import state, valid
 

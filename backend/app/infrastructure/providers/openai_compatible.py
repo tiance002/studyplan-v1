@@ -1,4 +1,7 @@
-"""One OpenAI-compatible HTTP provider. JSON mode; no automatic retries."""
+"""HOLD_FOR_V2: retained planning wire shapes share budget/strict JSON/receipt paths. They do not enable public planning submissions.
+
+One OpenAI-compatible HTTP provider. JSON mode; no automatic retries.
+"""
 from __future__ import annotations
 
 import json

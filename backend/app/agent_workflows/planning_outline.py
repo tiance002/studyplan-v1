@@ -1,4 +1,7 @@
-"""Versioned outline visibility; full frozen teaching facts remain local."""
+"""HOLD_FOR_V2: retained frozen snapshot/integrity and size guards, not a new planning entry point.
+
+Versioned outline visibility; full frozen teaching facts remain local.
+"""
 import hashlib
 import json
 from copy import deepcopy

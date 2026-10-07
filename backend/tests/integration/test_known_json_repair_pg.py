@@ -23,7 +23,7 @@ from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor
 from app.infrastructure.domain_pack import CURRENT_PACKS, load_pack
 from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
 from app.infrastructure.providers.openai_compatible import OpenAICompatibleLLM
-from app.infrastructure.providers.planning_demo import build_planning_demo
+from tests.helpers.planning_responses import build_planning_demo
 from app.main import create_app
 from app.ports.llm import LLMDispatchUnknownError
 from app.tools.seed_b3 import seed_reviewed_pack

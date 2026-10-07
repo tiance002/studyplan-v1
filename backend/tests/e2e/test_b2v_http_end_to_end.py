@@ -357,7 +357,7 @@ def _outline_handler(purpose: str, payload: dict[str, object]) -> dict[str, obje
 def _structure_handler(purpose: str, payload: dict[str, object]) -> dict[str, object]:
     """单个阶段的结构批次（一个请求只回答一个批次）。"""
     if payload.get("_structure_input_format") == "reviewed_structure_v1":
-        from app.infrastructure.providers.planning_demo import selected_output
+        from tests.helpers.planning_responses import selected_output
         return selected_output(purpose, payload)
     stage = payload["stage"]
     if stage["stable_key"] == "stage.foundation":

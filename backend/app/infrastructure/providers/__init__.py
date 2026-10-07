@@ -7,7 +7,6 @@
 - "provider 怎么选"只在一处定义，每个分支都必须显式判定，
   不允许出现"某个分支忘了判 fake"。
 
-⚠️ 当前 B1 阶段只有 Fake 实现。真实云适配器属 B3 范围。
 真实适配器必须遵守：**不自动重试**（C8），结果未知时不清洗为成功。
 """
 
@@ -52,11 +51,9 @@ def build_llm(settings: Settings) -> LLMPort:
                                    max_tokens=settings.llm_max_output_tokens, budget_policy=policy)
 
     if provider not in SUPPORTED_PROVIDERS:
-        # 真实 provider 尚未实现（B3）。此处**拒绝启动**而不是悄悄用 Fake ——
-        # "配置了云模型但实际跑 Fake"是最危险的失败模式。
+        # 未知 provider 必须拒绝，不降级为 Fake。
         raise ProviderConfigurationError(
-            f"provider={provider!r} 尚未实现（真实云适配器属 B3）。"
-            "当前仅支持 fake；请勿在生产配置真实 provider 后期望其可用。"
+            f"Unsupported provider={provider!r}; supported: fake, openai_compatible"
         )
 
     raise ProviderConfigurationError(f"未知的 LLM provider：{provider!r}")  # pragma: no cover

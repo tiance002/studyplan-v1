@@ -24,21 +24,20 @@ def test_provider_uses_per_run_pack_without_shared_selection():
     assert "2 stages" not in calls[0]["messages"][0]["content"]
 
 
-def test_fake_complete_route_and_missing_branch_rejected():
-    from copy import deepcopy
-
-    from app.agent_workflows.graphs import run_planning_graph
+def test_reviewed_required_node_validation_rejects_missing_branch():
     from app.agent_workflows.nodes import PlanningNodes
-    from app.infrastructure.providers.planning_demo import build_planning_demo
+    from app.infrastructure.providers.fake import FakeLLM
+    from tests.helpers.planning_responses import selected_output
 
     pack = domain_pack.load_pack("agent-application-v1.json")
-    nodes = PlanningNodes(llm=build_planning_demo(), save_draft=lambda state: "draft")
-    trace = run_planning_graph(nodes, {"goal": "Agent开发", "run_id": "test", "domain_pack": pack})
-    assert trace.stopped_at == "await_approval"
-    assert len(trace.state["outline"]["sections"]) > 2
-    assert set(pack["required_node_keys"]) <= {n["stable_key"] for n in trace.state["nodes"]}
-    assert len(trace.state["practice_proposal"]["tasks"]) == len(trace.state["outline"]["sections"])
-    broken = deepcopy(trace.state)
+    # Keep the content protection assertion; retired route length/task-count
+    # and interrupt expectations are not a product contract for Planning V2.
+    nodes = PlanningNodes(llm=FakeLLM())
+    payload = {"goal": "Agent开发", "domain_pack": pack}
+    broken = {**payload, **selected_output("planning.structure", payload),
+              "outline": selected_output("planning.outline", payload),
+              "practice_proposal": selected_output("planning.practice", payload)}
+    assert set(pack["required_node_keys"]) <= {n["stable_key"] for n in broken["nodes"]}
     broken["nodes"] = broken["nodes"][:2]
     errors = nodes.validate(broken)["structure_errors"]
     assert any("领域纲要缺少" in e for e in errors)

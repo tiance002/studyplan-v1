@@ -8,17 +8,6 @@ Operation = Literal['reorder_future_stage', 'remove_optional_topic']
 GeneratedOperation = Literal['change_goal', 'regenerate_future_plan', 'add_topic']
 
 
-class GeneratedPlanChangeRequest(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    plan_id: Key
-    expected_version: int = Field(ge=0, strict=True)
-    idempotency_key: Key
-    operation: GeneratedOperation
-    goal: str = Field(default='', max_length=2000)
-    goal_spec: GoalSpec | None = None
-    topic_keys: list[Key] = Field(default_factory=list, max_length=20)
-
-
 class PlanChangeRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     plan_id: Key

@@ -263,7 +263,7 @@ def test_authorized_ordinary_worker_factory_pg_checkpoint_and_draft(runtime_db, 
     from app.core.config import get_settings
     from app.infrastructure.checkpointer.planning_executor import PgPlanningExecutor
     from app.infrastructure.domain_pack import CURRENT_PACKS, load_pack
-    from app.infrastructure.providers.planning_demo import build_planning_demo
+    from tests.helpers.planning_responses import build_planning_demo
     from app.main import create_app
     from app.tools.seed_b3 import seed_reviewed_pack
     from fastapi.testclient import TestClient

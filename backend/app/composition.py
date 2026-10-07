@@ -43,7 +43,7 @@ def _fake_binding(scope: AuthContext, project_id: str) -> SubmissionBinding:
     """Freeze the deployment default budget for the Fake / in-process deployment."""
     from app.agent_workflows.planning_batches import DEFAULT_BUDGET
 
-    return SubmissionBinding(model_ref="fake:planning-demo", budget_policy=DEFAULT_BUDGET)
+    return SubmissionBinding(model_ref="fake:unconfigured", budget_policy=DEFAULT_BUDGET)
 
 
 def build_container(settings: Settings) -> AppContainer:
@@ -106,8 +106,8 @@ def build_container(settings: Settings) -> AppContainer:
     model_repository = PgModelSettings(dsn,settings.model_settings_encryption_key)
     model_service = ModelSettingsService(model_repository,ModelEndpointPolicy(settings.llm_allowed_hosts).validate)
     if settings.use_fake_llm:
-        from app.infrastructure.providers.planning_demo import build_planning_demo
-        llm = build_planning_demo()
+        from app.infrastructure.providers.fake import FakeLLM
+        llm = FakeLLM()
     else:
         from app.infrastructure.providers.runtime_factory import UnconfiguredLLM
         llm = UnconfiguredLLM()

@@ -1,33 +1,8 @@
-"""planning_graph：三张图中唯一可暂停等待用户的图。
+"""Retained planning nodes and content/reliability validators.
 
-流程（SOFTWARE_DESIGN.md §4）：
-
-    START -> normalize -> generate_outline -> build_dependencies_and_units
-          -> propose_practice -> validate -> [repair <= 2] -> save_draft_projection
-          -> await_approval [interrupt] -> apply_decision -> route_after_decision
-          -> (cancel | edit -> validate | approve -> commit_plan_idempotently) -> END
-
-**B1 范围说明**：本模块提供图的**结构与状态转移**，节点实现依赖注入的
-Ports（``LLMPort`` 等）。B1 用 Fake LLM 跑通；真实模型在 B3 接入。
-
-关键约束：
-
-- ``interrupt()`` **只**在 ``await_approval`` 节点；
-- 其前只做**无副作用快照读取**，不做付费模型调用或未保护写入；
-- 内容修复**至多 2 次**，超限失败并**保留错误**；
-- 提交必须 **幂等**（``run_id + operation_key`` 唯一且可重放）；
-- **错误分三通道**（input / generation / structure），互不覆盖；
-- **空学习目标直接失败**，绝不继续调用模型。
-
-## B1 修复要点（三类错误的覆盖语义）
-
-- ``normalize`` 只写 ``input_errors``；``input_errors`` 非空时由
-  ``route_after_normalize`` 直接路由到失败，**不经过任何模型节点**。
-- 模型节点失败时写 ``generation_errors``，``validate`` **不覆盖**它；
-  路由函数同时检查 generation 与 structure 错误。
-- ``validate`` 每次**完整重写** ``structure_errors``（覆盖语义），
-  修复成功后旧结构错误自然消失，无需依赖 reducer 的重置技巧。
-- ``validation_errors`` 是对外聚合视图，由节点显式计算。
+New generation is unavailable at the application boundary. Mixed frozen-content,
+budget, repair and publication responsibilities remain HOLD_FOR_V2; these nodes
+are not a specification for the next planner.
 """
 
 from __future__ import annotations
@@ -941,17 +916,7 @@ class PlanningNodes:
         """实践批次通过后推进完成索引（显式节点，使真实图可 checkpoint 恢复）。"""
         return {"current_practice_index": int(state.get("current_practice_index", 0)) + 1}
 
-    def await_approval(self, state: PlanningState) -> dict[str, Any]:
-        """真实图中的 interrupt 节点（供 b3f2-batch-v1 装配复用）。"""
-        from app.agent_workflows.graphs import _await_approval
 
-        return _await_approval(state)
-
-    def cancel_draft_node(self, state: PlanningState) -> dict[str, Any]:
-        """取消草案（供 b3f2-batch-v1 装配复用）。"""
-        from app.agent_workflows.graphs import _cancel_draft
-
-        return _cancel_draft(state)
 
 
 def route_after_normalize(state: PlanningState) -> str:

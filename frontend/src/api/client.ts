@@ -141,13 +141,6 @@ export const api = {
     const h = await r.json();
     return { fake_llm: h.llm_provider === "fake" };
   },
-  generate: (project: string, goal: string, goalSpec?: DTO['GoalSpec'] | null) =>
-    request<DTO["PlanGenerateResponse"]>(`/plans/generate${scope(project)}`, {
-      goal,
-      ...(goalSpec ? { goal_spec: goalSpec } : {}),
-    } satisfies DTO["PlanGenerateRequest"]),
-  generatePlanChange: (project: string, body: DTO['GeneratedPlanChangeRequest']) =>
-    request<DTO['PlanGenerateResponse']>(`/plan-changes/generate${scope(project)}`, body),
   run: (project: string, id: string) =>
     request<DTO["RunView"]>(`/runs/${encodeURIComponent(id)}${scope(project)}`),
   cancelRun: (project: string, id: string, body: DTO['RunCancelRequest']) =>

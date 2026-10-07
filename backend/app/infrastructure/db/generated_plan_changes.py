@@ -1,4 +1,7 @@
-"""Finite generated edits reuse immutable submissions, drafts and publication."""
+"""HOLD_FOR_V2: preparation is unavailable; retained save/validation protects CAS, immutable drafts, source snapshots and publication.
+
+Finite generated edits reuse immutable submissions, drafts and publication.
+"""
 from dataclasses import asdict, replace
 from uuid import NAMESPACE_URL, uuid5
 

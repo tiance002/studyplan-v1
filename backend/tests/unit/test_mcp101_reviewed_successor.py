@@ -336,7 +336,7 @@ def prepared_successor_generation():
     from app.agent_workflows.planning_batches import (
         DEFAULT_BUDGET, SHORT_GENERATION_VERSION, freeze_manifest, run_batched_planning_graph,
     )
-    from app.infrastructure.providers.planning_demo import build_planning_demo
+    from tests.helpers.planning_responses import build_planning_demo
 
     goal = "零基础系统学习 Agent 应用开发，先做一个最小应用。"
     pack = current()

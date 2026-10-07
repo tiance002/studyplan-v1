@@ -1,8 +1,5 @@
-from urllib.parse import quote, urlencode
-
 from app.api.v1.deps import get_auth_context, get_container
 from app.api.v1.plan_change_schemas import (
-    GeneratedPlanChangeRequest,
     PlanChangeContext,
     PlanChangeDecisionRequest,
     PlanChangePreviewView,
@@ -10,14 +7,11 @@ from app.api.v1.plan_change_schemas import (
     PlanChangeResult,
 )
 from app.api.v1.routes import ProjectId
-from app.api.v1.schemas import PlanGenerateResponse
 from app.api.v1.views import draft_view
 from app.application.container import AppContainer
 from app.application.plan_service import DraftBundle
 from app.core.errors import DependencyUnavailableError
-from app.domain.generated_plan_changes import GeneratedPlanChangeCommand
 from app.domain.plan_changes import PlanChangeCommand
-from app.domain.planning.intent import goal_spec_from_payload
 from app.domain.workspace.models import AuthContext
 from fastapi import APIRouter, Depends
 
@@ -48,20 +42,6 @@ def preview(body: PlanChangeRequest, project_id: str = ProjectId, scope: AuthCon
             container: AppContainer = Depends(get_container)):
     raw = _service(container).preview(scope, PlanChangeCommand(project_id=project_id, **body.model_dump()))
     return _view(raw, container, scope, project_id)
-
-
-@router.post('/generate', response_model=PlanGenerateResponse, status_code=202, operation_id='generate_plan_change')
-def generate(body: GeneratedPlanChangeRequest, project_id: str = ProjectId, scope: AuthContext = Depends(get_auth_context),
-             container: AppContainer = Depends(get_container)):
-    if container.plan_service is None:
-        raise DependencyUnavailableError('规划生成服务尚未装配')
-    data = body.model_dump(exclude={'goal_spec'})
-    command = GeneratedPlanChangeCommand(project_id=project_id, **data,
-        goal_spec=goal_spec_from_payload(body.goal_spec.model_dump(mode='json')) if body.goal_spec else None)
-    run_id = container.plan_service.submit_generation(scope=scope, project_id=project_id, goal=body.goal,
-                                                      route_command=command)
-    return PlanGenerateResponse(run_id=run_id,
-        status_url=f"/api/v1/runs/{quote(run_id, safe='')}?{urlencode({'project_id': project_id})}")
 
 
 @router.get('/{proposal_id}', response_model=PlanChangePreviewView, operation_id='get_plan_change_preview')

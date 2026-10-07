@@ -4,7 +4,6 @@ import psycopg
 import pytest
 
 from tests.e2e.test_b2v_http_end_to_end import migrated_db as migrated_db
-from tests.integration.test_generated_plan_changes_pg import _run_owned_route_browser
 from tests.integration.test_generated_plan_changes_pg import generated_route as generated_route
 
 pytestmark = pytest.mark.postgres
@@ -67,32 +66,3 @@ def test_history_recovers_unknown_without_claim_or_replay(generated_route):
     assert client.get('/api/v1/runs/' + run_id, params=params).json()['status'] == recovered['status']
     assert not container.planning_worker.tick()
     assert len(container.plan_service._llm.calls) == calls
-
-
-def test_real_browser_server_history_without_local_pointer(generated_route, monkeypatch):
-    import os
-
-    if os.environ.get('STUDYPLAN_GENERATED_ROUTE_BROWSER') != '1':
-        pytest.skip('real Chrome enabled only for owned browser acceptance')
-    db, container, client, params, headers, _ = generated_route
-    queued = client.post('/api/v1/plans/generate', params=params, headers=headers,
-                         json={'goal': 'Agent服务器恢复验收'})
-    assert queued.status_code == 202, queued.text
-    assert container.planning_worker.tick()
-    successful = client.get(queued.json()['status_url']).json()
-    assert successful['status'] == 'succeeded'
-    scope = container.browser_auth.resolve(client.cookies.get(container.settings.session_cookie_name))
-    run_id = 'browser-unknown-' + params['project_id']
-    with psycopg.connect(db.migrator_dsn) as conn:
-        conn.execute("""INSERT INTO ai_runs(run_id,actor_id,project_id,kind,status,next_action,
-                graph_name,graph_version,error_class)
-            VALUES (%s,%s,%s,'plan_generate','reconciliation_required','reconcile',
-                'planning','b3f2-short-v2','provider_dispatch_unknown')""",
-            (run_id, scope.actor_id, params['project_id']))
-    calls = len(container.plan_service._llm.calls)
-    monkeypatch.setenv('STUDYPLAN_HISTORY_UNKNOWN_RUN', run_id)
-    monkeypatch.setenv('STUDYPLAN_HISTORY_SUCCESS_RUN', successful['run_id'])
-    monkeypatch.setenv('STUDYPLAN_HISTORY_DRAFT', successful['result_ref'])
-    _run_owned_route_browser(generated_route, 'frontend/tests/run-history-pg.browser.cjs')
-    assert len(container.plan_service._llm.calls) == calls
-    assert client.get('/api/v1/plans/drafts/' + successful['result_ref'], params=params).json()['status'] == 'awaiting_approval'
