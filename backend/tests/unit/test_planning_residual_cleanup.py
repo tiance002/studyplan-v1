@@ -47,4 +47,3 @@ def test_nonplanning_import_smoke():
                    "app.application.learning_resources", "app.infrastructure.resources.github",
                    "app.infrastructure.resources.tavily", "app.infrastructure.providers.endpoint_policy"):
         assert importlib.import_module(module)
-

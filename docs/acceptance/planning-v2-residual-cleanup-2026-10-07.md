@@ -123,7 +123,7 @@
 - 临时前端验证服务已停止；已有本人受控体验入口未操作。
 - 下一安全动作：等待用户 Planning V2 正式 Goal，按其合同决定 HOLD 项统一替换。当前不自动进入该阶段。
 
-**PLANNING_V2_RESIDUAL_CLEANUP_COMPLETE**  
-**PLANNING_V2_NOT_IMPLEMENTED**  
-**整体 STAGING_BLOCKED / NOT_READY**  
+**PLANNING_V2_RESIDUAL_CLEANUP_COMPLETE**
+**PLANNING_V2_NOT_IMPLEMENTED**
+**整体 STAGING_BLOCKED / NOT_READY**
 **STOP**

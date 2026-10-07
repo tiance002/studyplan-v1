@@ -270,4 +270,3 @@ def _cancel_draft(state: PlanningState) -> dict[str, Any]:
     （见 ports/repository.py 的约束说明）；本节点只保证图内不会进入提交。
     """
     return {"result_id": "", "decision": "cancel"}
-
