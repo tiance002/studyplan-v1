@@ -387,6 +387,36 @@ class V2ExecutionSnapshot:
             original_curriculum_hash=raw["original_curriculum_hash"],
         )
 
+    def recompile_local(self, stages, *, domain_approvals=()):
+        """Recompile a complete permutation with only title/description edits.
+
+        The unchanged Item6 validator proves outcome coverage and actual
+        prerequisites; all source, project, task and capability facts stay frozen.
+        """
+        raw = self.to_payload()
+        c, b = raw["compiled"], raw["bindings"]
+        current = c["source_snapshots"]["curriculum"]
+        arguments = compiler_arguments(c, raw["compiler_packet"], domain_approvals=domain_approvals)
+        by_db = {b["stages"][s["stage_id"]]: (s, p) for s, p in zip(c["stages"], current["stages"], strict=True)}
+        if len(stages) != len(by_db) or {s.stage_id for s in stages} != set(by_db):
+            reject("local_required_stage_set")
+        reordered = []
+        for index, edited in enumerate(stages):
+            logical, prior = by_db[edited.stage_id]
+            if (edited.stable_key != logical["stable_key"] or edited.order_index != index
+                    or edited.section_kind != OutlineSectionKind.V2_CURRICULUM or edited.learning_guidance is not None):
+                reject("local_immutable_stage_identity")
+            prior["title"], prior["what_to_learn"], prior["order_index"] = edited.title, edited.objective, index
+            reordered.append(prior)
+        current["stages"] = reordered
+        server_fields = {"compile_sources", "compile_materials", "compile_cases", "compile_context", "case_findings", "plan_hash"}
+        candidate = validate_curriculum_output({k: v for k, v in current.items() if k not in server_fields},
+            arguments["context"].to_payload(), domain_approvals=domain_approvals)
+        from app.domain.planning.curriculum import CaseFinding, record_case_findings
+        candidate = record_case_findings(candidate, tuple(_decode(CaseFinding, f) for f in current["case_findings"]))
+        compiled = compile_curriculum(candidate, **arguments)
+        return self.create(compiled, bindings=b, packet=raw["compiler_packet"], original_curriculum_hash=raw["original_curriculum_hash"])
+
     def user_content(self):
         raw = self.to_payload()
         c, b = raw["compiled"], raw["bindings"]

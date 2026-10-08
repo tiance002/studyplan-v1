@@ -50,6 +50,7 @@ from app.domain.enums import (
 )
 from app.domain.planning.guidance import LearningGuidance, guidance_payload
 from app.domain.planning.intent import GoalSpec, goal_spec_payload
+from app.domain.planning.revisions import V2RevisionContext
 from app.domain.planning.v2_execution import V2ExecutionSnapshot, validate_v2_structure
 from app.domain.resources.curation import (
     KnowledgeExtension,
@@ -264,6 +265,7 @@ class PlanRevision:
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     goal_spec: GoalSpec | None = None
     v2_execution: V2ExecutionSnapshot | None = None
+    v2_revision: V2RevisionContext | None = None
 
     @staticmethod
     def create(
@@ -283,6 +285,7 @@ class PlanRevision:
         now: datetime | None = None,
         goal_spec: GoalSpec | None = None,
         v2_execution: V2ExecutionSnapshot | None = None,
+        v2_revision: V2RevisionContext | None = None,
     ) -> "PlanRevision":
         if revision < 1:
             raise ValidationAppError("revision 必须从 1 开始")
@@ -293,6 +296,7 @@ class PlanRevision:
             goal_snapshot=goal_snapshot.strip(),
             goal_spec=goal_spec,
             v2_execution=v2_execution,
+            v2_revision=v2_revision,
             stages=tuple(stages),
             unit_links=tuple(unit_links),
             task_links=tuple(task_links),
@@ -351,6 +355,7 @@ class PlanRevision:
                 "project_id": self.project_id,
                 "goal_snapshot": self.goal_snapshot,
                 **({"v2_execution": self.v2_execution.semantic_payload()} if self.v2_execution else {}),
+                **({"v2_revision": self.v2_revision.to_payload()} if self.v2_revision else {}),
                 **({"goal_spec": goal_spec_payload(self.goal_spec)} if self.goal_spec else {}),
                 "stages": _stages_payload(self.stages),
                 **_structure_payload(
@@ -471,6 +476,7 @@ class PlanDraft:
     # Manual route preview metadata is immutable and included in confirmation hash.
     route_change: dict[str, object] | None = None
     v2_execution: V2ExecutionSnapshot | None = None
+    v2_revision: V2RevisionContext | None = None
 
     @property
     def content_hash(self) -> str:
@@ -489,6 +495,7 @@ class PlanDraft:
                 "project_id": self.project_id,
                 "goal_snapshot": self.goal_snapshot,
                 **({"v2_execution": self.v2_execution.semantic_payload()} if self.v2_execution else {}),
+                **({"v2_revision": self.v2_revision.to_payload()} if self.v2_revision else {}),
                 **({"goal_spec": goal_spec_payload(self.goal_spec)} if self.goal_spec else {}),
                 "revision_candidate": self.revision_candidate,
                 **({"route_change": self.route_change} if self.route_change else {}),
@@ -565,6 +572,7 @@ def build_revision_snapshot(
     now: datetime | None = None,
     goal_spec: GoalSpec | None = None,
     v2_execution: V2ExecutionSnapshot | None = None,
+    v2_revision: V2RevisionContext | None = None,
 ) -> PlanRevision:
     """把「阶段 + 引用」构造为一个**独立**的新版本快照（B2-V §三）。
 
@@ -622,6 +630,7 @@ def build_revision_snapshot(
         goal_snapshot=goal_snapshot,
         goal_spec=goal_spec,
         v2_execution=v2_execution.remap_stages(remap) if v2_execution else None,
+        v2_revision=v2_revision,
         stages=new_stages,
         unit_links=tuple(
             PlanUnitLink(stage_id=_sid(x.stage_id), unit_id=x.unit_id, order_index=x.order_index)
@@ -669,6 +678,7 @@ def revision_from_draft(
         goal_snapshot=draft.goal_snapshot,
         goal_spec=draft.goal_spec,
         v2_execution=draft.v2_execution,
+        v2_revision=draft.v2_revision,
         stages=draft.stages,
         unit_links=draft.unit_links,
         task_links=draft.task_links,

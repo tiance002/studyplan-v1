@@ -1,3 +1,9 @@
+## 2026-10-08 Planning V2 Item8 R1：LOCAL_REVISION_PASS / CONTINUING_R2_R3
+
+- R0本地checkpoint f0a7a04a21c80afac9d3c839af6fafdef923e6f9；[Item8报告](../planning-v2/ITEM8_REPLANNING_REVISION.md)记录受控future说明/完整合法排序→Compiler→新Draft/hash→明确确认→原子Revision。typed revision context进入现有JSONB/hash，source/required/project事实保持原权威；自由文本待澄清，不使用is_semantic=false。
+- fresh-context独审PASS，关闭连续Revision历史保护/消费者丢失，以及成功幂等重放错误hash/version问题；可信未知领域approval可服务端注入，默认缺失fail-closed，默认未知领域Local未装配/PG-HTTP NOT RUN限制明确保留。历史Source/Exposure/Summary/Prompt/Practice/验收只读保持，第2/第3Revision workspace精准引用原第1版；新位置不伪造progress/mastery。
+- 核心8unit+10ownedPG=18PASS，受影响快照/发布50PASS；两个不同cookie/CSRF/PG HTTP用例PASS、DTO2PASS，不累加重叠复测。原HTTP预期422/领域400及其他中间FAIL保留，按实际handler修测试定向PASS；Ruff/diff PASS。业务/checkpoint新owned库保留、roles_created=[]、无migration或正式数据写入。产品模型/搜索/Reader0，public generate503，不push/merge/deploy，不进入Item9。R1本地checkpoint后按连续授权进入R2预算/同链重规划。
+
 ## 2026-10-08 Planning V2 Item8 R0：PRECHECK_PASS / CONTINUING_R1_R3
 
 - 基线6b291d10ab439bc37a540a626174941cc90fd28b/feat/n1-resource-discovery匹配，tracked clean；[Item8报告](../planning-v2/ITEM8_REPLANNING_REVISION.md)记录连续R0～R3授权与边界。有界现有组件核对和fresh-context独审PASS，无合同或必要migration阻塞；本checkpoint为只读预检，unit/PG/HTTP NOT RUN。

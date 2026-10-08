@@ -537,6 +537,10 @@ class PlanService:
         self, *, draft: PlanDraft, project_id: str, command: DecisionCommand
     ) -> DecisionOutcome:
         """确认发布。幂等键在**发布服务内最先**被检查，因此重放返回原结果。"""
+        if draft.v2_revision is not None:
+            draft.verify_hash(command.draft_hash)
+            if command.expected_version != draft.v2_revision.to_payload()["base_revision"]:
+                raise ConflictError("确认版本与当前变更预览不一致")
         try:
             result = self._publication.decide_draft(
                 draft=draft,
@@ -578,6 +582,8 @@ class PlanService:
         self, *, draft: PlanDraft, project_id: str, command: DecisionCommand, scope=None
     ) -> DecisionOutcome:
         """应用用户编辑 → **重新校验** → 保存新草案（不发布）。"""
+        if draft.v2_revision is not None:
+            raise ValidationAppError("Revision preview is immutable; create a fresh bounded preview")
         if draft.v2_execution is not None:
             # V2 edits need the exact persisted compiler authority packet and a
             # new validated candidate/manifest. The legacy editor must never

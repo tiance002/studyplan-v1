@@ -17,7 +17,12 @@ API 层**不应**知道基础设施实现（PG 仓储、Provider 工厂）。它
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from app.application.v2_revisions import V2RevisionService
+
+from app.application.assistant import AssistantService
 from app.application.learning_exposures import LearningExposureService
 from app.application.learning_resources import LearningResourceService
 from app.application.model_settings import ModelSettingsService
@@ -29,7 +34,6 @@ from app.application.prompts import PromptService
 from app.application.resource_changes import ResourceChangeService
 from app.application.resource_preferences import ResourcePreferenceService
 from app.application.summaries import SummaryService
-from app.application.assistant import AssistantService
 from app.core.config import Settings
 from app.ports.browser_auth import BrowserAuthPort
 from app.ports.planning_jobs import PlanningWorkerPort
@@ -65,3 +69,4 @@ class AppContainer:
     practice_change_service: PracticeChangeService | None = None
     practice_submission_service: PracticeSubmissionService | None = None
     plan_change_service: PlanChangeService | None = None
+    v2_revision_service: V2RevisionService | None = None

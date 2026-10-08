@@ -3710,6 +3710,333 @@
         }
       }
     },
+    "/api/v1/plans/v2/changes/context": {
+      "get": {
+        "summary": "Get V2 Revision Context",
+        "operationId": "get_v2_revision_context",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get V2 Revision Context"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/plans/v2/changes/classify": {
+      "post": {
+        "summary": "Classify V2 Plan Change",
+        "operationId": "classify_v2_plan_change",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2ChangeClassificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V2ChangeClassificationView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/plans/v2/changes/local": {
+      "post": {
+        "summary": "Preview V2 Local Change",
+        "operationId": "preview_v2_local_change",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2LocalChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanDraftView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/plans/v2/changes/{draft_id}": {
+      "get": {
+        "summary": "Get V2 Revision Preview",
+        "operationId": "get_v2_revision_preview",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanDraftView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/plans/v2/changes/{draft_id}/confirm": {
+      "post": {
+        "summary": "Confirm V2 Revision",
+        "operationId": "confirm_v2_revision",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2RevisionDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanDecisionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/plans/v2/changes/{draft_id}/cancel": {
+      "post": {
+        "summary": "Cancel V2 Revision",
+        "operationId": "cancel_v2_revision",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2RevisionDecisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanDecisionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/plans/generate": {
       "post": {
         "summary": "发起一次规划生成",
@@ -6269,6 +6596,12 @@
             "title": "Completed Stages",
             "default": 0
           },
+          "historically_completed_stages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Historically Completed Stages",
+            "default": 0
+          },
           "total_stages": {
             "type": "integer",
             "minimum": 0.0,
@@ -7064,6 +7397,19 @@
             "title": "V2 Content",
             "description": "Validated V2 teaching content for this exact draft or revision"
           },
+          "v2_revision": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "V2 Revision",
+            "description": "Validated change preview and exact historical lineage for this revision"
+          },
           "draft_id": {
             "type": "string",
             "maxLength": 64,
@@ -7263,6 +7609,19 @@
             ],
             "title": "V2 Content",
             "description": "Validated V2 teaching content for this exact draft or revision"
+          },
+          "v2_revision": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "V2 Revision",
+            "description": "Validated change preview and exact historical lineage for this revision"
           },
           "plan_id": {
             "type": "string",
@@ -12086,6 +12445,39 @@
         "title": "StageDetail",
         "description": "阶段详情（前端「阶段导航」直接消费）。"
       },
+      "StageHistoricalLearningView": {
+        "properties": {
+          "source_plan_id": {
+            "type": "string",
+            "title": "Source Plan Id"
+          },
+          "source_revision": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Source Revision"
+          },
+          "source_stage_id": {
+            "type": "string",
+            "title": "Source Stage Id"
+          },
+          "learning_status": {
+            "type": "string",
+            "enum": [
+              "started",
+              "completed"
+            ],
+            "title": "Learning Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source_plan_id",
+          "source_revision",
+          "source_stage_id",
+          "learning_status"
+        ],
+        "title": "StageHistoricalLearningView"
+      },
       "StageResourceAssignmentView": {
         "properties": {
           "assignment_id": {
@@ -12245,6 +12637,16 @@
           },
           "completion": {
             "$ref": "#/components/schemas/StageCompletionView"
+          },
+          "historical_learning": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StageHistoricalLearningView"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -12799,6 +13201,171 @@
         "title": "UnitProgress",
         "description": "学习单元的进度状态。\n\n注意：``SKIPPED`` ≠ ``COMPLETED``，二者都不代表掌握。"
       },
+      "V2ChangeClassificationRequest": {
+        "properties": {
+          "change_text": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Change Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "change_text"
+        ],
+        "title": "V2ChangeClassificationRequest"
+      },
+      "V2ChangeClassificationView": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "needs_clarification",
+            "title": "Status"
+          },
+          "clarification_questions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Clarification Questions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "clarification_questions"
+        ],
+        "title": "V2ChangeClassificationView"
+      },
+      "V2LocalChangeRequest": {
+        "properties": {
+          "current_plan_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Current Plan Id"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          },
+          "stage_edits": {
+            "items": {
+              "$ref": "#/components/schemas/V2LocalStageEdit"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Stage Edits"
+          },
+          "stage_order": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "minLength": 1
+                },
+                "type": "array",
+                "maxItems": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage Order"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "current_plan_id",
+          "expected_version",
+          "idempotency_key"
+        ],
+        "title": "V2LocalChangeRequest"
+      },
+      "V2LocalStageEdit": {
+        "properties": {
+          "stage_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Stage Id"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "what_to_learn": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "What To Learn"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "stage_id"
+        ],
+        "title": "V2LocalStageEdit"
+      },
+      "V2RevisionDecisionRequest": {
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "draft_hash": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Draft Hash"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "expected_version",
+          "draft_hash",
+          "idempotency_key"
+        ],
+        "title": "V2RevisionDecisionRequest"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -13075,6 +13642,20 @@
             "default": null,
             "description": "Validated V2 teaching content for this exact draft or revision",
             "title": "V2 Content"
+          },
+          "v2_revision": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Validated change preview and exact historical lineage for this revision",
+            "title": "V2 Revision"
           }
         },
         "required": [

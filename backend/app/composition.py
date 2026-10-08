@@ -78,8 +78,8 @@ def build_container(settings: Settings) -> AppContainer:
     from app.infrastructure.db.practice_changes import PgPracticeChanges
     practice_change_service = PracticeChangeService(PgPracticeChanges(dsn))
     from app.application.plan_changes import PlanChangeService
-    from app.infrastructure.db.plan_changes import PgPlanChanges
     from app.infrastructure.db.generated_plan_changes import PgGeneratedPlanChanges
+    from app.infrastructure.db.plan_changes import PgPlanChanges
     plan_change_service = PlanChangeService(PgPlanChanges(dsn))
     from app.application.practice_submissions import PracticeSubmissionService
     from app.infrastructure.db.practice_submissions import PgPracticeSubmissions
@@ -191,8 +191,8 @@ def build_container(settings: Settings) -> AppContainer:
     )
 
     from app.application.assistant import AssistantService
-    from app.infrastructure.db.assistant import PgAssistant
     from app.domain.assistant import ASSISTANT_PROTOCOL
+    from app.infrastructure.db.assistant import PgAssistant
 
     def assistant_provider(scope, project_id, run_id, model_ref, manifest):
         from app.infrastructure.providers.attempt_ledger import PgAttemptLLM
@@ -230,7 +230,12 @@ def build_container(settings: Settings) -> AppContainer:
         is_development=settings.is_development,
         admission_mode=settings.planning_worker_admission_mode,
     )
+    from app.application.v2_revisions import V2RevisionService
+    from app.infrastructure.db.v2_revisions import PgV2Revisions
+    v2_revision_service = V2RevisionService(PgV2Revisions(dsn))
+
     return AppContainer(settings=settings, sessions=sessions, plan_service=plan_service,
+                        v2_revision_service=v2_revision_service,
                         model_settings_service=model_service, browser_auth=browser_auth,
                         workspace_reader=workspace_reader, planning_worker=planning_worker,
                         resource_service=resource_service, exposure_service=exposure_service,

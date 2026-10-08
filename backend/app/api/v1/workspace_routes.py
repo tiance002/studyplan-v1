@@ -53,6 +53,7 @@ def workspace(
                 nodes=[n for n in data["nodes"] if n["node_id"] in node_ids],
                 resources=[r for r in plan.stage_resources if r.stage_id == stage.stage_id],
                 tasks=[t for t in data["tasks"] if t["task_id"] in tasks],
+                historical_learning=data.get("historical_learning_by_stage", {}).get(stage.stage_id),
                 completion=derive_stage_completion(
                     summary_completed=stage.stage_id in data.get("summary_stage_ids", set()),
                     required_task_ids=tasks, available_task_ids=[t["task_id"] for t in data["tasks"]],
@@ -67,4 +68,7 @@ def workspace(
         completed_units=sum(u.progress == "completed" for stage in stages for u in stage.units),
         total_stages=len(stages),
         completed_stages=sum(stage.completion.status == "completed" for stage in stages),
+        historically_completed_stages=sum(
+            stage.historical_learning is not None and stage.historical_learning.learning_status == "completed"
+            for stage in stages),
     )

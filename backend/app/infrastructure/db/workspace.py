@@ -13,11 +13,26 @@ class PgWorkspaceReader:
     def read(self, scope, project_id, unit_ids, task_ids, *, plan_id=None):
         scope.require_project(project_id)
         with psycopg.connect(self.dsn, row_factory=dict_row) as conn:
+            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
             conn.execute("SELECT set_config('app.project_id',%s,true)", (project_id,))
             conn.execute("SELECT set_config('app.actor_id',%s,true)", (scope.actor_id,))
             if conn.execute("SELECT 1 FROM learning_projects WHERE project_id=%s AND owner_actor_id=%s "
                             "AND archived_at IS NULL", (project_id, scope.actor_id)).fetchone() is None:
                 raise ForbiddenError()
+            historical_learning_by_stage = {}
+            if plan_id is not None:
+                from app.infrastructure.db.plan_repository import PgPlanRepository
+                from app.infrastructure.db.v2_revisions import capture_progress_basis
+                row = conn.execute("SELECT * FROM plan_revisions WHERE project_id=%s AND plan_id=%s", (project_id, plan_id)).fetchone()
+                if row is not None:
+                    plan = PgPlanRepository(self.dsn, connection=conn)._load_revision(conn, row)
+                    if plan.v2_revision is not None:
+                        basis = capture_progress_basis(conn, plan)
+                        for stage in basis["stages"]:
+                            if stage["historical_learning_status"] in {"started", "completed"}:
+                                historical_learning_by_stage[stage["stage_id"]] = {
+                                    key: value for key, value in stage["history_source"].items() if key != "source_stage_hash"}
+                                historical_learning_by_stage[stage["stage_id"]]["learning_status"] = stage["historical_learning_status"]
             summary_stage_ids, accepted_task_positions = set(), set()
             if plan_id is not None:
                 # Both facts share one statement snapshot and the current owner RLS scope.
@@ -70,4 +85,5 @@ class PgWorkspaceReader:
             node["child_ids"] = [r["to_node_id"] for r in relations if r["from_node_id"] == node["node_id"] and r["relation_type"] == "contains"]
             node["progress"] = None
         return {"units": units, "nodes": nodes, "tasks": tasks,
-                "summary_stage_ids": summary_stage_ids, "accepted_task_positions": accepted_task_positions}
+                "summary_stage_ids": summary_stage_ids, "accepted_task_positions": accepted_task_positions,
+                "historical_learning_by_stage": historical_learning_by_stage}

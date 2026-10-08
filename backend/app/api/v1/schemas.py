@@ -250,6 +250,40 @@ class PlanSnapshot(BaseModel):
     source_pack_key: str = Field(default="", max_length=128)
     source_pack_version: int = Field(default=0, ge=0)
     v2_content: dict[str, Any] | None = Field(default=None, description="Validated V2 teaching content for this exact draft or revision")
+    v2_revision: dict[str, Any] | None = Field(default=None, description="Validated change preview and exact historical lineage for this revision")
+
+
+class V2LocalStageEdit(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    stage_id: str = Field(min_length=1, max_length=64)
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    what_to_learn: str | None = Field(default=None, min_length=1, max_length=2000)
+
+
+class V2LocalChangeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    current_plan_id: str = Field(min_length=1, max_length=64)
+    expected_version: int = Field(ge=1, strict=True)
+    idempotency_key: str = Field(min_length=1, max_length=128)
+    stage_edits: list[V2LocalStageEdit] = Field(default_factory=list, max_length=100)
+    stage_order: list[Annotated[str, Field(min_length=1, max_length=64)]] | None = Field(default=None, max_length=100)
+
+
+class V2RevisionDecisionRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    expected_version: int = Field(ge=1, strict=True)
+    draft_hash: str = Field(min_length=1, max_length=128)
+    idempotency_key: str = Field(min_length=1, max_length=128)
+
+
+class V2ChangeClassificationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    change_text: str = Field(min_length=1, max_length=2000)
+
+
+class V2ChangeClassificationView(BaseModel):
+    status: Literal["needs_clarification"]
+    clarification_questions: list[str] = Field(min_length=1, max_length=3)
 
 
 class PlanDraftView(PlanSnapshot):
@@ -406,6 +440,13 @@ class StageCompletionView(BaseModel):
     total_practice_tasks: int = Field(default=0, ge=0)
 
 
+class StageHistoricalLearningView(BaseModel):
+    source_plan_id: str
+    source_revision: int = Field(ge=1)
+    source_stage_id: str
+    learning_status: Literal["started", "completed"]
+
+
 class StageWorkspaceView(BaseModel):
     stage: StageDetail
     units: list[WorkspaceUnitView]
@@ -413,6 +454,7 @@ class StageWorkspaceView(BaseModel):
     resources: list[StageResourceAssignmentView]
     tasks: list[PracticeTaskView]
     completion: StageCompletionView = Field(default_factory=StageCompletionView)
+    historical_learning: StageHistoricalLearningView | None = None
 
 
 class LearningWorkspaceView(BaseModel):
@@ -421,6 +463,7 @@ class LearningWorkspaceView(BaseModel):
     completed_units: int
     total_units: int
     completed_stages: int = Field(default=0, ge=0)
+    historically_completed_stages: int = Field(default=0, ge=0)
     total_stages: int = Field(default=0, ge=0)
 
 

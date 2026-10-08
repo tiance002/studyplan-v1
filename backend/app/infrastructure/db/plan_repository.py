@@ -51,7 +51,6 @@ from app.domain.enums import (
 )
 from app.domain.planning.guidance import guidance_from_payload, guidance_payload
 from app.domain.planning.intent import goal_spec_from_payload, goal_spec_payload
-from app.domain.planning.v2_execution import V2ExecutionSnapshot, validate_v2_structure
 from app.domain.planning.models import (
     PlanDraft,
     PlanRevision,
@@ -61,6 +60,8 @@ from app.domain.planning.models import (
     PlanUnitLink,
     PublishRecord,
 )
+from app.domain.planning.revisions import V2RevisionContext
+from app.domain.planning.v2_execution import V2ExecutionSnapshot, validate_v2_structure
 from app.domain.resources.curation import (
     KnowledgeExtension,
     StageResourceAssignment,
@@ -167,6 +168,7 @@ def _structure_payload(revision: PlanRevision) -> dict[str, Any]:
     """``plan_revisions.structure`` 的等价快照（审计用，非读回依据）。"""
     return {
         **({"v2_execution": revision.v2_execution.to_payload()} if revision.v2_execution else {}),
+        **({"v2_revision": revision.v2_revision.to_payload()} if revision.v2_revision else {}),
         **({"goal_spec": goal_spec_payload(revision.goal_spec)} if revision.goal_spec else {}),
         "stages": [_stage_payload(s) for s in revision.stages],
         "unit_links": [_unit_link_payload(x) for x in revision.unit_links],
@@ -184,6 +186,7 @@ def _structure_payload(revision: PlanRevision) -> dict[str, Any]:
 def _draft_payload(draft: PlanDraft) -> dict[str, Any]:
     return {
         **({"v2_execution": draft.v2_execution.to_payload()} if draft.v2_execution else {}),
+        **({"v2_revision": draft.v2_revision.to_payload()} if draft.v2_revision else {}),
         "goal_snapshot": draft.goal_snapshot,
         **({"route_change": draft.route_change} if draft.route_change else {}),
         **({"goal_spec": goal_spec_payload(draft.goal_spec)} if draft.goal_spec else {}),
@@ -296,12 +299,13 @@ class PgPlanRepository:
     单个事务内。构造只接收 DSN，便于在测试里指向临时库。
     """
 
-    def __init__(self, dsn: str, *, connection=None, resource_proposal_id=None, practice_proposal_id=None, route_change_id=None) -> None:
+    def __init__(self, dsn: str, *, connection=None, resource_proposal_id=None, practice_proposal_id=None, route_change_id=None, v2_domain_approvals=()) -> None:
         self._dsn = to_psycopg_dsn(dsn)
         self._connection = connection
         self._resource_proposal_id = resource_proposal_id
         self._practice_proposal_id = practice_proposal_id
         self._route_change_id = route_change_id
+        self._v2_domain_approvals = tuple(v2_domain_approvals)
 
     @contextmanager
     def _tx(self, project_id: str) -> Iterator[psycopg.Connection[dict[str, Any]]]:
@@ -455,6 +459,7 @@ class PgPlanRepository:
             goal_spec=goal_spec_from_payload(payload.get("goal_spec")),
             route_change=payload.get('route_change'),
             v2_execution=V2ExecutionSnapshot.from_payload(payload.get("v2_execution")),
+            v2_revision=V2RevisionContext.from_payload(payload.get("v2_revision")),
             revision_candidate=int(row.get("revision_candidate") or 1),
             stages=tuple(_stage_from(s) for s in _as_list(payload.get("stages"))),  # type: ignore[arg-type]
             resource_snapshots=cast(tuple[dict[str, object], ...], tuple(_as_list(payload.get("resource_snapshots")))),
@@ -574,6 +579,7 @@ class PgPlanRepository:
             revision=int(row["revision"]),  # type: ignore[arg-type]
             goal_snapshot=str(row["goal_snapshot"]),
             v2_execution=V2ExecutionSnapshot.from_payload(structure.get("v2_execution")),
+            v2_revision=V2RevisionContext.from_payload(structure.get("v2_revision")),
             goal_spec=goal_spec_from_payload(structure.get("goal_spec")) if isinstance(structure, dict) else None,
             stages=tuple(_stage_from({**s, "learning_guidance": guidance_by_key.get(s["stable_key"])}) for s in stages),
             resource_snapshots=cast(tuple[dict[str, object], ...], tuple(_as_list(structure.get("resource_snapshots")))) if isinstance(structure, dict) else (),
@@ -664,6 +670,9 @@ class PgPlanRepository:
                 # version check inside the publication transaction.
                 raise ConflictError("计划版本已变化，发布已中止", reason="plan_version_mismatch") from exc
             self._guard_resource_proposal(conn, project_id, draft.draft_id)
+            if draft.v2_revision:
+                from app.infrastructure.db.v2_revisions import validate_revision_basis
+                validate_revision_basis(conn, draft, expected_version=expected_version, domain_approvals=self._v2_domain_approvals)
             # 0) **事务内复核草案最新状态**（不信任调用方持有的旧对象）。
             row = conn.execute(
                 "SELECT status, content_hash FROM plan_drafts "

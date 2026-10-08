@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from urllib.parse import quote, urlencode
 
-from app.api.v1.deps import get_auth_context, get_plan_service
+from app.api.v1.deps import get_auth_context, get_container, get_plan_service
 from app.api.v1.schemas import (
     DraftDecisionRequest,
     PlanDecisionResponse,
@@ -33,6 +33,10 @@ from app.api.v1.schemas import (
     PlanView,
     RunCancelRequest,
     RunView,
+    V2ChangeClassificationRequest,
+    V2ChangeClassificationView,
+    V2LocalChangeRequest,
+    V2RevisionDecisionRequest,
 )
 from app.api.v1.views import (
     draft_view,
@@ -40,8 +44,9 @@ from app.api.v1.views import (
     run_view,
     stage_from_dto,
 )
+from app.application.container import AppContainer
 from app.application.plan_service import DecisionCommand, DraftBundle, PlanBundle, PlanService
-from app.core.errors import NotFoundError
+from app.core.errors import DependencyUnavailableError, NotFoundError
 from app.domain.planning.intent import GoalSpec, goal_spec_from_payload
 from app.domain.workspace.models import AuthContext
 from fastapi import APIRouter, Depends, Query, status
@@ -59,6 +64,66 @@ ProjectId = Query(
     max_length=64,
     description="学习空间 ID；必须属于当前会话的项目范围，否则 403",
 )
+
+
+def _v2_revision_service(container: AppContainer = Depends(get_container)):
+    if container.v2_revision_service is None:
+        raise DependencyUnavailableError("V2 计划修订服务尚未装配")
+    return container.v2_revision_service
+
+
+@router.get("/plans/v2/changes/context", response_model=dict, operation_id="get_v2_revision_context")
+def get_v2_revision_context(project_id: str = ProjectId,
+    scope: AuthContext = Depends(get_auth_context), service=Depends(_v2_revision_service)):
+    return service.context(scope=scope, project_id=project_id)
+
+
+@router.post("/plans/v2/changes/classify", response_model=V2ChangeClassificationView,
+    operation_id="classify_v2_plan_change")
+def classify_v2_plan_change(body: V2ChangeClassificationRequest, project_id: str = ProjectId,
+    scope: AuthContext = Depends(get_auth_context), service=Depends(_v2_revision_service)):
+    scope.require_project(project_id)
+    return service.classify_change(change_text=body.change_text)
+
+
+@router.post("/plans/v2/changes/local", response_model=PlanDraftView, operation_id="preview_v2_local_change")
+def preview_v2_local_change(body: V2LocalChangeRequest, project_id: str = ProjectId,
+    scope: AuthContext = Depends(get_auth_context), service=Depends(_v2_revision_service)):
+    from app.domain.planning.revisions import LocalStageEdit
+    args = body.model_dump(exclude={"stage_edits", "stage_order"})
+    bundle = service.preview_local(scope=scope, project_id=project_id, **args,
+        stage_edits=tuple(LocalStageEdit(**edit.model_dump()) for edit in body.stage_edits),
+        stage_order=tuple(body.stage_order) if body.stage_order is not None else None)
+    return draft_view(bundle)
+
+
+@router.get("/plans/v2/changes/{draft_id}", response_model=PlanDraftView, operation_id="get_v2_revision_preview")
+def get_v2_revision_preview(draft_id: str, project_id: str = ProjectId,
+    scope: AuthContext = Depends(get_auth_context), service=Depends(_v2_revision_service)):
+    return draft_view(service.get_preview(scope=scope, project_id=project_id, draft_id=draft_id))
+
+
+def _v2_decision_view(outcome):
+    return PlanDecisionResponse(run_id=outcome.run_id,
+        draft=draft_view(DraftBundle(draft=outcome.draft, resources=outcome.resources)),
+        plan=plan_view(PlanBundle(revision=outcome.plan, resources=outcome.plan_resources))
+            if outcome.plan is not None else None)
+
+
+@router.post("/plans/v2/changes/{draft_id}/confirm", response_model=PlanDecisionResponse,
+    operation_id="confirm_v2_revision")
+def confirm_v2_revision(draft_id: str, body: V2RevisionDecisionRequest, project_id: str = ProjectId,
+    scope: AuthContext = Depends(get_auth_context), service=Depends(_v2_revision_service)):
+    return _v2_decision_view(service.confirm(scope=scope, project_id=project_id, draft_id=draft_id,
+        **body.model_dump()))
+
+
+@router.post("/plans/v2/changes/{draft_id}/cancel", response_model=PlanDecisionResponse,
+    operation_id="cancel_v2_revision")
+def cancel_v2_revision(draft_id: str, body: V2RevisionDecisionRequest, project_id: str = ProjectId,
+    scope: AuthContext = Depends(get_auth_context), service=Depends(_v2_revision_service)):
+    return _v2_decision_view(service.cancel(scope=scope, project_id=project_id, draft_id=draft_id,
+        **body.model_dump()))
 
 
 @router.post(

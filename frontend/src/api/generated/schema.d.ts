@@ -865,6 +865,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/plans/v2/changes/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get V2 Revision Context */
+        get: operations["get_v2_revision_context"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/v2/changes/classify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Classify V2 Plan Change */
+        post: operations["classify_v2_plan_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/v2/changes/local": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview V2 Local Change */
+        post: operations["preview_v2_local_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/v2/changes/{draft_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get V2 Revision Preview */
+        get: operations["get_v2_revision_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/v2/changes/{draft_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm V2 Revision */
+        post: operations["confirm_v2_revision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/v2/changes/{draft_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel V2 Revision */
+        post: operations["cancel_v2_revision"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/plans/generate": {
         parameters: {
             query?: never;
@@ -1857,6 +1959,11 @@ export interface components {
              */
             completed_stages: number;
             /**
+             * Historically Completed Stages
+             * @default 0
+             */
+            historically_completed_stages: number;
+            /**
              * Total Stages
              * @default 0
              */
@@ -2169,6 +2276,13 @@ export interface components {
             v2_content?: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * V2 Revision
+             * @description Validated change preview and exact historical lineage for this revision
+             */
+            v2_revision?: {
+                [key: string]: unknown;
+            } | null;
             /** Draft Id */
             draft_id: string;
             status: components["schemas"]["PlanDraftStatus"];
@@ -2244,6 +2358,13 @@ export interface components {
              * @description Validated V2 teaching content for this exact draft or revision
              */
             v2_content?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * V2 Revision
+             * @description Validated change preview and exact historical lineage for this revision
+             */
+            v2_revision?: {
                 [key: string]: unknown;
             } | null;
             /** Plan Id */
@@ -3986,6 +4107,20 @@ export interface components {
             objective: string;
             learning_guidance?: components["schemas"]["LearningGuidance"] | null;
         };
+        /** StageHistoricalLearningView */
+        StageHistoricalLearningView: {
+            /** Source Plan Id */
+            source_plan_id: string;
+            /** Source Revision */
+            source_revision: number;
+            /** Source Stage Id */
+            source_stage_id: string;
+            /**
+             * Learning Status
+             * @enum {string}
+             */
+            learning_status: "started" | "completed";
+        };
         /**
          * StageResourceAssignmentView
          * @description 阶段 → 资源分配。``role=primary`` 表示该阶段主线。
@@ -4077,6 +4212,7 @@ export interface components {
             /** Tasks */
             tasks: components["schemas"]["PracticeTaskView"][];
             completion?: components["schemas"]["StageCompletionView"];
+            historical_learning?: components["schemas"]["StageHistoricalLearningView"] | null;
         };
         /** SummaryAttemptView */
         SummaryAttemptView: {
@@ -4259,6 +4395,52 @@ export interface components {
          * @enum {string}
          */
         UnitProgress: "not_started" | "in_progress" | "completed" | "skipped";
+        /** V2ChangeClassificationRequest */
+        V2ChangeClassificationRequest: {
+            /** Change Text */
+            change_text: string;
+        };
+        /** V2ChangeClassificationView */
+        V2ChangeClassificationView: {
+            /**
+             * Status
+             * @constant
+             */
+            status: "needs_clarification";
+            /** Clarification Questions */
+            clarification_questions: string[];
+        };
+        /** V2LocalChangeRequest */
+        V2LocalChangeRequest: {
+            /** Current Plan Id */
+            current_plan_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** Stage Edits */
+            stage_edits?: components["schemas"]["V2LocalStageEdit"][];
+            /** Stage Order */
+            stage_order?: string[] | null;
+        };
+        /** V2LocalStageEdit */
+        V2LocalStageEdit: {
+            /** Stage Id */
+            stage_id: string;
+            /** Title */
+            title?: string | null;
+            /** What To Learn */
+            what_to_learn?: string | null;
+        };
+        /** V2RevisionDecisionRequest */
+        V2RevisionDecisionRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Draft Hash */
+            draft_hash: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -4363,6 +4545,14 @@ export interface components {
              * @default null
              */
             v2_content: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * V2 Revision
+             * @description Validated change preview and exact historical lineage for this revision
+             * @default null
+             */
+            v2_revision: {
                 [key: string]: unknown;
             } | null;
         };
@@ -6522,6 +6712,222 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+        };
+    };
+    get_v2_revision_context: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    classify_v2_plan_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["V2ChangeClassificationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["V2ChangeClassificationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_v2_local_change: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["V2LocalChangeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanDraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_v2_revision_preview: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanDraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_v2_revision: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["V2RevisionDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanDecisionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_v2_revision: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["V2RevisionDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanDecisionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
