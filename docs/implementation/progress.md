@@ -1,3 +1,13 @@
+## 2026-10-08 Planning V2 Item 5：TEACHING_RESEARCH_COMPLETE / ITEM6_NOT_STARTED / STOP
+
+- 基线 `37871f0fd861810bcb67c76d02cb96819722dfc1`、`feat/n1-resource-discovery` 匹配、tracked clean；先有界审计旧端口/安全/Provider/预算，再明确11文件所有权。[本轮报告](../planning-v2/ITEM5_TEACHING_RESOURCE_RESEARCH.md)包含字段、复用、真实本地审核依据及限制。未改Item1～4、Policy v2、Seed/审核映射、架构；既存排除目录未访问/修改/提交。
+- ResourceResearcher仅消费冻结B missing outcomes，校验Gap/Plan/Coverage/Profile与actor/project/session来源；精确保留required/recommended、depth/text/refs及内部起点/事实。先scoped review+freeproof复用，再GitHub工程教程候选，Web仅不足时发现候选；标题/README/mainline_candidate不等于正文覆盖。真实本地MCP v8 roles/interfaces沿用既有review_record与实际free_public，不伪造正文hash/继承TOC资格；新正文只得research_checked，不晋升公共reviewed、不定课程角色。
+- 最小正文适配复用固定GitHub pinned transport：README索引最多一章、2HTTP/64KiBwire/16KiBtext/15s，MIME/encoding/path/IP/TLS/禁代理重定向重试；git-blob版本+textSHA/chunk/location绑定。独立Reader purpose复用原LLMPort/Provider，仅批准Policy原文+匿名known IDs，无tools/DB/课程权限；finally清正文，result/cache/snapshot/receipt只留metadata与有界短意见，拒绝整chunk及跨字段分段复制。
+- 共享预算reserve-before-dispatch，未知cost/token保worst，unknown/pending恢复阻断不重派。独立审查首轮FAIL发现分段正文、多指标超额漏记费用、completed错源回放；同批RED+局部修正后复核PASS，含跨repo缓存绑定、known失败后续research_stopped。typed snapshot不代表持久崩溃恢复，Item7仍须接实际预派发保存/总账/fence/reconcile。
+- 有效RED：Research16FAIL、Body75FAIL、Reader11FAIL+隐私2FAIL+单字段echo2FAIL+分段echo2FAIL，HARD同批23FAIL21PASS；最终新定向144PASS（Research44+Body83+Reader17），既有资源75与Provider/failclosed60PASS，共279不同用例PASS、collection279PASS、Ruff/diff PASS。SSL guard/runner root import环境失败原证据保留后定向修正；Fake/Mock不证明真实Reader教材语义，未重复全量Backend。
+- 820受保护tracked文件除允许Provider22行外、378历史账本、.env与旧progress全文保持。产品模型0/真实搜索0/真实Reader0/DB0；账本183/280、unknown177/183不动，无Run/Job/Draft/Plan mutation、migration、Worker/Runtime/UI接线，公共generate仍failclosed。真实PG行计数/浏览器/外部API/Reader语义/全量Backend/整链E2E均NOT RUN。
+- 未评估hard_constraints保留constraints_pending且不外发；未知领域无批准publicdescriptor为unresolved；Web仅候选；旧搜索无typed dispatch/usage为search_unclassified保预留并停止；URL缓存仅同冻结Run metadata。无合适免费资料/预算不足保留required缺口。Item1条件接受、Item2真实语义待整链限制不变。十一文件本地提交消息 `feat(planning): add v2 teaching resource research`，Final HEAD见最终答复与ignored final.json；主协调请求Sol6.1high、NORMAL/独立审查Sol6.1medium、安全及预算/引用具体缺口HARD Sol6.1xhigh，actual NOT OBSERVABLE。不改全局配置、不push/merge/deploy；ITEM6_NOT_STARTED；STOP。
+
 ## 2026-10-08 Planning V2 Item 4：RESOURCE_GAP_EXTRACTION_COMPLETE / ITEM5_NOT_STARTED / STOP
 
 - 基线 `2ef6f2ac16b4bc35a1bf1a826b3febcff4db406f`、`feat/n1-resource-discovery` 匹配，tracked clean。只新增纯领域 `extract(CapabilityPlan, CoverageResult)->ResourceGapSet` 与定向测试；[本轮报告](../planning-v2/ITEM4_RESOURCE_GAP_EXTRACTION.md)记录字段、接口、代表结果及信任边界。Item1/2/3、Policy v2、原审核映射、架构和历史报告不变。

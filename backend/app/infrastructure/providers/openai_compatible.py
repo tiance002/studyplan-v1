@@ -43,6 +43,10 @@ from app.infrastructure.providers.goal_requirement_contract import (
     valid_goal_requirement_input,
 )
 from app.ports.llm import LLMFailure, LLMNotDispatchedError, LLMResult
+from app.infrastructure.providers.research_reader_contract import (
+    READER_OUTPUT_CAP, READER_PURPOSE, READER_SHAPE, READER_SYSTEM,
+    validate_reader_input, validate_reader_output,
+)
 
 # Explicit shapes used by the existing deterministic validators/projection.
 SHAPES: dict[str, dict[str, Any]] = {
@@ -59,6 +63,7 @@ SHAPES[SUMMARY_PURPOSE] = {"conclusion": "needs_revision", "covered": [], "gaps"
 SHAPES[ASSISTANT_PURPOSE] = {"reply": "非空 Markdown 反馈", "status": "continue 或 ready_to_draft", "proposal": None}
 SHAPES[PROMPT_PURPOSE] = {"strengths": [], "gaps": [], "suggestions": []}
 SHAPES[GOAL_REQUIREMENT_PURPOSE] = GOAL_REQUIREMENT_SHAPE
+SHAPES[READER_PURPOSE] = READER_SHAPE
 SHAPES[CAPABILITY_PURPOSE] = CAPABILITY_SHAPE
 
 RESOURCE_ROLE_CONTRACT = (
@@ -123,6 +128,11 @@ class OpenAICompatibleLLM:
         self.configuration_ref = "deployment"
 
     def request_options(self, purpose: str) -> dict[str, object]:
+        if purpose == READER_PURPOSE:
+            return {"model": self.model, "max_tokens": min(READER_OUTPUT_CAP, self.budget_policy.practice,
+                                                            self.budget_policy.deployment_cap, self.budget_policy.model_cap),
+                    **({"thinking": {"type": "disabled"}} if (urlsplit(self.base_url).hostname or "").lower() == "api.deepseek.com"
+                       and self.model == "deepseek-flash" else {})}
         cap = min(self.budget_policy.practice, self.budget_policy.deployment_cap, self.budget_policy.model_cap) if purpose in {SUMMARY_PURPOSE, PROMPT_PURPOSE, ASSISTANT_PURPOSE, GOAL_REQUIREMENT_PURPOSE, CAPABILITY_PURPOSE} else self.budget_policy.for_purpose(purpose)
         options: dict[str, object] = {"model": self.model, "max_tokens": cap}
         if (urlsplit(self.base_url).hostname or "").lower() == "api.deepseek.com" and self.model == "deepseek-flash":
@@ -130,6 +140,10 @@ class OpenAICompatibleLLM:
         return options
 
     def preflight(self, *, purpose, payload, schema_name):
+        if purpose == READER_PURPOSE:
+            if not validate_reader_input(payload, schema_name):
+                return LLMFailure("research_reader_input_invalid", "Reader input contract rejected", details={"dispatched": False})
+            return None
         if purpose == CAPABILITY_PURPOSE:
             if not valid_capability_planning_input(payload, schema_name):
                 return LLMFailure("capability_planning_input_invalid", "Capability planning input contract rejected",
@@ -320,6 +334,8 @@ class OpenAICompatibleLLM:
             system = GOAL_REQUIREMENT_SYSTEM
         if purpose == CAPABILITY_PURPOSE:
             system = CAPABILITY_SYSTEM
+        if purpose == READER_PURPOSE:
+            system = READER_SYSTEM
         message = {"purpose": purpose, "schema": schema_name, "field_shape": shape, "context": context}
         if "domain_pack" in payload:
             message["domain_pack"] = payload["domain_pack"]
@@ -450,6 +466,12 @@ class OpenAICompatibleLLM:
             return LLMFailure("provider_invalid_shape", "Provider returned JSON with an invalid field shape",
                               details={**diagnostics, "missing_top_level_fields": missing}, **failure)
         diagnostics["missing_top_level_fields"] = missing
+        if purpose == READER_PURPOSE:
+            try:
+                validate_reader_output(parsed, payload)
+            except ValueError:
+                return LLMFailure("research_reader_output_invalid", "Reader response contract rejected",
+                                  details=diagnostics, **failure)
         return LLMResult(payload=parsed, model_id=str(data.get("model") or self.model),
                          provider="openai_compatible", input_tokens=failure["input_tokens"],
                          output_tokens=failure["output_tokens"], cost_micros=None,
