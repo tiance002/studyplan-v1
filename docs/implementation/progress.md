@@ -1,3 +1,12 @@
+## 2026-10-08 Planning V2 Item 1 Hard Constraint Fix：READY_FOR_REAL_RETEST / SEMANTIC_ACCEPTANCE_PENDING / ITEM2_NOT_STARTED / STOP
+
+- 基线 `e025f2f05b5b8216905f312a5ff80a6888b5e2d1`、`feat/n1-resource-discovery` 与预期一致、tracked clean；本地提交消息 `fix(planning): preserve explicit goal constraints`，final SHA见答复及 ignored final evidence。不push/merge/deploy。
+- 仅专用SYSTEM Prompt明确所有获准输入的显式禁止/实现/范围/费用限制，即使constraints为空也进入hard_constraints；需求与约束可共存，structured同义合并仍逐条原文/index，Python声明/interview用途不误分类，无限制不虚构、冲突保留澄清。Schema/SHAPE/Validator/IDhash/Analyzer/transport/preflight/预算无改动；非Prompt AST与基线相同。
+- 新12项先RED 1FAIL11PASS，修正后12PASS；统一回归198PASS（Item1 104+既有94，含JSON/unknown/GoalSpec/fail-closed），backend collection2061PASS、Ruff/diff PASS；独立有限审查PASS，无离线BLOCKER。正确fixtures仅证明机械表示/校验，漏自然语言约束仍Validator PASS反例保留，真实语义NOT RUN/PENDING，旧真实Case2 FAIL不被覆盖。
+- 产品模型0（本轮授权0）、搜索/Reader0、DB写入0、migration0；新Run/Job/PlanMutation0为未接DB及依赖访问门禁证据，真实PG行计数NOT RUN。public generate继续scope后503、无旧Fake注册、Planning占位页保持。历史真实响应/失败报告/账本/unknown177/config/架构均保全，未重派unknown，账本177/280与unknown1保持。
+- 仅Prompt、新Item1测试、本[实施报告](../planning-v2/ITEM1_HARD_CONSTRAINT_FIX.md)及本进度四文件；报告含根因、分层证据及独立审查。提出单独最多5次新身份复测（Case2/4/5/6+独立project_context，每案1次，无retry/repair）申请，尚未授权或执行，不消费上轮剩余次数。
+- 主协调请求Sol6.1high，实施/独立审查请求Sol6.1medium，actual均NOT OBSERVABLE，无HARD升级。完整Planning V2仍未完成，全产品STAGING_BLOCKED/NOT_READY；本轮STOP，Item2未启动。
+
 ## 2026-10-07 Planning V2 Item 1：PLANNING_V2_ITEM1_GOAL_REQUIREMENT_ANALYSIS_COMPLETE / ITEM2_NOT_STARTED / STOP
 
 - 基线 `31513e960723414645e4d3332c29718b603c96bd`、`feat/n1-resource-discovery`，与指定HEAD相同、tracked clean。上位[Architecture Contract](../planning-v2/PLANNING_V2_ARCHITECTURE_CONTRACT.md)原文保持；本地提交消息 `feat(planning): add v2 goal requirement analysis`，final SHA见答复与 `var/planning-v2-item1-20261007/final.json`；不push/merge/deploy。
