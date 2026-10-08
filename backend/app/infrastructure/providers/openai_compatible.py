@@ -42,6 +42,10 @@ from app.infrastructure.providers.goal_requirement_contract import (
     GOAL_REQUIREMENT_SYSTEM,
     valid_goal_requirement_input,
 )
+from app.infrastructure.providers.curriculum_contract import (
+    CURRICULUM_OUTPUT_CAP, CURRICULUM_PURPOSE, CURRICULUM_SHAPE, CURRICULUM_SYSTEM,
+    valid_curriculum_input, validate_curriculum_output,
+)
 from app.ports.llm import LLMFailure, LLMNotDispatchedError, LLMResult
 from app.infrastructure.providers.research_reader_contract import (
     READER_OUTPUT_CAP, READER_PURPOSE, READER_SHAPE, READER_SYSTEM,
@@ -65,6 +69,7 @@ SHAPES[PROMPT_PURPOSE] = {"strengths": [], "gaps": [], "suggestions": []}
 SHAPES[GOAL_REQUIREMENT_PURPOSE] = GOAL_REQUIREMENT_SHAPE
 SHAPES[READER_PURPOSE] = READER_SHAPE
 SHAPES[CAPABILITY_PURPOSE] = CAPABILITY_SHAPE
+SHAPES[CURRICULUM_PURPOSE] = CURRICULUM_SHAPE
 
 RESOURCE_ROLE_CONTRACT = (
     "Resource role must be exactly primary (主线), supplement (补充/补缺), "
@@ -128,6 +133,11 @@ class OpenAICompatibleLLM:
         self.configuration_ref = "deployment"
 
     def request_options(self, purpose: str) -> dict[str, object]:
+        if purpose == CURRICULUM_PURPOSE:
+            return {"model": self.model, "max_tokens": min(CURRICULUM_OUTPUT_CAP, self.budget_policy.practice,
+                                                            self.budget_policy.deployment_cap, self.budget_policy.model_cap),
+                    **({"thinking": {"type": "disabled"}} if (urlsplit(self.base_url).hostname or "").lower() == "api.deepseek.com"
+                       and self.model == "deepseek-flash" else {})}
         if purpose == READER_PURPOSE:
             return {"model": self.model, "max_tokens": min(READER_OUTPUT_CAP, self.budget_policy.practice,
                                                             self.budget_policy.deployment_cap, self.budget_policy.model_cap),
@@ -140,6 +150,11 @@ class OpenAICompatibleLLM:
         return options
 
     def preflight(self, *, purpose, payload, schema_name):
+        if purpose == CURRICULUM_PURPOSE:
+            if not valid_curriculum_input(payload, schema_name):
+                return LLMFailure("curriculum_input_invalid", "Curriculum input contract rejected",
+                                  details={"dispatched": False})
+            return None
         if purpose == READER_PURPOSE:
             if not validate_reader_input(payload, schema_name):
                 return LLMFailure("research_reader_input_invalid", "Reader input contract rejected", details={"dispatched": False})
@@ -336,6 +351,8 @@ class OpenAICompatibleLLM:
             system = CAPABILITY_SYSTEM
         if purpose == READER_PURPOSE:
             system = READER_SYSTEM
+        if purpose == CURRICULUM_PURPOSE:
+            system = CURRICULUM_SYSTEM
         message = {"purpose": purpose, "schema": schema_name, "field_shape": shape, "context": context}
         if "domain_pack" in payload:
             message["domain_pack"] = payload["domain_pack"]
@@ -471,6 +488,12 @@ class OpenAICompatibleLLM:
                 validate_reader_output(parsed, payload)
             except ValueError:
                 return LLMFailure("research_reader_output_invalid", "Reader response contract rejected",
+                                  details=diagnostics, **failure)
+        if purpose == CURRICULUM_PURPOSE:
+            try:
+                validate_curriculum_output(parsed, payload)
+            except (ValidationAppError, ValueError, KeyError, TypeError):
+                return LLMFailure("curriculum_output_invalid", "Curriculum response contract rejected",
                                   details=diagnostics, **failure)
         return LLMResult(payload=parsed, model_id=str(data.get("model") or self.model),
                          provider="openai_compatible", input_tokens=failure["input_tokens"],

@@ -1,3 +1,13 @@
+## 2026-10-08 Planning V2 Item 6：CURRICULUM_COMPOSITION_COMPLETE / ITEM7_NOT_STARTED / STOP
+
+- 基线 `b707ad8d667b2cd9c3f47ea87a7c5fa177ef2ad1`、`feat/n1-resource-discovery` 匹配、tracked clean；有界核对 Item6/7、Single Authority、Matrix 与现有教学实体。共享端口与 ResearchSession 可复用，无新搜索/预算平台。[本轮报告](../planning-v2/ITEM6_CURRICULUM_COMPOSITION.md)记录完整合同、代表课程和限制；九文件本地提交，未改上游 Policy/Schema/审核映射、Seed 或架构。
+- 新增冻结 CurriculumContext/Plan、共享领域 Validator、单次 CurriculumComposer、专用 `planning.curriculum_composition` / `CurriculumPlanV1` Provider协议。只编排 B 类，A只满足前置不回流复习；真实DAG支持跨阶段和阶段内有序教学。知识/单元/rubric/指导/PracticeDelta/任务验收及成果有结构化 outcome 关联，无额外教程正文。来源、受信版本、hash、原用户项目/约束由服务器保留 compile snapshot，模型不能改写。
+- 同时消费 Item3 reviewed content 和 Item5 research_checked；实际MCP v8 roles/interfaces+freeproof按现有证据冻结，minimal_connection研究及课程输出为合成fixture，不冒充正文或真实语义通过。同ID/version不同审核/免费事实不互借；缺教材/免费证明、未选合格案例、未判定硬约束保持incomplete。用户项目持续实践与whole_core/slices他人项目学习分开，MCP project_usage excluded仅micro，不强制主项目接入；interview不扩课。
+- 同一session预算预留实际Provider输出cap和总请求/最坏费用；条件项目search1HTTP、inspect最坏3HTTP/256KiB先预留，不读取源码、不引入Reader/第二模型。qualified未选保case_selection_pending、零搜索。unknown保pending/block，可信已观察超额升usage下界不重派；Item7 reconciliation须避免二结算。成功receipt/持久化/并发互斥未实现，不把内存snapshot当恢复能力。
+- RED Domain31FAIL、App25FAIL、Provider2FAIL保留；引用排序及unknown字节超额各1FAIL、独审两项2FAIL后局部修复。最终新三套件92PASS（51+28+13），受影响既有Provider/Reader/JSON与failclosed77PASS，合计169不同用例PASS，collection169PASS，Ruff/最终diff见报告。独立只读审查PASS，两项阻断关闭，最后源码差异与报告/证据有限复核无剩余具体阻断；未重复全量Backend。
+- 产品真实LLM/GitHub/Web/Reader/DB调用0；历史183/280及unknown177/183保留，不重派。无Run/Job/Draft/Plan mutation、migration、Worker/Runtime/UI接线或public generate开放；真实PG行数/浏览器/外部接口/课程教学语义/Item7编译/E2E均NOT RUN。Item1条件接受、Item2语义待整链及Item5 Web正文/约束适配/持久化边界保留。
+- 本地提交消息 `feat(planning): add v2 curriculum composition`；精确Final HEAD见最终答复及ignored final.json。主协调请求Sol6.1high、引用/预算Domain Sol6.1xhigh、App/独审Sol6.1medium、实体清点Luna medium，actual均NOT OBSERVABLE，不改全局配置，不用max/Astra。未push/merge/deploy；ITEM7_NOT_STARTED；STOP。
+
 ## 2026-10-08 Planning V2 Item 5：TEACHING_RESEARCH_COMPLETE / ITEM6_NOT_STARTED / STOP
 
 - 基线 `37871f0fd861810bcb67c76d02cb96819722dfc1`、`feat/n1-resource-discovery` 匹配、tracked clean；先有界审计旧端口/安全/Provider/预算，再明确11文件所有权。[本轮报告](../planning-v2/ITEM5_TEACHING_RESOURCE_RESEARCH.md)包含字段、复用、真实本地审核依据及限制。未改Item1～4、Policy v2、Seed/审核映射、架构；既存排除目录未访问/修改/提交。
