@@ -1,3 +1,10 @@
+## 2026-10-08 Planning V2 Item 7 P1：COMPILER_COMPLETE / CONTINUING_P2_P3
+
+- 基线 f1f3d139d197c29e8d76a0d5d0ce87a045278f4f；[P1 报告](../planning-v2/ITEM7_P1_COMPILER.md)记录完整字段流向与 P2 最小承载方案。新增纯 Compiler/Manifest，保留冻结课程、Profile、能力、来源、约束及项目事实，不补课程或生成 DB ID。
+- 独审发现资料资格一致重算 hash 晋升及未知 accepted_known 误拒绝；同批 RED 5 FAIL 后修复，独立定向复核 PASS。最终 Compiler 62 PASS，直接受影响回归 56 PASS（不累计重复用例），Ruff/diff PASS。原完整样例 digest 002f913c52b7a9fbc002c83d4da9948865a3d76fc0d7a2f597db5f4ff42a9ce0；不完整拒绝；原样例字节不变。
+- 本 checkpoint 产品模型/搜索/Reader/DB 写入 0；PG 持久化、事务、恢复、浏览器和真实教学语义 NOT RUN。既有 PG 角色只读预检满足要求，不修改全局角色。P2 拟在已有 JSONB 中增加 typed V2 snapshot，section_kind=v2_curriculum 仅协议 marker，真实 role 独立读回，须双向绑定与真实 PG 验证；无 migration。
+- 用户最新授权连续 P1→P2→P3，每阶段独审和本地 checkpoint，无需阶段间再授权；遇冻结合同/核心语义/必要 migration 或无法关闭完整性问题仍 STOP。真实外部调用保持 0，公开 generate 关闭，无 push/merge/deploy；ITEM8_NOT_STARTED。
+
 ## 2026-10-08 Planning V2 Item 7 P0 上游修复：RESOLVED / DOMAIN_LIVE_PENDING / P1_P3_NOT_STARTED / STOP
 
 - 基线 `5ca50020864bae52475fd0318a35677bb7ef203f`、`feat/n1-resource-discovery` 匹配；保留原 P0 报告字节/hash 与下方完整历史。[修复报告](../planning-v2/ITEM7_P0_UPSTREAM_UNBLOCK.md)记录三项上游修复、证据和限制。
