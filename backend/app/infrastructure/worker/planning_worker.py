@@ -95,7 +95,7 @@ class PlanningWorker:
             # A replacement Worker owns the run. The old claim cannot finish it.
             logger.warning("planning Worker stopped after losing lease for run %s", claim.run_id)
         except ReviewPersistenceInterrupted:
-            logger.exception("summary review persistence interrupted; retain job for fenced recovery")
+            logger.warning("runtime persistence interrupted; retain job for fenced recovery")
         except Exception:
             logger.exception("planning Worker execution failed for run %s", claim.run_id)
             self._jobs.finish(claim, "failed")

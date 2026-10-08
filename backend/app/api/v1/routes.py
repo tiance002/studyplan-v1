@@ -42,7 +42,7 @@ from app.api.v1.views import (
 )
 from app.application.plan_service import DecisionCommand, DraftBundle, PlanBundle, PlanService
 from app.core.errors import NotFoundError
-from app.domain.planning.intent import goal_spec_from_payload
+from app.domain.planning.intent import GoalSpec, goal_spec_from_payload
 from app.domain.workspace.models import AuthContext
 from fastapi import APIRouter, Depends, Query, status
 
@@ -88,6 +88,20 @@ def generate_plan(
         run_id=run_id,
         status_url=f"{API_PREFIX}/runs/{quote(run_id, safe='')}?{urlencode({'project_id': project_id})}",
     )
+
+
+@router.post(
+    "/plans/v2/owned/generate",response_model=PlanGenerateResponse,status_code=status.HTTP_202_ACCEPTED,
+    operation_id="generate_owned_v2_plan",summary="受控 owned 环境的 V2 规划验证",
+)
+def generate_owned_v2_plan(payload: PlanGenerateRequest, project_id: str=ProjectId,
+    scope: AuthContext=Depends(get_auth_context),service: PlanService=Depends(get_plan_service)) -> PlanGenerateResponse:
+    spec=goal_spec_from_payload(payload.goal_spec.model_dump(mode="json")) if payload.goal_spec else GoalSpec(payload.goal)
+    if spec.target!=payload.goal:
+        from app.core.errors import ValidationAppError
+        raise ValidationAppError("goal 与 goal_spec.target 必须一致")
+    run_id=service.submit_owned_v2(scope=scope,project_id=project_id,goal_spec=spec)
+    return PlanGenerateResponse(run_id=run_id,status_url=f"{API_PREFIX}/runs/{quote(run_id,safe='')}?{urlencode({'project_id':project_id})}")
 
 
 @router.get(

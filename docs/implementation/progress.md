@@ -1,3 +1,12 @@
+## 2026-10-08 Planning V2 Item7 P1～P3：IMPLEMENTATION_COMPLETE / ITEM8_NOT_STARTED / STOP
+
+- 本轮Start f1f3d139d197c29e8d76a0d5d0ce87a045278f4f；P1本地52a326bf5d11d297fd47623cea346d4f6b55ff0e、P2本地f7eeab33eeb59d6824b2bc23d3e1a355c3a83340；P3最终SHA见提交后交付回执。[统一报告](../planning-v2/ITEM7_PLANNING_EXECUTION.md)前置当前交付且逐字节保留原P0失败记录，[P3报告](../planning-v2/ITEM7_P3_RUNTIME.md)记恢复边界与独审闭环。
+- 实际链为现有Worker/Run/Job→V2 Item1～6→确定性Compiler→typed单事务Draft→明确当前hash确认→原子Revision/current/history。受控owned202路径显式装配，默认产品工厂不启用，正式public generate503，无旧outline/structure/practice权威。
+- P1/P2独审已PASS；P3独审主动关闭正文receipt/usage、错误分类、预算重放、Domain精确额度、checkpoint身份、candidate计数、Run终态和实际Worker接管等问题。最后Composer预算反例实际RED1FAIL→GREEN3PASS，Item6原合同不动。P3主PG20PASS、预算5PASS、传播3PASS，去重25不同用例；真实HTTP1PASS、DTO9PASS、相邻3文件23PASS，collection26PASS、Ruff/diffPASS。原恢复16PASS1FAIL及Composer RED保留，不隐瞒失败或重复累加。
+- 真实新owned业务/checkpoint PG，既有0025/现有PostgresSaver初始化、roles_created=[]、库保留；成功receipt缺全部checkpoint重建同Draft/hash，实际新Worker租约接管零重复派发，旧fence拒绝。unknown/pending不重派；纯body成功但未有Reader成功receipt保持阻断，不冒称自动恢复。
+- 产品模型/搜索/Reader0；历史unknown177/183、378证据、.env、旧Item6样例和历史progress保全核对。无架构/Policy/Prompt/Schema/Seed/审核映射/迁移/正式数据改动，不push/merge/deploy。主协调请求Sol6.1 high、关键实施/独审xhigh，实际解析NOT OBSERVABLE。
+- 真实外部语义、官方未知领域证据、教学质量、浏览器与完整用户E2E NOT RUN；Assistant仅共享context/PG helper核对，完整会话NOT RUN。全产品仍NOT_READY，不自动进入Item8；本地P3checkpoint后STOP。
+
 ## 2026-10-08 Planning V2 Item 7 P2：PERSISTENCE_COMPLETE / CONTINUING_P3
 
 - P2 基线 P1 checkpoint 52a326bf5d11d297fd47623cea346d4f6b55ff0e；[P2 报告](../planning-v2/ITEM7_P2_PERSISTENCE.md)记录显式 typed snapshot、单事务实体/Draft、当前 hash 编辑重编译、明确确认、Revision 与正式消费者。无 migration，公共来源只读，研究资料不升级资格。

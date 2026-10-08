@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from copy import deepcopy
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable, Mapping, Sequence, cast
 from uuid import NAMESPACE_URL, uuid5
@@ -25,22 +25,26 @@ from app.agent_workflows.planning_batches import (
 from app.agent_workflows.state import PlanningState
 from app.application.draft_projection import project_draft
 from app.application.model_binding import SubmissionBinding
-from app.application.project_candidate_binding import frozen_candidate_url
 from app.application.plan_resources import (
     StageResourceView,
-    normalize_stage_resources,
     assert_frozen_resource_projection,
+    normalize_stage_resources,
     resolve_stage_resources,
     restrict_pack_resources,
 )
-from app.core.errors import ConflictError, DependencyUnavailableError, NotFoundError, ValidationAppError, VersionConflictError
-from app.core.ids import content_hash
+from app.application.project_candidate_binding import frozen_candidate_url
+from app.core.errors import (
+    ConflictError,
+    DependencyUnavailableError,
+    NotFoundError,
+    ValidationAppError,
+    VersionConflictError,
+)
+from app.core.ids import content_hash, new_id
 from app.domain.enums import (
-    AiRunKind,
     AiRunNextAction,
     AiRunStatus,
     DraftDecision,
-    GraphName,
     PlanDraftStatus,
     StageResourceRole,
 )
@@ -159,6 +163,7 @@ class PlanService:
         preference_resolver: Callable[[AuthContext, str], Any] | None = None,
         route_changes: GeneratedPlanChangesPort | None = None,
         v2_persistence=None,
+        v2_runtime_factory=None,
     ) -> None:
         self._repo = repository
         self._runs = runs
@@ -186,6 +191,7 @@ class PlanService:
         self._preference_resolver = preference_resolver
         self._route_changes = route_changes
         self._v2_persistence = v2_persistence
+        self._v2_runtime_factory = v2_runtime_factory
         # Only synchronous Fake/in-process generation lacks durable jobs. Its
         # caller-owned submission and receipts live outside the graph state.
         self._generation_inputs = {}
@@ -206,6 +212,61 @@ class PlanService:
         """Reject new planning before binding, persistence or dispatch."""
         scope.require_project(project_id)
         raise DependencyUnavailableError("学习计划生成正在升级，当前暂不可创建新路线。")
+
+    def submit_owned_v2(self, *, scope, project_id, goal_spec):
+        """Controlled owned test entry; no default or deployment fallback."""
+        from app.domain.planning.intent import goal_spec_payload
+        from app.domain.planning.v2_runtime import V2_EXECUTION_VERSION
+        scope.require_project(project_id)
+        factory=self._v2_runtime_factory
+        if factory is None or getattr(factory,"owned_only",False) is not True or self._planning_jobs is None:
+            raise DependencyUnavailableError("V2 owned runtime is not configured")
+        current=self._repo.get_current(project_id=project_id)
+        expected=current.revision if current else 0
+        manifest=factory.build_submission(scope,project_id,goal_spec,expected)
+        run=RunRecord(new_id("run"),scope.actor_id,project_id,"plan_generate","planning",V2_EXECUTION_VERSION,
+            AiRunStatus.QUEUED,AiRunNextAction.WAIT,thread_id=new_id("thread"))
+        initial={"goal":goal_spec.target,"goal_spec":goal_spec_payload(goal_spec),"manifest":manifest}
+        self._planning_jobs.enqueue(run,initial,manifest)
+        return run.run_id
+
+    def _execute_owned_v2(self, *, scope, run, initial, submission, claim, guard):
+        from app.domain.planning.v2_runtime import V2BudgetExceeded, V2RecoveryBlocked
+        from app.ports.llm import LLMFailure
+        from app.ports.summaries import ReviewPersistenceInterrupted
+        if claim is None:
+            raise DependencyUnavailableError("V2 owned runtime is not configured")
+        fence=PlanningWriteFence(claim.job_id,claim.run_id,claim.project_id,claim.actor_id,claim.lease_token)
+        manifest=initial.get("manifest")
+        try:
+            if self._v2_runtime_factory is None:
+                raise DependencyUnavailableError("V2 owned runtime is not configured")
+            if manifest!=submission.get("manifest"):
+                raise ConflictError("V2 frozen submission manifest mismatch")
+            runtime=self._v2_runtime_factory(scope,run.project_id,run.run_id,manifest=manifest,
+                write_fence=fence,thread_id=run.thread_id,guard=guard)
+            result=runtime.execute(initial)
+        except (PlanningLeaseLostError,ReviewPersistenceInterrupted):
+            raise
+        except V2RecoveryBlocked:
+            result=LLMFailure("v2_recovery_blocked","V2 recovery requires reconciliation",dispatch_unknown=True)
+        except V2BudgetExceeded:
+            result=LLMFailure("v2_budget_exceeded","V2 frozen budget rejected continuation")
+        except DependencyUnavailableError:
+            result=LLMFailure("v2_runtime_unavailable","V2 owned runtime is not configured")
+        except ValidationAppError:
+            result=LLMFailure("v2_validation_failed","V2 frozen content failed validation")
+        except ConflictError:
+            result=LLMFailure("v2_persistence_conflict","V2 persistence conflict")
+        if isinstance(result,LLMFailure):
+            status=AiRunStatus.RECONCILIATION_REQUIRED if result.dispatch_unknown else AiRunStatus.FAILED
+            action=AiRunNextAction.RECONCILE if result.dispatch_unknown else AiRunNextAction.NONE
+            self._update_run(project_id=run.project_id,run_id=run.run_id,status=status,next_action=action,
+                error_class=result.error_class,write_fence=fence)
+            self._planning_jobs.finish(claim,"reconciliation_required" if result.dispatch_unknown else "failed")
+            return
+        self._update_run(project_id=run.project_id,run_id=run.run_id,status=AiRunStatus.SUCCEEDED,next_action=AiRunNextAction.NONE,
+            result_ref=result.draft_id,write_fence=fence,expected_plan_version=manifest["expected_version"])
 
     def _progress_sink(self, claim: JobClaim | None) -> Callable[[PlanningState], None] | None:
         """Business-progress publisher for one fenced claim.
@@ -253,6 +314,9 @@ class PlanService:
             issued_at=datetime.now(timezone.utc),
             learning_project_scope=(project_id,),
         )
+        from app.domain.planning.v2_runtime import V2_EXECUTION_VERSION
+        if run.graph_version==V2_EXECUTION_VERSION:
+            return self._execute_owned_v2(scope=scope,run=run,initial=initial,submission=submission,claim=claim,guard=guard)
         goal = str(initial.get("goal") or "")
         selected_pack = initial.get("domain_pack")
         if not isinstance(selected_pack, Mapping):

@@ -20,6 +20,7 @@ from app.core.errors import (
     VersionConflictError,
 )
 from app.core.ids import new_id
+from app.domain.planning.v2_runtime import V2_EXECUTION_VERSION
 from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -104,7 +105,7 @@ class PgPlanningJobRepository:
                     if snapshot.get(field):
                         snapshot[field] = datetime.fromisoformat(snapshot[field])
                 return _run_from(snapshot)
-            if (row["kind"] != "plan_generate" or row["graph_version"] != SHORT_GENERATION_VERSION
+            if (row["kind"] != "plan_generate" or row["graph_version"] not in {SHORT_GENERATION_VERSION, V2_EXECUTION_VERSION}
                     or row["status"] not in {"queued", "running"}
                     or row["job_status"] not in {"pending", "running"}):
                 raise ConflictError("只能取消当前协议的活动规划；旧运行和待核对记录保留",
@@ -333,7 +334,7 @@ class PgPlanningJobRepository:
             raise ValidationAppError("未知 Worker job 终态")
         with self._tx(actor_id=claim.actor_id, project_id=claim.project_id) as conn:
             if not self._lock_live_claim(
-                conn, claim, allowed_run_statuses=("queued", "running", "waiting_user", "succeeded", "failed")
+                conn, claim, allowed_run_statuses=("queued", "running", "waiting_user", "succeeded", "failed", "reconciliation_required")
             ):
                 return False
             cursor = conn.execute(

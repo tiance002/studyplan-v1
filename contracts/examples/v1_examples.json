@@ -19,7 +19,9 @@
     "plan_draft_view": "PlanDraftView",
     "plan_decision_response": "PlanDecisionResponse",
     "v2_draft_owned_pg": "PlanDraftView",
-    "v2_revision_owned_pg": "PlanView"
+    "v2_revision_owned_pg": "PlanView",
+    "v2_run_queued_owned_pg": "RunView",
+    "v2_run_finished_owned_pg": "RunView"
   },
   "plan_generate_request": {
     "goal": "我想学会用 Agent 做一个 PDF 知识助手",
@@ -982,5 +984,23 @@
     "status": "approved",
     "version": 1,
     "approved_at": "2026-10-08T13:43:32.286159+00:00"
+  },
+  "v2_run_queued_owned_pg": {
+    "run_id": "run_2abbf6f62bd7474f9d2df52d7d268cb7",
+    "status": "queued",
+    "next_action": "wait",
+    "version": 1,
+    "result_ref": null,
+    "error": null,
+    "progress": null
+  },
+  "v2_run_finished_owned_pg": {
+    "run_id": "run_2abbf6f62bd7474f9d2df52d7d268cb7",
+    "status": "succeeded",
+    "next_action": "none",
+    "version": 3,
+    "result_ref": "drf_65fc9ade5dff5c759bade40dfa08c49c",
+    "error": null,
+    "progress": null
   }
 }

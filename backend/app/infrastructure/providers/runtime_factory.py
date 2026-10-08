@@ -149,3 +149,51 @@ class PersonalPlanningRuntimeFactory:
         ledger = PgAttemptLLM(self.settings.database_url, provider, manifest=frozen_manifest)
         executor = PgPlanningExecutor(self.settings.checkpoint_database_url, llm=ledger)
         return PlanningRuntime(ledger, executor)
+
+
+class OwnedV2PlanningRuntimeFactory:
+    """Explicit owned-only assembly; ordinary composition never enables it.
+
+    Binding/provider resolvers are server dependencies. The HTTP request cannot
+    choose a model, budget, source registry or fabricate DomainApproval objects.
+    """
+    def __init__(self, dsn, checkpoint_dsn, *, source_facts, budget, binding_resolver,
+                 provider_resolver, github=None, web=None, body_reader=None,
+                 project_index=None, domain_sources=()):
+        from urllib.parse import urlsplit
+
+        from app.infrastructure.db.plan_repository import to_psycopg_dsn
+        for value in (dsn,checkpoint_dsn):
+            parsed=urlsplit(to_psycopg_dsn(value))
+            if not parsed.path.removeprefix("/").startswith("studyplan_test_") or parsed.hostname not in {"127.0.0.1","::1","localhost"}:
+                raise ValidationAppError("V2 controlled runtime requires loopback owned test databases")
+        if to_psycopg_dsn(dsn)==to_psycopg_dsn(checkpoint_dsn):
+            raise ValidationAppError("V2 business and checkpoint databases must be separate")
+        self.dsn,self.checkpoint_dsn=dsn,checkpoint_dsn
+        self.source_facts,self.budget=source_facts,budget
+        self.binding_resolver,self.provider_resolver=binding_resolver,provider_resolver
+        self.github,self.web,self.body_reader,self.project_index=github,web,body_reader,project_index
+        self.domain_sources=tuple(domain_sources)
+        self.owned_only=True
+
+    def build_submission(self,scope,project_id,goal_spec,expected_version):
+        from datetime import datetime, timezone
+
+        from app.domain.planning.v2_runtime import build_v2_manifest
+        scope.require_project(project_id)
+        binding=self.binding_resolver(scope,project_id)
+        return build_v2_manifest(goal_spec,model_ref=binding.model_ref,source_facts=self.source_facts,
+            budget=self.budget,checked_at=datetime.now(timezone.utc).isoformat(),expected_version=expected_version,domain_sources=self.domain_sources)
+
+    def __call__(self,scope,project_id,run_id,*,manifest,write_fence,thread_id,guard):
+        from app.infrastructure.checkpointer.v2_planning_executor import PgV2Checkpoints
+        from app.infrastructure.checkpointer.v2_planning_runtime import V2PlanningRuntime
+        from app.infrastructure.db.v2_planning_persistence import PgV2PlanningPersistence
+        from app.infrastructure.providers.v2_attempts import PgV2Calls
+        provider=self.provider_resolver(scope,project_id,run_id,manifest["model_ref"])
+        calls=PgV2Calls(self.dsn,scope=scope,project_id=project_id,run_id=run_id,manifest=manifest,
+            fence=write_fence,provider=provider,guard=guard)
+        checkpoints=PgV2Checkpoints(self.checkpoint_dsn,calls=calls,thread_id=thread_id)
+        return V2PlanningRuntime(calls=calls,checkpoints=checkpoints,persistence=PgV2PlanningPersistence(self.dsn),
+            source_facts=self.source_facts,github=self.github,web=self.web,body_reader=self.body_reader,
+            project_index=self.project_index,domain_sources=self.domain_sources)

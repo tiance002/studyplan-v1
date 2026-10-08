@@ -1,3 +1,81 @@
+# Planning V2 Item7 — P1～P3 实施与独立审查交付
+
+日期：2026-10-08。P1～P3 独立审查均 PASS，ITEM7_IMPLEMENTATION_COMPLETE；下方原P0失败报告完整保留，旧P1_P3_NOT_STARTED是历史时点。
+
+## 基线与本地checkpoint
+
+Item7 Start HEAD：`f1f3d139d197c29e8d76a0d5d0ce87a045278f4f`，分支 `feat/n1-resource-discovery`。连续实施、独立审查、范围内自动修复和本地checkpoint均由用户明确授权。之前P0阻塞已在 [上游修复报告](ITEM7_P0_UPSTREAM_UNBLOCK.md)处理，本轮不改写它的历史结论。
+
+| 阶段 | 本地checkpoint | 报告 |
+|---|---|---|
+| P1 Compiler | `52a326bf5d11d297fd47623cea346d4f6b55ff0e` | [P1报告](ITEM7_P1_COMPILER.md) |
+| P2 Persistence | `f7eeab33eeb59d6824b2bc23d3e1a355c3a83340` | [P2报告](ITEM7_P2_PERSISTENCE.md) |
+| P3 Runtime | 提交后写入最终交付回执，不在自身提交内容内形成hash循环 | [P3报告](ITEM7_P3_RUNTIME.md) |
+
+各阶段均有annotated本地checkpoint tag。未push、merge、deploy。主协调请求Sol6.1 high，关键实现/独审Sol6.1 xhigh，实际解析NOT OBSERVABLE；未改全局配置，无Sol max/6Astra。
+
+## 核心调用链和字段消费矩阵
+
+`受控owned提交 → 现有Run/Job/Worker → V2版本适配 → Item1 → Item2 → Item3 → Item4 → Item5 → Item6 → compile_curriculum → PgV2PlanningPersistence → Draft → 明确当前hash确认 → 原子publication → 正式PlanRevision/current → 学习与实践读取`。
+
+执行层只校验/编译/冻结/保存，课程决策仍由Item6负责。正常生成终态为succeeded+none；Plan发布依赖明确用户确认。非语义标题/描述编辑经原Item6 Validator及同一Compiler产生当前Draft hash，初始Curriculum hash只证明来源。语义改变不由Execution偷偷改写。
+
+| 事实/字段组 | 实际承载/校验 | 实际消费者及证据 |
+|---|---|---|
+| Profile target/scope/depth/starting_point/purpose/project_context | typed原快照、source/hash、compiler_packet | Compiler、Draft/Plan v2_content；隐私上下文只取必要教学事实 |
+| requirements/origin/rationale/source_refs/learner_claims | 原Profile与能力requirement/claim绑定 | Compiler完整性、Draft解释、A/B排除测试；A不产生教学实体 |
+| Capability/Policy/outcomes/importance/depth/前置 | 冻结CapabilityPlan/Context/Manifest | Coverage→Gap→Research→Curriculum→Compiler；实体links和正式投影 |
+| Stage title/role/order/why_now/what_to_learn/前置 | normalized Stage + typed映射；section_kind=v2_curriculum与快照双向校验 | 当前/历史Plan、Stage读取；长描述无截断；role独立保留 |
+| Knowledge identity/title/objectives/outcomes/materials | 精确稳定identity/version语义匹配；公共实体可复用 | Catalog/Knowledge/Exposure；不按标题合并或重建公共knowledge |
+| LearningUnit objectives/rubric/knowledge refs | 实体/links + 结构化rubric/outcomes | 真实PG学习、Prompt/Summary读取和源关联 |
+| 材料role/order/reading_focus/source/section/version/hash/review/access/限制 | 公共reviewed首次独立冻结来源核查；research_checked项目资源typed绑定 | 正式reading/Exposure；版本字符串保留、不晋升公共审核资格 |
+| Guidance/comparison/PracticeDelta全部字段 | 同一Compiler纯映射 + typed快照/原列 | Plan/PgPrompts/PgSummaries/Exposure实际投影 |
+| Task目标/范围/验收/outcomes/knowledge refs/order/kind | PracticeTask + 结构化验收和正式links | Practice/Prompt/Summary；不把dict转str或省略验收 |
+| 已有项目/Starter/Micro Exercise/final_artifact | 独立carrier/task kind/final_artifact与原project_context | 正式Plan/实践上下文；不强迫重建项目 |
+| ProjectStudy whole_core/slices/问题/范围/I-O/设计问题/案例 | 独立typed ProjectStudy，保留requirement与case资格 | 两种模式真实PG round-trip；不冒充旧SourceSlice或持续实践 |
+| hard_constraints/assessment/unresolved/source limitations | 来源hash保护，服务端重算/精确比对 | 编译与确认门禁、正式解释投影；未完整不可Draft |
+| 原Curriculum/当前Compiled/当前Draft/Revision hash与identity映射 | V2ExecutionSnapshotV1：version/compiled/manifest/bindings/compiler_packet/original_curriculum_hash | 固定类型解码、重编译全投影核验、CAS/publication/current/history |
+| Run/Job/Attempt/receipt/预算/来源/配置/dispatch identity | 原表与版本化manifest；服务器冻结提交再次核对 | PgV2Calls/PgV2Checkpoints/guarded transport/实际Worker；恢复和cancel/fence |
+
+完整原始字段清点在P1报告，实际PG消费表在P2报告。JSONB里存在不是接线证明：本轮使用真实PG、实际Repository/Service/HTTP消费者验证。Assistant继承共享context/隐私投影已代码及PG helper核对，完整Assistant对话与Provider仍NOT RUN。
+
+## 独立审查发现、修复与真实验证
+
+三阶段独审均在独立上下文中查看实际源码、diff、冻结合同和执行证据，主动构造反例；未让实施者自报PASS取代独审。
+
+- P1：一致重算hash可提升资料资格；未知accepted_known错误要求B类Reader权限。修复后独立反例PASS，无资格放宽。
+- P2：非空Run缺fence仍保存、首次公共source可自证替换、compiled/Manifest一致重哈希分叉、原完整样例缺空assessment造成快照失败。逐项RED→GREEN；共享原Compiler规范化，不修改历史样例或初始hash。真实PG确认单事务回滚/幂等/CAS/当前hash确认/Revision历史/Fresh Readback。
+- P3：正文回显可从envelope进入receipt、已知Reader错误误分类、预算重放阻断、checkpoint实际Run绑定、候选预算持久化、PG适配依赖方向、Run终态与Job不一致、Worker接管恢复错误及Composer本地预算传播。仅局部适配和受影响反例修复，详见P3报告；最后一项实际RED→GREEN、独审确认关闭，11源码/测试SHA256差异0。
+
+| 层与证据 | 实际结果 | 解释 |
+|---|---|---|
+| P1 Compiler | PASS 62；相邻PASS56 | 离线结构/确定性；两组有重叠 |
+| P2 Compiler/Snapshot | PASS69；相邻PASS114 | 含原P1用例，不累计冒称全新测试 |
+| P2真实owned PG | PASS20 + 新fenced正例PASS1 | 既有migration0025，新库/复用角色，不操作正式库 |
+| P2真实HTTP | PASS1；DTO PASS9 | 实际Cookie/CSRF/scope、编辑确认/current/history、public503 |
+| P3真实owned PG | 主矩阵PASS20；预算终态PASS5；传播闭环PASS3 | 三批去重共25不同PG用例；原16PASS1FAIL和Composer RED1FAIL保留 |
+| P3真实HTTP | PASS1；DTO PASS9 | 受控202、实际Worker、Draft、明确确认、current/history；完成后派发增量0 |
+| P3相邻离线 | PASS23 | 仅模型绑定/RC预算/旧Planning去接线3文件 |
+| Ruff / diff / import-collection | PASS；最终collection26项 | collection与执行分开，不替代PG验收 |
+| 真实产品模型/搜索/Reader | NOT RUN（请求0） | 外部返回明确为合成/Mock，未消费产品预算 |
+| 浏览器/完整用户E2E/真实教学语义 | NOT RUN | 不声明大规模可靠性或产品READY |
+
+成功receipt无checkpoint可重建完整进度；删全部V2 checkpoint后同Draft/hash、0重复外部派发。实际Worker于Draft落库后中断、新租约接管也零重复派发，旧fence失效。未知专项完整自动触发和可信registry/receipt恢复通过实际DomainVerifier+Mock transport测试，不代表真实领域来源语义已验收。unknown/pending不重派、不换请求身份；历史unknown177/183未操作。纯body成功而无Reader成功receipt的中断保持阻断，不能伪造正文或自动重读。
+
+## 修改范围、保全与剩余门禁
+
+P1新增纯Compiler/测试；P2新增typed执行快照、PG桥接与读取消费，必要现有Domain/Repository/API契约适配；P3新增纯版本manifest、PG runtime/checkpoint/receipt/transport适配和owned入口/Worker接线。完整路径清单由各checkpoint diff及阶段报告给出；最终交付回执保存源文件hash。
+
+无冻结架构/Item1～6核心语义/Policy/Prompt/Schema/审核映射/Seed修改，无migration/全局角色修改，无正式数据/历史Run/Receipt/unknown修改，无产品外部调用。原378份历史账本证据、.env、原Item6样例及progress历史由最终保全检查逐hash核对。受保护未跟踪目录未访问/修改/提交。
+
+尚需另行授权：真实Provider/搜索/Reader整链语义、真实官方未知领域注册证据、课程和教材教学质量、实际浏览器与完整用户接受。默认正式入口保持关闭，未切正式Worker/原数据库；这次只在显式装配的隔离owned路径证明实现。回退应正常revert本地阶段提交，不改历史、恢复旧Planning或自动迁移/删除owned证据。
+
+最终状态：ITEM7_IMPLEMENTATION_COMPLETE；ITEM8_NOT_STARTED；STOP。仅技术实施完成，真实语义与完整端到端验收待单独授权，产品NOT_READY。
+
+---
+
+# 以下为原P0历史报告（原字节完整保留）
+
 # Planning V2 Item 7 — P0 产品符合性预检
 
 日期：2026-10-08。结论：`ITEM7_PRODUCT_FIT_BLOCKED`、`P1_P3_NOT_STARTED`、`ITEM8_NOT_STARTED`、`STOP`。
