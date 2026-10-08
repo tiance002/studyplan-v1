@@ -1,3 +1,9 @@
+## 2026-10-08 Planning V2 Item8 R0：PRECHECK_PASS / CONTINUING_R1_R3
+
+- 基线6b291d10ab439bc37a540a626174941cc90fd28b/feat/n1-resource-discovery匹配，tracked clean；[Item8报告](../planning-v2/ITEM8_REPLANNING_REVISION.md)记录连续R0～R3授权与边界。有界现有组件核对和fresh-context独审PASS，无合同或必要migration阻塞；本checkpoint为只读预检，unit/PG/HTTP NOT RUN。
+- 复用Item7 Compiler/typed snapshot/Draft/Publication/current/history；旧PlanChange/PracticeChange缺snapshot会被marker双向保护拒绝，不能原样恢复旧Seed/selector语义。stage complete由同版本Summary+用户accepted任务推导，Exposure completed不等于掌握；新basis需含heads/reviews与来源/结构。
+- 下一仅有界future说明/顺序Local、明确GoalSpec进入同Item1～7 Semantic、typed lineage及祖先/sibling预算累计；未知文本待澄清。每阶段独审与本地checkpoint，产品模型/搜索/Reader0、正式generate关闭、不改正式数据/迁移，不push/merge/deploy，不进入Item9。
+
 ## 2026-10-08 Planning V2 Item7 P1～P3：IMPLEMENTATION_COMPLETE / ITEM8_NOT_STARTED / STOP
 
 - 本轮Start f1f3d139d197c29e8d76a0d5d0ce87a045278f4f；P1本地52a326bf5d11d297fd47623cea346d4f6b55ff0e、P2本地f7eeab33eeb59d6824b2bc23d3e1a355c3a83340；P3最终SHA见提交后交付回执。[统一报告](../planning-v2/ITEM7_PLANNING_EXECUTION.md)前置当前交付且逐字节保留原P0失败记录，[P3报告](../planning-v2/ITEM7_P3_RUNTIME.md)记恢复边界与独审闭环。
