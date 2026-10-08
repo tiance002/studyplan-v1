@@ -1,3 +1,12 @@
+## 2026-10-08 Planning V2 Item 2：CAPABILITY_PLANNING_COMPLETE / ITEM1_CONDITIONALLY_ACCEPTED / ITEM3_NOT_STARTED / STOP
+
+- 基线 `18ff5cca095e5a2037ab1742d0bfcfb275adc2c2`、`feat/n1-resource-discovery` 与预期一致、tracked clean。完成 Profile-only CapabilityPlanner、冻结 CapabilityPlan/Pending、小型只读 Policy v1（12 个可组合能力）、专用 Provider purpose/schema/prompt；不读取 raw GoalSpec，不接旧 selector/Seed/Graph。修改九文件，完整清单、最终字段与剩余边界见[Item 2 实施报告](../planning-v2/ITEM2_CAPABILITY_PLANNING.md)。
+- accepted_known(A) 可满足真前置，B-only 学习能力/outcomes 投影不重加 A；具体进阶学习目标独立保护。systematic_agent_route 要求 MCP 学习，project_usage 独立可 optional/excluded；排除学习冲突返回可回答澄清。未知领域无证据为 needs_verification，最多一份带来源/limitations/fixture 标记且 hash 绑定的离线证据补定义。没有 Item3～6 消费者或真实外部验证接线，不把结构验证当模型语义证明。
+- RED 原始失败保留：Domain 缺模块 collection error、Provider 6FAIL、独立审查机械输入负例25FAIL；修正共享输入边界与 JSON tuple/list 表示后，统一定向回归269PASS（新Item2 80、既有189），Backend Collection2146PASS（仅收集）。新代码/测试Ruff全规则PASS、adapter沿用基线E701/I001排除PASS、diff PASS；独立审查PASS，无合同冲突/未解决代码BLOCKER。真实模型语义/在线领域验证/PG/浏览器/整链E2E NOT RUN。
+- 产品模型0、搜索0、Reader0；账本仍183/280、unknown177/183保持未重派。800受保护tracked文件、378账本文件、.env及旧progress全文hash/内容保持，迁移0、前端0改动。公开generate仍scope后503，无新Run/Job/Draft/Plan操作；零依赖访问是离线门禁证据，真实PG行计数NOT RUN。未接Worker/组合根/旧Fake，未开放生成。
+- Item1按本轮用户明确授权有条件接受；Case7真实模型验收未完成、历史unknown与完整Item1端到端未验收保持，不改写旧报告。主协调请求Sol6.1high、实现/独立审查请求Sol6.1medium，actual均NOT OBSERVABLE，无全局模型配置变更/HARD升级。
+- 本地提交消息 `feat(planning): add v2 capability planning`，精确Final SHA见答复与ignored final证据。未push/merge/deploy，未进入Item3。最终 PLANNING_V2_ITEM2_CAPABILITY_PLANNING_COMPLETE / ITEM1_CONDITIONALLY_ACCEPTED / ITEM3_NOT_STARTED；完整产品未READY，STOP。
+
 ## 2026-10-08 Planning V2 Item 1 Project Context Reference Fix：FIX_READY / REAL_ACCEPTANCE_PENDING / ITEM2_NOT_STARTED / STOP
 
 - 基线 `d16c136432280c9c214a067ced812d8219ac2fb1`、`feat/n1-resource-discovery` 与预期一致、tracked clean；只改专用 Prompt 的项目来源说明，将歧义 `project_context（指goal.project_context）` 改为合法引用 `project_context`、禁止 `goal.project_context`，补一个完整 requirement 示例。Schema/Validator/SHAPE/IDhash/其他 Prompt 行为保持，无架构合同变更。
