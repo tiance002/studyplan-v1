@@ -1,3 +1,21 @@
+## 2026-10-08 Planning V2 Item 7 P0 上游修复：RESOLVED / DOMAIN_LIVE_PENDING / P1_P3_NOT_STARTED / STOP
+
+- 基线 `5ca50020864bae52475fd0318a35677bb7ef203f`、`feat/n1-resource-discovery` 匹配；保留原 P0 报告字节/hash 与下方完整历史。[修复报告](../planning-v2/ITEM7_P0_UPSTREAM_UNBLOCK.md)记录三项上游修复、证据和限制。
+- Item5 不再因任意硬约束拒绝全部研究：完整表达闭集选择实际事实检查，可信 reviewed/free 教材可复用；禁止联网仅本地复用，未知/歧义/强制中文仍 pending。Item6 根据实际选中教材访问证明、实际 carrier 与未解决事项判定，原文及source_refs保留；只读等无法证明的限制不放行。
+- 新增有界来源验证 producer，复用实际安全 GitHubTeachingBody + ResearchSession；服务器固定来源/pins/定义与公开许可。源审批供 Item2，实际冻结Plan由服务器再绑定；统一扩展描述贯通 Research/Reader/Curriculum，fixture 默认不能进入正式Provider。独审复现同会话重派及整体Plan替换，RED3FAIL后修复：成功/失败/snapshot不重派、审批绑定实际Plan。
+- 定向包PASS：约束22；研究/课程/Provider/JSON/fail-closed260；领域/Item2/Provider150；独审修复后领域/Provider98。包间重叠，不相加冒称不同用例。collection147PASS、独立只读审查PASS、diff及新增/受影响Ruff检查PASS。完整Provider Ruff两处基线E701为FAIL，未扩修旧助手逻辑。
+- 实际本地MCP索引/版本/freeproof用于机械代表，ROS2来源/模型/Reader输出为合成，经实际adapter+Mock验证，不冒称真实语义。生产官方registry/pins、技术定义审核、真实来源/模型质量仍DOMAIN_VERIFICATION_LIVE_PENDING；进程内issuer不能替代持久Receipt/恢复。
+- 真实产品模型/GitHub/Web/Reader调用0、数据库写入0；真实PG/行数、浏览器、Compiler/Worker/恢复NOT RUN。.env、378历史证据及未授权源码hash保持；无Policy/审核映射/Seed/架构/迁移/Runtime修改，无unknown重派、push/merge/deploy。仅本地提交；ITEM7_P0_CONSTRAINT_BLOCKERS_RESOLVED；ITEM7_P0_UNKNOWN_DOMAIN_STRUCTURAL_PATH_RESOLVED；DOMAIN_VERIFICATION_LIVE_PENDING；ITEM7_P1_P3_NOT_STARTED；STOP。
+
+## 2026-10-08 Planning V2 Item 7：PRODUCT_FIT_BLOCKED / P1_P3_NOT_STARTED / STOP
+
+- 基线 `5ca50020864bae52475fd0318a35677bb7ef203f`、`feat/n1-resource-discovery` 匹配，tracked clean；只读核对上位合同及当前 Item1～6、数据库/消费者接口。仅新增[Item7 P0报告](../planning-v2/ITEM7_PLANNING_EXECUTION.md)并前置本进度，旧正文完整保留；受保护未跟踪目录不动，未提交/推送/合并/部署。
+- P0 **FAIL**：Item5任意硬约束直接 `constraints_pending`，在审核/免费证明复用和研究前阻断；Item6任意约束非空强制incomplete。真实本地MCP review/freeproof对照：无约束可complete，免费约束即使gap/unresolved皆空仍incomplete；reviewed复用无约束resolved、有约束unresolved，均零外部派发。属于产品符合性机制阻塞，不误报外部证据NOT RUN。
+- A/B合成受信选择经实际接口保留accepted_known、B-only Coverage/Gap、项目carrier和MCP学习/项目用途分离，但研究全部constraints_pending。B仅json.cli诊断，不冒称独立异常处理或中文适配完整验收。C采用单一RAG代表：Item2 needs_verification，注入明确fixture证据后Item5仍public_descriptor_unapproved，Reader也只允许固定Policy；缺生产验证producer和受信公开投影消费，不能只靠Item7接线解决。
+- 诊断断言PASS（产品P0仍FAIL）；4既有定向用例PASS。HTTP首次因全socket禁用误伤Windows asyncio self-pipe为1FAIL；只修ignored runner允许本地self-pipe、禁止外联/DNS后仅复核该用例1PASS，五个不同用例最终PASS，公开generate认证后503/零storage access保持。独立只读审查PASS并确认STOP及fixture质量限制。未重复宽范围回归。
+- 仓库迁移单链head0025，真实PG applied version/行数NOT RUN；现有Draft/Revision hash/序列化/消费者只做字段清点，未宣称V2无损保存或无需migration。P1 Compiler、P2持久化/确认、P3 Worker/receipt/checkpoint/durable预算/恢复/owned HTTP全部NOT RUN且未开始，不创建实现占位。
+- 真实产品模型/搜索/Reader/用户DB写入0，未创建Run/Job/Draft/Plan；历史183/280及unknown177/183保留不重派，378份历史证据和.env保持。源码/Prompt/Schema/Policy/审核映射/Seed/架构/Runtime/UI/migration均未修改。先评审上游有限约束适配及有界领域验证/安全公开投影，不能删限制、放宽Validator或固定Recipe追绿。主协调Sol6.1high、链路/独审Sol6.1medium、清点Luna medium请求，actual均NOT OBSERVABLE。ITEM8_NOT_STARTED；STOP。
+
 ## 2026-10-08 Planning V2 Item 6：CURRICULUM_COMPOSITION_COMPLETE / ITEM7_NOT_STARTED / STOP
 
 - 基线 `b707ad8d667b2cd9c3f47ea87a7c5fa177ef2ad1`、`feat/n1-resource-discovery` 匹配、tracked clean；有界核对 Item6/7、Single Authority、Matrix 与现有教学实体。共享端口与 ResearchSession 可复用，无新搜索/预算平台。[本轮报告](../planning-v2/ITEM6_CURRICULUM_COMPOSITION.md)记录完整合同、代表课程和限制；九文件本地提交，未改上游 Policy/Schema/审核映射、Seed 或架构。

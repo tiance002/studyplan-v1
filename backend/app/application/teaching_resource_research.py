@@ -9,7 +9,9 @@ from app.core.ids import content_hash
 from app.domain.enums import PreferenceScope
 from app.domain.planning.capabilities import CAPABILITY_SCHEMA, validate_capability_planning_input
 from app.domain.planning.capability_policy import CAPABILITY_POLICY
+from app.domain.planning.constraint_adaptation import research_permissions
 from app.domain.planning.content_coverage import _qualified_mappings
+from app.domain.planning.domain_verification import public_outcomes, reader_authority
 from app.domain.planning.research_reader import (
     READER_OUTPUT_CAP,
     READER_PURPOSE,
@@ -36,9 +38,12 @@ from app.ports.resource_index import ResourceQuery
 
 
 class ResourceResearcher:
-    def __init__(self, *, github, web, body_reader, llm, reviewed_index=None, access_proofs=(), catalog=None):
+    def __init__(self, *, github, web, body_reader, llm, reviewed_index=None, access_proofs=(), catalog=None,
+                 domain_approvals=(), allow_fixture_domains=False):
         self.github, self.web, self.body_reader, self.llm = github, web, body_reader, llm
         self.reviewed_index, self.access_proofs, self.catalog = reviewed_index, tuple(access_proofs), catalog
+        self._domain_approvals = tuple(domain_approvals)
+        self._allow_fixture_domains = allow_fixture_domains
 
     def research(self, gap_set, *, plan, coverage, profile, session, scope, project_id, checked_at):
         if type(scope) is not AuthContext:
@@ -60,8 +65,11 @@ class ResourceResearcher:
                 project_id=project_id, checked_at=checked_at, actor_id=scope.actor_id)
             if session.input_hash != expected:
                 reject("session_input_hash")
+            public = public_outcomes(plan, domain_approvals=self._domain_approvals,
+                                     allow_fixture_domains=self._allow_fixture_domains)
             config_hash = content_hash({"reviewed_index": self.reviewed_index.index_hash if self.reviewed_index else None,
-                                       "access_proofs": [asdict(p) for p in self.access_proofs]})
+                "access_proofs": [asdict(p) for p in self.access_proofs], "public_outcomes": public,
+                "constraint_policy": "constraint-adaptation:v1"})
             if session.config_hash and session.config_hash != config_hash:
                 reject("session_configuration")
             session.config_hash = config_hash
@@ -93,11 +101,12 @@ class ResourceResearcher:
         if session.completed is not None:
             return session.completed
         entries = []
+        constraints_allowed, external_allowed = research_permissions(profile.hard_constraints)
         for requirement in requirements:
             resources, reasons = [], []
-            if profile.hard_constraints:
+            if not constraints_allowed:
                 reasons.append("constraints_pending")
-            elif CAPABILITY_POLICY.get(requirement.capability_id) is None:
+            elif any(public.get(o.outcome_id) != o.text for o in requirement.must_teach):
                 reasons.append("public_descriptor_unapproved")
             elif session.blocked:
                 reasons.append("research_stopped")
@@ -107,6 +116,9 @@ class ResourceResearcher:
                     remaining = self._remaining(requirement, resources)
                     if not remaining or session.blocked:
                         break
+                    if not external_allowed:
+                        reasons.append("network_forbidden")
+                        break
                     if index is None:
                         continue
                     reservation = session.reserve("search", searches=1, total_requests=1,
@@ -114,8 +126,8 @@ class ResourceResearcher:
                     if reservation is None:
                         reasons.append("budget_exhausted" if not session.blocked else "research_stopped")
                         break
-                    # Only current public Policy text goes to discovery, never
-                    # raw Profile/project context/starting point/claims/limits.
+                    # Only Policy/approved public definitions go to discovery,
+                    # never Profile/project context/starting point/claims/limits.
                     query = ResourceQuery(scope, tuple(o.outcome_id for o in remaining),
                         ResourcePreference(PreferenceScope.PROJECT, project_id), limit=5,
                         extra={"project_id": project_id, "query": "tutorial guide examples " + " ".join(o.text for o in remaining)})
@@ -261,7 +273,14 @@ class ResourceResearcher:
             payload = {"must_teach": [asdict(o) for o in remaining], "chunks": body.chunks,
                 "learner_context": {"accepted_known": sorted(c.capability_id for c in plan.accepted_known_capabilities
                     if CAPABILITY_POLICY.get(c.capability_id) is not None), "desired_depth": requirement.desired_depth}}
-            if not validate_reader_input(payload, READER_SCHEMA):
+            authority = reader_authority(plan, domain_approvals=self._domain_approvals,
+                                         allow_fixture_domains=self._allow_fixture_domains)
+            if authority is not None:
+                payload["domain_authority"] = authority
+                payload["learner_context"]["accepted_known"] = sorted(
+                    c.capability_id for c in plan.accepted_known_capabilities)
+            if not validate_reader_input(payload, READER_SCHEMA, domain_approvals=self._domain_approvals,
+                                         allow_fixture_domains=self._allow_fixture_domains):
                 return (), ("body_binding_invalid",)
             reader_reservation = session.reserve("reader", total_requests=1, reader_requests=1,
                 output_tokens=READER_OUTPUT_CAP, cost_micros=session.budget.reader_cost_micros)
@@ -302,7 +321,8 @@ class ResourceResearcher:
                 session.blocked = True
                 return (), ("reader_invalid",)
             try:
-                verdict = validate_reader_output(response.payload, payload)
+                verdict = validate_reader_output(response.payload, payload, domain_approvals=self._domain_approvals,
+                                                 allow_fixture_domains=self._allow_fixture_domains)
             except (ValueError, TypeError, KeyError):
                 session.blocked = True
                 return (), ("reader_invalid",)

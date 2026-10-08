@@ -9,7 +9,12 @@ from app.core.errors import ValidationAppError
 from app.core.ids import canonical_json, content_hash
 from app.domain.planning.capabilities import CAPABILITY_SCHEMA, validate_capability_planning_input
 from app.domain.planning.capability_policy import CAPABILITY_POLICY
+from app.domain.planning.constraint_adaptation import (
+    constraints_unresolved,
+    curriculum_constraint_assessments,
+)
 from app.domain.planning.content_coverage import CoverageEvaluator
+from app.domain.planning.domain_verification import public_outcomes_from_authority, reader_authority
 from app.domain.planning.goal_requirements import GoalRequirementProfile
 from app.domain.planning.resource_gaps import extract
 from app.domain.planning.resource_research import (
@@ -147,6 +152,8 @@ class CaseFinding:
 class CurriculumContext:
     _json: str = field(repr=False)
     research: ResourceResearchResult = field(repr=False)
+    _domain_approvals: tuple = field(default=(), repr=False)
+    _allow_fixture_domains: bool = field(default=False, repr=False)
 
     @property
     def input_hash(self):
@@ -157,6 +164,10 @@ class CurriculumContext:
 
     @property
     def public_outcome_texts(self):
+        authority = self.to_payload().get("domain_authority")
+        if authority is not None:
+            return public_outcomes_from_authority(authority, domain_approvals=self._domain_approvals,
+                                                 allow_fixture_domains=self._allow_fixture_domains)
         return {o.outcome_id: o.text for d in CAPABILITY_POLICY.definitions for o in d.learning_outcomes}
 
     def expected_session_hash(self, budget, *, actor_id, project_id):
@@ -193,7 +204,8 @@ class CurriculumPlan:
         return json.loads(self._json) | {"case_findings": json.loads(self._findings), "plan_hash": self.plan_hash}
 
 
-def prepare_curriculum(profile, plan, coverage, research, reviewed_index, *, catalog_sources=(), project_cases=(), access_proofs=()):
+def prepare_curriculum(profile, plan, coverage, research, reviewed_index, *, catalog_sources=(), project_cases=(), access_proofs=(),
+                       domain_approvals=(), allow_fixture_domains=False):
     try:
         if type(profile) is not GoalRequirementProfile or profile.status != "ready" or profile.profile_hash != plan.source_goal_profile_hash:
             _reject("profile_binding")
@@ -289,28 +301,31 @@ def prepare_curriculum(profile, plan, coverage, research, reviewed_index, *, cat
                 "starting_point": profile.starting_point, "outcome_purpose": profile.outcome_purpose,
                 "requirements": [asdict(r) for r in profile.required_requirements]},
             "constraints": [asdict(c) for c in profile.hard_constraints]}
+        authority = reader_authority(plan, domain_approvals=domain_approvals, allow_fixture_domains=allow_fixture_domains)
+        if authority is not None:
+            payload["domain_authority"] = authority
         payload = json.loads(canonical_json(payload))
         payload["input_hash"] = content_hash(payload)
         if len(canonical_json(payload).encode("utf-8")) > 131072:
             _reject("input_size")
-        return CurriculumContext(canonical_json(payload), research)
+        return CurriculumContext(canonical_json(payload), research, tuple(domain_approvals), allow_fixture_domains)
     except (TypeError, AttributeError, KeyError, ValueError):
         _reject("input")
 
 
-def valid_curriculum_input(payload, schema_name):
+def valid_curriculum_input(payload, schema_name, *, domain_approvals=(), allow_fixture_domains=False):
     try:
         if schema_name != CURRICULUM_SCHEMA:
             return False
-        _validate_input(payload)
+        _validate_input(payload, domain_approvals=domain_approvals, allow_fixture_domains=allow_fixture_domains)
         return True
     except (ValidationAppError, TypeError, ValueError, KeyError, AttributeError, RecursionError):
         return False
 
 
-def _validate_input(payload):
+def _validate_input(payload, *, domain_approvals=(), allow_fixture_domains=False):
     _fields(payload, {"schema_version", "input_hash", "sources", "capabilities", "accepted_known", "materials",
-        "project_cases", "profile_context", "constraints"})
+        "project_cases", "profile_context", "constraints"} | ({"domain_authority"} if "domain_authority" in payload else set()))
     if type(payload["schema_version"]) is not int or payload["schema_version"] != 1:
         _reject("schema")
     _hash(payload["input_hash"])
@@ -360,6 +375,24 @@ def _validate_input(payload):
     for cap in capabilities.values():
         if set(cap["prerequisites"]) - (set(capabilities) | known) or cap["capability_id"] in cap["prerequisites"]:
             _reject("prerequisite_range")
+    if "domain_authority" in payload:
+        authority = payload["domain_authority"]
+        public = public_outcomes_from_authority(authority, domain_approvals=domain_approvals,
+                                                allow_fixture_domains=allow_fixture_domains)
+        if (authority["plan"]["plan_hash"] != source["capability_plan_hash"]
+                or authority["plan"]["source_goal_profile_hash"] != source["profile_hash"]):
+            _reject("domain_plan_binding")
+        frozen = {c["capability_id"]: c for c in authority["plan"]["capabilities"] if c["disposition"] == "needs_learning"}
+        if set(frozen) != set(capabilities):
+            _reject("domain_capability_binding")
+        for key, cap in capabilities.items():
+            upstream = frozen[key]
+            if any(cap[name] != upstream[other] for name, other in (("title", "title"), ("importance", "learning_requirement"),
+                ("desired_depth", "desired_depth"), ("project_usage", "project_usage"), ("outcomes", "learning_outcomes"),
+                ("prerequisites", "prerequisite_refs"), ("requirement_refs", "requirement_refs"))):
+                _reject("domain_capability_binding")
+            if any(public.get(o["outcome_id"]) != o["text"] for o in cap["outcomes"]):
+                _reject("domain_public_binding")
     _ancestors(capabilities)
     material_ids = set()
     for material in _array(payload["materials"], 100):
@@ -486,9 +519,9 @@ def _sort_output_refs(value):
             _sort_output_refs(child)
 
 
-def validate_curriculum_output(raw, payload):
+def validate_curriculum_output(raw, payload, *, domain_approvals=(), allow_fixture_domains=False):
     try:
-        _validate_input(payload)
+        _validate_input(payload, domain_approvals=domain_approvals, allow_fixture_domains=allow_fixture_domains)
         if len(canonical_json(raw).encode("utf-8")) > 131072:
             _reject("output_size")
         document = json.loads(canonical_json(raw))
@@ -502,7 +535,9 @@ def validate_curriculum_output(raw, payload):
             compile_materials=[m for m in payload["materials"] if m["material_id"] in selected],
             compile_cases=[c for c in payload["project_cases"] if c["case_id"] in cases],
             compile_context={"profile_context": payload["profile_context"], "constraints": payload["constraints"],
-                "capabilities": payload["capabilities"], "accepted_known": payload["accepted_known"]})
+                "capabilities": payload["capabilities"], "accepted_known": payload["accepted_known"],
+                "constraint_assessments": curriculum_constraint_assessments(document, payload),
+                **({"domain_authority": payload["domain_authority"]} if "domain_authority" in payload else {})})
         return CurriculumPlan(canonical_json(document))
     except (TypeError, ValueError, KeyError, AttributeError, RecursionError):
         _reject("output")
@@ -707,7 +742,8 @@ def _validate_output(document, payload):
     _text(carrier["final_artifact"]["description"], 5000)
     carrier_allowed = {o for o in staged if capabilities[outcome_caps[o]]["project_usage"] != "excluded"}
     _acceptance(carrier["final_artifact"]["acceptance"], carrier_allowed, permit_empty_refs=not carrier_allowed)
-    expected_status = "incomplete" if unresolved or unfilled or payload["constraints"] else "complete"
+    assessments = curriculum_constraint_assessments(document, payload)
+    expected_status = "incomplete" if unresolved or unfilled or constraints_unresolved(assessments) else "complete"
     if document["status"] != expected_status:
         _reject("completeness")
 

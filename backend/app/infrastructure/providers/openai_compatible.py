@@ -28,6 +28,11 @@ from app.agent_workflows.planning_structure import (
 from app.application.planning_budget import OFFICIAL_DEEPSEEK_FLASH_OUTPUT_CAP, BudgetPolicy
 from app.core.errors import AppError, ValidationAppError
 from app.domain.assistant import ASSISTANT_PROTOCOL, ASSISTANT_PURPOSE, INPUT_LIMIT, NATURAL_CHAT
+from app.domain.planning.constraint_adaptation import composition_dispatch_allowed
+from app.domain.planning.domain_verification import (
+    curriculum_public_input_allowed,
+    valid_provider_domain_evidence,
+)
 from app.domain.prompts import PROMPT_PROTOCOL, PROMPT_PURPOSE
 from app.domain.summaries import SUMMARY_PROTOCOL, SUMMARY_PURPOSE
 from app.infrastructure.providers.capability_planning_contract import (
@@ -36,21 +41,29 @@ from app.infrastructure.providers.capability_planning_contract import (
     CAPABILITY_SYSTEM,
     valid_capability_planning_input,
 )
+from app.infrastructure.providers.curriculum_contract import (
+    CURRICULUM_OUTPUT_CAP,
+    CURRICULUM_PURPOSE,
+    CURRICULUM_SHAPE,
+    CURRICULUM_SYSTEM,
+    valid_curriculum_input,
+    validate_curriculum_output,
+)
 from app.infrastructure.providers.goal_requirement_contract import (
     GOAL_REQUIREMENT_PURPOSE,
     GOAL_REQUIREMENT_SHAPE,
     GOAL_REQUIREMENT_SYSTEM,
     valid_goal_requirement_input,
 )
-from app.infrastructure.providers.curriculum_contract import (
-    CURRICULUM_OUTPUT_CAP, CURRICULUM_PURPOSE, CURRICULUM_SHAPE, CURRICULUM_SYSTEM,
-    valid_curriculum_input, validate_curriculum_output,
+from app.infrastructure.providers.research_reader_contract import (
+    READER_OUTPUT_CAP,
+    READER_PURPOSE,
+    READER_SHAPE,
+    READER_SYSTEM,
+    validate_reader_input,
+    validate_reader_output,
 )
 from app.ports.llm import LLMFailure, LLMNotDispatchedError, LLMResult
-from app.infrastructure.providers.research_reader_contract import (
-    READER_OUTPUT_CAP, READER_PURPOSE, READER_SHAPE, READER_SYSTEM,
-    validate_reader_input, validate_reader_output,
-)
 
 # Explicit shapes used by the existing deterministic validators/projection.
 SHAPES: dict[str, dict[str, Any]] = {
@@ -113,7 +126,7 @@ PRACTICE_JSON_CONTRACT = (
 
 class OpenAICompatibleLLM:
     def __init__(self, *, base_url, api_key, model, timeout=120, max_tokens=8192, client=None,
-                 domain_pack=None, endpoint_guard=None, budget_policy: BudgetPolicy | None = None):
+                 domain_pack=None, endpoint_guard=None, budget_policy: BudgetPolicy | None = None, domain_approvals=()):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
@@ -127,6 +140,7 @@ class OpenAICompatibleLLM:
         # Compatibility view only; actual request budget is purpose-specific.
         self.max_tokens = max_tokens
         self.client = client
+        self.domain_approvals = tuple(domain_approvals)  # Server dependency; never read from payload.
         # Retained for old attempt identities; it is never an implicit request context.
         self.domain_pack = domain_pack or {}
         self.endpoint_guard = endpoint_guard
@@ -151,16 +165,20 @@ class OpenAICompatibleLLM:
 
     def preflight(self, *, purpose, payload, schema_name):
         if purpose == CURRICULUM_PURPOSE:
-            if not valid_curriculum_input(payload, schema_name):
+            if (not valid_curriculum_input(payload, schema_name, domain_approvals=self.domain_approvals)
+                or not curriculum_public_input_allowed(payload, domain_approvals=self.domain_approvals)
+                or not composition_dispatch_allowed(payload["constraints"])):
                 return LLMFailure("curriculum_input_invalid", "Curriculum input contract rejected",
                                   details={"dispatched": False})
             return None
         if purpose == READER_PURPOSE:
-            if not validate_reader_input(payload, schema_name):
+            if not validate_reader_input(payload, schema_name, domain_approvals=self.domain_approvals):
                 return LLMFailure("research_reader_input_invalid", "Reader input contract rejected", details={"dispatched": False})
             return None
         if purpose == CAPABILITY_PURPOSE:
-            if not valid_capability_planning_input(payload, schema_name):
+            if (not valid_capability_planning_input(payload, schema_name)
+                or not valid_provider_domain_evidence(payload, domain_approvals=self.domain_approvals)
+                or not composition_dispatch_allowed(payload["profile"]["hard_constraints"])):
                 return LLMFailure("capability_planning_input_invalid", "Capability planning input contract rejected",
                                   details={"dispatched": False})
             return None
@@ -303,7 +321,12 @@ class OpenAICompatibleLLM:
                 # Preserve frozen legacy turn wire shape and request identity.
                 shape = {"reply": "非空 Markdown 反馈"}
             if 'teaching_contract' in payload:
-                from app.domain.assistant_teaching import TEACHING_CONTRACT, teaching_shape, validate_expected_kind, PRACTICE_FINAL
+                from app.domain.assistant_teaching import (
+                    PRACTICE_FINAL,
+                    TEACHING_CONTRACT,
+                    teaching_shape,
+                    validate_expected_kind,
+                )
                 state=payload.get('teaching_state')
                 if (payload['teaching_contract']!=TEACHING_CONTRACT or not isinstance(state,dict)
                         or state.get('contract')!=TEACHING_CONTRACT
@@ -485,13 +508,13 @@ class OpenAICompatibleLLM:
         diagnostics["missing_top_level_fields"] = missing
         if purpose == READER_PURPOSE:
             try:
-                validate_reader_output(parsed, payload)
+                validate_reader_output(parsed, payload, domain_approvals=self.domain_approvals)
             except ValueError:
                 return LLMFailure("research_reader_output_invalid", "Reader response contract rejected",
                                   details=diagnostics, **failure)
         if purpose == CURRICULUM_PURPOSE:
             try:
-                validate_curriculum_output(parsed, payload)
+                validate_curriculum_output(parsed, payload, domain_approvals=self.domain_approvals)
             except (ValidationAppError, ValueError, KeyError, TypeError):
                 return LLMFailure("curriculum_output_invalid", "Curriculum response contract rejected",
                                   details=diagnostics, **failure)

@@ -3,6 +3,7 @@ import hashlib
 import re
 from dataclasses import dataclass, field
 
+from app.core.errors import ValidationAppError
 from app.core.ids import content_hash
 
 READER_PURPOSE = "planning.research_reader"
@@ -25,14 +26,23 @@ class TransientBody:
         self.chunks.clear()
 
 
-def validate_reader_input(payload, schema_name):
+def validate_reader_input(payload, schema_name, *, domain_approvals=(), allow_fixture_domains=False):
     try:
-        _fields(payload, {"must_teach", "chunks", "learner_context"})
+        expected = {"must_teach", "chunks", "learner_context"}
+        if type(payload) is dict and "domain_authority" in payload:
+            expected.add("domain_authority")
+        _fields(payload, expected)
         if schema_name != READER_SCHEMA:
             return False
         outcomes = _array(payload["must_teach"], 20, nonempty=True)
         from app.domain.planning.capability_policy import CAPABILITY_POLICY
         public_outcomes = {o.outcome_id: o.text for d in CAPABILITY_POLICY.definitions for o in d.learning_outcomes}
+        known_capabilities = {d.capability_id for d in CAPABILITY_POLICY.definitions}
+        if "domain_authority" in payload:
+            from app.domain.planning.domain_verification import resolve_reader_authority
+            plan, public_outcomes = resolve_reader_authority(payload["domain_authority"], domain_approvals=domain_approvals,
+                allow_fixture_domains=allow_fixture_domains)
+            known_capabilities = {c.capability_id for c in plan.accepted_known_capabilities}
         ids = []
         for outcome in outcomes:
             _fields(outcome, {"outcome_id", "text"})
@@ -63,18 +73,18 @@ def validate_reader_input(payload, schema_name):
             raise ValueError("Reader source range")
         learner = payload["learner_context"]
         _fields(learner, {"accepted_known", "desired_depth"})
-        allowed = {d.capability_id for d in CAPABILITY_POLICY.definitions}
         known = _array(learner["accepted_known"], 50)
         _unique(known)
-        if set(known) - allowed or learner["desired_depth"] not in {"foundation", "applied", "deep"}:
+        if set(known) - known_capabilities or learner["desired_depth"] not in {"foundation", "applied", "deep"}:
             raise ValueError("Reader learner context")
         return True
-    except (ValueError, TypeError, KeyError, UnicodeError):
+    except (ValidationAppError, ValueError, TypeError, KeyError, AttributeError, UnicodeError, RecursionError):
         return False
 
 
-def validate_reader_output(raw, payload):
-    if not validate_reader_input(payload, READER_SCHEMA):
+def validate_reader_output(raw, payload, *, domain_approvals=(), allow_fixture_domains=False):
+    if not validate_reader_input(payload, READER_SCHEMA, domain_approvals=domain_approvals,
+        allow_fixture_domains=allow_fixture_domains):
         raise ValueError("Reader input rejected")
     try:
         _fields(raw, {"outcomes", "teaching_fit"})

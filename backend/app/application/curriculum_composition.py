@@ -5,6 +5,7 @@ from dataclasses import replace
 from app.core.errors import ValidationAppError
 from app.core.ids import content_hash
 from app.domain.enums import PreferenceScope
+from app.domain.planning.constraint_adaptation import composition_dispatch_allowed
 from app.domain.planning.curriculum import (
     CURRICULUM_OUTPUT_CAP,
     CURRICULUM_PURPOSE,
@@ -53,8 +54,11 @@ class CurriculumComposer:
                 or type(session.budget) is not ResearchBudget):
             _reject("context_session")
         payload = context.to_payload()
-        if not valid_curriculum_input(payload, CURRICULUM_SCHEMA):
+        if not valid_curriculum_input(payload, CURRICULUM_SCHEMA, domain_approvals=context._domain_approvals,
+                                      allow_fixture_domains=context._allow_fixture_domains):
             _reject("context")
+        if not composition_dispatch_allowed(payload["constraints"]):
+            return _failure("curriculum_constraints_pending")
         if (type(context.research) is not ResourceResearchResult or replace(context.research) != context.research
                 or context.research.result_hash != payload["sources"]["research_hash"]
                 or type(session.completed) is not ResourceResearchResult or replace(session.completed) != session.completed
@@ -118,7 +122,8 @@ class CurriculumComposer:
             session.blocked = True
             return _failure("curriculum_truncated" if isinstance(response, LLMResult) else "curriculum_response_invalid")
         try:
-            curriculum = validate_curriculum_output(response.payload, payload)
+            curriculum = validate_curriculum_output(response.payload, payload, domain_approvals=context._domain_approvals,
+                                                    allow_fixture_domains=context._allow_fixture_domains)
         except (ValidationAppError, TypeError, ValueError, KeyError):
             session.blocked = True
             return _failure("curriculum_output_invalid")

@@ -20,7 +20,7 @@ class CapabilityPlanner:
         self._validator = CapabilityPlanValidator()
 
     def plan(self, profile: GoalRequirementProfile, *, run_id: str, attempt_id: str,
-             verification_evidence=()) -> CapabilityPlan | CapabilityPlanningPending | LLMFailure:
+             verification_evidence=(), domain_approvals=()) -> CapabilityPlan | CapabilityPlanningPending | LLMFailure:
         if not isinstance(profile, GoalRequirementProfile):
             raise ValidationAppError("能力规划只接受GoalRequirementProfile")
         try:
@@ -29,6 +29,12 @@ class CapabilityPlanner:
                        "verification_evidence": [e.to_payload() for e in evidence]}
             if not validate_capability_planning_input(payload, CAPABILITY_SCHEMA, allow_clarification=True):
                 return LLMFailure("capability_planning_input_invalid", "能力规划输入未通过校验", details={"dispatched": False})
+            # Fixtures retain their offline structural use. The real Provider
+            # rejects fixtures; a source_verification label requires an issued approval here too.
+            if any(e.evidence_kind == "source_verification" for e in evidence):
+                from app.domain.planning.domain_verification import validate_domain_evidence
+                if not validate_domain_evidence(profile, evidence, domain_approvals=domain_approvals):
+                    return LLMFailure("domain_verification_required", "领域来源尚未受信验证", details={"dispatched": False})
         except (TypeError, ValueError, AttributeError):
             return LLMFailure("capability_planning_input_invalid", "能力规划输入未通过校验", details={"dispatched": False})
         if profile.status == "needs_clarification":
