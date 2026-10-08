@@ -42,3 +42,15 @@ def test_v2_local_request_cannot_self_declare_semantics_or_coerce_version(app):
             result = client.post("/api/v1/plans/v2/changes/local", params={"project_id": "p"},
                                  json=body | extra)
             assert result.status_code == 422
+
+
+def test_semantic_replan_has_an_owned_route_and_requires_explicit_goal_spec(app):
+    assert "/api/v1/plans/v2/owned/replan" in app.openapi()["paths"]
+    with TestClient(app) as client:
+        body = {"current_plan_id": "plan", "expected_version": 1,
+                "idempotency_key": "new-run", "goal_spec": {"target": "学习新的目标"}}
+        for changed in ({"goal_spec": None}, {"expected_version": True}, {"model_ref": "other"},
+                        {"budget": {"max_total_requests": 500}}, {"is_semantic": False},
+                        {"goal_spec": {"target": "新目标", "accepted_known": ["python"]}}):
+            assert client.post("/api/v1/plans/v2/owned/replan", params={"project_id": "p"},
+                               json=body | changed).status_code == 422

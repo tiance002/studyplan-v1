@@ -37,6 +37,7 @@ from app.api.v1.schemas import (
     V2ChangeClassificationView,
     V2LocalChangeRequest,
     V2RevisionDecisionRequest,
+    V2SemanticReplanRequest,
 )
 from app.api.v1.views import (
     draft_view,
@@ -167,6 +168,20 @@ def generate_owned_v2_plan(payload: PlanGenerateRequest, project_id: str=Project
         raise ValidationAppError("goal 与 goal_spec.target 必须一致")
     run_id=service.submit_owned_v2(scope=scope,project_id=project_id,goal_spec=spec)
     return PlanGenerateResponse(run_id=run_id,status_url=f"{API_PREFIX}/runs/{quote(run_id,safe='')}?{urlencode({'project_id':project_id})}")
+
+
+@router.post("/plans/v2/owned/replan", response_model=PlanGenerateResponse,
+    status_code=status.HTTP_202_ACCEPTED, operation_id="replan_owned_v2_plan",
+    summary="在受控 owned 环境按明确的新目标重新规划")
+def replan_owned_v2_plan(body: V2SemanticReplanRequest, project_id: str = ProjectId,
+    scope: AuthContext = Depends(get_auth_context), service=Depends(_v2_revision_service)):
+    scope.require_project(project_id)
+    run_id = service.submit_semantic(scope=scope, project_id=project_id,
+        current_plan_id=body.current_plan_id, expected_version=body.expected_version,
+        idempotency_key=body.idempotency_key,
+        goal_spec=goal_spec_from_payload(body.goal_spec.model_dump(mode="json")))
+    return PlanGenerateResponse(run_id=run_id,
+        status_url=f"{API_PREFIX}/runs/{quote(run_id, safe='')}?{urlencode({'project_id': project_id})}")
 
 
 @router.get(

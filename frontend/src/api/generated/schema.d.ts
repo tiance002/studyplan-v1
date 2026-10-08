@@ -1005,6 +1005,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/plans/v2/owned/replan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 在受控 owned 环境按明确的新目标重新规划 */
+        post: operations["replan_owned_v2_plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/runs": {
         parameters: {
             query?: never;
@@ -4441,6 +4458,16 @@ export interface components {
             /** Idempotency Key */
             idempotency_key: string;
         };
+        /** V2SemanticReplanRequest */
+        V2SemanticReplanRequest: {
+            /** Current Plan Id */
+            current_plan_id: string;
+            /** Expected Version */
+            expected_version: number;
+            /** Idempotency Key */
+            idempotency_key: string;
+            goal_spec: components["schemas"]["GoalSpec"];
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -6981,6 +7008,42 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["PlanGenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanGenerateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    replan_owned_v2_plan: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["V2SemanticReplanRequest"];
             };
         };
         responses: {

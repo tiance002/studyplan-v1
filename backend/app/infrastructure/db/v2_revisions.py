@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 from dataclasses import asdict, replace
+from types import SimpleNamespace
 from uuid import NAMESPACE_URL, uuid5
 
 import psycopg
@@ -15,13 +16,99 @@ from app.core.errors import (
     ValidationAppError,
 )
 from app.core.ids import content_hash
-from app.domain.enums import PlanDraftStatus, StageResourceRole
+from app.domain.enums import AiRunNextAction, AiRunStatus, PlanDraftStatus, StageResourceRole
+from app.domain.planning.intent import GoalSpec, goal_spec_payload
 from app.domain.planning.models import PlanDraft, PlanPublicationService, PlanTaskKnowledgeLink
-from app.domain.planning.revisions import V2RevisionContext, local_candidate
+from app.domain.planning.revisions import V2RevisionContext, execution_facts, local_candidate
+from app.domain.planning.v2_runtime import V2_EXECUTION_VERSION, V2RecoveryBlocked, manifest_intact
 from app.domain.resources.curation import ResolvedSection
+from app.domain.runs.models import RunRecord
 from app.infrastructure.db.plan_repository import PgPlanRepository, to_psycopg_dsn
 from app.infrastructure.db.planning_fence import lock_plan_version
 from psycopg.rows import dict_row
+
+
+def frozen_submission(conn, *, actor_id, project_id, run_id):
+    rows = conn.execute("SELECT e.detail,r.graph_version,r.kind,r.actor_id,r.project_id FROM ai_run_events e "
+        "JOIN ai_runs r USING(run_id) WHERE e.run_id=%s AND e.status='submission' "
+        "AND e.detail->>'kind'='planning_submission' ORDER BY e.event_id", (run_id,)).fetchall()
+    if len(rows) != 1:
+        raise V2RecoveryBlocked("Revision requires one durable original submission")
+    row, detail = rows[0], rows[0]["detail"]
+    manifest = detail.get("manifest")
+    if (row["graph_version"] != V2_EXECUTION_VERSION or row["kind"] != "plan_generate"
+            or row["actor_id"] != actor_id or row["project_id"] != project_id
+            or detail.get("actor_id") != actor_id or detail.get("project_id") != project_id
+            or not manifest_intact(manifest) or detail.get("initial", {}).get("manifest") != manifest):
+        raise V2RecoveryBlocked("Revision original submission scope or manifest rejected")
+    raw = detail["initial"].get("v2_revision")
+    ctx = V2RevisionContext.from_payload(raw)
+    if (ctx is None and manifest["expected_version"] != 0
+            or (ctx is None) != ("v2_revision_hash" not in manifest)
+            or ctx is not None and (ctx.to_payload()["change_kind"] != "semantic"
+                or ctx.to_payload()["actor_id"] != actor_id or ctx.to_payload()["project_id"] != project_id
+                or ctx.to_payload()["context_hash"] != manifest.get("v2_revision_hash")
+                or manifest["goal_hash"] != content_hash(ctx.to_payload()["approved_goal_spec"])
+                or manifest["expected_version"] != ctx.to_payload()["base_revision"]
+                or content_hash(detail["initial"].get("goal_spec")) != manifest["goal_hash"])):
+        raise V2RecoveryBlocked("Revision submission context binding rejected")
+    if ctx is None:
+        roots = conn.execute("SELECT DISTINCT r.run_id FROM ai_runs r LEFT JOIN ai_run_events e "
+            "ON e.run_id=r.run_id AND e.status='submission' AND e.detail->>'kind'='planning_submission' "
+            "WHERE r.actor_id=%s AND r.project_id=%s AND r.graph_version=%s AND r.kind='plan_generate' "
+            "AND e.detail#>>'{initial,v2_revision}' IS NULL", (actor_id, project_id, V2_EXECUTION_VERSION)).fetchall()
+        if len(roots) != 1 or roots[0]["run_id"] != run_id:
+            raise V2RecoveryBlocked("Multiple initial V2 roots require reconciliation")
+    return detail
+
+
+def budget_family(conn, *, actor_id, project_id, run_id):
+    """Use original durable caps and every sibling's original immutable ledger."""
+    own = frozen_submission(conn, actor_id=actor_id, project_id=project_id, run_id=run_id)
+    context = own["initial"].get("v2_revision")
+    root = context["budget_root_run_id"] if context else run_id
+    original = frozen_submission(conn, actor_id=actor_id, project_id=project_id, run_id=root)
+    if original["initial"].get("v2_revision") is not None:
+        raise V2RecoveryBlocked("Budget root must resolve to the original planning authority")
+    rows = conn.execute("SELECT DISTINCT e.run_id FROM ai_run_events e JOIN ai_runs r USING(run_id) "
+        "WHERE r.project_id=%s AND r.actor_id=%s AND e.status='submission' "
+        "AND e.detail->'initial'->'v2_revision'->>'budget_root_run_id'=%s", (project_id, actor_id, root)).fetchall()
+    manifests = {root: original["manifest"]}
+    for row in rows:
+        detail = frozen_submission(conn, actor_id=actor_id, project_id=project_id, run_id=row["run_id"])
+        if detail["manifest"]["budget"] != original["manifest"]["budget"]:
+            raise V2RecoveryBlocked("Replanning cannot replace the original shared budget cap")
+        manifests[row["run_id"]] = detail["manifest"]
+    if run_id not in manifests:
+        raise V2RecoveryBlocked("Revision run is not a member of its frozen budget root")
+    return root, manifests
+
+
+def published_v2_draft(conn, *, actor_id, project_id, run_id, draft_id):
+    """Allow only completion of this exact already-published V2 result."""
+    if conn.execute("SELECT 1 FROM plan_drafts d JOIN ai_runs r USING(run_id) "
+            "WHERE d.project_id=%s AND r.project_id=%s AND r.actor_id=%s "
+            "AND r.run_id=%s AND d.draft_id=%s AND d.status='approved' "
+            "AND r.graph_version=%s AND r.kind='plan_generate' "
+            "AND EXISTS(SELECT 1 FROM plan_publications p WHERE p.project_id=d.project_id "
+                "AND p.draft_hash=d.content_hash)",
+            (project_id, project_id, actor_id, run_id, draft_id, V2_EXECUTION_VERSION)).fetchone() is None:
+        return False
+    detail = frozen_submission(conn, actor_id=actor_id, project_id=project_id, run_id=run_id)
+    draft = PgPlanRepository("", connection=conn).get_draft(project_id=project_id, draft_id=draft_id)
+    if (draft is None or draft.run_id != run_id or draft.v2_execution is None
+            or draft.v2_execution.to_payload()["bindings"]["run_id"] != run_id
+            or (draft.v2_revision.to_payload() if draft.v2_revision else None) != detail["initial"].get("v2_revision")):
+        raise V2RecoveryBlocked("Published result differs from its exact V2 submission")
+    return True
+
+
+def validate_semantic_input(conn, *, actor_id, project_id, run_id, manifest, context):
+    detail = frozen_submission(conn, actor_id=actor_id, project_id=project_id, run_id=run_id)
+    if detail["manifest"] != manifest or detail["initial"].get("v2_revision") != context.to_payload():
+        raise V2RecoveryBlocked("Semantic execution differs from its durable submission")
+    validate_revision_basis(conn, SimpleNamespace(project_id=project_id, v2_revision=context, v2_execution=True),
+        expected_version=context.to_payload()["base_revision"])
 
 
 def _stage_hash(stage):
@@ -44,6 +131,10 @@ def capture_progress_basis(conn, current, *, _seen=()):
                 or parent.structure_fingerprint() != ctx["base_structure_hash"]
                 or content_hash(parent.v2_execution.to_payload()["manifest"]) != ctx["base_execution_manifest_hash"]):
             raise ConflictError("Historical revision lineage no longer resolves exactly")
+        parent_root = (parent.v2_revision.to_payload()["budget_root_run_id"] if parent.v2_revision
+            else parent.v2_execution.to_payload()["bindings"]["run_id"])
+        if ctx["budget_root_run_id"] != parent_root:
+            raise ConflictError("Historical revision changed its exact ancestor budget root")
         prior_basis = capture_progress_basis(conn, parent, _seen=(*_seen, current.plan_id))
         parent_stages = {s.stage_id: s for s in parent.stages}
         parent_facts = {s["stage_id"]: s for s in prior_basis["stages"]}
@@ -141,6 +232,10 @@ def validate_revision_basis(conn, owner, *, expected_version=None, domain_approv
             or content_hash(current.v2_execution.to_payload()["manifest"]) != ctx["base_execution_manifest_hash"]):
         raise ConflictError("原当前版本已变化，请重新生成预览", reason="revision_basis_stale")
     progress = capture_progress_basis(conn, current)
+    root = (current.v2_revision.to_payload()["budget_root_run_id"] if current.v2_revision
+        else current.v2_execution.to_payload()["bindings"]["run_id"])
+    if ctx["budget_root_run_id"] != root:
+        raise ConflictError("Revision cannot replace its exact ancestor budget root")
     if progress != ctx["progress_basis"]:
         raise ConflictError("学习进度或成果已变化，请重新生成预览", reason="revision_progress_stale")
     wanted = []
@@ -152,6 +247,8 @@ def validate_revision_basis(conn, owner, *, expected_version=None, domain_approv
     if wanted != ctx["lineage"]:
         raise ConflictError("Exact revision lineage mismatch")
     if ctx["change_kind"] == "local":
+        if owner.goal_spec != current.goal_spec:
+            raise ConflictError("Local change altered the approved goal")
         by_key = {s.stable_key: s for s in owner.stages}
         remap = {s.stable_key: s.stage_id for s in current.stages}
         if set(by_key) != set(remap):
@@ -164,6 +261,13 @@ def validate_revision_basis(conn, owner, *, expected_version=None, domain_approv
         rebuilt = current.v2_execution.recompile_local(candidate, domain_approvals=domain_approvals)
         if rebuilt.semantic_payload() != owner.v2_execution.semantic_payload():
             raise ValidationAppError("Local change altered frozen required outcomes, sources, tasks or project facts")
+    elif hasattr(owner, "run_id"):
+        submission = frozen_submission(conn, actor_id=ctx["actor_id"], project_id=owner.project_id, run_id=owner.run_id)
+        if (submission["initial"].get("v2_revision") != ctx
+                or owner.v2_execution.to_payload()["bindings"]["run_id"] != owner.run_id
+                or goal_spec_payload(owner.goal_spec) != goal_spec_payload(GoalSpec(**ctx["approved_goal_spec"]))):
+            raise ConflictError("Semantic Draft lost its original goal or durable run binding")
+        budget_family(conn, actor_id=ctx["actor_id"], project_id=owner.project_id, run_id=owner.run_id)
     return current
 
 
@@ -255,6 +359,7 @@ class PgV2Revisions:
             unit_order = {s.stage_id: i for i, s in enumerate(stages)}
             c = execution.to_payload()["compiled"]
             draft = PlanDraft(draft_id=draft_id, project_id=project_id, run_id="", goal_snapshot=current.goal_snapshot,
+                goal_spec=current.goal_spec,
                 revision_candidate=current.revision + 1, stages=stages,
                 unit_links=tuple(sorted(current.unit_links, key=lambda link: (unit_order[link.stage_id], link.order_index))),
                 task_links=tuple(sorted(current.task_links, key=lambda link: (unit_order[link.stage_id], link.order_index))),
@@ -305,6 +410,60 @@ class PgV2Revisions:
             saved = repo.get_draft(project_id=project_id, draft_id=draft_id)
             return DecisionOutcome(saved.run_id, saved, _resources(saved))
 
-    def submit_semantic(self, **kwargs):
+    def submit_semantic(self, *, scope, project_id, expected_version, current_plan_id, idempotency_key, goal_spec):
         from app.core.errors import DependencyUnavailableError
-        raise DependencyUnavailableError("V2 owned replanning is not configured")
+        from app.domain.planning.v2_runtime import wire
+        factory = self.runtime_factory
+        scope.require_project(project_id)
+        if factory is None or getattr(factory, "owned_only", False) is not True or self.planning_jobs is None:
+            raise DependencyUnavailableError("V2 owned replanning is not configured")
+        if (to_psycopg_dsn(getattr(factory, "dsn", "")) != self.dsn
+                or to_psycopg_dsn(getattr(self.planning_jobs, "_dsn", "")) != self.dsn):
+            raise DependencyUnavailableError("Owned replanning dependencies must share the same business database")
+        if type(goal_spec) is not GoalSpec or type(expected_version) is not int or expected_version < 1:
+            raise ValidationAppError("Semantic change requires an explicit typed goal and current version")
+        goal_payload = wire(goal_spec_payload(goal_spec))
+        run_id = self._identity(scope, project_id, idempotency_key, "semantic")
+        fingerprint = content_hash({"expected_version": expected_version, "current_plan_id": current_plan_id,
+            "goal_spec": goal_payload})
+        with self._connection(scope, project_id) as conn:
+            if conn.execute("SELECT 1 FROM ai_runs WHERE run_id=%s", (run_id,)).fetchone():
+                previous = frozen_submission(conn, actor_id=scope.actor_id, project_id=project_id, run_id=run_id)
+                if previous["initial"].get("v2_revision", {}).get("input_hash") != fingerprint:
+                    raise IdempotencyConflictError("同一重规划身份已绑定不同目标")
+                return run_id
+            current = _base(conn, project_id)
+            if current.plan_id != current_plan_id or current.revision != expected_version:
+                raise ConflictError("当前版本已变化", reason="revision_basis_stale")
+            root = (current.v2_revision.to_payload()["budget_root_run_id"] if current.v2_revision
+                else current.v2_execution.to_payload()["bindings"]["run_id"])
+            if not root:
+                raise ValidationAppError("Semantic replanning requires the original durable V2 run")
+            original = frozen_submission(conn, actor_id=scope.actor_id, project_id=project_id, run_id=root)
+            _, family = budget_family(conn, actor_id=scope.actor_id, project_id=project_id, run_id=root)
+            if conn.execute("SELECT 1 FROM ai_provider_attempts WHERE run_id=ANY(%s) "
+                    "AND status IN('dispatched','reconciliation_required') LIMIT 1", (list(family),)).fetchone():
+                raise V2RecoveryBlocked("Original or sibling unknown dispatch blocks new replanning")
+            manifest = factory.build_submission(scope, project_id, goal_spec, expected_version)
+            if manifest["budget"] != original["manifest"]["budget"]:
+                raise ValidationAppError("Replanning cannot reset or increase the original shared budget")
+            progress = capture_progress_basis(conn, current)
+            lineage = [{"source_plan_id": current.plan_id, "source_revision": current.revision,
+                "source_stage_id": stage.stage_id, "source_stable_key": stage.stable_key,
+                "source_stage_hash": _stage_hash(stage), "learning_status": fact["learning_status"],
+                "target_stable_key": None} for fact, stage in zip(progress["stages"], current.stages, strict=True)]
+            context = V2RevisionContext.create(change_kind="semantic", actor_id=scope.actor_id, project_id=project_id,
+                base_plan_id=current.plan_id, base_revision=current.revision, base_structure_hash=current.structure_fingerprint(),
+                base_execution_manifest_hash=content_hash(current.v2_execution.to_payload()["manifest"]),
+                progress_basis=progress, lineage=lineage, approved_goal_spec=goal_payload, budget_root_run_id=root,
+                input_hash=fingerprint, change_diff={"before": execution_facts(current.v2_execution, progress=progress),
+                    "before_goal": current.goal_snapshot, "approved_goal_spec": goal_payload,
+                    "history_retained": True, "progress_inherited": False})
+            manifest["v2_revision_hash"] = context.to_payload()["context_hash"]
+            manifest["manifest_hash"] = content_hash({k: v for k, v in manifest.items() if k != "manifest_hash"})
+            initial = {"goal": goal_spec.target, "goal_spec": goal_payload, "manifest": manifest,
+                "v2_revision": context.to_payload()}
+            run = RunRecord(run_id, scope.actor_id, project_id, "plan_generate", "planning", V2_EXECUTION_VERSION,
+                AiRunStatus.QUEUED, AiRunNextAction.WAIT, thread_id="thread_" + run_id[4:])
+            self.planning_jobs.in_transaction(conn).enqueue(run, initial, manifest)
+            return run_id

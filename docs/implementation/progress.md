@@ -1,3 +1,13 @@
+## 2026-10-09 Planning V2 Item8 R2：SEMANTIC_REPLANNING_PASS / CONTINUING_R3
+
+- 同Item1～7、新Run/manifest/GoalSpec/basis/diff及共享root预算已实现；fresh-context独审最终PASS，关闭初始root旁路、legacy双root写入旁路、发布与Run完成CAS两窗口及中断恢复。历史读路径不因预算歧义关闭，精确本Run发布结果恢复仍检查原冻结输入/fence，普通dispatch不放宽。
+- 最终42PASS（25新ownedPG+17离线）及最后校验顺序3PG PASS，去重27不同PG；最终business HTTP2PASS，Ruff/diff/857tracked范围与378历史证据/env/旧progress保全PASS。旧SHORT public202 fixture NOT RUN，无真实外部语义或UI验收。R2创建本地checkpoint后仅执行约定R3两例+默认503/contract/collection/保护；产品模型/搜索/Reader0，不push/merge/deploy，不进入Item9。
+
+## 2026-10-09 Planning V2 Item8 R2：INDEPENDENT_REVIEW_CLOSURE / R3_NOT_STARTED
+
+- R2已接通同Item1～7的新Run、typed GoalSpec/basis/diff与祖先/sibling共享预算，真实owned HTTP及PG定向证据已落盘；当前HEAD仍为R1 checkpoint `074836ea5c01efd88eca114c13b43f1ea93bbac5`。独审发现初始入口/旧多root预算旁路及Draft已发布与Run完成之间的CAS/恢复窗口，正在同一闭包修复，不提前声明R2 PASS。
+- 原378份账本/证据、.env、旧progress及正式数据保留。历史歧义阻断新增派发/发布但不能破坏current/history读取；只在精确已发布本Run结果上允许完成恢复，不能放宽一般dispatch。R3仅补cancel迟到结果和known incomplete等受影响证明，产品模型/搜索/Reader0，不push/merge/deploy，不进入Item9。
+
 ## 2026-10-08 Planning V2 Item8 R1：LOCAL_REVISION_PASS / CONTINUING_R2_R3
 
 - R0本地checkpoint f0a7a04a21c80afac9d3c839af6fafdef923e6f9；[Item8报告](../planning-v2/ITEM8_REPLANNING_REVISION.md)记录受控future说明/完整合法排序→Compiler→新Draft/hash→明确确认→原子Revision。typed revision context进入现有JSONB/hash，source/required/project事实保持原权威；自由文本待澄清，不使用is_semantic=false。

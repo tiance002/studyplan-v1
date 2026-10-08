@@ -276,6 +276,14 @@ class V2RevisionDecisionRequest(BaseModel):
     idempotency_key: str = Field(min_length=1, max_length=128)
 
 
+class V2SemanticReplanRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    current_plan_id: str = Field(min_length=1, max_length=64)
+    expected_version: int = Field(ge=1, strict=True)
+    idempotency_key: str = Field(min_length=1, max_length=128)
+    goal_spec: GoalSpec
+
+
 class V2ChangeClassificationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     change_text: str = Field(min_length=1, max_length=2000)

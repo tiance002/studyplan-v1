@@ -21,6 +21,7 @@ import psycopg
 from app.agent_workflows.planning_batches import SHORT_GENERATION_VERSION
 from app.core.errors import ConflictError, ValidationAppError
 from app.domain.enums import AiRunNextAction, AiRunStatus
+from app.domain.planning.v2_runtime import V2_EXECUTION_VERSION
 from app.domain.runs.fencing import PlanningWriteFence
 from app.domain.runs.models import RunRecord
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -179,6 +180,13 @@ class PgRunRepository:
                               WHERE p.project_id=d.project_id AND p.draft_hash=d.content_hash)""",
                         (project_id, project_id, run_id, result_ref, SHORT_GENERATION_VERSION),
                     ).fetchone()
+                    if published_result is None and write_fence is not None:
+                        from app.infrastructure.db.v2_revisions import published_v2_draft
+                        version = conn.execute("SELECT graph_version FROM ai_runs WHERE run_id=%s AND project_id=%s",
+                            (run_id, project_id)).fetchone()
+                        if version and version["graph_version"] == V2_EXECUTION_VERSION and published_v2_draft(conn,
+                                actor_id=write_fence.actor_id, project_id=project_id, run_id=run_id, draft_id=result_ref):
+                            published_result = True
                 if published_result is None:
                     lock_plan_version(conn, project_id, expected_plan_version)
             if write_fence is not None:

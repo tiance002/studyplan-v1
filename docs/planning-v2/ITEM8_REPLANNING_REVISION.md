@@ -1,6 +1,6 @@
 # Planning V2 Item8 — Replanning & Revision
 
-日期：2026-10-08。R0、R1独立审查PASS；R2～R3尚未实施，不提前声明整体验收。
+日期：2026-10-08～09。R0、R1、R2独立审查PASS；R3尚未开始，不提前声明整体验收。
 
 ## 基线、授权与停止条件
 
@@ -46,6 +46,71 @@ R0独立审查PASS：现有JSONB/Publication/精确stage remap足以承载，无
 
 R1独立审查最终PASS：实际源码、18/50例XML、两个不同HTTP用例读回及12+9文件hash逐项核对一致。连续历史与确认重放缺陷关闭，默认未知领域注入限制保留；未知领域装配后的PG/HTTP NOT RUN。允许本地R1checkpoint后继续R2，不代表R2预算/恢复或真实外部语义已验收。
 
+## R2：同链 Semantic Replanning（独立审查PASS）
+
+入口`POST /api/v1/plans/v2/owned/replan`要求明确`current_plan_id / expected_version / idempotency_key / goal_spec`，拒绝客户端model/budget/actor或is_semantic覆盖。薄Application → PgV2Revisions在现有计划/owner锁内冻结原current、progress、批准GoalSpec与目标diff；复用PgPlanningJobRepository的同事务enqueue写新Run/submission/Job。异常使所有入队行回滚，避免连接间owner FK自锁。Owned工厂、仓储与Jobs必须同一业务DSN，业务与checkpoint仍为独立loopback新owned库；默认runtime未装配保持503。
+
+新Run实际进入原`V2PlanningRuntime.execute`：Item1 Profile → Item2 Capability → Item3 Coverage → Item4 Gap → Item5 Research → Item6 Curriculum → Item7 Compiler/P2 persistence。原current直到显式确认后才切换；失败、incomplete或unknown不会替换原current。相同请求身份同体仅返回原Run，不再派发，异体409；不恢复历史failed/unknown、不调用旧catalog/selector/outline/structure/practice。
+
+原进度事实和来源仍属于精确旧Revision。Semantic不靠标题把旧完成状态映射为新Stage或accepted_known；原历史由v2_revision.history展示，新增教学来自新Profile/Capability/Compiler。新GoalSpec不能借过去无证据事实伪造掌握；已有用户项目独立保留为user_project载体，不混为Project Study案例。新的完整GoalSpec利用已有字段持久化，并与ctx/durable manifest及Profile结构化字段逐项绑定；Local后续只能精确继承。
+
+Run运行时manifest单向绑定ctx.context_hash；Compiler ExecutionManifest仍由编译快照独立核验。ctx不为展示新结果而重哈希，user_content(execution=...)从冻结ctx和合法当前编译快照确定性展示前后阶段、outcomes/prerequisites、教材版本、实践/项目和unresolved。默认ctx历史投影与R1保持兼容。
+
+预算读取原durable root submission的冻结上限。同actor/project/root的祖先和所有siblings累计reservation、实际excess、candidate、请求/搜索/正文等计量；派发和settlement共用root锁。取消不退款，未知/已派发未结算不通过新身份绕开；新工厂提高cap、偷换root或跨库依赖直接拒绝。Local→Semantic的后续版本仍使用同一root，没有新ledger或额度平台。
+
+| 验证 | 证据 | 结果 |
+|---|---|---|
+| R2行为RED | r2-red.xml 3例；最初system python缺psycopg属于collection失败，另记录 | FAIL，真实业务RED使用.venv执行 |
+| 真实PG主体 | r2-closure.xml | PASS，8例：同链/确认、共享cap并发、unknown、配置/DSN、progress stale、ctx/两类manifest、原子rollback |
+| 最终源码goal/root/恢复 | r2-goal-root-recovery.xml | PASS，2例；与上行semantic重复1，合计9个不同PG用例，含semantic→local→后续semantic同root、缺GoalSpec/原文/结构化事实篡改拒绝、fresh Worker回执恢复零新增模拟派发 |
+| 受影响离线 | r2-affected-offline.xml | PASS，15例，不重复全Item7矩阵 |
+| HTTP真实owned PG+cookie/CSRF | r2-http-pg.xml | PASS，4例：两个Local兼容、新Semantic字段/用户项目/accepted_known/明确确认/fresh readback、并发确认CAS |
+| DTO | r2-api-red.xml / r2-api-green.xml | 缺路由RED1 FAIL → GREEN3 PASS；客户端预算/model/is_semantic/错误GoalSpec等拒绝 |
+
+HTTP的Provider/Search/Bodies是明确合成响应，Item1～7 Validator/Compiler/DB/认证链实际执行。Python claim不会进入learning stages，已有JSON CLI载体和完整GoalSpec读回PASS，只证明机械保全及接线，**不证明真实模型语义理解**。真实产品模型/搜索/Reader0。
+
+中间失败完整保留：first-green 2PASS1FAIL/diagnostic定位原goal_spec非空保护，随后增加精确typed绑定；expanded 7PASS1FAIL发现Compiler清单替代runtime清单在工厂索引model_ref时抛KeyError并留running，随后在工厂前manifest_intact拒绝并分类为RecoveryBlocked，最终closure通过。不是以放宽Schema、修改旧历史或增加调用追绿。R2实施与HTTP源码hash packet已冻结，独立审查尚未给最终结论，不提前声明R2完成。
+
+2026-10-09续接独审确认P1：原`/owned/generate`在已有current时仍创建无revision context的新root，绕过祖先预算/unknown/basis；无current但已存在初始Run时也可能重复创建独立root。真实HTTP `r2-initial-http-red.xml`复现202并新增Run/Job/submission，不作为通过证据。正在同一边界修复：初始root在项目锁内原子准入、同项目已有root任何状态拒绝新root、无ctx非零expected submission/Worker拒绝；不改历史Run，不为失败/unknown建立自动重派平台。R2仍未提交，独审未PASS。
+
+同一闭包还检查修复前持久化的多个初始root：只关闭新入口不够，旧queued Run、已保存Draft的generic确认及后续Semantic root解析也必须拒绝歧义；共用durable submission/root校验，不删除或重写历史。实际`r2-gate-legacy-double-root-red.xml`已复现2 FAIL。另发现Semantic Draft持久化之后与最终checkpoint/Run终态之间的发布时序：外部Local先发布应使旧Semantic明确终结冲突；精确本Run的Draft先合法发布应完成succeeded，不能卡在running或误报失败。这两窗口由同一实际PG反例矩阵收口，不能用通用忽略CAS替代。
+
+完成恢复另用`r2-gate-own-published-recovery-red.xml`真实复现1 FAIL：草案持久化后确认，模拟最终checkpoint中断，fresh Worker将已发布本Run误标failed。修复只投影精确approved+Publication/hash/typed snapshot/context绑定的本Run结果，并继续fence及原goal/source/domain冻结校验；一般dispatch仍按旧basis严格检查。新的publication budget校验只在mutation路径开启，不能让多root历史的current/history读取失效。最终源码与PG证据仍待独审收口。
+
+Owned初始入口的有限恢复边界：尚无current但原初始root已failed/needs_clarification/cancelled/unknown时，本轮不允许通过新初始身份再分配预算；需显式核对原Run。Item8面向已有current的修订，本轮不建设原失败Run恢复平台。
+
+
+### R2独审闭包的最终执行证据
+
+- `r2-final-closure-green.xml`：PASS，42例＝25个新owned PG场景+17离线场景，0 failure/error/skipped，实际228.443s。源码在own-published完成恢复补丁后冻结；此大包早于最后一次原冻结输入校验的顺序前移。
+- `r2-final-completion-input-green.xml`：最终源码PASS，3个owned PG场景，实际50.750s；精确本Run完成恢复、goal漂移与source facts漂移。仅将原比较前移至early completion之前，其他普通派发逻辑不改。own恢复与上一包重叠1例，两个XML合计27个不同PG场景+17离线场景，不把重跑累加。
+- `r2-initial-http-green.xml`：PASS，2例（23.541s），existing-current初始请求409且Run/Job/submission零增量；合法Semantic HTTP仍同链成功并可确认。先前实际202/+1各行的RED保留。
+- RED与诊断均保留：准入6 FAIL、无current历史root3 FAIL、旧双root2 FAIL、CAS/publication组合5 FAIL1 PASS、own完成中断恢复1 FAIL；中间reader/RLS诊断失败及对应修复均记录在`r2-business-closure-packet.json`，不隐藏失败。门禁仅mutation开启；reader保留原来源/hash/实体校验，历史歧义不屏蔽旧事实。
+- `PgRunRepository`原SHORT_GENERATION_VERSION已批准草案分支保持；其旧真实PG fixture要求现已禁用的public generate202，本轮NOT RUN，不为跑旧fixture重新开放入口。
+
+最终业务源码HTTP `r2-final-business-http-green.xml`：PASS，2例，22.76s；仅复测existing-current409/零行增量与合法Semantic整链确认。与先前相同HTTP场景重叠，不另加用例数。
+
+业务14文件最终hash、前后两份source版本与各XML绑定冻结在`r2-business-closure-packet.json`；root API/HTTP7文件冻结在`r2-root-gate-packet.json`。R2最终独审PASS：实际14个业务文件与7个API/contract文件hash一致，42+3例的source时序、最终2HTTP XML/hash已核对；无剩余actionable P1，可以创建本地R2 checkpoint。独审回执保存在`r2-review-receipt.json`。R3尚未开始。
+
+## 新增事实的实际消费者矩阵
+
+| 事实 | 冻结/存储 | 实际消费与拒绝边界 |
+|---|---|---|
+| actor/project | 服务端scope与typed context；现有Run/submission/Draft/Revision JSONB | PgV2Revisions owner/RLS核查、冻结submission与budget族归属；请求不能自报actor |
+| base plan/revision/structure hash | V2RevisionContext | Preview、保存/发布guard与恢复检查服务端current；旧Preview不能覆盖新current |
+| base execution manifest hash | 原V2ExecutionSnapshot的Compiler清单摘要 | 精确旧版本/lineage核验；这不是Run运行时清单 |
+| progress_basis/hash | 精确旧位置的records/heads/reviews/source snapshots及stage facts | 在计划锁内重新捕获，学习/成果或来源变化使Preview失效；不按标题继承 |
+| lineage/history source | source plan/revision/stage/hash与目标stable key，JSONB/hash保留 | Local递归历史保护、current/workspace历史展示；Semantic保留原记录引用，不猜新旧阶段关系或自动mastery |
+| Local change_diff | 有界future说明/排列前后值 | Compiler重编译与冻结语义比较；用户实际看到新说明和顺序，不要求新Draft hash等于初始Curriculum hash |
+| approved_goal_spec | Semantic context + 新Run initial；现有Plan GoalSpec字段精确绑定 | Item1重新生成Profile；scope/depth/starting_point/purpose/project_context与Profile一致，原目标hash与durable submission绑定；Local仅精确继承base |
+| Semantic diff | ctx保存批准目标差异和原future/source/practice事实；新facts来自当前合法compiled snapshot | user_content(execution=...)只做确定性投影，展示新旧阶段/outcomes/prerequisites/material versions/practice/unresolved；不回写ctx hash |
+| runtime manifest / v2_revision_hash | 新durable submission，单向绑定context hash | Worker、PgV2Calls、checkpoint与P2 bridge一致性校验；不能用Compiler清单替代运行授权 |
+| budget_root_run_id | context与原durable root/sibling submissions | budget_family/PgV2Calls按同actor/project/root累计请求、reservation/excess/candidate及unknown；Local后续不换root，新Run不退款或扩上限 |
+| input_hash/context_hash | 规范化请求/冻结context | 同身份同体复用、异体拒绝；context进入Draft hash/Revision fingerprint和runtime单向绑定 |
+| 实际发布内容/hash | typed snapshot、Draft content_hash、Revision structure_fingerprint | 专用及generic明确确认、Publication原子事务、current/history fresh readback |
+
+没有新增第二Planner、独立版本历史表、业务队列或review平台。原Item1～6领域语义、Policy、Schema、Prompt和审核映射不变。Item8对现有V2 goal_spec非空保护只允许带合法context的精确绑定，不放宽无绑定旧路径；`V2ExecutionSnapshotV1`字段集合保持不变。
+
 ## 后续证据
 
-R2～R3需补充Semantic同链、祖先/sibling预算累计、新Run/Manifest绑定、恢复与unknown/CAS测试、最终独审和checkpoint。真实外部语义与Item9 UI NOT RUN。
+R2独审已收口，checkpoint后进入R3；仅补受影响可靠性与最终保护/contract/collection，不重跑完整Item7。真实外部语义与Item9 UI NOT RUN。

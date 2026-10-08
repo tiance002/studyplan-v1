@@ -75,10 +75,22 @@ class PgV2Calls:
             )
             yield conn
 
-    def _lock(self, conn):
-        conn.execute(
-            "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", ("studyplan:plan-budget:" + self.run_id,)
+    def _lock(self, conn, *, published_draft_id=None):
+        from app.domain.planning.revisions import V2RevisionContext
+        from app.infrastructure.db.v2_revisions import (
+            budget_family,
+            frozen_submission,
+            published_v2_draft,
+            validate_semantic_input,
         )
+        submission = frozen_submission(conn, actor_id=self.scope.actor_id, project_id=self.project_id, run_id=self.run_id)
+        context = V2RevisionContext.from_payload(submission["initial"].get("v2_revision"))
+        root = context.to_payload()["budget_root_run_id"] if context else self.run_id
+        conn.execute(
+            "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", ("studyplan:plan-budget:" + root,)
+        )
+        self.budget_root_run_id = root
+        budget_family(conn, actor_id=self.scope.actor_id, project_id=self.project_id, run_id=self.run_id)
         lock_plan_version(conn, self.project_id, None)
         lock_planning_write(conn, project_id=self.project_id, run_id=self.run_id, fence=self.fence)
         run = conn.execute(
@@ -98,18 +110,29 @@ class PgV2Calls:
             or submissions[0]["detail"].get("initial", {}).get("manifest") != self.manifest
         ):
             raise V2RecoveryBlocked("V2 dispatch differs from server-persisted frozen submission")
+        own_published = published_draft_id is not None and published_v2_draft(conn,
+            actor_id=self.scope.actor_id, project_id=self.project_id, run_id=self.run_id, draft_id=published_draft_id)
+        if context is not None and not own_published:
+            validate_semantic_input(conn, actor_id=self.scope.actor_id, project_id=self.project_id,
+                run_id=self.run_id, manifest=self.manifest, context=context)
+        elif context is None and not own_published:
+            lock_plan_version(conn, self.project_id, 0)
 
-    def _reservations(self, conn):
+    def _reservations(self, conn, *, related_only=False):
+        from app.infrastructure.db.v2_revisions import budget_family
+        _, manifests = budget_family(conn, actor_id=self.scope.actor_id, project_id=self.project_id, run_id=self.run_id)
+        run_ids = [run for run in manifests if not related_only or run != self.run_id]
         rows = conn.execute(
-            "SELECT detail FROM ai_run_events WHERE run_id=%s AND status='v2_reservation' ORDER BY event_id",
-            (self.run_id,),
+            "SELECT run_id,detail FROM ai_run_events WHERE run_id=ANY(%s) AND status='v2_reservation' ORDER BY event_id",
+            (run_ids,),
         ).fetchall()
         usage = dict.fromkeys(METRICS, 0)
         seen = set()
         for row in rows:
             d = row["detail"]
             if (
-                d.get("manifest_hash") != self.manifest["manifest_hash"]
+                d.get("manifest_hash") != manifests[row["run_id"]]["manifest_hash"]
+                or d.get("run_id") != row["run_id"]
                 or d.get("digest") != content_hash({k: v for k, v in d.items() if k != "digest"})
                 or d["attempt_id"] in seen
                 or set(d["reserved"]) - set(METRICS)
@@ -121,11 +144,11 @@ class PgV2Calls:
                     raise V2RecoveryBlocked("V2 reservation metric invalid")
                 usage[metric] += value
         excess = conn.execute(
-            "SELECT detail FROM ai_run_events WHERE run_id=%s AND status='v2_observed_excess'", (self.run_id,)
+            "SELECT run_id,detail FROM ai_run_events WHERE run_id=ANY(%s) AND status='v2_observed_excess'", (run_ids,)
         ).fetchall()
         for row in excess:
             d = row["detail"]
-            if d.get("manifest_hash") != self.manifest["manifest_hash"] or d.get("digest") != content_hash(
+            if d.get("manifest_hash") != manifests[row["run_id"]]["manifest_hash"] or d.get("digest") != content_hash(
                 {k: v for k, v in d.items() if k != "digest"}
             ):
                 raise V2RecoveryBlocked("V2 observed budget integrity mismatch")
@@ -134,14 +157,14 @@ class PgV2Calls:
                     raise V2RecoveryBlocked("V2 observed budget invalid")
                 usage[metric] += value
         candidates = conn.execute(
-            "SELECT detail FROM ai_run_events WHERE run_id=%s AND status='v2_candidate_admission'",
-            (self.run_id,),
+            "SELECT run_id,detail FROM ai_run_events WHERE run_id=ANY(%s) AND status='v2_candidate_admission'",
+            (run_ids,),
         ).fetchall()
         seen = set()
         for row in candidates:
             d = row["detail"]
             if (
-                d.get("manifest_hash") != self.manifest["manifest_hash"]
+                d.get("manifest_hash") != manifests[row["run_id"]]["manifest_hash"]
                 or d.get("digest") != content_hash({k: v for k, v in d.items() if k != "digest"})
                 or d.get("identity") in seen
             ):
@@ -149,6 +172,10 @@ class PgV2Calls:
             seen.add(d["identity"])
             usage["candidates"] += 1
         return usage
+
+    def _budget_manifests(self, conn):
+        from app.infrastructure.db.v2_revisions import budget_family
+        return budget_family(conn, actor_id=self.scope.actor_id, project_id=self.project_id, run_id=self.run_id)[1]
 
     def admit_candidate(self, url):
         identity = content_hash({"run_id": self.run_id, "candidate_url": url})
@@ -178,9 +205,9 @@ class PgV2Calls:
                 (self.run_id, Jsonb(detail)),
             )
 
-    def usage(self):
+    def usage(self, *, related_only=False):
         with self.tx() as conn:
-            return self._reservations(conn)
+            return self._reservations(conn, related_only=related_only)
 
     def _identity(self, step, purpose, schema, payload, options):
         facts = {
@@ -268,8 +295,8 @@ class PgV2Calls:
             if old is not None:
                 return self._retained(old, identity)
             if conn.execute(
-                "SELECT 1 FROM ai_provider_attempts WHERE run_id=%s AND status IN('dispatched','reconciliation_required') LIMIT 1",
-                (self.run_id,),
+                "SELECT 1 FROM ai_provider_attempts WHERE run_id=ANY(%s) AND status IN('dispatched','reconciliation_required') LIMIT 1",
+                (list(self._budget_manifests(conn)),),
             ).fetchone():
                 raise V2RecoveryBlocked("Uncertain V2 dispatch blocks every new identity")
             usage = self._reservations(conn)
@@ -350,7 +377,7 @@ class PgV2Calls:
         with self.tx() as conn:
             conn.execute(
                 "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))",
-                ("studyplan:plan-budget:" + self.run_id,),
+                ("studyplan:plan-budget:" + self.budget_root_run_id,),
             )
             cursor = conn.execute(
                 "UPDATE ai_provider_attempts SET status=%s,response_payload=%s,error_class=%s,output_tokens=%s,cost_micros=%s WHERE attempt_id=%s AND run_id=%s AND status='dispatched'",

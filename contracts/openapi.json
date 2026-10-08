@@ -4144,6 +4144,59 @@
         }
       }
     },
+    "/api/v1/plans/v2/owned/replan": {
+      "post": {
+        "summary": "在受控 owned 环境按明确的新目标重新规划",
+        "operationId": "replan_owned_v2_plan",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2SemanticReplanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanGenerateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/runs": {
       "get": {
         "summary": "读取当前账户与学习空间最近的规划运行",
@@ -13365,6 +13418,39 @@
           "idempotency_key"
         ],
         "title": "V2RevisionDecisionRequest"
+      },
+      "V2SemanticReplanRequest": {
+        "properties": {
+          "current_plan_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Current Plan Id"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          },
+          "goal_spec": {
+            "$ref": "#/components/schemas/GoalSpec"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "current_plan_id",
+          "expected_version",
+          "idempotency_key",
+          "goal_spec"
+        ],
+        "title": "V2SemanticReplanRequest"
       },
       "ValidationError": {
         "properties": {

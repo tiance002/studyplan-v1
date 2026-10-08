@@ -101,7 +101,7 @@ class V2RevisionContext:
     def to_payload(self):
         return json.loads(self._json)
 
-    def user_content(self):
+    def user_content(self, *, execution=None):
         raw = self.to_payload()
         facts = {s["stage_id"]: s for s in raw["progress_basis"]["stages"]}
         history = []
@@ -113,6 +113,37 @@ class V2RevisionContext:
                 "stage_id": source["source_stage_id"], "stable_key": ref["source_stable_key"],
                 "learning_status": (fact["historical_learning_status"] if historical else ref["learning_status"]),
                 "target_stable_key": ref["target_stable_key"], "progress_inherited": False})
+        seen = {(h["source_plan_id"], h["stage_id"]) for h in history}
+        for ancestor in raw["progress_basis"].get("ancestor_bases", []):
+            for fact in ancestor["stages"]:
+                key = (ancestor["plan_id"], fact["stage_id"])
+                if key not in seen and fact["learning_status"] != "future":
+                    history.append({"source_plan_id": ancestor["plan_id"], "source_revision": ancestor["revision"],
+                        "stage_id": fact["stage_id"], "stable_key": fact["stable_key"],
+                        "learning_status": fact["learning_status"], "target_stable_key": None, "progress_inherited": False})
+                    seen.add(key)
+        changes = raw["change_diff"]
+        if raw["change_kind"] == "semantic" and execution is not None:
+            after = execution_facts(execution)
+            before = changes["before"]
+            changes = {**changes, "after": after, "added_stages": after["stages"],
+                "removed_stages": [s for s in before["stages"] if not s["protected"]],
+                "preserved_stages": [s for s in before["stages"] if s["protected"]],
+                "outcomes_changed": before["outcomes"] != after["outcomes"],
+                "prerequisites_changed": before["prerequisites"] != after["prerequisites"],
+                "materials_changed": before["materials"] != after["materials"],
+                "practice_changed": before["practice"] != after["practice"], "unresolved": after["unresolved"]}
         return {"change_kind": raw["change_kind"], "base_revision": raw["base_revision"],
-            "changes": raw["change_diff"], "history": history,
+            "changes": changes, "history": history,
             "history_policy": "历史成果保留在原版本；新版本不自动继承学习进度或掌握状态。"}
+
+
+def execution_facts(execution, *, progress=None):
+    """Display exact Compiler facts; no matching or transfer of progress by name."""
+    compiled = execution.to_payload()["compiled"]
+    protected = {s["stable_key"]: s["protected"] for s in progress["stages"]} if progress else {}
+    stages = [{**s, "protected": protected.get(s["stable_key"], False)} for s in compiled["stages"]]
+    return {"stages": stages, "outcomes": [{"capability_id": c["capability_id"], "outcomes": c["outcomes"]}
+        for c in compiled["source_snapshots"]["curriculum_context"]["capabilities"]],
+        "prerequisites": [{"stage_id": s["stage_id"], "prerequisite_stage_refs": s["prerequisite_stage_refs"]} for s in stages],
+        "materials": compiled["resource_assignments"], "practice": compiled["practice"], "unresolved": compiled["unresolved"]}

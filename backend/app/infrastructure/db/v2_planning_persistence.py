@@ -170,7 +170,7 @@ def _register_materials(conn, project_id, compiled):
     return result
 
 
-def validate_database_bindings(conn, owner):
+def validate_database_bindings(conn, owner, *, validate_run_authority=False):
     """Read the exact DB identities/versions and entity/link definitions, never titles as identities."""
     validate_v2_structure(owner)
     if owner.stage_resources:
@@ -179,6 +179,12 @@ def validate_database_bindings(conn, owner):
         require_snapshot_bindings(owner.stage_resources, owner.resource_snapshots)
     raw = owner.v2_execution.to_payload()
     c, b, project = raw["compiled"], raw["bindings"], owner.project_id
+    if validate_run_authority and b["run_id"]:
+        from app.infrastructure.db.v2_revisions import budget_family
+        actor = conn.execute("SELECT actor_id FROM ai_runs WHERE project_id=%s AND run_id=%s", (project, b["run_id"])).fetchone()
+        if actor is None:
+            raise ConflictError("V2 durable execution project is missing")
+        budget_family(conn, actor_id=actor["actor_id"], project_id=project, run_id=b["run_id"])
     for node in c["nodes"]:
         row = conn.execute(
             "SELECT stable_key,title,objectives,content_version FROM knowledge_nodes WHERE project_id=%s AND node_id=%s FOR SHARE",
@@ -314,6 +320,7 @@ class PgV2PlanningPersistence:
         source_facts,
         public_knowledge_bindings=(),
         write_fence=None,
+        v2_revision=None,
     ):
         scope.require_project(project_id)
         if run_id:
@@ -357,6 +364,7 @@ class PgV2PlanningPersistence:
                     existing.run_id != run_id
                     or not existing.v2_execution
                     or existing.v2_execution.to_payload()["manifest"] != result.manifest.to_payload()
+                    or existing.v2_revision != v2_revision
                 ):
                     raise IdempotencyConflictError("V2 draft identity already has different content")
                 if write_fence:
@@ -486,12 +494,18 @@ class PgV2PlanningPersistence:
                 v2_execution=V2ExecutionSnapshot.create(
                     result, bindings=bindings, packet=compiler_packet(context, source_facts)
                 ),
+                v2_revision=v2_revision,
             )
+            if v2_revision is not None:
+                from app.domain.planning.intent import goal_spec_from_payload
+                from app.infrastructure.db.v2_revisions import validate_revision_basis
+                draft.goal_spec = goal_spec_from_payload(v2_revision.to_payload()["approved_goal_spec"])
+                validate_revision_basis(conn, draft, expected_version=expected_version, domain_approvals=self.domain_approvals)
             if assignments:
                 draft.resource_snapshots = capture_resource_snapshots(
                     conn, draft.stage_resources, draft.stages
                 )
-            validate_database_bindings(conn, draft)
+            validate_database_bindings(conn, draft, validate_run_authority=True)
             if write_fence:
                 lock_planning_write(conn, project_id=project_id, run_id=run_id, fence=write_fence)
             repo.save_draft(draft, expected_version=expected_version, write_fence=write_fence)

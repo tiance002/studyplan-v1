@@ -52,9 +52,20 @@ class PgPlanningJobRepository:
         self._max_attempts = max_attempts
         self._admission_mode = admission_mode
         self._lock_connection: psycopg.Connection[Any] | None = None
+        self._transaction_connection: psycopg.Connection[Any] | None = None
+
+    def in_transaction(self, connection):
+        """Preserve admission configuration while sharing the caller's decision transaction."""
+        bound = PgPlanningJobRepository(self._dsn, actor_ids=self._actor_ids,
+            max_attempts=self._max_attempts, admission_mode=self._admission_mode)
+        bound._transaction_connection = connection
+        return bound
 
     @contextmanager
     def _tx(self, *, actor_id: str, project_id: str = "") -> Iterator[psycopg.Connection[Any]]:
+        if self._transaction_connection is not None:
+            yield self._transaction_connection
+            return
         with psycopg.connect(self._dsn, row_factory=dict_row) as conn:
             conn.execute(
                 "SELECT set_config('app.actor_id', %s, true), set_config('app.project_id', %s, true)",
@@ -172,6 +183,11 @@ class PgPlanningJobRepository:
             if owner is None or owner["owner_actor_id"] != run.actor_id:
                 raise ForbiddenError("无权为此学习空间提交规划")
 
+            if run.graph_version == V2_EXECUTION_VERSION:
+                # Share Publication's project decision lock: two initial callers
+                # cannot create separate roots before a current Plan exists.
+                lock_plan_version(conn, run.project_id, None)
+
             # Serialize duplicate enqueue attempts without requiring a new table
             # or relying on a run row that does not exist yet.
             conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (job_key,))
@@ -189,6 +205,25 @@ class PgPlanningJobRepository:
                 if len(events) == 1 and events[0]["detail"] == submission and job == {"job_key": job_key}:
                     return
                 raise ConflictError("同一 Run 已存在但提交内容或队列记录不一致", reason="planning_enqueue_conflict")
+
+            if run.graph_version == V2_EXECUTION_VERSION:
+                from app.domain.planning.revisions import V2RevisionContext
+                from app.domain.planning.v2_runtime import V2RecoveryBlocked, manifest_intact
+                if not manifest_intact(manifest) or initial.get("manifest") != manifest:
+                    raise V2RecoveryBlocked("V2 enqueue requires an intact frozen submission")
+                context = V2RevisionContext.from_payload(initial.get("v2_revision"))
+                if (context is None and manifest["expected_version"] != 0
+                        or (context is None) != ("v2_revision_hash" not in manifest)
+                        or context is not None and (
+                            context.to_payload()["context_hash"] != manifest["v2_revision_hash"]
+                            or context.to_payload()["base_revision"] != manifest["expected_version"])):
+                    raise V2RecoveryBlocked("V2 enqueue revision context binding rejected")
+                lock_plan_version(conn, run.project_id, manifest["expected_version"])
+                if context is None and conn.execute(
+                        "SELECT 1 FROM ai_runs WHERE actor_id=%s AND project_id=%s "
+                        "AND graph_version=%s AND kind='plan_generate' LIMIT 1",
+                        (run.actor_id, run.project_id, V2_EXECUTION_VERSION)).fetchone():
+                    raise ConflictError("已有规划运行，请先核对原运行结果", reason="v2_initial_run_exists")
 
             if self._admission_mode == "trusted_server":
                 active = conn.execute(

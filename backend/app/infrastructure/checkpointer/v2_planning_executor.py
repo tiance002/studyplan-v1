@@ -46,7 +46,8 @@ class PgV2Checkpoints:
         }
         value["digest"] = content_hash(value)
         with self.calls.tx() as business:
-            self.calls._lock(business)
+            self.calls._lock(business, published_draft_id=state.get("draft_id")
+                if state.get("stage") == "draft_persistence" else None)
             with psycopg.connect(self.dsn, autocommit=True) as conn:
                 conn.execute("SELECT pg_advisory_lock(hashtextextended(%s,0))", (self.thread_id,))
                 saver = PostgresSaver(conn)

@@ -354,7 +354,7 @@ class PgPlanRepository:
             validate_v2_structure(draft)
             if draft.v2_execution:
                 from app.infrastructure.db.v2_planning_persistence import validate_database_bindings
-                validate_database_bindings(conn, draft)
+                validate_database_bindings(conn, draft, validate_run_authority=True)
             self._lock_plan_version(conn, draft.project_id, expected_version)
             self._guard_resource_proposal(conn, draft.project_id, draft.draft_id)
             if draft.route_change and draft.draft_id != self._route_change_id:
@@ -701,8 +701,8 @@ class PgPlanRepository:
 
             if draft.v2_execution:
                 from app.infrastructure.db.v2_planning_persistence import validate_database_bindings
-                validate_database_bindings(conn, draft)
-                validate_database_bindings(conn, revision)
+                validate_database_bindings(conn, draft, validate_run_authority=True)
+                validate_database_bindings(conn, revision, validate_run_authority=True)
 
             if created:
                 if revision.stage_resources and not revision.resource_snapshots:

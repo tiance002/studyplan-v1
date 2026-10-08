@@ -268,9 +268,22 @@ class V2ExecutionSnapshot:
             reject("project")
         if hasattr(owner, "run_id") and b["run_id"] != owner.run_id:
             reject("run_binding")
+        revision = getattr(owner, "v2_revision", None)
+        if owner.goal_spec is not None:
+            from app.domain.planning.intent import goal_spec_payload
+            if revision is None:
+                reject("uncompiled_goal")
+            ctx = revision.to_payload()
+            if ctx["change_kind"] == "semantic" and content_hash(goal_spec_payload(owner.goal_spec)) != content_hash(ctx["approved_goal_spec"]):
+                reject("revision_goal")
+            profile = c["source_snapshots"]["goal_requirement_profile"]
+            for field in ("scope", "desired_depth", "starting_point", "outcome_purpose", "project_context"):
+                if content_hash(profile[field]) != content_hash(getattr(owner.goal_spec, field)):
+                    reject("revision_goal_profile")
+        elif revision is not None and revision.to_payload()["change_kind"] == "semantic":
+            reject("missing_revision_goal")
         if (
             owner.goal_snapshot != c["source_snapshots"]["goal_requirement_profile"]["target_summary"]
-            or owner.goal_spec is not None
             or owner.extensions
             or owner.source_pack_key
             or owner.source_pack_version

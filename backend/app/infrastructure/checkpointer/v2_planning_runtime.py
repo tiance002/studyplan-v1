@@ -8,7 +8,7 @@ from app.application.capability_planning import CapabilityPlanner
 from app.application.curriculum_composition import CurriculumComposer
 from app.application.goal_requirement_analysis import GoalRequirementAnalyzer
 from app.application.teaching_resource_research import ResourceResearcher
-from app.core.errors import ValidationAppError
+from app.core.errors import ConflictError, ValidationAppError, VersionConflictError
 from app.core.ids import content_hash
 from app.domain.enums import MediaType, ResourceProvenance, ResourceVerificationStatus
 from app.domain.planning.capabilities import CapabilityPlan, CapabilityPlanningPending
@@ -345,7 +345,13 @@ class V2PlanningRuntime:
             raise ValidationAppError("Runtime cannot accept fixture domain authority")
 
     def execute(self, initial):
+        from app.domain.planning.revisions import V2RevisionContext
+        revision = V2RevisionContext.from_payload(initial.get("v2_revision"))
         manifest = self.calls.manifest
+        if revision is None and manifest["expected_version"] != 0:
+            raise V2RecoveryBlocked("Existing revision requires bound replanning context")
+        if (revision is None) != ("v2_revision_hash" not in manifest):
+            raise V2RecoveryBlocked("Runtime revision marker/context mismatch")
         goal = goal_spec_from_payload(initial.get("goal_spec")) or GoalSpec(initial["goal"])
         if (
             manifest["goal_hash"] != content_hash(goal_spec_payload(goal))
@@ -354,6 +360,27 @@ class V2PlanningRuntime:
             != content_hash([wire(asdict(s)) for s in self.domain_sources])
         ):
             raise V2RecoveryBlocked("V2 frozen input/source versions mismatch")
+        # Publication is durable business truth even if its final checkpoint
+        # or Run projection was interrupted. Recover only this exact result;
+        # ordinary requests continue to require the original current basis.
+        from uuid import NAMESPACE_URL, uuid5
+
+        from app.infrastructure.db.plan_repository import PgPlanRepository
+        from app.infrastructure.db.v2_revisions import published_v2_draft
+        draft_id = "drf_" + uuid5(NAMESPACE_URL,
+            f"studyplan:v2draft:{self.calls.project_id}:{self.calls.run_id}").hex
+        self.calls.guard()
+        with self.calls.tx() as conn:
+            if published_v2_draft(conn, actor_id=self.calls.scope.actor_id, project_id=self.calls.project_id,
+                    run_id=self.calls.run_id, draft_id=draft_id):
+                self.calls._lock(conn, published_draft_id=draft_id)
+                return PgPlanRepository("", connection=conn).get_draft(project_id=self.calls.project_id, draft_id=draft_id)
+        if revision is not None:
+            from app.infrastructure.db.v2_revisions import validate_semantic_input
+            with self.calls.tx() as conn:
+                self.calls._lock(conn)
+                validate_semantic_input(conn, actor_id=self.calls.scope.actor_id, project_id=self.calls.project_id,
+                    run_id=self.calls.run_id, manifest=manifest, context=revision)
         state = self.checkpoints.load() or {}
 
         def save(stage, **values):
@@ -363,7 +390,8 @@ class V2PlanningRuntime:
 
             try:
                 self.checkpoints.save(state | {"stage": stage})
-            except (PlanningLeaseLostError, V2RecoveryBlocked, ReviewPersistenceInterrupted):
+            except (PlanningLeaseLostError, V2RecoveryBlocked, ReviewPersistenceInterrupted,
+                    ConflictError, VersionConflictError):
                 raise
             except Exception:
                 raise ReviewPersistenceInterrupted("V2 checkpoint persistence interrupted") from None
@@ -435,6 +463,7 @@ class V2PlanningRuntime:
                 raise V2RecoveryBlocked("Research checkpoint input binding mismatch")
         else:
             session = ResearchSession(self.calls.run_id, expected, budget)
+            session.usage.update(self.calls.usage(related_only=True))
             with self.calls.tx() as conn:
                 rows = conn.execute(
                     "SELECT detail FROM ai_run_events WHERE run_id=%s AND status='v2_reservation' AND detail->>'purpose'=ANY(%s)",
@@ -554,6 +583,7 @@ class V2PlanningRuntime:
                 capability_plan=plan,
                 source_facts=self.facts,
                 write_fence=self.calls.fence,
+                v2_revision=revision,
             )
         except psycopg.Error:
             from app.ports.summaries import ReviewPersistenceInterrupted

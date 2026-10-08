@@ -222,8 +222,9 @@ class PlanService:
         if factory is None or getattr(factory,"owned_only",False) is not True or self._planning_jobs is None:
             raise DependencyUnavailableError("V2 owned runtime is not configured")
         current=self._repo.get_current(project_id=project_id)
-        expected=current.revision if current else 0
-        manifest=factory.build_submission(scope,project_id,goal_spec,expected)
+        if current is not None:
+            raise ConflictError("已有学习计划，请通过重规划入口提交新目标", reason="v2_replanning_required")
+        manifest=factory.build_submission(scope,project_id,goal_spec,0)
         run=RunRecord(new_id("run"),scope.actor_id,project_id,"plan_generate","planning",V2_EXECUTION_VERSION,
             AiRunStatus.QUEUED,AiRunNextAction.WAIT,thread_id=new_id("thread"))
         initial={"goal":goal_spec.target,"goal_spec":goal_spec_payload(goal_spec),"manifest":manifest}
@@ -231,7 +232,7 @@ class PlanService:
         return run.run_id
 
     def _execute_owned_v2(self, *, scope, run, initial, submission, claim, guard):
-        from app.domain.planning.v2_runtime import V2BudgetExceeded, V2RecoveryBlocked
+        from app.domain.planning.v2_runtime import V2BudgetExceeded, V2RecoveryBlocked, manifest_intact
         from app.ports.llm import LLMFailure
         from app.ports.summaries import ReviewPersistenceInterrupted
         if claim is None:
@@ -241,11 +242,15 @@ class PlanService:
         try:
             if self._v2_runtime_factory is None:
                 raise DependencyUnavailableError("V2 owned runtime is not configured")
-            if manifest!=submission.get("manifest"):
-                raise ConflictError("V2 frozen submission manifest mismatch")
+            if not manifest_intact(manifest) or manifest!=submission.get("manifest"):
+                raise V2RecoveryBlocked("V2 frozen submission manifest mismatch")
             runtime=self._v2_runtime_factory(scope,run.project_id,run.run_id,manifest=manifest,
                 write_fence=fence,thread_id=run.thread_id,guard=guard)
             result=runtime.execute(initial)
+            if not isinstance(result, LLMFailure):
+                self._update_run(project_id=run.project_id,run_id=run.run_id,status=AiRunStatus.SUCCEEDED,next_action=AiRunNextAction.NONE,
+                    result_ref=result.draft_id,write_fence=fence,expected_plan_version=manifest["expected_version"])
+                return
         except (PlanningLeaseLostError,ReviewPersistenceInterrupted):
             raise
         except V2RecoveryBlocked:
@@ -256,7 +261,7 @@ class PlanService:
             result=LLMFailure("v2_runtime_unavailable","V2 owned runtime is not configured")
         except ValidationAppError:
             result=LLMFailure("v2_validation_failed","V2 frozen content failed validation")
-        except ConflictError:
+        except (ConflictError, VersionConflictError):
             result=LLMFailure("v2_persistence_conflict","V2 persistence conflict")
         if isinstance(result,LLMFailure):
             status=AiRunStatus.RECONCILIATION_REQUIRED if result.dispatch_unknown else AiRunStatus.FAILED
@@ -265,8 +270,6 @@ class PlanService:
                 error_class=result.error_class,write_fence=fence)
             self._planning_jobs.finish(claim,"reconciliation_required" if result.dispatch_unknown else "failed")
             return
-        self._update_run(project_id=run.project_id,run_id=run.run_id,status=AiRunStatus.SUCCEEDED,next_action=AiRunNextAction.NONE,
-            result_ref=result.draft_id,write_fence=fence,expected_plan_version=manifest["expected_version"])
 
     def _progress_sink(self, claim: JobClaim | None) -> Callable[[PlanningState], None] | None:
         """Business-progress publisher for one fenced claim.

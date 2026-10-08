@@ -99,3 +99,15 @@ def test_unknown_domain_local_requires_original_trusted_approval_without_new_ver
     updated = frozen.recompile_local(candidate, domain_approvals=(approval,))
     assert updated.to_payload()["compiled"]["stages"][0]["title"] == "已审核专项的合法说明"
     assert updated.to_payload()["compiled"]["source_snapshots"]["capability_plan"] == frozen.to_payload()["compiled"]["source_snapshots"]["capability_plan"]
+
+
+@pytest.mark.parametrize("expected_version", [1, 2])
+def test_runtime_without_revision_context_cannot_use_nonzero_base(expected_version):
+    from types import SimpleNamespace
+
+    from app.domain.planning.v2_runtime import V2RecoveryBlocked
+    from app.infrastructure.checkpointer.v2_planning_runtime import V2PlanningRuntime
+    runtime = V2PlanningRuntime(calls=SimpleNamespace(manifest={"expected_version": expected_version}),
+        checkpoints=None, persistence=None, source_facts=None)
+    with pytest.raises(V2RecoveryBlocked):
+        runtime.execute({"goal": "已存在路线时必须绑定原版本"})

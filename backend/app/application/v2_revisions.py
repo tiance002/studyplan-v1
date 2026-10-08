@@ -27,4 +27,9 @@ class V2RevisionService:
         return self._repository.cancel(**kwargs)
 
     def submit_semantic(self, **kwargs):
-        return self._repository.submit_semantic(**kwargs)
+        from app.core.errors import ConflictError
+        from app.domain.planning.v2_runtime import V2RecoveryBlocked
+        try:
+            return self._repository.submit_semantic(**kwargs)
+        except V2RecoveryBlocked:
+            raise ConflictError("原运行或共享预算存在待核对事实，不能重新派发", reason="revision_recovery_blocked") from None
