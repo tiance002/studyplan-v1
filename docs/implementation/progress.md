@@ -1,3 +1,12 @@
+## 2026-10-08 Planning V2 Item 4：RESOURCE_GAP_EXTRACTION_COMPLETE / ITEM5_NOT_STARTED / STOP
+
+- 基线 `2ef6f2ac16b4bc35a1bf1a826b3febcff4db406f`、`feat/n1-resource-discovery` 匹配，tracked clean。只新增纯领域 `extract(CapabilityPlan, CoverageResult)->ResourceGapSet` 与定向测试；[本轮报告](../planning-v2/ITEM4_RESOURCE_GAP_EXTRACTION.md)记录字段、接口、代表结果及信任边界。Item1/2/3、Policy v2、原审核映射、架构和历史报告不变。
+- 仅B学习集合：full无gap，partial仅missing，none把该能力全部missing合成一项；ID/文本从冻结Plan原样取出，importance/depth/requirement_refs精确保留，policy-only系统性MCP空refs合法。A Python不形成资料需求，全部full或B为空正常空gaps，不制造Item5工作。两个source hash绑定Plan/Coverage，结果使用既有canonical hash约定。
+- 复用Item3冻结Plan检查，明确拒绝错误来源/计算hash、v1/改写文本、额外/重复/过期/遗漏或交叠outcome及状态不一致；typed引用只核结构，不读取Index/正文或重判review。原始dict不当作冻结输入；双输入hash不证明缺失Profile/完整Index真实性，仍依赖上游，不新建parser/版本平台。
+- API stub先RED28FAIL/0ERROR，GREEN28PASS。统一定向36PASS（新28含真实MCP接口2+Item3 hash/validator6+failclosed2），同范围collection36PASS，Ruff两文件/diff PASS；独立有限审查PASS，无剩余BLOCKER。真实既有MCP窄概念full为空、applied partial仅minimal_connection；ToolCalling none精确保留两项。合成fixture只证明转换算法，不冒称新教材审核或产品语义通过。
+- 817受保护tracked文件、378历史账本、.env与旧progress全文保持；产品模型0/搜索0/Reader0，账本183/280、unknown177/183未重派。无DB/Run/Job/Draft/Plan mutation/迁移/UI/Worker/Runtime接线，公开generate仍failclosed。真实PG行计数/浏览器/产品模型/外部接口/正文审核/全量Backend/整链E2E均NOT RUN，Item1条件接受和Item2真实语义待整链的限制不变。
+- 四文件本地提交消息 `feat(planning): add v2 resource gap extraction`，精确Final HEAD见最终答复与ignored final.json。主协调请求Sol6.1high，领域实现/独立审查复用Sol6.1medium，actual NOT OBSERVABLE，无全局配置或HARD升级；无多余服务/表/Provider/流程抽象，未push/merge/deploy。ITEM5_NOT_STARTED；STOP。
+
 ## 2026-10-08 Planning V2 Item 3：CONTENT_COVERAGE_COMPLETE / ITEM4_NOT_STARTED / STOP
 
 - 基线 `91c17a63747ddd205880df488484a4fdf804d5f9`、`feat/n1-resource-discovery` 匹配，tracked clean；Policy v2 12 capabilities/27 outcomes 与前置报告一致，只做 Tool Calling 定向分区示例，没有重审全量粒度。原预检失败报告/架构/Item1与2/历史内容保持原文；[本轮实施报告](../planning-v2/ITEM3_CONTENT_COVERAGE_IMPLEMENTATION.md)记录合同、真实映射、验证及限制。
