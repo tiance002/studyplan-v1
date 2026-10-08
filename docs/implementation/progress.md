@@ -1,3 +1,12 @@
+## 2026-10-08 Planning V2 Item 3：CONTENT_COVERAGE_COMPLETE / ITEM4_NOT_STARTED / STOP
+
+- 基线 `91c17a63747ddd205880df488484a4fdf804d5f9`、`feat/n1-resource-discovery` 匹配，tracked clean；Policy v2 12 capabilities/27 outcomes 与前置报告一致，只做 Tool Calling 定向分区示例，没有重审全量粒度。原预检失败报告/架构/Item1与2/历史内容保持原文；[本轮实施报告](../planning-v2/ITEM3_CONTENT_COVERAGE_IMPLEMENTATION.md)记录合同、真实映射、验证及限制。
+- 新增冻结 CoverageResult/Entry/ContentRef、只读 Index/Evidence/Mapping、确定性 Evaluator 和 ResultValidator，仅B学习集合参与；完整covered/missing分区产生full/partial/none，同section多outcome合并引用，无教学资产创建或Plan修改。无映射正常missing；配置身份/版本/正文审核/来源损坏明确ValidationAppError。独立审查先发现v2标签可隐藏旧/拼错ID，补RED3FAIL后局部加Policy全outcomes+本Plan受信未知定义范围校验，未改Policy或引入别名。
+- 实际最小索引固定agent.application/v8、MCP10.2 source2与section稳定身份，核对既有chapter_review及197–205行审核文档；只映射mcp.roles/interfaces。窄foundation概念full，applied或systematic缺minimal_connection为partial，ToolCalling暂无充分精确映射为none。语义判断与机械身份检查分开；record/document hash不是10.2教程正文hash，v7 TOC不继承v8资格，没有重新审核Seed/新教程或让Seed决定课程。
+- 行为RED Domain31FAIL/Index12FAIL保留；最初缺模块collection及sandbox temp错误如实记录，改仓库内独立basetemp后重做有效RED。最终统一56PASS（Domain35+真实本地索引12+接口3+现有审核3+failclosed3），同范围collection56PASS，Ruff四文件/diff PASS，独立有限审查PASS，无剩余合同BLOCKER。Fake上游/合成证据只证明算法，两个真实概念映射另有既有审核和独立语义依据，不代替Item1/2真实模型验收。
+- 812受保护tracked文件、378账本文件、.env、原预检报告与旧progress全文保持；产品模型0/搜索0/Reader0，账本183/280、unknown177/183未重派。未运行DB/Run/Job/Draft/Plan写入，migration0，未接旧Graph/Worker/Runtime/组合根，公开generate仍failclosed。真实PG行计数/浏览器/产品模型语义/在线资料或教程执行/全量Backend/整链E2E均NOT RUN，不虚报数据库行数。
+- 六文件本地提交消息 `feat(planning): add v2 reviewed content coverage`，精确Final HEAD见最终答复与ignored final.json。主协调请求Sol6.1high、领域实现/证据清点/独立审查Sol6.1medium，实际解析NOT OBSERVABLE，无全局配置或HARD升级。Item1仍CONDITIONALLY_ACCEPTED，Item2真实语义待整链；Coverage输出无Item4合同级前置阻塞，但本轮未实现Item4/Gap/Research/Reader/UI。未push/merge/deploy；STOP。
+
 ## 2026-10-08 Planning V2 Item 2 Policy Outcomes：REFINEMENT_COMPLETE / ITEM3_READY_FOR_PRECHECK_REVIEW / ITEM3_IMPLEMENTATION_NOT_STARTED / STOP
 
 - 基线 `53c8b0851098d8905722d5867cfae27643672267`、`feat/n1-resource-discovery` 匹配；核对并保留两份预期未提交文档，没有reset。原Item3预检失败报告原样纳入本地提交，旧progress全文保留；[本轮修订报告](../planning-v2/ITEM2_POLICY_OUTCOME_REFINEMENT.md)记录最终映射与理由。
