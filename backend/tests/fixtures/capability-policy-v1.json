@@ -1,0 +1,205 @@
+{
+  "origin_commit": "53c8b0851098d8905722d5867cfae27643672267",
+  "purpose": "Immutable test-only v1 policy snapshot; no runtime compatibility registry",
+  "policy": {
+    "definitions": [
+      {
+        "capability_id": "python.core",
+        "default_depth": "foundation",
+        "learning_outcomes": [
+          {
+            "outcome_id": "python.core.functions",
+            "text": "使用函数、数据结构和异常组织程序"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#python.core"
+        ],
+        "real_prerequisites": [],
+        "title": "Python编程基础"
+      },
+      {
+        "capability_id": "python.async",
+        "default_depth": "deep",
+        "learning_outcomes": [
+          {
+            "outcome_id": "python.async.cancellation",
+            "text": "管理协程、并发和取消生命周期"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#python.async"
+        ],
+        "real_prerequisites": [
+          "python.core"
+        ],
+        "title": "Python异步并发"
+      },
+      {
+        "capability_id": "json.cli",
+        "default_depth": "applied",
+        "learning_outcomes": [
+          {
+            "outcome_id": "json.cli.io",
+            "text": "实现JSON文件读取、校验与CLI错误处理"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#json.cli"
+        ],
+        "real_prerequisites": [
+          "python.core"
+        ],
+        "title": "Python JSON文件CLI"
+      },
+      {
+        "capability_id": "llm.api",
+        "default_depth": "applied",
+        "learning_outcomes": [
+          {
+            "outcome_id": "llm.api.request",
+            "text": "组织模型请求并理解响应、费用与失败边界"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#llm.api"
+        ],
+        "real_prerequisites": [],
+        "title": "LLM API基础"
+      },
+      {
+        "capability_id": "structured.output",
+        "default_depth": "applied",
+        "learning_outcomes": [
+          {
+            "outcome_id": "structured.output.validation",
+            "text": "定义模型输出合同并校验JSON响应"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#structured.output"
+        ],
+        "real_prerequisites": [
+          "llm.api"
+        ],
+        "title": "模型结构化输出"
+      },
+      {
+        "capability_id": "tool.calling",
+        "default_depth": "applied",
+        "learning_outcomes": [
+          {
+            "outcome_id": "tool.calling.dispatch",
+            "text": "按工具合同校验参数并派发调用"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#tool.calling"
+        ],
+        "real_prerequisites": [
+          "llm.api"
+        ],
+        "title": "Tool Calling"
+      },
+      {
+        "capability_id": "agent.loop",
+        "default_depth": "applied",
+        "learning_outcomes": [
+          {
+            "outcome_id": "agent.loop.termination",
+            "text": "组织工具调用循环、终止条件与失败返回"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#agent.loop"
+        ],
+        "real_prerequisites": [
+          "tool.calling"
+        ],
+        "title": "工具型Agent循环"
+      },
+      {
+        "capability_id": "mcp",
+        "default_depth": "applied",
+        "learning_outcomes": [
+          {
+            "outcome_id": "mcp.protocol",
+            "text": "解释MCP客户端、服务端和工具协议边界"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#mcp"
+        ],
+        "real_prerequisites": [],
+        "title": "MCP协议与集成边界"
+      },
+      {
+        "capability_id": "error.permission",
+        "default_depth": "applied",
+        "learning_outcomes": [
+          {
+            "outcome_id": "error.permission.denial",
+            "text": "区分输入错误、权限拒绝、执行失败与未知结果"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#error.permission"
+        ],
+        "real_prerequisites": [],
+        "title": "错误与权限边界"
+      },
+      {
+        "capability_id": "eval.lite",
+        "default_depth": "applied",
+        "learning_outcomes": [
+          {
+            "outcome_id": "eval.lite.cases",
+            "text": "用可检查案例验证目标行为和失败分支"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#eval.lite"
+        ],
+        "real_prerequisites": [],
+        "title": "Eval-Lite"
+      },
+      {
+        "capability_id": "github.api",
+        "default_depth": "applied",
+        "learning_outcomes": [
+          {
+            "outcome_id": "github.api.scope",
+            "text": "处理GitHub API对象、分页、权限与失败"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#github.api"
+        ],
+        "real_prerequisites": [],
+        "title": "GitHub API集成"
+      },
+      {
+        "capability_id": "code.review",
+        "default_depth": "applied",
+        "learning_outcomes": [
+          {
+            "outcome_id": "code.review.evidence",
+            "text": "将Review结论关联到代码上下文与可检查依据"
+          }
+        ],
+        "policy_refs": [
+          "capability-policy:v1#code.review"
+        ],
+        "real_prerequisites": [],
+        "title": "代码审查依据"
+      }
+    ],
+    "policy_version": "v1",
+    "systematic_agent_rule": {
+      "policy_ref": "capability-policy:v1#systematic-agent-mcp",
+      "project_usage_not_forced": true,
+      "required_capability_id": "mcp",
+      "route_kind": "systematic_agent_route"
+    }
+  }
+}

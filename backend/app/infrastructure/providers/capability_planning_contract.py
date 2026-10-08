@@ -39,6 +39,7 @@ CAPABILITY_SYSTEM = (
     "输出严格单个JSON，只含field_shape中的字段。schema_version=1，source_goal_profile_hash复制profile.profile_hash，"
     "policy_version复制policy.policy_version。不输出plan_hash、能力title、learning_outcomes或definitions；"
     "已知能力的稳定定义、outcome ID和真实前置唯一来自只读Policy，服务器确定性回填，不得改写。"
+    "policy.outcome_selection是outcome适用范围的唯一规则，不提升窄概念目标的深度；MCP最小接入可作为独立教学练习，不要求最终项目使用MCP。"
     "模型只负责语义能力选择及claim/constraint绑定，不能宣称服务器已证明语义正确。"
     "disposition区分accepted_known与needs_learning。明确已会的能力按声明的实际语义范围接受，"
     "必须用learner_claim_refs和claim_bindings绑定真实claim_id；claim_bindings覆盖每条claim，"

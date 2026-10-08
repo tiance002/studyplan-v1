@@ -1,3 +1,20 @@
+## 2026-10-08 Planning V2 Item 2 Policy Outcomes：REFINEMENT_COMPLETE / ITEM3_READY_FOR_PRECHECK_REVIEW / ITEM3_IMPLEMENTATION_NOT_STARTED / STOP
+
+- 基线 `53c8b0851098d8905722d5867cfae27643672267`、`feat/n1-resource-discovery` 匹配；核对并保留两份预期未提交文档，没有reset。原Item3预检失败报告原样纳入本地提交，旧progress全文保留；[本轮修订报告](../planning-v2/ITEM2_POLICY_OUTCOME_REFINEMENT.md)记录最终映射与理由。
+- Policy v2保留12 capability身份/标题/真前置/defaultdepth，9项复合定义按独立教学任务拆为新ID，总27 outcomes；code.review/error.permission/eval.lite保持单项ID和原文，不强制全部能力partial。六候选只做一次有界审查，各场景教学不靠通用错误类别代替。无旧ID缩义复用、旧审核映射继承或双版本Runtime平台。
+- MCP roles/interfaces/minimal_connection分开；Policy唯一规则消费现有route/depth，systematic任意depth含最小接入；narrow/other foundation仅概念，applied/deep含实践。接入验证一次工具调用可独立练习，project_usage仍可excluded，不强迫主项目MCP。Validator仅回填接缝、Prompt仅一条指向Policy的适用说明；A/B/Schema/调用流程/hash算法保持。
+- 先RED31项25FAIL6PASS，GREEN33PASS；最终受影响回归113PASS（新33+既有Domain/Service57+Provider23），同三文件collection113PASS，Ruff四文件完整规则/diff/链接PASS。独立审查PASS，接口“等”开放范围已收紧Tool/Resource；AST核对Domain还原单接缝后等价。集合测试读真实冻结B outcomes，仅证粒度支持完整部分分区，不实现Coverage或Reviewed Mapping。
+- 805受保护tracked文件、378账本文件、.env、原预检报告hash及旧progress正文保持。产品模型0/搜索0/Reader0，账本仍183/280、unknown177/183未重派；无DB/Run/Job/Draft/Plan操作、migration/Seed/UI/Worker改动。真实PG/浏览器/产品语义/在线资料/全量Backend/Item3实现NOT RUN；公共generate代码保持fail-closed，本轮未重复运行入口测试。
+- 八文件本地提交消息 `fix(planning): refine v2 capability learning outcomes`，精确Final HEAD见最终答复与ignored final.json。主协调请求Sol6.1high、实现/独立审查沿用Sol6.1medium，actual均NOT OBSERVABLE，无全局配置修改或HARD升级。Item1仍CONDITIONALLY_ACCEPTED，Item2真实语义待整链；仅ITEM3_READY_FOR_PRECHECK_REVIEW，未自动进入Item3/4，未push/merge/deploy；STOP。
+
+## 2026-10-08 Planning V2 Item 3 预检：BLOCKED_BY_OUTCOME_GRANULARITY / ITEM2_MINIMAL_POLICY_REVISION_REQUIRED / STOP
+
+- 基线 `53c8b0851098d8905722d5867cfae27643672267`、`feat/n1-resource-discovery` 与预期一致，开始tracked clean。12个Policy能力各一个outcome，按covered/missing完整分区的单能力partial不可达；单ID本身不违规，但Tool Calling参数校验/派发、Agent循环/终止/失败返回、MCP角色职责/工具协议边界包含必须分别审核的范围，触发用户编码前STOP门禁。
+- 只新增[Item 3预检报告及最小Policy修订建议](../planning-v2/ITEM3_CONTENT_COVERAGE.md)并追加本进度。code.review证据关联、error.permission完整区分、eval.lite案例验证无需按名词机械拆；另外6个复合候选保留供独立修订任务收敛，不承诺仅拆重点3项就全面解阻。没有自动改Policy、CapabilityPlan、Profile或实现Coverage/Item4。
+- 只读核对MCP v8 source/section身份、version、10.1正文审读与10.2继承审核的范围及限制；没有把published/reviewed标签、章节目录或hash等同outcome覆盖。正式内容索引资格验收/映射、Item3 RED/GREEN与回归/collection/Ruff、真实PG及本轮generate执行测试均NOT RUN；生产文件未改，不重复基线测试。
+- AST/分区事实提取PASS、接口粒度门禁FAIL，独立开发审查确认阻断和建议范围；文档链接/diff/保护hash审计PASS。产品模型0、搜索0、Reader0，无DB/Run/Job/Draft/Plan操作、migration0、UI/Worker/公共generate改动0；历史账本及unknown177/183保持，Item1仍CONDITIONALLY_ACCEPTED、Item2真实语义验收未完成。
+- Start/Final HEAD保持一致，仅两份文档工作树修改，未执行仅在预检与实施通过后授权的功能commit，未push/merge/deploy。主协调请求Sol6.1high，独立复核沿用Sol6.1medium，actual均NOT OBSERVABLE。最终 ITEM3_BLOCKED_BY_OUTCOME_GRANULARITY / ITEM2_MINIMAL_POLICY_REVISION_REQUIRED / ITEM4_NOT_STARTED；STOP，等待独立Policy修订授权，不自动跨边界实施。
+
 ## 2026-10-08 Planning V2 Item 2：CAPABILITY_PLANNING_COMPLETE / ITEM1_CONDITIONALLY_ACCEPTED / ITEM3_NOT_STARTED / STOP
 
 - 基线 `18ff5cca095e5a2037ab1742d0bfcfb275adc2c2`、`feat/n1-resource-discovery` 与预期一致、tracked clean。完成 Profile-only CapabilityPlanner、冻结 CapabilityPlan/Pending、小型只读 Policy v1（12 个可组合能力）、专用 Provider purpose/schema/prompt；不读取 raw GoalSpec，不接旧 selector/Seed/Graph。修改九文件，完整清单、最终字段与剩余边界见[Item 2 实施报告](../planning-v2/ITEM2_CAPABILITY_PLANNING.md)。

@@ -413,7 +413,8 @@ class CapabilityPlanValidator:
             if route == "systematic_agent_route" and key == "mcp":
                 policy_refs = tuple(sorted((*policy_refs, CAPABILITY_POLICY.systematic_mcp_policy_ref)))
             capabilities.append(Capability(key, definition.title, item["disposition"], item["learning_requirement"],
-                item["project_usage"], item["desired_depth"], definition.learning_outcomes,
+                item["project_usage"], item["desired_depth"], CAPABILITY_POLICY.outcomes_for(
+                    definition, route_kind=route, desired_depth=item["desired_depth"]),
                 req_refs, policy_refs, claim_refs, prereqs, targets))
         return CapabilityPlan(1, profile.profile_hash, CAPABILITY_POLICY.version, route,
                               tuple(sorted(capabilities, key=lambda c: c.capability_id)),
