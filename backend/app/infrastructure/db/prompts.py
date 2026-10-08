@@ -57,6 +57,11 @@ class PgPrompts(PgSummaries):
             k: row[k] for k in ("task_id", "title", "goal", "in_scope", "out_scope", "acceptance", "status")
         }
         task["knowledge_links"] = links
+        revision = conn.execute("SELECT structure FROM plan_revisions WHERE project_id=%s AND plan_id=%s",(project,plan)).fetchone()
+        from app.domain.planning.v2_execution import V2ExecutionSnapshot
+        v2 = V2ExecutionSnapshot.from_payload((revision["structure"] or {}).get("v2_execution")) if revision else None
+        if v2:
+            task["v2_content"] = v2.stage_content(stage,task_id=task_id)
         return _json(practice), _json(task)
 
     @staticmethod

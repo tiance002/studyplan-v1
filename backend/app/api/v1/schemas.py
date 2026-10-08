@@ -164,7 +164,7 @@ class StageDetail(BaseModel):
     title: str = Field(..., max_length=200)
     section_kind: OutlineSectionKind
     order_index: int = Field(..., ge=0)
-    objective: str = Field(default="", max_length=1000)
+    objective: str = Field(default="", max_length=2000)
     learning_guidance: LearningGuidance | None = None
 
 
@@ -249,6 +249,7 @@ class PlanSnapshot(BaseModel):
     extensions: list[KnowledgeExtensionView] = Field(default_factory=list)
     source_pack_key: str = Field(default="", max_length=128)
     source_pack_version: int = Field(default=0, ge=0)
+    v2_content: dict[str, Any] | None = Field(default=None, description="Validated V2 teaching content for this exact draft or revision")
 
 
 class PlanDraftView(PlanSnapshot):

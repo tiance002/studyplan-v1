@@ -212,6 +212,7 @@ def draft_view(bundle: DraftBundle) -> PlanDraftView:
         version=draft.revision_candidate,
         validation_warnings=list(draft.validation_warnings),
         change_preview_id=draft.draft_id if draft.route_change else None,
+        v2_content=draft.v2_execution.user_content() if draft.v2_execution else None,
     )
 
 
@@ -244,4 +245,5 @@ def plan_view(bundle: PlanBundle) -> PlanView:
         status=revision.status,
         version=revision.version,
         approved_at=revision.approved_at.isoformat() if revision.approved_at else None,
+        v2_content=revision.v2_execution.user_content() if revision.v2_execution else None,
     )

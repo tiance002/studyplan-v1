@@ -50,6 +50,7 @@ from app.domain.enums import (
 )
 from app.domain.planning.guidance import LearningGuidance, guidance_payload
 from app.domain.planning.intent import GoalSpec, goal_spec_payload
+from app.domain.planning.v2_execution import V2ExecutionSnapshot, validate_v2_structure
 from app.domain.resources.curation import (
     KnowledgeExtension,
     StageResourceAssignment,
@@ -262,6 +263,7 @@ class PlanRevision:
     approved_at: datetime | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     goal_spec: GoalSpec | None = None
+    v2_execution: V2ExecutionSnapshot | None = None
 
     @staticmethod
     def create(
@@ -280,6 +282,7 @@ class PlanRevision:
         source_pack_version: int = 0,
         now: datetime | None = None,
         goal_spec: GoalSpec | None = None,
+        v2_execution: V2ExecutionSnapshot | None = None,
     ) -> "PlanRevision":
         if revision < 1:
             raise ValidationAppError("revision 必须从 1 开始")
@@ -289,6 +292,7 @@ class PlanRevision:
             revision=revision,
             goal_snapshot=goal_snapshot.strip(),
             goal_spec=goal_spec,
+            v2_execution=v2_execution,
             stages=tuple(stages),
             unit_links=tuple(unit_links),
             task_links=tuple(task_links),
@@ -346,6 +350,7 @@ class PlanRevision:
             {
                 "project_id": self.project_id,
                 "goal_snapshot": self.goal_snapshot,
+                **({"v2_execution": self.v2_execution.semantic_payload()} if self.v2_execution else {}),
                 **({"goal_spec": goal_spec_payload(self.goal_spec)} if self.goal_spec else {}),
                 "stages": _stages_payload(self.stages),
                 **_structure_payload(
@@ -367,6 +372,7 @@ class PlanRevision:
         return [s.stable_key for s in sorted(self.stages, key=lambda s: s.order_index)]
 
     def _validate_structure(self) -> None:
+        validate_v2_structure(self)
         if not self.stages:
             raise ValidationAppError("计划必须至少包含一个阶段")
         orders = [s.order_index for s in self.stages]
@@ -464,6 +470,7 @@ class PlanDraft:
     goal_spec: GoalSpec | None = None
     # Manual route preview metadata is immutable and included in confirmation hash.
     route_change: dict[str, object] | None = None
+    v2_execution: V2ExecutionSnapshot | None = None
 
     @property
     def content_hash(self) -> str:
@@ -481,6 +488,7 @@ class PlanDraft:
             {
                 "project_id": self.project_id,
                 "goal_snapshot": self.goal_snapshot,
+                **({"v2_execution": self.v2_execution.semantic_payload()} if self.v2_execution else {}),
                 **({"goal_spec": goal_spec_payload(self.goal_spec)} if self.goal_spec else {}),
                 "revision_candidate": self.revision_candidate,
                 **({"route_change": self.route_change} if self.route_change else {}),
@@ -556,6 +564,7 @@ def build_revision_snapshot(
     source_pack_version: int = 0,
     now: datetime | None = None,
     goal_spec: GoalSpec | None = None,
+    v2_execution: V2ExecutionSnapshot | None = None,
 ) -> PlanRevision:
     """把「阶段 + 引用」构造为一个**独立**的新版本快照（B2-V §三）。
 
@@ -612,6 +621,7 @@ def build_revision_snapshot(
         revision=revision,
         goal_snapshot=goal_snapshot,
         goal_spec=goal_spec,
+        v2_execution=v2_execution.remap_stages(remap) if v2_execution else None,
         stages=new_stages,
         unit_links=tuple(
             PlanUnitLink(stage_id=_sid(x.stage_id), unit_id=x.unit_id, order_index=x.order_index)
@@ -658,6 +668,7 @@ def revision_from_draft(
         revision=revision,
         goal_snapshot=draft.goal_snapshot,
         goal_spec=draft.goal_spec,
+        v2_execution=draft.v2_execution,
         stages=draft.stages,
         unit_links=draft.unit_links,
         task_links=draft.task_links,

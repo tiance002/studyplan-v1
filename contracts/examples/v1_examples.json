@@ -17,7 +17,9 @@
     "practice_task_view": "PracticeTaskView",
     "plan_view": "PlanView",
     "plan_draft_view": "PlanDraftView",
-    "plan_decision_response": "PlanDecisionResponse"
+    "plan_decision_response": "PlanDecisionResponse",
+    "v2_draft_owned_pg": "PlanDraftView",
+    "v2_revision_owned_pg": "PlanView"
   },
   "plan_generate_request": {
     "goal": "我想学会用 Agent 做一个 PDF 知识助手",
@@ -116,11 +118,19 @@
     "extension_id": "ext_1a2b3c4d5e6f7081",
     "stage_id": "stg_11c9aaaad2b440ed9e1a75fe3fc6a9ba",
     "topic": "关系型数据库认识与对比",
-    "concepts": ["基本特点", "典型适用场景"],
+    "concepts": [
+      "基本特点",
+      "典型适用场景"
+    ],
     "guidance": "了解 SQLite / PostgreSQL / MySQL 的基本特点及典型适用场景",
     "links": [],
-    "search_hints": ["关系型数据库对比 入门"],
-    "thinking_prompts": ["多人同时写入？", "是否需要独立服务？"],
+    "search_hints": [
+      "关系型数据库对比 入门"
+    ],
+    "thinking_prompts": [
+      "多人同时写入？",
+      "是否需要独立服务？"
+    ],
     "required": false,
     "order_index": 0
   },
@@ -128,7 +138,10 @@
     "unit_id": "unt_9f8e7d6c5b4a3928",
     "stable_key": "unit.python.basics",
     "title": "Python 基础语法",
-    "objectives": ["能读写文件", "能用函数拆分逻辑"],
+    "objectives": [
+      "能读写文件",
+      "能用函数拆分逻辑"
+    ],
     "rubric_version": 1,
     "progress": "in_progress"
   },
@@ -137,7 +150,9 @@
     "stable_key": "node.python.file_io",
     "title": "文件读写",
     "node_type": "concept",
-    "objectives": ["能解释 open/with 的差异"],
+    "objectives": [
+      "能解释 open/with 的差异"
+    ],
     "source_status": "ai_draft"
   },
   "practice_task_view": {
@@ -146,11 +161,20 @@
     "stable_key": "task.pdf.parse",
     "title": "实现 PDF 文本解析",
     "goal": "读取本地 PDF 并输出纯文本",
-    "in_scope": ["支持文本型 PDF"],
-    "out_scope": ["不做 OCR"],
-    "acceptance": ["能对示例 PDF 输出非空文本"],
+    "in_scope": [
+      "支持文本型 PDF"
+    ],
+    "out_scope": [
+      "不做 OCR"
+    ],
+    "acceptance": [
+      "能对示例 PDF 输出非空文本"
+    ],
     "status": "pending",
-    "thinking_prompts": ["解析失败时如何降级？", "大文件如何流式处理？"]
+    "thinking_prompts": [
+      "解析失败时如何降级？",
+      "大文件如何流式处理？"
+    ]
   },
   "plan_view": {
     "plan_id": "pln_5e6f708192a3b4c5",
@@ -206,11 +230,17 @@
         "extension_id": "ext_1a2b3c4d5e6f7081",
         "stage_id": "stg_11c9aaaad2b440ed9e1a75fe3fc6a9ba",
         "topic": "关系型数据库认识与对比",
-        "concepts": ["基本特点"],
+        "concepts": [
+          "基本特点"
+        ],
         "guidance": "了解基本特点及典型适用场景",
         "links": [],
-        "search_hints": ["关系型数据库对比 入门"],
-        "thinking_prompts": ["多人同时写入？"],
+        "search_hints": [
+          "关系型数据库对比 入门"
+        ],
+        "thinking_prompts": [
+          "多人同时写入？"
+        ],
         "required": false,
         "order_index": 0
       }
@@ -300,5 +330,657 @@
       "version": 3,
       "approved_at": "2026-09-28T04:00:00+00:00"
     }
+  },
+  "v2_draft_owned_pg": {
+    "project_id": "lpr_8572ea1310ad459d97c5405ac60448cf",
+    "revision": 1,
+    "goal_snapshot": "学习MCP",
+    "goal_spec": null,
+    "stages": [
+      {
+        "stage_id": "stg_87c449d4d4c04ff6aa26c0020be5c667",
+        "stable_key": "v2.stage.2c9d0cb7253faf6dd88dba6ebff0499551a3a2c5cccf0bd04fde7d60758fbcb2",
+        "title": "MCP协议与集成边界 · 我的课程",
+        "section_kind": "v2_curriculum",
+        "order_index": 0,
+        "objective": "解释并实践获准outcomes",
+        "learning_guidance": null
+      }
+    ],
+    "unit_links": [
+      {
+        "stage_id": "stg_87c449d4d4c04ff6aa26c0020be5c667",
+        "unit_id": "unt_WyJscHJfODU3MmVhMTMxMGFkNDU5ZDk3YzU0MDVhYzYwNDQ4Y2Y6ZTQ1YmVlZjQ3ZTk3ZmU1YTk3NGY4MjYzNzgyZTQ2MGVmZjc5NGYyOTdlYTQxZTA1MTgyYWQxYzdkNDU2NmNlOSIsInVuaXRfbWNwIl0",
+        "order_index": 0
+      }
+    ],
+    "task_links": [
+      {
+        "stage_id": "stg_87c449d4d4c04ff6aa26c0020be5c667",
+        "task_id": "ptk_WyJscHJfODU3MmVhMTMxMGFkNDU5ZDk3YzU0MDVhYzYwNDQ4Y2Y6ZTQ1YmVlZjQ3ZTk3ZmU1YTk3NGY4MjYzNzgyZTQ2MGVmZjc5NGYyOTdlYTQxZTA1MTgyYWQxYzdkNDU2NmNlOSIsInRhc2tfbWNwIl0",
+        "order_index": 0
+      }
+    ],
+    "stage_resources": [],
+    "extensions": [],
+    "source_pack_key": "",
+    "source_pack_version": 0,
+    "v2_content": {
+      "profile": {
+        "clarification_questions": [],
+        "desired_depth": "unspecified",
+        "hard_constraints": [],
+        "learner_claims": [],
+        "outcome_purpose": "learn",
+        "profile_hash": "a8481a2e4347b4e4f802c36a0a5453dfee467b789c3b8dd64e05124d3b224db6",
+        "project_context": "已有本地CLI",
+        "required_requirements": [
+          {
+            "origin": "explicit",
+            "rationale": "",
+            "requirement_id": "req_770ff9bad9cd7fdfe421c89a081ee8160b4907ab016114d36d03a87104d1002b",
+            "source_refs": [
+              "goal.target"
+            ],
+            "text": "学习MCP"
+          }
+        ],
+        "schema_version": 1,
+        "scope": [],
+        "starting_point": "",
+        "status": "ready",
+        "target_summary": "学习MCP"
+      },
+      "capabilities": {
+        "capabilities": [
+          {
+            "capability_id": "mcp",
+            "desired_depth": "applied",
+            "disposition": "needs_learning",
+            "learner_claim_refs": [],
+            "learning_outcomes": [
+              {
+                "outcome_id": "mcp.roles",
+                "text": "解释MCP Client与Server的职责及协作方式"
+              },
+              {
+                "outcome_id": "mcp.interfaces",
+                "text": "区分MCP Tool与Resource协议接口的边界"
+              },
+              {
+                "outcome_id": "mcp.minimal_connection",
+                "text": "完成有界的MCP最小接入并验证一次工具调用结果"
+              }
+            ],
+            "learning_requirement": "required",
+            "learning_target_refs": [],
+            "policy_refs": [
+              "capability-policy:v2#mcp"
+            ],
+            "prerequisite_refs": [],
+            "project_usage": "excluded",
+            "requirement_refs": [
+              "req_770ff9bad9cd7fdfe421c89a081ee8160b4907ab016114d36d03a87104d1002b"
+            ],
+            "title": "MCP协议与集成边界"
+          }
+        ],
+        "claim_bindings": [],
+        "constraint_effects": [],
+        "plan_hash": "a0a0e4721b2e979fa1a0c5e43ee487b350646d2b0fe5d603bab02b2bee90608e",
+        "policy_version": "v2",
+        "route_kind": "narrow_goal",
+        "schema_version": 1,
+        "source_goal_profile_hash": "a8481a2e4347b4e4f802c36a0a5453dfee467b789c3b8dd64e05124d3b224db6",
+        "verification_evidence": []
+      },
+      "stages": [
+        {
+          "capability_ids": [
+            "mcp"
+          ],
+          "curriculum_role": "specialization",
+          "knowledge_refs": [
+            "knowledge_mcp"
+          ],
+          "order_index": 0,
+          "outcome_refs": [
+            "mcp.interfaces",
+            "mcp.minimal_connection",
+            "mcp.roles"
+          ],
+          "prerequisite_stage_refs": [],
+          "project_study_refs": [],
+          "stable_key": "v2.stage.2c9d0cb7253faf6dd88dba6ebff0499551a3a2c5cccf0bd04fde7d60758fbcb2",
+          "stage_id": "stage_mcp",
+          "task_refs": [
+            "task_mcp"
+          ],
+          "title": "MCP协议与集成边界 · 我的课程",
+          "unit_refs": [
+            "unit_mcp"
+          ],
+          "what_to_learn": "解释并实践获准outcomes",
+          "why_now": "缺失能力需要有界教学",
+          "database_stage_id": "stg_87c449d4d4c04ff6aa26c0020be5c667",
+          "guidance": {
+            "comparison_focus": [],
+            "learning_focus": [
+              "精确目标"
+            ],
+            "practice_delta": {
+              "baseline": "当前可检查起点",
+              "increment": [
+                "本阶段增量"
+              ],
+              "preserved": [
+                "既有行为"
+              ],
+              "reuse": [
+                "按获准项目范围迁回"
+              ],
+              "validation": [
+                "正常与失败检查"
+              ]
+            },
+            "previous_relation": "基于已冻结学习起点",
+            "stage_ref": "stage_mcp",
+            "why_now": "缺失能力需要有界教学"
+          }
+        }
+      ],
+      "knowledge": [
+        {
+          "identity_kind": "curriculum_candidate",
+          "material_refs": [
+            "material_d125e9971ebde924f22e306787df8593532c0aafa00a4688ce799e553c0e5044"
+          ],
+          "objectives": [
+            "解释获准能力"
+          ],
+          "outcome_refs": [
+            "mcp.interfaces",
+            "mcp.minimal_connection",
+            "mcp.roles"
+          ],
+          "stable_key": "knowledge_mcp",
+          "stage_ref": "stage_mcp",
+          "title": "MCP协议与集成边界"
+        }
+      ],
+      "units": [
+        {
+          "knowledge_refs": [
+            "knowledge_mcp"
+          ],
+          "objectives": [
+            "完成教学与实践"
+          ],
+          "outcome_refs": [
+            "mcp.interfaces",
+            "mcp.minimal_connection",
+            "mcp.roles"
+          ],
+          "rubric": [
+            {
+              "outcome_refs": [
+                "mcp.interfaces",
+                "mcp.minimal_connection",
+                "mcp.roles"
+              ],
+              "text": "可检查解释与示例"
+            }
+          ],
+          "stable_key": "unit_mcp",
+          "stage_ref": "stage_mcp",
+          "title": "有界教学单元"
+        }
+      ],
+      "materials": [
+        {
+          "material_id": "material_d125e9971ebde924f22e306787df8593532c0aafa00a4688ce799e553c0e5044",
+          "order_index": 0,
+          "outcome_refs": [
+            "mcp.interfaces",
+            "mcp.minimal_connection",
+            "mcp.roles"
+          ],
+          "reading_focus": "只读对应教学章节",
+          "role": "primary",
+          "source_snapshot": {
+            "access_proof": null,
+            "content_hash": "147fca16098fb400abc6e84075c2f88da5341902f1f4bd9345cdc43d6e5d1443",
+            "evidence_refs": [
+              {
+                "hash_scope": "body",
+                "location": "chapter.md#L1-L1",
+                "reference": "chunk_54a066992b36e02b5c45c0f1c503ccfbf58763cdd6db35ae42dc47508c16e760",
+                "sha256": "b0cad9d37a5ff42e1c29aaa7508ea43d85cba8d78686d54d4fda9f4df0e33676"
+              }
+            ],
+            "free_access": "confirmed",
+            "kind": "researched_resource",
+            "limitations": [
+              "Synthetic fixture"
+            ],
+            "material_id": "material_d125e9971ebde924f22e306787df8593532c0aafa00a4688ce799e553c0e5044",
+            "outcome_refs": [
+              "mcp.interfaces",
+              "mcp.minimal_connection",
+              "mcp.roles"
+            ],
+            "qualification": "research_checked",
+            "section_refs": [
+              "chapter.md#L1-L1"
+            ],
+            "source_id": "resource_f9f97720e6ee57f5611422597cea23f8a30a69d4f076ddba7d9b9b3852cb1b17",
+            "source_version": "git-blob:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "title": "resource_f9f97720e6ee57f5611422597cea23f8a30a69d4f076ddba7d9b9b3852cb1b17",
+            "url": "https://github.com/demo/tutorial/blob/main/chapter.md",
+            "usable": true
+          },
+          "stage_ref": "stage_mcp"
+        }
+      ],
+      "practice": {
+        "carrier": {
+          "description": "已有本地CLI",
+          "final_artifact": {
+            "acceptance": [
+              {
+                "outcome_refs": [],
+                "text": "产出正常与失败证据"
+              }
+            ],
+            "description": "可检查学习成果"
+          },
+          "kind": "user_project",
+          "project_context_hash": "dbfdd75f46f930ea1fb5a127e3e2c87e1c48c91a5650ef25cd78769836206898",
+          "reason": "保留既有项目作为持续实践载体"
+        },
+        "final_artifact": {
+          "acceptance": [
+            {
+              "outcome_refs": [],
+              "text": "产出正常与失败证据"
+            }
+          ],
+          "description": "可检查学习成果"
+        },
+        "tasks": [
+          {
+            "acceptance": [
+              {
+                "outcome_refs": [
+                  "mcp.interfaces",
+                  "mcp.minimal_connection",
+                  "mcp.roles"
+                ],
+                "text": "正常与失败行为都有证据"
+              }
+            ],
+            "goal": "实际产生检查证据",
+            "in_scope": [
+              "获准能力"
+            ],
+            "knowledge_refs": [
+              "knowledge_mcp"
+            ],
+            "order_index": 0,
+            "out_scope": [
+              "整仓库重构"
+            ],
+            "outcome_refs": [
+              "mcp.interfaces",
+              "mcp.minimal_connection",
+              "mcp.roles"
+            ],
+            "practice_kind": "micro_exercise",
+            "stable_key": "task_mcp",
+            "stage_ref": "stage_mcp",
+            "title": "有界练习"
+          }
+        ]
+      },
+      "project_study": [],
+      "constraints": {
+        "assessments": [],
+        "constraint_refs": [],
+        "hard_constraints": []
+      },
+      "unresolved": [],
+      "source_limitations": []
+    },
+    "draft_id": "drf_ae1a2911b3b15ad18e1874f5fc967c22",
+    "status": "awaiting_approval",
+    "draft_hash": "329b9dfb0336e3af232c106474d3eb018265d778a93538ad7ab74e481b2b9c6a",
+    "version": 1,
+    "validation_warnings": [],
+    "change_preview_id": null
+  },
+  "v2_revision_owned_pg": {
+    "project_id": "lpr_8572ea1310ad459d97c5405ac60448cf",
+    "revision": 1,
+    "goal_snapshot": "学习MCP",
+    "goal_spec": null,
+    "stages": [
+      {
+        "stage_id": "stg_b2fc88b6953b464aaad9a9ab16e6127f",
+        "stable_key": "v2.stage.2c9d0cb7253faf6dd88dba6ebff0499551a3a2c5cccf0bd04fde7d60758fbcb2",
+        "title": "MCP协议与集成边界 · 我的课程",
+        "section_kind": "v2_curriculum",
+        "order_index": 0,
+        "objective": "解释并实践获准outcomes",
+        "learning_guidance": null
+      }
+    ],
+    "unit_links": [
+      {
+        "stage_id": "stg_b2fc88b6953b464aaad9a9ab16e6127f",
+        "unit_id": "unt_WyJscHJfODU3MmVhMTMxMGFkNDU5ZDk3YzU0MDVhYzYwNDQ4Y2Y6ZTQ1YmVlZjQ3ZTk3ZmU1YTk3NGY4MjYzNzgyZTQ2MGVmZjc5NGYyOTdlYTQxZTA1MTgyYWQxYzdkNDU2NmNlOSIsInVuaXRfbWNwIl0",
+        "order_index": 0
+      }
+    ],
+    "task_links": [
+      {
+        "stage_id": "stg_b2fc88b6953b464aaad9a9ab16e6127f",
+        "task_id": "ptk_WyJscHJfODU3MmVhMTMxMGFkNDU5ZDk3YzU0MDVhYzYwNDQ4Y2Y6ZTQ1YmVlZjQ3ZTk3ZmU1YTk3NGY4MjYzNzgyZTQ2MGVmZjc5NGYyOTdlYTQxZTA1MTgyYWQxYzdkNDU2NmNlOSIsInRhc2tfbWNwIl0",
+        "order_index": 0
+      }
+    ],
+    "stage_resources": [],
+    "extensions": [],
+    "source_pack_key": "",
+    "source_pack_version": 0,
+    "v2_content": {
+      "profile": {
+        "clarification_questions": [],
+        "desired_depth": "unspecified",
+        "hard_constraints": [],
+        "learner_claims": [],
+        "outcome_purpose": "learn",
+        "profile_hash": "a8481a2e4347b4e4f802c36a0a5453dfee467b789c3b8dd64e05124d3b224db6",
+        "project_context": "已有本地CLI",
+        "required_requirements": [
+          {
+            "origin": "explicit",
+            "rationale": "",
+            "requirement_id": "req_770ff9bad9cd7fdfe421c89a081ee8160b4907ab016114d36d03a87104d1002b",
+            "source_refs": [
+              "goal.target"
+            ],
+            "text": "学习MCP"
+          }
+        ],
+        "schema_version": 1,
+        "scope": [],
+        "starting_point": "",
+        "status": "ready",
+        "target_summary": "学习MCP"
+      },
+      "capabilities": {
+        "capabilities": [
+          {
+            "capability_id": "mcp",
+            "desired_depth": "applied",
+            "disposition": "needs_learning",
+            "learner_claim_refs": [],
+            "learning_outcomes": [
+              {
+                "outcome_id": "mcp.roles",
+                "text": "解释MCP Client与Server的职责及协作方式"
+              },
+              {
+                "outcome_id": "mcp.interfaces",
+                "text": "区分MCP Tool与Resource协议接口的边界"
+              },
+              {
+                "outcome_id": "mcp.minimal_connection",
+                "text": "完成有界的MCP最小接入并验证一次工具调用结果"
+              }
+            ],
+            "learning_requirement": "required",
+            "learning_target_refs": [],
+            "policy_refs": [
+              "capability-policy:v2#mcp"
+            ],
+            "prerequisite_refs": [],
+            "project_usage": "excluded",
+            "requirement_refs": [
+              "req_770ff9bad9cd7fdfe421c89a081ee8160b4907ab016114d36d03a87104d1002b"
+            ],
+            "title": "MCP协议与集成边界"
+          }
+        ],
+        "claim_bindings": [],
+        "constraint_effects": [],
+        "plan_hash": "a0a0e4721b2e979fa1a0c5e43ee487b350646d2b0fe5d603bab02b2bee90608e",
+        "policy_version": "v2",
+        "route_kind": "narrow_goal",
+        "schema_version": 1,
+        "source_goal_profile_hash": "a8481a2e4347b4e4f802c36a0a5453dfee467b789c3b8dd64e05124d3b224db6",
+        "verification_evidence": []
+      },
+      "stages": [
+        {
+          "capability_ids": [
+            "mcp"
+          ],
+          "curriculum_role": "specialization",
+          "knowledge_refs": [
+            "knowledge_mcp"
+          ],
+          "order_index": 0,
+          "outcome_refs": [
+            "mcp.interfaces",
+            "mcp.minimal_connection",
+            "mcp.roles"
+          ],
+          "prerequisite_stage_refs": [],
+          "project_study_refs": [],
+          "stable_key": "v2.stage.2c9d0cb7253faf6dd88dba6ebff0499551a3a2c5cccf0bd04fde7d60758fbcb2",
+          "stage_id": "stage_mcp",
+          "task_refs": [
+            "task_mcp"
+          ],
+          "title": "MCP协议与集成边界 · 我的课程",
+          "unit_refs": [
+            "unit_mcp"
+          ],
+          "what_to_learn": "解释并实践获准outcomes",
+          "why_now": "缺失能力需要有界教学",
+          "database_stage_id": "stg_b2fc88b6953b464aaad9a9ab16e6127f",
+          "guidance": {
+            "comparison_focus": [],
+            "learning_focus": [
+              "精确目标"
+            ],
+            "practice_delta": {
+              "baseline": "当前可检查起点",
+              "increment": [
+                "本阶段增量"
+              ],
+              "preserved": [
+                "既有行为"
+              ],
+              "reuse": [
+                "按获准项目范围迁回"
+              ],
+              "validation": [
+                "正常与失败检查"
+              ]
+            },
+            "previous_relation": "基于已冻结学习起点",
+            "stage_ref": "stage_mcp",
+            "why_now": "缺失能力需要有界教学"
+          }
+        }
+      ],
+      "knowledge": [
+        {
+          "identity_kind": "curriculum_candidate",
+          "material_refs": [
+            "material_d125e9971ebde924f22e306787df8593532c0aafa00a4688ce799e553c0e5044"
+          ],
+          "objectives": [
+            "解释获准能力"
+          ],
+          "outcome_refs": [
+            "mcp.interfaces",
+            "mcp.minimal_connection",
+            "mcp.roles"
+          ],
+          "stable_key": "knowledge_mcp",
+          "stage_ref": "stage_mcp",
+          "title": "MCP协议与集成边界"
+        }
+      ],
+      "units": [
+        {
+          "knowledge_refs": [
+            "knowledge_mcp"
+          ],
+          "objectives": [
+            "完成教学与实践"
+          ],
+          "outcome_refs": [
+            "mcp.interfaces",
+            "mcp.minimal_connection",
+            "mcp.roles"
+          ],
+          "rubric": [
+            {
+              "outcome_refs": [
+                "mcp.interfaces",
+                "mcp.minimal_connection",
+                "mcp.roles"
+              ],
+              "text": "可检查解释与示例"
+            }
+          ],
+          "stable_key": "unit_mcp",
+          "stage_ref": "stage_mcp",
+          "title": "有界教学单元"
+        }
+      ],
+      "materials": [
+        {
+          "material_id": "material_d125e9971ebde924f22e306787df8593532c0aafa00a4688ce799e553c0e5044",
+          "order_index": 0,
+          "outcome_refs": [
+            "mcp.interfaces",
+            "mcp.minimal_connection",
+            "mcp.roles"
+          ],
+          "reading_focus": "只读对应教学章节",
+          "role": "primary",
+          "source_snapshot": {
+            "access_proof": null,
+            "content_hash": "147fca16098fb400abc6e84075c2f88da5341902f1f4bd9345cdc43d6e5d1443",
+            "evidence_refs": [
+              {
+                "hash_scope": "body",
+                "location": "chapter.md#L1-L1",
+                "reference": "chunk_54a066992b36e02b5c45c0f1c503ccfbf58763cdd6db35ae42dc47508c16e760",
+                "sha256": "b0cad9d37a5ff42e1c29aaa7508ea43d85cba8d78686d54d4fda9f4df0e33676"
+              }
+            ],
+            "free_access": "confirmed",
+            "kind": "researched_resource",
+            "limitations": [
+              "Synthetic fixture"
+            ],
+            "material_id": "material_d125e9971ebde924f22e306787df8593532c0aafa00a4688ce799e553c0e5044",
+            "outcome_refs": [
+              "mcp.interfaces",
+              "mcp.minimal_connection",
+              "mcp.roles"
+            ],
+            "qualification": "research_checked",
+            "section_refs": [
+              "chapter.md#L1-L1"
+            ],
+            "source_id": "resource_f9f97720e6ee57f5611422597cea23f8a30a69d4f076ddba7d9b9b3852cb1b17",
+            "source_version": "git-blob:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "title": "resource_f9f97720e6ee57f5611422597cea23f8a30a69d4f076ddba7d9b9b3852cb1b17",
+            "url": "https://github.com/demo/tutorial/blob/main/chapter.md",
+            "usable": true
+          },
+          "stage_ref": "stage_mcp"
+        }
+      ],
+      "practice": {
+        "carrier": {
+          "description": "已有本地CLI",
+          "final_artifact": {
+            "acceptance": [
+              {
+                "outcome_refs": [],
+                "text": "产出正常与失败证据"
+              }
+            ],
+            "description": "可检查学习成果"
+          },
+          "kind": "user_project",
+          "project_context_hash": "dbfdd75f46f930ea1fb5a127e3e2c87e1c48c91a5650ef25cd78769836206898",
+          "reason": "保留既有项目作为持续实践载体"
+        },
+        "final_artifact": {
+          "acceptance": [
+            {
+              "outcome_refs": [],
+              "text": "产出正常与失败证据"
+            }
+          ],
+          "description": "可检查学习成果"
+        },
+        "tasks": [
+          {
+            "acceptance": [
+              {
+                "outcome_refs": [
+                  "mcp.interfaces",
+                  "mcp.minimal_connection",
+                  "mcp.roles"
+                ],
+                "text": "正常与失败行为都有证据"
+              }
+            ],
+            "goal": "实际产生检查证据",
+            "in_scope": [
+              "获准能力"
+            ],
+            "knowledge_refs": [
+              "knowledge_mcp"
+            ],
+            "order_index": 0,
+            "out_scope": [
+              "整仓库重构"
+            ],
+            "outcome_refs": [
+              "mcp.interfaces",
+              "mcp.minimal_connection",
+              "mcp.roles"
+            ],
+            "practice_kind": "micro_exercise",
+            "stable_key": "task_mcp",
+            "stage_ref": "stage_mcp",
+            "title": "有界练习"
+          }
+        ]
+      },
+      "project_study": [],
+      "constraints": {
+        "assessments": [],
+        "constraint_refs": [],
+        "hard_constraints": []
+      },
+      "unresolved": [],
+      "source_limitations": []
+    },
+    "plan_id": "pln_98ac65cb6b5f4224ba97cd2b01a4e70f",
+    "status": "approved",
+    "version": 1,
+    "approved_at": "2026-10-08T13:43:32.286159+00:00"
   }
 }

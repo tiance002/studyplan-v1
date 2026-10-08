@@ -37,6 +37,7 @@ class ExposureSourceSnapshot(BaseModel):
     kind: Literal["assigned_source_bindings"]
     public_assignments: list[dict[str, Any]]
     private_selections: list[dict[str, Any]]
+    v2_content: dict[str, Any] | None = None
 
 
 class ExposureView(BaseModel):

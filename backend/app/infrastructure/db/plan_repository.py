@@ -51,6 +51,7 @@ from app.domain.enums import (
 )
 from app.domain.planning.guidance import guidance_from_payload, guidance_payload
 from app.domain.planning.intent import goal_spec_from_payload, goal_spec_payload
+from app.domain.planning.v2_execution import V2ExecutionSnapshot, validate_v2_structure
 from app.domain.planning.models import (
     PlanDraft,
     PlanRevision,
@@ -165,6 +166,7 @@ def _extension_payload(e: KnowledgeExtension) -> dict[str, Any]:
 def _structure_payload(revision: PlanRevision) -> dict[str, Any]:
     """``plan_revisions.structure`` 的等价快照（审计用，非读回依据）。"""
     return {
+        **({"v2_execution": revision.v2_execution.to_payload()} if revision.v2_execution else {}),
         **({"goal_spec": goal_spec_payload(revision.goal_spec)} if revision.goal_spec else {}),
         "stages": [_stage_payload(s) for s in revision.stages],
         "unit_links": [_unit_link_payload(x) for x in revision.unit_links],
@@ -181,6 +183,7 @@ def _structure_payload(revision: PlanRevision) -> dict[str, Any]:
 
 def _draft_payload(draft: PlanDraft) -> dict[str, Any]:
     return {
+        **({"v2_execution": draft.v2_execution.to_payload()} if draft.v2_execution else {}),
         "goal_snapshot": draft.goal_snapshot,
         **({"route_change": draft.route_change} if draft.route_change else {}),
         **({"goal_spec": goal_spec_payload(draft.goal_spec)} if draft.goal_spec else {}),
@@ -344,6 +347,10 @@ class PgPlanRepository:
         - 被条件挡下时**抛** :class:`ConflictError`，不静默忽略。
         """
         with self._tx(draft.project_id) as conn:
+            validate_v2_structure(draft)
+            if draft.v2_execution:
+                from app.infrastructure.db.v2_planning_persistence import validate_database_bindings
+                validate_database_bindings(conn, draft)
             self._lock_plan_version(conn, draft.project_id, expected_version)
             self._guard_resource_proposal(conn, draft.project_id, draft.draft_id)
             if draft.route_change and draft.draft_id != self._route_change_id:
@@ -440,13 +447,14 @@ class PgPlanRepository:
         payload = row.get("payload") or {}
         if not isinstance(payload, dict):
             payload = {}
-        return PlanDraft(
+        draft = PlanDraft(
             draft_id=str(row["draft_id"]),
             project_id=str(row["project_id"]),
             run_id=str(row.get("run_id") or ""),
             goal_snapshot=str(payload.get("goal_snapshot") or ""),
             goal_spec=goal_spec_from_payload(payload.get("goal_spec")),
             route_change=payload.get('route_change'),
+            v2_execution=V2ExecutionSnapshot.from_payload(payload.get("v2_execution")),
             revision_candidate=int(row.get("revision_candidate") or 1),
             stages=tuple(_stage_from(s) for s in _as_list(payload.get("stages"))),  # type: ignore[arg-type]
             resource_snapshots=cast(tuple[dict[str, object], ...], tuple(_as_list(payload.get("resource_snapshots")))),
@@ -475,6 +483,14 @@ class PgPlanRepository:
             ),
             created_at=row.get("created_at"),  # type: ignore[arg-type]
         )
+        validate_v2_structure(draft)
+        if draft.v2_execution:
+            if draft.content_hash != row["content_hash"]:
+                raise ConflictError("V2 Draft stored hash mismatch")
+            with self._tx(project_id) as conn:
+                from app.infrastructure.db.v2_planning_persistence import validate_database_bindings
+                validate_database_bindings(conn, draft)
+        return draft
 
     # ------------------------------------------------------------- 版本读
 
@@ -552,11 +568,12 @@ class PgPlanRepository:
         guidance_by_key = {s["stable_key"]: s.get("learning_guidance")
                            for s in structure.get("stages", [])} if isinstance(structure, dict) else {}
         approved_at = _parse_dt(structure.get("approved_at")) if isinstance(structure, dict) else None
-        return PlanRevision(
+        revision = PlanRevision(
             plan_id=plan_id,
             project_id=project_id,
             revision=int(row["revision"]),  # type: ignore[arg-type]
             goal_snapshot=str(row["goal_snapshot"]),
+            v2_execution=V2ExecutionSnapshot.from_payload(structure.get("v2_execution")),
             goal_spec=goal_spec_from_payload(structure.get("goal_spec")) if isinstance(structure, dict) else None,
             stages=tuple(_stage_from({**s, "learning_guidance": guidance_by_key.get(s["stable_key"])}) for s in stages),
             resource_snapshots=cast(tuple[dict[str, object], ...], tuple(_as_list(structure.get("resource_snapshots")))) if isinstance(structure, dict) else (),
@@ -584,6 +601,14 @@ class PgPlanRepository:
             approved_at=approved_at,
             created_at=row.get("created_at"),  # type: ignore[arg-type]
         )
+        validate_v2_structure(revision)
+        if revision.v2_execution:
+            from app.infrastructure.db.v2_planning_persistence import validate_database_bindings
+            validate_database_bindings(conn, revision)
+            receipts = conn.execute("SELECT structure_fingerprint FROM plan_publications WHERE project_id=%s AND plan_id=%s",(project_id,plan_id)).fetchall()
+            if not receipts or any(item["structure_fingerprint"] != revision.structure_fingerprint() for item in receipts):
+                raise ConflictError("V2 immutable publication fingerprint mismatch")
+        return revision
 
     # ------------------------------------------------------------- 幂等记录
 
@@ -664,6 +689,11 @@ class PgPlanRepository:
                     "草案内容已变化，请重新加载后再确认",
                     reason="draft_hash_mismatch",
                 )
+
+            if draft.v2_execution:
+                from app.infrastructure.db.v2_planning_persistence import validate_database_bindings
+                validate_database_bindings(conn, draft)
+                validate_database_bindings(conn, revision)
 
             if created:
                 if revision.stage_resources and not revision.resource_snapshots:

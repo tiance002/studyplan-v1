@@ -252,6 +252,7 @@ class OutlineSectionKind(StrEnum):
     CORE = "core"
     PRACTICE = "practice"
     ADVANCED = "advanced"
+    V2_CURRICULUM = "v2_curriculum"
 
 
 class PracticeProjectStatus(StrEnum):

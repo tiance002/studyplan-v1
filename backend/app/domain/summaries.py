@@ -98,4 +98,9 @@ def review_rubric_context(snapshot):
             for unit in snapshot.get("unit_snapshots", []) if isinstance(unit, dict)]
     result["node_snapshot"] = [{key: node[key] for key in ("stable_key", "title", "objectives", "content_version") if key in node}
         for node in snapshot.get("node_snapshot", []) if isinstance(node, dict)]
+    v2 = snapshot.get("v2_content") or (snapshot.get("source_snapshot") or {}).get("v2_content")
+    if isinstance(v2, dict):
+        result["v2_requirements"] = {"stage_outcome_refs":v2["stage"]["outcome_refs"],
+            "prerequisite_stage_refs":v2["stage"]["prerequisite_stage_refs"],
+            "units":[{key:u[key] for key in ("objectives","outcome_refs","rubric")} for u in v2["units"]]}
     return result

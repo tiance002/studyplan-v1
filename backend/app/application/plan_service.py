@@ -158,6 +158,7 @@ class PlanService:
         planning_worker_admission_mode: str = "allowlist",
         preference_resolver: Callable[[AuthContext, str], Any] | None = None,
         route_changes: GeneratedPlanChangesPort | None = None,
+        v2_persistence=None,
     ) -> None:
         self._repo = repository
         self._runs = runs
@@ -184,6 +185,7 @@ class PlanService:
         self._binding_resolver = binding_resolver or _unbound_submission
         self._preference_resolver = preference_resolver
         self._route_changes = route_changes
+        self._v2_persistence = v2_persistence
         # Only synchronous Fake/in-process generation lacks durable jobs. Its
         # caller-owned submission and receipts live outside the graph state.
         self._generation_inputs = {}
@@ -421,6 +423,19 @@ class PlanService:
                                     require_snapshot=True),
         )
 
+    def get_revision(self, *, scope: AuthContext, project_id: str, revision: int) -> PlanBundle:
+        scope.require_project(project_id)
+        if revision < 1:
+            raise ValidationAppError("路线版本必须为正整数")
+        stored = self._repo.get_revision(project_id=project_id, revision=revision)
+        if stored is None:
+            raise NotFoundError("路线版本不存在")
+        return PlanBundle(
+            revision=stored,
+            resources=self._resolve(stored.stage_resources, stored.stages, stored.resource_snapshots,
+                                    require_snapshot=True),
+        )
+
     # ------------------------------------------------------------------ 决定
 
     def decide(
@@ -446,7 +461,7 @@ class PlanService:
             case DraftDecision.APPROVE:
                 return self._approve(draft=draft, project_id=project_id, command=command)
             case DraftDecision.EDIT:
-                return self._edit(draft=draft, project_id=project_id, command=command)
+                return self._edit(draft=draft, project_id=project_id, command=command, scope=scope)
             case DraftDecision.CANCEL:
                 return self._cancel(draft=draft, project_id=project_id, command=command)
             case _:  # pragma: no cover - 枚举已封闭
@@ -496,9 +511,21 @@ class PlanService:
         )
 
     def _edit(
-        self, *, draft: PlanDraft, project_id: str, command: DecisionCommand
+        self, *, draft: PlanDraft, project_id: str, command: DecisionCommand, scope=None
     ) -> DecisionOutcome:
         """应用用户编辑 → **重新校验** → 保存新草案（不发布）。"""
+        if draft.v2_execution is not None:
+            # V2 edits need the exact persisted compiler authority packet and a
+            # new validated candidate/manifest. The legacy editor must never
+            # preserve an invalid V2 manifest after changing normalized stages.
+            bridge = getattr(self, "_v2_persistence", None)
+            if bridge is None:
+                raise ValidationAppError("V2 description editing requires the V2 persistence bridge")
+            edited = bridge.edit_descriptions(scope=scope, project_id=project_id,
+                draft_id=draft.draft_id, expected_version=command.expected_version,
+                expected_hash=command.draft_hash, stages=command.edited_stages)
+            return DecisionOutcome(run_id=edited.run_id, draft=edited,
+                resources=self._resolve(edited.stage_resources, edited.stages, edited.resource_snapshots))
         if not command.draft_hash:
             raise ValidationAppError("edit requires current draft_hash")
         if command.draft_hash != draft.content_hash:

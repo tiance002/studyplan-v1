@@ -75,11 +75,16 @@ def _text(value: object, default: str = "") -> str:
 class PgPlanningCatalog:
     """幂等物化图产物。所有写入在**单个事务**内完成。"""
 
-    def __init__(self, dsn: str) -> None:
+    def __init__(self, dsn: str, *, connection=None) -> None:
         self._dsn = to_psycopg_dsn(dsn)
+        self._connection = connection
 
     @contextmanager
     def _tx(self, project_id: str) -> Iterator[psycopg.Connection[dict[str, Any]]]:
+        if self._connection is not None:
+            self._connection.execute("SELECT set_config('app.project_id', %s, true)", (project_id,))
+            yield self._connection
+            return
         with psycopg.connect(
             self._dsn, row_factory=dict_row
         ) as conn:  # type: psycopg.Connection[dict[str, Any]]
@@ -172,7 +177,7 @@ class PgPlanningCatalog:
                         key,
                         _text(unit.get("title"), key),
                         Jsonb(_str_list(unit.get("objectives"))),
-                        Jsonb(_as_dict(unit.get("rubric"))),
+                        Jsonb(unit["rubric"] if isinstance(unit.get("rubric"), list) else _as_dict(unit.get("rubric"))),
                         1,
                     ),
                 )

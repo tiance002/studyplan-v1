@@ -1011,6 +1011,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/plans/revisions/{revision}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 读取已确认的历史路线 */
+        get: operations["get_plan_revision"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/session": {
         parameters: {
             query?: never;
@@ -1643,6 +1660,10 @@ export interface components {
             private_selections: {
                 [key: string]: unknown;
             }[];
+            /** V2 Content */
+            v2_content?: {
+                [key: string]: unknown;
+            } | null;
         };
         /** ExposureView */
         ExposureView: {
@@ -1921,7 +1942,7 @@ export interface components {
          * @description 纲要分节类型。
          * @enum {string}
          */
-        OutlineSectionKind: "foundation" | "core" | "practice" | "advanced";
+        OutlineSectionKind: "foundation" | "core" | "practice" | "advanced" | "v2_curriculum";
         /** PlanChangeContext */
         PlanChangeContext: {
             /** Plan Id */
@@ -2124,6 +2145,13 @@ export interface components {
              * @default 0
              */
             source_pack_version: number;
+            /**
+             * V2 Content
+             * @description Validated V2 teaching content for this exact draft or revision
+             */
+            v2_content?: {
+                [key: string]: unknown;
+            } | null;
             /** Draft Id */
             draft_id: string;
             status: components["schemas"]["PlanDraftStatus"];
@@ -2194,6 +2222,13 @@ export interface components {
              * @default 0
              */
             source_pack_version: number;
+            /**
+             * V2 Content
+             * @description Validated V2 teaching content for this exact draft or revision
+             */
+            v2_content?: {
+                [key: string]: unknown;
+            } | null;
             /** Plan Id */
             plan_id: string;
             status: components["schemas"]["PlanRevisionStatus"];
@@ -4305,6 +4340,14 @@ export interface components {
              * @default 0
              */
             source_pack_version: number;
+            /**
+             * V2 Content
+             * @description Validated V2 teaching content for this exact draft or revision
+             * @default null
+             */
+            v2_content: {
+                [key: string]: unknown;
+            } | null;
         };
         /**
          * NodeView
@@ -6687,6 +6730,40 @@ export interface operations {
             };
             header?: never;
             path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_plan_revision: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path: {
+                revision: number;
+            };
             cookie?: never;
         };
         requestBody?: never;

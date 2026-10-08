@@ -203,6 +203,8 @@ class PgSummaries:
 
     @staticmethod
     def _stage_snapshot(conn, command, plan, stage):
+        from app.domain.planning.v2_execution import V2ExecutionSnapshot
+        v2 = V2ExecutionSnapshot.from_payload((plan["structure"] or {}).get("v2_execution"))
         units = conn.execute("""SELECT u.unit_id,u.stable_key,u.title,u.rubric_version,u.objectives,u.rubric,l.order_index
             FROM plan_unit_links l JOIN learning_units u ON u.project_id=l.project_id AND u.unit_id=l.unit_id
             WHERE l.project_id=%s AND l.plan_id=%s AND l.stage_id=%s ORDER BY l.order_index,l.unit_id""",
@@ -233,6 +235,7 @@ class PgSummaries:
         frozen = [item for item in (plan["structure"] or {}).get("resource_snapshots", [])
                   if item.get("stage_id") == command.stage_id]
         return _json({"snapshot_status": "frozen", "summary_scope": "stage", "unit_id": None,
+            **({"v2_content":v2.stage_content(command.stage_id)} if v2 else {}),
             "stage_title": stage["title"], "stage_stable_key": stage["stable_key"], "stage_objective": stage["objective"],
             "stage_snapshot": stage, "unit_snapshots": units, "objectives": objectives, "rubric": rubrics,
             "rubric_version": 1, "plan_id": command.plan_id, "plan_revision": plan["revision"], "stage_id": command.stage_id,

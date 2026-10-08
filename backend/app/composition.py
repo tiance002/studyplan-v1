@@ -33,6 +33,7 @@ from app.infrastructure.db import (
     PgRunRepository,
 )
 from app.infrastructure.db.job_repository import PgPlanningJobRepository
+from app.infrastructure.db.v2_planning_persistence import PgV2PlanningPersistence
 from app.infrastructure.providers import SUPPORTED_PROVIDERS, build_llm
 from app.infrastructure.worker.planning_worker import PlanningWorker
 
@@ -139,6 +140,7 @@ def build_container(settings: Settings) -> AppContainer:
         repository=PgPlanRepository(dsn),
         runs=PgRunRepository(dsn),
         catalog=PgPlanningCatalog(dsn),
+        v2_persistence=PgV2PlanningPersistence(dsn),
         resources=PgPublicResourceCatalog(dsn),
         llm=llm,
         graph_version=settings.graph_version or PROTOCOL_VERSION,

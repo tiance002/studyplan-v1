@@ -85,6 +85,12 @@ def prompt_review_context(snapshot):
         {key: link[key] for key in ("stable_key", "title", "role", "content_version") if key in link}
         for link in task.get("knowledge_links", [])
     ]
+    v2 = task.get("v2_content")
+    if isinstance(v2, dict):
+        result["v2_requirements"] = {
+            "stage_outcome_refs": v2["stage"]["outcome_refs"],
+            "tasks": [{key:t[key] for key in ("outcome_refs","knowledge_refs","practice_kind","acceptance")}
+                for t in v2["tasks"]]}
     return result
 
 

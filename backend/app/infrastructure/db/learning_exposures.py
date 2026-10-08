@@ -79,6 +79,10 @@ class PgLearningExposures:
         # Bindings are not reading/mastery evidence. Never fetch URLs here.
         sources = {"kind": "assigned_source_bindings", "public_assignments": public,
                    "private_selections": private}
+        from app.domain.planning.v2_execution import V2ExecutionSnapshot
+        v2 = V2ExecutionSnapshot.from_payload((plan["structure"] or {}).get("v2_execution"))
+        if v2:
+            sources["v2_content"] = v2.stage_content(stage,unit_id=unit)
         return _json(nodes), _json(sources)
 
     @staticmethod

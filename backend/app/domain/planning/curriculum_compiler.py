@@ -24,6 +24,8 @@ from app.domain.planning.curriculum import (
     CurriculumContext,
     CurriculumPlan,
     ProjectCase,
+    _sort_output_refs,
+    curriculum_constraint_assessments,
     prepare_curriculum,
     record_case_findings,
     validate_curriculum_output,
@@ -187,6 +189,23 @@ def _validate_authorities(context, profile, plan, source_facts):
     return payload
 
 
+def _normalized_mapping_document(document, payload):
+    """Canonical mapping input; frozen source bytes/hash remain a separate argument.
+
+    Reuse Item6's set representation and the exact historical empty-constraint
+    compatibility. This mechanical function grants no input/domain authority.
+    """
+    doc = json.loads(canonical_json(document))
+    wire = {key: value for key, value in doc.items() if key not in _SERVER_FIELDS | {"case_findings", "plan_hash"}}
+    _sort_output_refs(wire)
+    doc.update(wire)
+    actual_context = doc["compile_context"]
+    if ("constraint_assessments" not in actual_context and not payload["constraints"]
+            and curriculum_constraint_assessments(wire, payload) == []):
+        doc["compile_context"] = actual_context | {"constraint_assessments": []}
+    return doc
+
+
 def _validated_curriculum(curriculum, context, payload):
     if type(curriculum) is not CurriculumPlan:
         _reject("curriculum_type")
@@ -195,12 +214,7 @@ def _validated_curriculum(curriculum, context, payload):
     # Production compilation never enables fixture domain authority.
     rebuilt = validate_curriculum_output(raw, payload, domain_approvals=context._domain_approvals)
     expected = rebuilt.to_payload()
-    actual_context = document["compile_context"]
-    # Exact historical compatibility: only an absent, provably empty assessment
-    # list with no constraints is accepted. No constrained legacy result is waived.
-    if ("constraint_assessments" not in actual_context and not payload["constraints"]
-            and expected["compile_context"]["constraint_assessments"] == []):
-        actual_context = actual_context | {"constraint_assessments": []}
+    actual_context = _normalized_mapping_document(document, payload)["compile_context"]
     for name in _SERVER_FIELDS:
         actual = actual_context if name == "compile_context" else document[name]
         if canonical_json(actual) != canonical_json(expected[name]):
@@ -222,7 +236,7 @@ def _validated_curriculum(curriculum, context, payload):
             "case_findings": checked_findings})
     # Reference sets use the validator's canonical representation; source snapshot
     # still retains the exact originally frozen payload and original plan hash.
-    return expected | {"case_findings": checked_findings}
+    return _normalized_mapping_document(expected | {"case_findings": checked_findings}, payload)
 
 
 def _public_bindings(bindings, nodes):
@@ -258,56 +272,62 @@ def compile_curriculum(curriculum, *, context, profile, capability_plan, source_
     try:
         payload = _validate_authorities(context, profile, capability_plan, source_facts)
         doc = _validated_curriculum(curriculum, context, payload)
-        stages, nodes, units, guidance, tasks, assignments, relations = [], [], [], [], [], [], []
-        materials = {m["material_id"]: m for m in doc["compile_materials"]}
-        for stage in doc["stages"]:
-            ref = stage["stage_id"]
-            stages.append({key: value for key, value in stage.items()
-                if key not in {"role", "knowledge", "units", "guidance", "tasks", "assignments"}}
-                | {"stable_key": "v2.stage." + content_hash({"curriculum_stage_id": ref}),
-                    "curriculum_role": stage["role"], "knowledge_refs": [n["stable_key"] for n in stage["knowledge"]],
-                    "unit_refs": [u["stable_key"] for u in stage["units"]], "task_refs": [t["stable_key"] for t in stage["tasks"]]})
-            nodes.extend(node | {"stage_ref": ref, "identity_kind": "curriculum_candidate"} for node in stage["knowledge"])
-            units.extend(unit | {"stage_ref": ref} for unit in stage["units"])
-            guidance.append(stage["guidance"] | {"stage_ref": ref, "why_now": stage["why_now"],
-                "practice_delta": {key: value if key == "baseline" else [value]
-                    for key, value in stage["guidance"]["practice_delta"].items()}})
-            tasks.extend(task | {"stage_ref": ref, "order_index": index} for index, task in enumerate(stage["tasks"]))
-            for index, assignment in enumerate(stage["assignments"]):
-                assignments.append(assignment | {"stage_ref": ref, "order_index": index,
-                    "role": assignment["role"].lower(), "source_snapshot": materials[assignment["material_id"]]})
-            relations.extend({"kind": "stage_prerequisite", "prerequisite_stage_ref": prior, "stage_ref": ref}
-                for prior in stage["prerequisite_stage_refs"])
-        bindings = _public_bindings(public_knowledge_bindings, nodes)
-        for node in nodes:
-            if node["stable_key"] in bindings:
-                node.update(identity_kind="public_knowledge", public_binding=bindings[node["stable_key"]])
-        cases = {c["case_id"]: c for c in doc["compile_cases"]}
-        projects = [{"requirement": requirement, "case": cases[requirement["selected_case_ref"]]}
-            for requirement in doc["project_study_requirements"]]
-        identities = {"stages": [{"curriculum_stage_id": s["stage_id"], "semantic_key": s["stable_key"]} for s in stages],
-            "knowledge": [{"curriculum_stable_key": n["stable_key"], "identity_kind": n["identity_kind"],
-                **({"public_binding": n["public_binding"]} if "public_binding" in n else {})} for n in nodes],
-            "units": [{"curriculum_stable_key": u["stable_key"]} for u in units],
-            "tasks": [{"curriculum_stable_key": t["stable_key"]} for t in tasks],
-            "materials": [{key: m[key] for key in ("material_id", "source_id", "source_version", "section_refs", "content_hash")}
-                for m in doc["compile_materials"]]}
-        compiled = {"compiler_version": COMPILER_VERSION, "contract_version": COMPILED_CONTRACT_VERSION,
-            "stages": stages, "nodes": nodes, "units": units, "relations": relations, "guidance": guidance,
-            "resource_assignments": assignments, "practice": {"carrier": doc["carrier"], "tasks": tasks,
-                "final_artifact": doc["carrier"]["final_artifact"]}, "project_study": projects,
-            "constraints": {"hard_constraints": payload["constraints"], "constraint_refs": doc["constraint_refs"],
-                "assessments": doc["compile_context"]["constraint_assessments"]},
-            "unresolved": doc["unresolved"], "source_limitations": doc["source_limitations"],
-            "source_snapshots": {"curriculum": curriculum.to_payload(), "curriculum_context": payload,
-                "goal_requirement_profile": profile.to_payload(), "capability_plan": capability_plan.to_payload()}}
-        manifest = {"compiler_version": COMPILER_VERSION, "contract_version": COMPILED_CONTRACT_VERSION,
-            "input_curriculum_plan_hash": curriculum.plan_hash, "upstream_sources": doc["compile_sources"]
-                | {"curriculum_input_hash": context.input_hash, "policy_version": capability_plan.policy_version,
-                    "policy_hash": content_hash(CAPABILITY_POLICY.to_payload())},
-            "compiled_payload_digest": content_hash(compiled), "stable_identity_mapping": identities,
-            "validation": {"completeness": "PASS", "source_binding": "PASS", "upstream_authority": "PASS",
-                "source_content_semantics": "NOT RUN", "public_identity_database": "NOT RUN"}}
-        return CompiledPlan(canonical_json(compiled), ExecutionManifest(canonical_json(manifest)))
+        return _compile_validated(doc, curriculum=curriculum, payload=payload, profile=profile,
+            capability_plan=capability_plan, context=context, public_knowledge_bindings=public_knowledge_bindings)
     except (TypeError, ValueError, AttributeError, KeyError, RecursionError):
         _reject("input_shape")
+
+
+def _compile_validated(doc, *, curriculum, payload, profile, capability_plan, context, public_knowledge_bindings=()):
+    """Single deterministic mapping after authority validation; no qualification is issued here."""
+    stages, nodes, units, guidance, tasks, assignments, relations = [], [], [], [], [], [], []
+    materials = {m["material_id"]: m for m in doc["compile_materials"]}
+    for stage in doc["stages"]:
+        ref = stage["stage_id"]
+        stages.append({key: value for key, value in stage.items()
+            if key not in {"role", "knowledge", "units", "guidance", "tasks", "assignments"}}
+            | {"stable_key": "v2.stage." + content_hash({"curriculum_stage_id": ref}),
+                "curriculum_role": stage["role"], "knowledge_refs": [n["stable_key"] for n in stage["knowledge"]],
+                "unit_refs": [u["stable_key"] for u in stage["units"]], "task_refs": [t["stable_key"] for t in stage["tasks"]]})
+        nodes.extend(node | {"stage_ref": ref, "identity_kind": "curriculum_candidate"} for node in stage["knowledge"])
+        units.extend(unit | {"stage_ref": ref} for unit in stage["units"])
+        guidance.append(stage["guidance"] | {"stage_ref": ref, "why_now": stage["why_now"],
+            "practice_delta": {key: value if key == "baseline" else [value]
+                for key, value in stage["guidance"]["practice_delta"].items()}})
+        tasks.extend(task | {"stage_ref": ref, "order_index": index} for index, task in enumerate(stage["tasks"]))
+        for index, assignment in enumerate(stage["assignments"]):
+            assignments.append(assignment | {"stage_ref": ref, "order_index": index,
+                "role": assignment["role"].lower(), "source_snapshot": materials[assignment["material_id"]]})
+        relations.extend({"kind": "stage_prerequisite", "prerequisite_stage_ref": prior, "stage_ref": ref}
+            for prior in stage["prerequisite_stage_refs"])
+    bindings = _public_bindings(public_knowledge_bindings, nodes)
+    for node in nodes:
+        if node["stable_key"] in bindings:
+            node.update(identity_kind="public_knowledge", public_binding=bindings[node["stable_key"]])
+    cases = {c["case_id"]: c for c in doc["compile_cases"]}
+    projects = [{"requirement": requirement, "case": cases[requirement["selected_case_ref"]]}
+        for requirement in doc["project_study_requirements"]]
+    identities = {"stages": [{"curriculum_stage_id": s["stage_id"], "semantic_key": s["stable_key"]} for s in stages],
+        "knowledge": [{"curriculum_stable_key": n["stable_key"], "identity_kind": n["identity_kind"],
+            **({"public_binding": n["public_binding"]} if "public_binding" in n else {})} for n in nodes],
+        "units": [{"curriculum_stable_key": u["stable_key"]} for u in units],
+        "tasks": [{"curriculum_stable_key": t["stable_key"]} for t in tasks],
+        "materials": [{key: m[key] for key in ("material_id", "source_id", "source_version", "section_refs", "content_hash")}
+            for m in doc["compile_materials"]]}
+    compiled = {"compiler_version": COMPILER_VERSION, "contract_version": COMPILED_CONTRACT_VERSION,
+        "stages": stages, "nodes": nodes, "units": units, "relations": relations, "guidance": guidance,
+        "resource_assignments": assignments, "practice": {"carrier": doc["carrier"], "tasks": tasks,
+            "final_artifact": doc["carrier"]["final_artifact"]}, "project_study": projects,
+        "constraints": {"hard_constraints": payload["constraints"], "constraint_refs": doc["constraint_refs"],
+            "assessments": doc["compile_context"]["constraint_assessments"]},
+        "unresolved": doc["unresolved"], "source_limitations": doc["source_limitations"],
+        "source_snapshots": {"curriculum": curriculum.to_payload(), "curriculum_context": payload,
+            "goal_requirement_profile": profile.to_payload(), "capability_plan": capability_plan.to_payload()}}
+    manifest = {"compiler_version": COMPILER_VERSION, "contract_version": COMPILED_CONTRACT_VERSION,
+        "input_curriculum_plan_hash": curriculum.plan_hash, "upstream_sources": doc["compile_sources"]
+            | {"curriculum_input_hash": context.input_hash, "policy_version": capability_plan.policy_version,
+                "policy_hash": content_hash(CAPABILITY_POLICY.to_payload())},
+        "compiled_payload_digest": content_hash(compiled), "stable_identity_mapping": identities,
+        "validation": {"completeness": "PASS", "source_binding": "PASS", "upstream_authority": "PASS",
+            "source_content_semantics": "NOT RUN", "public_identity_database": "NOT RUN"}}
+    return CompiledPlan(canonical_json(compiled), ExecutionManifest(canonical_json(manifest)))

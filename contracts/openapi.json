@@ -4099,6 +4099,58 @@
         }
       }
     },
+    "/api/v1/plans/revisions/{revision}": {
+      "get": {
+        "summary": "读取已确认的历史路线",
+        "operationId": "get_plan_revision",
+        "parameters": [
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Revision"
+            }
+          },
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/session": {
       "get": {
         "summary": "Get Session",
@@ -5717,6 +5769,18 @@
             },
             "type": "array",
             "title": "Private Selections"
+          },
+          "v2_content": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "V2 Content"
           }
         },
         "type": "object",
@@ -6419,7 +6483,8 @@
           "foundation",
           "core",
           "practice",
-          "advanced"
+          "advanced",
+          "v2_curriculum"
         ],
         "title": "OutlineSectionKind",
         "description": "纲要分节类型。"
@@ -6933,6 +6998,19 @@
             "title": "Source Pack Version",
             "default": 0
           },
+          "v2_content": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "V2 Content",
+            "description": "Validated V2 teaching content for this exact draft or revision"
+          },
           "draft_id": {
             "type": "string",
             "maxLength": 64,
@@ -7119,6 +7197,19 @@
             "minimum": 0.0,
             "title": "Source Pack Version",
             "default": 0
+          },
+          "v2_content": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "V2 Content",
+            "description": "Validated V2 teaching content for this exact draft or revision"
           },
           "plan_id": {
             "type": "string",
@@ -11916,7 +12007,7 @@
           },
           "objective": {
             "type": "string",
-            "maxLength": 1000,
+            "maxLength": 2000,
             "title": "Objective",
             "default": ""
           },
@@ -12917,6 +13008,20 @@
             "minimum": 0,
             "title": "Source Pack Version",
             "type": "integer"
+          },
+          "v2_content": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Validated V2 teaching content for this exact draft or revision",
+            "title": "V2 Content"
           }
         },
         "required": [

@@ -1,3 +1,10 @@
+## 2026-10-08 Planning V2 Item 7 P2：PERSISTENCE_COMPLETE / CONTINUING_P3
+
+- P2 基线 P1 checkpoint 52a326bf5d11d297fd47623cea346d4f6b55ff0e；[P2 报告](../planning-v2/ITEM7_P2_PERSISTENCE.md)记录显式 typed snapshot、单事务实体/Draft、当前 hash 编辑重编译、明确确认、Revision 与正式消费者。无 migration，公共来源只读，研究资料不升级资格。
+- fresh-context 独审主动发现 Run/fence、首次 public 来源替换、compiled/Manifest 重哈希分叉及历史空约束快照兼容四项，分别 RED→GREEN，最终独审 PASS。Compiler/Snapshot 69 PASS（含原P1 62），相邻定向114 PASS；真实 owned PG20 PASS+新增fenced正例1 PASS；真实Cookie/CSRF/scope编辑确认/current/history HTTP1 PASS；DTO契约9 PASS；Ruff/diff PASS，不累加重复测试冒充全新覆盖。
+- 仅新 owned PG 写入、现有0025、roles_created=[]，库及每次身份回执保留。真实产品模型/搜索/Reader0，正式库/历史证据/.env/旧样例不改，public generate503。真实教材语义/浏览器/全产品E2E NOT RUN。
+- 本地 P2 checkpoint 后按用户连续授权进入 P3；不 push/merge/deploy，不进入 Item8，尚不声明完整 Item7 或产品 READY。
+
 ## 2026-10-08 Planning V2 Item 7 P1：COMPILER_COMPLETE / CONTINUING_P2_P3
 
 - 基线 f1f3d139d197c29e8d76a0d5d0ce87a045278f4f；[P1 报告](../planning-v2/ITEM7_P1_COMPILER.md)记录完整字段流向与 P2 最小承载方案。新增纯 Compiler/Manifest，保留冻结课程、Profile、能力、来源、约束及项目事实，不补课程或生成 DB ID。

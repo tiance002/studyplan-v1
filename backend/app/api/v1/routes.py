@@ -5,6 +5,7 @@
     GET  /api/v1/plans/drafts/{draft_id}           草案（含已核验资源）
     POST /api/v1/plans/drafts/{draft_id}/decision  approve / edit / cancel
     GET  /api/v1/plans/current                     当前正式路线
+    GET  /api/v1/plans/revisions/{revision}        已确认的历史路线
 
 ## 两条硬约束（Goal §六）
 
@@ -224,3 +225,18 @@ def get_current_plan(
     if bundle is None:
         raise NotFoundError("当前没有已确认的路线")
     return plan_view(bundle)
+
+
+@router.get(
+    "/plans/revisions/{revision}",
+    response_model=PlanView,
+    operation_id="get_plan_revision",
+    summary="读取已确认的历史路线",
+)
+def get_plan_revision(
+    revision: int,
+    project_id: str = ProjectId,
+    scope: AuthContext = Depends(get_auth_context),
+    service: PlanService = Depends(get_plan_service),
+) -> PlanView:
+    return plan_view(service.get_revision(scope=scope, project_id=project_id, revision=revision))
