@@ -42,7 +42,10 @@ GOAL_REQUIREMENT_SYSTEM = (
     "project_context仅为可选已有项目背景，保留其来源，不将旅行等业务场景误认为技术专项。"
     "source_refs仅引用本次实际提供且非空的事实：goal.target、goal.scope及有效goal.scope[i]、"
     "goal.desired_depth、goal.starting_point、goal.outcome_purpose、goal.constraints及有效goal.constraints[i]、"
-    "project_context（指goal.project_context）。不得发明来源。"
+    "project_context。已有项目背景的合法source_ref是project_context；goal.project_context是非法source_ref，禁止输出。"
+    "例如用户要求基于已有项目继续实践，相关requirement可写为"
+    '{"text":"基于已有项目继续实践","source_refs":["project_context"],"origin":"explicit","rationale":""}。'
+    "不得发明来源。"
     "只有缺失或冲突信息会实质改变required requirements、hard constraints、scope或target解释时才澄清，"
     "status=needs_clarification并给1至3个人类可直接回答的问题，不暴露内部ID。"
     "信息足够时status=ready，clarification_questions必须为空且required_requirements非空。"

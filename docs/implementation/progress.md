@@ -1,3 +1,12 @@
+## 2026-10-08 Planning V2 Item 1 Project Context Reference Fix：FIX_READY / REAL_ACCEPTANCE_PENDING / ITEM2_NOT_STARTED / STOP
+
+- 基线 `d16c136432280c9c214a067ced812d8219ac2fb1`、`feat/n1-resource-discovery` 与预期一致、tracked clean；只改专用 Prompt 的项目来源说明，将歧义 `project_context（指goal.project_context）` 改为合法引用 `project_context`、禁止 `goal.project_context`，补一个完整 requirement 示例。Schema/Validator/SHAPE/IDhash/其他 Prompt 行为保持，无架构合同变更。
+- 新最小测试先 RED 1FAIL4PASS，修正后 5PASS；合并局部回归 33PASS（新5、硬约束12、GoalSpec9、Provider Prompt1、公开生成/范围/组合根6），Ruff/diff PASS。无全量或大规模无关回归；独立审查结论见[实施报告](../planning-v2/ITEM1_PROJECT_CONTEXT_REFERENCE_FIX.md)。
+- 历史真实 Case7 原输出仍被 Validator 拒绝；仅离线副本三处引用替换后验证 PASS、ID/hash稳定，标记 OFFLINE_MODIFIED_HISTORICAL_OUTPUT_NOT_REAL_PASS。原失败证据不覆盖、不重发。此前真实 Cases2/4/5/6 PASS、Case7 FAIL 保持，本轮真实模型验收 NOT RUN/PENDING。
+- 产品模型0（授权0）、搜索/Reader0、DB写入0、migration0；账本182/280全部375文件hash保持，unknown177保留未重派。797受保护tracked文件、配置、架构及历史Case7证据保持；public generate仍scope后503，Run/Job/PlanMutation0为依赖访问门禁证据，真实PG行计数 NOT RUN。未启动旧Planning、Worker、数据库或Item2，未改占位页。
+- 仅 Prompt、新测试、本实施报告和本进度四文件；本地提交消息 `fix(planning): clarify project context source reference`，精确SHA见最终答复/ignored final证据，不push/merge/deploy。提出单独最多1次DeepSeek deepseek-flash、仅Case7、无retry/repair的新授权申请，未执行、不消费已耗尽的五次授权。
+- 主协调请求Sol6.1high，实现/独立审查请求Sol6.1medium，actual均NOT OBSERVABLE，无HARD升级。最终 ITEM1_PROJECT_CONTEXT_FIX_READY / ITEM1_REAL_ACCEPTANCE_PENDING / ITEM2_NOT_STARTED；完整Planning V2未完成，STOP。
+
 ## 2026-10-08 Planning V2 Item 1 Hard Constraint Fix：READY_FOR_REAL_RETEST / SEMANTIC_ACCEPTANCE_PENDING / ITEM2_NOT_STARTED / STOP
 
 - 基线 `e025f2f05b5b8216905f312a5ff80a6888b5e2d1`、`feat/n1-resource-discovery` 与预期一致、tracked clean；本地提交消息 `fix(planning): preserve explicit goal constraints`，final SHA见答复及 ignored final evidence。不push/merge/deploy。
