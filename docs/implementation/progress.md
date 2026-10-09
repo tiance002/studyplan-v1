@@ -1,3 +1,12 @@
+## 2026-10-09 Item2真实失败定向离线修复：ITEM2_REAL_FAILURE_OFFLINE_FIX_PASS / ITEM2_REAL_SEMANTIC_RETEST_NOT_RUN / STOP
+
+- [本轮报告](../planning-v2/ITEM2_REAL_FAILURE_FIX.md)基于b7b7aff07386648b61bea97a5df1591f15bfdd95。原185响应原样重放仍definition_refs拒绝；真实184 Profile/source refs/hash与历史失败/raw/账本不改。只修Item2专用Prompt/field shape，原Schema/Validator/Policy/约束版本及Runtime保持。
+- 已选Policy能力必须精确复制自己的policy_refs和real_prerequisites；MCP系统特殊ref仍server添加。learning/project仅真实排除，载体保留/工具允许范围为not_applicable但不代表满足或授予权限，下游pending/incomplete保护保持。新MCP文案例子不新增exact allowlist、仍Provider failclosed。
+- 六真实req有合法语义映射：原项目背景→Python accepted_known，技术目标→structured/tool，applied/learn仅真实规划条件refs；MCP仅政策引入可无direct refs/targets。无需改原Profile或为覆盖而新增json.cli；五能力synthetic witness不是固定路线或真实语义PASS。辅助能力需真实必要性。
+- RED6FAIL/14PASS→合并定向117PASS/1.70s；测试格式整理后新20PASS/1.57s，Ruff与diff PASS。actual Provider/MockTransport完整messages17775bytes/32768、4096非思考、真实原Profile保持；仅模拟返回合法Plan，Token/cash上界与真实模型改善NOT RUN。独审PASS，请求Sol6.1xhigh/实际解析NOT OBSERVABLE。
+- 真实产品模型/搜索/Reader/正文/账户价格preflight0；模型185/280、unknown177/183与search6/1000保持、余量不授权。源码仅Prompt文件；必要新test/真实payload副本fixture/报告/progress，历史progress bytes与.env保持。PG/Worker/React/浏览器/完整教材课程NOT RUN，无migration/正式DB/public503开放/push/merge/deploy。
+- 可准备只复测Item2，沿用真实已PASS Item1；后续新1请求与必要preflight需Owner单独授权及新HEAD/Prompt/body/identity冻结，不复用旧付费入口/184/185身份。旧真实FAIL不追绿，本轮本地checkpoint见回执；STOP。
+
 ## 2026-10-09 Scenario A真实Item1–2验收：ITEM1_REAL_SEMANTIC_PASS / ITEM2_PROGRAM_FAIL / ITEM2_REAL_SEMANTIC_FAIL / STOP
 
 - [本轮真实验收](../planning-v2/PLANNING_V2_SCENARIO_A_REAL_SEMANTIC.md)基于1fdd5d4e845b22e74e4168399e9ca14ec070bd3d。Owner单独批准2新deepseek-flash、2官方价格余额GET并接受无数学现金硬上限残余风险；冻结原A未改。官方实时peak输入2/输出8 CNY每百万，余额1.96；仅峰值无缓存折扣估算，不冒充实际扣款或现金门禁。

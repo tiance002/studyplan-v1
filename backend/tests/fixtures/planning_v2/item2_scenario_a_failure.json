@@ -1,0 +1,312 @@
+{
+  "kind": "REAL_RETAINED_PAYLOAD_COPY_FOR_OFFLINE_VALIDATION_NOT_NEW_MODEL_RESULT",
+  "source_head": "b7b7aff07386648b61bea97a5df1591f15bfdd95",
+  "ledger_numbers": [
+    184,
+    185
+  ],
+  "item1_response_sha256": "5df5001e08e9bdc6d57ebdbc3876b264e95780d67049e5351029a7afd7a69a76",
+  "item2_response_sha256": "94fdf2be78bb721b23345b1507ed0c0373b0370d30dffe50ce56070e52b59268",
+  "goal": {
+    "target": "我已经会 Python，想系统学习 Agent 的结构化输出与受限工具调用，并把这些能力加入我现有的待办事项 CLI。",
+    "scope": [
+      "结构化输出",
+      "受限工具调用",
+      "系统性 Agent 应用学习"
+    ],
+    "desired_depth": "applied",
+    "starting_point": "已经会 Python。",
+    "outcome_purpose": "learn",
+    "constraints": [
+      "保留现有 CLI 和 JSON 任务文件作为持续实践载体",
+      "不重新创建演示项目",
+      "工具仅操作用户明确允许的本地任务范围"
+    ],
+    "project_context": "我已有一个 Python 本地待办事项管理 CLI，使用 JSON 文件保存任务，希望在现有程序上逐步增加 Agent 能力。"
+  },
+  "profile_response": {
+    "schema_version": 1,
+    "target_summary": "在已会 Python 的基础上，系统学习 Agent 的结构化输出与受限工具调用，并将这些能力加入现有待办事项 CLI。",
+    "required_requirements": [
+      {
+        "text": "我已有一个 Python 本地待办事项管理 CLI，使用 JSON 文件保存任务，希望在现有程序上逐步增加 Agent 能力。",
+        "origin": "explicit",
+        "source_refs": [
+          "project_context"
+        ],
+        "rationale": ""
+      },
+      {
+        "text": "系统学习 Agent 的结构化输出",
+        "origin": "explicit",
+        "source_refs": [
+          "goal.target",
+          "goal.scope[0]",
+          "goal.scope[2]"
+        ],
+        "rationale": ""
+      },
+      {
+        "text": "系统学习 Agent 的受限工具调用",
+        "origin": "explicit",
+        "source_refs": [
+          "goal.target",
+          "goal.scope[1]",
+          "goal.scope[2]"
+        ],
+        "rationale": ""
+      },
+      {
+        "text": "把这些能力加入我现有的待办事项 CLI",
+        "origin": "explicit",
+        "source_refs": [
+          "goal.target",
+          "project_context"
+        ],
+        "rationale": ""
+      },
+      {
+        "text": "学习深度为应用级",
+        "origin": "explicit",
+        "source_refs": [
+          "goal.desired_depth"
+        ],
+        "rationale": ""
+      },
+      {
+        "text": "学习成果用途是学习",
+        "origin": "explicit",
+        "source_refs": [
+          "goal.outcome_purpose"
+        ],
+        "rationale": ""
+      }
+    ],
+    "hard_constraints": [
+      {
+        "text": "保留现有 CLI 和 JSON 任务文件作为持续实践载体",
+        "source_refs": [
+          "goal.constraints[0]"
+        ]
+      },
+      {
+        "text": "不重新创建演示项目",
+        "source_refs": [
+          "goal.constraints[1]"
+        ]
+      },
+      {
+        "text": "工具仅操作用户明确允许的本地任务范围",
+        "source_refs": [
+          "goal.constraints[2]"
+        ]
+      }
+    ],
+    "learner_claims": [
+      {
+        "text": "已经会 Python。",
+        "source_refs": [
+          "goal.starting_point"
+        ]
+      }
+    ],
+    "clarification_questions": [],
+    "status": "ready"
+  },
+  "failed_capability_response": {
+    "schema_version": 1,
+    "source_goal_profile_hash": "b0386820c14a6aa2b9aa9b1df1aeb1ddc6b5e8925df0a8ec6f70d66dd09f7348",
+    "policy_version": "v2",
+    "route_kind": "systematic_agent_route",
+    "status": "ready",
+    "capabilities": [
+      {
+        "capability_id": "python.core",
+        "disposition": "accepted_known",
+        "learning_requirement": "recommended",
+        "project_usage": "required",
+        "desired_depth": "foundation",
+        "requirement_refs": [],
+        "policy_refs": [
+          "capability-policy:v2#python.core"
+        ],
+        "learner_claim_refs": [
+          "claim_c8ac338322d76f51dbc023628f1229cf757c67f890f6bd73ee088970eeb04dd8"
+        ],
+        "prerequisite_refs": [],
+        "learning_target_refs": []
+      },
+      {
+        "capability_id": "json.cli",
+        "disposition": "needs_learning",
+        "learning_requirement": "recommended",
+        "project_usage": "required",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_87dccf132ded659d3d39e74922a217e974b04e6a3c1e40724005e0d6269251fe"
+        ],
+        "policy_refs": [],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [
+          "python.core"
+        ],
+        "learning_target_refs": [
+          "req_87dccf132ded659d3d39e74922a217e974b04e6a3c1e40724005e0d6269251fe"
+        ]
+      },
+      {
+        "capability_id": "llm.api",
+        "disposition": "needs_learning",
+        "learning_requirement": "required",
+        "project_usage": "required",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_87dccf132ded659d3d39e74922a217e974b04e6a3c1e40724005e0d6269251fe",
+          "req_1a84f4f5e7b28835281d1d3c4798bd224754621434f7fd4e55284e96058a49f5",
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387"
+        ],
+        "policy_refs": [],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [],
+        "learning_target_refs": [
+          "req_1a84f4f5e7b28835281d1d3c4798bd224754621434f7fd4e55284e96058a49f5",
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387"
+        ]
+      },
+      {
+        "capability_id": "structured.output",
+        "disposition": "needs_learning",
+        "learning_requirement": "required",
+        "project_usage": "required",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_1a84f4f5e7b28835281d1d3c4798bd224754621434f7fd4e55284e96058a49f5",
+          "req_31f0e2d9e8cedf68a82afaa4d2a24a69caca334d808b1d3e2428501284b89121"
+        ],
+        "policy_refs": [],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [
+          "llm.api"
+        ],
+        "learning_target_refs": [
+          "req_1a84f4f5e7b28835281d1d3c4798bd224754621434f7fd4e55284e96058a49f5"
+        ]
+      },
+      {
+        "capability_id": "tool.calling",
+        "disposition": "needs_learning",
+        "learning_requirement": "required",
+        "project_usage": "required",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387",
+          "req_31f0e2d9e8cedf68a82afaa4d2a24a69caca334d808b1d3e2428501284b89121"
+        ],
+        "policy_refs": [],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [
+          "llm.api"
+        ],
+        "learning_target_refs": [
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387"
+        ]
+      },
+      {
+        "capability_id": "agent.loop",
+        "disposition": "needs_learning",
+        "learning_requirement": "required",
+        "project_usage": "required",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_87dccf132ded659d3d39e74922a217e974b04e6a3c1e40724005e0d6269251fe",
+          "req_1a84f4f5e7b28835281d1d3c4798bd224754621434f7fd4e55284e96058a49f5",
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387"
+        ],
+        "policy_refs": [],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [
+          "tool.calling"
+        ],
+        "learning_target_refs": [
+          "req_87dccf132ded659d3d39e74922a217e974b04e6a3c1e40724005e0d6269251fe",
+          "req_1a84f4f5e7b28835281d1d3c4798bd224754621434f7fd4e55284e96058a49f5",
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387"
+        ]
+      },
+      {
+        "capability_id": "error.permission",
+        "disposition": "needs_learning",
+        "learning_requirement": "required",
+        "project_usage": "required",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387"
+        ],
+        "policy_refs": [],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [],
+        "learning_target_refs": [
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387"
+        ]
+      },
+      {
+        "capability_id": "eval.lite",
+        "disposition": "needs_learning",
+        "learning_requirement": "recommended",
+        "project_usage": "required",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_31f0e2d9e8cedf68a82afaa4d2a24a69caca334d808b1d3e2428501284b89121"
+        ],
+        "policy_refs": [],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [],
+        "learning_target_refs": [
+          "req_31f0e2d9e8cedf68a82afaa4d2a24a69caca334d808b1d3e2428501284b89121"
+        ]
+      },
+      {
+        "capability_id": "mcp",
+        "disposition": "needs_learning",
+        "learning_requirement": "required",
+        "project_usage": "optional",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_ef9a96e06fdb82a3b722992b257e488669318f9820ae438c433808b60b87491a"
+        ],
+        "policy_refs": [
+          "capability-policy:v2#mcp"
+        ],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [],
+        "learning_target_refs": [
+          "req_ef9a96e06fdb82a3b722992b257e488669318f9820ae438c433808b60b87491a"
+        ]
+      }
+    ],
+    "claim_bindings": [
+      {
+        "claim_ref": "claim_c8ac338322d76f51dbc023628f1229cf757c67f890f6bd73ee088970eeb04dd8",
+        "capability_id": "python.core"
+      }
+    ],
+    "constraint_effects": [
+      {
+        "constraint_ref": "constraint_353f2063b30972f52a4d2ae767957d422387029277e2371234da0eb4d2afd295",
+        "capability_id": "json.cli",
+        "exclusion": "project"
+      },
+      {
+        "constraint_ref": "constraint_2dfcc040dcc3799e4ebe8c206e42373a287a2049502c461982d55710cc691824",
+        "capability_id": null,
+        "exclusion": "not_applicable"
+      },
+      {
+        "constraint_ref": "constraint_b4cdb6339f3ac80f43f8bad2537ce4e3d3a984668ec7cd5ffb56699e09b6cf48",
+        "capability_id": "tool.calling",
+        "exclusion": "project"
+      }
+    ],
+    "clarification_questions": []
+  }
+}
