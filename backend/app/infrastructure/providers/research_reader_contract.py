@@ -3,6 +3,7 @@ from app.domain.planning.research_reader import (
     READER_OUTPUT_CAP,
     READER_PURPOSE,
     READER_SCHEMA,
+    READER_SCHEMA_V2,
     validate_reader_input,
     validate_reader_output,
 )
@@ -24,6 +25,15 @@ READER_SYSTEM = (
     "只输出field_shape规定的单个JSON，每个must_teach ID恰好一次，无额外字段。"
     "limitations最多3项每项160字符，rationale最多240字符，仅简短说明，不复制整段正文、提示或命令。"
 )
+READER_SHAPE_V2 = READER_SHAPE | {"quality_evidence": {
+    dimension: {"category": "adequate/strong/insufficient/unknown", "rationale": "最多160字符的教学质量依据",
+                "evidence_refs": [{"chunk_id": "输入chunk ID", "content_hash": "输入hash"}]}
+    for dimension in ("continuity", "beginner_fit", "examples", "version_fit")}}
+READER_SYSTEM_V2 = READER_SYSTEM + (
+    "quality_evidence分别为连续性、初学者适配、示例、版本适配保留adequate/strong/insufficient/unknown及简短依据和真实chunk引用。"
+    "adequate表示满足基本教学条件；strong须正文有更充分、具体的教学支持；证据不足如实用insufficient或unknown，unknown可无引用。"
+    "无数字分数，不分配Primary或声称全局最佳。"
+    "本次最多六个已批准且相关的目标，仅评审输入范围，不推断未审目标；质量意见不替代逐目标支持判断。")
 
 __all__ = ["READER_OUTPUT_CAP", "READER_PURPOSE", "READER_SCHEMA", "READER_SHAPE", "READER_SYSTEM",
-           "validate_reader_input", "validate_reader_output"]
+           "READER_SCHEMA_V2", "READER_SHAPE_V2", "READER_SYSTEM_V2", "validate_reader_input", "validate_reader_output"]

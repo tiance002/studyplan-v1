@@ -251,7 +251,10 @@ class DurableBody:
                 step="teaching-body",
                 purpose="research.body",
                 schema="V2TransientBodyV1",
-                payload={"url": candidate.url, "discovery": candidate.discovery, "options": kwargs},
+                payload={"url": candidate.url, "discovery": candidate.discovery, "options": kwargs,
+                         **({"review_scope": self.ledger.current_review_scope,
+                             "review_identity": self.ledger.current_review_candidate_hash}
+                            if self.ledger.manifest.get("product_semantics") == "planning-v2-product-v2" else {})},
                 reserved={"total_requests": 2, "body_bytes": 65536},
                 invoke=invoke,
                 encode=encode,
@@ -286,8 +289,15 @@ class DurableResourceResearcher(ResourceResearcher):
         super().__init__(**kwargs)
 
     def _inspect(self, candidate, requirement, remaining, plan, session, checked_at):
+        # Scope is frozen in the body identity too. A new approved scope may
+        # read anew; a previous body-only success can never be blindly replayed.
+        self.ledger.current_review_scope = [asdict(o) for o in remaining]
+        self.ledger.current_review_candidate_hash = content_hash({"discovery": candidate.discovery,
+            "desired_depth": requirement.desired_depth})
         self.ledger.admit_candidate(candidate.url)
-        recovered = self.ledger.inspected(candidate.url, remaining)
+        recovered = self.ledger.inspected(candidate.url, remaining,
+            **({"candidate_identity": self.ledger.current_review_candidate_hash}
+               if session.rules_version == "research_comparison_v2" else {}))
         if recovered is not None:
             # The successfully validated Reader receipt already binds exact
             # source/chunk/outcome metadata; no synthetic body is constructed.
@@ -468,6 +478,8 @@ class V2PlanningRuntime:
         gaps = extract(plan, coverage)
         save("coverage_gaps", coverage=coverage.to_payload(), gaps_hash=gaps.result_hash)
         budget = ResearchBudget(**manifest["budget"])
+        product_v2 = manifest.get("product_semantics") == "planning-v2-product-v2"
+        rules_version = "research_comparison_v2" if product_v2 else "legacy"
         expected = research_input_hash(
             gaps,
             plan,
@@ -477,13 +489,15 @@ class V2PlanningRuntime:
             project_id=self.calls.project_id,
             checked_at=manifest["checked_at"],
             actor_id=self.calls.scope.actor_id,
+            rules_version=rules_version,
         )
         if state.get("research_snapshot"):
             session = ResearchSession.restore(_decode(ResearchSnapshot, state["research_snapshot"]))
-            if session.input_hash != expected or session.run_id != self.calls.run_id:
+            if (session.input_hash != expected or session.run_id != self.calls.run_id
+                    or session.rules_version != rules_version):
                 raise V2RecoveryBlocked("Research checkpoint input binding mismatch")
         else:
-            session = ResearchSession(self.calls.run_id, expected, budget)
+            session = ResearchSession(self.calls.run_id, expected, budget, rules_version=rules_version)
             session.usage.update(self.calls.usage(related_only=True))
             with self.calls.tx() as conn:
                 rows = conn.execute(
@@ -550,7 +564,7 @@ class V2PlanningRuntime:
             )
         # Count local candidate admission too; the per-request durable ledger
         # remains the authority for all external dispatch metrics.
-        save("resource_research", research_snapshot=wire(asdict(session.snapshot())))
+        save("resource_research", research_snapshot=wire(session.snapshot().to_payload()))
         context = prepare_curriculum(
             profile,
             plan,
@@ -561,6 +575,7 @@ class V2PlanningRuntime:
             access_proofs=self.facts.access_proofs,
             project_cases=self.facts.project_cases,
             domain_approvals=approvals,
+            semantics_version=2 if product_v2 else 1,
         )
         if state.get("curriculum"):
             doc = state["curriculum"]

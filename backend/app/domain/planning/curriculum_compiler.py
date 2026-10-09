@@ -26,6 +26,7 @@ from app.domain.planning.curriculum import (
     ProjectCase,
     _sort_output_refs,
     curriculum_constraint_assessments,
+    curriculum_semantics,
     prepare_curriculum,
     record_case_findings,
     validate_curriculum_output,
@@ -36,6 +37,8 @@ from app.domain.planning.resource_research import ResearchRequirement, ResourceR
 
 COMPILER_VERSION = "curriculum-compiler-v1"
 COMPILED_CONTRACT_VERSION = "CompiledCurriculumV1"
+COMPILER_VERSION_V2 = "curriculum-compiler-v2"
+COMPILED_CONTRACT_VERSION_V2 = "CompiledCurriculumV2"
 _SERVER_FIELDS = {"compile_sources", "compile_materials", "compile_cases", "compile_context"}
 
 
@@ -162,6 +165,8 @@ def _validate_authorities(context, profile, plan, source_facts):
             "prerequisites": list(capability.prerequisite_refs), "requirement_refs": list(capability.requirement_refs),
             "unavailable_outcomes": sorted(o.outcome_id for o in capability.learning_outcomes
                 if o.outcome_id not in available or o.outcome_id in unresolved)}
+        if curriculum_semantics(payload) == 2:
+            expected["learning_target_refs"] = list(capability.learning_target_refs)
         if canonical_json(entry) != canonical_json(expected):
             _reject("context_capability_binding")
     researched = set()
@@ -183,7 +188,8 @@ def _validate_authorities(context, profile, plan, source_facts):
     index = source_facts.reviewed_index
     rebuilt_context = prepare_curriculum(profile, plan, CoverageEvaluator().evaluate(plan, index), context.research, index,
         catalog_sources=source_facts.catalog_sources, access_proofs=source_facts.access_proofs,
-        project_cases=source_facts.project_cases, domain_approvals=context._domain_approvals)
+        project_cases=source_facts.project_cases, domain_approvals=context._domain_approvals,
+        semantics_version=curriculum_semantics(payload))
     if canonical_json(rebuilt_context.to_payload()) != canonical_json(payload):
         _reject("source_context_projection_binding")
     return payload
@@ -314,7 +320,10 @@ def _compile_validated(doc, *, curriculum, payload, profile, capability_plan, co
         "tasks": [{"curriculum_stable_key": t["stable_key"]} for t in tasks],
         "materials": [{key: m[key] for key in ("material_id", "source_id", "source_version", "section_refs", "content_hash")}
             for m in doc["compile_materials"]]}
-    compiled = {"compiler_version": COMPILER_VERSION, "contract_version": COMPILED_CONTRACT_VERSION,
+    version = curriculum_semantics(payload)
+    compiler_version = COMPILER_VERSION_V2 if version == 2 else COMPILER_VERSION
+    contract_version = COMPILED_CONTRACT_VERSION_V2 if version == 2 else COMPILED_CONTRACT_VERSION
+    compiled = {"compiler_version": compiler_version, "contract_version": contract_version,
         "stages": stages, "nodes": nodes, "units": units, "relations": relations, "guidance": guidance,
         "resource_assignments": assignments, "practice": {"carrier": doc["carrier"], "tasks": tasks,
             "final_artifact": doc["carrier"]["final_artifact"]}, "project_study": projects,
@@ -323,7 +332,10 @@ def _compile_validated(doc, *, curriculum, payload, profile, capability_plan, co
         "unresolved": doc["unresolved"], "source_limitations": doc["source_limitations"],
         "source_snapshots": {"curriculum": curriculum.to_payload(), "curriculum_context": payload,
             "goal_requirement_profile": profile.to_payload(), "capability_plan": capability_plan.to_payload()}}
-    manifest = {"compiler_version": COMPILER_VERSION, "contract_version": COMPILED_CONTRACT_VERSION,
+    if version == 2:
+        compiled["constraints"]["permission_obligations"] = doc["permission_obligations"]
+        compiled["semantics_version"] = 2
+    manifest = {"compiler_version": compiler_version, "contract_version": contract_version,
         "input_curriculum_plan_hash": curriculum.plan_hash, "upstream_sources": doc["compile_sources"]
             | {"curriculum_input_hash": context.input_hash, "policy_version": capability_plan.policy_version,
                 "policy_hash": content_hash(CAPABILITY_POLICY.to_payload())},

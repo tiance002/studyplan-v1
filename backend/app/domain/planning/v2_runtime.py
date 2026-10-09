@@ -14,12 +14,23 @@ from app.domain.planning.research_reader import READER_PURPOSE, READER_SCHEMA
 from app.domain.planning.resource_research import ResearchBudget
 
 V2_EXECUTION_VERSION = "planning-v2-execution-v1"
+PRODUCT_SEMANTICS_V2 = "planning-v2-product-v2"
 PURPOSE_SCHEMAS = {
     GOAL_REQUIREMENT_PURPOSE: GOAL_REQUIREMENT_SCHEMA,
     CAPABILITY_PURPOSE: CAPABILITY_SCHEMA,
     READER_PURPOSE: READER_SCHEMA,
     CURRICULUM_PURPOSE: CURRICULUM_SCHEMA,
 }
+
+
+def purpose_schema(manifest, purpose):
+    """Select only the schema frozen by this run, never the current default."""
+    if manifest.get("product_semantics") == PRODUCT_SEMANTICS_V2:
+        if purpose == READER_PURPOSE:
+            return "ResearchReaderV2"
+        if purpose == CURRICULUM_PURPOSE:
+            return "CurriculumPlanV2"
+    return PURPOSE_SCHEMAS.get(purpose)
 
 
 class V2RecoveryBlocked(RuntimeError):
@@ -50,6 +61,7 @@ def manifest_intact(manifest):
         return (
             type(manifest) is dict
             and manifest["protocol"] == V2_EXECUTION_VERSION
+            and ("product_semantics" not in manifest or manifest["product_semantics"] == PRODUCT_SEMANTICS_V2)
             and manifest["manifest_hash"]
             == content_hash({k: v for k, v in manifest.items() if k != "manifest_hash"})
             and type(manifest["model_ref"]) is str
@@ -76,6 +88,7 @@ def build_v2_manifest(
     expected_version=0,
     output_caps=None,
     domain_sources=(),
+    product_semantics=None,
 ):
     goal = GoalSpec(goal) if isinstance(goal, str) else goal
     if type(goal) is not GoalSpec or type(budget) is not ResearchBudget:
@@ -91,6 +104,8 @@ def build_v2_manifest(
         "domain_registry_hash": content_hash([wire(asdict(s)) for s in domain_sources]),
         "output_caps": output_caps or {p: 1024 if p == READER_PURPOSE else 8192 for p in PURPOSE_SCHEMAS},
     }
+    if product_semantics is not None:
+        d["product_semantics"] = product_semantics
     d["manifest_hash"] = content_hash(d)
     if not manifest_intact(d):
         raise ValidationAppError("Invalid V2 frozen submission")

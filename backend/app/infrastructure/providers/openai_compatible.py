@@ -333,7 +333,8 @@ class OpenAICompatibleLLM:
                         or state.get('step') not in ('diagnose','question_round_2','resolve','reexpress','ready')
                         or payload.get('mode') not in ('summary','practice')):
                     return LLMFailure('assistant_teaching_contract_invalid','Incomplete frozen teaching contract')
-                try: validate_expected_kind(payload)
+                try:
+                    validate_expected_kind(payload)
                 except (ValidationAppError,KeyError,TypeError):
                     return LLMFailure('assistant_teaching_contract_invalid','Frozen response kind mismatch')
                 shape=teaching_shape(state,payload['mode'],response_kind=payload.get('expected_response_kind'))
@@ -373,9 +374,23 @@ class OpenAICompatibleLLM:
         if purpose == CAPABILITY_PURPOSE:
             system = CAPABILITY_SYSTEM
         if purpose == READER_PURPOSE:
-            system = READER_SYSTEM
+            if schema_name == "ResearchReaderV2":
+                from app.infrastructure.providers.research_reader_contract import (
+                    READER_SHAPE_V2,
+                    READER_SYSTEM_V2,
+                )
+                shape, system = READER_SHAPE_V2, READER_SYSTEM_V2
+            else:
+                system = READER_SYSTEM
         if purpose == CURRICULUM_PURPOSE:
-            system = CURRICULUM_SYSTEM
+            if schema_name == "CurriculumPlanV2":
+                from app.infrastructure.providers.curriculum_contract import (
+                    CURRICULUM_SHAPE_V2,
+                    CURRICULUM_SYSTEM_V2,
+                )
+                shape, system = CURRICULUM_SHAPE_V2, CURRICULUM_SYSTEM_V2
+            else:
+                system = CURRICULUM_SYSTEM
         message = {"purpose": purpose, "schema": schema_name, "field_shape": shape, "context": context}
         if "domain_pack" in payload:
             message["domain_pack"] = payload["domain_pack"]
@@ -495,7 +510,8 @@ class OpenAICompatibleLLM:
             # still rejected by the coaching validator, never repaired/retried.
             missing = [] if 'reply' in parsed else ['reply']
             consumed={'reply','status','proposal'}
-            if payload.get('teaching_contract')=='issue-ledger-v1':consumed|={'phase','issues','evaluation','teaching'}
+            if payload.get('teaching_contract') == 'issue-ledger-v1':
+                consumed |= {'phase', 'issues', 'evaluation', 'teaching'}
             diagnostics['ignored_fields'] = sorted(k for k in parsed if k not in consumed)
         # Batch schema completeness belongs to deterministic planning validation.
         # Preserve partial objects (including repair output) for bounded local repair.

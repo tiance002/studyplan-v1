@@ -20,11 +20,15 @@ from app.domain.planning.curriculum import (
     CurriculumContext,
     CurriculumPlan,
     ProjectCase,
+    blocking_unresolved_outcomes,
+    curriculum_semantics,
     validate_curriculum_output,
 )
 from app.domain.planning.curriculum_compiler import (
     COMPILED_CONTRACT_VERSION,
+    COMPILED_CONTRACT_VERSION_V2,
     COMPILER_VERSION,
+    COMPILER_VERSION_V2,
     CompiledPlan,
     CurriculumSourceFacts,
     PublicKnowledgeBinding,
@@ -81,7 +85,7 @@ def compiler_packet(context, source_facts):
         return item
 
     return json.loads(
-        canonical_json(value({"research": asdict(context.research), "source_facts": asdict(source_facts)}))
+        canonical_json(value({"research": context.research._payload(), "source_facts": asdict(source_facts)}))
     )
 
 
@@ -122,7 +126,7 @@ class V2ExecutionSnapshot:
     def create(cls, compiled: CompiledPlan, *, bindings, packet, original_curriculum_hash=None):
         return cls.from_payload(
             {
-                "version": "V2ExecutionSnapshotV1",
+                "version": "V2ExecutionSnapshotV2" if compiled.to_payload().get("semantics_version") == 2 else "V2ExecutionSnapshotV1",
                 "compiled": compiled.to_payload(),
                 "manifest": compiled.manifest.to_payload(),
                 "bindings": bindings,
@@ -160,6 +164,7 @@ class V2ExecutionSnapshot:
                 reject("curriculum_digest")
             args = compiler_arguments(c, raw["compiler_packet"])
             context = source["curriculum_context"]
+            version = curriculum_semantics(context)
             sources = context["sources"]
             if (
                 context["input_hash"] != content_hash({k: v for k, v in context.items() if k != "input_hash"})
@@ -201,9 +206,9 @@ class V2ExecutionSnapshot:
             if rebuilt.to_payload() != c or rebuilt.manifest.to_payload() != m:
                 reject("compiler_projection_binding")
             if (
-                raw["version"] != "V2ExecutionSnapshotV1"
-                or c["contract_version"] != COMPILED_CONTRACT_VERSION
-                or c["compiler_version"] != COMPILER_VERSION
+                raw["version"] != ("V2ExecutionSnapshotV2" if version == 2 else "V2ExecutionSnapshotV1")
+                or c["contract_version"] != (COMPILED_CONTRACT_VERSION_V2 if version == 2 else COMPILED_CONTRACT_VERSION)
+                or c["compiler_version"] != (COMPILER_VERSION_V2 if version == 2 else COMPILER_VERSION)
                 or m["compiled_payload_digest"] != content_hash(c)
                 or m["contract_version"] != c["contract_version"]
                 or m["compiler_version"] != c["compiler_version"]
@@ -237,7 +242,7 @@ class V2ExecutionSnapshot:
             for key, fact in b["materials"].items():
                 if fact["material_digest"] != content_hash(materials[key]) or not fact["resource_id"]:
                     reject("material_binding")
-            if c["unresolved"] or any(
+            if blocking_unresolved_outcomes(frozen, context) or any(
                 m["validation"][k] != "PASS" for k in ("completeness", "source_binding", "upstream_authority")
             ):
                 reject("incomplete")

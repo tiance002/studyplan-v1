@@ -9,10 +9,10 @@ from app.domain.planning.constraint_adaptation import composition_dispatch_allow
 from app.domain.planning.curriculum import (
     CURRICULUM_OUTPUT_CAP,
     CURRICULUM_PURPOSE,
-    CURRICULUM_SCHEMA,
     CaseFinding,
     CurriculumContext,
     ProjectCase,
+    curriculum_schema,
     record_case_findings,
     valid_curriculum_input,
     validate_curriculum_output,
@@ -54,7 +54,8 @@ class CurriculumComposer:
                 or type(session.budget) is not ResearchBudget):
             _reject("context_session")
         payload = context.to_payload()
-        if not valid_curriculum_input(payload, CURRICULUM_SCHEMA, domain_approvals=context._domain_approvals,
+        schema_name = curriculum_schema(payload)
+        if not valid_curriculum_input(payload, schema_name, domain_approvals=context._domain_approvals,
                                       allow_fixture_domains=context._allow_fixture_domains):
             _reject("context")
         if not composition_dispatch_allowed(payload["constraints"]):
@@ -92,7 +93,7 @@ class CurriculumComposer:
             return _failure("curriculum_budget_exhausted")
         self._composed.add(identity)
         try:
-            response = self.llm.generate_structured(purpose=CURRICULUM_PURPOSE, schema_name=CURRICULUM_SCHEMA,
+            response = self.llm.generate_structured(purpose=CURRICULUM_PURPOSE, schema_name=schema_name,
                 payload=payload, run_id=session.run_id, attempt_id=attempt_id)
         except LLMNotDispatchedError:
             session.settle(reservation, total_requests=0, output_tokens=0, cost_micros=0)

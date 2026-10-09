@@ -19,14 +19,15 @@ from app.domain.planning.research_reader import READER_PURPOSE, validate_reader_
 from app.domain.planning.resource_research import (
     METRICS,
     ResearchEvidenceRef,
+    ResearchQualityEvidence,
     ResearchResource,
 )
 from app.domain.planning.v2_runtime import (
-    PURPOSE_SCHEMAS,
     V2_EXECUTION_VERSION,
     V2BudgetExceeded,
     V2RecoveryBlocked,
     manifest_intact,
+    purpose_schema,
     wire,
 )
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -436,7 +437,7 @@ class PgV2Calls:
             return LLMFailure("v2_budget_exceeded", "V2 frozen budget rejected continuation")
 
     def _generate_structured(self, *, purpose, payload, schema_name, run_id, attempt_id):
-        if run_id != self.run_id or PURPOSE_SCHEMAS.get(purpose) != schema_name:
+        if run_id != self.run_id or purpose_schema(self.manifest, purpose) != schema_name:
             raise ValidationAppError("V2 purpose/schema/run mismatch")
         options = self.request_options(purpose)
         cap = options.get("max_tokens")
@@ -570,6 +571,9 @@ class PgV2Calls:
                 "version_fit": "compatible",
             }.items()
         )
+        if "rules_version" in payload:
+            acceptable = acceptable and all(q["category"] in {"adequate", "strong"}
+                for q in verdict["quality_evidence"].values())
         chunks = {c["chunk_id"]: c for c in body.chunks}
         refs = tuple(
             ResearchEvidenceRef(
@@ -580,6 +584,10 @@ class PgV2Calls:
             for r in o["evidence_refs"]
         )
         limits = tuple(sorted({v for o in verdict["outcomes"] for v in o["limitations"]}))[:12]
+        quality = tuple(ResearchQualityEvidence(dimension, opinion["category"], opinion["rationale"],
+            tuple(ResearchEvidenceRef(payload["must_teach"][0]["outcome_id"], ref["chunk_id"], ref["content_hash"],
+                chunks[ref["chunk_id"]]["location"], "body") for ref in opinion["evidence_refs"]))
+            for dimension, opinion in verdict.get("quality_evidence", {}).items() if acceptable)
         resource = ResearchResource(
             body.resource_id,
             body.url,
@@ -590,7 +598,11 @@ class PgV2Calls:
             refs,
             tuple(sorted(fit.items())),
             limits,
+            quality,
         )
+        resource_payload = asdict(resource)
+        if "rules_version" not in payload:
+            resource_payload.pop("quality_evidence")
         return {
             "candidate_url": self.current_candidate_url,
             "must_teach": payload["must_teach"],
@@ -598,7 +610,9 @@ class PgV2Calls:
                 {k: c[k] for k in ("chunk_id", "resource_id", "version", "content_hash", "location")}
                 for c in body.chunks
             ],
-            "resource": wire(asdict(resource)) if acceptable else None,
+            "resource": wire(resource_payload) if acceptable else None,
+            **({"rules_version": payload["rules_version"],
+                "candidate_identity": self.current_review_candidate_hash} if "rules_version" in payload else {}),
             "body_usage": {"total_requests": body.requests, "body_bytes": body.bytes_read},
             "reader_usage": {
                 "total_requests": 1,
@@ -611,7 +625,7 @@ class PgV2Calls:
             else ["outcomes_unresolved" if acceptable else "teaching_fit_unresolved"],
         }
 
-    def inspected(self, candidate_url, remaining):
+    def inspected(self, candidate_url, remaining, *, candidate_identity=None):
         wanted = wire([asdict(o) for o in remaining])
         with self.tx() as conn:
             rows = conn.execute(
@@ -621,7 +635,12 @@ class PgV2Calls:
             for row in rows:
                 d = self._retained(row, row["request_fingerprint"])
                 item = d.get("inspection")
-                if item and item["candidate_url"] == candidate_url and item["must_teach"] == wanted:
+                if (item and item["candidate_url"] == candidate_url and item["must_teach"] == wanted
+                        and row["schema_name"] == purpose_schema(self.manifest, READER_PURPOSE)
+                        and (self.manifest.get("product_semantics") != "planning-v2-product-v2" or
+                             candidate_identity is not None and item.get("candidate_identity") == candidate_identity)
+                        and item.get("rules_version", "legacy") == (
+                            "research_comparison_v2" if self.manifest.get("product_semantics") == "planning-v2-product-v2" else "legacy")):
                     from app.domain.planning.v2_execution import _decode
 
                     return (

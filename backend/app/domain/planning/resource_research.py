@@ -10,6 +10,29 @@ from app.domain.planning.capability_policy import LearningOutcome
 from app.domain.planning.goal_requirements import HardConstraint, LearnerClaim
 
 METRICS = ("searches", "candidates", "body_bytes", "reader_requests", "output_tokens", "total_requests", "cost_micros")
+RESEARCH_COMPARISON_V2 = "research_comparison_v2"
+
+
+def _rules(value):
+    if value not in {"legacy", RESEARCH_COMPARISON_V2}:
+        reject("research_rules_version")
+
+
+@dataclass(frozen=True, slots=True)
+class ResearchQualityEvidence:
+    dimension: str
+    category: str
+    rationale: str
+    evidence: tuple["ResearchEvidenceRef", ...]
+
+    def __post_init__(self):
+        if self.dimension not in {"continuity", "beginner_fit", "examples", "version_fit"} or self.category not in {"adequate", "strong"}:
+            reject("quality_evidence")
+        _text(self.rationale, 160)
+        refs = _tuple(self.evidence, ResearchEvidenceRef, 2)
+        if not refs or any(ref.hash_scope != "body" for ref in refs):
+            reject("quality_evidence")
+        object.__setattr__(self, "evidence", refs)
 
 
 def reject(field):
@@ -147,8 +170,15 @@ class ResearchResource:
     evidence: tuple[ResearchEvidenceRef, ...]
     teaching_fit: tuple[tuple[str, str], ...]
     limitations: tuple[str, ...]
+    quality_evidence: tuple[ResearchQualityEvidence, ...] = ()
 
     def __post_init__(self):
+        quality = _tuple(self.quality_evidence, ResearchQualityEvidence, 4)
+        if quality and {q.dimension for q in quality} != {"continuity", "beginner_fit", "examples", "version_fit"}:
+            reject("quality_evidence")
+        if any(replace(q) != q for q in quality):
+            reject("quality_evidence")
+        object.__setattr__(self, "quality_evidence", tuple(sorted(quality, key=lambda q: q.dimension)))
         for value in (self.resource_id, self.url, self.version, self.checked_at):
             _text(value, 4096)
         if self.free_access not in {"confirmed", "unknown", "paid"} or self.qualification not in {
@@ -175,8 +205,21 @@ class ResearchEntry:
     resources: tuple[ResearchResource, ...]
     unresolved_outcomes: tuple[LearningOutcome, ...]
     reason_codes: tuple[str, ...]
+    comparison_status: str = "legacy"
+    comparison_order: tuple[str, ...] = ()
+    comparison_reasons: tuple[str, ...] = ()
 
     def __post_init__(self):
+        if self.comparison_status not in {"legacy", "sufficient", "insufficient"}:
+            reject("research_comparison")
+        order = _tuple(self.comparison_order, str, 500)
+        if len(set(order)) != len(order) or set(order) - {r.resource_id for r in self.resources}:
+            reject("research_comparison")
+        object.__setattr__(self, "comparison_order", order)
+        reasons = _tuple(self.comparison_reasons, str, 20)
+        for reason in reasons:
+            _text(reason, 160)
+        object.__setattr__(self, "comparison_reasons", reasons)
         if type(self.requirement) is not ResearchRequirement or replace(self.requirement) != self.requirement:
             reject("research_requirement")
         resources = _tuple(self.resources, ResearchResource, 500)
@@ -213,8 +256,10 @@ class ResourceResearchResult:
     entries: tuple[ResearchEntry, ...]
     checked_at: str
     budget_usage: tuple[tuple[str, int], ...]
+    rules_version: str = "legacy"
 
     def __post_init__(self):
+        _rules(self.rules_version)
         for value in (self.source_gap_set_hash, self.source_capability_plan_hash,
                       self.source_coverage_result_hash, self.source_profile_hash):
             _hash(value)
@@ -232,10 +277,21 @@ class ResourceResearchResult:
 
     @property
     def result_hash(self):
-        return content_hash(asdict(self))
+        return content_hash(self._payload())
+
+    def _payload(self):
+        payload = asdict(self)
+        if self.rules_version == "legacy":
+            payload.pop("rules_version")
+            for entry in payload["entries"]:
+                for key in ("comparison_status", "comparison_order", "comparison_reasons"):
+                    entry.pop(key)
+                for resource in entry["resources"]:
+                    resource.pop("quality_evidence")
+        return payload
 
     def to_payload(self):
-        return json.loads(canonical_json(asdict(self) | {"result_hash": self.result_hash}))
+        return json.loads(canonical_json(self._payload() | {"result_hash": self.result_hash}))
 
 
 @dataclass(frozen=True, slots=True)
@@ -250,10 +306,27 @@ class ResearchSnapshot:
     config_hash: str
     inspected: tuple[tuple[str, tuple[ResearchResource, ...]], ...]
     completed: ResourceResearchResult | None
+    rules_version: str = "legacy"
+    inspected_scopes: tuple[tuple[str, tuple[str, ...]], ...] = ()
+
+    def to_payload(self):
+        payload = asdict(self)
+        if self.rules_version == "legacy":
+            payload.pop("rules_version")
+            payload.pop("inspected_scopes")
+            for _, resources in payload["inspected"]:
+                for resource in resources:
+                    resource.pop("quality_evidence")
+            if self.completed is not None:
+                payload["completed"] = self.completed._payload()
+        return json.loads(canonical_json(payload))
 
 
 class ResearchSession:
-    def __init__(self, run_id, input_hash, budget):
+    def __init__(self, run_id, input_hash, budget, *, rules_version="legacy"):
+        _rules(rules_version)
+        self.rules_version = rules_version
+        self.inspected_scopes = {}
         _text(run_id, 200)
         _hash(input_hash)
         if type(budget) is not ResearchBudget:
@@ -320,13 +393,23 @@ class ResearchSession:
         # and save-before-dispatch. This in-memory object is not crash safety.
         return ResearchSnapshot(self.run_id, self.input_hash, self.budget, tuple(sorted(self.usage.items())),
             self.blocked, len(self._pending), self.unknown_measurement, self.config_hash,
-            tuple(sorted(self.inspected.items())), self.completed)
+            tuple(sorted(self.inspected.items())), self.completed, self.rules_version,
+            tuple(sorted(self.inspected_scopes.items())))
 
     @classmethod
     def restore(cls, snapshot):
         if type(snapshot) is not ResearchSnapshot:
             reject("research_snapshot")
-        session = cls(snapshot.run_id, snapshot.input_hash, snapshot.budget)
+        session = cls(snapshot.run_id, snapshot.input_hash, snapshot.budget, rules_version=snapshot.rules_version)
+        scopes = _tuple(snapshot.inspected_scopes, tuple, 500)
+        for key, outcomes in scopes:
+            _text(key, 4096)
+            _tuple(outcomes, str, 100)
+            if len(outcomes) != len(set(outcomes)):
+                reject("snapshot_scopes")
+        if len(dict(scopes)) != len(scopes):
+            reject("snapshot_scopes")
+        session.inspected_scopes = dict(scopes)
         _amount(snapshot.pending_count)
         if type(snapshot.blocked) is not bool or type(snapshot.unknown_measurement) is not bool:
             reject("snapshot_state")
@@ -358,7 +441,11 @@ class ResearchSession:
         return session
 
 
-def research_input_hash(gap_set, plan, coverage, profile, budget, *, project_id, checked_at, actor_id):
-    return content_hash({"gap_set": gap_set.result_hash, "plan": plan.plan_hash, "coverage": coverage.result_hash,
+def research_input_hash(gap_set, plan, coverage, profile, budget, *, project_id, checked_at, actor_id, rules_version="legacy"):
+    _rules(rules_version)
+    payload = {"gap_set": gap_set.result_hash, "plan": plan.plan_hash, "coverage": coverage.result_hash,
         "profile": profile.profile_hash, "budget": asdict(budget), "project_id": project_id,
-        "actor_id": actor_id, "checked_at": checked_at})
+        "actor_id": actor_id, "checked_at": checked_at}
+    if rules_version != "legacy":
+        payload["rules_version"] = rules_version
+    return content_hash(payload)

@@ -46,3 +46,25 @@ CURRICULUM_SYSTEM = (
     "保持稳定语义ID、有意义的阶段/单元顺序和有限篇幅；不要输出评分、mastery、搜索词或资源数量目标。"
     "结构合法与教学语义正确分开，不声称用户已经掌握、已经阅读或实践通过。"
 )
+
+# Separate version: legacy wire requests retain their original instructions.
+CURRICULUM_SHAPE_V2 = CURRICULUM_SHAPE | {"schema_version": 2, "semantics_version": 2,
+    "permission_obligations": [{"constraint_ref": "original constraint_id", "source_refs": ["original source ref"],
+        "project_context_hash": "original project_context_hash", "task_ref": "actual task stable_key",
+        "outcome_refs": ["actual task outcome"], "acceptance_refs": ["task.acceptance.0"],
+        "authorization_before_execution": True, "default_deny": True, "allowed_scope": "user_authorized_local_tasks",
+        "input_validation": True, "cases": [{"kind": "allowed|unauthorized|out_of_scope|invalid_parameters|execution_failure|json_protection",
+        "acceptance_ref": "task.acceptance.0", "artifact": "specific inspectable case record"}],
+        "practice_artifact": "permission contract, validation code, six case records and original JSON integrity evidence"}]}
+CURRICULUM_SYSTEM_V2 = CURRICULUM_SYSTEM + (
+    "当前为semantics_version=2。local_tool_scope在课程确认时验证权限教学义务是否充分安排，"
+    "不验证用户尚未实现的运行代码，也不授予任何本地工具权限。该约束须绑定原constraint/source/project_context、"
+    "真实任务及验收，安排执行前用户明确授权、默认拒绝、允许范围、输入校验及越权拒绝。"
+    "六种case各对应同一任务不同的验收索引和产物，必须恰好包括allowed、unauthorized、out_of_scope、"
+    "invalid_parameters、execution_failure、json_protection。不能用重复安全承诺替代具体输入、期望行为与可检查产物。"
+    "未安排该义务保持incomplete；其他privacy/no_network/readonly/unknown约束保护不变。"
+    "仅recommended且未选入教学、不是required真实先修、也不违背用户明确选择的未解决目标，"
+    "保留unresolved与原因但可不阻断完整必学课程；不得伪造其教材资格、删除建议或改importance。"
+    "research_comparisons提供有限候选的真实审读范围、教学质量及比较不足；"
+    "最终教材角色仍由你决定，先outcome覆盖和教学质量，质量相当才中文优先，不声称全局最佳。"
+)

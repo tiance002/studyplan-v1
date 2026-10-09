@@ -136,6 +136,16 @@ def curriculum_constraint_assessments(document, payload):
         for assessment in assessments:
             if assessment["constraint_ref"] in free_ids:
                 assessment.update(status="pending", reason="case_free_access_evidence_pending", evidence_refs=())
+    if payload.get("semantics_version") == 2:
+        obligations = {item["constraint_ref"]: item for item in document["permission_obligations"]}
+        for assessment in assessments:
+            if assessment["scope"] == "practice_permission_scope":
+                arranged = assessment["constraint_ref"] in obligations
+                assessment.update(planning_status="arranged" if arranged else "pending", runtime_status="unverified")
+                if arranged:
+                    item = obligations[assessment["constraint_ref"]]
+                    assessment.update(status="planning_arranged", reason="bound_permission_teaching_obligation_arranged",
+                        evidence_refs=(item["task_ref"], *item["acceptance_refs"]))
     return assessments
 
 

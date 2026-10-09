@@ -398,3 +398,17 @@ End-to-End Product Acceptance
 最终文档核对结果：`git diff --check` **PASS**；路径/symbol 与当前 HOLD 清单核对 **PASS**；九项职责及 Producer/Consumer Matrix **PASS**；独立 architecture reverse review 修订后 **PASS**。没有 Item 1 前置 BLOCKER。生产代码差异0，产品 model calls=0、search calls=0、DB writes=0、migrations=0；无 push/merge/deploy。
 
 回滚只需经评审正常 revert 本次文档提交；不改写历史、不恢复旧规划产品语义、不回滚数据库。确切 final HEAD 在提交后的答复报告，避免自引用提交 hash。本轮到此 STOP，等待下一单项 Goal。
+
+## 13. 2026-10-10 授权的局部产品语义修订
+
+授权依据：`PLANNING_V2_CURRICULUM_RESEARCH_PRODUCT_FIX_V1`。本节在实现前记录最小差异；此前版本、已冻结 Run、Receipt、Revision 和原始验收证据不改写。
+
+新 owned 提交显式冻结 `product_semantics = planning-v2-product-v2`；无此标记的历史 manifest 仍按 v1 运行及重验。标记参与 manifest hash、研究输入身份和课程输入身份，恢复不得升级或降级版本。仍使用现有 JSONB 快照及事务、fence、预算保护，不新增 migration。
+
+1. **课程权限义务与运行事实分离。** `CurriculumPlanV2` 对 `local_tool_scope` 提供结构化教学义务，绑定原 constraint ID/source refs、原项目上下文及实际 Task/outcome/acceptance。安排未来执行前用户授权、默认拒绝、允许范围、输入校验、越权拒绝，以及允许、未经授权、越界、非法参数、执行失败、原 JSON 数据保护的验收与可检查产物。服务器验证引用和结构；内容真实承担教学义务仍需独立语义评审。规划义务通过只表示教学已安排；运行权限始终未验证，不授予任何工具执行权限。其他约束的拒绝保护及 existing_carrier 原文要求不变。v1 不追授此义务状态。
+2. **完整必学课程与未完成建议分离。** v2 允许仅 recommended 的未解决 outcomes 在未纳入实际教学、未作为 required 的真实先修、未违背用户明确选择时保留为可见建议而不阻断 complete。required 缺教材/安排或真实先修缺失仍 incomplete；已选内容必须有真实支撑。原 importance、未解决原因及来源完整保留至 Compiler、Draft、Revision 和读回。v1 的 complete 判断不变。
+3. **有界研究质量与范围证据。** `research_comparison_v2` 的派发先 required 后 recommended，保持原 Gap 身份与结果 canonical 顺序。获准候选在共享预算内进行有限比较，记录 outcome 覆盖、连贯教学、起点适配、示例/实践、版本及审读限制的来源证据；仅质量基本相当时中文优先。研究不决定 PRIMARY，也不声称全局最佳；不足以比较须明确记录。`ResearchReaderV2` 保持 1024 输出上限，联合审读最多六个已批准相关 outcomes；新的范围需真实证据且计入原预算。缓存绑定 URL、来源版本和已审范围，同 URL 不扩张资格。已有成功范围复用，新增范围不冒用旧响应，正文仍仅瞬态保存。
+
+联合审读限于相关且相同 desired_depth 的能力；不同深度必须另行审读，缓存及 durable 派发身份绑定深度、来源和范围。Reader 可返回 inadequate 的事实：`insufficient` 或 `unknown` 质量意见不产生合格教材，保留缺口及比较不足，不能升级为覆盖。
+
+新 Research/Reader、Curriculum/Compiler/执行快照具有显式版本绑定。旧 hash 与序列化不能因新增默认字段而改变；旧版本只读取旧字段，未知版本及派发/恢复版本不匹配拒绝。新 Curriculum 可消费冻结的 legacy Research 事实，但比较状态仍为 legacy，不追授新质量证据、不重解释其原 result_hash；新 owned Runtime 本身只生产新 Research 版本。已有结构如无法无损承载上述事实，停止该部分，报告最小阻塞，不能静默迁移历史数据。此修订不授权任何真实外部调用、正式生成或正式数据库写入。

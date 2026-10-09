@@ -159,7 +159,7 @@ class OwnedV2PlanningRuntimeFactory:
     """
     def __init__(self, dsn, checkpoint_dsn, *, source_facts, budget, binding_resolver,
                  provider_resolver, github=None, web=None, body_reader=None,
-                 project_index=None, domain_sources=()):
+                 project_index=None, domain_sources=(), product_semantics="planning-v2-product-v2"):
         from urllib.parse import urlsplit
 
         from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -174,6 +174,10 @@ class OwnedV2PlanningRuntimeFactory:
         self.binding_resolver,self.provider_resolver=binding_resolver,provider_resolver
         self.github,self.web,self.body_reader,self.project_index=github,web,body_reader,project_index
         self.domain_sources=tuple(domain_sources)
+        # Server-owned new submissions opt in; restored manifests retain their version.
+        if product_semantics not in {None, "planning-v2-product-v2"}:
+            raise ValidationAppError("Unknown owned V2 product semantics")
+        self.product_semantics=product_semantics
         self.owned_only=True
 
     def build_submission(self,scope,project_id,goal_spec,expected_version):
@@ -183,7 +187,8 @@ class OwnedV2PlanningRuntimeFactory:
         scope.require_project(project_id)
         binding=self.binding_resolver(scope,project_id)
         return build_v2_manifest(goal_spec,model_ref=binding.model_ref,source_facts=self.source_facts,
-            budget=self.budget,checked_at=datetime.now(timezone.utc).isoformat(),expected_version=expected_version,domain_sources=self.domain_sources)
+            budget=self.budget,checked_at=datetime.now(timezone.utc).isoformat(),expected_version=expected_version,
+            domain_sources=self.domain_sources,product_semantics=self.product_semantics)
 
     def __call__(self,scope,project_id,run_id,*,manifest,write_fence,thread_id,guard):
         from app.infrastructure.checkpointer.v2_planning_executor import PgV2Checkpoints

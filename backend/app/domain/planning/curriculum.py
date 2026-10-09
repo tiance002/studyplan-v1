@@ -26,6 +26,7 @@ from app.domain.resources.curation import PublicResourceSource
 
 CURRICULUM_PURPOSE = "planning.curriculum_composition"
 CURRICULUM_SCHEMA = "CurriculumPlanV1"
+CURRICULUM_SCHEMA_V2 = "CurriculumPlanV2"
 CURRICULUM_OUTPUT_CAP = 8192
 _ROLES = {"common_core", "specialization", "project_study", "integration"}
 _MODES = {"whole_core", "slices"}
@@ -173,9 +174,12 @@ class CurriculumContext:
     def expected_session_hash(self, budget, *, actor_id, project_id):
         from dataclasses import asdict
         source = self.to_payload()["sources"]
-        return content_hash({"gap_set": source["gap_set_hash"], "plan": source["capability_plan_hash"],
+        payload = {"gap_set": source["gap_set_hash"], "plan": source["capability_plan_hash"],
             "coverage": source["coverage_hash"], "profile": source["profile_hash"], "budget": asdict(budget),
-            "actor_id": actor_id, "project_id": project_id, "checked_at": source["research_checked_at"]})
+            "actor_id": actor_id, "project_id": project_id, "checked_at": source["research_checked_at"]}
+        if self.research.rules_version != "legacy":
+            payload["rules_version"] = self.research.rules_version
+        return content_hash(payload)
 
 
 @dataclass(frozen=True, slots=True)
@@ -205,8 +209,10 @@ class CurriculumPlan:
 
 
 def prepare_curriculum(profile, plan, coverage, research, reviewed_index, *, catalog_sources=(), project_cases=(), access_proofs=(),
-                       domain_approvals=(), allow_fixture_domains=False):
+                       domain_approvals=(), allow_fixture_domains=False, semantics_version=1):
     try:
+        if type(semantics_version) is not int or semantics_version not in {1, 2}:
+            _reject("semantics_version")
         if type(profile) is not GoalRequirementProfile or profile.status != "ready" or profile.profile_hash != plan.source_goal_profile_hash:
             _reject("profile_binding")
         if not validate_capability_planning_input({"profile": profile.to_payload(), "policy": CAPABILITY_POLICY.to_payload(),
@@ -217,6 +223,8 @@ def prepare_curriculum(profile, plan, coverage, research, reviewed_index, *, cat
         gaps = extract(plan, coverage)
         if type(research) is not ResourceResearchResult or replace(research) != research:
             _reject("research")
+        if semantics_version == 1 and research.rules_version != "legacy":
+            _reject("research_version")
         if (research.source_gap_set_hash, research.source_capability_plan_hash, research.source_coverage_result_hash,
             research.source_profile_hash) != (gaps.result_hash, plan.plan_hash, coverage.result_hash, profile.profile_hash):
             _reject("research_binding")
@@ -261,9 +269,12 @@ def prepare_curriculum(profile, plan, coverage, research, reviewed_index, *, cat
             for resource in entry.resources:
                 _url(resource.url)
                 # Identity alone cannot lend one resource's access or review to another outcome.
-                key = ("research", canonical_json(asdict(resource)))
+                frozen_resource = asdict(resource)
+                if research.rules_version == "legacy":
+                    frozen_resource.pop("quality_evidence")
+                key = ("research", canonical_json(frozen_resource))
                 material = materials.setdefault(key, {"kind": "researched_resource", "source_id": resource.resource_id,
-                    "source_version": resource.version, "section_refs": [], "content_hash": content_hash(asdict(resource)),
+                    "source_version": resource.version, "section_refs": [], "content_hash": content_hash(frozen_resource),
                     "url": resource.url, "title": resource.resource_id, "outcome_refs": [], "qualification": resource.qualification,
                     "free_access": resource.free_access, "usable": resource.free_access == "confirmed"
                         and resource.qualification in {"public_reviewed", "research_checked"}, "evidence_refs": [],
@@ -288,6 +299,9 @@ def prepare_curriculum(profile, plan, coverage, research, reviewed_index, *, cat
             "unavailable_outcomes": sorted(o.outcome_id for o in c.learning_outcomes
                 if o.outcome_id not in available or o.outcome_id in upstream_unresolved)}
             for c in plan.learning_capabilities]
+        if semantics_version == 2:
+            for entry, capability in zip(capabilities, plan.learning_capabilities, strict=True):
+                entry["learning_target_refs"] = list(capability.learning_target_refs)
         cases = [_case(case) for case in project_cases]
         if len(cases) > 50 or len({case["case_id"] for case in cases}) != len(cases):
             _reject("project_cases")
@@ -304,6 +318,15 @@ def prepare_curriculum(profile, plan, coverage, research, reviewed_index, *, cat
         authority = reader_authority(plan, domain_approvals=domain_approvals, allow_fixture_domains=allow_fixture_domains)
         if authority is not None:
             payload["domain_authority"] = authority
+        if semantics_version == 2:
+            payload.update(schema_version=2, semantics_version=2)
+            payload["research_comparisons"] = [{"capability_id": entry.requirement.capability_id,
+                "status": entry.comparison_status, "resource_order": list(entry.comparison_order),
+                "reasons": list(entry.comparison_reasons), "resources": [{"resource_id": resource.resource_id,
+                    "source_version": resource.version, "outcome_refs": sorted({r.outcome_id for r in resource.evidence}),
+                    "teaching_fit": dict(resource.teaching_fit), "quality_evidence": [asdict(q) for q in resource.quality_evidence],
+                    "limitations": list(resource.limitations)} for resource in entry.resources]}
+                for entry in research.entries]
         payload = json.loads(canonical_json(payload))
         payload["input_hash"] = content_hash(payload)
         if len(canonical_json(payload).encode("utf-8")) > 131072:
@@ -313,9 +336,23 @@ def prepare_curriculum(profile, plan, coverage, research, reviewed_index, *, cat
         _reject("input")
 
 
+def curriculum_semantics(payload):
+    # A missing marker means historical v1; even an explicit marker=1 is not
+    # accepted because it would change the old authority's frozen shape/hash.
+    if "semantics_version" not in payload:
+        return 1
+    if type(payload["semantics_version"]) is not int or payload["semantics_version"] != 2:
+        _reject("semantics_version")
+    return 2
+
+
+def curriculum_schema(payload):
+    return CURRICULUM_SCHEMA_V2 if curriculum_semantics(payload) == 2 else CURRICULUM_SCHEMA
+
+
 def valid_curriculum_input(payload, schema_name, *, domain_approvals=(), allow_fixture_domains=False):
     try:
-        if schema_name != CURRICULUM_SCHEMA:
+        if schema_name != curriculum_schema(payload):
             return False
         _validate_input(payload, domain_approvals=domain_approvals, allow_fixture_domains=allow_fixture_domains)
         return True
@@ -324,9 +361,11 @@ def valid_curriculum_input(payload, schema_name, *, domain_approvals=(), allow_f
 
 
 def _validate_input(payload, *, domain_approvals=(), allow_fixture_domains=False):
+    version = curriculum_semantics(payload)
     _fields(payload, {"schema_version", "input_hash", "sources", "capabilities", "accepted_known", "materials",
-        "project_cases", "profile_context", "constraints"} | ({"domain_authority"} if "domain_authority" in payload else set()))
-    if type(payload["schema_version"]) is not int or payload["schema_version"] != 1:
+        "project_cases", "profile_context", "constraints"} | ({"domain_authority"} if "domain_authority" in payload else set())
+        | ({"semantics_version", "research_comparisons"} if version == 2 else set()))
+    if type(payload["schema_version"]) is not int or payload["schema_version"] != version:
         _reject("schema")
     _hash(payload["input_hash"])
     if len(canonical_json(payload).encode("utf-8")) > 131072 or content_hash(
@@ -350,7 +389,7 @@ def _validate_input(payload, *, domain_approvals=(), allow_fixture_domains=False
     capabilities, outcomes = {}, set()
     for cap in _array(payload["capabilities"], 50):
         _fields(cap, {"capability_id", "title", "importance", "desired_depth", "project_usage", "outcomes",
-            "prerequisites", "requirement_refs", "unavailable_outcomes"})
+            "prerequisites", "requirement_refs", "unavailable_outcomes"} | ({"learning_target_refs"} if version == 2 else set()))
         _key(cap["capability_id"])
         if cap["capability_id"] in known or cap["capability_id"] in capabilities:
             _reject("B_only")
@@ -370,6 +409,8 @@ def _validate_input(payload, *, domain_approvals=(), allow_fixture_domains=False
             outcomes.add(outcome["outcome_id"])
         _ids(cap["unavailable_outcomes"], refs)
         _ids(cap["requirement_refs"])
+        if version == 2:
+            _ids(cap["learning_target_refs"], cap["requirement_refs"])
         _ids(cap["prerequisites"])
         capabilities[cap["capability_id"]] = cap
     for cap in capabilities.values():
@@ -390,6 +431,8 @@ def _validate_input(payload, *, domain_approvals=(), allow_fixture_domains=False
             if any(cap[name] != upstream[other] for name, other in (("title", "title"), ("importance", "learning_requirement"),
                 ("desired_depth", "desired_depth"), ("project_usage", "project_usage"), ("outcomes", "learning_outcomes"),
                 ("prerequisites", "prerequisite_refs"), ("requirement_refs", "requirement_refs"))):
+                _reject("domain_capability_binding")
+            if version == 2 and cap["learning_target_refs"] != upstream["learning_target_refs"]:
                 _reject("domain_capability_binding")
             if any(public.get(o["outcome_id"]) != o["text"] for o in cap["outcomes"]):
                 _reject("domain_public_binding")
@@ -437,6 +480,8 @@ def _validate_input(payload, *, domain_approvals=(), allow_fixture_domains=False
                 _reject("access_proof")
         elif proof is not None:
             _reject("access_proof")
+    if version == 2:
+        _validate_research_comparisons(payload, capabilities)
     case_ids = set()
     for case in _array(payload["project_cases"], 50):
         parsed = ProjectCase(**(case | {"outcome_refs": tuple(case["outcome_refs"]),
@@ -475,6 +520,60 @@ def _validate_input(payload, *, domain_approvals=(), allow_fixture_domains=False
         constraints.add(constraint["constraint_id"])
 
 
+def _validate_research_comparisons(payload, capabilities):
+    """Validate retained comparison structure; this never proves teaching quality."""
+    materials = {(m["source_id"], m["source_version"]) for m in payload["materials"]}
+    seen = set()
+    for entry in _array(payload["research_comparisons"], 50):
+        _fields(entry, {"capability_id", "status", "resource_order", "reasons", "resources"})
+        key = entry["capability_id"]
+        if key not in capabilities or key in seen or entry["status"] not in {"legacy", "sufficient", "insufficient"}:
+            _reject("research_comparison_scope")
+        seen.add(key)
+        _strings(entry["reasons"], 20, text_limit=160)
+        identities = set()
+        allowed = {o["outcome_id"] for o in capabilities[key]["outcomes"]}
+        for resource in _array(entry["resources"], 100):
+            _fields(resource, {"resource_id", "source_version", "outcome_refs", "teaching_fit", "quality_evidence", "limitations"})
+            _text(resource["resource_id"], 200)
+            _text(resource["source_version"], 200)
+            if (resource["resource_id"], resource["source_version"]) not in materials:
+                _reject("research_comparison_source")
+            if resource["resource_id"] in identities:
+                _reject("research_comparison_duplicate")
+            identities.add(resource["resource_id"])
+            _ids(resource["outcome_refs"], allowed)
+            _strings(resource["limitations"], 12, text_limit=160)
+            if type(resource["teaching_fit"]) is not dict or len(resource["teaching_fit"]) > 5:
+                _reject("research_comparison_fit")
+            for name, value in resource["teaching_fit"].items():
+                _text(name, 160)
+                _text(value, 160)
+            dimensions = set()
+            for quality in _array(resource["quality_evidence"], 4):
+                _fields(quality, {"dimension", "category", "rationale", "evidence"})
+                if quality["dimension"] not in {"continuity", "beginner_fit", "examples", "version_fit"} or quality["dimension"] in dimensions:
+                    _reject("research_comparison_quality")
+                dimensions.add(quality["dimension"])
+                if quality["category"] not in {"adequate", "strong"}:
+                    _reject("research_comparison_quality")
+                _text(quality["rationale"], 160)
+                for ref in _array(quality["evidence"], 2, nonempty=True):
+                    _fields(ref, {"outcome_id", "reference", "sha256", "location", "hash_scope"})
+                    _key(ref["outcome_id"])
+                    _text(ref["reference"], 1024)
+                    _hash(ref["sha256"])
+                    _text(ref["location"], 1024)
+                    if ref["hash_scope"] != "body":
+                        _reject("research_comparison_evidence")
+            if dimensions and dimensions != {"continuity", "beginner_fit", "examples", "version_fit"}:
+                _reject("research_comparison_quality")
+        if _ids(entry["resource_order"], identities) != identities and entry["status"] != "legacy":
+            _reject("research_comparison_order")
+        if entry["status"] == "sufficient" and (len(identities) < 2 or any(not r["quality_evidence"] for r in entry["resources"])):
+            _reject("research_comparison_claim")
+
+
 def _ancestors(capabilities):
     complete, visiting = {}, set()
     def visit(key):
@@ -507,7 +606,7 @@ def _acceptance(value, allowed, *, permit_empty_refs=False):
 def _sort_output_refs(value):
     # These fields denote sets. Teaching order, objectives and task text retain their order.
     refs = {"capability_ids", "outcome_refs", "prerequisite_stage_refs", "material_refs", "knowledge_refs",
-        "project_study_refs", "constraint_refs"}
+        "project_study_refs", "constraint_refs", "source_refs", "acceptance_refs"}
     if type(value) is dict:
         for key, child in value.items():
             if key in refs:
@@ -544,9 +643,11 @@ def validate_curriculum_output(raw, payload, *, domain_approvals=(), allow_fixtu
 
 
 def _validate_output(document, payload):
+    version = curriculum_semantics(payload)
     _fields(document, {"schema_version", "input_hash", "status", "stages", "carrier", "project_study_requirements",
-        "unresolved", "constraint_refs", "source_limitations"})
-    if type(document["schema_version"]) is not int or document["schema_version"] != 1 or document["input_hash"] != payload["input_hash"]:
+        "unresolved", "constraint_refs", "source_limitations"} | ({"semantics_version", "permission_obligations"} if version == 2 else set()))
+    if (type(document["schema_version"]) is not int or document["schema_version"] != version
+            or curriculum_semantics(document) != version or document["input_hash"] != payload["input_hash"]):
         _reject("input_binding")
     if document["status"] not in {"complete", "incomplete"}:
         _reject("status")
@@ -727,7 +828,7 @@ def _validate_output(document, payload):
         stage_map[stage["stage_id"]] = stage
     if set(requirements) - project_refs:
         _reject("unassigned_project_study")
-    required = {o for c in capabilities.values() if c["importance"] == "required" for o in cap_outcomes[c["capability_id"]]}
+    required = required_curriculum_outcomes(payload)
     if required - (staged | unresolved):
         _reject("required_outcome_omitted")
     carrier = document["carrier"]
@@ -742,10 +843,83 @@ def _validate_output(document, payload):
     _text(carrier["final_artifact"]["description"], 5000)
     carrier_allowed = {o for o in staged if capabilities[outcome_caps[o]]["project_usage"] != "excluded"}
     _acceptance(carrier["final_artifact"]["acceptance"], carrier_allowed, permit_empty_refs=not carrier_allowed)
+    if version == 2:
+        _validate_permission_obligations(document, payload)
     assessments = curriculum_constraint_assessments(document, payload)
-    expected_status = "incomplete" if unresolved or unfilled or constraints_unresolved(assessments) else "complete"
+    blocking = blocking_unresolved_outcomes(document, payload)
+    expected_status = "incomplete" if blocking or unfilled or constraints_unresolved(assessments) else "complete"
     if document["status"] != expected_status:
         _reject("completeness")
+
+
+def blocking_unresolved_outcomes(document, payload):
+    unresolved = {item["outcome_ref"] for item in document["unresolved"]}
+    if curriculum_semantics(payload) == 1:
+        return unresolved
+    required = required_curriculum_outcomes(payload)
+    selected = {ref for stage in document["stages"] for ref in stage["outcome_refs"]}
+    # Explicit source requirements are selected teaching too, even if a future
+    # carrier uses a different stage projection.
+    selected.update(ref for req in document["project_study_requirements"] for ref in req["outcome_refs"])
+    return unresolved & (required | selected)
+
+
+def required_curriculum_outcomes(payload):
+    capabilities = {c["capability_id"]: c for c in payload["capabilities"]}
+    closure = {key for key, cap in capabilities.items() if cap["importance"] == "required"}
+    if curriculum_semantics(payload) == 2:
+        closure.update(key for key, cap in capabilities.items() if cap["learning_target_refs"])
+        ancestors = _ancestors(capabilities)
+        closure.update(parent for key in tuple(closure) for parent in ancestors[key] if parent in capabilities)
+    return {o["outcome_id"] for key in closure for o in capabilities[key]["outcomes"]}
+
+
+def _validate_permission_obligations(document, payload):
+    from app.domain.planning.constraint_adaptation import constraint_kind
+
+    constraints = {c["constraint_id"]: c for c in payload["constraints"]}
+    tasks = {task["stable_key"]: task for stage in document["stages"] for task in stage["tasks"]}
+    kinds = {"allowed", "unauthorized", "out_of_scope", "invalid_parameters", "execution_failure", "json_protection"}
+    seen = set()
+    for item in _array(document["permission_obligations"], 30):
+        _fields(item, {"constraint_ref", "source_refs", "project_context_hash", "task_ref", "outcome_refs", "acceptance_refs",
+            "authorization_before_execution", "default_deny", "allowed_scope", "input_validation", "cases", "practice_artifact"})
+        constraint = constraints.get(item["constraint_ref"])
+        if (constraint is None or constraint_kind(constraint["text"]) != "local_tool_scope"
+                or item["constraint_ref"] in seen):
+            _reject("permission_constraint")
+        seen.add(item["constraint_ref"])
+        if (_ids(item["source_refs"], nonempty=True) != set(constraint["source_refs"])
+                or item["project_context_hash"] != payload["profile_context"]["project_context_hash"]
+                or not payload["profile_context"]["project_context"]):
+            _reject("permission_source_binding")
+        task = tasks.get(item["task_ref"])
+        if task is None:
+            _reject("permission_task_binding")
+        refs = _ids(item["outcome_refs"], task["outcome_refs"], nonempty=True)
+        acceptances = {task["stable_key"] + ".acceptance." + str(i): acceptance for i, acceptance in enumerate(task["acceptance"])}
+        acceptance_refs = _ids(item["acceptance_refs"], acceptances, nonempty=True, limit=30)
+        if any(not refs & set(acceptances[ref]["outcome_refs"]) for ref in acceptance_refs):
+            _reject("permission_acceptance_binding")
+        if (item["authorization_before_execution"] is not True or item["default_deny"] is not True
+                or item["input_validation"] is not True or item["allowed_scope"] != "user_authorized_local_tasks"):
+            _reject("permission_boundary")
+        _text(item["practice_artifact"], 2000)
+        cases = _array(item["cases"], 6, nonempty=True)
+        case_kinds, case_refs, artifacts, texts = set(), set(), set(), set()
+        for case in cases:
+            _fields(case, {"kind", "acceptance_ref", "artifact"})
+            if case["kind"] not in kinds or case["kind"] in case_kinds or case["acceptance_ref"] not in acceptance_refs:
+                _reject("permission_case_binding")
+            _text(case["artifact"], 2000)
+            case_kinds.add(case["kind"])
+            case_refs.add(case["acceptance_ref"])
+            artifacts.add(case["artifact"].strip())
+            texts.add(acceptances[case["acceptance_ref"]]["text"].strip())
+        # Distinct cases must have inspectable case-specific records. This is
+        # a structural check; independent review still assesses their meaning.
+        if case_kinds != kinds or len(case_refs) != 6 or len(artifacts) != 6 or len(texts) != 6:
+            _reject("permission_case_completeness")
 
 
 def record_case_findings(curriculum, findings):

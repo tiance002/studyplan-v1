@@ -8,6 +8,7 @@ from app.core.ids import content_hash
 
 READER_PURPOSE = "planning.research_reader"
 READER_SCHEMA = "ResearchReaderV1"
+READER_SCHEMA_V2 = "ResearchReaderV2"
 READER_OUTPUT_CAP = 1024
 
 
@@ -31,10 +32,14 @@ def validate_reader_input(payload, schema_name, *, domain_approvals=(), allow_fi
         expected = {"must_teach", "chunks", "learner_context"}
         if type(payload) is dict and "domain_authority" in payload:
             expected.add("domain_authority")
+        if schema_name == READER_SCHEMA_V2:
+            expected.add("rules_version")
         _fields(payload, expected)
-        if schema_name != READER_SCHEMA:
+        if schema_name not in {READER_SCHEMA, READER_SCHEMA_V2}:
             return False
-        outcomes = _array(payload["must_teach"], 20, nonempty=True)
+        if schema_name == READER_SCHEMA_V2 and payload["rules_version"] != "research_comparison_v2":
+            return False
+        outcomes = _array(payload["must_teach"], 6 if schema_name == READER_SCHEMA_V2 else 20, nonempty=True)
         from app.domain.planning.capability_policy import CAPABILITY_POLICY
         public_outcomes = {o.outcome_id: o.text for d in CAPABILITY_POLICY.definitions for o in d.learning_outcomes}
         known_capabilities = {d.capability_id for d in CAPABILITY_POLICY.definitions}
@@ -83,11 +88,12 @@ def validate_reader_input(payload, schema_name, *, domain_approvals=(), allow_fi
 
 
 def validate_reader_output(raw, payload, *, domain_approvals=(), allow_fixture_domains=False):
-    if not validate_reader_input(payload, READER_SCHEMA, domain_approvals=domain_approvals,
+    v2 = "rules_version" in payload
+    if not validate_reader_input(payload, READER_SCHEMA_V2 if v2 else READER_SCHEMA, domain_approvals=domain_approvals,
         allow_fixture_domains=allow_fixture_domains):
         raise ValueError("Reader input rejected")
     try:
-        _fields(raw, {"outcomes", "teaching_fit"})
+        _fields(raw, {"outcomes", "teaching_fit", "quality_evidence"} if v2 else {"outcomes", "teaching_fit"})
         outcomes = _array(raw["outcomes"], 20, nonempty=True)
         expected = {o["outcome_id"] for o in payload["must_teach"]}
         chunks = {c["chunk_id"]: c for c in payload["chunks"]}
@@ -124,6 +130,22 @@ def validate_reader_output(raw, payload, *, domain_approvals=(), allow_fixture_d
         _unique(ids)
         if set(ids) != expected:
             raise ValueError("Reader outcome range")
+        if v2:
+            quality = raw["quality_evidence"]
+            _fields(quality, {"continuity", "beginner_fit", "examples", "version_fit"})
+            for opinion in quality.values():
+                _fields(opinion, {"category", "rationale", "evidence_refs"})
+                if opinion["category"] not in {"adequate", "strong", "insufficient", "unknown"}:
+                    raise ValueError("Reader quality category")
+                short_reason(opinion["rationale"], 160)
+                refs = _array(opinion["evidence_refs"], 2, nonempty=opinion["category"] != "unknown")
+                cited = []
+                for ref in refs:
+                    _fields(ref, {"chunk_id", "content_hash"})
+                    if ref["chunk_id"] not in chunks or chunks[ref["chunk_id"]]["content_hash"] != ref["content_hash"]:
+                        raise ValueError("Reader quality evidence mismatch")
+                    cited.append(ref["chunk_id"])
+                _unique(cited)
         # Check the aggregate retained opinion too: splitting a short body
         # across fields/outcomes must not turn it into persistable metadata.
         for text in body_texts:
