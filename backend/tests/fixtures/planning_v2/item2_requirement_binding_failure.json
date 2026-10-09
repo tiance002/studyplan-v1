@@ -1,0 +1,144 @@
+{
+  "kind": "REAL_RETAINED_186_PAYLOAD_COPY_FOR_OFFLINE_VALIDATION_NOT_NEW_MODEL_RESULT",
+  "ledger_number": 186,
+  "sources": [
+    {
+      "path": "var/planning-v2-item2-real-retest-20261010/item2.response.body",
+      "sha256": "8b0726363d90fae713d761209c7bdef600e2349ef2b628ca1472247f163af320"
+    },
+    {
+      "path": "var/planning-v2-item2-real-retest-20261010/item2.provider.json",
+      "sha256": "a082df4f47074b57fa431b494ef096a49c163b5b107d852b92f5638abc802567"
+    },
+    {
+      "path": "var/planning-v2-item2-real-retest-20261010/item2.validator-diagnosis.json",
+      "sha256": "4df447f6e3ad1cd29f469bde82e5793357190d1a9c02490f2e89bd398a898ddd"
+    }
+  ],
+  "failed_capability_response": {
+    "schema_version": 1,
+    "source_goal_profile_hash": "b0386820c14a6aa2b9aa9b1df1aeb1ddc6b5e8925df0a8ec6f70d66dd09f7348",
+    "policy_version": "v2",
+    "route_kind": "systematic_agent_route",
+    "status": "ready",
+    "capabilities": [
+      {
+        "capability_id": "python.core",
+        "disposition": "accepted_known",
+        "learning_requirement": "recommended",
+        "project_usage": "required",
+        "desired_depth": "foundation",
+        "requirement_refs": [
+          "req_87dccf132ded659d3d39e74922a217e974b04e6a3c1e40724005e0d6269251fe"
+        ],
+        "policy_refs": [
+          "capability-policy:v2#python.core"
+        ],
+        "learner_claim_refs": [
+          "claim_c8ac338322d76f51dbc023628f1229cf757c67f890f6bd73ee088970eeb04dd8"
+        ],
+        "prerequisite_refs": [],
+        "learning_target_refs": []
+      },
+      {
+        "capability_id": "llm.api",
+        "disposition": "needs_learning",
+        "learning_requirement": "required",
+        "project_usage": "required",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_1a84f4f5e7b28835281d1d3c4798bd224754621434f7fd4e55284e96058a49f5",
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387"
+        ],
+        "policy_refs": [
+          "capability-policy:v2#llm.api"
+        ],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [],
+        "learning_target_refs": []
+      },
+      {
+        "capability_id": "structured.output",
+        "disposition": "needs_learning",
+        "learning_requirement": "required",
+        "project_usage": "required",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_1a84f4f5e7b28835281d1d3c4798bd224754621434f7fd4e55284e96058a49f5",
+          "req_79489f4dae497d8f4b1db68f175e24b5d13f6103db9371aeb33bb7f5e22602e8"
+        ],
+        "policy_refs": [
+          "capability-policy:v2#structured.output"
+        ],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [
+          "llm.api"
+        ],
+        "learning_target_refs": [
+          "req_1a84f4f5e7b28835281d1d3c4798bd224754621434f7fd4e55284e96058a49f5"
+        ]
+      },
+      {
+        "capability_id": "tool.calling",
+        "disposition": "needs_learning",
+        "learning_requirement": "required",
+        "project_usage": "required",
+        "desired_depth": "applied",
+        "requirement_refs": [
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387",
+          "req_79489f4dae497d8f4b1db68f175e24b5d13f6103db9371aeb33bb7f5e22602e8"
+        ],
+        "policy_refs": [
+          "capability-policy:v2#tool.calling"
+        ],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [
+          "llm.api"
+        ],
+        "learning_target_refs": [
+          "req_8c998f59c8d9e240523f9aa6c16bf61f978b01d5ad7979db46f1ba811df36387"
+        ]
+      },
+      {
+        "capability_id": "mcp",
+        "disposition": "needs_learning",
+        "learning_requirement": "required",
+        "project_usage": "optional",
+        "desired_depth": "applied",
+        "requirement_refs": [],
+        "policy_refs": [
+          "capability-policy:v2#mcp"
+        ],
+        "learner_claim_refs": [],
+        "prerequisite_refs": [],
+        "learning_target_refs": []
+      }
+    ],
+    "claim_bindings": [
+      {
+        "claim_ref": "claim_c8ac338322d76f51dbc023628f1229cf757c67f890f6bd73ee088970eeb04dd8",
+        "capability_id": "python.core"
+      }
+    ],
+    "constraint_effects": [
+      {
+        "constraint_ref": "constraint_353f2063b30972f52a4d2ae767957d422387029277e2371234da0eb4d2afd295",
+        "capability_id": null,
+        "exclusion": "not_applicable"
+      },
+      {
+        "constraint_ref": "constraint_2dfcc040dcc3799e4ebe8c206e42373a287a2049502c461982d55710cc691824",
+        "capability_id": null,
+        "exclusion": "not_applicable"
+      },
+      {
+        "constraint_ref": "constraint_b4cdb6339f3ac80f43f8bad2537ce4e3d3a984668ec7cd5ffb56699e09b6cf48",
+        "capability_id": null,
+        "exclusion": "not_applicable"
+      }
+    ],
+    "clarification_questions": []
+  },
+  "freeze_head": "1b4e056faa5ddac7a20b43d4e3eee1e93b43821b",
+  "original_request_start_head": "9bd56be638ae4db39609b1d8b4402cdad320691b"
+}
