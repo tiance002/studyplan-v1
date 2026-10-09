@@ -1,10 +1,10 @@
 # Item 9 — Initial Clarification Continuation
 
-日期：2026-10-09。**C0–C2 PASS；React U1–U3 正在实施。** 本报告保留真实与合成验证边界，不代表真实产品模型或教材语义验收。
+日期：2026-10-09。**C0–C2 PASS；React U1–U3 已完成，最终分层证据见 React 报告。** 本报告保留真实与合成验证边界，不代表真实产品模型或教材语义验收。
 
 ## 基线与范围
 
-Start HEAD：`9be82b98c714e378812b8e17728c452f93951496`，branch：`feat/n1-resource-discovery`。后端阶段源码验收基于该 HEAD 加本报告列出的工作树差异；阶段提交 SHA 在统一交付记录中记录。
+Start HEAD：`9be82b98c714e378812b8e17728c452f93951496`，branch：`feat/n1-resource-discovery`。后端阶段源码验收基于该 HEAD 加本报告列出的工作树差异；阶段提交 SHA：`d142cde1c5e33b50955770b2fa4b69650c1f8a2e`；最终交付见 `checkpoint-item9-final-20261009`。
 
 原 U0 报告与进度保留；原型 SHA256：`dc1dd08b40520f76c1fece10858dd2c8e38843e4b2400fed0ea8b9ef2915df7b`，本轮未修改。开始时只有两份预期文档变化；`.workbuddy/`、`design-preview/` 不操作。证据目录：`var/planning-v2-item9-clarification-20261009/`，其中 baseline 保存 tracked hashes、U0/进度原文与私有配置 hash，无配置内容或认证头。
 
@@ -68,4 +68,4 @@ RED 包括缺少 clarification 输入、JSONB list/tuple 比较、下游来源�
 
 `PUBLIC_GENERATE_NOT_ENABLED`
 
-React 正在按用户授权继续；真实产品语义验收仍待另行授权。不 push、merge、deploy。
+React 已按用户授权完成；真实产品语义验收仍待另行授权。不 push、merge、deploy。

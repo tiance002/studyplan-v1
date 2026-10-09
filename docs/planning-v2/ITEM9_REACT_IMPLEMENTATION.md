@@ -1,26 +1,83 @@
-# Item 9 — 澄清安全续接与正式 React（当前执行）
+# Planning V2 Item 9 — 初始澄清续接与正式 React 验收
 
-日期：2026-10-09。Start HEAD：`9be82b98c714e378812b8e17728c452f93951496`。C0–C2 已通过且独立审查 PASS；React U1–U3 正在实施，浏览器验收尚未完成。下方原 U0 阻塞报告按原文保留，不把历史 STOP 覆盖为 PASS。
+日期：2026-10-09。C0–C2 与 U1–U3 已完成。保留原 U0 失败报告原文；以下结果不改写历史 STOP，也不代表真实产品模型或教学质量验收。
 
-## API / 页面消费边界
+## 基线、阶段与最终身份
 
-| 用户界面事实 | 服务端来源 | 当前验证 |
+- Branch：`feat/n1-resource-discovery`。Start HEAD：`9be82b98c714e378812b8e17728c452f93951496`。
+- C0–C2 提交：`d142cde1c5e33b50955770b2fa4b69650c1f8a2e`，`fix(planning): support bounded initial clarification continuation`；本地 annotated `checkpoint-item9-clarification-20261009`。
+- React 源码 / 截图 / 测试以本报告同批本地提交冻结；最终交付 HEAD 使用 annotated 本地引用 `checkpoint-item9-final-20261009` 精确定位，实际 SHA 随最终 Git 回执记录在 `var/planning-v2-item9-clarification-20261009/final-receipt.json` 及用户交付消息中。避免在提交内容中填写尚不存在的自身 SHA。
+- 批准 HTML SHA256：`dc1dd08b40520f76c1fece10858dd2c8e38843e4b2400fed0ea8b9ef2915df7b`，保持原样。架构合同、Policy、Seed、迁移、正式环境配置和历史账本未修改。
+
+## 真实 API 与页面消费矩阵
+
+| 用户内容 / 操作 | 实际消费来源及保护 | 验证 |
 |---|---|---|
-| 输入目标与补充信息 | GoalSpec；owned availability 决定入口可用性 | NOT RUN |
-| 初始澄清、合法答复 | RunView typed clarification；窄用途同预算根 continuation POST | NOT RUN |
-| 进度与失败 / unknown / cancelled | GET runs；只用用户语言呈现，不自动重派 | NOT RUN |
-| 阶段安排、知识与单元 | v2_content.stages / nodes / units / guidance | NOT RUN |
-| Primary / Supplement / Reference、章节及版本 | v2_content.resource_assignments[].source_snapshot | NOT RUN |
-| 自己项目、阶段增量、Micro Exercise、最终成果 | v2_content.practice + guidance.practice_delta | NOT RUN |
-| 别人项目源码学习 | v2_content.project_study；与自己的持续实践区分 | NOT RUN |
-| 未完成课程 | typed planning issues；Compiler 拒绝时没有可确认 Draft | NOT RUN |
-| Draft 编辑与确认 | 当前 Draft hash/version + decision；确认后 fresh current read | NOT RUN |
-| 未来说明 / 合法顺序调整 | Item 8 context/local preview/confirm；不编辑教材或任意任务 | NOT RUN |
-| 目标变化与历史 | owned semantic replan；准确 revision/lineage，不按标题继承进度 | NOT RUN |
+| 目标、可选补充、入口 | GoalSpec；GET `/plans/v2/availability`，服务端 owned runtime / jobs / actor 准入决定可用性 | owned 浏览器 PASS；正常不可用分支拦截 PASS |
+| 初始问题、答复、恢复 | RunView typed `clarification`；POST `/plans/v2/owned/clarifications` 绑定 parent/version/question/member/actor/project；GET 跟随 continuation | 真实 PG / Worker / Cookie-CSRF 浏览器 PASS |
+| 进度、取消、失败、待核对 | GET runs/run、原 cancel API、固定 typed planning_issues；使用用户语言，不显示内部 Run/Receipt/hash/Policy ID | 真实 incomplete PASS；取消/unknown PG 合同 PASS；前端拦截 PASS |
+| 目标起点、已有声明与硬约束 | `goal_spec` 或冻结 `v2_content.profile`；`serverGoal` 保留 target 来源的规范化 learner_claims / hard_constraints；不重新分析 raw goal | 实际 null goal_spec 读回 PASS；target-only 反例 PASS |
+| 需要学习与已有能力 | `v2_content.capabilities.capabilities` 的 disposition、importance/learning_requirement、project_usage、learning_outcomes[].text | 公开 DTO SSR / 浏览器 PASS；Python 已有能力不变新任务 |
+| 阶段安排、知识、学习单元 | `v2_content.stages[].guidance`、`knowledge[]`、`units[]`；真实公开投影不是内部 nodes/guidance 数组 | SSR / 展开 / 390px PASS |
+| Primary / Supplement / Reference | `v2_content.materials[].source_snapshot`：阅读范围、section_refs、版本、限制和安全 HTTP(S) 链接 | 真实 Primary 浏览器 PASS；S/R 显示合成 SSR PASS |
+| 自己项目、增量、Micro Exercise、最终成果 | `practice.carrier/tasks/final_artifact` 与阶段 guidance.practice_delta；MCP 项目使用 excluded 仍可独立小练习 | owned 浏览器 / SSR PASS |
+| 别人项目源码学习 | `project_study[].requirement/case` 与阶段 project_study_refs；whole_core/slices、正常/失败、输入输出、取舍、产物、避读范围分别呈现 | 合成显示 fixture SSR PASS；真实审核案例浏览器 NOT RUN |
+| 不完整课程 | Compiler 完整校验后固定 typed issues，无 Draft，无确认按钮 | 真实 owned Worker / 浏览器 PASS |
+| Draft 描述编辑与采用 | 只编辑既有阶段说明；fresh Draft hash/version；显式勾选确认；成功后 fresh current | 真实 owned 草案编辑 / 确认 PASS |
+| 未来阶段调整 | Item8 context、protected、local preview、confirm/cancel；不修改任务、教材或课程结构 | 真实 preview / 双刷新 / confirm v2 / cancel PASS；合法顺序 Domain/PG 合同 PASS |
+| 目标变化 | owned semantic replan 202 → Run → Draft → V2 revision confirm，保留原补充事实及预算根 | 真实预算拒绝分支 PASS；成功确认前端拦截 PASS + C2 PG 成功合同 PASS；真实浏览器成功确认 NOT RUN |
+| current/history | server revision / lineage；查看历史时隐藏新 Draft 编辑、预览与确认，不依据标题继承记录 | 真实 PG / 刷新 / 重新登录 / 历史隔离 PASS |
 
-批准 HTML 保持原样，SHA256：`dc1dd08b40520f76c1fece10858dd2c8e38843e4b2400fed0ea8b9ef2915df7b`。静态演示数据与状态切换器不进入生产 React；界面只呈现实际服务端冻结事实。
+## 实现与独立审查
 
-仅新 owned PG / checkpoint 和显式 Mock/Fake ports用于验证。真实产品模型、搜索、Reader 调用为 0；原正式数据库不写，公开 `/plans/generate` 继续关闭。真实产品课程质量与用户语义验收仍待另行授权。
+正式 React 复用 StudyPlan 导航、认证、工作区、浅色样式。目标输入与可选补充弹窗、typed 澄清、阶段/单元折叠、教材弹窗、教学指导、项目实践、最终成果、草案确认与 Item8 修改全部消费服务器事实，没有原型状态切换器或静态假课程进入产品。所有阶段默认折叠，遵循用户正式 React 指令第184行。既有 Learning Assistant、Summary、Prompt、Practice、Outcome 页面未重构。
+
+后端独审四组缺陷及关闭证据详见 [澄清续接报告](ITEM9_CLARIFICATION_CONTINUATION.md)：context presence / durable binding、actor availability、答案指纹、可信 incomplete 与持久化中断。
+
+U1–U3 独立审查最终结论 **PASS**，无未关闭 P1/P2 源码问题；源码、分层日志和桌面/手机截图均由独立审查者实际读回。独立 UI 审查主动发现并关闭：内部字段与公开 projection 混淆、未知 POST 换身份/刷新解锁、POST 与后续 GET 失败误混、preview 丢失/排序恢复、history 页面确认隐藏新 Draft、已知能力与 Micro Exercise 文案、空初始表单覆盖 Draft、规范化能力/约束字段遗漏，以及 null goal_spec / target-only 声明约束在重新规划时丢失。修复未放宽后端合同，复用同一审查者与证据包定向闭合。
+
+未知 POST 前冻结操作种类、请求体与幂等身份，并限定 actor/project；status0、5xx 或成功状态但不可解析响应保守待核对，刷新/重新登录或 generic GET 不自动清除，不换身份重派。已明确收到 POST 响应后保存句柄，随后 GET 失败不会错误永久锁定。仍没有自动或用户自助解除 unknown 的功能；需要服务端或人工核对后续处理，页面保持禁止再次写入。
+
+请求模型/effort：backend 与独审 Sol6.1 xhigh、前端实现 Sol6.1 medium、机械清单 Luna medium；实际模型解析 `NOT OBSERVABLE`，不把角色或提示词当作身份，不修改全局配置。
+
+## 实际执行与证据分层
+
+| 验证层 | 结果 | 实际证据 / 限制 |
+|---|---|---|
+| Backend 定向 unit/contract | PASS，119 | `unit-contract-final-green.txt`，exit0；无完整历史矩阵重跑 |
+| 新 owned PG / Worker / HTTP | PASS | 31项基础矩阵 + 4/9/3定向关闭；共38个新 PG case，不把重跑子集相加；actual TCP Cookie-CSRF 完整链见 `socket-http-success.json` |
+| 前端 Node / 公开 DTO SSR | PASS | `frontend-final-unit.txt`；最终项目数以日志为准；SSR 是机械字段保全，合成扩展不证明教材 reviewed |
+| TS / Vite build | PASS | `frontend-final-build.txt`，72 modules，exit0；普通沙箱 realpath EPERM 保留，由受控执行完成 |
+| 拦截 HTTP Edge | PASS | `frontend-final-boundary.txt`：8个不可用/终态/unknown/409场景，history 确认隔离，semantic 正分支；不接 PG / Worker / Provider |
+| 真实 Edge → Vite → HTTP → 新 PG → Worker | PASS，有已记录负分支 | `react-browser-main-partial.json` 的澄清→Draft→采用v1→local preview双刷新→history→采用v2；`react-browser-resume.json` PASS：重新登录、取消preview、incomplete和history；`react-ready-selector-red.json` 中普通ready/Draft编辑/采用已执行；`react-final-readback.json` PASS：读取冻结补充事实及真实同预算拒绝 |
+| Fresh owned PG readback | PASS | `browser-pg-readback.json`；10 Run / 10 Job / 5 Draft / 4 Revision 属本轮独立合成库；3个 continuation 的 parent=root，不代表正式库行计数 |
+| 桌面 / 手机视觉 | PASS | 1440×1000 / 390×844；根代理与独审实际看图，保留初始、补充、进度、澄清、课程、展开、教材、未完成、preview、current/history图 |
+| Ruff / import / collection / diff | PASS | 后端阶段定向证据复用；最终 git diff --check / staged check；无无关全量回归 |
+| 真实收费 Provider / 搜索 / Reader、真实教材教学质量、正式 DB、整产品 E2E | NOT RUN | 产品调用0、正式写入0；全部外部端口明确 Mock；没有用 Fake / PG / UI 代替真实语义验收 |
+
+本地证据目录：`var/planning-v2-item9-clarification-20261009/`，凭据和认证头不写入日志。owned 业务库 `studyplan_test_item9_browser_629ebe84` 与 checkpoint 库 `studyplan_test_item9_browsercp_ad53c626` 保留；无新角色，无新 migration，应用既有0025。其余每次 PG 测试的新 owned 数据库 receipts 同目录保留。
+
+真实浏览器负结果全部保留：一次 selector 精确匹配 FAIL（未派发）；一次合成端口只识别“教材必须免费”而输入“教程必须免费”，停在 curriculum_constraints_pending，无 Draft，原 failed Run 保留，不重派；主脚本把同预算搜索耗尽误预期为成功草案而等待超时 FAIL，随后定向确认 budget/incomplete 与旧 current 保留，不放宽预算。第一次 semantic 探查发生在 profile fallback 修复前，补充事实丢失已由实际源码修复/target-only反例/正分支拦截及 fresh owned 读回关闭。最新独立 ready 用户首次 semantic 202 的冻结事实正确保留，同预算搜索限额4中初始已使用3，仍拒绝不足资料的完整草案。正式语义成功浏览器确认明确 NOT RUN。另有预填 textarea 精确 label selector FAIL，仅修正测试定位后定向读回 PASS；不重做 initial root。完整原日志不删除、不把 NOT RUN 标 PASS。
+
+## 视觉证据与改动文件
+
+- [首页桌面](screenshots/item9-react/01-initial-desktop.png)、[可选信息](screenshots/item9-react/02-supplement-desktop.png)、[首页手机](screenshots/item9-react/03-initial-mobile.png)、[首次澄清](screenshots/item9-react/05-clarification-desktop.png)。
+- [最终课程草案](screenshots/item9-react/19-final-draft-top-desktop.png)、[展开阶段](screenshots/item9-react/20-final-draft-stage-desktop.png)、[手机展开](screenshots/item9-react/21-final-draft-stage-mobile.png)、[教材弹窗](screenshots/item9-react/08-material-dialog-desktop.png)。
+- [局部修改预览](screenshots/item9-react/11-local-preview-desktop.png)、[历史路线](screenshots/item9-react/16-history-top-desktop.png)、[手机历史](screenshots/item9-react/18-history-mobile.png)、[手机不完整课程](screenshots/item9-react/15-incomplete-mobile.png)、[冻结补充保留](screenshots/item9-react/22-final-replan-preserved-supplement.png)、[最终预算拒绝](screenshots/item9-react/23-final-semantic-budget-boundary.png)。
+
+React 改动：`frontend/src/features/planning/{PlanningPage,Curriculum,PlanningDialog,facts,planning.css}`、`frontend/src/api/client.ts`、`frontend/src/main.tsx`。受影响测试：`planning-facts.test.mjs`、`planning-render.test.mjs`、`planning-public-draft.fixture.json`（真实合成 HTTP DTO 副本，无认证信息）、`planning-placeholder.browser.cjs`、`planning-history.browser.cjs`、`planning-semantic.browser.cjs` 与 `frontend/package.json` 定向脚本。本批另更新两个 Item9 报告与唯一 progress，新增本目录截图；后端24文件阶段清单见 C0–C2 提交与报告。
+
+生产入口仍关闭，正常环境不会显示可派发的生成按钮；owned-only 端点没有改为公共入口。测试服务器和 Vite 在交付时停止，仅保留证据及 owned 数据库。无 push / merge / deploy，无自动进入下一业务 Item。
+
+`INITIAL_CLARIFICATION_CONTINUATION_PASS`
+
+`ITEM9_REACT_IMPLEMENTATION_COMPLETE`
+
+`REAL_PRODUCT_SEMANTIC_ACCEPTANCE_PENDING`
+
+`PUBLIC_GENERATE_NOT_ENABLED`
+
+`STOP`
 
 ---
 

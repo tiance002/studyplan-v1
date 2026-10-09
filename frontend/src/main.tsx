@@ -184,7 +184,7 @@ function App() {
         />
       )}
       {page === "planning" && (
-        <PlanningPage />
+        <PlanningPage key={`${session.username}:${project}`} project={project} actorKey={session.username || ''} onPublished={refresh} />
       )}
       {page === "path" && (
         <LearningPath

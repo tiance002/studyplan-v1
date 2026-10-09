@@ -7,7 +7,7 @@
     "test": "node --test tests/*.test.mjs",
     "test:auth": "node tests/auth.browser.cjs",
     "test:workspace": "node tests/workspace.browser.cjs",
-    "test:planning": "node tests/planning-placeholder.browser.cjs",
+    "test:planning": "node tests/planning-placeholder.browser.cjs && node tests/planning-history.browser.cjs && node tests/planning-semantic.browser.cjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",

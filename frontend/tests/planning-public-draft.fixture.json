@@ -1,0 +1,864 @@
+{
+  "project_id": "lpr_462858984ceb4e15aef1cb9f2999d5d3",
+  "revision": 1,
+  "goal_snapshot": "系统学习 Agent，并在已有本地 JSON 待办 CLI 上持续实践",
+  "goal_spec": null,
+  "stages": [
+    {
+      "stage_id": "stg_de2412b08214455d94b52c6a5f5ab071",
+      "stable_key": "v2.stage.86fec81a5d8001751548e453f2800b8d8bf531b8799546eabe6a84f23deca06a",
+      "title": "LLM API基础",
+      "section_kind": "v2_curriculum",
+      "order_index": 0,
+      "objective": "解释并实践获准outcomes",
+      "learning_guidance": null
+    },
+    {
+      "stage_id": "stg_da4d1831f57847c8a9dcc202d737f27b",
+      "stable_key": "v2.stage.2c9d0cb7253faf6dd88dba6ebff0499551a3a2c5cccf0bd04fde7d60758fbcb2",
+      "title": "MCP协议与集成边界",
+      "section_kind": "v2_curriculum",
+      "order_index": 1,
+      "objective": "解释并实践获准outcomes",
+      "learning_guidance": null
+    },
+    {
+      "stage_id": "stg_3459132b29584f27802449031d7c099d",
+      "stable_key": "v2.stage.a96f4a2d7505fe929e06f0f2d28aea6efb7d33d514f7841d0187032ee6891300",
+      "title": "Tool Calling",
+      "section_kind": "v2_curriculum",
+      "order_index": 2,
+      "objective": "解释并实践获准outcomes",
+      "learning_guidance": null
+    }
+  ],
+  "unit_links": [
+    {
+      "stage_id": "stg_de2412b08214455d94b52c6a5f5ab071",
+      "unit_id": "unt_WyJscHJfNDYyODU4OTg0Y2ViNGUxNWFlZjFjYjlmMjk5OWQ1ZDM6MTRjYjgwY2NiOGFlMjcwYjAzMTdkYTBmYjBmNmFiMDljMDFjZjRhYjIyODg3NDU3YmUxNGJlMzNlOGFkNGI2YSIsInVuaXRfbGxtX2FwaSJd",
+      "order_index": 0
+    },
+    {
+      "stage_id": "stg_da4d1831f57847c8a9dcc202d737f27b",
+      "unit_id": "unt_WyJscHJfNDYyODU4OTg0Y2ViNGUxNWFlZjFjYjlmMjk5OWQ1ZDM6MTRjYjgwY2NiOGFlMjcwYjAzMTdkYTBmYjBmNmFiMDljMDFjZjRhYjIyODg3NDU3YmUxNGJlMzNlOGFkNGI2YSIsInVuaXRfbWNwIl0",
+      "order_index": 0
+    },
+    {
+      "stage_id": "stg_3459132b29584f27802449031d7c099d",
+      "unit_id": "unt_WyJscHJfNDYyODU4OTg0Y2ViNGUxNWFlZjFjYjlmMjk5OWQ1ZDM6MTRjYjgwY2NiOGFlMjcwYjAzMTdkYTBmYjBmNmFiMDljMDFjZjRhYjIyODg3NDU3YmUxNGJlMzNlOGFkNGI2YSIsInVuaXRfdG9vbF9jYWxsaW5nIl0",
+      "order_index": 0
+    }
+  ],
+  "task_links": [
+    {
+      "stage_id": "stg_de2412b08214455d94b52c6a5f5ab071",
+      "task_id": "ptk_WyJscHJfNDYyODU4OTg0Y2ViNGUxNWFlZjFjYjlmMjk5OWQ1ZDM6MTRjYjgwY2NiOGFlMjcwYjAzMTdkYTBmYjBmNmFiMDljMDFjZjRhYjIyODg3NDU3YmUxNGJlMzNlOGFkNGI2YSIsInRhc2tfbGxtX2FwaSJd",
+      "order_index": 0
+    },
+    {
+      "stage_id": "stg_da4d1831f57847c8a9dcc202d737f27b",
+      "task_id": "ptk_WyJscHJfNDYyODU4OTg0Y2ViNGUxNWFlZjFjYjlmMjk5OWQ1ZDM6MTRjYjgwY2NiOGFlMjcwYjAzMTdkYTBmYjBmNmFiMDljMDFjZjRhYjIyODg3NDU3YmUxNGJlMzNlOGFkNGI2YSIsInRhc2tfbWNwIl0",
+      "order_index": 0
+    },
+    {
+      "stage_id": "stg_3459132b29584f27802449031d7c099d",
+      "task_id": "ptk_WyJscHJfNDYyODU4OTg0Y2ViNGUxNWFlZjFjYjlmMjk5OWQ1ZDM6MTRjYjgwY2NiOGFlMjcwYjAzMTdkYTBmYjBmNmFiMDljMDFjZjRhYjIyODg3NDU3YmUxNGJlMzNlOGFkNGI2YSIsInRhc2tfdG9vbF9jYWxsaW5nIl0",
+      "order_index": 0
+    }
+  ],
+  "stage_resources": [],
+  "extensions": [],
+  "source_pack_key": "",
+  "source_pack_version": 0,
+  "v2_content": {
+    "profile": {
+      "clarification_questions": [],
+      "desired_depth": "applied",
+      "hard_constraints": [
+        {
+          "constraint_id": "constraint_df5efc86ed221aeec8c0f74dc6d7640a8ed8fa5d39a1b0dd52de3e5cfceb1a98",
+          "source_refs": [
+            "goal.constraints[0]"
+          ],
+          "text": "教材必须免费"
+        }
+      ],
+      "learner_claims": [
+        {
+          "claim_id": "claim_91ce89e0c9a2da14651f7eab33c2ff85fd058329d1d1a120fb5530514f59ff6a",
+          "source_refs": [
+            "goal.starting_point"
+          ],
+          "text": "我已经会Python"
+        }
+      ],
+      "outcome_purpose": "learn",
+      "profile_hash": "fe7923df83933e072dad0c7ed3125097f6c44a6b704d1ff5b95a65efeee76bd3",
+      "project_context": "已有本地 JSON 待办 CLI，保留现有接口和数据，不重建演示项目",
+      "required_requirements": [
+        {
+          "origin": "explicit",
+          "rationale": "",
+          "requirement_id": "req_87fca11aca3af8fc730e19c7d39009f026c9a614de9e637850d3917aed8d51ef",
+          "source_refs": [
+            "clarification.answers[0]",
+            "goal.target"
+          ],
+          "text": "系统学习 Agent，并在已有本地 JSON 待办 CLI 上持续实践"
+        }
+      ],
+      "schema_version": 1,
+      "scope": [],
+      "starting_point": "我已经会Python",
+      "status": "ready",
+      "target_summary": "系统学习 Agent，并在已有本地 JSON 待办 CLI 上持续实践"
+    },
+    "capabilities": {
+      "capabilities": [
+        {
+          "capability_id": "llm.api",
+          "desired_depth": "applied",
+          "disposition": "needs_learning",
+          "learner_claim_refs": [],
+          "learning_outcomes": [
+            {
+              "outcome_id": "llm.api.exchange",
+              "text": "组织模型API请求并读取模型响应"
+            },
+            {
+              "outcome_id": "llm.api.usage_cost",
+              "text": "读取模型请求usage并理解费用边界"
+            },
+            {
+              "outcome_id": "llm.api.failure_boundary",
+              "text": "识别模型请求失败、截断与结果未知的边界"
+            }
+          ],
+          "learning_requirement": "required",
+          "learning_target_refs": [],
+          "policy_refs": [
+            "capability-policy:v2#llm.api"
+          ],
+          "prerequisite_refs": [],
+          "project_usage": "required",
+          "requirement_refs": [
+            "req_87fca11aca3af8fc730e19c7d39009f026c9a614de9e637850d3917aed8d51ef"
+          ],
+          "title": "LLM API基础"
+        },
+        {
+          "capability_id": "mcp",
+          "desired_depth": "applied",
+          "disposition": "needs_learning",
+          "learner_claim_refs": [],
+          "learning_outcomes": [
+            {
+              "outcome_id": "mcp.roles",
+              "text": "解释MCP Client与Server的职责及协作方式"
+            },
+            {
+              "outcome_id": "mcp.interfaces",
+              "text": "区分MCP Tool与Resource协议接口的边界"
+            },
+            {
+              "outcome_id": "mcp.minimal_connection",
+              "text": "完成有界的MCP最小接入并验证一次工具调用结果"
+            }
+          ],
+          "learning_requirement": "required",
+          "learning_target_refs": [],
+          "policy_refs": [
+            "capability-policy:v2#mcp",
+            "capability-policy:v2#systematic-agent-mcp"
+          ],
+          "prerequisite_refs": [],
+          "project_usage": "excluded",
+          "requirement_refs": [
+            "req_87fca11aca3af8fc730e19c7d39009f026c9a614de9e637850d3917aed8d51ef"
+          ],
+          "title": "MCP协议与集成边界"
+        },
+        {
+          "capability_id": "python.core",
+          "desired_depth": "applied",
+          "disposition": "accepted_known",
+          "learner_claim_refs": [
+            "claim_91ce89e0c9a2da14651f7eab33c2ff85fd058329d1d1a120fb5530514f59ff6a"
+          ],
+          "learning_outcomes": [
+            {
+              "outcome_id": "python.core.program_structure",
+              "text": "使用函数组织Python程序"
+            },
+            {
+              "outcome_id": "python.core.data_structures",
+              "text": "使用Python数据结构表达和处理数据"
+            },
+            {
+              "outcome_id": "python.core.exceptions",
+              "text": "使用Python异常表达和处理程序错误"
+            }
+          ],
+          "learning_requirement": "required",
+          "learning_target_refs": [],
+          "policy_refs": [
+            "capability-policy:v2#python.core"
+          ],
+          "prerequisite_refs": [],
+          "project_usage": "required",
+          "requirement_refs": [
+            "req_87fca11aca3af8fc730e19c7d39009f026c9a614de9e637850d3917aed8d51ef"
+          ],
+          "title": "Python编程基础"
+        },
+        {
+          "capability_id": "tool.calling",
+          "desired_depth": "applied",
+          "disposition": "needs_learning",
+          "learner_claim_refs": [],
+          "learning_outcomes": [
+            {
+              "outcome_id": "tool.calling.input_validation",
+              "text": "按工具输入合同校验调用参数"
+            },
+            {
+              "outcome_id": "tool.calling.invoke_result",
+              "text": "派发有效工具请求并处理调用结果"
+            }
+          ],
+          "learning_requirement": "required",
+          "learning_target_refs": [],
+          "policy_refs": [
+            "capability-policy:v2#tool.calling"
+          ],
+          "prerequisite_refs": [
+            "llm.api"
+          ],
+          "project_usage": "required",
+          "requirement_refs": [
+            "req_87fca11aca3af8fc730e19c7d39009f026c9a614de9e637850d3917aed8d51ef"
+          ],
+          "title": "Tool Calling"
+        }
+      ],
+      "claim_bindings": [
+        {
+          "capability_id": "python.core",
+          "claim_ref": "claim_91ce89e0c9a2da14651f7eab33c2ff85fd058329d1d1a120fb5530514f59ff6a"
+        }
+      ],
+      "constraint_effects": [
+        {
+          "capability_id": null,
+          "constraint_ref": "constraint_df5efc86ed221aeec8c0f74dc6d7640a8ed8fa5d39a1b0dd52de3e5cfceb1a98",
+          "exclusion": "not_applicable"
+        }
+      ],
+      "plan_hash": "cf73aa75e1e384deeeeb70ca00f439c4d20b6d39e5c25fc55feab726eb5e104c",
+      "policy_version": "v2",
+      "route_kind": "systematic_agent_route",
+      "schema_version": 1,
+      "source_goal_profile_hash": "fe7923df83933e072dad0c7ed3125097f6c44a6b704d1ff5b95a65efeee76bd3",
+      "verification_evidence": []
+    },
+    "stages": [
+      {
+        "capability_ids": [
+          "llm.api"
+        ],
+        "curriculum_role": "specialization",
+        "knowledge_refs": [
+          "knowledge_llm_api"
+        ],
+        "order_index": 0,
+        "outcome_refs": [
+          "llm.api.exchange",
+          "llm.api.failure_boundary",
+          "llm.api.usage_cost"
+        ],
+        "prerequisite_stage_refs": [],
+        "project_study_refs": [],
+        "stable_key": "v2.stage.86fec81a5d8001751548e453f2800b8d8bf531b8799546eabe6a84f23deca06a",
+        "stage_id": "stage_llm_api",
+        "task_refs": [
+          "task_llm_api"
+        ],
+        "title": "LLM API基础",
+        "unit_refs": [
+          "unit_llm_api"
+        ],
+        "what_to_learn": "解释并实践获准outcomes",
+        "why_now": "缺失能力需要有界教学",
+        "database_stage_id": "stg_de2412b08214455d94b52c6a5f5ab071",
+        "guidance": {
+          "comparison_focus": [],
+          "learning_focus": [
+            "精确目标"
+          ],
+          "practice_delta": {
+            "baseline": "当前可检查起点",
+            "increment": [
+              "本阶段增量"
+            ],
+            "preserved": [
+              "既有行为"
+            ],
+            "reuse": [
+              "按获准项目范围迁回"
+            ],
+            "validation": [
+              "正常与失败检查"
+            ]
+          },
+          "previous_relation": "基于已冻结学习起点",
+          "stage_ref": "stage_llm_api",
+          "why_now": "缺失能力需要有界教学"
+        }
+      },
+      {
+        "capability_ids": [
+          "mcp"
+        ],
+        "curriculum_role": "specialization",
+        "knowledge_refs": [
+          "knowledge_mcp"
+        ],
+        "order_index": 1,
+        "outcome_refs": [
+          "mcp.interfaces",
+          "mcp.minimal_connection",
+          "mcp.roles"
+        ],
+        "prerequisite_stage_refs": [],
+        "project_study_refs": [],
+        "stable_key": "v2.stage.2c9d0cb7253faf6dd88dba6ebff0499551a3a2c5cccf0bd04fde7d60758fbcb2",
+        "stage_id": "stage_mcp",
+        "task_refs": [
+          "task_mcp"
+        ],
+        "title": "MCP协议与集成边界",
+        "unit_refs": [
+          "unit_mcp"
+        ],
+        "what_to_learn": "解释并实践获准outcomes",
+        "why_now": "缺失能力需要有界教学",
+        "database_stage_id": "stg_da4d1831f57847c8a9dcc202d737f27b",
+        "guidance": {
+          "comparison_focus": [],
+          "learning_focus": [
+            "精确目标"
+          ],
+          "practice_delta": {
+            "baseline": "当前可检查起点",
+            "increment": [
+              "本阶段增量"
+            ],
+            "preserved": [
+              "既有行为"
+            ],
+            "reuse": [
+              "按获准项目范围迁回"
+            ],
+            "validation": [
+              "正常与失败检查"
+            ]
+          },
+          "previous_relation": "基于已冻结学习起点",
+          "stage_ref": "stage_mcp",
+          "why_now": "缺失能力需要有界教学"
+        }
+      },
+      {
+        "capability_ids": [
+          "tool.calling"
+        ],
+        "curriculum_role": "specialization",
+        "knowledge_refs": [
+          "knowledge_tool_calling"
+        ],
+        "order_index": 2,
+        "outcome_refs": [
+          "tool.calling.input_validation",
+          "tool.calling.invoke_result"
+        ],
+        "prerequisite_stage_refs": [
+          "stage_llm_api"
+        ],
+        "project_study_refs": [],
+        "stable_key": "v2.stage.a96f4a2d7505fe929e06f0f2d28aea6efb7d33d514f7841d0187032ee6891300",
+        "stage_id": "stage_tool_calling",
+        "task_refs": [
+          "task_tool_calling"
+        ],
+        "title": "Tool Calling",
+        "unit_refs": [
+          "unit_tool_calling"
+        ],
+        "what_to_learn": "解释并实践获准outcomes",
+        "why_now": "缺失能力需要有界教学",
+        "database_stage_id": "stg_3459132b29584f27802449031d7c099d",
+        "guidance": {
+          "comparison_focus": [],
+          "learning_focus": [
+            "精确目标"
+          ],
+          "practice_delta": {
+            "baseline": "当前可检查起点",
+            "increment": [
+              "本阶段增量"
+            ],
+            "preserved": [
+              "既有行为"
+            ],
+            "reuse": [
+              "按获准项目范围迁回"
+            ],
+            "validation": [
+              "正常与失败检查"
+            ]
+          },
+          "previous_relation": "基于已冻结学习起点",
+          "stage_ref": "stage_tool_calling",
+          "why_now": "缺失能力需要有界教学"
+        }
+      }
+    ],
+    "knowledge": [
+      {
+        "identity_kind": "curriculum_candidate",
+        "material_refs": [
+          "material_be276d2ec7551002fe881c04ccc9b438e03a7612ef5ff04205cb600000334e23"
+        ],
+        "objectives": [
+          "解释获准能力"
+        ],
+        "outcome_refs": [
+          "llm.api.exchange",
+          "llm.api.failure_boundary",
+          "llm.api.usage_cost"
+        ],
+        "stable_key": "knowledge_llm_api",
+        "stage_ref": "stage_llm_api",
+        "title": "LLM API基础"
+      },
+      {
+        "identity_kind": "curriculum_candidate",
+        "material_refs": [
+          "material_c551c4f0922b8f293dc551082eab4a3445529764a2f93a6ef31ae8452d286db2"
+        ],
+        "objectives": [
+          "解释获准能力"
+        ],
+        "outcome_refs": [
+          "mcp.interfaces",
+          "mcp.minimal_connection",
+          "mcp.roles"
+        ],
+        "stable_key": "knowledge_mcp",
+        "stage_ref": "stage_mcp",
+        "title": "MCP协议与集成边界"
+      },
+      {
+        "identity_kind": "curriculum_candidate",
+        "material_refs": [
+          "material_da2d5efffc7427e2209a41dbff2378683c3215e8cad6e7c61fc6d99aa795c66d"
+        ],
+        "objectives": [
+          "解释获准能力"
+        ],
+        "outcome_refs": [
+          "tool.calling.input_validation",
+          "tool.calling.invoke_result"
+        ],
+        "stable_key": "knowledge_tool_calling",
+        "stage_ref": "stage_tool_calling",
+        "title": "Tool Calling"
+      }
+    ],
+    "units": [
+      {
+        "knowledge_refs": [
+          "knowledge_llm_api"
+        ],
+        "objectives": [
+          "完成教学与实践"
+        ],
+        "outcome_refs": [
+          "llm.api.exchange",
+          "llm.api.failure_boundary",
+          "llm.api.usage_cost"
+        ],
+        "rubric": [
+          {
+            "outcome_refs": [
+              "llm.api.exchange",
+              "llm.api.failure_boundary",
+              "llm.api.usage_cost"
+            ],
+            "text": "可检查解释与示例"
+          }
+        ],
+        "stable_key": "unit_llm_api",
+        "stage_ref": "stage_llm_api",
+        "title": "有界教学单元"
+      },
+      {
+        "knowledge_refs": [
+          "knowledge_mcp"
+        ],
+        "objectives": [
+          "完成教学与实践"
+        ],
+        "outcome_refs": [
+          "mcp.interfaces",
+          "mcp.minimal_connection",
+          "mcp.roles"
+        ],
+        "rubric": [
+          {
+            "outcome_refs": [
+              "mcp.interfaces",
+              "mcp.minimal_connection",
+              "mcp.roles"
+            ],
+            "text": "可检查解释与示例"
+          }
+        ],
+        "stable_key": "unit_mcp",
+        "stage_ref": "stage_mcp",
+        "title": "有界教学单元"
+      },
+      {
+        "knowledge_refs": [
+          "knowledge_tool_calling"
+        ],
+        "objectives": [
+          "完成教学与实践"
+        ],
+        "outcome_refs": [
+          "tool.calling.input_validation",
+          "tool.calling.invoke_result"
+        ],
+        "rubric": [
+          {
+            "outcome_refs": [
+              "tool.calling.input_validation",
+              "tool.calling.invoke_result"
+            ],
+            "text": "可检查解释与示例"
+          }
+        ],
+        "stable_key": "unit_tool_calling",
+        "stage_ref": "stage_tool_calling",
+        "title": "有界教学单元"
+      }
+    ],
+    "materials": [
+      {
+        "material_id": "material_be276d2ec7551002fe881c04ccc9b438e03a7612ef5ff04205cb600000334e23",
+        "order_index": 0,
+        "outcome_refs": [
+          "llm.api.exchange",
+          "llm.api.failure_boundary",
+          "llm.api.usage_cost"
+        ],
+        "reading_focus": "只读对应教学章节",
+        "role": "primary",
+        "source_snapshot": {
+          "access_proof": null,
+          "content_hash": "ac1d02e2fd74b20e99116c07175205568b5390bfb4afcf72c4f479d7d7212e67",
+          "evidence_refs": [
+            {
+              "hash_scope": "body",
+              "location": "chapter.md#L1-L1",
+              "reference": "chunk_e4d251c1057b828fe69fd6bf92a5a197f376ab1d14fa722212346fcc1a3ae9dd",
+              "sha256": "b0cad9d37a5ff42e1c29aaa7508ea43d85cba8d78686d54d4fda9f4df0e33676"
+            }
+          ],
+          "free_access": "confirmed",
+          "kind": "researched_resource",
+          "limitations": [
+            "Synthetic fixture"
+          ],
+          "material_id": "material_be276d2ec7551002fe881c04ccc9b438e03a7612ef5ff04205cb600000334e23",
+          "outcome_refs": [
+            "llm.api.exchange",
+            "llm.api.failure_boundary",
+            "llm.api.usage_cost"
+          ],
+          "qualification": "research_checked",
+          "section_refs": [
+            "chapter.md#L1-L1"
+          ],
+          "source_id": "resource_9100e5dcd3bba6bc29f184fbdb52d0300f1ae2cc0cbcbdada90b5da8795bd031",
+          "source_version": "git-blob:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "title": "resource_9100e5dcd3bba6bc29f184fbdb52d0300f1ae2cc0cbcbdada90b5da8795bd031",
+          "url": "https://github.com/demo/item9-tutorial1/blob/main/chapter.md",
+          "usable": true
+        },
+        "stage_ref": "stage_llm_api"
+      },
+      {
+        "material_id": "material_c551c4f0922b8f293dc551082eab4a3445529764a2f93a6ef31ae8452d286db2",
+        "order_index": 0,
+        "outcome_refs": [
+          "mcp.interfaces",
+          "mcp.minimal_connection",
+          "mcp.roles"
+        ],
+        "reading_focus": "只读对应教学章节",
+        "role": "primary",
+        "source_snapshot": {
+          "access_proof": null,
+          "content_hash": "ab110888e3a25e485a977050748c857932c3a57fe0bcd77cc92fb5dff7f96e48",
+          "evidence_refs": [
+            {
+              "hash_scope": "body",
+              "location": "chapter.md#L1-L1",
+              "reference": "chunk_85f5b1d420a1348efa8b9fa5503bc2598b60283432f5ec874afa096110d76263",
+              "sha256": "b0cad9d37a5ff42e1c29aaa7508ea43d85cba8d78686d54d4fda9f4df0e33676"
+            }
+          ],
+          "free_access": "confirmed",
+          "kind": "researched_resource",
+          "limitations": [
+            "Synthetic fixture"
+          ],
+          "material_id": "material_c551c4f0922b8f293dc551082eab4a3445529764a2f93a6ef31ae8452d286db2",
+          "outcome_refs": [
+            "mcp.interfaces",
+            "mcp.minimal_connection",
+            "mcp.roles"
+          ],
+          "qualification": "research_checked",
+          "section_refs": [
+            "chapter.md#L1-L1"
+          ],
+          "source_id": "resource_9a6e3ca26ae67b4bf7c01f445c56aa5445a93452d743108a4a57752ad2a18da7",
+          "source_version": "git-blob:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "title": "resource_9a6e3ca26ae67b4bf7c01f445c56aa5445a93452d743108a4a57752ad2a18da7",
+          "url": "https://github.com/demo/item9-tutorial2/blob/main/chapter.md",
+          "usable": true
+        },
+        "stage_ref": "stage_mcp"
+      },
+      {
+        "material_id": "material_da2d5efffc7427e2209a41dbff2378683c3215e8cad6e7c61fc6d99aa795c66d",
+        "order_index": 0,
+        "outcome_refs": [
+          "tool.calling.input_validation",
+          "tool.calling.invoke_result"
+        ],
+        "reading_focus": "只读对应教学章节",
+        "role": "primary",
+        "source_snapshot": {
+          "access_proof": null,
+          "content_hash": "feb1a598aa0c0adf5fbafc1200813c287d8330554dcbe743d7c28f27a3a32a27",
+          "evidence_refs": [
+            {
+              "hash_scope": "body",
+              "location": "chapter.md#L1-L1",
+              "reference": "chunk_0359fb2ece978def1caf226deacd9c77753fdfd5be9ef1b255c7a045bd145c47",
+              "sha256": "b0cad9d37a5ff42e1c29aaa7508ea43d85cba8d78686d54d4fda9f4df0e33676"
+            }
+          ],
+          "free_access": "confirmed",
+          "kind": "researched_resource",
+          "limitations": [
+            "Synthetic fixture"
+          ],
+          "material_id": "material_da2d5efffc7427e2209a41dbff2378683c3215e8cad6e7c61fc6d99aa795c66d",
+          "outcome_refs": [
+            "tool.calling.input_validation",
+            "tool.calling.invoke_result"
+          ],
+          "qualification": "research_checked",
+          "section_refs": [
+            "chapter.md#L1-L1"
+          ],
+          "source_id": "resource_8f5339e84126544b50e4c2158086442243ec47a33f5a4c5deae025d591e0ec39",
+          "source_version": "git-blob:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "title": "resource_8f5339e84126544b50e4c2158086442243ec47a33f5a4c5deae025d591e0ec39",
+          "url": "https://github.com/demo/item9-tutorial3/blob/main/chapter.md",
+          "usable": true
+        },
+        "stage_ref": "stage_tool_calling"
+      }
+    ],
+    "practice": {
+      "carrier": {
+        "description": "已有本地 JSON 待办 CLI，保留现有接口和数据，不重建演示项目",
+        "final_artifact": {
+          "acceptance": [
+            {
+              "outcome_refs": [
+                "llm.api.exchange",
+                "llm.api.failure_boundary",
+                "llm.api.usage_cost",
+                "tool.calling.input_validation",
+                "tool.calling.invoke_result"
+              ],
+              "text": "产出正常与失败证据"
+            }
+          ],
+          "description": "可检查学习成果"
+        },
+        "kind": "user_project",
+        "project_context_hash": "53586a100e3111767ae6472097402d48fd0160a2082c248f0921c64c02a79fe2",
+        "reason": "保留既有项目作为持续实践载体"
+      },
+      "final_artifact": {
+        "acceptance": [
+          {
+            "outcome_refs": [
+              "llm.api.exchange",
+              "llm.api.failure_boundary",
+              "llm.api.usage_cost",
+              "tool.calling.input_validation",
+              "tool.calling.invoke_result"
+            ],
+            "text": "产出正常与失败证据"
+          }
+        ],
+        "description": "可检查学习成果"
+      },
+      "tasks": [
+        {
+          "acceptance": [
+            {
+              "outcome_refs": [
+                "llm.api.exchange",
+                "llm.api.failure_boundary",
+                "llm.api.usage_cost"
+              ],
+              "text": "正常与失败行为都有证据"
+            }
+          ],
+          "goal": "实际产生检查证据",
+          "in_scope": [
+            "获准能力"
+          ],
+          "knowledge_refs": [
+            "knowledge_llm_api"
+          ],
+          "order_index": 0,
+          "out_scope": [
+            "整仓库重构"
+          ],
+          "outcome_refs": [
+            "llm.api.exchange",
+            "llm.api.failure_boundary",
+            "llm.api.usage_cost"
+          ],
+          "practice_kind": "carrier",
+          "stable_key": "task_llm_api",
+          "stage_ref": "stage_llm_api",
+          "title": "有界练习"
+        },
+        {
+          "acceptance": [
+            {
+              "outcome_refs": [
+                "mcp.interfaces",
+                "mcp.minimal_connection",
+                "mcp.roles"
+              ],
+              "text": "正常与失败行为都有证据"
+            }
+          ],
+          "goal": "实际产生检查证据",
+          "in_scope": [
+            "获准能力"
+          ],
+          "knowledge_refs": [
+            "knowledge_mcp"
+          ],
+          "order_index": 0,
+          "out_scope": [
+            "整仓库重构"
+          ],
+          "outcome_refs": [
+            "mcp.interfaces",
+            "mcp.minimal_connection",
+            "mcp.roles"
+          ],
+          "practice_kind": "micro_exercise",
+          "stable_key": "task_mcp",
+          "stage_ref": "stage_mcp",
+          "title": "有界练习"
+        },
+        {
+          "acceptance": [
+            {
+              "outcome_refs": [
+                "tool.calling.input_validation",
+                "tool.calling.invoke_result"
+              ],
+              "text": "正常与失败行为都有证据"
+            }
+          ],
+          "goal": "实际产生检查证据",
+          "in_scope": [
+            "获准能力"
+          ],
+          "knowledge_refs": [
+            "knowledge_tool_calling"
+          ],
+          "order_index": 0,
+          "out_scope": [
+            "整仓库重构"
+          ],
+          "outcome_refs": [
+            "tool.calling.input_validation",
+            "tool.calling.invoke_result"
+          ],
+          "practice_kind": "carrier",
+          "stable_key": "task_tool_calling",
+          "stage_ref": "stage_tool_calling",
+          "title": "有界练习"
+        }
+      ]
+    },
+    "project_study": [],
+    "constraints": {
+      "assessments": [
+        {
+          "constraint_ref": "constraint_df5efc86ed221aeec8c0f74dc6d7640a8ed8fa5d39a1b0dd52de3e5cfceb1a98",
+          "evidence_refs": [
+            "material_be276d2ec7551002fe881c04ccc9b438e03a7612ef5ff04205cb600000334e23",
+            "material_c551c4f0922b8f293dc551082eab4a3445529764a2f93a6ef31ae8452d286db2",
+            "material_da2d5efffc7427e2209a41dbff2378683c3215e8cad6e7c61fc6d99aa795c66d"
+          ],
+          "policy_ref": "constraint-adaptation:v1",
+          "reason": "all_selected_materials_verified_free",
+          "scope": "material_access",
+          "source_refs": [
+            "goal.constraints[0]"
+          ],
+          "status": "satisfied"
+        }
+      ],
+      "constraint_refs": [
+        "constraint_df5efc86ed221aeec8c0f74dc6d7640a8ed8fa5d39a1b0dd52de3e5cfceb1a98"
+      ],
+      "hard_constraints": [
+        {
+          "constraint_id": "constraint_df5efc86ed221aeec8c0f74dc6d7640a8ed8fa5d39a1b0dd52de3e5cfceb1a98",
+          "source_refs": [
+            "goal.constraints[0]"
+          ],
+          "text": "教材必须免费"
+        }
+      ]
+    },
+    "unresolved": [],
+    "source_limitations": []
+  },
+  "v2_revision": null,
+  "draft_id": "drf_e5692fae87305e1dabd1f80bca778f63",
+  "status": "awaiting_approval",
+  "draft_hash": "29cba0e798b4249115cc29c4d6713b556eaa86750d7841654c9d778ca184b1b6",
+  "version": 1,
+  "validation_warnings": [],
+  "change_preview_id": null
+}

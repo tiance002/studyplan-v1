@@ -11,6 +11,11 @@ export type SummarySave = DTO['SummarySaveView'];
 export type SummaryReviewBody = DTO['SummaryReviewRequest'];
 export type SummaryReviewRun = DTO['SummaryReviewRunView'];
 export type SummaryCancelBody = DTO['SummaryCancelRequest'];
+export type PlanningDraft = DTO['PlanDraftView'];
+export type PlanningPlan = DTO['PlanView'];
+export type PlanningRun = DTO['RunView'];
+export type GoalSpec = DTO['GoalSpec'];
+export type RevisionContext = {plan_id:string;revision:number;goal:string;history_policy:string;stages:{stage_id:string;title:string;protected:boolean;learning_status:string}[]};
 let csrfToken = "";
 export const setCsrfToken = (token: string) => {
   csrfToken = token;
@@ -19,6 +24,8 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public code = '',
+    public outcomeUnknown = false,
   ) {
     super(message);
   }
@@ -40,7 +47,7 @@ async function request<T>(
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch {
-    throw new ApiError(0, "无法连接服务，请检查网络连接后重试。");
+    throw new ApiError(0, "无法连接服务，请检查网络连接后重试。", '', body !== undefined);
   }
   const data = await response.json().catch(() => null);
   if (!response.ok)
@@ -52,9 +59,11 @@ async function request<T>(
           : typeof data?.detail === "string"
             ? data.detail
             : `请求失败（${response.status}），请检查输入或重新加载。`),
+      typeof data?.code === 'string' ? data.code : '',
+      body !== undefined && response.status >= 500,
     );
   if (data === null)
-    throw new ApiError(response.status, "服务返回了无法读取的内容，请稍后重试。");
+    throw new ApiError(response.status, "服务返回了无法读取的内容，请稍后重试。", '', body !== undefined);
   return data as T;
 }
 const scope = (project: string) => `?project_id=${encodeURIComponent(project)}`;
@@ -62,6 +71,15 @@ export { request as requestApi };
 const resourceScope = (project: string, target: ResourceTarget) =>
   `${scope(project)}&${new URLSearchParams({plan_id:target.plan_id,stage_id:target.stage_id,unit_id:target.unit_id})}${target.node_id ? `&node_id=${encodeURIComponent(target.node_id)}` : ''}`;
 export const api = {
+  planningAvailability: (project:string) => request<DTO['V2PlanningAvailability']>(`/plans/v2/availability${scope(project)}`),
+  generateOwnedPlan: (project:string, body:DTO['PlanGenerateRequest']) => request<DTO['PlanGenerateResponse']>(`/plans/v2/owned/generate${scope(project)}`,body),
+  answerPlanningQuestions: (project:string,body:DTO['V2ClarificationRequest']) => request<DTO['PlanGenerateResponse']>(`/plans/v2/owned/clarifications${scope(project)}`,body),
+  revisionContext: (project:string) => request<RevisionContext>(`/plans/v2/changes/context${scope(project)}`),
+  previewLocalPlan: (project:string,body:DTO['V2LocalChangeRequest']) => request<PlanningDraft>(`/plans/v2/changes/local${scope(project)}`,body),
+  revisionPreview: (project:string,id:string) => request<PlanningDraft>(`/plans/v2/changes/${encodeURIComponent(id)}${scope(project)}`),
+  decideRevision: (project:string,id:string,action:'confirm'|'cancel',body:DTO['V2RevisionDecisionRequest']) => request<DTO['PlanDecisionResponse']>(`/plans/v2/changes/${encodeURIComponent(id)}/${action}${scope(project)}`,body),
+  replanOwned: (project:string,body:DTO['V2SemanticReplanRequest']) => request<DTO['PlanGenerateResponse']>(`/plans/v2/owned/replan${scope(project)}`,body),
+  planRevision: (project:string,revision:number) => request<PlanningPlan>(`/plans/revisions/${revision}${scope(project)}`),
   planChangeContext: (project: string) => request<DTO['PlanChangeContext']>(`/plan-changes/context${scope(project)}`),
   previewPlanChange: (project: string, body: DTO['PlanChangeRequest']) => request<DTO['PlanChangePreviewView']>(`/plan-changes${scope(project)}`, body),
   planChange: (project: string, id: string) => request<DTO['PlanChangePreviewView']>(`/plan-changes/${encodeURIComponent(id)}${scope(project)}`),

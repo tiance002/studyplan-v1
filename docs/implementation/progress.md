@@ -1,3 +1,10 @@
+## 2026-10-09 Planning V2 Item9：CLARIFICATION_CONTINUATION_PASS / REACT_IMPLEMENTATION_COMPLETE / REAL_PRODUCT_SEMANTIC_ACCEPTANCE_PENDING / PUBLIC_GENERATE_NOT_ENABLED / STOP
+
+- C0–C2 本地提交d142cde1c5e33b50955770b2fa4b69650c1f8a2e：原failed Run/Receipt保留，typed问题/答案版本成员来源绑定，最多两轮，同预算root，原子幂等及unknown/fence不绕过，无migration。119 unit/contract、38个独立owned PG case（31基础+定向关闭复用）、actualTCP Cookie-CSRF→Draft→confirm→freshcurrent/history PASS；独审四组缺陷关闭。
+- U1–U3正式React接线真实公开profile/capabilities/stages.guidance/knowledge/units/materials/practice/projectstudy/constraints，不复制HTML演示状态；保留规范化target来源claim/constraint和已有项目。独审关闭public字段、unknown身份、GET/POST失败区分、preview/history确认隔离、空表单及补充事实丢失。最终Node/SSR、build、8拦截边界+history+semantic正分支PASS；真实owned Edge澄清→完整Draft→明确采用→local预览/确认/取消→freshcurrent/history、刷新重login及390px视觉PASS。搜索共享预算不足的semantic真实负分支PASS，成功semantic浏览器确认NOT RUN（PG成功合同+前端拦截正分支分别PASS）。所有原FAIL/selector/fixture证据保留，不重派failed或unknown。
+- [React最终报告](../planning-v2/ITEM9_REACT_IMPLEMENTATION.md)与[澄清报告](../planning-v2/ITEM9_CLARIFICATION_CONTINUATION.md)保留原U0 STOP历史；HTML dc1dd08...、架构合同、.env、历史账本与受保护目录保持。final HEAD定位本地checkpoint-item9-final-20261009及交付SHA回执，无push/merge/deploy。
+- 产品LLM/搜索/Reader请求0，原正式DB写0，实际外部端口仅显式Mock；owned业务/checkpoint及证据保留，临时服务器交付停止。真实课程质量、真实模型语义与正式开放仍待另行授权。不把Mock或浏览器通过当产品可用，正常public generate503保护保持。
+
 ## 2026-10-09 Planning V2 Item 9 C0–C2
 
 初始澄清安全续接 PASS，独立安全审查四组缺陷已关闭。119 unit/contract、31 新 owned PG 矩阵与受影响定向检查 PASS；真实本地 TCP Cookie/CSRF→新 Run→Draft→确认→Revision fresh readback PASS。原 failed Run/Receipt 保留、最多两轮、同预算根、unknown 不重派、public generate503。无 migration / 正式库写 / 产品LLM搜索Reader；新 owned DB与证据保留。React U1–U3 按已批准HTML连续实施中，真实产品语义仍待授权。详见 ITEM9_CLARIFICATION_CONTINUATION.md；原U0 STOP与原型批准记录保留。

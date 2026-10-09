@@ -1,64 +1,54 @@
-// Local browser fixture only: no backend, database, provider or external network.
-const { chromium } = require('playwright-core');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const BASE = process.env.STUDYPLAN_URL || 'http://127.0.0.1:5178';
-const MESSAGE = '新的学习规划流程正在重构，当前暂不可创建新路线。';
-
-(async () => {
-  assert.ok(['127.0.0.1', 'localhost'].includes(new URL(BASE).hostname));
-  const browser = await chromium.launch({ channel: 'msedge', headless: true });
-  const evidence = [];
-  try {
-    for (const status of ['none', 'queued', 'running', 'waiting_user', 'succeeded', 'failed', 'cancelled', 'reconciliation_required']) {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      const requests = [], errors = [];
-      page.on('pageerror', error => errors.push(error.message));
-      await context.route('**/*', route => {
-        const request = route.request(), url = new URL(request.url());
-        if (!['127.0.0.1', 'localhost'].includes(url.hostname)) return route.abort('blockedbyclient');
-        if (url.pathname === '/api/v1/session') return route.fulfill({ json: { username: 'placeholder-owner', project_ids: ['placeholder-project'], csrf_token: 'local-fixture' } });
-        if (url.pathname === '/healthz') return route.fulfill({ json: { llm_provider: 'unavailable' } });
-        if (url.pathname === '/api/v1/workspace') return route.fulfill({ status: 404, json: {} });
-        if (url.pathname.startsWith('/api/v1/')) {
-          requests.push({ method: request.method(), path: url.pathname });
-          return route.abort('blockedbyclient');
-        }
-        return route.continue();
-      });
-      // Old opaque identifiers must never cause automatic recovery or replay.
-      await context.addInitScript(({ status }) => {
-        if (status === 'none') return;
-        localStorage.setItem('studyplan-run:placeholder-project', 'retained-' + status);
-        localStorage.setItem('studyplan-run:["placeholder-owner","placeholder-project"]', 'retained-' + status);
-        localStorage.setItem('studyplan-plan-change:["placeholder-owner","placeholder-project"]', 'retained-proposal');
-      }, { status });
-      await page.goto(BASE + '/#planning');
-      await page.waitForLoadState('networkidle');
-      const heading = page.getByRole('heading', { name: '学习计划', exact: true });
-      await heading.waitFor();
-      const content = heading.locator('..');
-      assert.equal((await content.innerText()).trim(), '学习计划\n\n' + MESSAGE);
-      assert.equal(await content.locator('button,input,textarea,select,form,details').count(), 0);
-      assert.doesNotMatch(await content.innerText(), /Seed|Run|RAG|Coding|Workflow|Browser|A[0-8]|专项|草案|方向/);
-      await page.reload();
-      await page.waitForLoadState('networkidle');
-      assert.equal((await content.innerText()).trim(), '学习计划\n\n' + MESSAGE);
-      assert.deepEqual(requests, [], 'no generation, draft, publication, run recovery or history requests');
-      assert.deepEqual(errors, []);
-      evidence.push({ retained_status: status, unexpected_api_requests: requests, page_errors: errors, rendered: await content.innerText() });
-      if (status === 'none' && process.env.STUDYPLAN_PLACEHOLDER_EVIDENCE_DIR) {
-        const directory = path.resolve(process.env.STUDYPLAN_PLACEHOLDER_EVIDENCE_DIR);
-        fs.mkdirSync(directory, { recursive: true });
-        await page.screenshot({ path: path.join(directory, 'planning-placeholder-edge.png'), fullPage: true });
-      }
-      await context.close();
-    }
-    if (process.env.STUDYPLAN_PLACEHOLDER_EVIDENCE_DIR) {
-      fs.writeFileSync(path.join(path.resolve(process.env.STUDYPLAN_PLACEHOLDER_EVIDENCE_DIR), 'planning-placeholder-browser.json'), JSON.stringify({ status: 'PASS', browser: 'Edge', fixture: 'local intercepted HTTP; no backend/DB/provider', cases: evidence }, null, 2));
-    }
-    console.log('PASS: Edge planning route placeholder, 8 retained-cache states and reload; 0 planning/Run/Draft/decision calls');
-  } finally { await browser.close(); }
-})().catch(error => { console.error(error); process.exitCode = 1; });
+// Intercepted HTTP boundary; owned PG/Worker acceptance is separate.
+const {chromium}=require('playwright-core'),assert=require('node:assert/strict');
+const BASE=process.env.STUDYPLAN_URL||'http://127.0.0.1:5178';
+(async()=>{
+ assert.ok(['localhost','127.0.0.1'].includes(new URL(BASE).hostname));const browser=await chromium.launch({channel:'msedge',headless:true});
+ try {for(const scenario of ['none','failed','reconciliation_required','cancelled','network_unknown','server_unknown','unreadable_success','conflict']){
+  const unknown=scenario.endsWith('unknown')||scenario==='unreadable_success',canGenerate=unknown||scenario==='conflict';
+  const context=await browser.newContext(),page=await context.newPage(),mutations=[],errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await context.route('**/*',route=>{
+   const request=route.request(),url=new URL(request.url());if(!['localhost','127.0.0.1'].includes(url.hostname))return route.abort();
+   if(url.pathname==='/api/v1/session')return route.fulfill({json:{username:'boundary-owner',project_ids:['boundary-project'],csrf_token:'fixture-csrf'}});
+   if(url.pathname==='/healthz')return route.fulfill({json:{llm_provider:'unavailable'}});
+   if(url.pathname==='/api/v1/workspace'||url.pathname==='/api/v1/plans/current')return route.fulfill({status:404,json:{}});
+   if(url.pathname==='/api/v1/plans/v2/availability')return route.fulfill({json:{initial_generation:canGenerate,clarification:false,semantic_replanning:false,local_change:false,message:canGenerate?'受控学习规划可用':'学习计划生成正在升级，当前暂不可创建新路线。'}});
+   const retained={run_id:'retained',status:scenario,next_action:'none',version:1,error:{code:scenario,message:'需要核对当前状态'}};
+   if(url.pathname==='/api/v1/runs')return route.fulfill({json:scenario==='none'||canGenerate?[]:[retained]});
+   if(url.pathname==='/api/v1/runs/retained')return route.fulfill({json:retained});
+   if(url.pathname==='/api/v1/plans/v2/owned/generate'&&request.method()==='POST'){
+    mutations.push({path:url.pathname,body:request.postDataJSON()});
+    if(scenario==='conflict')return route.fulfill({status:409,json:{code:'conflict',message:'服务端版本已变化'}});
+    if(scenario==='network_unknown')return route.abort();
+    if(scenario==='server_unknown')return route.fulfill({status:500,json:{message:'需要核对提交结果'}});
+    return route.fulfill({status:202,body:'not-json',contentType:'application/json'});
+   }
+   if(url.pathname.startsWith('/api/v1/')){if(request.method()!=='GET')mutations.push({path:url.pathname});return route.abort();}return route.continue();
+  });
+  await page.goto(BASE+'/#planning');await page.getByRole('heading',{name:'学习计划',exact:true}).waitFor();
+  const generate=page.getByRole('button',{name:'生成学习计划',exact:true});
+  if(canGenerate){
+   await page.getByLabel('学习目标',{exact:true}).fill('学习目标');await generate.click();
+   if(scenario==='conflict'){
+    await page.getByRole('alert').filter({hasText:'计划或问题已变化，请手动刷新后核对当前状态。'}).waitFor();
+    assert.equal(await page.evaluate(()=>sessionStorage.getItem('studyplan-v2:["boundary-owner","boundary-project"]:mutation')),null);
+   }else{
+    await page.getByText('提交结果尚未核对，请刷新当前状态。不会自动重复提交。').waitFor();
+    const frozen=await page.evaluate(()=>sessionStorage.getItem('studyplan-v2:["boundary-owner","boundary-project"]:mutation'));
+    assert.ok(frozen.includes('generateOwnedPlan'));assert.ok(!frozen.includes('fixture-csrf'));
+   }
+  }else{
+   await page.getByText('学习计划生成正在升级，当前暂不可创建新路线。').waitFor();
+   if(scenario==='none')assert.equal(await generate.isDisabled(),true);
+   else {await page.getByRole('heading',{name:scenario==='reconciliation_required'?'需要核对执行结果':scenario==='cancelled'?'已取消生成':'计划尚未完成',exact:true}).waitFor();assert.equal(await generate.count(),0);assert.equal(await page.getByLabel('学习目标',{exact:true}).count(),0);}
+  }
+  if(scenario==='none'||canGenerate){await page.getByRole('button',{name:'补充信息（可选）'}).click();await page.getByRole('dialog').waitFor();await page.keyboard.press('Escape');assert.equal(await page.getByRole('dialog').count(),0);}
+  await page.reload();await page.getByRole('heading',{name:'学习计划',exact:true}).waitFor();
+  if(unknown){await page.getByText('提交结果尚未核对，请刷新当前状态。不会自动重复提交。').waitFor();await page.getByRole('button',{name:'刷新当前状态',exact:true}).click();assert.equal(await generate.isDisabled(),true);assert.equal(mutations.length,1);}
+  else if(scenario==='conflict'){await page.getByRole('button',{name:'刷新当前状态',exact:true}).click();assert.equal(mutations.length,1);}
+  else assert.deepEqual(mutations,[]);
+  assert.deepEqual(errors,[]);await context.close();
+ }
+ console.log('PASS: 8 intercepted scenarios; disabled initial generation, retained Run hides empty form, dialog Escape, unknown identity survives reload/manual GET, 409 safe conflict, no automatic mutations');
+ }finally{await browser.close();}
+})().catch(error=>{console.error(error);process.exitCode=1;});
