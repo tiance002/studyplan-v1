@@ -1,3 +1,12 @@
+## 2026-10-09 Scenario A真实Item1–2验收：ITEM1_REAL_SEMANTIC_PASS / ITEM2_PROGRAM_FAIL / ITEM2_REAL_SEMANTIC_FAIL / STOP
+
+- [本轮真实验收](../planning-v2/PLANNING_V2_SCENARIO_A_REAL_SEMANTIC.md)基于1fdd5d4e845b22e74e4168399e9ca14ec070bd3d。Owner单独批准2新deepseek-flash、2官方价格余额GET并接受无数学现金硬上限残余风险；冻结原A未改。官方实时peak输入2/输出8 CNY每百万，余额1.96；仅峰值无缓存折扣估算，不冒充实际扣款或现金门禁。
+- 单一acceptance scenario-a-real-5cf165c5a344，ledger184/185，各一次；实际wire完整messages5692/14238bytes，均32KiB前置检查后绑定Goal/body/messages/Profile/pricing哈希，exclusive fsync账本后发送同bytes。4096非思考，原model/finish/usage显式检查，旧unknown177/183与Case7不重派，未知0。
+- Item1真实ready Profile、三约束原文/source refs、Python已知与原CLI/JSON全文保留；1239input/522output/stop/3104ms，Validator/hash与独立语义PASS。独审文件绑定原response与Profile后才派S2；未用合成Profile。
+- Item2真实3710input/2064output/stop/6347ms，Provider明确200 JSON但Domain capability_plan_invalid。原样复现首拒definition_refs：7已知能力缺Policy refs；独审FAIL：载体保留/工具权限范围误成project exclusion又usage required，MCP把learn用途当技术学习目标，另应用深度req未覆盖。无合法CapabilityPlan/plan_hash；STOP不repair/retry，不自动修Prompt。
+- 总2模型/2metadata，4949input+2586output=7535tokens，peak估算CNY0.030586；账本183→185/280、历史unknown2保持，search6/1000未增，本批额度已全部使用，余量不授权。派发前ignored harness两处来源/默认值审查finding已关闭；开发独审请求Sol6.1xhigh，实际解析NOT OBSERVABLE。
+- 仅报告/progress tracked修改，生产/Prompt/Schema/Policy/.env/正式数据库/public503未改，旧记录hash与progress历史bytes保持。PG/Worker/浏览器/全量回归/完整教材课程端到端NOT RUN，搜索Reader正文领域验证0。无新业务Run/Job/Draft/Revision、migration、push/merge/deploy。STOP，建议后续单独授权有界Item2离线Prompt合同修复，真实复测另行授权。
+
 ## 2026-10-09 Planning V2 Item2约束作用域最小修复：ITEM2_CONSTRAINT_SCOPE_FIX_PASS / REAL_SEMANTIC_ACCEPTANCE_NOT_RUN / STOP
 
 - [本轮报告](../planning-v2/ITEM2_CONSTRAINT_SCOPE_FIX.md)基于18b8474e7c9b17839675213ed28e44811854e19d，原Scenario A逐字段不变。仅两个完整原文exact新增识别：CLI/JSON持续载体→existing_carrier，用户允许本地任务范围→local_tool_scope。无关键词/相似度开放，网络/外发/隐私/复合约束8反例仍实际Provider preflight拒绝，0外部invoke。
