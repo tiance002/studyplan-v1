@@ -1,3 +1,7 @@
+## 2026-10-10 Planning V2 Item 2 单次真实复测：本地准备完成，等待授权
+
+任务 PLANNING_V2_ITEM2_REAL_RETEST_V1；source HEAD f214f729ec05322c8e179adc2deadc94a90fc731。原184响应重建 Profile/source_refs/constraint_id/hash 全文一致 PASS；实际最新 Prompt + Provider preflight/MockTransport 请求构造 PASS，messages 17775 bytes，deepseek-flash/4096/thinking disabled。账本仍185，unknown177/183保留；本轮所有真实外部请求0，价格/余额/真实Item2/独立真实语义 NOT RUN，未创建新请求身份或账本项。仅报告及进度；复用上轮117/20/Ruff/独审，不重跑矩阵。Owner 单独外部授权未收到，EXTERNAL_AUTHORIZATION_PENDING，ITEM2_REAL_SEMANTIC_RETEST_NOT_RUN；STOP，不进入Item3–7。详见 docs/planning-v2/ITEM2_REAL_SEMANTIC_RETEST.md。
+
 ## 2026-10-09 Item2真实失败定向离线修复：ITEM2_REAL_FAILURE_OFFLINE_FIX_PASS / ITEM2_REAL_SEMANTIC_RETEST_NOT_RUN / STOP
 
 - [本轮报告](../planning-v2/ITEM2_REAL_FAILURE_FIX.md)基于b7b7aff07386648b61bea97a5df1591f15bfdd95。原185响应原样重放仍definition_refs拒绝；真实184 Profile/source refs/hash与历史失败/raw/账本不改。只修Item2专用Prompt/field shape，原Schema/Validator/Policy/约束版本及Runtime保持。
