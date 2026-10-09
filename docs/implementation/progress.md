@@ -1,3 +1,11 @@
+## 2026-10-09 Planning V2 产品验收前置收口：PREP_COMPLETE / REAL_PRODUCT_ACCEPTANCE_NOT_RUN / STOP
+
+- [前置报告](../planning-v2/PLANNING_V2_PRODUCT_ACCEPTANCE_PREP.md)基于dc3d60372502a43caf544558ade46cba945aaf0f，复用C0–U3有效证据；本机模型账本实际183/280、unknown2，搜索6/1000，剩余仅算术97/994，本Goal外部授权0，旧177/183不重派。
+- 唯一成功Semantic补证：全新owned业务/checkpoint、实际Worker/HTTP Cookie-CSRF/Edge，json.cli初始Draft明确确认v1→保留Python已知/CLI/免费约束→python.async新Draft明确确认v2→刷新重登录current/history PASS。两个succeeded Run同原budget root，累计search2/Reader2/body131072/output22528/total14/internalcost162000；原已验证owned caps未提高。旧summary原文/rubric/source snapshot及exposure全保持，新版本不继承；Practice artifact/模型summary review NOT RUN。全部Mock/合成资格，不冒称真实教材通过，临时服务器已停、新owned库保留。
+- A/B/C固定验收输入及矩阵完成；真实受控索引只支持MCP roles/interfaces，不含minimal_connection，三目标资料链未闭合。B需可信领域与源码行为审核，C写入/统计及部分Python掌握属需验证风险，不自动改Policy。最小一期优先A，待Owner单独授权最多7模型（含4Reader）/4搜索/8正文HTTP；durable上界19、当前有效Provider output16384。默认ResearchBudget output4096/total16/cost100000无法承载该最坏批次，未改cap/正式装配。
+- 独审关闭报告purpose枚举/Reader purpose/有效4096 cap及条件费用误述；新public503 storage-denied单项PASS，3最终GoalSpec构造PASS；完整Backend/正式PG/真实外部/真实教学质量NOT RUN。输入token无现有硬cap、当前价余额/搜索credit未查，因此现金硬上限未证明；历史价条件CNY0.360448不是授权或保证。
+- 本轮只新增报告并前置progress，源码/架构/迁移/Policy/Seeds/审核资格/.env/历史账本不改，产品模型/真实搜索/Reader0，正式generate关闭，不push/merge/deploy。本地checkpoint见本次交付回执。STOP等待Owner对真实外部范围、合法预算绑定、输入/现金门禁及费用单独决定。
+
 ## 2026-10-09 Planning V2 Item9：CLARIFICATION_CONTINUATION_PASS / REACT_IMPLEMENTATION_COMPLETE / REAL_PRODUCT_SEMANTIC_ACCEPTANCE_PENDING / PUBLIC_GENERATE_NOT_ENABLED / STOP
 
 - C0–C2 本地提交d142cde1c5e33b50955770b2fa4b69650c1f8a2e：原failed Run/Receipt保留，typed问题/答案版本成员来源绑定，最多两轮，同预算root，原子幂等及unknown/fence不绕过，无migration。119 unit/contract、38个独立owned PG case（31基础+定向关闭复用）、actualTCP Cookie-CSRF→Draft→confirm→freshcurrent/history PASS；独审四组缺陷关闭。
