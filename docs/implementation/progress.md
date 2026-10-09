@@ -1,3 +1,11 @@
+## 2026-10-09 Planning V2 Token与现金门禁最小闭包：BLOCKED_WITH_EXACT_MISSING_AUTHORITY / STOP
+
+- [最小闭包报告](../planning-v2/PLANNING_V2_TOKEN_CASH_GATE_CLOSURE.md)基于2edc467a236df3e0c73cc95f46a5226c1b212f93，复用owned预算、Worker/Semantic/历史/React证据，不重跑全量。T0已读官方V4.1 Tokenizer指导/Issue5及Chat Completions；token_usage直接超时后读取确切官方索引，资产目录访问失败不代表不存在。Tokenizer/ZIP未下载，未安装依赖或跑真实计费实验。
+- INPUT_BOUND_UNPROVEN仍未解决：第三方特殊token反例否定无条件local计数上界，但不证明当前main仍有同一Bug。当前JSON确实可保留特殊字面量，纯离线可达性PASS不代表API计数。官方context ceiling是被接收推理输入的宽上界候选；有限缺口为超限/拒绝请求是否不收费，或全部计费输入同受ceiling限制，以及数值/版本冻结。Unknown本身不是反证；无需无限猜测服务器行为。
+- 按T0条件停止T1/T2 cash代码，CASH_DISPATCH_GUARD_MISSING / COST_UNCERTAIN_CONTINUE仍未解决。用户本轮T2优先：如可信worst现金预约已存在，usage=None保留整笔并可在同root累计cap内继续；并非所有缺usage必停。当前只有internal cost_micros，不能冒充现金。旧报告保留溯源，cash定向反例NOT RUN；原unknown/取消/fence/恢复PASS仅复用。
+- 独审请求Sol6.1xhigh，实际解析NOT OBSERVABLE；报告条件与有限权威缺口经复核，独审PASS不等于cash门禁或真实产品验收通过。新tracked修改仅报告/progress，旧历史bytes保留，源码/.env/账本/正式DB/公开入口不改，无migration，无push/merge/deploy。
+- 模型/搜索账本hash不变：模型183/280、unknown2（177/183）、search6/1000；算术余量不授权。真实DeepSeek/Tavily/正文/Reader/凭据preflight0，新资产下载0；T0公开文档读取单列，不能说所有网络0。不自动批准CNY0.50或context宽界金额，尚不能READY_FOR_EXTERNAL_PREFLIGHT。下一仅补官方计费范围或授权固定资产+API对应证明，账号GET不能代替；本地checkpoint见回执，STOP。
+
 ## 2026-10-09 Planning V2真实验收派发门禁：BLOCKED / REAL_EXTERNAL_REQUESTS_NOT_RUN / STOP
 
 - [派发门禁报告](../planning-v2/PLANNING_V2_REAL_ACCEPTANCE_DISPATCH_GATE.md)基于d19f0b7a51e4b48bcd2f5b4073edf675d8016b91，直接复用前置C0–U3/成功Semantic/固定A/B/C/教材及保护证据。新owned一期内部budget16384output/19total/144000内部cost/search4/Reader4/body262144/candidates8可由既有factory冻结，不改default或正式装配；旧P1 root22528output/162000cost绝不替换或归零。
