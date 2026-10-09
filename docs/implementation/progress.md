@@ -1,3 +1,11 @@
+## 2026-10-09 Planning V2 Item9：HTML_PROTOTYPE_READY_FOR_USER_REVIEW / REACT_NOT_STARTED / REAL_PRODUCT_ACCEPTANCE_PENDING / STOP
+
+- 基线 feat/n1-resource-discovery / 8c578d404a9b6337ede9c0c2e7fd70deb01f3ef4。先复用既有 HTML 与首版22项离线Edge证据，按追加要求增量补足教学概览、折叠阶段理由/知识/教材/实践、前置与单元完成能力、持续项目增量与独立MCP Micro Exercise，以及Case Study输入输出/失败/取舍/产物；无固定方向选择器、Python复习或固定学习日期。
+- [Item9评审报告](../planning-v2/ITEM9_HTML_PROTOTYPE_REVIEW.md)与[独立HTML](../planning-v2/prototypes/planning-v2-ui.html)覆盖A–F；所有资料、案例与历史均合成且标明演示，无虚构可用网址或审核资格。未完成草案禁确认；未来说明/合法顺序可预览确认，任意任务/教材编辑不开放，目标改变回到重新规划演示。
+- 本机Edge154.0.4258.62，1440×1000与390×844新增20项PASS；独审发现未采用D被独立F顺带采用，最小隔离后受影响3项PASS、独审关闭PASS。14张新截图已实际核看，首版截图与失败记录保留。脚本首次同义文案匹配FAIL、修复前返回入口超时FAIL分别记录，不混为真实产品语义验收。
+- 只修改HTML/评审文档/本progress；其他tracked文件、历史报告/账本/受保护目录保持。产品模型/搜索/Reader/API/DB0，正式React/后端/Policy/Prompt/Schema/Worker/迁移/发布配置不改。public generate原fail-closed实现未动，本轮HTTP产品验证NOT RUN；Backend/PG/Worker/完整产品E2E NOT RUN。
+- 本地提交消息 feat(planning): add v2 planning html prototype，SHA见本次交付回执；不push/merge/deploy。实现/独审请求Sol6.1medium，实际解析NOT OBSERVABLE。用户尚未批准原型，React严格NOT_STARTED；完成后STOP，后续仅按用户设计反馈修订。
+
 ## 2026-10-09 Planning V2 Item8：IMPLEMENTATION_COMPLETE / ITEM9_NOT_STARTED / REAL_PRODUCT_SEMANTIC_ACCEPTANCE_PENDING / STOP
 
 - [Item8统一报告](../planning-v2/ITEM8_REPLANNING_REVISION.md)完成R0～R3；R0 f0a7a04、R1 074836e、R2 2a14b32，R3精确SHA见最终本地tag/提交后回执。Local未来说明/合法完整排序→Compiler→Draft/hash→明确确认→原子Revision；Semantic新GoalSpec/newRun进入同Item1～7，旧current直到确认，历史精确lineage保留且不复制进度/mastery，无第二Planner或旧固定路线回流。
