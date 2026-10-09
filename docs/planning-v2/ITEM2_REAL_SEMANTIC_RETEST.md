@@ -1,119 +1,129 @@
-# Item 2 单次真实语义复测：本地冻结准备
+# Item 2 单次真实语义复测
 
-任务：`PLANNING_V2_ITEM2_REAL_RETEST_V1`。日期：2026-10-10。
+任务：PLANNING_V2_ITEM2_REAL_RETEST_V1。日期：2026-10-10。
 
-**R0 本地准备 PASS；本次真实程序验收 NOT RUN；本次独立真实语义验收 NOT RUN。**
+**Provider PASS；程序合同 FAIL；独立真实语义 FAIL。不是合法 pending。**
 
-本 Goal 明确要求 Owner 另行批准外部请求；截至本报告交付，尚未收到该项单独授权。因此价格、余额预检和真实 Item 2 请求均未执行。上一轮184/185的授权已使用，账本剩余容量不构成本轮授权。未把离线请求构造或合成结果当作真实复测 PASS。
+Owner 在明确的“1次Item2模型、最多2次官方元数据、4096输出、关闭thinking、32KiB消息、接受非严格现金硬上限残余风险”范围之后回复“执行”，本轮按该范围执行。唯一模型请求已完成并STOP，没有重试、repair或后续模型调用。原始JSON没有修改或补齐；未形成合法CapabilityPlan或plan_hash。
 
-## 1. 基线与范围
+## 1. 基线、授权与范围
 
-- Start/source HEAD：`f214f729ec05322c8e179adc2deadc94a90fc731`，与参考一致。
-- Branch：`feat/n1-resource-discovery`。
-- 起始 tracked tree clean；只有既存 `.workbuddy/`、`design-preview/` untracked，未操作。
-- 本报告的文档 checkpoint 是 Final HEAD；提交后准确 SHA 存于 ignored delivery receipt，避免报告自引用自身提交 SHA。
-- 复用 [上轮真实 Scenario A](PLANNING_V2_SCENARIO_A_REAL_SEMANTIC.md)、[约束作用域修复](ITEM2_CONSTRAINT_SCOPE_FIX.md) 和 [Item 2 真实失败离线修复](ITEM2_REAL_FAILURE_FIX.md)。权威合同、Policy v2、Schema、Validator、历史 Profile、正式配置和生产源码均未修改。
-- 仅新增本报告、前置进度记录；本地冻结脚本和证据保存在 ignored `var/planning-v2-item2-real-retest-20261010/`。
-- 主会话实际 model/effort 解析：`NOT OBSERVABLE`；未修改模型全局配置。复用上轮独审，不为本地机械核对重复派审。
+- 参考/source HEAD：f214f729ec05322c8e179adc2deadc94a90fc731。
+- R0准备报告提交及真实执行Start HEAD：9bd56be638ae4db39609b1d8b4402cdad320691b。与参考之间只有本任务报告/进度，无新增源码变化。
+- Branch：feat/n1-resource-discovery。执行前tracked tree clean，仅既存 .workbuddy/、design-preview/ untracked，未操作。
+- Final HEAD为本报告所属tag checkpoint-planning-v2-item2-real-retest-20261010^{commit}；准确SHA保存ignored delivery receipt，避免文档自引用。
+- 复用 [原Scenario A真实验收](PLANNING_V2_SCENARIO_A_REAL_SEMANTIC.md)、[约束作用域修复](ITEM2_CONSTRAINT_SCOPE_FIX.md)、[Item2离线修复](ITEM2_REAL_FAILURE_FIX.md)。原117项回归/20项修复测试/Ruff/独审在源码未变时复用，不重跑Item1或完整矩阵。
+- tracked修改仅本报告和进度。harness、响应和审查证据在ignored var/planning-v2-item2-real-retest-20261010/。架构、Policy v2、Schema、Validator、历史Profile、生产代码和正式配置未修改。
+- 独立审查请求gpt-6.1-sol/xhigh；实际解析NOT OBSERVABLE。主会话实际解析同样NOT OBSERVABLE，未修改全局模型配置。
+- 本轮授权只消费新scope；原184/185授权已使用，不沿用旧额度。允许不严格现金硬上限的开发验收，不构成现金门禁PASS。
 
-## 2. 原真实 Profile 冻结
+## 2. R0：原真实Profile与请求冻结
 
-从 `var/planning-v2-scenario-a-real-20261009/item1.response.body` 的实际 HTTP envelope 提取 `choices[0].message.content`，解析原 JSON，再使用原 `GoalRequirementProfileValidator` 和原 GoalSpec 重建。没有使用合成 witness 作为输入。
+从第184次原始HTTP响应 var/planning-v2-scenario-a-real-20261009/item1.response.body 提取模型JSON，再以原GoalSpec和原GoalRequirementProfileValidator重建。全文与历史item1.json.output、原Provider payload完全相同，source_refs、constraint_id和确定性hash均保留。
 
-核对结果均 PASS：
+- 原响应SHA256：5df5001e08e9bdc6d57ebdbc3876b264e95780d67049e5351029a7afd7a69a76。
+- 实际输入Profile hash：b0386820c14a6aa2b9aa9b1df1aeb1ddc6b5e8925df0a8ec6f70d66dd09f7348，status=ready。
+- 原独立Item1语义PASS的响应/Profile绑定一致，本轮Item1请求0。未使用合成Profile替代。
+- 最新Item2 Prompt文件SHA256：b38c2a292577fc3ebcaabeee8f9e463924cc9ed3b41488ac3cc30b634bfd6d8e；实际system消息与当前CAPABILITY_SYSTEM一致。
 
-- 原始响应 SHA256：`5df5001e08e9bdc6d57ebdbc3876b264e95780d67049e5351029a7afd7a69a76`。
-- 原 JSON 与历史 `item1.provider.json.payload` 相同。
-- 重建 Profile 全文与历史 `item1.json.output` 相同，包括全部 source_refs、三条 constraint_id、learner_claim、项目背景及确定性 hash。
-- Profile `status=ready`；hash：`b0386820c14a6aa2b9aa9b1df1aeb1ddc6b5e8925df0a8ec6f70d66dd09f7348`。
-- 上轮独立 Item 1 审查的 Profile hash 和原响应 SHA 绑定一致，程序与真实语义 PASS 直接复用；本轮没有重新调用 Item 1。
+冻结Scenario A：已会Python；系统学习Agent结构化输出与受限工具调用；applied深度、learn用途；现有Python待办CLI、JSON任务文件。三条约束原文：“保留现有 CLI 和 JSON 任务文件作为持续实践载体”“不重新创建演示项目”“工具仅操作用户明确允许的本地任务范围”。完整Goal/Profile在goal.json、profile.json，原184/185响应不改。
 
-冻结 GoalSpec：
+调用链仅 CapabilityPlanner → OpenAICompatibleLLM → DeepSeek chat/completions。无完整Worker、Coverage、Research、Reader或Curriculum。
 
-```json
-{
-  "target": "我已经会 Python，想系统学习 Agent 的结构化输出与受限工具调用，并把这些能力加入我现有的待办事项 CLI。",
-  "scope": ["结构化输出", "受限工具调用", "系统性 Agent 应用学习"],
-  "desired_depth": "applied",
-  "starting_point": "已经会 Python。",
-  "outcome_purpose": "learn",
-  "constraints": [
-    "保留现有 CLI 和 JSON 任务文件作为持续实践载体",
-    "不重新创建演示项目",
-    "工具仅操作用户明确允许的本地任务范围"
-  ],
-  "project_context": "我已有一个 Python 本地待办事项管理 CLI，使用 JSON 文件保存任务，希望在现有程序上逐步增加 Agent 能力。"
-}
-```
+实际参数：deepseek-flash、max_tokens=4096、thinking.type=disabled、JSON响应模式。完整system/user messages canonical UTF-8为 **17,775 bytes**，≤32,768；真实入账前检查，body与R0捕获相等。messages SHA256：b911f9af9ef682cea4e82e1c89ba3422d39ff7e5f805f1a4dd964eeb988743aa；body SHA256：630d99817623e3744fa3ca50c319556511c567a11a1181e8210b77aec6c785e1。同一wire先绑定identity并fsync追加请求账本，再发送HTTP；没有认证头/API Key日志。
 
-## 3. 实际配置与序列化检查
+32KiB只是开发期异常大输入保护，不是Token或现金数学上限。
 
-本地读取现有 LLM 配置，通过正式 `build_llm` 工厂装配 `OpenAICompatibleLLM`，将其 client 替换为 `MockTransport`。真实 `CapabilityPlanner` 消费上述原 Profile，执行 Provider preflight 和请求构造；MockTransport 捕获请求后立即中止，不返回模拟模型答案，也不执行 HTTP/DNS/账户请求。没有启用 endpoint 网络验证。
+## 3. 官方预检、请求、usage及费用
 
-| 核对项 | 实际结果 |
+官方价格/余额GET恰好2次，均HTTP200，无redirect/retry。预检时间2026-10-10 00:27:41（Asia/Shanghai）：账户is_available=true，CNY余额1.95。此为派发前快照，未追加余额读取或核实实际扣款。
+
+[本轮官方价目](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/) 显示deepseek-flash文档版本DeepSeek-V4.1-Flash，高峰缓存未命中输入CNY2/百万tokens、输出CNY8/百万tokens。冻结文本及来源在price.txt、price-source.json、pricing.json。实际响应模型别名为deepseek-flash；不把文档版本当作响应返回的额外身份。
+
+| 项目 | 实际结果 |
 |---|---|
-| Provider / endpoint | `openai_compatible` / `https://api.deepseek.com` |
-| 模型 / 输出 / thinking | `deepseek-flash` / `max_tokens=4096` / `thinking.type=disabled` |
-| 凭据 | 本地已配置；有效性 NOT RUN，未记录值或认证头 |
-| Item 2 Prompt 文件 SHA256 | `b38c2a292577fc3ebcaabeee8f9e463924cc9ed3b41488ac3cc30b634bfd6d8e` |
-| 实际加载 Prompt | 请求 system 内容与当前 `CAPABILITY_SYSTEM` 完全一致 |
-| 完整 messages canonical UTF-8 | 17,775 bytes，PASS ≤32,768 |
-| messages SHA256 | `b911f9af9ef682cea4e82e1c89ba3422d39ff7e5f805f1a4dd964eeb988743aa` |
-| 完整 canonical body SHA256 | `630d99817623e3744fa3ca50c319556511c567a11a1181e8210b77aec6c785e1` |
-| 新 acceptance / 一次性 request identity | NOT ALLOCATED；授权后新建，不复用184/185或历史 Case 7 |
-| 当前价格 / 余额 / 可用账户 | NOT RUN；不把2026-10-09快照当当前事实 |
+| Acceptance / attempt | item2-real-retest-515c82f1b8a6 / item2-real-retest-515c82f1b8a6:item2:1 |
+| 原append-only账本编号 | **186**，新identity，无历史重派 |
+| 派发时间 | 2026-10-10 00:31:02.879748（Asia/Shanghai） |
+| 请求/响应model | deepseek-flash / deepseek-flash |
+| HTTP / finishReason | 200 / stop |
+| input / output / total tokens | **4474 / 1152 / 5626** |
+| reported cache hit / miss | 128 / 4346；估算不采用缓存折扣 |
+| Provider latency / 应用wall | **4330 ms / 4430 ms** |
+| Provider cost_micros | null，不当作现金金额 |
+| 高峰缓存未命中费用估算 | **CNY0.018164**，非实际扣款、非数学现金硬上限 |
+| 本轮unknown / retry / repair | 0 / 0 / 0 |
 
-32 KiB 仅为开发期异常大输入保护，不是 Token 上界或现金数学硬上限。获得授权后，实际序列化消息必须再次检查并绑定同次 identity；本地 capture 不替代请求入账前的检查。真实执行应先保存不可变 body/输入 identity、检查并 fsync 原 append-only 账本预约，再发送同一冻结 wire body。不得运行上轮已经消费的两次请求入口。
+估算：(4474×2 + 1152×8) / 1,000,000 = CNY0.018164。原usage整数、非负、total一致，typed Provider usage相同，output≤4096。没有用历史价格或事后余额推测扣款。
 
-## 4. 最新账本与历史保护
+## 4. 程序合同与失败诊断
 
-只读检查发现 request/result 连续配对1–185，unknown仍为177、183。付费账本 JSON 文件383个，清单 SHA256 `9f796b705ada8858b224fe039e16f3b7d4cc86116d1163a8df5d950aa1128c72`；搜索账本 JSON 文件12个，清单 SHA256 `f6a2829b1c4557a3cd2f320ee2f2d54a67f07303420cb0103f2bab5ed5bcad2a`。清单采用按文件名排序的 `name SHA256\n` 拼接后哈希。
+Provider返回合法JSON及可信usage，原CapabilityPlanValidator仍拒绝未经修改的JSON。首拒details.field为 **required_requirement_coverage**。
 
-本轮模型、元数据、搜索、Reader、正文请求均0；未追加 authorization、request 或 result。历史184/185响应、unknown、账本及 `.env` 保留字节哈希。旧280累计容量不等于本次可派发权限。
+| 未覆盖的原requirement | 原来源 | 缺陷 |
+|---|---|---|
+| req_31f0e2d9e8cedf68a82afaa4d2a24a69caca334d808b1d3e2428501284b89121：“把这些能力加入我现有的待办事项 CLI” | goal.target、project_context | 全部能力requirement_refs均未绑定显式项目整合目标 |
+| req_ef9a96e06fdb82a3b722992b257e488669318f9820ae438c433808b60b87491a：“学习成果用途是学习” | goal.outcome_purpose | 冻结合同所需的规划条件覆盖遗漏；不能伪装成技术learning_target补救 |
 
-## 5. 获得授权后的单次结果判定
+应用返回LLMFailure(error_class=capability_plan_invalid)。不是CapabilityPlanningPending或unknown；模型声称status=ready不等于合法Plan。plan_hash=null，完整hash重建NOT RUN。没有修改Profile、补字段或生成修正版witness。
 
-| 层次 / 返回 | 判定与停止条件 |
+局部机械检查通过：五项Policy refs及真实前置精确匹配Policy v2；没有额外requirement_ref；Python claim准确；三条constraint_effects均not_applicable/capability_id=null；systematic路线MCP为required学习、optional项目。Validator到需求覆盖检查后拒绝，完整server-normalized Plan、MCP特殊政策最终绑定及hash没有生成。
+
+原始实际response及模型JSON完整保存在item2.response.body、item2.provider.json；应用失败在item2.json；原样重放与缺失ID/文本/来源在item2.validator-diagnosis.json。原响应SHA256：8b0726363d90fae713d761209c7bdef600e2349ef2b628ca1472247f163af320。
+
+## 5. 独立真实语义审查
+
+独立开发代理对照原Goal、真实184 Profile、原186 response及冻结Policy审查并原样重放Validator。逐项证据在review-item2.json/md、review-summary.md，绑定上述响应hash及真实输入。**10项为9 PASS/1 FAIL，整体FAIL。**程序检查不能代替语义审查。
+
+| 独审项目 | 状态 | 原始输出依据 |
+|---|---|---|
+| 原Profile及来源身份 | PASS | 原184全文、来源hash与实际请求一致，没有改写目标 |
+| Python已知且不复习测试 | PASS | accepted_known、原claim绑定，无基础学习/掌握测试 |
+| structured.output学习目标 | PASS | required/applied，绑定真实结构化输出技术目标 |
+| tool.calling学习目标 | PASS | required/applied，绑定真实受限工具调用技术目标 |
+| llm.api及能力范围 | PASS | 实际先修正确，没有无依据辅助能力或固定路线 |
+| MCP课程政策与项目采用 | PASS | required学习、optional项目；自身Policy来源，不把learn当MCP明确技术目标 |
+| 三条实践约束效果 | PASS | not_applicable，不变成能力排除或权限已满足 |
+| 原CLI/JSON不强制完整json.cli | PASS | 没有新增json.cli或完整掌握断言，也不要求重建项目 |
+| depth/purpose与技术目标区分 | PASS | applied作为条件引用；learn不伪装技术目标（其引用缺失另由完整覆盖项拒绝） |
+| 完整目标归因与ready成立 | **FAIL** | 原CLI整合及learn条件未覆盖，局部背景保留不足以宣布ready |
+
+不存在已确认的硬约束冲突，不能把失败包装成合法pending。局部正确及一次结果不能证明所有用户目标可靠通过。仍未验证教材、课程或Draft语义。
+
+## 6. 与第185次真实失败的差异
+
+| 185缺陷 | 本次186 |
 |---|---|
-| Provider | HTTP、实际 response model、finishReason、可信整数 usage 必须核对；unknown、截断、不可信 usage 或异常立即 STOP，不换身份重派 |
-| CapabilityPlan | 原 Validator 严格验证原 JSON：Policy refs、前置、MCP来源、需求覆盖、claim_bindings、constraint_effects、disposition/project_usage 一致及 plan_hash；不补字段、不改响应 |
-| CapabilityPlanningPending | 与合法 Plan、Provider failure 分开保存（dataclass 完整字段）；程序合法不等于该 pending 语义合理，独立审查实际冲突依据；无 Plan 时没有 plan_hash |
-| Validator FAIL | 保存第一拒绝字段和必要离线诊断，保留原响应，STOP，不逐字段追绿 |
-| 独立语义 | 开发审查代理读取原 Goal、原 Profile 和新实际响应逐项判断；程序 PASS 不能代替语义 PASS |
+| 七个已知能力缺Policy refs，首拒definition_refs | 五项定义和前置引用均正确，首拒已变化 |
+| CLI载体误作json.cli项目排除 | not_applicable，没有机械增加json.cli |
+| 工具范围误作tool.calling项目排除 | not_applicable，与实际能力使用不冲突 |
+| MCP以learn用途伪装明确学习目标 | MCP技术目标refs为空，自身Policy refs正确，项目optional |
+| applied条件遗漏 | 本次两项能力引用applied；但项目整合和learn条件遗漏 |
 
-独立语义预期：Python accepted_known且不复习/测试；structured.output、tool.calling符合目标；llm.api及辅助能力有实际必要性；系统性 Agent 的 MCP 学习 required但最终 CLI 不强制集成；现有 CLI/JSON保留且不重建；工具范围不是能力禁用；背景不自动导致完整json.cli学习或掌握结论；applied/learn不是明确技术目标；不扩展固定路线。一次成功只证明本次 Scenario A。
+这些只是本次原输出的局部改善，不能宣称Prompt对任意目标已稳定有效。185原失败和原响应保持原样。
 
-原场景不存在已确认的能力排除冲突；若模型返回 pending，必须审查其理由，不能仅因为返回类型合法就宣布业务通过。合法 pending、无依据 pending、程序错误分别记录。
+## 7. 派发门禁审查及历史保护
 
-无论响应 PASS、FAIL 或 pending，均只有一次请求并立即结束；双层 PASS仅冻结本次 Plan，不进入 Coverage、Research或Curriculum。
+派发前独审发现两项ignored harness记录bug：未预约也可能标unknown；不可信usage也可能给数字费用估算。仅修本地入口，unknown依赖已预约且结果不明，估算依赖可信Provider usage/model/finish门禁。5个unknown表达式和2个cash条件反例PASS。初审FAIL保留review-harness-initial.json/md；最终review-harness.json/md PASS，harness SHA256：1e030972bbe2b7c276b509ab281febb2cb0ef3a046399cd68821f2dccc593e1a。没有修改生产代码或模型输出。
 
-## 6. 与185失败的差异及课程限制
+最终账本保护PASS：旧1–185请求/result及历史响应hash不变；只追加authorization-item2-real-retest-20261010.json、request-186.json、result-186.json。连续配对至186；186为failed/unknown=false；历史unknown177、183保留；搜索账本不变。identity、R0 body及实际wire hash相同。STOP.json明确scope已消费且禁止继续派发。
 
-第185次原响应仍保留：Provider成功、Validator首拒 `definition_refs`、项目载体与工具范围被错误当作project排除、MCP归因/元数据技术目标和部分requirement覆盖错误。本轮没有新响应，因此没有证据证明这些真实语义缺陷已关闭。
+本轮模型 **1/1**、官方元数据 **2/2**；Item1、搜索、Reader、正文、其他模型 **0**。无retry/repair、旧identity重派、正式数据库、产品Worker/Run/Draft/Revision写入。此处acceptance/run_id只是应用调用身份，不代表创建产品Run。
 
-最新 Prompt明确逐能力精确复制Policy定义引用/前置、特殊MCP政策由服务端处理、区分实际排除与实践条件、区分技术目标与规划条件、避免由JSON项目机械增加能力。上轮117项定向回归、20项修复测试、Ruff及独立审查PASS在源码未变时复用，不重复执行。合成 witness只证明合法映射可表达。
+公开generate保护、正式配置及全部生产源码hash未变，沿用原503证据；本轮HTTP门禁探测NOT RUN，未启用正式生成。仅报告/进度文档更新，原历史进度字节保留；未push/merge/deploy。final-audit.json及delivery-receipt.json记录交付保护。
 
-`existing_carrier` 识别不等于最终课程已复用项目；`local_tool_scope` 的not_applicable不等于实际权限已验证。后续缺乏可信项目载体或工具权限满足证据时，Curriculum继续pending/incomplete。本次Item2即使双层PASS，也不能声称教材、课程、Draft或端到端完整通过。
+## 8. 未验证事项和下一步
 
-## 7. 执行证据和下一步
+全量Backend/PG/Worker、React/浏览器、Item3–7、真实教材及完整课程/Draft质量均NOT RUN。实际扣款读回及严格数学现金硬门禁NOT RUN。
 
-本轮运行：`.venv/Scripts/python.exe var/planning-v2-item2-real-retest-20261010/prepare.py`，exit0，本地冻结及 MockTransport请求截获 PASS。启动器存在旧Python路径提示，但实际脚本正常退出；未操作受保护目录。证据为 `baseline.json`、`goal.json`、`profile.json`、`item2.offline-request.json` 和原历史证据。没有生成新模型响应、usage、费用或Plan hash。
+existing_carrier/local_tool_scope被识别、不构成能力排除，不表示项目载体或实际权限已满足；下游缺可信证据时Curriculum继续pending/incomplete。本次没有进入那些环节。
 
-| 验收项目 | 状态 |
-|---|---|
-| 原184真实Profile重建/全文/hash/来源一致 | PASS |
-| 最新配置、Prompt、Provider preflight及32 KiB请求构造 | PASS（本地） |
-| 185失败修复的既有定向回归与独审 | PASS（复用） |
-| 本次真实价格/余额、真实Item2、程序验收 | NOT RUN |
-| 本次真实独立语义审查、usage及费用估算 | NOT RUN |
-| 全量Backend、PG、React/浏览器、Worker、Item3–7 | NOT RUN |
+最小下一步建议为有界离线定位：强化冻结requirement_refs完整覆盖核对，明确原项目应用目标以及用途/深度条件的真实引用，同时learning_target_refs只指技术目标。禁止删除原Profile需求、任意关联能力、放宽Validator或修正旧响应。本轮不实施建议、不申请或消费第二次请求；任何再次真实复测须单独授权。
 
-本轮无生产代码变更。公开generate保护源码未变，沿用原503证据；本轮没有HTTP探测或启用正式生成。正式数据库、历史Receipt、配置、架构合同均未操作；未push/merge/deploy。
+**ITEM2_REAL_SEMANTIC_RETEST_FAIL**
 
-下一步需 Owner **单独明确授权**：最多1次新的DeepSeek Item2请求、官方价格/余额GET合计最多2次，4096输出且thinking关闭、实际消息≤32KiB，并接受无严格现金数学硬上限的残余风险。禁止充值、换模型、重试、repair及搜索/Reader/正文/其他模型。本报告没有批准该范围。
+**ITEM2_SEMANTIC_REVIEW_REQUIRED**
 
-**`ITEM2_REAL_SEMANTIC_RETEST_NOT_RUN`**
-
-**`EXTERNAL_AUTHORIZATION_PENDING`**
+**ITEM3_7_NOT_STARTED_THIS_RUN**
 
 **STOP。**

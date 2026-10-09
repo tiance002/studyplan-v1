@@ -1,3 +1,7 @@
+## 2026-10-10 Planning V2 Item2单次真实复测：FAIL，已STOP
+
+Owner在明确范围后授权执行；source/start HEAD9bd56be638ae4db39609b1d8b4402cdad320691b（原准备参考f214f729）。原184真实Profile/hash全文未改；新Acceptance item2-real-retest-515c82f1b8a6，仅账本186一次Item2。ProviderPASS HTTP200/stop/4474input/1152output/5626total，4330ms，高峰未命中估算CNY0.018164（非扣款/硬上限）。ValidatorFAIL首拒required_requirement_coverage：原项目整合目标及learn用途需求未引用；无合法Plan/hash，不是pending。独立真实语义10项9PASS1FAIL、整体FAIL，局部Policy/先修/约束效果/Python已知/MCP项目分离改善不能替代总体通过。模型1/1、官方元数据2/2已消费；其他模型/搜索/Reader/正文/Item1均0，无retry/repair。旧账1–185/unknown177183/响应/.env/生产源码hash保留；只追加新grant/request/result186。只报告/进度与ignored证据，不自动修复或复测，不进入Item3–7，不push/merge/deploy/公开生成。详见docs/planning-v2/ITEM2_REAL_SEMANTIC_RETEST.md；ITEM2_REAL_SEMANTIC_RETEST_FAIL/ITEM2_SEMANTIC_REVIEW_REQUIRED/STOP。
+
 ## 2026-10-10 Planning V2 Item 2 单次真实复测：本地准备完成，等待授权
 
 任务 PLANNING_V2_ITEM2_REAL_RETEST_V1；source HEAD f214f729ec05322c8e179adc2deadc94a90fc731。原184响应重建 Profile/source_refs/constraint_id/hash 全文一致 PASS；实际最新 Prompt + Provider preflight/MockTransport 请求构造 PASS，messages 17775 bytes，deepseek-flash/4096/thinking disabled。账本仍185，unknown177/183保留；本轮所有真实外部请求0，价格/余额/真实Item2/独立真实语义 NOT RUN，未创建新请求身份或账本项。仅报告及进度；复用上轮117/20/Ruff/独审，不重跑矩阵。Owner 单独外部授权未收到，EXTERNAL_AUTHORIZATION_PENDING，ITEM2_REAL_SEMANTIC_RETEST_NOT_RUN；STOP，不进入Item3–7。详见 docs/planning-v2/ITEM2_REAL_SEMANTIC_RETEST.md。
