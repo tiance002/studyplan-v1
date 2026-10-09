@@ -1,3 +1,11 @@
+## 2026-10-09 Planning V2真实验收派发门禁：BLOCKED / REAL_EXTERNAL_REQUESTS_NOT_RUN / STOP
+
+- [派发门禁报告](../planning-v2/PLANNING_V2_REAL_ACCEPTANCE_DISPATCH_GATE.md)基于d19f0b7a51e4b48bcd2f5b4073edf675d8016b91，直接复用前置C0–U3/成功Semantic/固定A/B/C/教材及保护证据。新owned一期内部budget16384output/19total/144000内部cost/search4/Reader4/body262144/candidates8可由既有factory冻结，不改default或正式装配；旧P1 root22528output/162000cost绝不替换或归零。
+- G2确证BLOCKED：实际Provider序列化无可信current DeepSeek输入token/framing上界，响应后usageNone/costNone仍可返回；现有METRICS无货币/价格/input绑定和现金累计派发拒绝。新owned同usageNone Run原有效lease反例允许下一身份Mock调用，内部预约保留8192/2/40000，现金费用不确定停机NOT IMPLEMENTED。现价/余额/Tavily额度为未来preflight事项，不以旧价/CNY0.50或内部144000冒称现金保证，本轮费用授权0。
+- 三代表机械G4 PASS：真实新owned两库、factory冻结A、dispatch前PG已提交预约、累计超output拒绝/恢复0重派；不足output/total/internalcost各0invoke；unknown和cancel保留预约与阻续派。初始7Mockinvoke+同例counter1=8，另实际serializer MockTransport1；不是完整A/Reader schema/token/cash语义验收。可信input/cash反例NOT RUN，源码改动0，新owned库保留。
+- 独审Sol6.1xhigh，owned有界Sol6.1medium，请求身份/实际解析NOT OBSERVABLE。单完整Run可代两模型暂停，无通用恢复改造；合法partial研究可能消耗到限额才最终人工语义审查，不能把其称typed失败停机。真实执行仍受G2阻断；仅提议下一轮Owner另授权最多4官方元数据GET，产品模型/搜索/正文/Reader及现金0，未执行。
+- 本轮全部外部请求0，正式DB/历史账本/.env/迁移/Policy/Seeds/受保护目录未动，public generate关闭，未push/merge/deploy。只提交报告与progress，旧历史bytes保留，本地checkpoint及SHA见交付回执；STOP，不自动preflight或收费。
+
 ## 2026-10-09 Planning V2 产品验收前置收口：PREP_COMPLETE / REAL_PRODUCT_ACCEPTANCE_NOT_RUN / STOP
 
 - [前置报告](../planning-v2/PLANNING_V2_PRODUCT_ACCEPTANCE_PREP.md)基于dc3d60372502a43caf544558ade46cba945aaf0f，复用C0–U3有效证据；本机模型账本实际183/280、unknown2，搜索6/1000，剩余仅算术97/994，本Goal外部授权0，旧177/183不重派。
