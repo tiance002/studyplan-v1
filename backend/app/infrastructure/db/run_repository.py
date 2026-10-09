@@ -150,6 +150,14 @@ class PgRunRepository:
             ).fetchall()
         return tuple(_run_from(row) for row in rows)
 
+    def get_clarification(self, *, scope, project_id, run_id):
+        from app.infrastructure.db.v2_clarifications import PgV2Clarifications
+        return PgV2Clarifications(self._dsn).read(scope=scope, project_id=project_id, run_id=run_id)
+
+    def get_planning_issues(self, *, scope, project_id, run_id):
+        from app.infrastructure.db.v2_clarifications import read_planning_issues
+        return read_planning_issues(self._dsn, scope=scope, project_id=project_id, run_id=run_id)
+
     def update_run(
         self,
         *,

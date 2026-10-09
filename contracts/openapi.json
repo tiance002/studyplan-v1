@@ -3710,6 +3710,102 @@
         }
       }
     },
+    "/api/v1/plans/v2/availability": {
+      "get": {
+        "summary": "Get V2 Planning Availability",
+        "operationId": "get_v2_planning_availability",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V2PlanningAvailability"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/plans/v2/owned/clarifications": {
+      "post": {
+        "summary": "Submit Owned V2 Clarification",
+        "operationId": "submit_owned_v2_clarification",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403",
+              "title": "Project Id"
+            },
+            "description": "学习空间 ID；必须属于当前会话的项目范围，否则 403"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2ClarificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanGenerateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/plans/v2/changes/context": {
       "get": {
         "summary": "Get V2 Revision Context",
@@ -12062,6 +12158,104 @@
         ],
         "title": "RunCancelRequest"
       },
+      "RunClarification": {
+        "properties": {
+          "clarification_version": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 1.0,
+            "title": "Clarification Version"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/RunClarificationQuestion"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Questions"
+          },
+          "can_submit_answers": {
+            "type": "boolean",
+            "title": "Can Submit Answers"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Message"
+          },
+          "continuation_run_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Run Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "clarification_version",
+          "questions",
+          "can_submit_answers",
+          "message"
+        ],
+        "title": "RunClarification"
+      },
+      "RunClarificationQuestion": {
+        "properties": {
+          "question_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Question Id"
+          },
+          "question_text": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Question Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "question_id",
+          "question_text"
+        ],
+        "title": "RunClarificationQuestion"
+      },
+      "RunPlanningIssue": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "required_material_unresolved",
+              "constraint_unresolved",
+              "project_case_unresolved",
+              "curriculum_incomplete"
+            ],
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "RunPlanningIssue"
+      },
       "RunProgress": {
         "properties": {
           "phase": {
@@ -12231,6 +12425,24 @@
                 "type": "null"
               }
             ]
+          },
+          "clarification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunClarification"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "planning_issues": {
+            "items": {
+              "$ref": "#/components/schemas/RunPlanningIssue"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Planning Issues"
           },
           "progress": {
             "anyOf": [
@@ -13294,6 +13506,69 @@
         ],
         "title": "V2ChangeClassificationView"
       },
+      "V2ClarificationAnswer": {
+        "properties": {
+          "question_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Question Id"
+          },
+          "answer_text": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Answer Text"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "question_id",
+          "answer_text"
+        ],
+        "title": "V2ClarificationAnswer"
+      },
+      "V2ClarificationRequest": {
+        "properties": {
+          "parent_run_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Parent Run Id"
+          },
+          "clarification_version": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 1.0,
+            "title": "Clarification Version"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/V2ClarificationAnswer"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Answers"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Idempotency Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "parent_run_id",
+          "clarification_version",
+          "answers",
+          "idempotency_key"
+        ],
+        "title": "V2ClarificationRequest"
+      },
       "V2LocalChangeRequest": {
         "properties": {
           "current_plan_id": {
@@ -13389,6 +13664,41 @@
           "stage_id"
         ],
         "title": "V2LocalStageEdit"
+      },
+      "V2PlanningAvailability": {
+        "properties": {
+          "initial_generation": {
+            "type": "boolean",
+            "title": "Initial Generation"
+          },
+          "clarification": {
+            "type": "boolean",
+            "title": "Clarification"
+          },
+          "semantic_replanning": {
+            "type": "boolean",
+            "title": "Semantic Replanning"
+          },
+          "local_change": {
+            "type": "boolean",
+            "title": "Local Change"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "initial_generation",
+          "clarification",
+          "semantic_replanning",
+          "local_change",
+          "message"
+        ],
+        "title": "V2PlanningAvailability"
       },
       "V2RevisionDecisionRequest": {
         "properties": {

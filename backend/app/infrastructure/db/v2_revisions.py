@@ -28,7 +28,9 @@ from app.infrastructure.db.planning_fence import lock_plan_version
 from psycopg.rows import dict_row
 
 
-def frozen_submission(conn, *, actor_id, project_id, run_id):
+def frozen_submission(conn, *, actor_id, project_id, run_id, _seen=()):
+    if run_id in _seen or len(_seen) > 3:
+        raise V2RecoveryBlocked("Clarification ancestry contains a cycle or exceeds its bound")
     rows = conn.execute("SELECT e.detail,r.graph_version,r.kind,r.actor_id,r.project_id FROM ai_run_events e "
         "JOIN ai_runs r USING(run_id) WHERE e.run_id=%s AND e.status='submission' "
         "AND e.detail->>'kind'='planning_submission' ORDER BY e.event_id", (run_id,)).fetchall()
@@ -42,6 +44,7 @@ def frozen_submission(conn, *, actor_id, project_id, run_id):
             or not manifest_intact(manifest) or detail.get("initial", {}).get("manifest") != manifest):
         raise V2RecoveryBlocked("Revision original submission scope or manifest rejected")
     raw = detail["initial"].get("v2_revision")
+    clarification = detail["initial"].get("v2_clarification")
     ctx = V2RevisionContext.from_payload(raw)
     if (ctx is None and manifest["expected_version"] != 0
             or (ctx is None) != ("v2_revision_hash" not in manifest)
@@ -52,11 +55,18 @@ def frozen_submission(conn, *, actor_id, project_id, run_id):
                 or manifest["expected_version"] != ctx.to_payload()["base_revision"]
                 or content_hash(detail["initial"].get("goal_spec")) != manifest["goal_hash"])):
         raise V2RecoveryBlocked("Revision submission context binding rejected")
-    if ctx is None:
+    if (clarification is None) != ("v2_clarification_hash" not in manifest):
+        raise V2RecoveryBlocked("Clarification marker/context mismatch")
+    if clarification is not None:
+        from app.infrastructure.db.v2_clarifications import validate_continuation
+        validate_continuation(conn, actor_id=actor_id, project_id=project_id, run_id=run_id,
+            submission=detail, seen=(*_seen, run_id))
+    if ctx is None and clarification is None:
         roots = conn.execute("SELECT DISTINCT r.run_id FROM ai_runs r LEFT JOIN ai_run_events e "
             "ON e.run_id=r.run_id AND e.status='submission' AND e.detail->>'kind'='planning_submission' "
             "WHERE r.actor_id=%s AND r.project_id=%s AND r.graph_version=%s AND r.kind='plan_generate' "
-            "AND e.detail#>>'{initial,v2_revision}' IS NULL", (actor_id, project_id, V2_EXECUTION_VERSION)).fetchall()
+            "AND e.detail#>>'{initial,v2_revision}' IS NULL "
+            "AND e.detail#>>'{initial,v2_clarification}' IS NULL", (actor_id, project_id, V2_EXECUTION_VERSION)).fetchall()
         if len(roots) != 1 or roots[0]["run_id"] != run_id:
             raise V2RecoveryBlocked("Multiple initial V2 roots require reconciliation")
     return detail
@@ -65,14 +75,15 @@ def frozen_submission(conn, *, actor_id, project_id, run_id):
 def budget_family(conn, *, actor_id, project_id, run_id):
     """Use original durable caps and every sibling's original immutable ledger."""
     own = frozen_submission(conn, actor_id=actor_id, project_id=project_id, run_id=run_id)
-    context = own["initial"].get("v2_revision")
-    root = context["budget_root_run_id"] if context else run_id
+    from app.infrastructure.db.v2_clarifications import root_of
+    root = root_of(own, run_id)
     original = frozen_submission(conn, actor_id=actor_id, project_id=project_id, run_id=root)
-    if original["initial"].get("v2_revision") is not None:
+    if original["initial"].get("v2_revision") is not None or original["initial"].get("v2_clarification") is not None:
         raise V2RecoveryBlocked("Budget root must resolve to the original planning authority")
     rows = conn.execute("SELECT DISTINCT e.run_id FROM ai_run_events e JOIN ai_runs r USING(run_id) "
         "WHERE r.project_id=%s AND r.actor_id=%s AND e.status='submission' "
-        "AND e.detail->'initial'->'v2_revision'->>'budget_root_run_id'=%s", (project_id, actor_id, root)).fetchall()
+        "AND (e.detail->'initial'->'v2_revision'->>'budget_root_run_id'=%s "
+        "OR e.detail->'initial'->'v2_clarification'->>'budget_root_run_id'=%s)", (project_id, actor_id, root, root)).fetchall()
     manifests = {root: original["manifest"]}
     for row in rows:
         detail = frozen_submission(conn, actor_id=actor_id, project_id=project_id, run_id=row["run_id"])
@@ -82,6 +93,13 @@ def budget_family(conn, *, actor_id, project_id, run_id):
     if run_id not in manifests:
         raise V2RecoveryBlocked("Revision run is not a member of its frozen budget root")
     return root, manifests
+
+
+def revision_budget_root(conn, revision, actor_id):
+    if revision.v2_revision:
+        return revision.v2_revision.to_payload()["budget_root_run_id"]
+    run = revision.v2_execution.to_payload()["bindings"]["run_id"]
+    return budget_family(conn, actor_id=actor_id, project_id=revision.project_id, run_id=run)[0] if run else run
 
 
 def published_v2_draft(conn, *, actor_id, project_id, run_id, draft_id):
@@ -131,8 +149,7 @@ def capture_progress_basis(conn, current, *, _seen=()):
                 or parent.structure_fingerprint() != ctx["base_structure_hash"]
                 or content_hash(parent.v2_execution.to_payload()["manifest"]) != ctx["base_execution_manifest_hash"]):
             raise ConflictError("Historical revision lineage no longer resolves exactly")
-        parent_root = (parent.v2_revision.to_payload()["budget_root_run_id"] if parent.v2_revision
-            else parent.v2_execution.to_payload()["bindings"]["run_id"])
+        parent_root = revision_budget_root(conn, parent, ctx["actor_id"])
         if ctx["budget_root_run_id"] != parent_root:
             raise ConflictError("Historical revision changed its exact ancestor budget root")
         prior_basis = capture_progress_basis(conn, parent, _seen=(*_seen, current.plan_id))
@@ -232,8 +249,7 @@ def validate_revision_basis(conn, owner, *, expected_version=None, domain_approv
             or content_hash(current.v2_execution.to_payload()["manifest"]) != ctx["base_execution_manifest_hash"]):
         raise ConflictError("原当前版本已变化，请重新生成预览", reason="revision_basis_stale")
     progress = capture_progress_basis(conn, current)
-    root = (current.v2_revision.to_payload()["budget_root_run_id"] if current.v2_revision
-        else current.v2_execution.to_payload()["bindings"]["run_id"])
+    root = revision_budget_root(conn, current, ctx["actor_id"])
     if ctx["budget_root_run_id"] != root:
         raise ConflictError("Revision cannot replace its exact ancestor budget root")
     if progress != ctx["progress_basis"]:
@@ -354,8 +370,7 @@ class PgV2Revisions:
                 change_diff={"preserved_stages": [s.title for s in stages if s == before[s.stage_id]], "modified_stages": modified,
                     "removed_stages": [], "added_stages": [], "outcomes_changed": False, "prerequisites_changed": False,
                     "materials_changed": False, "practice_changed": False, "unresolved": []}, lineage=lineage,
-                approved_goal_spec=None, budget_root_run_id=(current.v2_revision.to_payload()["budget_root_run_id"]
-                    if current.v2_revision else current.v2_execution.to_payload()["bindings"]["run_id"]), input_hash=fingerprint)
+                approved_goal_spec=None, budget_root_run_id=revision_budget_root(conn, current, scope.actor_id), input_hash=fingerprint)
             unit_order = {s.stage_id: i for i, s in enumerate(stages)}
             c = execution.to_payload()["compiled"]
             draft = PlanDraft(draft_id=draft_id, project_id=project_id, run_id="", goal_snapshot=current.goal_snapshot,
@@ -435,8 +450,7 @@ class PgV2Revisions:
             current = _base(conn, project_id)
             if current.plan_id != current_plan_id or current.revision != expected_version:
                 raise ConflictError("当前版本已变化", reason="revision_basis_stale")
-            root = (current.v2_revision.to_payload()["budget_root_run_id"] if current.v2_revision
-                else current.v2_execution.to_payload()["bindings"]["run_id"])
+            root = revision_budget_root(conn, current, scope.actor_id)
             if not root:
                 raise ValidationAppError("Semantic replanning requires the original durable V2 run")
             original = frozen_submission(conn, actor_id=scope.actor_id, project_id=project_id, run_id=root)

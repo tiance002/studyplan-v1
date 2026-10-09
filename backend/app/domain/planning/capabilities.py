@@ -162,6 +162,9 @@ def validate_capability_planning_input(payload, schema_name, *, allow_clarificat
         # validated provenance, never something a recomputed hash proves.
         allowed_sources.add("goal.constraints")
         allowed_sources.update(f"goal.constraints[{i}]" for i in range(20))
+        # As with raw constraint indices, Item1 proves actual answer membership.
+        # Downstream only retains bounded source syntax from the hashed Profile.
+        allowed_sources.update(f"clarification.answers[{i}]" for i in range(6))
         body = {k: v for k, v in raw.items() if k != "profile_hash"}
         if (raw["schema_version"] != 1 or type(raw["schema_version"]) is not int
                 or raw["profile_hash"] != content_hash(body)

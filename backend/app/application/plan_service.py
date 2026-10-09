@@ -99,6 +99,8 @@ class RunBundle:
 
     run: RunRecord
     progress: dict[str, object] | None = None
+    clarification: dict[str, object] | None = None
+    planning_issues: tuple[dict[str, object], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -270,6 +272,28 @@ class PlanService:
                 error_class=result.error_class,write_fence=fence)
             self._planning_jobs.finish(claim,"reconciliation_required" if result.dispatch_unknown else "failed")
             return
+
+    def submit_owned_clarification(self, *, scope, project_id, **values):
+        from app.infrastructure.db.v2_clarifications import PgV2Clarifications
+        scope.require_project(project_id)
+        factory = self._v2_runtime_factory
+        if factory is None or getattr(factory, "owned_only", False) is not True:
+            raise DependencyUnavailableError("V2 owned clarification is not configured")
+        from app.domain.planning.v2_runtime import V2RecoveryBlocked
+        try:
+            return PgV2Clarifications(factory.dsn, factory=factory, jobs=self._planning_jobs).submit(
+                scope=scope, project_id=project_id, **values)
+        except (V2RecoveryBlocked, KeyError, TypeError, ValueError, AttributeError):
+            raise ConflictError("澄清来源或共享预算需核对，不能重新派发", reason="clarification_recovery_blocked") from None
+
+    def owned_v2_available(self, *, scope):
+        from app.infrastructure.db.plan_repository import to_psycopg_dsn
+        factory, jobs = self._v2_runtime_factory, self._planning_jobs
+        return bool(factory is not None and getattr(factory, "owned_only", False) is True and jobs is not None
+            and (getattr(jobs, "_admission_mode", None) == "trusted_server"
+                or (getattr(jobs, "_admission_mode", None) == "allowlist" and scope.actor_id in getattr(jobs, "_actor_ids", ())))
+            and to_psycopg_dsn(factory.dsn) == getattr(jobs, "_dsn", None)
+            and to_psycopg_dsn(factory.dsn) == getattr(self._runs, "_dsn", None))
 
     def _progress_sink(self, claim: JobClaim | None) -> Callable[[PlanningState], None] | None:
         """Business-progress publisher for one fenced claim.
@@ -470,6 +494,10 @@ class PlanService:
         return RunBundle(
             run=run,
             progress=self._runs.get_progress(project_id=project_id, run_id=run_id),
+            clarification=(self._runs.get_clarification(scope=scope, project_id=project_id, run_id=run_id)
+                if hasattr(self._runs, "get_clarification") else None),
+            planning_issues=(self._runs.get_planning_issues(scope=scope, project_id=project_id, run_id=run_id)
+                if hasattr(self._runs, "get_planning_issues") else ()),
         )
 
     def get_draft(self, *, scope: AuthContext, project_id: str, draft_id: str) -> DraftBundle:

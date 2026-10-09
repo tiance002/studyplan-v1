@@ -347,7 +347,18 @@ class V2PlanningRuntime:
     def execute(self, initial):
         from app.domain.planning.revisions import V2RevisionContext
         revision = V2RevisionContext.from_payload(initial.get("v2_revision"))
+        clarification = initial.get("v2_clarification")
         manifest = self.calls.manifest
+        if (clarification is None) != ("v2_clarification_hash" not in manifest):
+            raise V2RecoveryBlocked("Runtime clarification marker/context mismatch")
+        if clarification is not None:
+            from app.infrastructure.db.v2_revisions import frozen_submission
+            with self.calls.tx() as conn:
+                self.calls._lock(conn)
+                submission = frozen_submission(conn, actor_id=self.calls.scope.actor_id,
+                    project_id=self.calls.project_id, run_id=self.calls.run_id)
+                if submission["initial"].get("v2_clarification") != clarification:
+                    raise V2RecoveryBlocked("Runtime clarification differs from durable consent")
         if revision is None and manifest["expected_version"] != 0:
             raise V2RecoveryBlocked("Existing revision requires bound replanning context")
         if (revision is None) != ("v2_revision_hash" not in manifest):
@@ -397,9 +408,19 @@ class V2PlanningRuntime:
                 raise ReviewPersistenceInterrupted("V2 checkpoint persistence interrupted") from None
 
         profile = GoalRequirementAnalyzer(self.calls).analyze(
-            goal, run_id=self.calls.run_id, attempt_id="goal-analysis"
+            goal, run_id=self.calls.run_id, attempt_id="goal-analysis",
+            clarification=clarification["item1_input"] if clarification else None,
         )
         if not isinstance(profile, GoalRequirementProfile) or profile.status != "ready":
+            if isinstance(profile, GoalRequirementProfile) and revision is None:
+                import psycopg
+                from app.infrastructure.db.v2_clarifications import freeze_questions
+                from app.ports.summaries import ReviewPersistenceInterrupted
+                try:
+                    freeze_questions(self.calls, profile, goal)
+                except psycopg.Error:
+                    raise ReviewPersistenceInterrupted("Clarification persistence interrupted") from None
+                save("goal_clarification", profile=profile.to_payload())
             return (
                 profile
                 if isinstance(profile, LLMFailure)
@@ -564,9 +585,23 @@ class V2PlanningRuntime:
                 "curriculum_composition",
                 curriculum={"json": curriculum._json, "findings": curriculum._findings},
             )
-        compiled = compile_curriculum(
-            curriculum, context=context, profile=profile, capability_plan=plan, source_facts=self.facts
-        )
+        try:
+            compiled = compile_curriculum(
+                curriculum, context=context, profile=profile, capability_plan=plan, source_facts=self.facts
+            )
+        except ValidationAppError as error:
+            if error.details.get("field") != "incomplete":
+                raise
+            # Compiler has already revalidated authorities, server snapshots and
+            # case findings. Only its bounded diagnostics may become public facts.
+            import psycopg
+            from app.infrastructure.db.v2_clarifications import freeze_planning_issues
+            from app.ports.summaries import ReviewPersistenceInterrupted
+            try:
+                freeze_planning_issues(self.calls, curriculum, diagnostics=error.details["diagnostics"])
+            except psycopg.Error:
+                raise ReviewPersistenceInterrupted("Incomplete facts persistence interrupted") from None
+            return LLMFailure("v2_curriculum_incomplete", "Validated curriculum remains incomplete")
         save("deterministic_compiler", compiled_digest=compiled.digest)
         self.calls.guard()
         import psycopg

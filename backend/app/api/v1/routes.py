@@ -35,7 +35,9 @@ from app.api.v1.schemas import (
     RunView,
     V2ChangeClassificationRequest,
     V2ChangeClassificationView,
+    V2ClarificationRequest,
     V2LocalChangeRequest,
+    V2PlanningAvailability,
     V2RevisionDecisionRequest,
     V2SemanticReplanRequest,
 )
@@ -71,6 +73,31 @@ def _v2_revision_service(container: AppContainer = Depends(get_container)):
     if container.v2_revision_service is None:
         raise DependencyUnavailableError("V2 计划修订服务尚未装配")
     return container.v2_revision_service
+
+
+@router.get("/plans/v2/availability", response_model=V2PlanningAvailability, operation_id="get_v2_planning_availability")
+def get_v2_planning_availability(project_id: str = ProjectId, scope: AuthContext = Depends(get_auth_context),
+    service: PlanService = Depends(get_plan_service), container: AppContainer = Depends(get_container)):
+    scope.require_project(project_id)
+    owned = service.owned_v2_available(scope=scope)
+    revisions = container.v2_revision_service
+    repository = getattr(revisions, "_repository", None)
+    # Semantic generation also requires its actual owned runtime and queue.
+    semantic = bool(owned and getattr(repository, "runtime_factory", None) is service._v2_runtime_factory
+        and getattr(repository, "planning_jobs", None) is service._planning_jobs)
+    return V2PlanningAvailability(initial_generation=owned, clarification=owned,
+        semantic_replanning=semantic, local_change=revisions is not None,
+        message="受控学习规划可用" if owned else "学习计划生成正在升级，当前暂不可创建新路线。")
+
+
+@router.post("/plans/v2/owned/clarifications", response_model=PlanGenerateResponse,
+    status_code=status.HTTP_202_ACCEPTED, operation_id="submit_owned_v2_clarification")
+def submit_owned_v2_clarification(body: V2ClarificationRequest, project_id: str = ProjectId,
+    scope: AuthContext = Depends(get_auth_context), service: PlanService = Depends(get_plan_service)):
+    run_id = service.submit_owned_clarification(scope=scope, project_id=project_id,
+        **body.model_dump(mode="json"))
+    return PlanGenerateResponse(run_id=run_id,
+        status_url=f"{API_PREFIX}/runs/{quote(run_id, safe='')}?{urlencode({'project_id': project_id})}")
 
 
 @router.get("/plans/v2/changes/context", response_model=dict, operation_id="get_v2_revision_context")
@@ -215,7 +242,7 @@ def get_run(
     """对外运行状态：``status`` / ``next_action`` / ``result_ref``（不透明）
     以及分批生成的业务进度 ``progress``（无图内部字段）。"""
     bundle = service.get_run(scope=scope, project_id=project_id, run_id=run_id)
-    return run_view(bundle.run, bundle.progress)
+    return run_view(bundle.run, bundle.progress, bundle.clarification, bundle.planning_issues)
 
 
 @router.post(

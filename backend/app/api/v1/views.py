@@ -49,6 +49,8 @@ _RUN_ERROR_MESSAGES: dict[str, str] = {
     "model_not_configured": "尚未配置可用模型，无法开始生成",
     "run_budget_exhausted": "本次运行已达到冻结的请求/输出预算上限，已停止派发",
     "run_manifest_violation": "执行清单与冻结提交不一致，已拒绝派发",
+    "goal_clarification_required": "需要补充信息，请回答本轮问题后明确提交",
+    "v2_curriculum_incomplete": "教学安排尚未完整，需处理教材或约束限制后再确认目标",
 }
 
 #: 进度阶段闭集；未知值一律回落到 ``outline``，不猜测、不回显原始值。
@@ -89,7 +91,7 @@ def _optional_int(value: Any) -> int | None:
     return None if value is None else int(value)
 
 
-def run_view(run: RunRecord, progress: Mapping[str, Any] | None = None) -> RunView:
+def run_view(run: RunRecord, progress: Mapping[str, Any] | None = None, clarification=None, planning_issues=()) -> RunView:
     """运行投影 + 业务进度 → ``RunView``。``result_ref`` 保持不透明。"""
     error: ErrorBody | None = None
     if run.error_class:
@@ -107,6 +109,8 @@ def run_view(run: RunRecord, progress: Mapping[str, Any] | None = None) -> RunVi
         result_ref=run.result_ref,
         error=error,
         progress=progress_view(progress),
+        clarification=clarification,
+        planning_issues=list(planning_issues),
     )
 
 

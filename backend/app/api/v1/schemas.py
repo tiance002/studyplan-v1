@@ -101,6 +101,50 @@ class RunProgress(BaseModel):
     failure_stage: str = Field(default="", max_length=128)
 
 
+class RunClarificationQuestion(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    question_id: str = Field(min_length=1, max_length=80)
+    question_text: str = Field(min_length=1, max_length=500)
+
+
+class RunClarification(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    clarification_version: int = Field(ge=1, le=3)
+    questions: list[RunClarificationQuestion] = Field(min_length=1, max_length=3)
+    can_submit_answers: bool
+    message: str = Field(max_length=500)
+    continuation_run_id: str | None = Field(default=None, max_length=64)
+
+
+class V2ClarificationAnswer(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    question_id: str = Field(min_length=1, max_length=80)
+    answer_text: str = Field(min_length=1, max_length=2000)
+
+
+class V2ClarificationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    parent_run_id: str = Field(min_length=1, max_length=64)
+    clarification_version: int = Field(ge=1, le=2, strict=True)
+    answers: list[V2ClarificationAnswer] = Field(min_length=1, max_length=3)
+    idempotency_key: str = Field(min_length=1, max_length=128)
+
+
+class V2PlanningAvailability(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    initial_generation: bool
+    clarification: bool
+    semantic_replanning: bool
+    local_change: bool
+    message: str = Field(max_length=500)
+
+
+class RunPlanningIssue(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    code: Literal["required_material_unresolved", "constraint_unresolved", "project_case_unresolved", "curriculum_incomplete"]
+    message: str = Field(max_length=500)
+
+
 class RunView(BaseModel):
     """对外运行状态投影（**唯一**可授权给前端的运行视图）。
 
@@ -114,6 +158,8 @@ class RunView(BaseModel):
     version: int = Field(..., ge=1, description="乐观并发版本号")
     result_ref: str | None = Field(default=None, max_length=128)
     error: ErrorBody | None = None
+    clarification: RunClarification | None = None
+    planning_issues: list[RunPlanningIssue] = Field(default_factory=list, max_length=20)
     progress: RunProgress | None = Field(
         default=None, description="分批生成业务进度；未发布过进度的运行（如旧版）为 null"
     )
@@ -495,6 +541,12 @@ V1_SCHEMAS: tuple[type[BaseModel], ...] = (
     ErrorBody,
     PrefsSnapshot,
     RunProgress,
+    RunClarificationQuestion,
+    RunClarification,
+    V2ClarificationAnswer,
+    V2ClarificationRequest,
+    V2PlanningAvailability,
+    RunPlanningIssue,
     RunView,
     RunCancelRequest,
     PlanGenerateRequest,

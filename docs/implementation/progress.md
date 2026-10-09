@@ -1,3 +1,15 @@
+## 2026-10-09 Planning V2 Item 9 C0–C2
+
+初始澄清安全续接 PASS，独立安全审查四组缺陷已关闭。119 unit/contract、31 新 owned PG 矩阵与受影响定向检查 PASS；真实本地 TCP Cookie/CSRF→新 Run→Draft→确认→Revision fresh readback PASS。原 failed Run/Receipt 保留、最多两轮、同预算根、unknown 不重派、public generate503。无 migration / 正式库写 / 产品LLM搜索Reader；新 owned DB与证据保留。React U1–U3 按已批准HTML连续实施中，真实产品语义仍待授权。详见 ITEM9_CLARIFICATION_CONTINUATION.md；原U0 STOP与原型批准记录保留。
+
+## 2026-10-09 Planning V2 Item9 React U0：IMPLEMENTATION_BLOCKED / REACT_NOT_STARTED / PUBLIC_GENERATE_NOT_ENABLED / STOP
+
+- 用户已正式批准HTML，当前HEAD9be82b98c714e378812b8e17728c452f93951496，原型SHA256 dc1dd08b40520f76c1fece10858dd2c8e38843e4b2400fed0ea8b9ef2915df7b匹配。按新Goal先执行U0，未以旧Item8 HEAD假定当前基线；起始tracked clean。
+- [React U0报告](../planning-v2/ITEM9_REACT_IMPLEMENTATION.md)记录实质阻塞：Analyzer非ready返回goal_clarification_required，Run/Job failed+none，未形成规范化goal_analysis checkpoint；内部receipt可能保留原始输出，但RunView无typed问题/回答续接。任何已有初始root（包括failed澄清）均阻新root，failed不能Worker claim，无公开resume；Semantic要求合法current，不能替代无current的初始澄清。
+- 用户明确要求关键操作缺少安全API且需新业务设计时STOP，故U1/U2/U3未开始，无React/DTO/API/业务代码修改，无Fake状态冒充实际生成。需先评审初始澄清的来源/版本绑定与合法答案继续、同root预算/幂等/unknown规则；不自行改Item1–8、历史Run或新增恢复平台。正常public503是预期边界，不能为此开放入口。
+- NORMAL Sol6.1medium负责后端真实调用链、FAST Lunamedium只枚举前端符号/DTO，实际解析NOT OBSERVABLE；没有让FAST批准复杂行为。源码U0因关键操作缺口FAIL；基线/原型/哈希/范围核对PASS。前端build/tests、owned PG/HTTP/Worker、真实浏览器与React截图均NOT RUN，尚无实施可独审。
+- 产品模型/搜索/Reader/API/正式DB写入0，未创建owned库/账号/Run/Job，正式行数NOT RUN；历史unknown177/183及账本/受保护目录保留。只新增报告及本progress前置记录，其他900tracked基线除progress全部哈希保持；未创建实施commit，不push/merge/deploy。按附件STOP边界暂停，等待用户决定最小澄清续接合同后再续React。
+
 ## 2026-10-09 Planning V2 Item9：HTML_PROTOTYPE_READY_FOR_USER_REVIEW / REACT_NOT_STARTED / REAL_PRODUCT_ACCEPTANCE_PENDING / STOP
 
 - 基线 feat/n1-resource-discovery / 8c578d404a9b6337ede9c0c2e7fd70deb01f3ef4。先复用既有 HTML 与首版22项离线Edge证据，按追加要求增量补足教学概览、折叠阶段理由/知识/教材/实践、前置与单元完成能力、持续项目增量与独立MCP Micro Exercise，以及Case Study输入输出/失败/取舍/产物；无固定方向选择器、Python复习或固定学习日期。

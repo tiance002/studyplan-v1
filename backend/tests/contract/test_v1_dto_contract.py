@@ -142,6 +142,8 @@ def test_run_view_never_exposes_graph_internals() -> None:
         "result_ref",
         "error",
         "progress",
+        "clarification",
+        "planning_issues",
     }
 
 

@@ -78,7 +78,7 @@ class GoalRequirementProfileValidator:
     _fields = frozenset({"schema_version", "target_summary", "required_requirements", "hard_constraints",
                          "learner_claims", "clarification_questions", "status"})
 
-    def validate(self, raw: object, *, goal: GoalSpec) -> GoalRequirementProfile:
+    def validate(self, raw: object, *, goal: GoalSpec, clarification=None) -> GoalRequirementProfile:
         if not isinstance(goal, GoalSpec):
             raise ValidationAppError("GoalRequirementProfile 需要有效 GoalSpec")
         data = self._object(raw, self._fields)
@@ -92,6 +92,10 @@ class GoalRequirementProfileValidator:
         if (status == "ready" and questions) or (status == "needs_clarification" and not questions):
             self._reject("clarification_questions")
         allowed = self._source_refs(goal)
+        if clarification is not None:
+            from app.domain.planning.clarification import answer_input
+            clarification = answer_input(clarification)
+            allowed.update(a["source_ref"] for a in clarification["answers"])
         requirements = []
         for item in self._array(data["required_requirements"], 50):
             item = self._object(item, {"text", "origin", "source_refs", "rationale"})
@@ -112,6 +116,11 @@ class GoalRequirementProfileValidator:
             if not any(c.text == text and f"goal.constraints[{index}]" in c.source_refs for c in constraints):
                 self._reject("structured_constraint_missing_or_changed")
         claims = self._facts(data["learner_claims"], allowed, "claim", LearnerClaim)
+        if clarification is not None:
+            for key, actual in (("hard_constraints", constraints), ("learner_claims", claims)):
+                for prior in clarification["retained_facts"][key]:
+                    if not any(f.text == prior["text"] and set(prior["source_refs"]) <= set(f.source_refs) for f in actual):
+                        self._reject("retained_fact_missing_or_changed")
         self._unique([r.requirement_id for r in requirements])
         self._unique([c.constraint_id for c in constraints])
         self._unique([c.claim_id for c in claims])

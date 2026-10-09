@@ -865,6 +865,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/plans/v2/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get V2 Planning Availability */
+        get: operations["get_v2_planning_availability"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/v2/owned/clarifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Owned V2 Clarification */
+        post: operations["submit_owned_v2_clarification"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/plans/v2/changes/context": {
         parameters: {
             query?: never;
@@ -3902,6 +3936,36 @@ export interface components {
             /** Idempotency Key */
             idempotency_key: string;
         };
+        /** RunClarification */
+        RunClarification: {
+            /** Clarification Version */
+            clarification_version: number;
+            /** Questions */
+            questions: components["schemas"]["RunClarificationQuestion"][];
+            /** Can Submit Answers */
+            can_submit_answers: boolean;
+            /** Message */
+            message: string;
+            /** Continuation Run Id */
+            continuation_run_id?: string | null;
+        };
+        /** RunClarificationQuestion */
+        RunClarificationQuestion: {
+            /** Question Id */
+            question_id: string;
+            /** Question Text */
+            question_text: string;
+        };
+        /** RunPlanningIssue */
+        RunPlanningIssue: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "required_material_unresolved" | "constraint_unresolved" | "project_case_unresolved" | "curriculum_incomplete";
+            /** Message */
+            message: string;
+        };
         /**
          * RunProgress
          * @description 一次运行的分批生成**业务进度**（唯一可授权给前端的进度视图）。
@@ -4006,6 +4070,9 @@ export interface components {
             /** Result Ref */
             result_ref?: string | null;
             error?: components["schemas"]["ErrorBody"] | null;
+            clarification?: components["schemas"]["RunClarification"] | null;
+            /** Planning Issues */
+            planning_issues?: components["schemas"]["RunPlanningIssue"][];
             /** @description 分批生成业务进度；未发布过进度的运行（如旧版）为 null */
             progress?: components["schemas"]["RunProgress"] | null;
         };
@@ -4427,6 +4494,24 @@ export interface components {
             /** Clarification Questions */
             clarification_questions: string[];
         };
+        /** V2ClarificationAnswer */
+        V2ClarificationAnswer: {
+            /** Question Id */
+            question_id: string;
+            /** Answer Text */
+            answer_text: string;
+        };
+        /** V2ClarificationRequest */
+        V2ClarificationRequest: {
+            /** Parent Run Id */
+            parent_run_id: string;
+            /** Clarification Version */
+            clarification_version: number;
+            /** Answers */
+            answers: components["schemas"]["V2ClarificationAnswer"][];
+            /** Idempotency Key */
+            idempotency_key: string;
+        };
         /** V2LocalChangeRequest */
         V2LocalChangeRequest: {
             /** Current Plan Id */
@@ -4448,6 +4533,19 @@ export interface components {
             title?: string | null;
             /** What To Learn */
             what_to_learn?: string | null;
+        };
+        /** V2PlanningAvailability */
+        V2PlanningAvailability: {
+            /** Initial Generation */
+            initial_generation: boolean;
+            /** Clarification */
+            clarification: boolean;
+            /** Semantic Replanning */
+            semantic_replanning: boolean;
+            /** Local Change */
+            local_change: boolean;
+            /** Message */
+            message: string;
         };
         /** V2RevisionDecisionRequest */
         V2RevisionDecisionRequest: {
@@ -6739,6 +6837,74 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+        };
+    };
+    get_v2_planning_availability: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["V2PlanningAvailability"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_owned_v2_clarification: {
+        parameters: {
+            query: {
+                /** @description 学习空间 ID；必须属于当前会话的项目范围，否则 403 */
+                project_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["V2ClarificationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanGenerateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -188,7 +188,7 @@ def test_raw_goal_authority_boundary_profile_is_only_downstream_object():
     assert isinstance(profile, GoalRequirementProfile)
     assert "goal" not in {f.name for f in fields(profile)}
     assert not {"raw_goal", "goal_spec", "raw_target"} & profile.to_payload().keys()
-    assert list(inspect.signature(GoalRequirementAnalyzer.analyze).parameters) == ["self", "goal", "run_id", "attempt_id"]
+    assert list(inspect.signature(GoalRequirementAnalyzer.analyze).parameters) == ["self", "goal", "run_id", "attempt_id", "clarification"]
 
 
 class ResultPort:

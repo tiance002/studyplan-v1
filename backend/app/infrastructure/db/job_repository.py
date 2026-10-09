@@ -212,6 +212,13 @@ class PgPlanningJobRepository:
                 if not manifest_intact(manifest) or initial.get("manifest") != manifest:
                     raise V2RecoveryBlocked("V2 enqueue requires an intact frozen submission")
                 context = V2RevisionContext.from_payload(initial.get("v2_revision"))
+                clarification = initial.get("v2_clarification")
+                if (clarification is None) != ("v2_clarification_hash" not in manifest):
+                    raise V2RecoveryBlocked("V2 clarification marker/context mismatch")
+                if clarification is not None:
+                    from app.infrastructure.db.v2_clarifications import validate_continuation
+                    validate_continuation(conn, actor_id=run.actor_id, project_id=run.project_id,
+                        run_id=run.run_id, submission=submission)
                 if (context is None and manifest["expected_version"] != 0
                         or (context is None) != ("v2_revision_hash" not in manifest)
                         or context is not None and (
@@ -219,7 +226,7 @@ class PgPlanningJobRepository:
                             or context.to_payload()["base_revision"] != manifest["expected_version"])):
                     raise V2RecoveryBlocked("V2 enqueue revision context binding rejected")
                 lock_plan_version(conn, run.project_id, manifest["expected_version"])
-                if context is None and conn.execute(
+                if context is None and clarification is None and conn.execute(
                         "SELECT 1 FROM ai_runs WHERE actor_id=%s AND project_id=%s "
                         "AND graph_version=%s AND kind='plan_generate' LIMIT 1",
                         (run.actor_id, run.project_id, V2_EXECUTION_VERSION)).fetchone():

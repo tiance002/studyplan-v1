@@ -85,7 +85,8 @@ class PgV2Calls:
         )
         submission = frozen_submission(conn, actor_id=self.scope.actor_id, project_id=self.project_id, run_id=self.run_id)
         context = V2RevisionContext.from_payload(submission["initial"].get("v2_revision"))
-        root = context.to_payload()["budget_root_run_id"] if context else self.run_id
+        from app.infrastructure.db.v2_clarifications import root_of
+        root = root_of(submission, self.run_id)
         conn.execute(
             "SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", ("studyplan:plan-budget:" + root,)
         )
@@ -122,6 +123,11 @@ class PgV2Calls:
         from app.infrastructure.db.v2_revisions import budget_family
         _, manifests = budget_family(conn, actor_id=self.scope.actor_id, project_id=self.project_id, run_id=self.run_id)
         run_ids = [run for run in manifests if not related_only or run != self.run_id]
+        return self.family_reservations(conn, manifests, run_ids)
+
+    @staticmethod
+    def family_reservations(conn, manifests, run_ids):
+        """Reuse the exact ledger integrity/usage rules for consent admission."""
         rows = conn.execute(
             "SELECT run_id,detail FROM ai_run_events WHERE run_id=ANY(%s) AND status='v2_reservation' ORDER BY event_id",
             (run_ids,),

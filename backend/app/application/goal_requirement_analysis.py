@@ -15,7 +15,7 @@ class GoalRequirementAnalyzer:
         self._llm = llm
         self._validator = GoalRequirementProfileValidator()
 
-    def analyze(self, goal: GoalSpec | str, *, run_id: str, attempt_id: str) -> GoalRequirementProfile | LLMFailure:
+    def analyze(self, goal: GoalSpec | str, *, run_id: str, attempt_id: str, clarification=None) -> GoalRequirementProfile | LLMFailure:
         """Return the sole downstream goal authority, or an existing typed failure.
 
         No persistence, receipt creation, retry, repair or continuation here.
@@ -28,9 +28,13 @@ class GoalRequirementAnalyzer:
         for value in (run_id, attempt_id):
             if not isinstance(value, str) or not value.strip() or len(value) > 200:
                 raise ValidationAppError("分析调用必须有有效 run/attempt identity")
+        payload = {"goal": goal_spec_payload(goal)}
+        if clarification is not None:
+            from app.domain.planning.clarification import answer_input
+            payload["clarification"] = answer_input(clarification)
         result = self._llm.generate_structured(
             purpose=GOAL_REQUIREMENT_PURPOSE, schema_name=GOAL_REQUIREMENT_SCHEMA,
-            payload={"goal": goal_spec_payload(goal)}, run_id=run_id, attempt_id=attempt_id,
+            payload=payload, run_id=run_id, attempt_id=attempt_id,
         )
         if isinstance(result, LLMFailure):
             return result
@@ -39,7 +43,7 @@ class GoalRequirementAnalyzer:
             return LLMFailure("provider_output_truncated", "模型输出被截断", input_tokens=result.input_tokens,
                               output_tokens=result.output_tokens, latency_ms=result.latency_ms)
         try:
-            return self._validator.validate(result.payload, goal=goal)
+            return self._validator.validate(result.payload, goal=goal, clarification=clarification)
         except ValidationAppError:
             return LLMFailure("goal_requirement_profile_invalid", "目标分析响应未通过结构校验",
                               input_tokens=result.input_tokens, output_tokens=result.output_tokens,
