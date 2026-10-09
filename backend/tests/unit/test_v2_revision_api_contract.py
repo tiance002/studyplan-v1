@@ -54,3 +54,22 @@ def test_semantic_replan_has_an_owned_route_and_requires_explicit_goal_spec(app)
                         {"goal_spec": {"target": "新目标", "accepted_known": ["python"]}}):
             assert client.post("/api/v1/plans/v2/owned/replan", params={"project_id": "p"},
                                json=body | changed).status_code == 422
+
+
+@pytest.mark.parametrize("repository_present", [False, True])
+def test_unconfigured_semantic_runtime_returns_503_without_database_access(app, monkeypatch, repository_present):
+    import psycopg
+    from app.application.v2_revisions import V2RevisionService
+    from app.infrastructure.db.v2_revisions import PgV2Revisions
+
+    def forbidden_connection(*args, **kwargs):
+        pytest.fail("Unconfigured replanning must fail before database access")
+
+    monkeypatch.setattr(psycopg, "connect", forbidden_connection)
+    service = V2RevisionService(PgV2Revisions("postgresql://127.0.0.1/unconfigured")) if repository_present else None
+    app.state.container = replace(app.state.container, v2_revision_service=service)
+    with TestClient(app) as client:
+        result = client.post("/api/v1/plans/v2/owned/replan", params={"project_id": "p"},
+            json={"current_plan_id": "plan", "expected_version": 1,
+                  "idempotency_key": "unconfigured", "goal_spec": {"target": "合成目标"}})
+    assert result.status_code == 503

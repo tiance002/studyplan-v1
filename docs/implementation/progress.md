@@ -1,3 +1,11 @@
+## 2026-10-09 Planning V2 Item8：IMPLEMENTATION_COMPLETE / ITEM9_NOT_STARTED / REAL_PRODUCT_SEMANTIC_ACCEPTANCE_PENDING / STOP
+
+- [Item8统一报告](../planning-v2/ITEM8_REPLANNING_REVISION.md)完成R0～R3；R0 f0a7a04、R1 074836e、R2 2a14b32，R3精确SHA见最终本地tag/提交后回执。Local未来说明/合法完整排序→Compiler→Draft/hash→明确确认→原子Revision；Semantic新GoalSpec/newRun进入同Item1～7，旧current直到确认，历史精确lineage保留且不复制进度/mastery，无第二Planner或旧固定路线回流。
+- 各阶段独审PASS，关闭连续历史保护/消费者、成功重放hash、初始/legacy双root预算旁路、发布与Run完成CAS及own已发布中断恢复问题。普通dispatch保留basis/root/fence，已发布完成例外仍核原goal/source/domain；历史歧义只阻新动作，合法current/history继续可查。
+- R1核心18PASS/受影响50PASS及真实HTTP，R2最终42PASS＋最终source3PG PASS（去重27不同PG+17offline）和最终business HTTP2PASS，复用其他有效HTTP/DTO。R3仅新增2ownedPG首跑PASS：cancel迟到回执/excess保留原root、B cap拒绝/旧fence不成Draft，以及known clarification failed/none/current及成果历史保持/重放零dispatch。API5PASS含2默认503无DB；59例仅collection/执行0不冒充测试PASS。全改Python Ruff/diff PASS，857tracked范围/378历史证据/env/原progress保全PASS，原RED和诊断FAIL保留。
+- 全部实际持久化仅新owned业务/checkpoint库，既有0025/现有PostgresSaver，roles_created=[]、库保留。产品模型/搜索/Reader0，public generate503；无正式DB/历史unknown177/183改写或重派，无migration、架构/Policy/Prompt/上游领域Schema/Seed/审核映射改动，不push/merge/deploy，不进入Item9。
+- 真实外部语义/官方未知领域/完整用户E2E/Assistant全会话/浏览器UI/全量Backend/正式PG行数NOT RUN；默认未知领域Local缺原可信审批注入仍fail-closed，装配后PG/HTTP NOT RUN；旧SHORT public202 fixture及typed incomplete替代例NOT RUN（本轮已选实际needs_clarification）。全产品不因此READY。主协调请求Sol6.1high、关键agent spawn xhigh并复用，实际解析NOT OBSERVABLE，不改全局配置。完成本地R3检查点后STOP。
+
 ## 2026-10-09 Planning V2 Item8 R2：SEMANTIC_REPLANNING_PASS / CONTINUING_R3
 
 - 同Item1～7、新Run/manifest/GoalSpec/basis/diff及共享root预算已实现；fresh-context独审最终PASS，关闭初始root旁路、legacy双root写入旁路、发布与Run完成CAS两窗口及中断恢复。历史读路径不因预算歧义关闭，精确本Run发布结果恢复仍检查原冻结输入/fence，普通dispatch不放宽。

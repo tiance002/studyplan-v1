@@ -1,6 +1,6 @@
 # Planning V2 Item8 — Replanning & Revision
 
-日期：2026-10-08～09。R0、R1、R2独立审查PASS；R3尚未开始，不提前声明整体验收。
+日期：2026-10-08～09。R0、R1、R2独立审查PASS；R3独立审查PASS，本轮授权范围内Item8实现验收完成；真实产品语义验收仍待后续明确授权。
 
 ## 基线、授权与停止条件
 
@@ -69,13 +69,13 @@ Run运行时manifest单向绑定ctx.context_hash；Compiler ExecutionManifest仍
 
 HTTP的Provider/Search/Bodies是明确合成响应，Item1～7 Validator/Compiler/DB/认证链实际执行。Python claim不会进入learning stages，已有JSON CLI载体和完整GoalSpec读回PASS，只证明机械保全及接线，**不证明真实模型语义理解**。真实产品模型/搜索/Reader0。
 
-中间失败完整保留：first-green 2PASS1FAIL/diagnostic定位原goal_spec非空保护，随后增加精确typed绑定；expanded 7PASS1FAIL发现Compiler清单替代runtime清单在工厂索引model_ref时抛KeyError并留running，随后在工厂前manifest_intact拒绝并分类为RecoveryBlocked，最终closure通过。不是以放宽Schema、修改旧历史或增加调用追绿。R2实施与HTTP源码hash packet已冻结，独立审查尚未给最终结论，不提前声明R2完成。
+中间失败完整保留：first-green 2PASS1FAIL/diagnostic定位原goal_spec非空保护，随后增加精确typed绑定；expanded 7PASS1FAIL发现Compiler清单替代runtime清单在工厂索引model_ref时抛KeyError并留running，随后在工厂前manifest_intact拒绝并分类为RecoveryBlocked，最终closure通过。不是以放宽Schema、修改旧历史或增加调用追绿。这是首轮实现时点的冻结记录；当时独审尚未完成。后续独审闭包与最终PASS见下文，首轮证据和失败仍保留。
 
-2026-10-09续接独审确认P1：原`/owned/generate`在已有current时仍创建无revision context的新root，绕过祖先预算/unknown/basis；无current但已存在初始Run时也可能重复创建独立root。真实HTTP `r2-initial-http-red.xml`复现202并新增Run/Job/submission，不作为通过证据。正在同一边界修复：初始root在项目锁内原子准入、同项目已有root任何状态拒绝新root、无ctx非零expected submission/Worker拒绝；不改历史Run，不为失败/unknown建立自动重派平台。R2仍未提交，独审未PASS。
+2026-10-09续接独审确认P1：原`/owned/generate`在已有current时仍创建无revision context的新root，绕过祖先预算/unknown/basis；无current但已存在初始Run时也可能重复创建独立root。真实HTTP `r2-initial-http-red.xml`复现202并新增Run/Job/submission，不作为通过证据。随后在同一边界完成修复：初始root在项目锁内原子准入、同项目已有root任何状态拒绝新root、无ctx非零expected submission/Worker拒绝；不改历史Run，不为失败/unknown建立自动重派平台。这是独审发现问题的历史时点；现已完成下述闭包并提交R2。
 
 同一闭包还检查修复前持久化的多个初始root：只关闭新入口不够，旧queued Run、已保存Draft的generic确认及后续Semantic root解析也必须拒绝歧义；共用durable submission/root校验，不删除或重写历史。实际`r2-gate-legacy-double-root-red.xml`已复现2 FAIL。另发现Semantic Draft持久化之后与最终checkpoint/Run终态之间的发布时序：外部Local先发布应使旧Semantic明确终结冲突；精确本Run的Draft先合法发布应完成succeeded，不能卡在running或误报失败。这两窗口由同一实际PG反例矩阵收口，不能用通用忽略CAS替代。
 
-完成恢复另用`r2-gate-own-published-recovery-red.xml`真实复现1 FAIL：草案持久化后确认，模拟最终checkpoint中断，fresh Worker将已发布本Run误标failed。修复只投影精确approved+Publication/hash/typed snapshot/context绑定的本Run结果，并继续fence及原goal/source/domain冻结校验；一般dispatch仍按旧basis严格检查。新的publication budget校验只在mutation路径开启，不能让多root历史的current/history读取失效。最终源码与PG证据仍待独审收口。
+完成恢复另用`r2-gate-own-published-recovery-red.xml`真实复现1 FAIL：草案持久化后确认，模拟最终checkpoint中断，fresh Worker将已发布本Run误标failed。修复只投影精确approved+Publication/hash/typed snapshot/context绑定的本Run结果，并继续fence及原goal/source/domain冻结校验；一般dispatch仍按旧basis严格检查。新的publication budget校验只在mutation路径开启，不能让多root历史的current/history读取失效。最终源码与PG证据经下述独审已收口。
 
 Owned初始入口的有限恢复边界：尚无current但原初始root已failed/needs_clarification/cancelled/unknown时，本轮不允许通过新初始身份再分配预算；需显式核对原Run。Item8面向已有current的修订，本轮不建设原失败Run恢复平台。
 
@@ -90,7 +90,7 @@ Owned初始入口的有限恢复边界：尚无current但原初始root已failed/
 
 最终业务源码HTTP `r2-final-business-http-green.xml`：PASS，2例，22.76s；仅复测existing-current409/零行增量与合法Semantic整链确认。与先前相同HTTP场景重叠，不另加用例数。
 
-业务14文件最终hash、前后两份source版本与各XML绑定冻结在`r2-business-closure-packet.json`；root API/HTTP7文件冻结在`r2-root-gate-packet.json`。R2最终独审PASS：实际14个业务文件与7个API/contract文件hash一致，42+3例的source时序、最终2HTTP XML/hash已核对；无剩余actionable P1，可以创建本地R2 checkpoint。独审回执保存在`r2-review-receipt.json`。R3尚未开始。
+业务14文件最终hash、前后两份source版本与各XML绑定冻结在`r2-business-closure-packet.json`；root API/HTTP7文件冻结在`r2-root-gate-packet.json`。R2最终独审PASS：实际14个业务文件与7个API/contract文件hash一致，42+3例的source时序、最终2HTTP XML/hash已核对；无剩余actionable P1，可以创建本地R2 checkpoint。独审回执保存在`r2-review-receipt.json`。R3最终独审PASS（见下文）。
 
 ## 新增事实的实际消费者矩阵
 
@@ -111,6 +111,110 @@ Owned初始入口的有限恢复边界：尚无current但原初始root已failed/
 
 没有新增第二Planner、独立版本历史表、业务队列或review平台。原Item1～6领域语义、Policy、Schema、Prompt和审核映射不变。Item8对现有V2 goal_spec非空保护只允许带合法context的精确绑定，不放宽无绑定旧路径；`V2ExecutionSnapshotV1`字段集合保持不变。
 
-## 后续证据
+## R3：受影响可靠性与交付边界（独立审查PASS）
 
-R2独审已收口，checkpoint后进入R3；仅补受影响可靠性与最终保护/contract/collection，不重跑完整Item7。真实外部语义与Item9 UI NOT RUN。
+R2本地checkpoint `2a14b32bbe18d41a8b2110d49c949cfbc4f63058` 后，仅新增in-flight取消/迟到计量/fence以及known clarification或incomplete保护两类实际owned PG强例。R2已验证的完成窗口、fresh Worker成功receipt恢复、unknown、共享cap与HTTP历史不重复运行完整矩阵。
+
+root边界`r3-api-boundary.xml`：PASS，5例，其中3例为既有DTO保护、2例新增未装配服务/已装配仓储但无owned runtime返回503。测试将`psycopg.connect`设为失败哨兵，实际HTTP路径未触发任何数据库连接；这是离线边界证明，不冒充真实认证/PG，认证证据复用R1/R2实际cookie/CSRF用例。
+
+`contracts/examples/v2_revision_examples.json`来自实际Item8 owned HTTP读回，Local/Confirmation/Semantic GoalSpec和historical_learning用真实DTO校验PASS。明确标注只展示新增字段的响应投影，不能冒充完整PlanView；外部端口是合成输出、产品真实外部调用0，完整响应留在本机证据目录。
+
+### R3真实PG与最终工具检查
+
+`r3-owned-pg.xml`首跑PASS，2例、0 failure/error/skipped，21.696s；业务源码相对R2修改0。只追加两个强场景及辅助测试，完整source/test SHA、实际argv、网络审计和新库元数据保存在`r3-implementation-packet.json`。
+
+1. 同root A已持久化dispatched后取消，pending阶段B及新Semantic提交均阻断；迟到success仍留下原attempt receipt和observed excess。冻结cap50、原累计7，迟到观测53（reservation1+excess52）后总累计60，不退款、不换root。A Run/Job继续reconciliation，不自动把迟到成功变为计划成功；B在unknown消除后明确因BudgetExceeded拒绝，额外invoke0。实际旧fence调用持久化被拒绝，新增Draft0，current、旧学习记录/来源hash一致。这是合成调用计量反例，不是真实产品请求数或费用。
+2. actual Item1 typed `needs_clarification`经Worker形成`failed + none / goal_clarification_required`、Job failed、无Draft。Provider receipt是合法成功响应，与业务目标尚待澄清区分。同身份重放和fresh Worker额外dispatch0；原Summary、Prompt、Practice、用户acceptance成果、来源和current/history hash不变。
+
+只使用新owned `studyplan_test_v2i8_708ca2bc`与`studyplan_test_v2i8cp_0a5018ef`，既有0025/现有PostgresSaver初始化，roles_created=[]，库保留。网络审计无外部尝试；产品模型/搜索/Reader0。
+
+| 检查 | 实际结果与证据 |
+|---|---|
+| 最小目标collection/import | PASS：5个目标文件59例收集，exit0；未执行这59例，不能称59 tests PASS |
+| API默认未装配边界/DTO | PASS：`r3-api-boundary.xml`5例；新增2例无DB连接 |
+| API示例 | PASS：由实际owned HTTP响应派生，DTO校验；只投影新增字段 |
+| Ruff | PASS：相对Start HEAD的全部修改Python文件；R3新PG测试单独Ruff也PASS |
+| 最终diff/范围及历史保护 | PASS：857 tracked范围、378历史证据、.env及原progress保全；git diff --check exit0；不重跑功能测试 |
+
+主协调请求Sol6.1 high，关键实现/独审spawn请求Sol6.1 xhigh；R3复用原agent的followup工具不能切换model/effort，不把bounded角色名称当实际medium配置。实际解析均NOT OBSERVABLE，不改全局配置。
+
+## 最终独立审查与逐项验收
+
+独立审查代理在与实施者分离的上下文读取实际源码、diff、冻结合同、test XML与PG/HTTP读回，不采用实施者自评代替证据。R0/R1/R2已分别PASS；R3核对14个业务/测试文件与root3个文件hash、两个R3 XML/hash、实际示例投影和报告，最终PASS，无剩余actionable P0/P1。原缺陷及RED/FAIL保留，回执分别在本机`r1-review-receipt.json`、`r2-review-receipt.json`与`r3-review-receipt.json`。
+
+| 产品/安全要求 | 最终证据门禁 | 结果 |
+|---|---|---|
+| 服务端Local/Semantic/待澄清分类 | 受控命令与字段拒绝，不信任is_semantic或Seed关键词 | PASS |
+| Local未来内容、required/前置/来源/hash | R1 Compiler、10ownedPG、真实HTTP及来源/进度失效反例 | PASS，限说明/排序范围 |
+| Semantic复用Item1～7 | R2实际Worker/Validator/Compiler/PG及最终HTTP；GoalSpec/ctx/manifest精确绑定 | PASS，限机械链路与保护 |
+| 原current与显式确认 | 原Publication/CAS、异体幂等、并发确认，以及known clarification不生成Draft | PASS |
+| 历史/开始/未来/掌握区分 | 精确旧Revision/stage/hash lineage，连续历史消费者不复制progress/mastery | PASS |
+| Summary/Prompt/Practice/成果/来源 | R1/R2 HTTP和R3实际旧记录/hash读回一致 | PASS |
+| 预算/unknown/cancel/迟到/fence | R2共享root与R3计量7→60/cap50，late不退款、不成Draft，B cap拒绝 | PASS |
+| Worker恢复与终态 | R2 own-published两窗口/中断恢复/输入漂移，以及R3待澄清同id重放零dispatch | PASS |
+| 默认入口与HTTP/契约 | 默认503无DB触碰；owned cookie/CSRF/scope/current/history，实际示例/DTO | PASS |
+| 范围与证据诚实 | 59只collection/执行0；Ruff/diff/保护，外部产品调用0，不改变冻结上游 | PASS |
+
+不得把上述PASS扩展成真实模型理解、教学语义、大规模稳定性或全产品READY。真实产品语义仍pending。
+
+## Checkpoint与修改文件
+
+Start HEAD `6b291d10ab439bc37a540a626174941cc90fd28b`。本地阶段记录：
+
+| 阶段 | 本地提交 | 注释tag |
+|---|---|---|
+| R0 | `f0a7a04a21c80afac9d3c839af6fafdef923e6f9` | `checkpoint-planning-v2-item8-r0-20261008` |
+| R1 | `074836ea5c01efd88eca114c13b43f1ea93bbac5` | `checkpoint-planning-v2-item8-r1-20261008` |
+| R2 | `2a14b32bbe18d41a8b2110d49c949cfbc4f63058` | `checkpoint-planning-v2-item8-r2-20261009` |
+| R3 | 本报告所在最终交付提交；实际SHA见提交后回执及本地tag解析 | `checkpoint-planning-v2-item8-r3-20261009` |
+
+Final HEAD通过最终tag解析及提交后回执核对，报告不把自己的未来commit SHA写成已存在值。只有本地commit/tag，没有push/merge/deploy。
+
+完整修改文件（相对Start HEAD）：
+
+- `backend/app/api/v1/routes.py`
+- `backend/app/api/v1/schemas.py`
+- `backend/app/api/v1/views.py`
+- `backend/app/api/v1/workspace_routes.py`
+- `backend/app/application/container.py`
+- `backend/app/application/plan_service.py`
+- `backend/app/application/v2_revisions.py`
+- `backend/app/composition.py`
+- `backend/app/domain/planning/models.py`
+- `backend/app/domain/planning/revisions.py`
+- `backend/app/domain/planning/v2_execution.py`
+- `backend/app/infrastructure/checkpointer/v2_planning_executor.py`
+- `backend/app/infrastructure/checkpointer/v2_planning_runtime.py`
+- `backend/app/infrastructure/db/job_repository.py`
+- `backend/app/infrastructure/db/plan_repository.py`
+- `backend/app/infrastructure/db/run_repository.py`
+- `backend/app/infrastructure/db/v2_planning_persistence.py`
+- `backend/app/infrastructure/db/v2_revisions.py`
+- `backend/app/infrastructure/db/workspace.py`
+- `backend/app/infrastructure/providers/v2_attempts.py`
+- `backend/app/ports/v2_revisions.py`
+- `backend/tests/integration/test_v2_replanning_http_pg.py`
+- `backend/tests/integration/test_v2_replanning_pg.py`
+- `backend/tests/integration/test_v2_replanning_runtime_pg.py`
+- `backend/tests/unit/test_v2_replanning.py`
+- `backend/tests/unit/test_v2_revision_api_contract.py`
+- `contracts/examples/v2_revision_examples.json`
+- `contracts/openapi.json`
+- `docs/implementation/progress.md`
+- `docs/planning-v2/ITEM8_REPLANNING_REVISION.md`
+- `frontend/src/api/generated/schema.d.ts`
+
+## 未验证事项与剩余限制
+
+- 真实产品模型、GitHub/Web搜索、Reader及官方未知领域证据/教学语义：NOT RUN，实际外部产品调用0。合成Provider通过Schema/Validator/Compiler/接线，不能代替真实语义验收或大规模可靠性验证。
+- Item9 React/HTML、浏览器视觉、完整用户E2E与Assistant完整会话：NOT RUN。复用现有学习位置/成果只读服务的定向事实核对，不宣称所有产品消费者已完整E2E。
+- 默认unknown-domain Local缺可信审批注入仍fail-closed；配置注入的离线正/反例PASS，配置注入的PG/HTTP NOT RUN。
+- typed incomplete替代场景：NOT RUN；本轮依约选择actual typed needs_clarification强例，不把两者冒称均实测。
+- 旧SHORT发布抢先完成PG fixture依赖已禁用的public generate202：NOT RUN，旧分支保留；不为测试重新开放旧生成。
+- 全量Backend回归、正式PG连接及行计数：NOT RUN。本轮所有实际持久化验证只用新owned库，不把未连接正式库的行数冒充实测0；无正式数据操作。
+- 无current但已有failed/cancelled/unknown初始root时，不自动创建第二初始root；需核对原Run，不新建恢复平台。历史歧义仅阻止新动作，旧合法current/history仍可查。
+- 首轮Local的受控API支持未来阶段说明及完整合法排序；实践/资源任意结构编辑不在新增命令中。新增语义能力必须进入原Item1～7，不借旧generated operations或固定Recipe实现。
+
+上位架构合同、Item1～6核心语义、Policy/Prompt/领域Schema、Seed和审核映射不改；新增context只用原JSONB。无migration、第二Planner/历史表/队列；public generate保持503，不push/merge/deploy。原unknown177/183、378份账本/历史证据和.env由hash审计保护，不恢复/重派或改写。
+
+最终状态：`ITEM8_IMPLEMENTATION_COMPLETE` / `ITEM9_NOT_STARTED` / `REAL_PRODUCT_SEMANTIC_ACCEPTANCE_PENDING`。本地R3 commit/tag作为最终HEAD，精确SHA写提交后回执，不push/merge/deploy。STOP。

@@ -626,3 +626,176 @@ def test_own_published_semantic_result_recovers_after_final_checkpoint_interrupt
     EVIDENCE.joinpath("r2-closure-own-published-result-recovery-" + (input_drift or "valid") + ".json").write_text(json.dumps({"database": db.name,
         "run_id": run, "draft_id": draft.draft_id, "current_plan_id": published[0].plan_id,
         "run_status": recovered.status.value, "input_drift": input_drift, "new_dispatch": 0, "external_calls": 0}, indent=2), encoding="utf8")
+
+
+def _r3_network_guard(monkeypatch):
+    import socket
+
+    import httpx
+    attempted = []
+    original_connect = socket.socket.connect
+    def connect(sock, address):
+        if isinstance(address, tuple) and address[0] not in {"127.0.0.1", "::1", "localhost"}:
+            attempted.append("non-loopback socket")
+            raise AssertionError("R3 forbids external network")
+        return original_connect(sock, address)
+    def http_request(*args, **kw):
+        attempted.append("HTTP request")
+        raise AssertionError("R3 uses only synthetic provider/search/Reader ports")
+    monkeypatch.setattr(socket.socket, "connect", connect)
+    monkeypatch.setattr(httpx.Client, "send", http_request)
+    monkeypatch.setattr(httpx.AsyncClient, "send", http_request)
+    return attempted
+
+
+def _r3_history(env):
+    from app.infrastructure.db.v2_revisions import capture_progress_basis
+    with env.revisions._connection(env.scope, env.project) as conn:
+        return capture_progress_basis(conn, env.repo.get_current(project_id=env.project))
+
+
+def test_r3_cancelled_semantic_late_receipt_keeps_shared_root_excess_and_fence(db, checkpoint_db, scope, monkeypatch):
+    from threading import Event
+
+    from app.core.ids import content_hash
+    from app.infrastructure.db.v2_planning_persistence import PgV2PlanningPersistence
+    from app.infrastructure.db.v2_revisions import budget_family
+    from app.ports.planning_jobs import PlanningLeaseLostError
+
+    from backend.tests.unit.test_curriculum_compiler import inputs
+    network = _r3_network_guard(monkeypatch)
+    env = environment(db, checkpoint_db, scope)
+    saved_history(db, scope, env.base)
+    historical = _r3_history(env)
+    one, two = submit(env, "r3-inflight-one"), submit(env, "r3-inflight-two")
+    first, second = ledger(db, env, one), ledger(db, env, two)
+    before = second.usage()
+    cap = first.manifest["budget"]["max_total_requests"]
+    started, release = Event(), Event()
+    invoked, forbidden = [], []
+    def in_flight(_):
+        invoked.append("A")
+        started.set()
+        assert release.wait(20), "owned synthetic late result release timed out"
+        return {"late": True}
+    def late_call():
+        return first.call(step="r3-late", purpose="owned-budget-probe", schema="OwnedBudgetProbeV1",
+            payload={"case": "cancel-late-shared-root"}, reserved={"total_requests": 1, "output_tokens": 1, "cost_micros": 1},
+            invoke=in_flight, encode=lambda value: ({"kind": "probe", "value": value},
+                {"total_requests": cap + 3, "output_tokens": 2, "cost_micros": 3}))
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(late_call)
+        try:
+            assert started.wait(20), "A never reached committed durable dispatch"
+            with pytest.raises(V2RecoveryBlocked):
+                debit(second, "r3-B-before-cancel", lambda _: forbidden.append("B-before"))
+            with pytest.raises(V2RecoveryBlocked):
+                submit(env, "r3-new-before-cancel")
+            active = env.runs.get_run(project_id=env.project, run_id=one)
+            cancelled = env.jobs.cancel_run(actor_id=scope.actor_id, project_id=env.project, run_id=one,
+                expected_version=active.version, idempotency_key="r3-cancel-inflight")
+            assert cancelled.status.value == "reconciliation_required" and cancelled.next_action.value == "reconcile"
+            with pytest.raises(V2RecoveryBlocked):
+                debit(second, "r3-B-after-cancel", lambda _: forbidden.append("B-after"))
+            with pytest.raises(V2RecoveryBlocked):
+                submit(env, "r3-new-after-cancel")
+        finally:
+            release.set()
+        with pytest.raises(PlanningLeaseLostError):
+            future.result(timeout=20)
+    assert invoked == ["A"] and forbidden == []
+    after = second.usage()
+    assert after["total_requests"] == before["total_requests"] + cap + 3 > cap
+    assert after["output_tokens"] == before["output_tokens"] + 2
+    assert after["cost_micros"] == before["cost_micros"] + 3
+    with pytest.raises(V2BudgetExceeded):
+        debit(second, "r3-B-cap-after-late-success", lambda _: forbidden.append("B-cap"))
+    curriculum, args = inputs()
+    with pytest.raises(PlanningLeaseLostError):
+        PgV2PlanningPersistence(db.app_dsn).persist(scope=scope, project_id=env.project, run_id=one,
+            expected_version=1, curriculum=curriculum, write_fence=first.fence, **args)
+    with first.tx() as conn:
+        root, family = budget_family(conn, actor_id=scope.actor_id, project_id=env.project, run_id=two)
+        receipt = conn.execute("SELECT status,response_payload FROM ai_provider_attempts WHERE run_id=%s", (one,)).fetchone()
+        excess = conn.execute("SELECT detail FROM ai_run_events WHERE run_id=%s AND status='v2_observed_excess'", (one,)).fetchone()["detail"]
+        assert receipt["status"] == "succeeded" and receipt["response_payload"]["value"] == {"late": True}
+        assert excess["excess"] == {"total_requests": cap + 2, "output_tokens": 1, "cost_micros": 2}
+        assert conn.execute("SELECT count(*) AS n FROM ai_provider_attempts WHERE run_id=%s", (two,)).fetchone()["n"] == 0
+        assert conn.execute("SELECT count(*) AS n FROM plan_drafts WHERE run_id=ANY(%s)", ([one, two],)).fetchone()["n"] == 0
+        assert conn.execute("SELECT status FROM ai_jobs WHERE run_id=%s", (one,)).fetchone()["status"] == "reconciliation_required"
+    assert root == env.root and set(family) == {env.root, one, two}
+    assert env.runs.get_run(project_id=env.project, run_id=one) == cancelled
+    assert PgPlanRepository(db.app_dsn).get_current(project_id=env.project) == env.base
+    assert _r3_history(env) == historical and forbidden == [] and network == []
+    EVIDENCE.joinpath("r3-cancel-late-root-fence.json").write_text(json.dumps({"business_database": db.name,
+        "checkpoint_database": checkpoint_db.name, "root_run_id": root, "family": list(family),
+        "cancelled_run_id": one, "sibling_run_id": two, "receipt_status": receipt["status"],
+        "cancelled_run_status": cancelled.status.value, "excess": excess["excess"], "usage_before": before,
+        "usage_after": after, "frozen_cap": cap, "history_hash_before_after": content_hash(historical),
+        "source_snapshot_hash": content_hash(env.base.v2_execution.to_payload()), "blocked_invokes": forbidden,
+        "old_fence_persist": "PASS", "B_cap_rejected_after_success": True, "drafts_created": 0,
+        "external_network_attempts": network, "external_calls": 0}, ensure_ascii=False, indent=2), encoding="utf8")
+
+
+def test_r3_known_clarification_worker_terminal_replay_preserves_current_history(db, checkpoint_db, scope, monkeypatch):
+    from dataclasses import replace
+
+    from app.core.ids import content_hash
+    from app.infrastructure.db.practice_submissions import PgPracticeSubmissions
+    from app.infrastructure.db.prompts import PgPrompts
+    from app.infrastructure.db.summaries import PgSummaries
+
+    from backend.tests.unit.test_goal_requirement_analysis import output
+    network = _r3_network_guard(monkeypatch)
+    env = environment(db, checkpoint_db, scope)
+    summary, prompt, accepted = saved_history(db, scope, env.base)
+    historical = _r3_history(env)
+    original = env.provider.generate_structured
+    def clarify(**kw):
+        result = original(**kw)
+        assert kw["purpose"] == "planning.goal_requirement_analysis"
+        return replace(result, payload=output(target_summary=kw["payload"]["goal"]["target"],
+            status="needs_clarification", required_requirements=[],
+            clarification_questions=["首版先验证最小原型，还是包含全部运行保障？"]))
+    monkeypatch.setattr(env.provider, "generate_structured", clarify)
+    ports = (env.provider, env.factory.github, env.factory.body_reader)
+    before = tuple(len(port.calls) for port in ports)
+    run = submit(env, "r3-known-clarification")
+    assert env.worker.tick()
+    result = env.runs.get_run(project_id=env.project, run_id=run)
+    assert result.status.value == "failed" and result.next_action.value == "none"
+    assert result.error_class == "goal_clarification_required" and result.result_ref is None
+    after = tuple(len(port.calls) for port in ports)
+    assert after == (before[0] + 1, before[1], before[2])
+    with psycopg.connect(db.migrator_dsn) as conn:
+        job = conn.execute("SELECT status FROM ai_jobs WHERE run_id=%s", (run,)).fetchone()[0]
+        attempts = conn.execute("SELECT attempt_id,status,response_payload FROM ai_provider_attempts WHERE run_id=%s", (run,)).fetchall()
+        assert job == "failed" and len(attempts) == 1 and attempts[0][1] == "succeeded"
+        assert attempts[0][2]["value"]["payload"]["status"] == "needs_clarification"
+        assert conn.execute("SELECT count(*) FROM plan_drafts WHERE run_id=%s", (run,)).fetchone()[0] == 0
+    assert submit(env, "r3-known-clarification") == run
+    env.service.execute_generation(project_id=env.project, run_id=run)
+    jobs = PgPlanningJobRepository(db.app_dsn, actor_ids=(scope.actor_id,))
+    fresh = PlanService(repository=PgPlanRepository(db.app_dsn), runs=PgRunRepository(db.app_dsn), catalog=None,
+        resources=None, llm=None, graph_version="", planning_jobs=jobs, v2_runtime_factory=env.factory)
+    assert not PlanningWorker(jobs=jobs, execute=fresh.execute_generation, actor_ids=(scope.actor_id,)).tick()
+    assert tuple(len(port.calls) for port in ports) == after
+    with psycopg.connect(db.migrator_dsn) as conn:
+        assert conn.execute("SELECT attempt_id,status,response_payload FROM ai_provider_attempts WHERE run_id=%s", (run,)).fetchall() == attempts
+    assert env.runs.get_run(project_id=env.project, run_id=run) == result
+    assert PgPlanRepository(db.app_dsn).get_current(project_id=env.project) == env.base
+    assert _r3_history(env) == historical
+    assert PgSummaries(db.app_dsn).attempt(scope, env.project, summary["attempt_id"]) == summary
+    assert PgPrompts(db.app_dsn).attempt(scope, env.project, prompt["revision_id"]) == prompt
+    assert PgPracticeSubmissions(db.app_dsn).get(scope, env.project, accepted["submission"]["submission_id"]) == accepted["submission"]
+    assert network == []
+    EVIDENCE.joinpath("r3-known-clarification-terminal-replay.json").write_text(json.dumps({"business_database": db.name,
+        "checkpoint_database": checkpoint_db.name, "root_run_id": env.root, "semantic_run_id": run,
+        "run_status": result.status.value, "next_action": result.next_action.value, "error_class": result.error_class,
+        "job_status": job, "provider_receipt_status": attempts[0][1], "profile_status": "needs_clarification",
+        "attempt_id": attempts[0][0], "provider_search_reader_calls_before": before, "after": after,
+        "replay_new_dispatch": 0, "history_hash_before_after": content_hash(historical),
+        "source_snapshot_hash": content_hash(env.base.v2_execution.to_payload()), "current_plan_id": env.base.plan_id,
+        "summary_id": summary["attempt_id"], "prompt_id": prompt["revision_id"],
+        "submission_id": accepted["submission"]["submission_id"], "drafts_created": 0,
+        "external_network_attempts": network, "external_calls": 0}, ensure_ascii=False, indent=2), encoding="utf8")
