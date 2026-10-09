@@ -1,3 +1,11 @@
+## 2026-10-09 Planning V2真实语义小规模验收：LOCAL_PREPARATION_COMPLETE / EXTERNAL_AUTHORIZATION_PENDING / ITEM2_PROVIDER_PREFLIGHT_BLOCKED / STOP
+
+- [语义烟测报告](../planning-v2/PLANNING_V2_REAL_SEMANTIC_SMOKE.md)基于b87b15660a1080c242a0935c44c597c95eb537a9。仅本地准备，真实模型/价格余额元数据/产品搜索/Reader/正文全部0；模型账本183/280、unknown177/183及search6/1000 hash不变，余量不授权，不重派旧Case7或历史unknown。Scenario A逐字段沿用前置冻结Goal，不改约束或Policy。
+- 独立Analyzer/Provider实际序列化CaptureOnly入口：Item1完整system/user messages UTF8 JSON5692bytes（content5515），development cap32768，32768通过/32769拒绝；没有真实HTTPdelegate或live模式，不返回Fake模型结果，不冒充Token/现金上界。Item2 synthetic结构Profile非模型结果，实际Provider preflight拒绝，Item2 wire尺寸和真实语义均NOT RUN；完整Worker不启动。
+- 确定本地接缝阻塞：GoalRequirementProfileValidator要求三条structured constraints原文source_ref保留；composition_dispatch_allowed拒绝unclassified，冻结constraints[0]/[2]恰属unclassified，故任意合法ready A Profile都无法派发Item2。结构和domain证据准入分别PASS，actual Provider为capability_planning_input_invalid/dispatched=false；不删除约束、不扩短语表、不绕过保护，单独评审最小接缝修复或由Owner收缩仅Item1。
+- 独立准备源码复核与真实语义审查分开，后者NOT RUN；请求Sol6.1xhigh，实际解析NOT OBSERVABLE。旧技术证据复用，不跑全量Backend/PG/浏览器。tracked仅报告/progress，旧历史bytes保持，生产/Prompt/Schema/正式配置/数据库/Worker/public generate不改，无push/merge/deploy。
+- Owner仍需明确追加最多2新模型、最多2官方价格余额元数据读取、接受无严格现金数学硬限残余风险，以及无retry/repair/充值/换模型/搜索Reader正文。除此仍需先处理已知Item2接缝；本轮无新授权账、请求身份或收费结果。真实Profile/CapabilityPlan/usage/费用/语义全部NOT RUN；本地checkpoint见回执，STOP。
+
 ## 2026-10-09 Planning V2 Token与现金门禁最小闭包：BLOCKED_WITH_EXACT_MISSING_AUTHORITY / STOP
 
 - [最小闭包报告](../planning-v2/PLANNING_V2_TOKEN_CASH_GATE_CLOSURE.md)基于2edc467a236df3e0c73cc95f46a5226c1b212f93，复用owned预算、Worker/Semantic/历史/React证据，不重跑全量。T0已读官方V4.1 Tokenizer指导/Issue5及Chat Completions；token_usage直接超时后读取确切官方索引，资产目录访问失败不代表不存在。Tokenizer/ZIP未下载，未安装依赖或跑真实计费实验。
