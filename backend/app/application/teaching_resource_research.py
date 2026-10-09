@@ -9,7 +9,7 @@ from app.core.ids import content_hash
 from app.domain.enums import PreferenceScope
 from app.domain.planning.capabilities import CAPABILITY_SCHEMA, validate_capability_planning_input
 from app.domain.planning.capability_policy import CAPABILITY_POLICY
-from app.domain.planning.constraint_adaptation import research_permissions
+from app.domain.planning.constraint_adaptation import research_constraint_policy, research_permissions
 from app.domain.planning.content_coverage import _qualified_mappings
 from app.domain.planning.domain_verification import public_outcomes, reader_authority
 from app.domain.planning.research_reader import (
@@ -69,7 +69,7 @@ class ResourceResearcher:
                                      allow_fixture_domains=self._allow_fixture_domains)
             config_hash = content_hash({"reviewed_index": self.reviewed_index.index_hash if self.reviewed_index else None,
                 "access_proofs": [asdict(p) for p in self.access_proofs], "public_outcomes": public,
-                "constraint_policy": "constraint-adaptation:v1"})
+                "constraint_policy": research_constraint_policy(profile.hard_constraints)})
             if session.config_hash and session.config_hash != config_hash:
                 reject("session_configuration")
             session.config_hash = config_hash

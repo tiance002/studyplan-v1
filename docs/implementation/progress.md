@@ -1,3 +1,11 @@
+## 2026-10-09 Planning V2 Item2约束作用域最小修复：ITEM2_CONSTRAINT_SCOPE_FIX_PASS / REAL_SEMANTIC_ACCEPTANCE_NOT_RUN / STOP
+
+- [本轮报告](../planning-v2/ITEM2_CONSTRAINT_SCOPE_FIX.md)基于18b8474e7c9b17839675213ed28e44811854e19d，原Scenario A逐字段不变。仅两个完整原文exact新增识别：CLI/JSON持续载体→existing_carrier，用户允许本地任务范围→local_tool_scope。无关键词/相似度开放，网络/外发/隐私/复合约束8反例仍实际Provider preflight拒绝，0外部invoke。
+- 真实Item2 Planner/Provider serializer通过CaptureOnly到达构造：messages UTF8 JSON12970bytes/32768、deepseek-flash非思考/output4096；无真实HTTPdelegate，无Fake模型输出。原三约束/source_refs/ID/Profile hash保持。尺寸是开发期防大量数据护栏，不冒充token/现金保证。
+- 局部constraint-adaptation:v2仅新增精确规则，旧v1表/assessment不变；Research仅受影响配置升级绑定，旧v1含新短语restore在缓存前拒绝、不改snapshot。独审456旧规则canonical/历史合成Curriculum-Compiler-typed snapshot hashes/6恢复反例PASS，两版本入口finding先RED后关闭，最终独审PASS。请求Sol6.1xhigh，实际解析NOT OBSERVABLE。
+- 最终合并定向123PASS、Ruff/diff检查PASS，初始RED与独审反例原记录保留。carrier仍须user_project且description完全等于原project_context；工具scope始终pending，无实际权限证据，模型承诺不能变complete，Compiler拒绝incomplete。因此仅Item2准入修复，完整Draft与真实语义尚未通过。
+- 产品模型/搜索/Reader/正文/账户预检0；账本183/280、unknown177/183、search6/1000/.env hash保持，余量不授权。PG/Worker/HTTP/React/浏览器/全量Backend及真实语义NOT RUN，既有保护复用；无新Run/Job/Draft、migration、正式配置/DB/公共入口改变，无push/merge/deploy。旧progress历史bytes保留；本地checkpoint与SHA见交付回执。STOP，不自动外部调用。
+
 ## 2026-10-09 Planning V2真实语义小规模验收：LOCAL_PREPARATION_COMPLETE / EXTERNAL_AUTHORIZATION_PENDING / ITEM2_PROVIDER_PREFLIGHT_BLOCKED / STOP
 
 - [语义烟测报告](../planning-v2/PLANNING_V2_REAL_SEMANTIC_SMOKE.md)基于b87b15660a1080c242a0935c44c597c95eb537a9。仅本地准备，真实模型/价格余额元数据/产品搜索/Reader/正文全部0；模型账本183/280、unknown177/183及search6/1000 hash不变，余量不授权，不重派旧Case7或历史unknown。Scenario A逐字段沿用前置冻结Goal，不改约束或Policy。

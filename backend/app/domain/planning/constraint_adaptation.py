@@ -8,6 +8,9 @@ from dataclasses import asdict, dataclass
 from app.core.ids import content_hash
 
 CONSTRAINT_POLICY = "constraint-adaptation:v1"
+# Additive scope rules have their own reference. Never relabel v1 assessments
+# or reinterpret a persisted v1 research configuration as the new rules.
+CONSTRAINT_SCOPE_POLICY = "constraint-adaptation:v2"
 _PHRASES = {
     "free_material": ("免费教材", "教程免费", "教程要求免费", "只使用免费教材", "教材必须免费"),
     "existing_carrier": ("不要重新创建演示项目", "不重新创建演示项目", "不要重新建立演示项目"),
@@ -16,10 +19,29 @@ _PHRASES = {
     "chinese_material": ("只使用中文教材", "教材必须为中文"),
     "chinese_preference": ("中文优先", "优先中文教材"),
 }
+_SCOPED_PHRASES = {
+    "existing_carrier": ("保留现有 CLI 和 JSON 任务文件作为持续实践载体",),
+    "local_tool_scope": ("工具仅操作用户明确允许的本地任务范围",),
+}
 
 
-def constraint_kind(text):
+def constraint_kind(text, *, policy_ref=None):
+    if policy_ref not in {None, CONSTRAINT_POLICY, CONSTRAINT_SCOPE_POLICY}:
+        raise ValueError("Unknown constraint adaptation policy")
+    if policy_ref != CONSTRAINT_POLICY:
+        scoped = next((kind for kind, phrases in _SCOPED_PHRASES.items() if text in phrases), None)
+        if scoped is not None:
+            return scoped
     return next((kind for kind, phrases in _PHRASES.items() if text in phrases), "unclassified")
+
+
+def constraint_policy_ref(text):
+    return CONSTRAINT_SCOPE_POLICY if any(text in phrases for phrases in _SCOPED_PHRASES.values()) else CONSTRAINT_POLICY
+
+
+def research_constraint_policy(constraints):
+    """Only affected inputs change the persisted research configuration hash."""
+    return CONSTRAINT_SCOPE_POLICY if any(constraint_policy_ref(c.text) == CONSTRAINT_SCOPE_POLICY for c in constraints) else CONSTRAINT_POLICY
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,18 +73,20 @@ def composition_dispatch_allowed(constraints):
     return all(constraint_kind(c["text"]) not in {"no_network", "unclassified"} for c in constraints)
 
 
-def assess_curriculum(constraints, materials, project_context, carrier=None):
+def assess_curriculum(constraints, materials, project_context, carrier=None, *, policy_ref=None):
     """Check selected facts, not model assertions. Runtime restrictions defer.
 
     Materials must already have passed the curriculum source/access validator.
     Chinese language and readonly behavior cannot be proved by task prose.
     """
+    if policy_ref not in {None, CONSTRAINT_POLICY, CONSTRAINT_SCOPE_POLICY}:
+        raise ValueError("Unknown constraint adaptation policy")
     results = []
     for constraint in constraints:
-        kind = constraint_kind(constraint["text"])
+        kind = constraint_kind(constraint["text"], policy_ref=policy_ref)
         status, reason, evidence = "pending", "no_trusted_check", ()
         scope = {"free_material": "material_access", "existing_carrier": "practice_carrier",
-            "readonly_practice": "practice_behavior", "no_network": "external_dispatch",
+            "readonly_practice": "practice_behavior", "local_tool_scope": "practice_permission_scope", "no_network": "external_dispatch",
             "chinese_material": "material_language", "chinese_preference": "material_preference"}.get(kind, "unclassified")
         if kind == "free_material":
             if materials and all(m["usable"] and m["free_access"] == "confirmed" for m in materials):
@@ -86,12 +110,17 @@ def assess_curriculum(constraints, materials, project_context, carrier=None):
             status, reason = "not_applicable", "preference_not_mandatory_material_constraint"
         elif kind == "readonly_practice":
             reason = "task_prose_does_not_prove_readonly_behavior"
+        elif kind == "local_tool_scope":
+            # Understanding the practice boundary grants no tool/file access.
+            # No trusted runtime permission evidence exists at composition time.
+            reason = "runtime_permission_evidence_pending"
         elif kind == "no_network":
             reason = "downstream_network_boundary_pending"
         elif kind == "chinese_material":
             reason = "trusted_language_proof_pending"
         results.append(asdict(ConstraintAssessment(constraint["constraint_id"], tuple(constraint["source_refs"]),
-            scope, status, evidence, reason)))
+            scope, status, evidence, reason,
+            CONSTRAINT_POLICY if policy_ref == CONSTRAINT_POLICY else constraint_policy_ref(constraint["text"]))))
     return results
 
 
