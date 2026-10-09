@@ -159,7 +159,8 @@ class OwnedV2PlanningRuntimeFactory:
     """
     def __init__(self, dsn, checkpoint_dsn, *, source_facts, budget, binding_resolver,
                  provider_resolver, github=None, web=None, body_reader=None,
-                 project_index=None, domain_sources=(), product_semantics="planning-v2-product-v2"):
+                  project_index=None, domain_sources=(), product_semantics="planning-v2-product-v2",
+                  acceptance_gate=None):
         from urllib.parse import urlsplit
 
         from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -178,6 +179,11 @@ class OwnedV2PlanningRuntimeFactory:
         if product_semantics not in {None, "planning-v2-product-v2"}:
             raise ValidationAppError("Unknown owned V2 product semantics")
         self.product_semantics=product_semantics
+        from app.domain.planning.v2_runtime import OWNED_ACCEPTANCE_GATE
+        if acceptance_gate is not None and (acceptance_gate != OWNED_ACCEPTANCE_GATE
+                or product_semantics != "planning-v2-product-v2" or domain_sources or project_index is not None):
+            raise ValidationAppError("Owned acceptance forbids additional domain/project-case dispatch")
+        self.acceptance_gate=acceptance_gate
         self.owned_only=True
 
     def build_submission(self,scope,project_id,goal_spec,expected_version):
@@ -188,7 +194,8 @@ class OwnedV2PlanningRuntimeFactory:
         binding=self.binding_resolver(scope,project_id)
         return build_v2_manifest(goal_spec,model_ref=binding.model_ref,source_facts=self.source_facts,
             budget=self.budget,checked_at=datetime.now(timezone.utc).isoformat(),expected_version=expected_version,
-            domain_sources=self.domain_sources,product_semantics=self.product_semantics)
+             domain_sources=self.domain_sources,product_semantics=self.product_semantics,
+             acceptance_gate=self.acceptance_gate)
 
     def __call__(self,scope,project_id,run_id,*,manifest,write_fence,thread_id,guard):
         from app.infrastructure.checkpointer.v2_planning_executor import PgV2Checkpoints
@@ -202,3 +209,7 @@ class OwnedV2PlanningRuntimeFactory:
         return V2PlanningRuntime(calls=calls,checkpoints=checkpoints,persistence=PgV2PlanningPersistence(self.dsn),
             source_facts=self.source_facts,github=self.github,web=self.web,body_reader=self.body_reader,
             project_index=self.project_index,domain_sources=self.domain_sources)
+
+    def reviews(self):
+        from app.infrastructure.db.v2_owned_reviews import PgOwnedV2Reviews
+        return PgOwnedV2Reviews(self.dsn, self.checkpoint_dsn)

@@ -66,6 +66,9 @@ class PgV2Calls:
         self.fence, self.provider, self.guard = fence, provider, guard
         self.domain_approvals = tuple(domain_approvals)
         self.current_body = None
+        if "owned_acceptance" in manifest:
+            from app.infrastructure.db.v2_owned_reviews import _owned_dsn
+            _owned_dsn(self.dsn)
 
     @contextmanager
     def tx(self):
@@ -301,12 +304,20 @@ class PgV2Calls:
             ).fetchone()
             if old is not None:
                 return self._retained(old, identity)
+            if "owned_acceptance" in self.manifest:
+                from app.infrastructure.db.v2_owned_reviews import authorize_owned_dispatch
+                authorize_owned_dispatch(conn, self, purpose)
             if conn.execute(
                 "SELECT 1 FROM ai_provider_attempts WHERE run_id=ANY(%s) AND status IN('dispatched','reconciliation_required') LIMIT 1",
                 (list(self._budget_manifests(conn)),),
             ).fetchone():
                 raise V2RecoveryBlocked("Uncertain V2 dispatch blocks every new identity")
             usage = self._reservations(conn)
+            if "owned_acceptance" in self.manifest:
+                count = conn.execute("SELECT count(*) AS n FROM ai_run_events WHERE run_id=ANY(%s) AND status='v2_reservation' AND detail->>'purpose'=%s",
+                    (list(self._budget_manifests(conn)), purpose)).fetchone()["n"]
+                if count >= self.manifest["owned_acceptance"]["purpose_limits"][purpose]:
+                    raise V2BudgetExceeded()
             if set(reserved) - set(METRICS) or any(
                 type(v) is not int or v < 0 or usage[k] + v > self.manifest["budget"]["max_" + k]
                 for k, v in reserved.items()
@@ -442,6 +453,8 @@ class PgV2Calls:
         options = self.request_options(purpose)
         cap = options.get("max_tokens")
         if type(cap) is not int or not 0 < cap <= self.manifest["output_caps"][purpose]:
+            raise V2BudgetExceeded()
+        if "owned_acceptance" in self.manifest and cap != self.manifest["output_caps"][purpose]:
             raise V2BudgetExceeded()
         reserved = {
             "total_requests": 1,

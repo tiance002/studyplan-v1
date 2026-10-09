@@ -404,6 +404,13 @@ class V2PlanningRuntime:
                     run_id=self.calls.run_id, manifest=manifest, context=revision)
         state = self.checkpoints.load() or {}
 
+        def owned_review(stage, **values):
+            if "owned_acceptance" not in manifest:
+                save(stage, **values)
+                return None
+            from app.infrastructure.db.v2_owned_reviews import review_stage
+            return review_stage(self.calls, self.checkpoints, state, stage, **values)
+
         def save(stage, **values):
             state.update(values)
             from app.ports.planning_jobs import PlanningLeaseLostError
@@ -436,7 +443,9 @@ class V2PlanningRuntime:
                 if isinstance(profile, LLMFailure)
                 else LLMFailure("goal_clarification_required", "Goal needs clarification")
             )
-        save("goal_analysis", profile=profile.to_payload())
+        pending = owned_review("goal_analysis", profile=profile.to_payload())
+        if pending is not None:
+            return pending
         planner = CapabilityPlanner(self.calls)
         plan = planner.plan(
             profile,
@@ -473,7 +482,9 @@ class V2PlanningRuntime:
         self.calls.domain_approvals = approvals
         self.calls.provider.domain_approvals = approvals
         self.persistence.domain_approvals = approvals
-        save("capability_planning", capability_plan=plan.to_payload())
+        pending = owned_review("capability_planning", capability_plan=plan.to_payload())
+        if pending is not None:
+            return pending
         coverage = CoverageEvaluator().evaluate(plan, self.facts.reviewed_index)
         gaps = extract(plan, coverage)
         save("coverage_gaps", coverage=coverage.to_payload(), gaps_hash=gaps.result_hash)
@@ -596,10 +607,11 @@ class V2PlanningRuntime:
             )
             if not isinstance(curriculum, CurriculumPlan):
                 return curriculum
-            save(
-                "curriculum_composition",
-                curriculum={"json": curriculum._json, "findings": curriculum._findings},
-            )
+        if "owned_acceptance" in manifest or not state.get("curriculum"):
+            pending = owned_review("curriculum_composition",
+                curriculum={"json": curriculum._json, "findings": curriculum._findings})
+            if pending is not None:
+                return pending
         try:
             compiled = compile_curriculum(
                 curriculum, context=context, profile=profile, capability_plan=plan, source_facts=self.facts

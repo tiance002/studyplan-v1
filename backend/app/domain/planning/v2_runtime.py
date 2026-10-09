@@ -1,6 +1,6 @@
 """Frozen V2 execution protocol; contains no persistence or provider calls."""
 
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 
@@ -21,6 +21,21 @@ PURPOSE_SCHEMAS = {
     READER_PURPOSE: READER_SCHEMA,
     CURRICULUM_PURPOSE: CURRICULUM_SCHEMA,
 }
+OWNED_ACCEPTANCE_GATE = "scenario-a-review-v1"
+OWNED_REVIEW_STAGES = ("goal_analysis", "capability_planning", "curriculum_composition")
+
+
+def owned_acceptance_policy():
+    return {"version": OWNED_ACCEPTANCE_GATE,
+        "purpose_limits": {GOAL_REQUIREMENT_PURPOSE: 1, CAPABILITY_PURPOSE: 1,
+            READER_PURPOSE: 6, CURRICULUM_PURPOSE: 1, "research.search": 6, "research.body": 6},
+        "review_stages": list(OWNED_REVIEW_STAGES)}
+
+
+@dataclass(frozen=True, slots=True)
+class OwnedV2ReviewPending:
+    stage: str
+    review_hash: str
 
 
 def purpose_schema(manifest, purpose):
@@ -72,6 +87,12 @@ def manifest_intact(manifest):
             and set(manifest["output_caps"]) == set(PURPOSE_SCHEMAS)
             and all(type(v) is int and 0 < v <= 8192 for v in manifest["output_caps"].values())
             and manifest["output_caps"][READER_PURPOSE] <= 1024
+            and ("owned_acceptance" not in manifest or (
+                manifest["owned_acceptance"] == owned_acceptance_policy()
+                and manifest.get("product_semantics") == PRODUCT_SEMANTICS_V2
+                and manifest["expected_version"] == 0
+                and "v2_revision_hash" not in manifest and "v2_clarification_hash" not in manifest
+                and manifest["output_caps"] == {p: 1024 if p == READER_PURPOSE else 4096 for p in PURPOSE_SCHEMAS}))
             and datetime.fromisoformat(manifest["checked_at"]).tzinfo is not None
         )
     except (TypeError, ValueError, KeyError, ValidationAppError):
@@ -89,6 +110,7 @@ def build_v2_manifest(
     output_caps=None,
     domain_sources=(),
     product_semantics=None,
+    acceptance_gate=None,
 ):
     goal = GoalSpec(goal) if isinstance(goal, str) else goal
     if type(goal) is not GoalSpec or type(budget) is not ResearchBudget:
@@ -106,6 +128,14 @@ def build_v2_manifest(
     }
     if product_semantics is not None:
         d["product_semantics"] = product_semantics
+    if acceptance_gate is not None:
+        if acceptance_gate != OWNED_ACCEPTANCE_GATE or domain_sources:
+            raise ValidationAppError("Unknown or expanded owned acceptance gate")
+        caps = {p: 1024 if p == READER_PURPOSE else 4096 for p in PURPOSE_SCHEMAS}
+        if output_caps is not None and output_caps != caps:
+            raise ValidationAppError("Owned acceptance requires exact output caps")
+        d["output_caps"] = caps
+        d["owned_acceptance"] = owned_acceptance_policy()
     d["manifest_hash"] = content_hash(d)
     if not manifest_intact(d):
         raise ValidationAppError("Invalid V2 frozen submission")

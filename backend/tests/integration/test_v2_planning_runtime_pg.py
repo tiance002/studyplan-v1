@@ -565,6 +565,9 @@ def make_worker_service(
         provider_resolver=lambda scope, project, run, ref: provider,
         github=search,
         body_reader=bodies,
+        # This helper intentionally emits ReaderV1/CurriculumV1 wire fixtures.
+        # Product-v2 acceptance uses its separate versioned provider fixture.
+        product_semantics=None,
     )
     factory = factory_transform(factory) if factory_transform else factory
     jobs = PgPlanningJobRepository(db.app_dsn, actor_ids=(actor,))

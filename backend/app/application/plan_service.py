@@ -227,6 +227,8 @@ class PlanService:
         if current is not None:
             raise ConflictError("已有学习计划，请通过重规划入口提交新目标", reason="v2_replanning_required")
         manifest=factory.build_submission(scope,project_id,goal_spec,0)
+        if "owned_acceptance" in manifest and getattr(self._planning_jobs, "_max_attempts", 0) < 4:
+            raise ValidationAppError("Owned acceptance requires at least four bounded Worker claims")
         run=RunRecord(new_id("run"),scope.actor_id,project_id,"plan_generate","planning",V2_EXECUTION_VERSION,
             AiRunStatus.QUEUED,AiRunNextAction.WAIT,thread_id=new_id("thread"))
         initial={"goal":goal_spec.target,"goal_spec":goal_spec_payload(goal_spec),"manifest":manifest}
@@ -234,7 +236,12 @@ class PlanService:
         return run.run_id
 
     def _execute_owned_v2(self, *, scope, run, initial, submission, claim, guard):
-        from app.domain.planning.v2_runtime import V2BudgetExceeded, V2RecoveryBlocked, manifest_intact
+        from app.domain.planning.v2_runtime import (
+            OwnedV2ReviewPending,
+            V2BudgetExceeded,
+            V2RecoveryBlocked,
+            manifest_intact,
+        )
         from app.ports.llm import LLMFailure
         from app.ports.summaries import ReviewPersistenceInterrupted
         if claim is None:
@@ -249,6 +256,10 @@ class PlanService:
             runtime=self._v2_runtime_factory(scope,run.project_id,run.run_id,manifest=manifest,
                 write_fence=fence,thread_id=run.thread_id,guard=guard)
             result=runtime.execute(initial)
+            if isinstance(result, OwnedV2ReviewPending):
+                # The checkpoint, review event and revoked job were committed
+                # by the runtime. No Draft reference or public decision exists.
+                return
             if not isinstance(result, LLMFailure):
                 self._update_run(project_id=run.project_id,run_id=run.run_id,status=AiRunStatus.SUCCEEDED,next_action=AiRunNextAction.NONE,
                     result_ref=result.draft_id,write_fence=fence,expected_plan_version=manifest["expected_version"])

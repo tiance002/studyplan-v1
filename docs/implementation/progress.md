@@ -1,3 +1,7 @@
+## 2026-10-10 Scenario A真实课程验收：先批准owned受控门禁，离线完成，真实调用待执行
+
+PLANNING_V2_SCENARIO_A_REAL_PRODUCT_ACCEPTANCE_V1；Start2706fd531b7d4caa25127c588c0e2c97b1a1fd86。Owner已单独确认9模型(Goal1/Capability1/Reader6/Curriculum1)、6search、6body12HTTP、2metadata并接受无严格人民币数学硬上限风险，再批准先最小owned门禁修复。新scenario-a-review-v1冻结purpose/caps，三真实checkpoint审核，同Run/root/Job受fence/CAS续接，不假崩溃/不重派成功或unknown；owned领取累计4次。新PG8PASS、unit46PASS、wire9MockPASS，相邻旧PG7PASS(保留stale fixture原FAIL，仅显式legacy修fixture)。Ruff/diff PASS，无migration/公开API/前端/正式配置/历史改写。独审发现Reader raw/usage/finish回显持久化路径，已投影/拒绝并通过合并哨兵；正式独审结论待执行冻结前确认。当前真实模型/搜索/Reader/正文/metadata均0；187旧账/unknown177183/.env受hash保护。仅新owned数据库与offline fixture；旧283证据复用。报告docs/planning-v2/PLANNING_V2_SCENARIO_A_REAL_PRODUCT_ACCEPTANCE.md；后续按已授权批次执行，不push/merge/deploy/公开generate，不将离线PASS称真实课程通过。
+
 ## 2026-10-10 课程语义与研究策略版本化修复：技术PASS，真实教材课程NOT RUN，STOP
 
 PLANNING_V2_CURRICULUM_RESEARCH_PRODUCT_FIX_V1；Start d41435038798efead87a8ccc7610d89d745a6e73。先记录架构第13节授权语义及历史兼容，再实施owned product_semantics=planning-v2-product-v2、ResearchReader/Curriculum/Compiler/Snapshot V2；无标记legacy hash/序列化保持。local_tool_scope绑定原constraint/source/项目、实际tool.calling Task/outcome/6验收与产物，planning_arranged/runtime_unverified分层，不授予权限；其他约束failclosed。required/明确学习选择/真实先修闭包必完整；未选recommended缺口可不阻断但保留至Draft/Revision/HTTP。Research required先，有限候选质量/覆盖比较后中文tie，单候选/截断/不可比保留不足，不由I5选PRIMARY；最多6个同深度相关missing outcomes联合、成功范围复用、新范围只审新增、版本/深度/范围绑durable身份，正文瞬态。真实184/187与Coverage/Gap hash不变，Python不重加。独审找到并关闭明确推荐目标省略、版本receipt复用、跨深度、metadata-only正文身份碰撞、单候选比较误报；最终独立技术PASS。
