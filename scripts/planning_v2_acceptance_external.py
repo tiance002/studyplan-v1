@@ -15,6 +15,7 @@ import math
 import os
 import re
 import threading
+import zlib
 from contextlib import contextmanager
 from copy import copy, deepcopy
 from dataclasses import asdict
@@ -48,6 +49,7 @@ PRICE_REVIEW_VERSION = "owned-price-review-v1"
 PRICE_URL = "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/"
 BALANCE_URL = "https://api.deepseek.com/user/balance"
 READER = "planning.research_reader"
+MODEL_RESPONSE_LIMIT = 524288
 _LOCKS = {}
 _LOCKS_GUARD = threading.Lock()
 
@@ -598,11 +600,73 @@ class _PriceText(HTMLParser):
             self.parts.append(value.strip())
 
 
+class _ModelResponseRejected(Exception):
+    """A received response was locally rejected; never a dispatch retry."""
+
+    def __init__(self, reason):
+        self.reason = reason
+        super().__init__(reason)
+
+
+def _decode_model_response(raw, encoding):
+    """Bound output allocation, using the same codec backends as local HTTPX.
+
+    This owned text-only boundary accepts a single complete encoded frame.
+    Multiple codings/frames and trailing bytes are rejected rather than silently
+    ignored. HTTPX's streaming chunk_size alone does not bound decompression.
+    """
+    if encoding == "identity":
+        return bytes(raw)
+    try:
+        if encoding in {"gzip", "deflate"}:
+            decoder = zlib.decompressobj(31 if encoding == "gzip" else zlib.MAX_WBITS)
+            try:
+                decoded = decoder.decompress(raw, MODEL_RESPONSE_LIMIT + 1)
+            except zlib.error:
+                if encoding != "deflate":
+                    raise
+                # HTTPX accepts both zlib-wrapped and raw deflate.
+                decoder = zlib.decompressobj(-zlib.MAX_WBITS)
+                decoded = decoder.decompress(raw, MODEL_RESPONSE_LIMIT + 1)
+            if len(decoded) > MODEL_RESPONSE_LIMIT or decoder.unconsumed_tail:
+                raise _ModelResponseRejected("model_response_decoded_size")
+            if not decoder.eof or decoder.unused_data:
+                raise _ModelResponseRejected("model_response_decoding_failed")
+        elif encoding == "zstd":
+            import zstandard
+            # max_output_size is ignored by this backend for declared-size
+            # frames. Check the declared length BEFORE any output allocation.
+            params = zstandard.get_frame_parameters(raw)
+            # This backend returns early for a declared empty frame, skipping
+            # completeness/trailing checks. Empty content cannot be model JSON.
+            if params.content_size == 0:
+                raise _ModelResponseRejected("model_response_decoding_failed")
+            if params.content_size != zstandard.CONTENTSIZE_UNKNOWN and params.content_size > MODEL_RESPONSE_LIMIT:
+                raise _ModelResponseRejected("model_response_decoded_size")
+            if params.window_size > 8 * 1024 * 1024:
+                raise _ModelResponseRejected("model_response_decoding_failed")
+            decoded = zstandard.ZstdDecompressor(max_window_size=8 * 1024 * 1024).decompress(
+                raw, max_output_size=MODEL_RESPONSE_LIMIT + 1, allow_extra_data=False)
+        else:
+            raise _ModelResponseRejected("model_response_encoding_unsupported")
+    except (ImportError, zlib.error) as error:
+        raise _ModelResponseRejected("model_response_decoding_failed") from error
+    except _ModelResponseRejected:
+        raise
+    except Exception as error:
+        # Codec exceptions carry no response text into receipts or diagnostics.
+        raise _ModelResponseRejected("model_response_decoding_failed") from error
+    if len(decoded) > MODEL_RESPONSE_LIMIT:
+        raise _ModelResponseRejected("model_response_decoded_size")
+    return decoded
+
+
 class _ModelBatch:
     def __init__(self, owner, port, run_id, transport):
         self.owner, self.port, self.run_id = owner, port, run_id
         self.configuration_ref, self.model = port.configuration_ref, port.model
         self.active, self.envelope, self.record = None, None, None
+        self.capture = None
         self.dispatch_started = False
         self.lock = threading.Lock()
         port.client = httpx.Client(transport=_ModelWire(self, transport or httpx.HTTPTransport(retries=0, trust_env=False)),
@@ -616,7 +680,7 @@ class _ModelBatch:
         if not self.lock.acquire(blocking=False):
             raise LLMNotDispatchedError("Owned model dispatch already active")
         try:
-            self.record, self.envelope, self.dispatch_started = None, None, False
+            self.record, self.envelope, self.capture, self.dispatch_started = None, None, None, False
             self.owner.check()
             if (kwargs["run_id"] != self.run_id or self.run_id != self.owner._binding()["run_id"]
                 or kwargs["purpose"] not in PURPOSE_SCHEMAS
@@ -624,7 +688,11 @@ class _ModelBatch:
                 raise LLMNotDispatchedError("Owned model identity differs from frozen run")
             self.active, self.envelope, self.record = kwargs, None, None
             self.owner._parent("model", attempt_id=kwargs["attempt_id"])
-            result = self.port.generate_structured(**kwargs)
+            try:
+                result = self.port.generate_structured(**kwargs)
+            except _ModelResponseRejected as error:
+                # The wire already stored its one known failure receipt/STOP.
+                return LLMFailure(error.reason, "Owned response decoding rejected")
             if self.record is None:
                 self.owner._stop(kwargs["purpose"], getattr(result, "error_class", "local_not_dispatched"))
                 return result
@@ -638,7 +706,8 @@ class _ModelBatch:
             reason = None
             if not valid:
                 reason = "usage_untrusted"
-            elif envelope.get("model") != "deepseek-flash":
+            elif (envelope.get("model") != "deepseek-flash"
+                    or getattr(result, "model_id", envelope.get("model")) != envelope.get("model")):
                 reason = "model_identity_invalid"
             elif not isinstance(result, LLMResult):
                 reason = getattr(result, "error_class", "provider_invalid")
@@ -655,7 +724,8 @@ class _ModelBatch:
             self.owner._result(self.owner.model_ledger, record, status="reconciliation_required" if unknown else "failed" if reason else "succeeded",
                 unknown=unknown, usage={k: usage[k] for k in ("prompt_tokens", "completion_tokens", "total_tokens")} if valid else None,
                 usage_sha256=_sha(_encoded(usage)), finish_reason=finish if finish in {"stop", "length"} else None,
-                estimate_currency="CNY", peak_cash_estimate=cost, estimate_only=True, error_class=reason)
+                estimate_currency="CNY", peak_cash_estimate=cost, estimate_only=True, error_class=reason,
+                **(self.capture or {}))
             retained = asdict(result)
             if kwargs["purpose"] == READER:
                 # PgV2Calls still owns the final Reader projection/echo checks.
@@ -713,30 +783,59 @@ class _ModelWire(httpx.BaseTransport):
                 **owner._parent("model", attempt_id=kwargs["attempt_id"])})
         batch.record = record
         batch.dispatch_started = True
+        raw = bytearray()
+        capture = {"request_sha256": _sha(_encoded(record)), "response_complete": False}
         try:
             response = self.inner.handle_request(request)
-            raw = bytearray()
+            capture["http_status"] = response.status_code
+            encodings = response.headers.get_list("content-encoding", split_commas=True)
+            capture["content_encoding_sha256"] = _sha(_encoded(encodings))
+            encoding = encodings[0].strip().lower() if len(encodings) == 1 else "identity" if not encodings else "unsupported"
+            capture["content_encoding"] = encoding if encoding in {"identity", "gzip", "deflate", "zstd"} else "unsupported"
             try:
                 for chunk in response.stream:
-                    if len(raw) + len(chunk) > 524288:
-                        raise ValueError("model_response_size")
+                    if len(raw) + len(chunk) > MODEL_RESPONSE_LIMIT:
+                        raise _ModelResponseRejected("model_response_wire_size")
                     raw.extend(chunk)
             finally:
                 response.close()
-            owner._secret_free(raw)
+            capture["response_complete"] = True
+            decoded = _decode_model_response(raw, encoding)
+            capture.update(response_sha256=_sha(raw), response_bytes=len(raw),
+                decoded_sha256=_sha(decoded), decoded_bytes=len(decoded))
             try:
-                batch.envelope = _decode(bytes(raw))
+                owner._secret_free(raw)
+                owner._secret_free(decoded)
+            except ValidationAppError:
+                raise _ModelResponseRejected("model_response_secret_echo") from None
+            try:
+                batch.envelope = _decode(decoded)
             except ValidationAppError:
                 batch.envelope = {}
+            batch.capture = capture
             # Metadata only: provider text, Reader chunks and secrets stay transient.
             _exclusive(owner.evidence_dir / f"external-model-{record['number']:02}-response.json",
-                {"http_status": response.status_code, "response_sha256": _sha(raw), "response_bytes": len(raw)})
+                capture)
             if kwargs["purpose"] != READER:
                 with (owner.evidence_dir / f"external-model-{record['number']:02}-response.body").open("xb") as stream:
                     stream.write(raw)
                     stream.flush()
                     os.fsync(stream.fileno())
-            return httpx.Response(response.status_code, headers=response.headers, content=bytes(raw), request=request)
+            # Provider JSON and usage audit consume exactly this decoded byte
+            # string. Strip the encoding to prevent HTTPX decompressing again.
+            headers = httpx.Headers(response.headers)
+            for field in ("content-encoding", "content-length", "transfer-encoding"):
+                headers.pop(field, None)
+            headers["content-length"] = str(len(decoded))
+            return httpx.Response(response.status_code, headers=headers, content=decoded, request=request)
+        except _ModelResponseRejected as error:
+            capture.update(response_sha256=_sha(raw), response_bytes=len(raw), error_class=error.reason)
+            _exclusive(owner.evidence_dir / f"external-model-{record['number']:02}-response.json", capture)
+            owner._result(owner.model_ledger, record, status="failed", unknown=False,
+                usage=None, **capture)
+            owner._stop(kwargs["purpose"], error.reason, unknown=False)
+            batch.record = None
+            raise
         except Exception as error:
             owner._result(owner.model_ledger, record, status="reconciliation_required", unknown=True,
                 error_class=type(error).__name__, usage=None)
