@@ -28,6 +28,7 @@ from app.domain.planning.v2_runtime import (
     V2RecoveryBlocked,
     manifest_intact,
     purpose_schema,
+    research_rules_version,
     wire,
 )
 from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -187,8 +188,11 @@ class PgV2Calls:
         from app.infrastructure.db.v2_revisions import budget_family
         return budget_family(conn, actor_id=self.scope.actor_id, project_id=self.project_id, run_id=self.run_id)[1]
 
-    def admit_candidate(self, url):
-        identity = content_hash({"run_id": self.run_id, "candidate_url": url})
+    def admit_candidate(self, url, *, operation_identity=None):
+        if (operation_identity is not None) != (research_rules_version(self.manifest) == "research_chapter_v3"):
+            raise V2RecoveryBlocked("Candidate operation identity differs from frozen research rules")
+        identity = content_hash({"run_id": self.run_id, "candidate_url": url,
+            **({"operation_identity": operation_identity} if operation_identity is not None else {})})
         with self.tx() as conn:
             self._lock(conn)
             existing = conn.execute(
@@ -624,6 +628,9 @@ class PgV2Calls:
                 for c in body.chunks
             ],
             "resource": wire(resource_payload) if acceptable else None,
+            **({"research_rules_version": "research_chapter_v3", "body_chapter": {
+                "resource_id": body.resource_id, "url": body.url, "version": body.version}}
+               if research_rules_version(self.manifest) == "research_chapter_v3" else {}),
             **({"rules_version": payload["rules_version"],
                 "candidate_identity": self.current_review_candidate_hash} if "rules_version" in payload else {}),
             "body_usage": {"total_requests": body.requests, "body_bytes": body.bytes_read},
@@ -653,7 +660,8 @@ class PgV2Calls:
                         and (self.manifest.get("product_semantics") != "planning-v2-product-v2" or
                              candidate_identity is not None and item.get("candidate_identity") == candidate_identity)
                         and item.get("rules_version", "legacy") == (
-                            "research_comparison_v2" if self.manifest.get("product_semantics") == "planning-v2-product-v2" else "legacy")):
+                            "research_comparison_v2" if self.manifest.get("product_semantics") == "planning-v2-product-v2" else "legacy")
+                        and item.get("research_rules_version", item.get("rules_version", "legacy")) == research_rules_version(self.manifest)):
                     from app.domain.planning.v2_execution import _decode
 
                     return (

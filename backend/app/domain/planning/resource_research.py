@@ -11,11 +11,65 @@ from app.domain.planning.goal_requirements import HardConstraint, LearnerClaim
 
 METRICS = ("searches", "candidates", "body_bytes", "reader_requests", "output_tokens", "total_requests", "cost_micros")
 RESEARCH_COMPARISON_V2 = "research_comparison_v2"
+RESEARCH_CHAPTER_V3 = "research_chapter_v3"
 
 
 def _rules(value):
-    if value not in {"legacy", RESEARCH_COMPARISON_V2}:
+    if value not in {"legacy", RESEARCH_COMPARISON_V2, RESEARCH_CHAPTER_V3}:
         reject("research_rules_version")
+
+
+@dataclass(frozen=True, slots=True)
+class ResearchChapterReview:
+    """Attempted chapter/scope metadata; never proof that an outcome is covered."""
+    resource_id: str
+    url: str
+    version: str
+    outcome_ids: tuple[str, ...]
+    chunks: tuple[tuple[str, str, str], ...]
+
+    def __post_init__(self):
+        _text(self.resource_id, 200)
+        _text(self.url, 4096)
+        _text(self.version, 200)
+        outcomes = _tuple(self.outcome_ids, str, 6)
+        if not outcomes or len(set(outcomes)) != len(outcomes):
+            reject("chapter_scope")
+        for outcome in outcomes:
+            _text(outcome, 200)
+        object.__setattr__(self, "outcome_ids", tuple(sorted(outcomes)))
+        chunks = _tuple(self.chunks, tuple, 2)
+        if not chunks or any(len(c) != 3 for c in chunks) or len({c[0] for c in chunks}) != len(chunks):
+            reject("chapter_chunks")
+        for reference, digest, location in chunks:
+            _text(reference, 200)
+            _hash(digest)
+            _text(location, 1024)
+            if reference != "chunk_" + content_hash({"resource_id": self.resource_id,
+                    "version": self.version, "content_hash": digest, "location": location}):
+                reject("chapter_chunks")
+        object.__setattr__(self, "chunks", tuple(sorted(chunks)))
+
+
+@dataclass(frozen=True, slots=True)
+class ResearchUnreadChapter:
+    """Known selected-but-unread path; no source version or coverage claim."""
+    path: str
+    outcome_ids: tuple[str, ...]
+
+    def __post_init__(self):
+        _text(self.path, 1024)
+        if (self.path.startswith("/") or any(ord(c) < 32 or ord(c) == 127 for c in self.path)
+                or any(c in self.path for c in ("\\", "%", "?", "#", ":"))
+                or any(part in {"", ".", ".."} for part in self.path.split("/"))):
+            reject("unread_chapter_path")
+        self.path.encode("utf-8")
+        outcomes = _tuple(self.outcome_ids, str, 6)
+        if not outcomes or len(set(outcomes)) != len(outcomes):
+            reject("chapter_scope")
+        for outcome in outcomes:
+            _text(outcome, 200)
+        object.__setattr__(self, "outcome_ids", tuple(sorted(outcomes)))
 
 
 @dataclass(frozen=True, slots=True)
@@ -308,9 +362,14 @@ class ResearchSnapshot:
     completed: ResourceResearchResult | None
     rules_version: str = "legacy"
     inspected_scopes: tuple[tuple[str, tuple[str, ...]], ...] = ()
+    chapter_reviews: tuple[tuple[str, tuple[ResearchChapterReview, ...]], ...] = ()
+    unread_chapters: tuple[tuple[str, tuple[ResearchUnreadChapter, ...]], ...] = ()
 
     def to_payload(self):
         payload = asdict(self)
+        if self.rules_version != RESEARCH_CHAPTER_V3:
+            payload.pop("chapter_reviews")
+            payload.pop("unread_chapters")
         if self.rules_version == "legacy":
             payload.pop("rules_version")
             payload.pop("inspected_scopes")
@@ -327,6 +386,8 @@ class ResearchSession:
         _rules(rules_version)
         self.rules_version = rules_version
         self.inspected_scopes = {}
+        self.chapter_reviews = {}
+        self.unread_chapters = {}
         _text(run_id, 200)
         _hash(input_hash)
         if type(budget) is not ResearchBudget:
@@ -394,7 +455,8 @@ class ResearchSession:
         return ResearchSnapshot(self.run_id, self.input_hash, self.budget, tuple(sorted(self.usage.items())),
             self.blocked, len(self._pending), self.unknown_measurement, self.config_hash,
             tuple(sorted(self.inspected.items())), self.completed, self.rules_version,
-            tuple(sorted(self.inspected_scopes.items())))
+            tuple(sorted(self.inspected_scopes.items())), tuple(sorted(self.chapter_reviews.items())),
+            tuple(sorted(self.unread_chapters.items())))
 
     @classmethod
     def restore(cls, snapshot):
@@ -410,6 +472,24 @@ class ResearchSession:
         if len(dict(scopes)) != len(scopes):
             reject("snapshot_scopes")
         session.inspected_scopes = dict(scopes)
+        chapters = _tuple(snapshot.chapter_reviews, tuple, 500)
+        if snapshot.rules_version != RESEARCH_CHAPTER_V3 and chapters or len(dict(chapters)) != len(chapters):
+            reject("snapshot_chapters")
+        for key, reviews in chapters:
+            _text(key, 4096)
+            _tuple(reviews, ResearchChapterReview, 500)
+            if any(replace(review) != review for review in reviews) or len(set(reviews)) != len(reviews):
+                reject("snapshot_chapters")
+        session.chapter_reviews = dict(chapters)
+        unread = _tuple(snapshot.unread_chapters, tuple, 500)
+        if snapshot.rules_version != RESEARCH_CHAPTER_V3 and unread or len(dict(unread)) != len(unread):
+            reject("snapshot_chapters")
+        for key, reviews in unread:
+            _text(key, 4096)
+            _tuple(reviews, ResearchUnreadChapter, 500)
+            if any(replace(review) != review for review in reviews) or len(set(reviews)) != len(reviews):
+                reject("snapshot_chapters")
+        session.unread_chapters = dict(unread)
         _amount(snapshot.pending_count)
         if type(snapshot.blocked) is not bool or type(snapshot.unknown_measurement) is not bool:
             reject("snapshot_state")

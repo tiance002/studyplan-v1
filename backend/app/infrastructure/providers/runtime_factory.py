@@ -160,7 +160,7 @@ class OwnedV2PlanningRuntimeFactory:
     def __init__(self, dsn, checkpoint_dsn, *, source_facts, budget, binding_resolver,
                  provider_resolver, github=None, web=None, body_reader=None,
                   project_index=None, domain_sources=(), product_semantics="planning-v2-product-v2",
-                  acceptance_gate=None, capability_output_protocol=None):
+                  acceptance_gate=None, capability_output_protocol=None, research_rules_version=None):
         from urllib.parse import urlsplit
 
         from app.infrastructure.db.plan_repository import to_psycopg_dsn
@@ -179,6 +179,11 @@ class OwnedV2PlanningRuntimeFactory:
         if product_semantics not in {None, "planning-v2-product-v2"}:
             raise ValidationAppError("Unknown owned V2 product semantics")
         self.product_semantics=product_semantics
+        from app.domain.planning.resource_research import RESEARCH_CHAPTER_V3
+        if research_rules_version is not None and (
+                research_rules_version != RESEARCH_CHAPTER_V3 or product_semantics != "planning-v2-product-v2"):
+            raise ValidationAppError("Chapter research requires an explicitly frozen product V2 Run")
+        self.research_rules_version=research_rules_version
         from app.domain.planning.v2_runtime import OWNED_ACCEPTANCE_GATE
         if acceptance_gate is not None and (acceptance_gate != OWNED_ACCEPTANCE_GATE
                 or product_semantics != "planning-v2-product-v2" or domain_sources or project_index is not None):
@@ -202,7 +207,8 @@ class OwnedV2PlanningRuntimeFactory:
         return build_v2_manifest(goal_spec,model_ref=binding.model_ref,source_facts=self.source_facts,
             budget=self.budget,checked_at=datetime.now(timezone.utc).isoformat(),expected_version=expected_version,
              domain_sources=self.domain_sources,product_semantics=self.product_semantics,
-             acceptance_gate=self.acceptance_gate, capability_output_protocol=self.capability_output_protocol)
+             acceptance_gate=self.acceptance_gate, capability_output_protocol=self.capability_output_protocol,
+             research_rules_version=self.research_rules_version)
 
     def __call__(self,scope,project_id,run_id,*,manifest,write_fence,thread_id,guard):
         from app.infrastructure.checkpointer.v2_planning_executor import PgV2Checkpoints

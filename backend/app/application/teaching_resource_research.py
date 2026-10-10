@@ -23,13 +23,16 @@ from app.domain.planning.research_reader import (
 )
 from app.domain.planning.resource_gaps import extract
 from app.domain.planning.resource_research import (
+    RESEARCH_CHAPTER_V3,
     RESEARCH_COMPARISON_V2,
+    ResearchChapterReview,
     ResearchEntry,
     ResearchEvidenceRef,
     ResearchQualityEvidence,
     ResearchRequirement,
     ResearchResource,
     ResearchSession,
+    ResearchUnreadChapter,
     ResourceResearchResult,
     reject,
     research_input_hash,
@@ -87,10 +90,10 @@ class ResourceResearcher:
             wanted_outcomes = {outcome.outcome_id for requirement in requirements for outcome in requirement.must_teach}
             missing_outcomes = set(wanted_outcomes)
             outcome_depths = {o.outcome_id: c.desired_depth for c in plan.learning_capabilities for o in c.learning_outcomes}
-            if session.rules_version == RESEARCH_COMPARISON_V2:
+            if session.rules_version in {RESEARCH_COMPARISON_V2, RESEARCH_CHAPTER_V3}:
                 wanted_outcomes.update(o.outcome_id for o in plan.learning_outcomes if public.get(o.outcome_id) == o.text)
             for cache_identity, findings in session.inspected.items():
-                candidate_url = cache_identity.split("#review:", 1)[0] if session.rules_version == RESEARCH_COMPARISON_V2 else cache_identity
+                candidate_url = cache_identity.split("#review:", 1)[0] if session.rules_version in {RESEARCH_COMPARISON_V2, RESEARCH_CHAPTER_V3} else cache_identity
                 for resource in findings:
                     if (type(resource) is not ResearchResource or replace(resource) != resource
                         or resource.checked_at != checked_at or resource.qualification != "research_checked"
@@ -98,13 +101,39 @@ class ResourceResearcher:
                         or not self._source_binding(resource.resource_id, resource.url, resource.version, candidate_url)
                         or any(ref.outcome_id not in wanted_outcomes or ref.hash_scope != "body" for ref in resource.evidence)):
                         reject("inspected_source_binding")
-                    if session.rules_version == RESEARCH_COMPARISON_V2 and (
+                    if session.rules_version in {RESEARCH_COMPARISON_V2, RESEARCH_CHAPTER_V3} and (
                             "#review:" not in cache_identity or
                             "#depth:" not in cache_identity or
                             any(outcome_depths.get(ref.outcome_id) != cache_identity.rsplit("#depth:", 1)[-1]
                                 for ref in resource.evidence) or
-                            {r.outcome_id for r in resource.evidence} - set(session.inspected_scopes.get(cache_identity, ()))):
+                            (session.rules_version != RESEARCH_CHAPTER_V3 and
+                             {r.outcome_id for r in resource.evidence} - set(session.inspected_scopes.get(cache_identity, ())))):
                         reject("inspected_scope_binding")
+            if session.rules_version == RESEARCH_CHAPTER_V3:
+                for cache_identity, reviews in session.chapter_reviews.items():
+                    origin = cache_identity.split("#review:", 1)[0]
+                    depth = cache_identity.rsplit("#depth:", 1)[-1]
+                    if "#review:" not in cache_identity or "#depth:" not in cache_identity:
+                        reject("chapter_source_binding")
+                    for review in reviews:
+                        if (type(review) is not ResearchChapterReview or replace(review) != review
+                                or not self._source_binding(review.resource_id, review.url, review.version, origin)
+                                or any(outcome_depths.get(o) != depth or o not in wanted_outcomes for o in review.outcome_ids)):
+                            reject("chapter_source_binding")
+                for cache_identity, findings in session.inspected.items():
+                    reviews = session.chapter_reviews.get(cache_identity, ())
+                    for resource in findings:
+                        if any(not any(review.resource_id == resource.resource_id and review.url == resource.url
+                                and review.version == resource.version and ref.outcome_id in review.outcome_ids
+                                and (ref.reference, ref.sha256, ref.location) in review.chunks
+                                for review in reviews) for ref in resource.evidence):
+                            reject("chapter_evidence_binding")
+                for identity, reviews in session.unread_chapters.items():
+                    if "#review:" not in identity or "#depth:" not in identity or any(
+                            type(r) is not ResearchUnreadChapter or replace(r) != r or any(
+                                outcome_depths.get(o) != identity.rsplit("#depth:", 1)[-1] or o not in wanted_outcomes
+                                for o in r.outcome_ids) for r in reviews):
+                        reject("chapter_source_binding")
             completed = session.completed
             if completed is not None:
                 if type(completed) is not ResourceResearchResult or replace(completed) != completed:
@@ -122,7 +151,8 @@ class ResourceResearcher:
         if session.completed is not None:
             return session.completed
         entries = {}
-        v2 = session.rules_version == RESEARCH_COMPARISON_V2
+        v2 = session.rules_version in {RESEARCH_COMPARISON_V2, RESEARCH_CHAPTER_V3}
+        v3 = session.rules_version == RESEARCH_CHAPTER_V3
         constraints_allowed, external_allowed = research_permissions(profile.hard_constraints)
         essential = {c.capability_id for c in plan.learning_capabilities
                      if c.learning_requirement == "required" or c.learning_target_refs}
@@ -230,6 +260,16 @@ class ResourceResearcher:
                             break
                         scope_outcomes = self._review_scope(requirement, remaining, plan, session, missing_outcomes) if v2 else remaining
                         cache_key = self._cache_key(candidate, requirement.desired_depth) if v2 else candidate.url
+                        if v3:
+                            resources, why, attempted = self._inspect_chapters(candidate, requirement, resources,
+                                plan, session, checked_at, missing_outcomes, first_turn)
+                            reasons.extend(why)
+                            if why:
+                                comparison_complete = False
+                            if first_turn and attempted:
+                                turn_yielded = True
+                                break
+                            continue
                         if cache_key in session.inspected and (not v2 or
                                 {o.outcome_id for o in scope_outcomes} <= set(session.inspected_scopes.get(cache_key, ()))):
                             wanted = {o.outcome_id for o in requirement.must_teach}
@@ -288,6 +328,29 @@ class ResourceResearcher:
                 work.extend(sorted(required_work, key=lambda r:
                     (not entries[r.capability_id].unresolved_outcomes, r.capability_id)))
                 work.extend(elective_work)
+        if v3:
+            # Late joint review evidence is authoritative only for its exact
+            # source/version/depth/outcome scope. Rebuild before freezing once.
+            for requirement in requirements:
+                previous = entries[requirement.capability_id]
+                resources = self._merge_resources(list(previous.resources) + self._cached(requirement, session))
+                missing = self._remaining(requirement, resources)
+                reasons = set(previous.comparison_reasons) - {"single_candidate_only", "comparison_unavailable", "quality_incomparable"}
+                if len(resources) < 2 or any(not r.quality_evidence for r in resources):
+                    reasons.add("single_candidate_only" if len(resources) == 1 else "comparison_unavailable")
+                incomparable = self._incomparable(resources)
+                if incomparable:
+                    reasons.add("quality_incomparable")
+                incomplete = reasons & {"budget_exhausted", "budget_exceeded", "research_stopped", "research_unknown",
+                    "search_unknown", "search_failed", "search_not_dispatched", "search_unclassified", "body_unread",
+                    "body_failed", "body_binding_invalid", "reader_not_dispatched", "reader_failed", "reader_invalid",
+                    "candidate_invalid", "network_forbidden", "constraints_pending", "public_descriptor_unapproved"}
+                comparison = "sufficient" if (not missing and len(resources) >= 2 and
+                    all(r.quality_evidence for r in resources) and not incomparable and not incomplete) else "insufficient"
+                entries[requirement.capability_id] = ResearchEntry(requirement,
+                    "resolved" if not missing else "partial" if len(missing) < len(requirement.must_teach) else "unresolved",
+                    tuple(resources), missing, previous.reason_codes if missing else (), comparison,
+                    self._comparison_order(resources), tuple(sorted(reasons | {"finite_scope_only"})))
         result = ResourceResearchResult(gap_set.result_hash, plan.plan_hash, coverage.result_hash, profile.profile_hash,
             tuple(entries.values()), checked_at, tuple(sorted(session.usage.items())), session.rules_version)
         session.completed = result
@@ -295,11 +358,12 @@ class ResourceResearcher:
 
     def _review_scope(self, requirement, remaining, plan, session, missing_outcomes):
         """One dependency-neighbour scope; never union the entire required set."""
-        if session.rules_version != RESEARCH_COMPARISON_V2:
+        if session.rules_version not in {RESEARCH_COMPARISON_V2, RESEARCH_CHAPTER_V3}:
             return remaining
         public = public_outcomes(plan, domain_approvals=self._domain_approvals,
                                  allow_fixture_domains=self._allow_fixture_domains)
-        selected = list(requirement.must_teach[:6])
+        selected = list((remaining or requirement.must_teach)[:6] if session.rules_version == RESEARCH_CHAPTER_V3
+                        else requirement.must_teach[:6])
         related = {requirement.capability_id}
         for capability in plan.learning_capabilities:
             if requirement.capability_id in capability.prerequisite_refs:
@@ -314,6 +378,86 @@ class ResourceResearcher:
                             and public.get(outcome.outcome_id) == outcome.text and len(selected) < 6):
                         selected.append(outcome)
         return tuple(selected)
+
+    @staticmethod
+    def _cached(requirement, session):
+        wanted = {o.outcome_id for o in requirement.must_teach}
+        return [replace(resource, evidence=refs)
+            for identity, findings in session.inspected.items()
+            if identity.endswith("#depth:" + requirement.desired_depth)
+            for resource in findings
+            if (refs := tuple(ref for ref in resource.evidence if ref.outcome_id in wanted))]
+
+    @staticmethod
+    def _excluded_chapters(candidate, requirement, outcomes, session):
+        wanted = {o.outcome_id for o in outcomes}
+        chapters = {}
+        for review in session.chapter_reviews.get(ResourceResearcher._cache_key(candidate, requirement.desired_depth), ()):
+            for chunk in review.chunks:
+                chapters.setdefault(chunk[2].rsplit("#L", 1)[0], set()).update(review.outcome_ids)
+        for review in session.unread_chapters.get(ResourceResearcher._cache_key(candidate, requirement.desired_depth), ()):
+            chapters.setdefault(review.path, set()).update(review.outcome_ids)
+        return tuple(sorted(path for path, reviewed in chapters.items() if wanted <= reviewed))
+
+    @staticmethod
+    def _record_unread_chapter(candidate, requirement, outcomes, session, path):
+        review = ResearchUnreadChapter(path, tuple(o.outcome_id for o in outcomes))
+        origin, repo = urlsplit(candidate.url), candidate.discovery.get("repo", {})
+        if (candidate.discovery.get("source") != "github" or type(repo) is not dict
+                or origin.scheme != "https" or origin.netloc not in {"github.com", "github.com:443"}
+                or origin.path != "/" + str(repo.get("owner")) + "/" + str(repo.get("name"))
+                or origin.query or origin.fragment):
+            reject("unread_chapter_source")
+        key = ResourceResearcher._cache_key(candidate, requirement.desired_depth)
+        session.unread_chapters[key] = tuple(sorted(set(session.unread_chapters.get(key, ()) + (review,)),
+                                                 key=lambda r: (r.path, r.outcome_ids)))
+
+    @staticmethod
+    def _record_chapter(candidate, requirement, outcomes, session, *, resource_id, url, version, chunks):
+        review = ResearchChapterReview(resource_id, url, version, tuple(o.outcome_id for o in outcomes), tuple(
+            (c["chunk_id"], c["content_hash"], c["location"]) for c in chunks))
+        if not ResourceResearcher._source_binding(resource_id, url, version, candidate.url):
+            reject("chapter_source_binding")
+        key = ResourceResearcher._cache_key(candidate, requirement.desired_depth)
+        previous = session.chapter_reviews.get(key, ())
+        if any(r.resource_id == resource_id and r.version != version for r in previous):
+            reject("research_source_version_conflict")
+        session.chapter_reviews[key] = tuple(sorted(set(previous + (review,)), key=lambda r: (r.url, r.version, r.outcome_ids)))
+
+    def _inspect_chapters(self, candidate, requirement, resources, plan, session, checked_at, missing_outcomes, first_turn):
+        key, reasons, attempted = self._cache_key(candidate, requirement.desired_depth), [], False
+        while not session.blocked:
+            remaining = self._remaining(requirement, resources)
+            if not remaining and len(resources) >= 2:
+                break
+            exhausted = set(session.inspected_scopes.get(key, ()))
+            scope_remaining = tuple(o for o in (remaining or requirement.must_teach) if o.outcome_id not in exhausted)
+            if not scope_remaining:
+                break
+            supported = {ref.outcome_id for findings in session.inspected.values() for resource in findings for ref in resource.evidence}
+            scope = self._review_scope(requirement, scope_remaining, plan, session, missing_outcomes - supported - exhausted)
+            if {o.outcome_id for o in scope} <= set(session.inspected_scopes.get(key, ())):
+                break  # Only repository exhaustion, never a chapter negative.
+            admission = session.reserve("candidate", candidates=1)
+            if admission is None:
+                reasons.append("budget_exhausted")
+                break
+            session.settle(admission, candidates=1)
+            before = session.chapter_reviews.get(key, ())
+            before_unread = session.unread_chapters.get(key, ())
+            checked, why = self._inspect(candidate, requirement, scope, plan, session, checked_at)
+            attempted = True
+            reasons.extend(why)
+            previous = session.inspected.get(key, ())
+            session.inspected[key] = tuple(sorted(set(previous + tuple(checked)), key=lambda r: (r.resource_id, r.version, repr(r.evidence))))
+            resources = self._merge_resources(resources + self._cached(requirement, session))
+            if (session.chapter_reviews.get(key, ()) == before and
+                    session.unread_chapters.get(key, ()) == before_unread) and not session.blocked:
+                session.inspected_scopes[key] = tuple(sorted(set(session.inspected_scopes.get(key, ())) |
+                                                            {o.outcome_id for o in scope}))
+            if first_turn or session.blocked:
+                break
+        return resources, tuple(reasons), attempted
 
     @staticmethod
     def _merge_resources(resources):
@@ -446,8 +590,10 @@ class ResourceResearcher:
         try:
             try:
                 options = {"max_bytes": 65536, "timeout_seconds": 15}
-                if session.rules_version == RESEARCH_COMPARISON_V2 and getattr(self.body_reader, "supports_outcome_selection", False):
+                if session.rules_version in {RESEARCH_COMPARISON_V2, RESEARCH_CHAPTER_V3} and getattr(self.body_reader, "supports_outcome_selection", False):
                     options["must_teach"] = tuple(o.text for o in remaining)
+                if session.rules_version == RESEARCH_CHAPTER_V3 and getattr(self.body_reader, "supports_chapter_selection", False):
+                    options["exclude_paths"] = self._excluded_chapters(candidate, requirement, remaining, session)
                 body = self.body_reader.read(candidate, **options)
             except Exception:
                 session.mark_unknown()
@@ -467,14 +613,23 @@ class ResourceResearcher:
                 session.blocked = True
                 return (), ("body_failed",)
             if body.status != "succeeded":
+                if session.rules_version == RESEARCH_CHAPTER_V3 and body.status == "unread" and body.attempted_path:
+                    if body.attempted_path in options.get("exclude_paths", ()):
+                        session.blocked = True
+                        return (), ("body_binding_invalid",)
+                    self._record_unread_chapter(candidate, requirement, remaining, session, body.attempted_path)
                 return (), ("body_unread",)
             if not self._body_binding(body, candidate):
                 session.blocked = True
                 return (), ("body_binding_invalid",)
+            if session.rules_version == RESEARCH_CHAPTER_V3:
+                if any(c["location"].rsplit("#L", 1)[0] in options.get("exclude_paths", ()) for c in body.chunks):
+                    session.blocked = True
+                    return (), ("body_binding_invalid",)
             payload = {"must_teach": [asdict(o) for o in remaining], "chunks": body.chunks,
                 "learner_context": {"accepted_known": sorted(c.capability_id for c in plan.accepted_known_capabilities
                     if CAPABILITY_POLICY.get(c.capability_id) is not None), "desired_depth": requirement.desired_depth}}
-            schema = READER_SCHEMA_V2 if session.rules_version == RESEARCH_COMPARISON_V2 else READER_SCHEMA
+            schema = READER_SCHEMA_V2 if session.rules_version in {RESEARCH_COMPARISON_V2, RESEARCH_CHAPTER_V3} else READER_SCHEMA
             if schema == READER_SCHEMA_V2:
                 payload["rules_version"] = RESEARCH_COMPARISON_V2
             authority = reader_authority(plan, domain_approvals=self._domain_approvals,
@@ -487,6 +642,9 @@ class ResourceResearcher:
                                          allow_fixture_domains=self._allow_fixture_domains):
                 session.blocked = True
                 return (), ("body_binding_invalid",)
+            if session.rules_version == RESEARCH_CHAPTER_V3:
+                self._record_chapter(candidate, requirement, remaining, session, resource_id=body.resource_id,
+                    url=body.url, version=body.version, chunks=body.chunks)
             reader_reservation = session.reserve("reader", total_requests=1, reader_requests=1,
                 output_tokens=READER_OUTPUT_CAP, cost_micros=session.budget.reader_cost_micros)
             if reader_reservation is None:
@@ -535,7 +693,7 @@ class ResourceResearcher:
             if any(fit[key] != value for key, value in {"continuity": "sufficient", "beginner_fit": "suitable",
                     "examples": "present", "version_fit": "compatible"}.items()):
                 return (), ("teaching_fit_unresolved",)
-            if session.rules_version == RESEARCH_COMPARISON_V2 and any(
+            if session.rules_version in {RESEARCH_COMPARISON_V2, RESEARCH_CHAPTER_V3} and any(
                     q["category"] not in {"adequate", "strong"} for q in verdict["quality_evidence"].values()):
                 return (), ("teaching_fit_unresolved",)
             chunks = {c["chunk_id"]: c for c in body.chunks}

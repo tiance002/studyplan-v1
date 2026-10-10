@@ -12,7 +12,7 @@ from app.domain.planning.curriculum import CURRICULUM_PURPOSE, CURRICULUM_SCHEMA
 from app.domain.planning.goal_requirements import GOAL_REQUIREMENT_PURPOSE, GOAL_REQUIREMENT_SCHEMA
 from app.domain.planning.intent import GoalSpec, goal_spec_payload
 from app.domain.planning.research_reader import READER_PURPOSE, READER_SCHEMA
-from app.domain.planning.resource_research import ResearchBudget
+from app.domain.planning.resource_research import RESEARCH_CHAPTER_V3, ResearchBudget
 
 V2_EXECUTION_VERSION = "planning-v2-execution-v1"
 PRODUCT_SEMANTICS_V2 = "planning-v2-product-v2"
@@ -51,6 +51,11 @@ def purpose_schema(manifest, purpose):
     return PURPOSE_SCHEMAS.get(purpose)
 
 
+def research_rules_version(manifest):
+    return manifest.get("research_rules_version", "research_comparison_v2"
+        if manifest.get("product_semantics") == PRODUCT_SEMANTICS_V2 else "legacy")
+
+
 class V2RecoveryBlocked(RuntimeError):
     """No additional dispatch is safe without explicit reconciliation."""
 
@@ -80,6 +85,9 @@ def manifest_intact(manifest):
             type(manifest) is dict
             and manifest["protocol"] == V2_EXECUTION_VERSION
             and ("product_semantics" not in manifest or manifest["product_semantics"] == PRODUCT_SEMANTICS_V2)
+            and ("research_rules_version" not in manifest or (
+                manifest["research_rules_version"] == RESEARCH_CHAPTER_V3
+                and manifest.get("product_semantics") == PRODUCT_SEMANTICS_V2))
             and ("capability_output_protocol" not in manifest or (
                 manifest["capability_output_protocol"] == CAPABILITY_DECISION_PROTOCOL
                 and manifest.get("product_semantics") == PRODUCT_SEMANTICS_V2
@@ -119,6 +127,7 @@ def build_v2_manifest(
     product_semantics=None,
     acceptance_gate=None,
     capability_output_protocol=None,
+    research_rules_version=None,
 ):
     goal = GoalSpec(goal) if isinstance(goal, str) else goal
     if type(goal) is not GoalSpec or type(budget) is not ResearchBudget:
@@ -136,6 +145,10 @@ def build_v2_manifest(
     }
     if product_semantics is not None:
         d["product_semantics"] = product_semantics
+    if research_rules_version is not None:
+        if research_rules_version != RESEARCH_CHAPTER_V3 or product_semantics != PRODUCT_SEMANTICS_V2:
+            raise ValidationAppError("Chapter research requires an explicitly frozen product V2 Run")
+        d["research_rules_version"] = research_rules_version
     if capability_output_protocol is not None:
         if (capability_output_protocol != CAPABILITY_DECISION_PROTOCOL
                 or acceptance_gate != OWNED_ACCEPTANCE_GATE

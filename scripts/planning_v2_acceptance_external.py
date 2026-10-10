@@ -703,12 +703,16 @@ class _ModelBatch:
                 for k in ("prompt_tokens", "completion_tokens", "total_tokens"))
                 and usage["total_tokens"] == usage["prompt_tokens"] + usage["completion_tokens"]
                 and usage["completion_tokens"] <= cap)
+            choices = envelope.get("choices") if type(envelope) is dict else None
+            finish = choices[0].get("finish_reason") if type(choices) is list and choices and type(choices[0]) is dict else None
             reason = None
             if not valid:
                 reason = "usage_untrusted"
             elif (envelope.get("model") != "deepseek-flash"
                     or getattr(result, "model_id", envelope.get("model")) != envelope.get("model")):
                 reason = "model_identity_invalid"
+            elif type(finish) is not str or finish not in {"stop", "length"}:
+                reason = "finish_reason_invalid"
             elif not isinstance(result, LLMResult):
                 reason = getattr(result, "error_class", "provider_invalid")
             elif result.finish_reason != "stop" or envelope["choices"][0].get("finish_reason") != "stop":
@@ -719,11 +723,9 @@ class _ModelBatch:
             cost = str((Decimal(usage["prompt_tokens"]) * Decimal(pricing["input_peak_per_million"])
                 + Decimal(usage["completion_tokens"]) * Decimal(pricing["output_peak_per_million"])) / Decimal(1000000)) if valid else None
             unknown = isinstance(result, LLMFailure) and result.dispatch_unknown
-            choices = envelope.get("choices") if type(envelope) is dict else None
-            finish = choices[0].get("finish_reason") if type(choices) is list and choices and type(choices[0]) is dict else None
             self.owner._result(self.owner.model_ledger, record, status="reconciliation_required" if unknown else "failed" if reason else "succeeded",
                 unknown=unknown, usage={k: usage[k] for k in ("prompt_tokens", "completion_tokens", "total_tokens")} if valid else None,
-                usage_sha256=_sha(_encoded(usage)), finish_reason=finish if finish in {"stop", "length"} else None,
+                usage_sha256=_sha(_encoded(usage)), finish_reason=finish if type(finish) is str and finish in {"stop", "length"} else None,
                 estimate_currency="CNY", peak_cash_estimate=cost, estimate_only=True, error_class=reason,
                 **(self.capture or {}))
             retained = asdict(result)
@@ -733,7 +735,8 @@ class _ModelBatch:
                 retained = {"error_class": reason, "input_tokens": getattr(result, "input_tokens", None),
                     "output_tokens": getattr(result, "output_tokens", None), "payload_retained": False,
                     "payload_sha256": content_hash(result.payload) if isinstance(result, LLMResult) else None,
-                    "model_id": getattr(result, "model_id", None), "finish_reason": getattr(result, "finish_reason", None)}
+                    "model_id": envelope.get("model") if envelope.get("model") == "deepseek-flash" else None,
+                    "finish_reason": finish if type(finish) is str and finish in {"stop", "length"} else None}
             self.owner._secret_free(_encoded(retained))
             _exclusive(self.owner.evidence_dir / f"external-model-{record['number']:02}-provider.json", retained)
             if reason:
@@ -896,24 +899,33 @@ class _ExternalWire(httpx.BaseTransport):
             owner._result(folder, record, status="reconciliation_required", unknown=True, error_class=type(error).__name__)
             owner._stop(self.kind, type(error).__name__, unknown=True)
             raise
-        return httpx.Response(response.status_code, headers=response.headers, request=request,
+        audit = _AuditStream(owner, response.stream, folder, record, response.status_code, tavily)
+        wrapped = httpx.Response(response.status_code, headers=response.headers, request=request,
             extensions=response.extensions,
-            stream=_AuditStream(owner, response.stream, folder, record, response.status_code, tavily))
+            stream=audit)
+        # HTTPX copies the extensions mapping in Response.__init__. Bind the
+        # actual adapter-visible mapping rather than the original transport's.
+        audit.extensions = wrapped.extensions
+        return wrapped
 
     def close(self):
         self.inner.close()
 
 
 class _AuditStream(httpx.SyncByteStream):
-    def __init__(self, owner, stream, folder, record, status, tavily):
+    def __init__(self, owner, stream, folder, record, status, tavily, extensions=None):
         self.owner, self.stream, self.folder, self.record, self.status, self.tavily = owner, stream, folder, record, status, tavily
         self.size, self.digest, self.finished, self.closed, self.raw = 0, hashlib.sha256(), False, False, bytearray()
+        self.extensions = extensions if extensions is not None else {}
 
     def __iter__(self):
         for chunk in self.stream:
             self.size += len(chunk)
             self.digest.update(chunk)
-            if self.size > 262144:
+            # The body adapter must see and count the over-limit chunk before
+            # refusing it against its tighter aggregate 65536-byte reservation.
+            # It never appends that chunk to the parsing buffer.
+            if self.size > 262144 and self.record["kind"] != "body_http":
                 raise httpx.ReadError("Owned external response too large")
             if self.record["kind"] == "search":
                 self.raw.extend(chunk)
@@ -928,6 +940,20 @@ class _AuditStream(httpx.SyncByteStream):
         # Known non-200 responses can be classified from their headers without
         # reading error bodies; native adapters deliberately do that.
         unknown, usage, reason = not self.finished and self.status == 200, None, None
+        # Only the body adapter can attest to a validated header-only capacity
+        # refusal. A partial read, HTTP error or transport interruption cannot
+        # acquire this known-unread classification.
+        capacity_rejected = (self.record["kind"] == "body_http" and self.status == 200
+            and self.size == 0 and not self.finished
+            and self.extensions.get("studyplan_body_termination") == "declared_capacity_rejected")
+        if capacity_rejected:
+            unknown, reason = False, "declared_capacity_rejected"
+        elif self.record["kind"] == "body_http" and self.status == 200 and not self.finished:
+            termination = self.extensions.get("studyplan_body_termination")
+            if termination == "streamed_capacity_rejected" and self.size > 0:
+                unknown, reason = False, "streamed_capacity_rejected"
+            elif termination == "body_validation_rejected" and self.size == 0:
+                unknown, reason = False, "body_validation_rejected"
         if self.finished and self.record["kind"] == "search" and self.status == 200:
             try:
                 data = _decode(bytes(self.raw))
@@ -945,10 +971,10 @@ class _AuditStream(httpx.SyncByteStream):
         failed = self.status != 200 or reason is not None
         self.owner._result(self.folder, self.record, http_status=self.status, response_bytes=self.size,
             response_sha256=self.digest.hexdigest(), unknown=unknown, usage=usage, error_class=reason,
-            status="reconciliation_required" if unknown else "failed" if failed else "succeeded")
+            status="unread" if capacity_rejected else "reconciliation_required" if unknown else "failed" if failed else "succeeded")
         # Existing port results own the known-HTTP semantic policy (e.g. an
         # unread GitHub chapter is consumed but is not a batch-wide STOP).
-        if unknown or reason is not None:
+        if unknown or (reason is not None and not capacity_rejected):
             self.owner._stop(self.record["kind"], reason or "external_response_failed", unknown=unknown)
 
 
@@ -979,6 +1005,7 @@ class _BoundedIndex:
 
 class _BoundedBody:
     supports_outcome_selection = True
+    supports_chapter_selection = True
 
     def __init__(self, owner, port):
         self.owner, self.port = owner, port

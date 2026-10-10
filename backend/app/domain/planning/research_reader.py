@@ -22,6 +22,7 @@ class TransientBody:
     reason: str = ""
     requests: int = 0
     bytes_read: int = 0
+    attempted_path: str = ""
 
     def close(self):
         self.chunks.clear()

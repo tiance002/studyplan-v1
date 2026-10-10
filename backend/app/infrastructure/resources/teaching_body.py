@@ -35,6 +35,12 @@ _JSON_TYPES = {"application/json", "application/vnd.github+json"}
 _ADMIN_FILES = {"contributing", "license", "licence", "changelog", "code_of_conduct", "security", "support"}
 _SELECTION_STOPWORDS = {"the", "and", "for", "with", "from", "into", "using", "use", "build", "validate",
     "implement", "explain", "learn", "learning", "tutorial", "course", "guide", "docs", "chapter", "lesson"}
+# Search vocabulary for public capability concepts, not course/path allowlists.
+# Exact policy outcome binding is required before adding these translations.
+_CAPABILITY_SEARCH_ALIASES = {
+    "structured.output": ("结构化输出",),
+    "tool.calling": ("工具调用",),
+}
 
 
 def _reject(reason="invalid_body_payload", *, unread=False):
@@ -51,6 +57,7 @@ def _valid_ref(ref):
 
 class GitHubTeachingBody(GitHubResourceIndex):
     supports_outcome_selection = True
+    supports_chapter_selection = True
 
     @staticmethod
     def _selection_terms(must_teach):
@@ -62,11 +69,14 @@ class GitHubTeachingBody(GitHubResourceIndex):
         from app.domain.planning.capability_policy import CAPABILITY_POLICY
         aliases = {outcome.text: definition.title + " " + definition.capability_id
             for definition in CAPABILITY_POLICY.definitions for outcome in definition.learning_outcomes}
+        translated = {outcome.text: _CAPABILITY_SEARCH_ALIASES.get(definition.capability_id, ())
+            for definition in CAPABILITY_POLICY.definitions for outcome in definition.learning_outcomes}
         terms = set()
         for text in must_teach:
             words = text + " " + aliases.get(text, "")
             terms.update(word.lower() for word in re.findall(r"[A-Za-z][A-Za-z0-9]*|[\u4e00-\u9fff]{2,}", words)
                 if word.lower() not in _SELECTION_STOPWORDS)
+            terms.update(translated.get(text, ()))
         return terms
 
     @staticmethod
@@ -117,17 +127,29 @@ class GitHubTeachingBody(GitHubResourceIndex):
                         _reject("teaching_chapter_not_found", unread=True)
                     _reject("body_http_rejected")
                 if response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() not in _JSON_TYPES:
+                    response.extensions["studyplan_body_termination"] = "body_validation_rejected"
                     _reject("unsupported_body_response_type")
                 if response.headers.get("Content-Encoding", "identity").strip().lower() != "identity":
+                    response.extensions["studyplan_body_termination"] = "body_validation_rejected"
                     _reject("unsupported_body_encoding")
                 length = response.headers.get("Content-Length")
-                if length is not None and (not length.isdecimal() or len(length) > 20 or int(length) > budget[0]):
-                    _reject("body_size_exceeded")
+                if length is not None:
+                    if not re.fullmatch(r"[0-9]{1,20}", length):
+                        response.extensions["studyplan_body_termination"] = "body_validation_rejected"
+                        _reject("body_size_exceeded")
+                    if int(length) > budget[0]:
+                        # Explicit local refusal before consumption, shared with
+                        # the wire audit stream through the response extensions.
+                        # Invalid headers and actual streamed overruns never set
+                        # this marker and retain their fail-closed behavior.
+                        response.extensions["studyplan_body_termination"] = "declared_capacity_rejected"
+                        _reject("body_size_exceeded", unread=True)
                 for chunk in response.iter_raw():
                     receipt["bytes"] += len(chunk)
                     if time.monotonic() >= deadline:
                         raise GitHubFailure("body_read_unknown", unknown=True)
                     if len(chunk) > budget[0]:
+                        response.extensions["studyplan_body_termination"] = "streamed_capacity_rejected"
                         _reject("body_size_exceeded")
                     budget[0] -= len(chunk)
                     body.extend(chunk)
@@ -182,10 +204,10 @@ class GitHubTeachingBody(GitHubResourceIndex):
             data.clear()
             raw = text = None
 
-    def read(self, candidate: ResourceRecord, *, paths=(), must_teach=(), max_bytes=65536,
+    def read(self, candidate: ResourceRecord, *, paths=(), must_teach=(), exclude_paths=(), max_bytes=65536,
              timeout_seconds=15) -> TransientBody:
         receipts, payloads = [], []
-        readme = chapter_text = None
+        readme = chapter_text = selected = None
 
         def result(status, reason="", **metadata):
             return TransientBody(status, reason=reason,
@@ -220,6 +242,14 @@ class GitHubTeachingBody(GitHubResourceIndex):
                 validate_content_path(path)
                 if posixpath.splitext(path)[1].lower() not in _TEXT_EXTENSIONS:
                     _reject("invalid_body_selection")
+            if not isinstance(exclude_paths, (tuple, list)) or len(exclude_paths) > 100:
+                _reject("invalid_body_selection")
+            for path in exclude_paths:
+                validate_content_path(path)
+                if posixpath.splitext(path)[1].lower() not in _TEXT_EXTENSIONS:
+                    _reject("invalid_body_selection")
+            if len(set(exclude_paths)) != len(exclude_paths) or set(paths) & set(exclude_paths):
+                _reject("invalid_body_selection")
             if (not isinstance(must_teach, (tuple, list)) or len(must_teach) > 6
                 or any(not isinstance(text, str) or not text.strip() or len(text) > 2000 for text in must_teach)):
                 _reject("invalid_body_outcomes")
@@ -237,7 +267,7 @@ class GitHubTeachingBody(GitHubResourceIndex):
                 if paths and paths[0] not in {entry.path for entry in indexed}:
                     _reject("body_path_not_in_index")
                 chapters = [entry for entry in indexed if posixpath.splitext(posixpath.basename(entry.path))[0].lower().split(".")[0]
-                    not in _ADMIN_FILES]
+                    not in _ADMIN_FILES and entry.path not in exclude_paths]
                 if paths:
                     selected = paths[0]
                 else:
@@ -258,7 +288,8 @@ class GitHubTeachingBody(GitHubResourceIndex):
             return result("succeeded", resource_id=resource_id, url=chapter_url, version=version, chunks=[chunk])
         except GitHubFailure as exc:
             return result("unknown" if exc.unknown else "unread" if exc.unread else "failed",
-                "body_read_unknown" if exc.unknown else exc.reason)
+                "body_read_unknown" if exc.unknown else exc.reason,
+                attempted_path=selected if exc.unread and not exc.unknown and selected else "")
         except (ValueError, UnicodeError, TypeError, AttributeError, binascii.Error):
             return result("failed", "invalid_body_payload")
         except (httpx.HTTPError, OSError):

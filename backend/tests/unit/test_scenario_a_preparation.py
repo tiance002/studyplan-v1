@@ -103,7 +103,8 @@ def test_zero_network_preparation_freezes_full_facts_before_manifest_and_unsigne
     assert packet["request_plan"] | {"purpose_limits": None} == {
         "purpose_limits": None, "model_requests": 9, "search_requests": 6, "body_operations": 6,
         "body_http_requests": 12, "metadata_requests": 0, "output_tokens": 18432, "body_bytes": 393216,
-        "retry_limit": 0, "repair_limit": 0, "run_limit": 1, "total_requests": 27, "cost_micros": 186000}
+        "retry_limit": 0, "repair_limit": 0, "run_limit": 1, "total_requests": 27, "cost_micros": 186000,
+        "research_rules_version": "research_chapter_v3"}
     request = json.loads((path.parent / "owner-authorization-request.json").read_bytes())
     assert request["owner_approved"] is False and request["actions"] == [] and request["owner_evidence"] == ""
     assert not list(path.parent.glob("submission*.json"))

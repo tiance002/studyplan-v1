@@ -186,10 +186,14 @@ class DurableBody:
         self.ledger, self.reader = ledger, reader
         self.supports_outcome_selection = (ledger.manifest.get("product_semantics") == "planning-v2-product-v2"
                                           and getattr(reader, "supports_outcome_selection", False))
+        self.supports_chapter_selection = (ledger.manifest.get("research_rules_version") == "research_chapter_v3"
+                                          and getattr(reader, "supports_chapter_selection", False))
 
     def read(self, candidate, **kwargs):
         live = []
         identity_options = dict(kwargs)
+        if "exclude_paths" in identity_options and not self.supports_chapter_selection:
+            raise V2RecoveryBlocked("Chapter exclusions require the frozen new research version")
         if "must_teach" in identity_options:
             # Product-v2 already freezes the complete exact outcome scope in
             # this receipt identity. Preserve historical body-only identities.
@@ -229,6 +233,9 @@ class DurableBody:
                     "kind": "failure",
                     "value": asdict(LLMFailure("body_binding_invalid", "Body binding rejected")),
                 }, {"total_requests": body.requests, "body_bytes": body.bytes_read}
+            if self.supports_chapter_selection and body.status == "unread" and body.attempted_path:
+                from app.domain.planning.resource_research import ResearchUnreadChapter
+                ResearchUnreadChapter(body.attempted_path, tuple(o["outcome_id"] for o in self.ledger.current_review_scope))
             if body.status == "succeeded":
                 import hashlib
 
@@ -271,6 +278,8 @@ class DurableBody:
                     ]
                     if body.status == "succeeded"
                     else [],
+                    **({"attempted_path": body.attempted_path if body.status == "unread" else ""}
+                       if self.supports_chapter_selection else {}),
                 },
             }, measured
 
@@ -278,7 +287,7 @@ class DurableBody:
             d = self.ledger.call(
                 step="teaching-body",
                 purpose="research.body",
-                schema="V2TransientBodyV1",
+                schema="V2TransientBodyV2" if self.ledger.manifest.get("research_rules_version") == "research_chapter_v3" else "V2TransientBodyV1",
                 payload={"url": candidate.url, "discovery": candidate.discovery, "options": identity_options,
                          **({"review_scope": self.ledger.current_review_scope,
                              "review_identity": self.ledger.current_review_candidate_hash}
@@ -293,7 +302,8 @@ class DurableBody:
                     if any(type(value.get(k)) is not int or value[k] < 0 for k in ("requests", "bytes_read")):
                         raise V2RecoveryBlocked("Historical negative body receipt lacks trustworthy usage")
                     return TransientBody(value["status"], reason=value.get("reason", ""),
-                                         requests=value["requests"], bytes_read=value["bytes_read"])
+                                         requests=value["requests"], bytes_read=value["bytes_read"],
+                                         attempted_path=value.get("attempted_path", "") if self.supports_chapter_selection else "")
                 raise V2RecoveryBlocked(
                     "Body-only receipt has no validated Reader outcome; no body redispatch"
                 )
@@ -327,17 +337,25 @@ class DurableResourceResearcher(ResourceResearcher):
         # read anew; a previous body-only success can never be blindly replayed.
         self.ledger.current_review_scope = [asdict(o) for o in remaining]
         self.ledger.current_review_candidate_hash = content_hash({"discovery": candidate.discovery,
-            "desired_depth": requirement.desired_depth})
-        self.ledger.admit_candidate(candidate.url)
+            "desired_depth": requirement.desired_depth,
+            **({"exclude_paths": self._excluded_chapters(candidate, requirement, remaining, session)}
+               if session.rules_version == "research_chapter_v3" else {})})
+        self.ledger.admit_candidate(candidate.url,
+            **({"operation_identity": content_hash({"candidate_identity": self.ledger.current_review_candidate_hash,
+                "scope": self.ledger.current_review_scope})} if session.rules_version == "research_chapter_v3" else {}))
         recovered = self.ledger.inspected(candidate.url, remaining,
             **({"candidate_identity": self.ledger.current_review_candidate_hash}
-               if session.rules_version == "research_comparison_v2" else {}))
+               if session.rules_version in {"research_comparison_v2", "research_chapter_v3"} else {}))
         if recovered is not None:
             # The successfully validated Reader receipt already binds exact
             # source/chunk/outcome metadata; no synthetic body is constructed.
             if checked_at != self.ledger.manifest["checked_at"]:
                 raise V2RecoveryBlocked("Reader recovery timestamp mismatch")
             resources, reasons, metadata = recovered
+            if session.rules_version == "research_chapter_v3":
+                chapter = metadata["body_chapter"]
+                self._record_chapter(candidate, requirement, remaining, session, **chapter,
+                                     chunks=metadata["body_chunks"])
             reservation = session.reserve("body", total_requests=2, body_bytes=65536)
             if reservation is None:
                 return (), ("budget_exhausted",)
@@ -526,7 +544,8 @@ class V2PlanningRuntime:
         save("coverage_gaps", coverage=coverage.to_payload(), gaps_hash=gaps.result_hash)
         budget = ResearchBudget(**manifest["budget"])
         product_v2 = manifest.get("product_semantics") == "planning-v2-product-v2"
-        rules_version = "research_comparison_v2" if product_v2 else "legacy"
+        from app.domain.planning.v2_runtime import research_rules_version
+        rules_version = research_rules_version(manifest)
         expected = research_input_hash(
             gaps,
             plan,

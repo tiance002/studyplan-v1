@@ -33,7 +33,7 @@ from app.core.errors import ValidationAppError
 from app.core.ids import canonical_json, content_hash
 from app.domain.planning.capability_decisions import CAPABILITY_DECISION_PROTOCOL
 from app.domain.planning.intent import GoalSpec, goal_spec_from_payload, goal_spec_payload
-from app.domain.planning.resource_research import ResearchBudget
+from app.domain.planning.resource_research import RESEARCH_CHAPTER_V3, ResearchBudget
 from app.domain.planning.v2_runtime import (
     OWNED_ACCEPTANCE_GATE,
     PURPOSE_SCHEMAS,
@@ -148,6 +148,8 @@ def request_plan(manifest):
         "body_bytes": 65536 * limits["research.body"], "retry_limit": 0, "repair_limit": 0, "run_limit": 1}
     if "capability_output_protocol" in manifest:
         plan["schema_names"] = {purpose: purpose_schema(manifest, purpose) for purpose in PURPOSE_SCHEMAS}
+    if "research_rules_version" in manifest:
+        plan["research_rules_version"] = manifest["research_rules_version"]
     # The same worst reservations used by PgV2Calls/DurableIndex/DurableBody.
     plan["total_requests"] = models + plan["search_requests"] + plan["body_http_requests"]
     plan["cost_micros"] = models * budget["reader_cost_micros"] + plan["search_requests"] * budget["search_cost_micros"]
@@ -186,7 +188,7 @@ def prepare(output, *, goal, model_ref, request_options, root=ROOT, facts=None, 
     manifest = build_v2_manifest(goal, model_ref=model_ref, source_facts=read_source_facts(reference),
         budget=budget or scenario_budget(), checked_at=datetime.now(timezone.utc).isoformat(), expected_version=0,
         product_semantics="planning-v2-product-v2", acceptance_gate=OWNED_ACCEPTANCE_GATE,
-        capability_output_protocol=capability_output_protocol)
+        capability_output_protocol=capability_output_protocol, research_rules_version=RESEARCH_CHAPTER_V3)
     plan = request_plan(manifest)
     _options(request_options, manifest)
     packet = {"version": VERSION, "acceptance_id": "scenario-a-" + uuid.uuid4().hex,
