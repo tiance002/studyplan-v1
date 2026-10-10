@@ -9,6 +9,10 @@ from app.domain.planning.capabilities import (
     CapabilityPlanValidator,
     validate_capability_planning_input,
 )
+from app.domain.planning.capability_decisions import (
+    CAPABILITY_DECISION_PROTOCOL,
+    normalize_capability_decision,
+)
 from app.domain.planning.capability_policy import CAPABILITY_POLICY
 from app.domain.planning.goal_requirements import GoalRequirementProfile
 from app.ports.llm import LLMFailure, LLMPort
@@ -20,14 +24,23 @@ class CapabilityPlanner:
         self._validator = CapabilityPlanValidator()
 
     def plan(self, profile: GoalRequirementProfile, *, run_id: str, attempt_id: str,
-             verification_evidence=(), domain_approvals=()) -> CapabilityPlan | CapabilityPlanningPending | LLMFailure:
+             verification_evidence=(), domain_approvals=(),
+             output_protocol=CAPABILITY_SCHEMA) -> CapabilityPlan | CapabilityPlanningPending | LLMFailure:
         if not isinstance(profile, GoalRequirementProfile):
             raise ValidationAppError("能力规划只接受GoalRequirementProfile")
+        if output_protocol == CAPABILITY_SCHEMA:
+            schema_name = CAPABILITY_SCHEMA
+        elif output_protocol == CAPABILITY_DECISION_PROTOCOL:
+            from app.domain.planning.capabilities import CAPABILITY_DECISION_SCHEMA
+            schema_name = CAPABILITY_DECISION_SCHEMA
+        else:
+            return LLMFailure("capability_planning_protocol_invalid", "能力规划协议未被当前Run冻结",
+                              details={"dispatched": False})
         try:
             evidence = tuple(verification_evidence)
             payload = {"profile": profile.to_payload(), "policy": CAPABILITY_POLICY.to_payload(),
                        "verification_evidence": [e.to_payload() for e in evidence]}
-            if not validate_capability_planning_input(payload, CAPABILITY_SCHEMA, allow_clarification=True):
+            if not validate_capability_planning_input(payload, schema_name, allow_clarification=True):
                 return LLMFailure("capability_planning_input_invalid", "能力规划输入未通过校验", details={"dispatched": False})
             # Fixtures retain their offline structural use. The real Provider
             # rejects fixtures; a source_verification label requires an issued approval here too.
@@ -43,7 +56,7 @@ class CapabilityPlanner:
         for value in (run_id, attempt_id):
             if not isinstance(value, str) or not value.strip() or len(value) > 200:
                 raise ValidationAppError("能力规划需要有效调用身份")
-        result = self._llm.generate_structured(purpose=CAPABILITY_PURPOSE, schema_name=CAPABILITY_SCHEMA,
+        result = self._llm.generate_structured(purpose=CAPABILITY_PURPOSE, schema_name=schema_name,
             payload=payload, run_id=run_id, attempt_id=attempt_id)
         if isinstance(result, LLMFailure):
             return result
@@ -51,7 +64,9 @@ class CapabilityPlanner:
             return LLMFailure("provider_output_truncated", "能力规划输出被截断", input_tokens=result.input_tokens,
                               output_tokens=result.output_tokens, latency_ms=result.latency_ms)
         try:
-            return self._validator.validate(result.payload, profile=profile, verification_evidence=evidence)
+            if schema_name == CAPABILITY_SCHEMA:
+                return self._validator.validate(result.payload, profile=profile, verification_evidence=evidence)
+            return normalize_capability_decision(result.payload, profile=profile, verification_evidence=evidence)
         except (ValidationAppError, TypeError, ValueError, KeyError):
             return LLMFailure("capability_plan_invalid", "能力规划输出未通过校验", input_tokens=result.input_tokens,
                               output_tokens=result.output_tokens, latency_ms=result.latency_ms)

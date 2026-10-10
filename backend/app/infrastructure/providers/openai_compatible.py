@@ -28,6 +28,7 @@ from app.agent_workflows.planning_structure import (
 from app.application.planning_budget import OFFICIAL_DEEPSEEK_FLASH_OUTPUT_CAP, BudgetPolicy
 from app.core.errors import AppError, ValidationAppError
 from app.domain.assistant import ASSISTANT_PROTOCOL, ASSISTANT_PURPOSE, INPUT_LIMIT, NATURAL_CHAT
+from app.domain.planning.capabilities import CAPABILITY_DECISION_SCHEMA
 from app.domain.planning.constraint_adaptation import composition_dispatch_allowed
 from app.domain.planning.domain_verification import (
     curriculum_public_input_allowed,
@@ -40,6 +41,10 @@ from app.infrastructure.providers.capability_planning_contract import (
     CAPABILITY_SHAPE,
     CAPABILITY_SYSTEM,
     valid_capability_planning_input,
+)
+from app.infrastructure.providers.capability_planning_decision_contract import (
+    CAPABILITY_DECISION_SHAPE,
+    CAPABILITY_DECISION_SYSTEM,
 )
 from app.infrastructure.providers.curriculum_contract import (
     CURRICULUM_OUTPUT_CAP,
@@ -372,7 +377,10 @@ class OpenAICompatibleLLM:
         if purpose == GOAL_REQUIREMENT_PURPOSE:
             system = GOAL_REQUIREMENT_SYSTEM
         if purpose == CAPABILITY_PURPOSE:
-            system = CAPABILITY_SYSTEM
+            if schema_name == CAPABILITY_DECISION_SCHEMA:
+                shape, system = CAPABILITY_DECISION_SHAPE, CAPABILITY_DECISION_SYSTEM
+            else:
+                system = CAPABILITY_SYSTEM
         if purpose == READER_PURPOSE:
             if schema_name == "ResearchReaderV2":
                 from app.infrastructure.providers.research_reader_contract import (

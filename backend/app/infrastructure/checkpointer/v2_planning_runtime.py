@@ -11,7 +11,7 @@ from app.application.teaching_resource_research import ResourceResearcher
 from app.core.errors import ConflictError, ValidationAppError, VersionConflictError
 from app.core.ids import content_hash
 from app.domain.enums import MediaType, ResourceProvenance, ResourceVerificationStatus
-from app.domain.planning.capabilities import CapabilityPlan, CapabilityPlanningPending
+from app.domain.planning.capabilities import CAPABILITY_SCHEMA, CapabilityPlan, CapabilityPlanningPending
 from app.domain.planning.content_coverage import CoverageEvaluator
 from app.domain.planning.curriculum import CurriculumPlan, prepare_curriculum
 from app.domain.planning.curriculum_compiler import compile_curriculum
@@ -487,6 +487,7 @@ class V2PlanningRuntime:
             attempt_id="capability-planning",
             verification_evidence=self.evidence,
             domain_approvals=self.approvals,
+            output_protocol=manifest.get("capability_output_protocol", CAPABILITY_SCHEMA),
         )
         if isinstance(plan, CapabilityPlanningPending) and plan.status == "needs_verification":
             requested = {
@@ -505,6 +506,7 @@ class V2PlanningRuntime:
                     attempt_id="capability-verified",
                     verification_evidence=self.evidence,
                     domain_approvals=self.approvals,
+                    output_protocol=manifest.get("capability_output_protocol", CAPABILITY_SCHEMA),
                 )
         if not isinstance(plan, CapabilityPlan):
             return (

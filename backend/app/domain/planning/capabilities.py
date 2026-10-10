@@ -11,6 +11,7 @@ from app.domain.planning.goal_requirements import GoalRequirementProfile
 
 CAPABILITY_PURPOSE = "planning.capability_planning"
 CAPABILITY_SCHEMA = "CapabilityPlanV1"
+CAPABILITY_DECISION_SCHEMA = "CapabilityDecisionV2"
 WIRE_FIELDS = {"schema_version", "source_goal_profile_hash", "policy_version", "route_kind", "status",
                "capabilities", "claim_bindings", "constraint_effects", "clarification_questions"}
 ITEM_FIELDS = {"capability_id", "disposition", "learning_requirement", "project_usage", "desired_depth",
@@ -129,7 +130,7 @@ def validate_capability_planning_input(payload, schema_name, *, allow_clarificat
     """Provider preflight checks serialized authority, never reinterprets raw GoalSpec."""
     try:
         _object(payload, {"profile", "policy", "verification_evidence"})
-        if schema_name != CAPABILITY_SCHEMA:
+        if schema_name not in {CAPABILITY_SCHEMA, CAPABILITY_DECISION_SCHEMA}:
             return False
         raw = _object(payload["profile"], {f.name for f in fields(GoalRequirementProfile)} | {"profile_hash"})
         _text(raw["target_summary"])

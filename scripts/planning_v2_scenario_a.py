@@ -31,6 +31,7 @@ if __name__ == "__main__":
 
 from app.core.errors import ValidationAppError
 from app.core.ids import canonical_json, content_hash
+from app.domain.planning.capability_decisions import CAPABILITY_DECISION_PROTOCOL
 from app.domain.planning.intent import GoalSpec, goal_spec_from_payload, goal_spec_payload
 from app.domain.planning.resource_research import ResearchBudget
 from app.domain.planning.v2_runtime import (
@@ -39,6 +40,7 @@ from app.domain.planning.v2_runtime import (
     build_v2_manifest,
     manifest_intact,
     owned_acceptance_policy,
+    purpose_schema,
     wire,
 )
 from app.domain.workspace.models import AuthContext
@@ -144,6 +146,8 @@ def request_plan(manifest):
         "body_http_requests": 2 * limits["research.body"], "metadata_requests": 0,
         "output_tokens": sum(limits[p] * manifest["output_caps"][p] for p in PURPOSE_SCHEMAS),
         "body_bytes": 65536 * limits["research.body"], "retry_limit": 0, "repair_limit": 0, "run_limit": 1}
+    if "capability_output_protocol" in manifest:
+        plan["schema_names"] = {purpose: purpose_schema(manifest, purpose) for purpose in PURPOSE_SCHEMAS}
     # The same worst reservations used by PgV2Calls/DurableIndex/DurableBody.
     plan["total_requests"] = models + plan["search_requests"] + plan["body_http_requests"]
     plan["cost_micros"] = models * budget["reader_cost_micros"] + plan["search_requests"] * budget["search_cost_micros"]
@@ -170,7 +174,8 @@ def _options(options, manifest):
             _reject("request_model_mismatch")
 
 
-def prepare(output, *, goal, model_ref, request_options, root=ROOT, facts=None, budget=None):
+def prepare(output, *, goal, model_ref, request_options, root=ROOT, facts=None, budget=None,
+            capability_output_protocol=None):
     """Zero-network/zero-DB preparation for a fresh batch; existing dirs reject."""
     if type(goal) is not GoalSpec:
         _reject("goal")
@@ -180,7 +185,8 @@ def prepare(output, *, goal, model_ref, request_options, root=ROOT, facts=None, 
         else freeze_source_facts(output / "source-facts.json", facts))
     manifest = build_v2_manifest(goal, model_ref=model_ref, source_facts=read_source_facts(reference),
         budget=budget or scenario_budget(), checked_at=datetime.now(timezone.utc).isoformat(), expected_version=0,
-        product_semantics="planning-v2-product-v2", acceptance_gate=OWNED_ACCEPTANCE_GATE)
+        product_semantics="planning-v2-product-v2", acceptance_gate=OWNED_ACCEPTANCE_GATE,
+        capability_output_protocol=capability_output_protocol)
     plan = request_plan(manifest)
     _options(request_options, manifest)
     packet = {"version": VERSION, "acceptance_id": "scenario-a-" + uuid.uuid4().hex,
@@ -592,6 +598,7 @@ def main(argv=None):
     prep.add_argument("--request-options-file", required=True)
     prep.add_argument("--model-ref", required=True)
     prep.add_argument("--output", required=True)
+    prep.add_argument("--capability-output-protocol", choices=(CAPABILITY_DECISION_PROTOCOL,))
     request = sub.add_parser("external-request", help="Write unsigned fresh external authorization request; zero network")
     request.add_argument("--packet", required=True)
     request.add_argument("--model-ledger", required=True)
@@ -618,7 +625,8 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.action == "prepare":
         packet = prepare(args.output, goal=goal_spec_from_payload(_read(args.goal_file)), model_ref=args.model_ref,
-            request_options=_read(args.request_options_file))
+            request_options=_read(args.request_options_file),
+            capability_output_protocol=args.capability_output_protocol)
         print(canonical_json({"acceptance_id": packet["acceptance_id"], "manifest_hash": packet["manifest"]["manifest_hash"],
             "request_plan": packet["request_plan"], "external_requests": 0, "database_requests": 0,
             "external_authorization_required": True}))
