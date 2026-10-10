@@ -26,7 +26,7 @@ from app.application.resource_discovery_contract import (
 from app.core.errors import ForbiddenError, ValidationAppError
 from app.core.ids import new_id
 from app.domain.enums import MediaType, ResourceProvenance, ResourceVerificationStatus
-from app.domain.resources.models import ResourceRecord, UnavailableResult
+from app.domain.resources.models import ResourceRecord, SourceSearchUnavailable
 from app.domain.workspace.models import AuthContext
 from app.infrastructure.resources.github_transport import (
     GitHubNotDispatchedError,
@@ -63,8 +63,11 @@ def topic_overlap(words, text):
 
 
 class GitHubFailure(Exception):
-    def __init__(self, reason, *, unknown=False):
+    def __init__(self, reason, *, unknown=False, not_dispatched=False, stop_required=False, unread=False):
         self.reason, self.unknown = reason, unknown
+        self.not_dispatched = not_dispatched
+        self.stop_required = stop_required or unknown or not_dispatched
+        self.unread = unread
 
 
 class GitHubResourceIndex:
@@ -89,7 +92,7 @@ class GitHubResourceIndex:
         validate_github_url(str(url))
         remaining = deadline - time.monotonic()
         if remaining <= 0:
-            raise GitHubFailure(UNKNOWN_INSPECTION_REASON, unknown=True)
+            raise GitHubFailure("github_deadline_before_dispatch", not_dispatched=True)
         receipt = {"kind": kind, "path": path, "status": "dispatched", "bytes": 0,
                    "dispatched_at": datetime.now(timezone.utc).isoformat()}
         receipts.append(receipt)
@@ -105,7 +108,8 @@ class GitHubResourceIndex:
                               else "github_rate_limited" if response.status_code == 429
                               else "github_forbidden" if response.status_code in {401, 403}
                               else "github_not_found" if response.status_code == 404 else "github_http_error")
-                    raise GitHubFailure(reason)
+                    raise GitHubFailure(reason, stop_required=(300 <= response.status_code < 400
+                        or response.status_code in {401, 403, 429}))
                 if response.headers.get("Content-Encoding", "identity").lower() != "identity":
                     raise GitHubFailure(UNKNOWN_INSPECTION_REASON, unknown=True)
                 length = response.headers.get("Content-Length", "")
@@ -113,10 +117,10 @@ class GitHubResourceIndex:
                     raise GitHubFailure(UNKNOWN_INSPECTION_REASON, unknown=True)
                 body = bytearray()
                 for chunk in response.iter_raw():
+                    receipt["bytes"] += len(chunk)
                     if time.monotonic() >= deadline or len(chunk) > budget[0]:
                         raise GitHubFailure(UNKNOWN_INSPECTION_REASON, unknown=True)
                     budget[0] -= len(chunk)
-                    receipt["bytes"] += len(chunk)
                     body.extend(chunk)
             if time.monotonic() >= deadline:
                 raise GitHubFailure(UNKNOWN_INSPECTION_REASON, unknown=True)
@@ -127,7 +131,7 @@ class GitHubResourceIndex:
             return data
         except GitHubNotDispatchedError:
             receipt["status"] = "not_dispatched"
-            raise GitHubFailure("github_destination_rejected") from None
+            raise GitHubFailure("github_destination_rejected", not_dispatched=True) from None
         except GitHubFailure as exc:
             if exc.unknown:
                 receipt["status"] = "reconciliation_required"
@@ -151,15 +155,23 @@ class GitHubResourceIndex:
         if not isinstance(query.limit, int) or isinstance(query.limit, bool) or query.limit < 1:
             raise ValidationAppError("检索数量需为正整数")
         limit = min(5, query.limit)
+        receipts = []
+        def failure(exc):
+            return SourceSearchUnavailable(UNKNOWN_SEARCH_REASON if exc.unknown else exc.reason,
+                status="unknown" if exc.unknown else "not_dispatched" if exc.not_dispatched else "failed",
+                requests=sum(r["status"] != "not_dispatched" for r in receipts),
+                bytes_read=sum(r["bytes"] for r in receipts), receipts=tuple(receipts),
+                stop_required=exc.stop_required)
+
         try:
             with self._client() as client:
                 data = self._json(client, "/search/repositories", params={"q": words.strip(), "per_page": limit},
-                    deadline=time.monotonic() + self._timeout, kind="search", receipts=[], budget=[_MAX_BODY])
+                    deadline=time.monotonic() + self._timeout, kind="search", receipts=receipts, budget=[_MAX_BODY])
         except GitHubFailure as exc:
-            return UnavailableResult(UNKNOWN_SEARCH_REASON if exc.unknown else exc.reason)
+            return failure(exc)
         items = data.get("items")
         if not isinstance(items, list):
-            return UnavailableResult(UNKNOWN_SEARCH_REASON)
+            return failure(GitHubFailure("github_invalid_search_response", stop_required=True))
         candidates, seen = [], set()
         for rank, item in enumerate(items[:5], 1):
             if not isinstance(item, dict):
@@ -193,7 +205,7 @@ class GitHubResourceIndex:
                 discovery=evidence.model_dump(mode="json"), source_note="GitHub搜索候选；尚未检查教程"))
             if len(candidates) >= limit:
                 break
-        return candidates or UnavailableResult("github_no_results")
+        return candidates
 
     @staticmethod
     def _chapters(text, readme_path):

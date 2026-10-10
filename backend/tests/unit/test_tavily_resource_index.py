@@ -92,7 +92,7 @@ def test_candidate_unsafe_urls_are_not_returned_or_fetched(url):
         return streaming_json({"results": [{"title": "candidate", "url": url}]})
 
     result = TavilyResourceIndex("key", transport=httpx.MockTransport(respond)).find(query())
-    assert isinstance(result, UnavailableResult)
+    assert result == []
     assert calls == ["https://api.tavily.com/search"]
 
 

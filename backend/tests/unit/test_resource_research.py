@@ -228,8 +228,9 @@ def test_pending_dispatch_restores_blocked_and_not_fresh_budget():
 def test_body_outer_resource_binding_rejects_cross_resource_chunk():
     bad = body()
     bad.resource_id = "resource_" + "b" * 64
-    result, _, _, _, bodies, reader, _ = run(bodies=Bodies(bad))
+    result, session, _, web, bodies, reader, _ = run(bodies=Bodies(bad))
     assert not reader.calls and result.entries[0].status == "unresolved" and not bodies.produced[0].chunks
+    assert session.blocked and not web.calls
 
 
 def test_unknown_search_freezes_run_without_web_fallback():

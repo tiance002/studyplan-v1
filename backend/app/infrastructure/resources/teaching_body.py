@@ -32,10 +32,13 @@ _MAX_WIRE = 65536
 _MAX_TEXT = 16384
 _SHA = re.compile(r"[0-9a-f]{40}\Z")
 _JSON_TYPES = {"application/json", "application/vnd.github+json"}
+_ADMIN_FILES = {"contributing", "license", "licence", "changelog", "code_of_conduct", "security", "support"}
+_SELECTION_STOPWORDS = {"the", "and", "for", "with", "from", "into", "using", "use", "build", "validate",
+    "implement", "explain", "learn", "learning", "tutorial", "course", "guide", "docs", "chapter", "lesson"}
 
 
-def _reject(reason="invalid_body_payload"):
-    raise GitHubFailure(reason)
+def _reject(reason="invalid_body_payload", *, unread=False):
+    raise GitHubFailure(reason, unread=unread)
 
 
 def _valid_ref(ref):
@@ -47,6 +50,48 @@ def _valid_ref(ref):
 
 
 class GitHubTeachingBody(GitHubResourceIndex):
+    supports_outcome_selection = True
+
+    @staticmethod
+    def _selection_terms(must_teach):
+        """Exact approved labels aid discovery, never establish coverage.
+
+        Chinese public outcome text can name an English technical capability.
+        Only the existing policy's exact text binding supplies that alias.
+        """
+        from app.domain.planning.capability_policy import CAPABILITY_POLICY
+        aliases = {outcome.text: definition.title + " " + definition.capability_id
+            for definition in CAPABILITY_POLICY.definitions for outcome in definition.learning_outcomes}
+        terms = set()
+        for text in must_teach:
+            words = text + " " + aliases.get(text, "")
+            terms.update(word.lower() for word in re.findall(r"[A-Za-z][A-Za-z0-9]*|[\u4e00-\u9fff]{2,}", words)
+                if word.lower() not in _SELECTION_STOPWORDS)
+        return terms
+
+    @staticmethod
+    def _select_chapter(chapters, must_teach):
+        if not chapters:
+            return None, "no_supported_teaching_chapter"
+        if not must_teach:
+            return chapters[0].path, ""
+        terms = GitHubTeachingBody._selection_terms(must_teach)
+        scored = []
+        for chapter in chapters:
+            label = chapter.title + " " + posixpath.splitext(chapter.path)[0]
+            words = {w.lower() for w in re.findall(r"[A-Za-z][A-Za-z0-9]*|[\u4e00-\u9fff]{2,}", label)}
+            # English tokens match whole words; Chinese phrases may appear
+            # inside a heading. No arbitrary path can enter this ranking.
+            score = sum(term in words if term.isascii() else term in label for term in terms)
+            scored.append((score, chapter))
+        best = max(score for score, _ in scored)
+        if best == 0:
+            return None, "no_matching_teaching_chapter"
+        winners = [chapter for score, chapter in scored if score == best]
+        if len(winners) != 1:
+            return None, "ambiguous_teaching_chapter"
+        return winners[0].path, ""
+
     def _json(self, client, path, *, params, deadline, kind, receipts, budget):
         """Reuse the fixed transport; distinguish invalid data from lost replies.
 
@@ -68,6 +113,8 @@ class GitHubTeachingBody(GitHubResourceIndex):
                 headers={"Accept": "application/vnd.github+json", "Accept-Encoding": "identity",
                     "X-GitHub-Api-Version": "2026-03-10", "User-Agent": "StudyPlan-resource-research"}) as response:
                 if response.status_code != 200:
+                    if response.status_code == 404 and "/contents/" in path:
+                        _reject("teaching_chapter_not_found", unread=True)
                     _reject("body_http_rejected")
                 if response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() not in _JSON_TYPES:
                     _reject("unsupported_body_response_type")
@@ -121,8 +168,10 @@ class GitHubTeachingBody(GitHubResourceIndex):
             raw = base64.b64decode(data["content"].replace("\n", "").replace("\r", ""), validate=True)
             size = data.get("size")
             if (not isinstance(size, int) or isinstance(size, bool) or size != len(raw)
-                or not 0 < len(raw) <= _MAX_TEXT):
-                _reject("body_size_exceeded")
+                or len(raw) == 0):
+                _reject()
+            if len(raw) > _MAX_TEXT:
+                _reject("body_size_exceeded", unread=True)
             text = raw.decode("utf-8")
             if "\x00" in text:
                 _reject()
@@ -133,7 +182,8 @@ class GitHubTeachingBody(GitHubResourceIndex):
             data.clear()
             raw = text = None
 
-    def read(self, candidate: ResourceRecord, *, paths=(), max_bytes=65536, timeout_seconds=15) -> TransientBody:
+    def read(self, candidate: ResourceRecord, *, paths=(), must_teach=(), max_bytes=65536,
+             timeout_seconds=15) -> TransientBody:
         receipts, payloads = [], []
         readme = chapter_text = None
 
@@ -170,6 +220,11 @@ class GitHubTeachingBody(GitHubResourceIndex):
                 validate_content_path(path)
                 if posixpath.splitext(path)[1].lower() not in _TEXT_EXTENSIONS:
                     _reject("invalid_body_selection")
+            if (not isinstance(must_teach, (tuple, list)) or len(must_teach) > 6
+                or any(not isinstance(text, str) or not text.strip() or len(text) > 2000 for text in must_teach)):
+                _reject("invalid_body_outcomes")
+            for text in must_teach:
+                text.encode("utf-8")
             prefix, params = f"/repos/{owner}/{name}", {"ref": ref}
             deadline = time.monotonic() + min(timeout_seconds, self._timeout)
             budget = [max_bytes]
@@ -178,12 +233,17 @@ class GitHubTeachingBody(GitHubResourceIndex):
                     kind="content", receipts=receipts, budget=budget)
                 payloads.append(data)
                 readme_path, _, readme = self._decode_file(data)
-                chapters = [entry.path for entry in self._chapters(readme, readme_path) if entry.status != "unsupported"]
-                if paths and paths[0] not in chapters:
+                indexed = [entry for entry in self._chapters(readme, readme_path) if entry.status != "unsupported"]
+                if paths and paths[0] not in {entry.path for entry in indexed}:
                     _reject("body_path_not_in_index")
-                if not chapters:
-                    return result("unread", "no_supported_teaching_chapter")
-                selected = paths[0] if paths else chapters[0]
+                chapters = [entry for entry in indexed if posixpath.splitext(posixpath.basename(entry.path))[0].lower().split(".")[0]
+                    not in _ADMIN_FILES]
+                if paths:
+                    selected = paths[0]
+                else:
+                    selected, reason = self._select_chapter(chapters, must_teach)
+                    if selected is None:
+                        return result("unread", reason)
                 data = self._json(client, prefix + "/contents/" + quote(selected, safe="/"), params=params,
                     deadline=deadline, kind="content", receipts=receipts, budget=budget)
                 payloads.append(data)
@@ -197,7 +257,8 @@ class GitHubTeachingBody(GitHubResourceIndex):
             chunk["text"] = chapter_text
             return result("succeeded", resource_id=resource_id, url=chapter_url, version=version, chunks=[chunk])
         except GitHubFailure as exc:
-            return result("unknown" if exc.unknown else "failed", "body_read_unknown" if exc.unknown else exc.reason)
+            return result("unknown" if exc.unknown else "unread" if exc.unread else "failed",
+                "body_read_unknown" if exc.unknown else exc.reason)
         except (ValueError, UnicodeError, TypeError, AttributeError, binascii.Error):
             return result("failed", "invalid_body_payload")
         except (httpx.HTTPError, OSError):

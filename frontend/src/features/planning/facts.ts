@@ -17,7 +17,30 @@ export const fact = (value: unknown): Fact => value && typeof value === 'object'
 export const facts = (value: unknown): Fact[] => Array.isArray(value) ? value.map(fact) : [];
 export const text = (value: unknown): string => typeof value === 'string' ? value : '';
 export const lines = (value: unknown): string[] => Array.isArray(value) ? value.map(item => typeof item === 'string' ? item : text(fact(item).text)).filter(Boolean) : [];
-export const resourceTitle = (value: unknown) => { const title = text(value); return !title || /^(resource|material)_[a-f0-9]{32,}$/i.test(title) ? '指定学习教材' : title; };
+export const resourceTitle = (value: unknown, urlValue?: unknown) => {
+    const title = text(value);
+    if (title && !/^(?:(?:resource|material)_)?[a-f0-9]{32,}$/i.test(title)) return title;
+    try {
+        const url = new URL(text(urlValue));
+        const path = url.pathname.split('/').filter(Boolean);
+        if (url.protocol === 'https:' && url.hostname === 'github.com' && path.length >= 2) {
+            return path.slice(0, 2).join('/') + (path[2] === 'blob' && path.length > 4 ? ' · ' + path.slice(4).join('/') : '');
+        }
+    } catch { /* No inferred material title without a saved source URL. */ }
+    return '指定学习教材';
+};
+export function constraintStatus(assessment: Fact): string {
+    if (text(assessment.planning_status) || text(assessment.runtime_status)) {
+        const planning = assessment.planning_status === 'arranged' ? '学习要求已安排' : assessment.planning_status === 'pending' ? '学习要求仍待安排' : '学习安排以保存的状态为准';
+        const runtime = assessment.runtime_status === 'unverified' ? '实际运行尚未验证' : '实际运行以保存的验证状态为准';
+        return `${planning}；${runtime}`;
+    }
+    return assessment.status === 'satisfied' ? '已有符合限制的依据' : assessment.status === 'unresolved' ? '仍需核实' : '以服务端核实状态为准';
+}
+export function unresolvedOutcomes(content: Fact): { title: string; reason: string }[] {
+    const titles = new Map(facts(fact(content.capabilities).capabilities).flatMap(cap => facts(cap.learning_outcomes).map(outcome => [text(outcome.outcome_id), text(outcome.text)] as const)));
+    return facts(content.unresolved).map(item => ({title: titles.get(text(item.outcome_ref)) || '待补齐学习目标', reason: item.reason === 'source_unavailable' ? '学习资料尚未齐全' : text(item.reason)}));
+}
 export const safeUrl = (value: unknown) => { try {
     const url = new URL(text(value));
     return ['https:', 'http:'].includes(url.protocol) ? url.href : undefined;

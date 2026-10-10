@@ -211,7 +211,7 @@ def test_invalid_chapter_payload_is_known_failure_and_never_leaks_body(changes):
 @pytest.mark.parametrize("raw", [b"\xffsecret", b"nul\x00secret", b"x" * 16385, b""], ids=["invalid-utf8", "nul", "oversized", "empty"])
 def test_invalid_utf8_nul_empty_or_oversized_text_known_failure(raw):
     body = make_adapter(lambda req: standard_response(req, text=raw)).read(candidate())
-    assert body.status == "failed" and body.requests == 2 and body.chunks == []
+    assert body.status == ("unread" if len(raw) > 16384 else "failed") and body.requests == 2 and body.chunks == []
     assert "secret" not in repr(body)
 
 

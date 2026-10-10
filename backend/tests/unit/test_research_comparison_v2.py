@@ -110,7 +110,8 @@ def test_joint_review_reuses_same_depth_and_never_shallow_for_deep():
     shallow = reader.calls[0]["payload"]
     assert shallow["learner_context"]["desired_depth"] == "foundation"
     assert not any(o["outcome_id"].startswith("tool.calling") for o in shallow["must_teach"])
-    assert reader.calls[2]["payload"]["learner_context"]["desired_depth"] == "deep"
+    # Required scopes get a first coverage attempt before either comparison.
+    assert reader.calls[1]["payload"]["learner_context"]["desired_depth"] == "deep"
     assert all(e.status == "resolved" for e in result.entries)
     restored = ResearchSession.restore(session.snapshot())
     assert set(restored.inspected) == set(session.inspected)

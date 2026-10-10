@@ -267,6 +267,51 @@ class UnavailableResult:
         )
 
 
+@dataclass(frozen=True, slots=True, kw_only=True)
+class SourceSearchUnavailable(UnavailableResult):
+    """Source-observed failure and metering, compatible with legacy consumers.
+
+    A known HTTP response is different from a lost reply. Callers consume these
+    facts directly; the human-readable reason is never a dispatch classifier.
+    """
+
+    status: str
+    requests: int
+    bytes_read: int
+    receipts: tuple[dict, ...]
+    stop_required: bool
+
+    def __post_init__(self):
+        if (type(self.status) is not str or self.status not in {"failed", "not_dispatched", "unknown"}
+            or type(self.requests) is not int or self.requests < 0
+            or type(self.bytes_read) is not int or self.bytes_read < 0
+            or type(self.stop_required) is not bool or type(self.receipts) is not tuple
+            or not isinstance(self.reason, str) or not self.reason):
+            raise ValueError("Invalid source search facts")
+        allowed = {"succeeded", "failed", "not_dispatched", "reconciliation_required", "unknown"}
+        for receipt in self.receipts:
+            if (type(receipt) is not dict or type(receipt.get("status")) is not str or receipt["status"] not in allowed
+                or type(receipt.get("bytes")) is not int or receipt["bytes"] < 0
+                or (receipt["status"] == "not_dispatched" and receipt["bytes"] != 0)):
+                raise ValueError("Invalid source search receipt")
+            http_status = receipt.get("http_status")
+            if http_status is not None and (type(http_status) is not int or not 100 <= http_status <= 599):
+                raise ValueError("Invalid source HTTP status")
+            if http_status is not None and (300 <= http_status < 400 or http_status in {401, 403, 429}) and not self.stop_required:
+                raise ValueError("Source safety or quota refusal must stop")
+        if (self.requests != sum(r["status"] != "not_dispatched" for r in self.receipts)
+            or self.bytes_read != sum(r["bytes"] for r in self.receipts)
+            or (self.status == "not_dispatched" and self.requests != 0)
+            or (self.status == "unknown" and (self.requests == 0 or not self.stop_required
+                or not any(r["status"] in {"unknown", "reconciliation_required"} for r in self.receipts)))
+            or (self.status != "unknown" and any(r["status"] in {"unknown", "reconciliation_required"}
+                for r in self.receipts))):
+            raise ValueError("Inconsistent source search metering")
+        # Own the observed metadata so a transport's retained dict cannot alter
+        # the evidence after this result has been returned.
+        object.__setattr__(self, "receipts", tuple(dict(r) for r in self.receipts))
+
+
 def _require_text(value: str, field: str, *, max_len: int) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ValidationAppError(f"{field}不能为空")
@@ -280,6 +325,7 @@ __all__ = [
     "PreferenceOverride",
     "ResourcePreference",
     "ResourceRecord",
+    "SourceSearchUnavailable",
     "UnavailableResult",
     "rank_resources",
     "require_safe_url",

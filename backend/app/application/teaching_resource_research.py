@@ -34,7 +34,12 @@ from app.domain.planning.resource_research import (
     reject,
     research_input_hash,
 )
-from app.domain.resources.models import ResourcePreference, ResourceRecord, UnavailableResult
+from app.domain.resources.models import (
+    ResourcePreference,
+    ResourceRecord,
+    SourceSearchUnavailable,
+    UnavailableResult,
+)
 from app.domain.workspace.models import AuthContext
 from app.ports.llm import LLMFailure, LLMNotDispatchedError, LLMResult
 from app.ports.resource_index import ResourceQuery
@@ -116,12 +121,34 @@ class ResourceResearcher:
             reject("research_input")
         if session.completed is not None:
             return session.completed
-        entries = []
+        entries = {}
         v2 = session.rules_version == RESEARCH_COMPARISON_V2
         constraints_allowed, external_allowed = research_permissions(profile.hard_constraints)
-        work = sorted(requirements, key=lambda r: (r.importance != "required", r.capability_id)) if v2 else requirements
-        for requirement in work:
-            resources, reasons = [], []
+        essential = {c.capability_id for c in plan.learning_capabilities
+                     if c.learning_requirement == "required" or c.learning_target_refs}
+        # A recommended prerequisite of an essential capability still needs a
+        # coverage attempt. This scheduling fact never changes its importance.
+        while True:
+            expanded = essential | {p for c in plan.learning_capabilities if c.capability_id in essential
+                                    for p in c.prerequisite_refs}
+            if expanded == essential:
+                break
+            essential = expanded
+        required_work = sorted((r for r in requirements if r.capability_id in essential), key=lambda r: r.capability_id)
+        elective_work = sorted((r for r in requirements if r.capability_id not in essential), key=lambda r: r.capability_id)
+        # One new candidate per essential scope first; only then spend on
+        # remaining coverage/comparison. Keep discovered batches in-memory so
+        # the second visit cannot re-search or re-dispatch a prior candidate.
+        work = list(required_work or elective_work) if v2 else requirements
+        visited, discovered = set(), {}
+        for work_position, requirement in enumerate(work):
+            previous_entry = entries.get(requirement.capability_id)
+            resources = list(previous_entry.resources) if previous_entry else []
+            reasons = [r for r in previous_entry.comparison_reasons if r not in
+                       {"single_candidate_only", "comparison_unavailable", "finite_scope_only"}] if previous_entry else []
+            first_turn = v2 and requirement.capability_id in essential and requirement.capability_id not in visited
+            visited.add(requirement.capability_id)
+            turn_yielded = False
             comparison_complete = True
             if not constraints_allowed:
                 reasons.append("constraints_pending")
@@ -141,53 +168,64 @@ class ResourceResearcher:
                             if refs:
                                 resources.append(replace(resource, evidence=refs))
                     resources = self._merge_resources(resources)
-                    if not self._remaining(requirement, resources):
-                        # Reuse exact reviewed evidence without another search or
-                        # Reader. A single retained source is not a comparison.
-                        comparison_complete = len(resources) > 1
-                for index in (self.github, self.web):
+                for provider_position, index in enumerate((self.github, self.web)):
                     remaining = self._remaining(requirement, resources)
                     if (not remaining and (not v2 or resources and all(r.qualification == "public_reviewed" for r in resources)
-                            or v2 and resources and not reasons)) or session.blocked:
+                            or v2 and len(resources) >= 2)) or session.blocked:
                         break
                     if not external_allowed:
                         reasons.append("network_forbidden")
                         break
                     if index is None:
                         continue
-                    reservation = session.reserve("search", searches=1, total_requests=1,
-                                                  cost_micros=session.budget.search_cost_micros)
-                    if reservation is None:
-                        reasons.append("budget_exhausted" if not session.blocked else "research_stopped")
-                        break
                     # Only Policy/approved public definitions go to discovery,
                     # never Profile/project context/starting point/claims/limits.
                     query = ResourceQuery(scope, tuple(o.outcome_id for o in (requirement.must_teach if v2 else remaining)),
                         ResourcePreference(PreferenceScope.PROJECT, project_id), limit=5,
                         extra={"project_id": project_id, "query": "tutorial guide examples " + " ".join(o.text for o in (requirement.must_teach if v2 else remaining))})
-                    try:
-                        candidates = index.find(query)
-                    except Exception:
-                        session.mark_unknown()
-                        reasons.append("research_unknown")
-                        break
-                    if isinstance(candidates, UnavailableResult):
-                        # Legacy search port has no typed dispatch/usage status.
-                        # Do not infer it from provider text. Retain reservation
-                        # and stop conservatively for later reconciliation.
-                        session.mark_unknown()
-                        reasons.append("search_unclassified")
-                        break
-                    session.settle(reservation, total_requests=1, searches=1)
+                    batch_key = (requirement.capability_id, provider_position)
+                    if batch_key in discovered:
+                        candidates = discovered[batch_key]
+                    else:
+                        reservation = session.reserve("search", searches=1, total_requests=1,
+                                                      cost_micros=session.budget.search_cost_micros)
+                        if reservation is None:
+                            reasons.append("budget_exhausted" if not session.blocked else "research_stopped")
+                            break
+                        try:
+                            candidates = index.find(query)
+                        except Exception:
+                            session.mark_unknown()
+                            reasons.append("research_unknown")
+                            break
+                        if type(candidates) is SourceSearchUnavailable:
+                            if candidates.status == "unknown":
+                                session.mark_unknown()
+                                reasons.append("search_unknown")
+                                break
+                            session.settle(reservation, total_requests=candidates.requests, searches=candidates.requests)
+                            reasons.append("search_failed" if candidates.status == "failed" else "search_not_dispatched")
+                            if candidates.stop_required:
+                                session.blocked = True
+                                break
+                            candidates = []
+                        elif isinstance(candidates, UnavailableResult):
+                            session.mark_unknown()
+                            reasons.append("search_unclassified")
+                            break
+                        else:
+                            session.settle(reservation, total_requests=1, searches=1)
+                        discovered[batch_key] = candidates
                     if type(candidates) is not list or len(candidates) > 5 or any(type(c) is not ResourceRecord for c in candidates):
                         reasons.append("candidate_invalid")
                         continue
                     for candidate in sorted(candidates, key=lambda c: c.language != "zh"):
                         if candidate.project_id != project_id:
                             reasons.append("candidate_invalid")
-                            continue
+                            session.blocked = True
+                            break
                         remaining = self._remaining(requirement, resources)
-                        if (not remaining and not v2) or session.blocked:
+                        if (not remaining and (not v2 or len(resources) >= 2)) or session.blocked:
                             comparison_complete = not session.blocked
                             break
                         scope_outcomes = self._review_scope(requirement, remaining, plan, session, missing_outcomes) if v2 else remaining
@@ -201,6 +239,8 @@ class ResourceResearcher:
                                     filtered = replace(resource, evidence=refs)
                                     if filtered not in resources:
                                         resources.append(filtered)
+                            if v2:
+                                resources = self._merge_resources(resources)
                             continue
                         if v2:
                             reviewed = set(session.inspected_scopes.get(cache_key, ()))
@@ -225,8 +265,11 @@ class ResourceResearcher:
                         if v2:
                             session.inspected_scopes[cache_key] = tuple(sorted(set(session.inspected_scopes.get(cache_key, ())) |
                                 {o.outcome_id for o in scope_outcomes}))
-                    if v2 and resources:
-                        break  # finite discovered batch, never claim global optimality
+                        if first_turn:
+                            turn_yielded = True
+                            break
+                    if turn_yielded or v2 and not self._remaining(requirement, resources):
+                        break  # partial evidence never suppresses later providers
             missing = self._remaining(requirement, resources)
             if missing and not reasons:
                 reasons.append("no_suitable_free_resource")
@@ -234,15 +277,19 @@ class ResourceResearcher:
             if v2 and (len(resources) < 2 or any(not r.quality_evidence for r in resources)):
                 comparison_complete = False
                 reasons.append("single_candidate_only" if len(resources) == 1 else "comparison_unavailable")
-            entries.append(ResearchEntry(requirement, status,
+            entries[requirement.capability_id] = ResearchEntry(requirement, status,
                 tuple(sorted(resources, key=lambda r: (r.resource_id, r.version))), missing,
                 tuple(sorted(set(reasons))) if missing else (),
                 "sufficient" if v2 and comparison_complete and resources and not missing and not self._incomparable(resources) else "insufficient" if v2 else "legacy",
                 self._comparison_order(resources) if v2 else (),
                 tuple(sorted(set(reasons) | {"finite_scope_only"} |
-                    ({"quality_incomparable"} if self._incomparable(resources) else set()))) if v2 else ()))
+                    ({"quality_incomparable"} if self._incomparable(resources) else set()))) if v2 else ())
+            if v2 and required_work and work_position == len(required_work) - 1:
+                work.extend(sorted(required_work, key=lambda r:
+                    (not entries[r.capability_id].unresolved_outcomes, r.capability_id)))
+                work.extend(elective_work)
         result = ResourceResearchResult(gap_set.result_hash, plan.plan_hash, coverage.result_hash, profile.profile_hash,
-            tuple(entries), checked_at, tuple(sorted(session.usage.items())), session.rules_version)
+            tuple(entries.values()), checked_at, tuple(sorted(session.usage.items())), session.rules_version)
         session.completed = result
         return result
 
@@ -293,25 +340,33 @@ class ResourceResearcher:
         return candidate.url + "#review:" + content_hash(candidate.discovery) + "#depth:" + desired_depth
 
     @staticmethod
+    def _comparison_relation(a, b):
+        """Joint evidence/quality relation; no scalar score or hidden weighting."""
+        dimensions = ("continuity", "beginner_fit", "examples", "version_fit")
+        aq, bq = ({q.dimension: q.category for q in r.quality_evidence} for r in (a, b))
+        if any(q.get(d) not in {"adequate", "strong"} for q in (aq, bq) for d in dimensions):
+            return "incomparable"
+        ac, bc = ({ref.outcome_id for ref in r.evidence} for r in (a, b))
+        av, bv = (tuple(q[d] == "strong" for d in dimensions) for q in (aq, bq))
+        if ac == bc and av == bv:
+            return "equal"
+        if ac >= bc and all(x >= y for x, y in zip(av, bv, strict=True)):
+            return "better"
+        if bc >= ac and all(y >= x for x, y in zip(av, bv, strict=True)):
+            return "worse"
+        return "incomparable"
+
+    @staticmethod
     def _comparison_order(resources):
         # Stable finite preference: evidence coverage, multidimensional quality,
         # then Chinese only when coverage and every quality dimension tie.
         dimensions = ("continuity", "beginner_fit", "examples", "version_fit")
         def quality(resource):
             return tuple(dict((q.dimension, q.category) for q in resource.quality_evidence).get(d) for d in dimensions)
-        def dominates(a, b):
-            a_coverage = {ref.outcome_id for ref in a.evidence}
-            b_coverage = {ref.outcome_id for ref in b.evidence}
-            if a_coverage > b_coverage:
-                return True
-            if a_coverage != b_coverage:
-                return False
-            aq, bq = quality(a), quality(b)
-            return (None not in aq + bq and all(x == "strong" or y != "strong" for x, y in zip(aq, bq, strict=True))
-                and any(x == "strong" and y != "strong" for x, y in zip(aq, bq, strict=True)))
         pending, ordered = list(resources), []
         while pending:
-            front = [r for r in pending if not any(dominates(other, r) for other in pending)]
+            front = [r for r in pending if not any(ResourceResearcher._comparison_relation(other, r) == "better"
+                                                 for other in pending)]
             # Language can break only genuinely comparable equal-quality ties.
             front.sort(key=lambda r: r.resource_id)
             for profile in dict.fromkeys((tuple(sorted({ref.outcome_id for ref in r.evidence})), quality(r)) for r in front):
@@ -324,10 +379,8 @@ class ResourceResearcher:
 
     @staticmethod
     def _incomparable(resources):
-        qualities = [{q.dimension: q.category for q in r.quality_evidence} for r in resources]
-        return any(any(a.get(d) == "strong" and b.get(d) != "strong" for d in a)
-            and any(b.get(d) == "strong" and a.get(d) != "strong" for d in b)
-            for a in qualities for b in qualities)
+        return any(ResourceResearcher._comparison_relation(a, b) == "incomparable"
+                   for i, a in enumerate(resources) for b in resources[i + 1:])
 
     @staticmethod
     def _remaining(requirement, resources):
@@ -392,7 +445,10 @@ class ResourceResearcher:
         body, payload = None, None
         try:
             try:
-                body = self.body_reader.read(candidate, max_bytes=65536, timeout_seconds=15)
+                options = {"max_bytes": 65536, "timeout_seconds": 15}
+                if session.rules_version == RESEARCH_COMPARISON_V2 and getattr(self.body_reader, "supports_outcome_selection", False):
+                    options["must_teach"] = tuple(o.text for o in remaining)
+                body = self.body_reader.read(candidate, **options)
             except Exception:
                 session.mark_unknown()
                 return (), ("research_unknown",)
@@ -413,6 +469,7 @@ class ResourceResearcher:
             if body.status != "succeeded":
                 return (), ("body_unread",)
             if not self._body_binding(body, candidate):
+                session.blocked = True
                 return (), ("body_binding_invalid",)
             payload = {"must_teach": [asdict(o) for o in remaining], "chunks": body.chunks,
                 "learner_context": {"accepted_known": sorted(c.capability_id for c in plan.accepted_known_capabilities
@@ -428,6 +485,7 @@ class ResourceResearcher:
                     c.capability_id for c in plan.accepted_known_capabilities)
             if not validate_reader_input(payload, schema, domain_approvals=self._domain_approvals,
                                          allow_fixture_domains=self._allow_fixture_domains):
+                session.blocked = True
                 return (), ("body_binding_invalid",)
             reader_reservation = session.reserve("reader", total_requests=1, reader_requests=1,
                 output_tokens=READER_OUTPUT_CAP, cost_micros=session.budget.reader_cost_micros)

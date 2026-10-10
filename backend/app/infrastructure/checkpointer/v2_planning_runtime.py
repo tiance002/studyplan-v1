@@ -27,7 +27,7 @@ from app.domain.planning.resource_research import (
     research_input_hash,
 )
 from app.domain.planning.v2_execution import _decode
-from app.domain.resources.models import ResourceRecord, UnavailableResult
+from app.domain.resources.models import ResourceRecord, SourceSearchUnavailable, UnavailableResult
 from app.infrastructure.providers.v2_attempts import (
     V2RecoveryBlocked,
     wire,
@@ -52,6 +52,16 @@ class DurableIndex:
         }
 
         def encode(result):
+            if type(result) is SourceSearchUnavailable:
+                # Source-observed dispatch facts, never reason-text guessing.
+                from dataclasses import replace
+
+                replace(result)  # Revalidate retained mutable receipt dicts.
+                measured = {"searches": result.requests, "total_requests": result.requests}
+                if result.status == "unknown":
+                    return {"kind": "failure", "value": asdict(LLMFailure(
+                        "search_unknown", "Search requires reconciliation", dispatch_unknown=True))}, measured
+                return {"kind": "search_status", "value": asdict(result)}, measured
             if (
                 isinstance(result, UnavailableResult)
                 or type(result) is not list
@@ -71,7 +81,6 @@ class DurableIndex:
                 # Retain discovery metadata, never a provider excerpt/body.
                 row = wire(asdict(r))
                 row["source_note"] = ""
-                row["title"] = "Resource candidate"
                 row["discovery"] = {
                     "source": r.discovery.get("source", "github"),
                     "repo": r.discovery.get("repo", {}),
@@ -94,6 +103,11 @@ class DurableIndex:
         )
         if d["kind"] == "failure":
             return UnavailableResult("V2 search requires reconciliation")
+        if d["kind"] == "search_status":
+            value = dict(d["value"])
+            value["suggestions"] = tuple(value["suggestions"])
+            value["receipts"] = tuple(value["receipts"])
+            return SourceSearchUnavailable(**value)
         values = []
         for row in d["value"]:
             row = dict(row)
@@ -170,9 +184,19 @@ class DurableIndex:
 class DurableBody:
     def __init__(self, ledger, reader):
         self.ledger, self.reader = ledger, reader
+        self.supports_outcome_selection = (ledger.manifest.get("product_semantics") == "planning-v2-product-v2"
+                                          and getattr(reader, "supports_outcome_selection", False))
 
     def read(self, candidate, **kwargs):
         live = []
+        identity_options = dict(kwargs)
+        if "must_teach" in identity_options:
+            # Product-v2 already freezes the complete exact outcome scope in
+            # this receipt identity. Preserve historical body-only identities.
+            if (not self.supports_outcome_selection or tuple(identity_options["must_teach"]) !=
+                    tuple(o["text"] for o in self.ledger.current_review_scope)):
+                raise V2RecoveryBlocked("Body selection differs from frozen review scope")
+            del identity_options["must_teach"]
 
         def invoke(ident):
             value = self.reader.read(candidate, **kwargs)
@@ -193,7 +217,7 @@ class DurableBody:
                     ),
                 }, measured
             if (
-                body.status not in {"succeeded", "failed"}
+                body.status not in {"succeeded", "failed", "unread"}
                 or type(body.requests) is not int
                 or type(body.bytes_read) is not int
                 or body.requests < 0
@@ -237,6 +261,10 @@ class DurableBody:
                     "url": body.url if body.status == "succeeded" else "",
                     "version": body.version if body.status == "succeeded" else "",
                     "status": body.status,
+                    "requests": body.requests,
+                    "bytes_read": body.bytes_read,
+                    "reason": body.reason if body.reason and len(body.reason) <= 160
+                        and all(c in "abcdefghijklmnopqrstuvwxyz0123456789_" for c in body.reason) else "body_unread",
                     "chunks": [
                         {k: c[k] for k in ("chunk_id", "resource_id", "version", "content_hash", "location")}
                         for c in body.chunks
@@ -251,7 +279,7 @@ class DurableBody:
                 step="teaching-body",
                 purpose="research.body",
                 schema="V2TransientBodyV1",
-                payload={"url": candidate.url, "discovery": candidate.discovery, "options": kwargs,
+                payload={"url": candidate.url, "discovery": candidate.discovery, "options": identity_options,
                          **({"review_scope": self.ledger.current_review_scope,
                              "review_identity": self.ledger.current_review_candidate_hash}
                             if self.ledger.manifest.get("product_semantics") == "planning-v2-product-v2" else {})},
@@ -260,6 +288,12 @@ class DurableBody:
                 encode=encode,
             )
             if not live:
+                if d["kind"] == "body_metadata" and d["value"]["status"] in {"unread", "failed"}:
+                    value = d["value"]
+                    if any(type(value.get(k)) is not int or value[k] < 0 for k in ("requests", "bytes_read")):
+                        raise V2RecoveryBlocked("Historical negative body receipt lacks trustworthy usage")
+                    return TransientBody(value["status"], reason=value.get("reason", ""),
+                                         requests=value["requests"], bytes_read=value["bytes_read"])
                 raise V2RecoveryBlocked(
                     "Body-only receipt has no validated Reader outcome; no body redispatch"
                 )

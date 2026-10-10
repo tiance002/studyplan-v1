@@ -16,7 +16,7 @@ from app.application.resource_discovery_contract import DiscoveryEvidence
 from app.core.errors import ForbiddenError, ValidationAppError
 from app.core.ids import new_id
 from app.domain.enums import MediaType, PreferenceScope, ResourceProvenance, ResourceVerificationStatus
-from app.domain.resources.models import ResourceRecord, UnavailableResult
+from app.domain.resources.models import ResourceRecord, SourceSearchUnavailable, UnavailableResult
 from app.domain.workspace.models import AuthContext
 from app.ports.resource_index import ResourceQuery
 
@@ -92,7 +92,8 @@ class TavilyResourceIndex:
             raise ValidationAppError("检索数量需为正整数")
         limit = min(query.limit, 5)
         if not self._key:
-            return UnavailableResult("tavily_not_configured")
+            return SourceSearchUnavailable(reason="tavily_not_configured", status="not_dispatched",
+                requests=0, bytes_read=0, receipts=(), stop_required=True)
         search_words = words
         if query.preference.scope is not PreferenceScope.SYSTEM:
             search_words += (f"\nPreferred format: {query.preference.mode.value}; "
@@ -103,43 +104,52 @@ class TavilyResourceIndex:
                    "include_raw_content": False, "include_usage": True}
         started = time.monotonic()
         searched_at = datetime.now(timezone.utc).isoformat()
+        receipt = {"status": "reconciliation_required", "bytes": 0}
+
+        def failure(reason, *, known=False, stop=True):
+            receipt["status"] = "failed" if known else "reconciliation_required"
+            return SourceSearchUnavailable(reason=reason, status="failed" if known else "unknown",
+                requests=1, bytes_read=receipt["bytes"], receipts=(receipt,), stop_required=stop)
+
         try:
             with httpx.Client(transport=self._transport, timeout=self._timeout, trust_env=False,
                               follow_redirects=False, verify=True) as client:
                 with client.stream("POST", _ENDPOINT, json=payload,
                                    headers={"Authorization": "Bearer " + self._key,
                                             "Accept-Encoding": "identity"}) as response:
+                    receipt["http_status"] = response.status_code
                     if 300 <= response.status_code < 400:
-                        return UnavailableResult("tavily_redirect_rejected")
-                    if response.status_code == 401:
-                        return UnavailableResult("tavily_unauthorized")
+                        return failure("tavily_redirect_rejected", known=True)
+                    if response.status_code in {401, 403}:
+                        return failure("tavily_unauthorized", known=True)
                     if response.status_code == 429:
-                        return UnavailableResult("tavily_rate_limited")
+                        return failure("tavily_rate_limited", known=True)
                     if response.status_code != 200:
-                        return UnavailableResult("tavily_http_error")
+                        return failure("tavily_http_error", known=True, stop=False)
                     # Identity encoding avoids decoding unbounded compressed data.
                     if response.headers.get("Content-Encoding", "identity").lower() != "identity":
-                        return UnavailableResult(UNKNOWN_SEARCH_REASON)
+                        return failure(UNKNOWN_SEARCH_REASON)
                     declared = response.headers.get("Content-Length", "")
                     if declared.isdecimal() and (len(declared) > 20 or int(declared) > _MAX_BODY):
-                        return UnavailableResult(UNKNOWN_SEARCH_REASON)
+                        return failure(UNKNOWN_SEARCH_REASON)
                     body = bytearray()
                     for chunk in response.iter_raw():
+                        receipt["bytes"] += len(chunk)
                         if time.monotonic() - started > self._timeout:
-                            return UnavailableResult(UNKNOWN_SEARCH_REASON)
+                            return failure(UNKNOWN_SEARCH_REASON)
                         if len(body) + len(chunk) > _MAX_BODY:
-                            return UnavailableResult(UNKNOWN_SEARCH_REASON)
+                            return failure(UNKNOWN_SEARCH_REASON)
                         body.extend(chunk)
         except httpx.TimeoutException:
-            return UnavailableResult(UNKNOWN_SEARCH_REASON)
+            return failure(UNKNOWN_SEARCH_REASON)
         except httpx.HTTPError:
-            return UnavailableResult(UNKNOWN_SEARCH_REASON)
+            return failure(UNKNOWN_SEARCH_REASON)
         try:
             decoded = json.loads(body)
         except (ValueError, UnicodeError, RecursionError):
-            return UnavailableResult(UNKNOWN_SEARCH_REASON)
+            return failure(UNKNOWN_SEARCH_REASON, known=True)
         if not isinstance(decoded, dict) or not isinstance(decoded.get("results"), list):
-            return UnavailableResult(UNKNOWN_SEARCH_REASON)
+            return failure(UNKNOWN_SEARCH_REASON, known=True)
         candidates: list[ResourceRecord] = []
         seen: set[str] = set()
         for provider_rank, item in enumerate(decoded["results"], 1):
@@ -173,4 +183,4 @@ class TavilyResourceIndex:
             ))
             if len(candidates) == limit:
                 break
-        return candidates if candidates else UnavailableResult("tavily_no_safe_results")
+        return candidates
