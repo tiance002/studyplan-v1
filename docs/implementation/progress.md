@@ -1,3 +1,13 @@
+## 2026-10-10 R01–R05真实课程验收前集中修复：离线PASS，外部0，STOP
+
+Start HEAD `7a6f9d0c9db80adc75412d557b5b3be6aef0a5cf`；分支 `feat/n1-resource-discovery`，tracked clean，原 `.workbuddy/`、`design-preview/` 未操作。仅依据附件局部反例修复中文Policy短章节发现、章级scope/不可读路径推进、>6 outcomes分批、最终合法证据聚合、正文主动拒绝和真实unknown区分、W5 finish类型审计。未改变Policy、课程规则、上位架构、hash算法或预算。新owned manifest显式冻结 `research_chapter_v3` / `V2TransientBodyV2`，Reader wire仍V2；旧v2/legacy身份/编码/completed结果及unknown保护保持。新snapshot只存章/source/version/hash/outcome范围及unread路径事实，无正文；同URL不授予新覆盖。
+
+定向验证最终：研究/旧版本/manifest/prepare/durable seams七模块124PASS；正文/W5组合31PASS，最终外部分类13PASS（组间有重叠，不相加）；新ownedPG章级negative/unread两例2PASS、R05native/global结算1PASS，回放外部增量0；公开generate503与存储0访问1PASS；统一Ruff/diff PASS。独立xhigh源码复核PASS，16文件hash0差异；实际模型解析NOT OBSERVABLE。保留实际RED及中间环境/fixture失败，关闭超额unknown/计量前抛异常/selected-unread整仓库耗尽三处审查finding；没有放宽Validator追绿。额外核对任务中段所保存2565个既有证据/账本/配置hash，结束0变化。
+
+实现本地checkpoint `7622b020599c6b7e220f57cd7b04e20067ca8f99`，报告 [STUDYPLAN_R01_R05_CONCENTRATED_FIX](../planning-v2/STUDYPLAN_R01_R05_CONCENTRATED_FIX.md)，原始证据ignored `var/r01-r05-fix/`。真实DeepSeek/Tavily/GitHub/Reader/正文/price/balance0，正式库/历史Run/Receipt/账本/失败身份未改；无migration/前端/push/merge/deploy，公开入口保持503。真实教材资格、模型教学质量、Curriculum完整产品及浏览器验收NOT RUN；新收费验收仍须Owner新授权。
+
+`R01_R05_CONCENTRATED_OFFLINE_PASS` / `REAL_RESOURCE_CURRICULUM_ACCEPTANCE_NOT_RUN` / `STOP`
+
 ## 2026-10-10 Item 2 Capability 单一权威输出修复：离线PASS，真实复测未运行，STOP
 
 任务 `STUDYPLAN_CAPABILITY_SINGLE_AUTHORITY_FIX_V1`。Start HEAD `0fd5123e5e780b7c5d1e37ceaf39911e18350b64`，分支 `feat/n1-resource-discovery`。第193次原始响应及对应Profile只读重建后，Profile hash `71ffa724242a6ceea352eb701671ee361ad692c7325926fe2f14f3158b5203e6` 与响应匹配；原CapabilityPlanValidator仍准确拒绝 `claim_binding`：Python claim→`python.core`，但能力数组缺少accepted_known行。历史响应SHA `cff138e9601d96576648b9e85f2c6a58843c4f9eba52c131136fd5d52f8ed5d9` 未改。
