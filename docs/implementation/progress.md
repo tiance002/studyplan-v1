@@ -1,3 +1,15 @@
+## 2026-10-10 Item 2 Capability 单一权威输出修复：离线PASS，真实复测未运行，STOP
+
+任务 `STUDYPLAN_CAPABILITY_SINGLE_AUTHORITY_FIX_V1`。Start HEAD `0fd5123e5e780b7c5d1e37ceaf39911e18350b64`，分支 `feat/n1-resource-discovery`。第193次原始响应及对应Profile只读重建后，Profile hash `71ffa724242a6ceea352eb701671ee361ad692c7325926fe2f14f3158b5203e6` 与响应匹配；原CapabilityPlanValidator仍准确拒绝 `claim_binding`：Python claim→`python.core`，但能力数组缺少accepted_known行。历史响应SHA `cff138e9601d96576648b9e85f2c6a58843c4f9eba52c131136fd5d52f8ed5d9` 未改。
+
+新增明确版本化 `CapabilityDecisionV2`/`capability-decision-v2` wire；manifest仅对新的owned V2 acceptance显式冻结此标记，旧 `planning-v2-product-v2` manifest继续使用 `CapabilityPlanV1`。单一 `claim_decisions` 由服务端按冻结Policy规范化为既有标准CapabilityPlan，title/outcomes/policy refs/prerequisites仍由Policy确定；没有自动增加漏选能力或补造project usage/requirement refs。Python accepted_known在真实第193 Profile的合成离线规范化→Coverage/Gap中未进入学习缺口。错语义映射仍需独立Stage Review。
+
+验证：14项新unit PASS；受影响Item2/Provider/Policy/manifest/Scenario A/owned gate 11模块定向pytest含新owned PG，exit0；PG Mock真实Provider序列化、attempt/Receipt、同identity重放零重复HTTP、冷恢复及旧manifest拒载PASS；Ruff/`git diff --check` PASS。默认pytest temp目录初次运行受沙箱临时目录权限影响，改用仓库`var/` basetemp复跑PASS。独立审查无blocking finding，并做10项 malformed boundary probes；真实Provider质量、Reviewer语义和端到端产品验收NOT RUN，实际开发模型解析NOT OBSERVABLE。
+
+本地实现提交 `b311eb8f35ef0bc96c6e21c2cc123aa8cf28a6d7`（11个源/测试文件），报告 `docs/planning-v2/STUDYPLAN_CAPABILITY_SINGLE_AUTHORITY_FIX.md`。本轮真实模型/搜索/Reader/正文/价格/余额请求0；未改历史Receipt/Run/账本、正式数据库、架构合同、Policy、Schema/Validator或公共生成入口；没有migration、push、merge、deploy。原有 `.workbuddy/`、`design-preview/` 和未跟踪验收报告保留未提交。
+
+`CAPABILITY_SINGLE_AUTHORITY_OFFLINE_PASS` / `REAL_RESOURCE_CURRICULUM_ACCEPTANCE_NOT_RUN` / `STOP`
+
 ## 2026-10-10 W5响应共享受限解码与用量审计：离线PASS，外部0，STOP
 
 STUDYPLAN_W5_RESPONSE_DECODING_FIX_V1；Start f07f6f6b1616eb5bd88806c5f41cba1b713bd375，feat/n1-resource-discovery。仅owned W5外部helper/2测试文件/报告/progress。按Content-Encoding一次受限解码，Provider与audit共享decoded bytes、移除编码头避免双解压，wire/decoded均524288bytes及请求hash绑定；gzip/deflate/raw-deflate/zstd单完整帧支持，unsupported/损坏/截断/超限known failed，transport loss仍unknown/reconciliation，usage/model/finish严格交叉校验。独审发现zstd空帧提前return绕过完整性，明确拒绝并补4反例；Reader完整响应与正文不落盘，敏感回显拒绝。新40用例与既有37唯一unit全部取得PASS证据（64合并PASS后边界矩阵39PASS1错误断言FAIL、修正分类定向3PASS）；新owned PG2PASS，首轮identity断言2FAIL及库保留；Ruff/diff PASS。真实190/191原字节opt-in Mock重放/原Analyzer+Planner+Validator PASS，仅OFFLINE_REPLAY_FIXTURE_PASS，无新真实Run，不升级191历史failed/usage=null/Receipt/STOP。533历史文件SHA0差异，global模型191/search6/旧unknown177183/.env保持。真实模型/搜索/Reader/正文/metadata全部0，正式库/前端/Policy/Prompt/hash/预算/迁移未改，公开503保护复用；未重跑374/283/全量UI。后续新acceptance仍需独立Owner授权、重新冻结当前helper及新preflight，不复用失败Run或旧授权。报告docs/planning-v2/STUDYPLAN_W5_RESPONSE_DECODING_FIX.md。W5_RESPONSE_DECODING_OFFLINE_PASS / REAL_RESOURCE_CURRICULUM_ACCEPTANCE_NOT_RUN / STOP。
