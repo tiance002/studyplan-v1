@@ -1,3 +1,9 @@
+## 2026-10-10 当前 HEAD Scenario A 真实课程连续验收：Goal PASS / Capability 程序 FAIL，STOP
+
+新 Acceptance `scenario-a-3c9a3e1ad0094b5dbdac39bee0d84df8`，起止 HEAD `8131326403372bd2129085a95d4159e3929b1bc1`，分支 `feat/n1-resource-discovery`。完整 SourceFacts 冷进程恢复、manifest 来源绑定、2次官方价格/余额预检与独立价格审查均PASS；没有源码差异。新owned Run `run_50aad9f56ce642489bbcafeb03ed9839`。真实 Goal Analysis #194 HTTP200/stop，1239/319 tokens，Profile hash `2ea320907983106c1f79270b4ecd574c4c1b7c623e03624b6a39bf3345548193`，Validator与独立语义审查PASS；同一 Run 通过审查后续接。真实 Capability #195 HTTP200/stop，3694/1798 tokens，真实响应被原 Validator 以 `constraint_effect` 拒绝：保留现有 CLI/JSON、工具本地授权范围两条都输出 `exclusion=not_applicable` 却带非空 capability_id，违反严格合同。独立复核程序FAIL、语义AMBIGUOUS；部分能力选择合理，但硬约束未闭合且 `needs_verification` 无依据。Run以 `capability_plan_invalid` failed 终止，无 Capability review checkpoint；不修改原输出、不repair、不retry、不续接。
+
+本批产品模型2/9，输入4933、输出2117、估算CNY0.026802（非现金硬上限）；官方GET2/2，搜索/正文/HTTP正文/Reader均0。历史ledger195，unknown177/183不变；搜索仍6/1000。Coverage/Gap/Research/Reader/Curriculum/Compiler/Draft/API/React均NOT RUN；正式库、历史Run/Receipt/账本、Policy、Validator、Prompt及公开生成未改。子代理实际model/effort解析NOT OBSERVABLE；后续不使用6.1 Sol xhigh。详见[当前HEAD连续验收报告](../planning-v2/STUDYPLAN_SCENARIO_A_REAL_CURRICULUM_ACCEPTANCE_CURRENT_HEAD.md)。`SCENARIO_A_CAPABILITY_PROGRAM_FAIL_STOPPED` / `CAPABILITY_SEMANTIC_AMBIGUOUS` / `REAL_CURRICULUM_ACCEPTANCE_NOT_COMPLETE` / `OWNED_PRODUCT_E2E_NOT_RUN` / `STOP`。
+
 ## 2026-10-10 R01–R05真实课程验收前集中修复：离线PASS，外部0，STOP
 
 Start HEAD `7a6f9d0c9db80adc75412d557b5b3be6aef0a5cf`；分支 `feat/n1-resource-discovery`，tracked clean，原 `.workbuddy/`、`design-preview/` 未操作。仅依据附件局部反例修复中文Policy短章节发现、章级scope/不可读路径推进、>6 outcomes分批、最终合法证据聚合、正文主动拒绝和真实unknown区分、W5 finish类型审计。未改变Policy、课程规则、上位架构、hash算法或预算。新owned manifest显式冻结 `research_chapter_v3` / `V2TransientBodyV2`，Reader wire仍V2；旧v2/legacy身份/编码/completed结果及unknown保护保持。新snapshot只存章/source/version/hash/outcome范围及unread路径事实，无正文；同URL不授予新覆盖。
