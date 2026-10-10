@@ -68,6 +68,32 @@ def assembly_options(prepared, **changes):
     return values
 
 
+@pytest.mark.parametrize("value", [
+    "postgresql://synthetic:synthetic@127.0.0.1/studyplan_test_fixture?dbname=studyplan_formal",
+    "postgresql://synthetic:synthetic@127.0.0.1/studyplan_test_fixture?host=remote.invalid",
+    "postgresql://synthetic:synthetic@127.0.0.1/studyplan_test_fixture?hostaddr=203.0.113.4",
+    "postgresql://synthetic:synthetic@127.0.0.1/studyplan_test_fixture?service=remote",
+    "postgresql://synthetic:synthetic@127.0.0.1/studyplan_test_fixture#override",
+])
+def test_effective_owned_dsn_overrides_rejected_before_any_connection(value):
+    with pytest.raises(ValidationAppError):
+        runner._validated_owned_dsn(value)
+
+
+def test_owned_pair_and_environment_cannot_redirect_connection(monkeypatch):
+    value = "postgresql://synthetic:synthetic@127.0.0.1:5432/studyplan_test_fixture"
+    assert runner._validated_owned_dsn(value) == value
+    with pytest.raises(ValidationAppError):
+        runner._owned_pair(value, value.replace("127.0.0.1:5432", "localhost"))
+    with pytest.raises(ValidationAppError):
+        runner._owned_pair(value, value.replace(":5432", ":05432"))
+    for name in ("PGHOSTADDR", "PGSERVICE", "PGSERVICEFILE"):
+        monkeypatch.setenv(name, "synthetic-redirect")
+        with pytest.raises(ValidationAppError):
+            runner._validated_owned_dsn(value)
+        monkeypatch.delenv(name)
+
+
 def test_zero_network_preparation_freezes_full_facts_before_manifest_and_unsigned_request(prepared):
     root, path, packet = prepared
     loaded = runner.load_prepared(path, root=root)
@@ -211,9 +237,10 @@ def test_no_external_options_or_formal_database_fallback_can_enable_runner(prepa
             runner.assemble_prepared(path, **assembly_options(prepared, **changes))
 
 
-def test_zero_network_cli_help_has_no_metadata_authorize_execute_or_review_command(capsys):
+def test_cli_help_exposes_controlled_driver_without_auto_authorize_or_retry(capsys):
     with pytest.raises(SystemExit) as stopped:
         runner.main(["--help"])
     assert stopped.value.code == 0
     output = capsys.readouterr().out
-    assert "{prepare}" in output and "{execute}" not in output and "{metadata}" not in output
+    assert "external-request" in output and "preflight" in output and "decide" in output and "tick" in output
+    assert "authorize," not in output and "sub.add_parser(\"retry\")" not in output
